@@ -8,6 +8,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/social/widgets/comment_actions_capsule.dart";
+import "package:photos/ui/social/widgets/comment_actions_popup.dart";
 import "package:photos/utils/social/relative_time_formatter.dart";
 
 class CommentBubbleWidget extends StatefulWidget {
@@ -44,6 +45,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
   bool _isLiked = false;
   bool _isLoadingParent = false;
   bool _isLoadingReactions = false;
+
+  final OverlayPortalController _overlayController = OverlayPortalController();
+  final LayerLink _layerLink = LayerLink();
+  final GlobalKey _contentKey = GlobalKey();
 
   @override
   void initState() {
@@ -94,13 +99,122 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     if (mounted) setState(() {});
   }
 
+  void _showHighlight() {
+    _overlayController.show();
+  }
+
+  void _hideHighlight() {
+    _overlayController.hide();
+  }
+
   @override
   Widget build(BuildContext context) {
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: OverlayPortal(
+        controller: _overlayController,
+        overlayChildBuilder: _buildOverlayContent,
+        child: GestureDetector(
+          onLongPress: _showHighlight,
+          child: KeyedSubtree(
+            key: _contentKey,
+            child: _buildCommentContent(showActionsCapsule: true),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverlayContent(BuildContext context) {
+    // Get original widget size for perfect alignment
+    final renderBox =
+        _contentKey.currentContext?.findRenderObject() as RenderBox?;
+    final size = renderBox?.size;
+
+    return Stack(
+      children: [
+        // Full-screen barrier with black opacity 0.7
+        GestureDetector(
+          onTap: _hideHighlight,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Container(
+                color: Colors.black.withValues(alpha: 0.7 * value),
+              );
+            },
+          ),
+        ),
+        // Highlighted comment + popup menu
+        CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          child: Material(
+            color: Colors.transparent,
+            child: SizedBox(
+              width: size?.width,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.scale(
+                      scale: 0.95 + (0.05 * value),
+                      alignment: widget.isOwnComment
+                          ? Alignment.topRight
+                          : Alignment.topLeft,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: widget.isOwnComment
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    _buildCommentContent(
+                      showActionsCapsule: false,
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding:
+                          EdgeInsets.only(left: widget.isOwnComment ? 0 : 24),
+                      child: CommentActionsPopup(
+                        isLiked: _isLiked,
+                        onLikeTap: () {
+                          _hideHighlight();
+                          _toggleLike();
+                        },
+                        onReplyTap: () {
+                          _hideHighlight();
+                          widget.onReplyTap();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommentContent({
+    required bool showActionsCapsule,
+    bool includePadding = true,
+  }) {
     return Padding(
       padding: EdgeInsets.only(
         right: widget.isOwnComment ? 24 : 0,
-        top: 8,
-        bottom: 8,
+        top: includePadding ? 8 : 0,
+        bottom: includePadding ? 8 : 0,
       ),
       child: Column(
         crossAxisAlignment: widget.isOwnComment
@@ -127,7 +241,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
                   currentUserID: widget.currentUserID,
                   userResolver: widget.userResolver,
                 ),
-                if (!_isLoadingReactions)
+                if (!_isLoadingReactions && showActionsCapsule)
                   Positioned(
                     right: -16,
                     bottom: -17,
