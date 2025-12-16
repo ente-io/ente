@@ -151,53 +151,27 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
         CompositedTransformFollower(
           link: _layerLink,
           showWhenUnlinked: false,
-          child: Material(
-            color: Colors.transparent,
-            child: SizedBox(
-              width: size?.width,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.scale(
-                      scale: 0.95 + (0.05 * value),
-                      alignment: widget.isOwnComment
-                          ? Alignment.topRight
-                          : Alignment.topLeft,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: widget.isOwnComment
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: [
-                    _buildCommentContent(
-                      showActionsCapsule: false,
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding:
-                          EdgeInsets.only(left: widget.isOwnComment ? 0 : 24),
-                      child: CommentActionsPopup(
-                        isLiked: _isLiked,
-                        onLikeTap: () {
-                          _hideHighlight();
-                          _toggleLike();
-                        },
-                        onReplyTap: () {
-                          _hideHighlight();
-                          widget.onReplyTap();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+          child: SizedBox(
+            width: size?.width,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.scale(
+                    scale: 0.95 + (0.05 * value),
+                    alignment: widget.isOwnComment
+                        ? Alignment.topRight
+                        : Alignment.topLeft,
+                    child: child,
+                  ),
+                );
+              },
+              child: _buildCommentContent(
+                showActionsCapsule: false,
+                showActionsPopup: true,
               ),
             ),
           ),
@@ -208,6 +182,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
 
   Widget _buildCommentContent({
     required bool showActionsCapsule,
+    bool showActionsPopup = false,
     bool includePadding = true,
   }) {
     return Padding(
@@ -254,6 +229,24 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
               ],
             ),
           ),
+          if (showActionsPopup)
+            Padding(
+              padding: EdgeInsets.only(
+                left: widget.isOwnComment ? 0 : 24,
+                top: 8,
+              ),
+              child: CommentActionsPopup(
+                isLiked: _isLiked,
+                onLikeTap: () {
+                  _hideHighlight();
+                  _toggleLike();
+                },
+                onReplyTap: () {
+                  _hideHighlight();
+                  widget.onReplyTap();
+                },
+              ),
+            ),
         ],
       ),
     );
