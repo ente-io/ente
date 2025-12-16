@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
@@ -361,11 +362,22 @@ class _StreakChip extends StatelessWidget {
         color: colorScheme.backgroundElevated,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Text(
-        "$streak ⚡",
-        style:
-            textTheme.small.copyWith(color: colorScheme.textMuted, height: 1),
-        textHeightBehavior: _tightTextHeightBehavior,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "$streak",
+            style: textTheme.small
+                .copyWith(color: colorScheme.textMuted, height: 1),
+            textHeightBehavior: _tightTextHeightBehavior,
+          ),
+          const SizedBox(width: 4),
+          const Icon(
+            EnteIcons.lightningFilled,
+            size: 14,
+            color: Color(0xFFFFBC03),
+          ),
+        ],
       ),
     );
   }
