@@ -17,6 +17,7 @@ import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/rituals/delete_ritual_confirmation_sheet.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
@@ -45,6 +46,28 @@ class _RitualPageState extends State<RitualPage> {
   late DateTime _visibleMonth;
   final GlobalKey _shareButtonKey = GlobalKey();
   bool _sharing = false;
+
+  Future<void> _confirmAndDeleteRitual(Ritual ritual) async {
+    final shouldDelete = await showDeleteRitualConfirmationSheet(context);
+    if (!shouldDelete) return;
+
+    try {
+      await ritualsService.deleteRitual(ritual.id);
+    } catch (e, s) {
+      _logger.warning("Failed to delete ritual", e, s);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.somethingWentWrongPleaseTryAgain),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    await Navigator.of(context).maybePop();
+  }
 
   @override
   void initState() {
@@ -219,10 +242,7 @@ class _RitualPageState extends State<RitualPage> {
                   await showRitualEditor(context, ritual: currentRitual);
                 },
                 onDelete: () async {
-                  await ritualsService.deleteRitual(currentRitual.id);
-                  if (context.mounted) {
-                    await Navigator.of(context).maybePop();
-                  }
+                  await _confirmAndDeleteRitual(currentRitual);
                 },
               ),
               const SizedBox(width: 16),
