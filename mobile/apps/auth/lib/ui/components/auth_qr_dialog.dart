@@ -152,37 +152,42 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                 const SizedBox(height: 8),
                 RepaintBoundary(
                   key: _qrKey,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                    decoration: BoxDecoration(
-                      color: qrBoxColor,
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Ente Auth icon at top right
-                        Positioned(
-                          top: -16,
-                          right: -16,
-                          child: Transform.rotate(
-                            angle: -4 * 3.14159 / 180, // -4 degrees
-                            child: Image.asset(
-                              'assets/qr_logo.png',
-                              height: 64,
-                              width: 64,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: qrBoxColor,
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
+                        children: [
+                          // Ente Auth icon at top right - positioned at corner
+                          Positioned(
+                            top: -6,
+                            right: -6,
+                            child: Transform.rotate(
+                              angle: -4 * 3.14159 / 180, // -4 degrees
+                              child: Image.asset(
+                                'assets/qr_logo.png',
+                                height: 52,
+                                width: 52,
+                              ),
                             ),
                           ),
-                        ),
-                        Column(
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                            child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Account name at top center
+                            const SizedBox(height: 8),
+                            // Issuer at top center
+                            // Leave space for the logo (64px) + some padding
                             ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: qrSize,
+                                maxWidth: qrSize - 72,
                               ),
                               child: Text(
                                 widget.title,
@@ -230,24 +235,26 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                               version: QrVersions.auto,
                               size: qrSize,
                             ),
-                            const SizedBox(height: 42),
-                          ],
-                        ),
-
-                        // Auth branding at bottom right
-                        Positioned(
-                          bottom: 0,
-                          right: 2,
-                          child: SvgPicture.asset(
-                            'assets/svg/auth-logo.svg',
-                            height: 16,
-                            colorFilter: const ColorFilter.mode(
-                              accentColor,
-                              BlendMode.srcIn,
-                            ),
+                              const SizedBox(height: 42),
+                            ],
                           ),
                         ),
-                      ],
+
+                          // Auth branding at bottom right
+                          Positioned(
+                            bottom: 12,
+                            right: 22,
+                            child: SvgPicture.asset(
+                              'assets/svg/auth-logo.svg',
+                              height: 16,
+                              colorFilter: const ColorFilter.mode(
+                                accentColor,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
