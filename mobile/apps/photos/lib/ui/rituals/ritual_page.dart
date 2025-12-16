@@ -21,6 +21,7 @@ import "package:photos/ui/rituals/delete_ritual_confirmation_sheet.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
+import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_share_card.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -592,7 +593,7 @@ class _RitualHeader extends StatelessWidget {
           child: Center(
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text(
+              child: RitualEmojiIcon(
                 ritual.icon,
                 style: textTheme.largeBold.copyWith(height: 1),
                 textHeightBehavior: _tightTextHeightBehavior,

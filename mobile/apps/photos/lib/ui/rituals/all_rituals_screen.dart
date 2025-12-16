@@ -9,6 +9,7 @@ import "package:photos/ui/rituals/delete_ritual_confirmation_sheet.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
+import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/start_new_ritual_card.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -176,7 +177,7 @@ class _RitualOverviewCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
-                    child: Text(
+                    child: RitualEmojiIcon(
                       ritual.icon,
                       style: textTheme.bodyBold.copyWith(height: 1),
                       textHeightBehavior: _tightTextHeightBehavior,
