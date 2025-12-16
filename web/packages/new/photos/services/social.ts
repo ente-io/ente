@@ -18,6 +18,8 @@ export interface UnifiedReaction {
     collectionID: number;
     fileID?: number;
     commentID?: string;
+    /** True if this reaction is on a reply (only in feed responses). */
+    isCommentReply?: boolean;
     reactionType: string;
     userID: number;
     anonUserID?: string;
@@ -59,7 +61,47 @@ export const getUnifiedSocialDiff = async (
         { headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
-    const data = UnifiedDiffResponse.parse(await res.json());
+    return decryptSocialDiff(collectionKey, await res.json());
+};
+
+/**
+ * Get album feed - comments and reactions relevant to the current user.
+ *
+ * This uses a server-side filtered endpoint that only returns:
+ * - Comments on files owned by the user (excluding user's own comments)
+ * - Replies to user's comments
+ * - Reactions on files owned by the user
+ * - Reactions on user's comments
+ *
+ * @param collectionID The ID of the collection.
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @returns Filtered comments and reactions for the user's feed.
+ */
+export const getAlbumFeed = async (
+    collectionID: number,
+    collectionKey: string,
+): Promise<UnifiedSocialDiff> => {
+    const res = await fetch(
+        await apiURL("/social/album-feed", {
+            collectionID,
+            sinceTime: 0,
+            limit: 1000,
+        }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    return decryptSocialDiff(collectionKey, await res.json());
+};
+
+/**
+ * Decrypt comments and reactions from the unified diff endpoint response.
+ */
+const decryptSocialDiff = async (
+    collectionKey: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    responseJson: any,
+): Promise<UnifiedSocialDiff> => {
+    const data = UnifiedDiffResponse.parse(responseJson);
 
     // Decrypt comments
     const comments: Comment[] = [];
@@ -70,6 +112,7 @@ export const getUnifiedSocialDiff = async (
                 collectionID: comment.collectionID,
                 fileID: comment.fileID ?? undefined,
                 parentCommentID: comment.parentCommentID ?? undefined,
+                parentCommentUserID: comment.parentCommentUserID ?? undefined,
                 userID: comment.userID,
                 anonUserID: comment.anonUserID ?? undefined,
                 encData: { text: "", userName: "" },
@@ -93,6 +136,7 @@ export const getUnifiedSocialDiff = async (
                 collectionID: comment.collectionID,
                 fileID: comment.fileID ?? undefined,
                 parentCommentID: comment.parentCommentID ?? undefined,
+                parentCommentUserID: comment.parentCommentUserID ?? undefined,
                 userID: comment.userID,
                 anonUserID: comment.anonUserID ?? undefined,
                 encData,
@@ -124,6 +168,7 @@ export const getUnifiedSocialDiff = async (
                 collectionID: reaction.collectionID,
                 fileID: reaction.fileID ?? undefined,
                 commentID: reaction.commentID ?? undefined,
+                isCommentReply: reaction.isCommentReply ?? undefined,
                 reactionType,
                 userID: reaction.userID,
                 anonUserID: reaction.anonUserID ?? undefined,
@@ -149,6 +194,7 @@ const RemoteComment = z.object({
     collectionID: z.number(),
     fileID: z.number().nullish(),
     parentCommentID: z.string().nullish(),
+    parentCommentUserID: z.number().nullish(),
     userID: z.number(),
     anonUserID: z.string().nullish(),
     cipher: z.string().nullish(),
@@ -163,6 +209,7 @@ const RemoteReaction = z.object({
     collectionID: z.number(),
     fileID: z.number().nullish(),
     commentID: z.string().nullish(),
+    isCommentReply: z.boolean().nullish(),
     userID: z.number(),
     anonUserID: z.string().nullish(),
     cipher: z.string().nullish(),

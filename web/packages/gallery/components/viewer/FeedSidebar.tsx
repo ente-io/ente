@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
     Box,
+    CircularProgress,
     Drawer,
     IconButton,
     Stack,
@@ -10,8 +11,16 @@ import {
 } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
+import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
+import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
+import type { Comment } from "ente-new/photos/services/comment";
+import {
+    getAlbumFeed,
+    type UnifiedReaction,
+} from "ente-new/photos/services/social";
 import React, { useEffect, useMemo, useState } from "react";
 
 // =============================================================================
@@ -147,13 +156,21 @@ const LikedReplyIcon: React.FC<{ heartStroke?: string }> = ({
 
 export interface FeedSidebarProps extends ModalVisibilityProps {
     /**
-     * The name of the album to display in the header.
+     * The collection (album) to show feed for.
      */
-    albumName: string;
+    collection: Collection;
     /**
      * The files in the album, used to display thumbnails in feed items.
      */
     files?: EnteFile[];
+    /**
+     * The current user's ID.
+     */
+    currentUserID: number;
+    /**
+     * A map from user IDs to their email addresses for display.
+     */
+    emailByUserID: Map<number, string>;
 }
 
 /** A user who performed an action in the feed. */
@@ -161,6 +178,8 @@ interface FeedUser {
     userID: number;
     anonUserID?: string;
     userName: string;
+    /** Email used for avatar color (may differ from userName for display). */
+    email: string;
 }
 
 /** Base interface for all feed items. */
@@ -221,310 +240,8 @@ type FeedItem =
     | LikedCommentFeedItem
     | LikedReplyFeedItem;
 
-/** Comment structure matching the schema. */
-interface Comment {
-    id: string;
-    collectionID: number;
-    fileID?: number;
-    encData: { text: string; userName: string };
-    parentCommentID?: string;
-    isDeleted: boolean;
-    userID: number;
-    anonUserID?: string;
-    createdAt: number;
-    updatedAt: number;
-}
-
-/** Reaction structure matching the schema. */
-interface Reaction {
-    id: string;
-    collectionID: number;
-    fileID?: number;
-    commentID?: string;
-    encData: { name: string }; // e.g., { name: "like" }
-    isDeleted: boolean;
-    userID: number;
-    anonUserID?: string;
-    createdAt: number;
-    updatedAt: number;
-}
-
 /** Thumbnail URL cache for files. */
 type ThumbnailCache = Map<number, string>;
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-// Mock current user ID
-const CURRENT_USER_ID = 2;
-
-// Mock user map for looking up user names by userID
-const mockUsers = new Map<number, string>([
-    [CURRENT_USER_ID, "Anand"],
-    [3, "jay00723426@gmail.com"],
-    [4, "Vishnu"],
-    [5, "Priya"],
-    [6, "Ravi"],
-    [7, "Meera"],
-]);
-
-/**
- * Generate mock comments based on actual file IDs from the album.
- */
-const generateMockComments = (files: EnteFile[]): Comment[] => {
-    if (files.length === 0) return [];
-
-    const fileID1 = files[0]?.id;
-    const fileID2 = files[1]?.id ?? fileID1;
-    const fileID3 = files[2]?.id ?? fileID1;
-    const fileID4 = files[3]?.id ?? fileID1;
-
-    return [
-        // 3 people commented on photo 3 at different times
-        {
-            id: "c1",
-            collectionID: 1,
-            fileID: fileID3,
-            encData: {
-                text: "Amazing shot!",
-                userName: "jay00723426@gmail.com",
-            },
-            isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 2 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 2 * 60 * 60 * 1000,
-        },
-        {
-            id: "c2",
-            collectionID: 1,
-            fileID: fileID3,
-            encData: { text: "Love the colors!", userName: "Vishnu" },
-            isDeleted: false,
-            userID: 4,
-            createdAt: Date.now() - 3 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 3 * 60 * 60 * 1000,
-        },
-        {
-            id: "c3",
-            collectionID: 1,
-            fileID: fileID3,
-            encData: { text: "Beautiful!", userName: "Priya" },
-            isDeleted: false,
-            userID: 5,
-            createdAt: Date.now() - 4 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 4 * 60 * 60 * 1000,
-        },
-        // 1 person commented on photo 4
-        {
-            id: "c4",
-            collectionID: 1,
-            fileID: fileID4,
-            encData: { text: "Nice one!", userName: "Meera" },
-            isDeleted: false,
-            userID: 7,
-            createdAt: Date.now() - 5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 5 * 60 * 60 * 1000,
-        },
-        // Current user's comment (to be liked by 3 people)
-        {
-            id: "c_mine",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { text: "Thanks everyone!", userName: "Anand" },
-            isDeleted: false,
-            userID: CURRENT_USER_ID,
-            createdAt: Date.now() - 6 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 6 * 60 * 60 * 1000,
-        },
-        // 2 people replied to my comment
-        {
-            id: "c_reply1",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { text: "You're welcome!", userName: "Ravi" },
-            parentCommentID: "c_mine",
-            isDeleted: false,
-            userID: 6,
-            createdAt: Date.now() - 5.5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 5.5 * 60 * 60 * 1000,
-        },
-        {
-            id: "c_reply2",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { text: "Great album!", userName: "Meera" },
-            parentCommentID: "c_mine",
-            isDeleted: false,
-            userID: 7,
-            createdAt: Date.now() - 5.3 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 5.3 * 60 * 60 * 1000,
-        },
-        // A comment from someone else (for current user to reply to)
-        {
-            id: "c_other",
-            collectionID: 1,
-            fileID: fileID2,
-            encData: {
-                text: "When was this taken?",
-                userName: "jay00723426@gmail.com",
-            },
-            isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 8 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 8 * 60 * 60 * 1000,
-        },
-        // Current user's reply (to be liked by 3 people)
-        {
-            id: "c_my_reply",
-            collectionID: 1,
-            fileID: fileID2,
-            encData: { text: "Last weekend!", userName: "Anand" },
-            parentCommentID: "c_other",
-            isDeleted: false,
-            userID: CURRENT_USER_ID,
-            createdAt: Date.now() - 7 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 7 * 60 * 60 * 1000,
-        },
-    ];
-};
-
-/**
- * Generate mock reactions based on actual file IDs from the album.
- */
-const generateMockReactions = (files: EnteFile[]): Reaction[] => {
-    if (files.length === 0) return [];
-
-    const fileID1 = files[0]?.id;
-    const fileID2 = files[1]?.id ?? fileID1;
-
-    return [
-        // 4 people liked photo 1 at different times (one should be the most recent of all reactions)
-        {
-            id: "r1",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 3, // jay
-            createdAt: Date.now() - 10 * 60 * 1000, // 10 minutes ago (MOST RECENT)
-            updatedAt: Date.now() - 10 * 60 * 1000,
-        },
-        {
-            id: "r2",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 4, // Vishnu
-            createdAt: Date.now() - 30 * 60 * 1000, // 30 minutes ago
-            updatedAt: Date.now() - 30 * 60 * 1000,
-        },
-        {
-            id: "r3",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 5, // Priya
-            createdAt: Date.now() - 45 * 60 * 1000, // 45 minutes ago
-            updatedAt: Date.now() - 45 * 60 * 1000,
-        },
-        {
-            id: "r4",
-            collectionID: 1,
-            fileID: fileID1,
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 6, // Ravi
-            createdAt: Date.now() - 60 * 60 * 1000, // 1 hour ago
-            updatedAt: Date.now() - 60 * 60 * 1000,
-        },
-        // 2 people liked photo 2
-        {
-            id: "r5",
-            collectionID: 1,
-            fileID: fileID2,
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 7, // Meera
-            createdAt: Date.now() - 1.5 * 60 * 60 * 1000, // 1.5 hours ago
-            updatedAt: Date.now() - 1.5 * 60 * 60 * 1000,
-        },
-        {
-            id: "r6",
-            collectionID: 1,
-            fileID: fileID2,
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 3, // jay
-            createdAt: Date.now() - 1.6 * 60 * 60 * 1000, // 1.6 hours ago
-            updatedAt: Date.now() - 1.6 * 60 * 60 * 1000,
-        },
-        // 3 people liked my comment (c_mine) at different times
-        {
-            id: "r7",
-            collectionID: 1,
-            commentID: "c_mine",
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 3, // jay
-            createdAt: Date.now() - 5.5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 5.5 * 60 * 60 * 1000,
-        },
-        {
-            id: "r8",
-            collectionID: 1,
-            commentID: "c_mine",
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 4, // Vishnu
-            createdAt: Date.now() - 5.6 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 5.6 * 60 * 60 * 1000,
-        },
-        {
-            id: "r9",
-            collectionID: 1,
-            commentID: "c_mine",
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 5, // Priya
-            createdAt: Date.now() - 5.7 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 5.7 * 60 * 60 * 1000,
-        },
-        // 3 people liked my reply (c_my_reply)
-        {
-            id: "r10",
-            collectionID: 1,
-            commentID: "c_my_reply",
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 3, // jay
-            createdAt: Date.now() - 6.5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 6.5 * 60 * 60 * 1000,
-        },
-        {
-            id: "r11",
-            collectionID: 1,
-            commentID: "c_my_reply",
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 4, // Vishnu
-            createdAt: Date.now() - 6.6 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 6.6 * 60 * 60 * 1000,
-        },
-        {
-            id: "r12",
-            collectionID: 1,
-            commentID: "c_my_reply",
-            encData: { name: "like" },
-            isDeleted: false,
-            userID: 5, // Priya
-            createdAt: Date.now() - 6.7 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 6.7 * 60 * 60 * 1000,
-        },
-    ];
-};
 
 // =============================================================================
 // Utility Functions
@@ -544,19 +261,6 @@ const getUserDisplayName = (
     return userName;
 };
 
-/**
- * Truncate email to show just the username part before @ followed by ...
- */
-const truncateEmail = (name: string): string => {
-    if (name.includes("@")) {
-        const [username] = name.split("@");
-        if (username && username.length > 7) {
-            return username.slice(0, 7) + "...";
-        }
-        return username ?? name;
-    }
-    return name;
-};
 
 /**
  * Check if a comment is a reply (has a parent).
@@ -566,18 +270,25 @@ const isReply = (comment: Comment): boolean => {
 };
 
 /**
- * Process raw comments and reactions into feed items for the current user.
+ * Process feed items from server-filtered data.
+ *
+ * The server already filters to only return items relevant to the current user:
+ * - Comments on files owned by the user (excluding user's own)
+ * - Replies to user's comments
+ * - Reactions on files owned by the user
+ * - Reactions on user's comments
+ *
+ * This function categorizes and formats them for display.
  */
 const processFeedItems = (
     comments: Comment[],
-    reactions: Reaction[],
-    files: EnteFile[],
+    reactions: UnifiedReaction[],
+    _files: EnteFile[],
     thumbnailCache: ThumbnailCache,
     users: Map<number, string>,
     currentUserID: number,
 ): FeedItem[] => {
     const feedItems: FeedItem[] = [];
-    const commentMap = new Map(comments.map((c) => [c.id, c]));
 
     // Helper to get username from user map
     const getUserName = (userID: number): string =>
@@ -587,57 +298,20 @@ const processFeedItems = (
     const getThumbnailURL = (fileID: number | undefined): string | undefined =>
         fileID ? thumbnailCache.get(fileID) : undefined;
 
-    // Get IDs of files owned by current user (for mock data, treat all files as owned by current user)
-    const myFileIDs = new Set(files.map((f) => f.id));
+    // 1. Process comments - categorize as "commented_photo" or "replied_comment"
+    for (const c of comments) {
+        if (c.isDeleted) continue;
 
-    // Get IDs of comments/replies by current user
-    const myCommentIDs = new Set(
-        comments
-            .filter((c) => c.userID === currentUserID && !isReply(c))
-            .map((c) => c.id),
-    );
-    const myReplyIDs = new Set(
-        comments
-            .filter((c) => c.userID === currentUserID && isReply(c))
-            .map((c) => c.id),
-    );
+        // For comments, userName from encData might be an email
+        const email = users.get(c.userID) ?? c.encData.userName;
 
-    // 1. Process "commented on your photo" - not grouped
-    comments
-        .filter(
-            (c) =>
-                !c.isDeleted &&
-                c.fileID &&
-                myFileIDs.has(c.fileID) &&
-                c.userID !== currentUserID &&
-                !isReply(c),
-        )
-        .forEach((c) => {
-            feedItems.push({
-                id: `commented_photo_${c.id}`,
-                type: "commented_photo",
-                fileID: c.fileID!,
-                thumbnailURL: getThumbnailURL(c.fileID),
-                timestamp: c.createdAt,
-                user: {
-                    userID: c.userID,
-                    anonUserID: c.anonUserID,
-                    userName: c.encData.userName,
-                },
-            });
-        });
+        // Only show "Replied to your comment" if the parent comment belongs to
+        // the current user. Otherwise show "Commented on your photo".
+        const isReplyToCurrentUser =
+            isReply(c) && c.parentCommentUserID === currentUserID;
 
-    // 2. Process "replied to your comment" - not grouped
-    comments
-        .filter(
-            (c) =>
-                !c.isDeleted &&
-                c.parentCommentID &&
-                (myCommentIDs.has(c.parentCommentID) ||
-                    myReplyIDs.has(c.parentCommentID)) &&
-                c.userID !== currentUserID,
-        )
-        .forEach((c) => {
+        if (isReplyToCurrentUser) {
+            // This is a reply to the current user's comment
             feedItems.push({
                 id: `replied_comment_${c.id}`,
                 type: "replied_comment",
@@ -649,32 +323,60 @@ const processFeedItems = (
                     userID: c.userID,
                     anonUserID: c.anonUserID,
                     userName: c.encData.userName,
+                    email,
                 },
             });
-        });
+        } else {
+            // This is a comment on the current user's photo (including replies
+            // to other people's comments)
+            feedItems.push({
+                id: `commented_photo_${c.id}`,
+                type: "commented_photo",
+                fileID: c.fileID!,
+                thumbnailURL: getThumbnailURL(c.fileID),
+                timestamp: c.createdAt,
+                user: {
+                    userID: c.userID,
+                    anonUserID: c.anonUserID,
+                    userName: c.encData.userName,
+                    email,
+                },
+            });
+        }
+    }
 
-    // 3. Process "liked your photo" - grouped by fileID
+    // 2. Process reactions - categorize as "liked_photo", "liked_comment", or "liked_reply"
+    // Group photo likes by fileID
     const photoLikes = new Map<
         number,
         { users: FeedUser[]; latestTimestamp: number }
     >();
-    reactions
-        .filter(
-            (r) =>
-                !r.isDeleted &&
-                r.fileID &&
-                !r.commentID &&
-                myFileIDs.has(r.fileID) &&
-                r.userID !== currentUserID,
-        )
-        .forEach((r) => {
-            const fileID = r.fileID!;
+    // Group comment likes by commentID (server provides fileID from the comment)
+    const commentLikes = new Map<
+        string,
+        {
+            users: FeedUser[];
+            latestTimestamp: number;
+            fileID?: number;
+            isReply?: boolean;
+        }
+    >();
+
+    for (const r of reactions) {
+        if (r.isDeleted) continue;
+
+        const email = getUserName(r.userID);
+        const user: FeedUser = {
+            userID: r.userID,
+            anonUserID: r.anonUserID,
+            userName: email,
+            email,
+        };
+
+        if (r.fileID && !r.commentID) {
+            // Reaction on a photo
+            const fileID = r.fileID;
             const existing = photoLikes.get(fileID);
-            const user: FeedUser = {
-                userID: r.userID,
-                anonUserID: r.anonUserID,
-                userName: getUserName(r.userID),
-            };
             if (existing) {
                 existing.users.push(user);
                 if (r.createdAt > existing.latestTimestamp) {
@@ -689,39 +391,10 @@ const processFeedItems = (
                     latestTimestamp: r.createdAt,
                 });
             }
-        });
-    photoLikes.forEach((data, fileID) => {
-        feedItems.push({
-            id: `liked_photo_${fileID}`,
-            type: "liked_photo",
-            fileID,
-            thumbnailURL: getThumbnailURL(fileID),
-            timestamp: data.latestTimestamp,
-            users: data.users,
-        });
-    });
-
-    // 4. Process "liked your comment" - grouped by commentID
-    const commentLikes = new Map<
-        string,
-        { users: FeedUser[]; latestTimestamp: number; comment?: Comment }
-    >();
-    reactions
-        .filter(
-            (r) =>
-                !r.isDeleted &&
-                r.commentID &&
-                myCommentIDs.has(r.commentID) &&
-                r.userID !== currentUserID,
-        )
-        .forEach((r) => {
-            const commentID = r.commentID!;
+        } else if (r.commentID) {
+            // Reaction on a comment (server populates fileID from the comment)
+            const commentID = r.commentID;
             const existing = commentLikes.get(commentID);
-            const user: FeedUser = {
-                userID: r.userID,
-                anonUserID: r.anonUserID,
-                userName: getUserName(r.userID),
-            };
             if (existing) {
                 existing.users.push(user);
                 if (r.createdAt > existing.latestTimestamp) {
@@ -733,69 +406,49 @@ const processFeedItems = (
                 commentLikes.set(commentID, {
                     users: [user],
                     latestTimestamp: r.createdAt,
-                    comment: commentMap.get(commentID),
+                    fileID: r.fileID,
+                    isReply: r.isCommentReply,
                 });
             }
-        });
-    commentLikes.forEach((data, commentID) => {
-        feedItems.push({
-            id: `liked_comment_${commentID}`,
-            type: "liked_comment",
-            commentID,
-            fileID: data.comment?.fileID,
-            thumbnailURL: getThumbnailURL(data.comment?.fileID),
-            timestamp: data.latestTimestamp,
-            users: data.users,
-        });
-    });
+        }
+    }
 
-    // 5. Process "liked your reply" - grouped by replyID
-    const replyLikes = new Map<
-        string,
-        { users: FeedUser[]; latestTimestamp: number; reply?: Comment }
-    >();
-    reactions
-        .filter(
-            (r) =>
-                !r.isDeleted &&
-                r.commentID &&
-                myReplyIDs.has(r.commentID) &&
-                r.userID !== currentUserID,
-        )
-        .forEach((r) => {
-            const replyID = r.commentID!;
-            const existing = replyLikes.get(replyID);
-            const user: FeedUser = {
-                userID: r.userID,
-                anonUserID: r.anonUserID,
-                userName: getUserName(r.userID),
-            };
-            if (existing) {
-                existing.users.push(user);
-                if (r.createdAt > existing.latestTimestamp) {
-                    existing.latestTimestamp = r.createdAt;
-                    existing.users.pop();
-                    existing.users.unshift(user);
-                }
-            } else {
-                replyLikes.set(replyID, {
-                    users: [user],
-                    latestTimestamp: r.createdAt,
-                    reply: commentMap.get(replyID),
-                });
-            }
-        });
-    replyLikes.forEach((data, replyID) => {
+    // Add grouped photo likes to feed
+    for (const [fileID, data] of photoLikes) {
         feedItems.push({
-            id: `liked_reply_${replyID}`,
-            type: "liked_reply",
-            replyID,
-            fileID: data.reply?.fileID,
-            thumbnailURL: getThumbnailURL(data.reply?.fileID),
+            id: `liked_photo_${fileID}`,
+            type: "liked_photo",
+            fileID,
+            thumbnailURL: getThumbnailURL(fileID),
             timestamp: data.latestTimestamp,
             users: data.users,
         });
-    });
+    }
+
+    // Add grouped comment/reply likes to feed
+    for (const [commentID, data] of commentLikes) {
+        if (data.isReply) {
+            feedItems.push({
+                id: `liked_reply_${commentID}`,
+                type: "liked_reply",
+                replyID: commentID,
+                fileID: data.fileID,
+                thumbnailURL: getThumbnailURL(data.fileID),
+                timestamp: data.latestTimestamp,
+                users: data.users,
+            });
+        } else {
+            feedItems.push({
+                id: `liked_comment_${commentID}`,
+                type: "liked_comment",
+                commentID,
+                fileID: data.fileID,
+                thumbnailURL: getThumbnailURL(data.fileID),
+                timestamp: data.latestTimestamp,
+                users: data.users,
+            });
+        }
+    }
 
     // Sort by timestamp (newest first)
     return feedItems.sort((a, b) => b.timestamp - a.timestamp);
@@ -820,16 +473,14 @@ const getActionText = (item: FeedItem): string => {
 };
 
 /**
- * Get the users string for display (e.g., "jay003... and 2 others").
+ * Get the users string for display (e.g., "anand@ente.io and 2 others").
  */
 const getUsersDisplayText = (users: FeedUser[]): string => {
     if (users.length === 0) return "";
-    const firstName = truncateEmail(
-        getUserDisplayName(
-            users[0]!.userID,
-            users[0]!.userName,
-            users[0]!.anonUserID,
-        ),
+    const firstName = getUserDisplayName(
+        users[0]!.userID,
+        users[0]!.userName,
+        users[0]!.anonUserID,
     );
     if (users.length === 1) {
         return firstName;
@@ -896,7 +547,11 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item }) => {
                         return (
                             <StyledAvatar
                                 key={`${user.userID}-${user.anonUserID ?? index}`}
-                                sx={{ zIndex: users.length - index }}
+                                sx={{
+                                    zIndex: users.length - index,
+                                    bgcolor: getAvatarColor(user.email),
+                                    color: "#fff",
+                                }}
                             >
                                 {displayName[0]?.toUpperCase() ?? "A"}
                             </StyledAvatar>
@@ -923,25 +578,37 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item }) => {
 export const FeedSidebar: React.FC<FeedSidebarProps> = ({
     open,
     onClose,
-    albumName,
+    collection,
     files = [],
+    currentUserID,
+    emailByUserID,
 }) => {
     const [thumbnailCache, setThumbnailCache] = useState<ThumbnailCache>(
         new Map(),
     );
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [reactions, setReactions] = useState<UnifiedReaction[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Get the 5 most recent files from the album (sorted by updationTime)
-    const recentFiles = useMemo(() => {
-        return [...files]
-            .sort((a, b) => b.updationTime - a.updationTime)
-            .slice(0, 5);
-    }, [files]);
-
-    // Load thumbnails for the recent files
+    // Load thumbnails for files that have reactions/comments
     useEffect(() => {
         const loadThumbnails = async () => {
+            // Get unique file IDs from comments and reactions
+            const fileIDsWithActivity = new Set<number>();
+            for (const c of comments) {
+                if (c.fileID) fileIDsWithActivity.add(c.fileID);
+            }
+            for (const r of reactions) {
+                if (r.fileID) fileIDsWithActivity.add(r.fileID);
+            }
+
+            // Find matching files
+            const filesToLoad = files.filter((f) =>
+                fileIDsWithActivity.has(f.id),
+            );
+
             const newCache = new Map<number, string>();
-            for (const file of recentFiles) {
+            for (const file of filesToLoad) {
                 try {
                     const url =
                         await downloadManager.renderableThumbnailURL(file);
@@ -955,32 +622,45 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
             setThumbnailCache(newCache);
         };
 
-        if (open && recentFiles.length > 0) {
+        if (open && (comments.length > 0 || reactions.length > 0)) {
             void loadThumbnails();
         }
-    }, [open, recentFiles]);
+    }, [open, comments, reactions, files]);
 
-    // Generate mock data based on actual files
-    const mockComments = useMemo(
-        () => generateMockComments(recentFiles),
-        [recentFiles],
-    );
-    const mockReactions = useMemo(
-        () => generateMockReactions(recentFiles),
-        [recentFiles],
-    );
+    // Fetch social data when sidebar opens
+    useEffect(() => {
+        const fetchSocialData = async () => {
+            if (!open || !collection) return;
+
+            setIsLoading(true);
+            try {
+                const { comments: fetchedComments, reactions: fetchedReactions } =
+                    await getAlbumFeed(collection.id, collection.key);
+                setComments(fetchedComments);
+                setReactions(fetchedReactions);
+            } catch (e) {
+                log.error("Failed to fetch album feed", e);
+                setComments([]);
+                setReactions([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        void fetchSocialData();
+    }, [open, collection]);
 
     const feedItems = useMemo(
         () =>
             processFeedItems(
-                mockComments,
-                mockReactions,
-                recentFiles,
+                comments,
+                reactions,
+                files,
                 thumbnailCache,
-                mockUsers,
-                CURRENT_USER_ID,
+                emailByUserID,
+                currentUserID,
             ),
-        [mockComments, mockReactions, recentFiles, thumbnailCache],
+        [comments, reactions, files, thumbnailCache, emailByUserID, currentUserID],
     );
 
     return (
@@ -994,7 +674,7 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
                             ...theme.applyStyles("dark", { color: "#fff" }),
                         })}
                     >
-                        {albumName}
+                        {collection.name}
                     </Typography>
                     <CloseButton onClick={onClose}>
                         <CloseIcon sx={{ fontSize: 22 }} />
@@ -1002,9 +682,17 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
                 </Header>
 
                 <ContentContainer>
-                    {feedItems.map((item) => (
-                        <FeedItemRow key={item.id} item={item} />
-                    ))}
+                    {isLoading ? (
+                        <LoadingContainer>
+                            <CircularProgress size={24} />
+                        </LoadingContainer>
+                    ) : feedItems.length === 0 ? (
+                        <EmptyStateText>No activity yet</EmptyStateText>
+                    ) : (
+                        feedItems.map((item) => (
+                            <FeedItemRow key={item.id} item={item} />
+                        ))
+                    )}
                 </ContentContainer>
             </DrawerContentWrapper>
         </SidebarDrawer>
@@ -1154,14 +842,10 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
     height: 32,
     fontSize: 14,
     fontWeight: 600,
-    backgroundColor: "#E0E0E0",
-    color: "#666",
     border: "2px solid #FAFAFA",
     marginLeft: -8,
     "&:first-of-type": { marginLeft: 0 },
     ...theme.applyStyles("dark", {
-        backgroundColor: "#3a3a3a",
-        color: "#b0b0b0",
         border: "2px solid #1b1b1b",
     }),
 }));
@@ -1191,4 +875,18 @@ const ThumbnailImage = styled("img")(() => ({
     borderRadius: 8,
     objectFit: "cover",
     flexShrink: 0,
+}));
+
+const LoadingContainer = styled(Box)(() => ({
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "48px 0",
+}));
+
+const EmptyStateText = styled(Typography)(({ theme }) => ({
+    textAlign: "center",
+    color: "#666",
+    padding: "48px 0",
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.6)" }),
 }));

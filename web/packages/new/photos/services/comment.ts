@@ -20,6 +20,8 @@ export interface Comment {
     collectionID: number;
     fileID?: number;
     parentCommentID?: string;
+    /** User ID of the parent comment's author (only in feed responses). */
+    parentCommentUserID?: number;
     userID: number;
     anonUserID?: string;
     encData: CommentData;
