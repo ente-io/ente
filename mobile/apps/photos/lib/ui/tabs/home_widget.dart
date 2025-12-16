@@ -60,6 +60,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
+import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
 import "package:photos/ui/home/home_bottom_nav_bar.dart";
@@ -767,12 +768,12 @@ class _HomeWidgetState extends State<HomeWidget> {
               ValueListenableBuilder<double>(
                 valueListenable: _christmasPullOffsetNotifier,
                 builder: (context, pullOffset, child) {
-                  if (pullOffset <= 0) {
-                    return const SizedBox.shrink();
-                  }
                   return ValueListenableBuilder<bool>(
                     valueListenable: _christmasPullReleasedNotifier,
                     builder: (context, isReleased, child) {
+                      if (pullOffset <= 0) {
+                        return const SizedBox.shrink();
+                      }
                       return Positioned(
                         top: 0,
                         left: 0,
@@ -785,6 +786,11 @@ class _HomeWidgetState extends State<HomeWidget> {
                     },
                   );
                 },
+              ),
+              Positioned.fill(
+                child: FadingSnowOverlay(
+                  pullOffsetNotifier: _christmasPullOffsetNotifier,
+                ),
               ),
             ],
           ),
@@ -877,9 +883,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                     final double overscroll = notification.metrics.pixels;
                     if (overscroll < 0) {
                       _christmasPullOffsetNotifier.value = -overscroll;
-                      _christmasPullReleasedNotifier.value = false;
+                      if (_christmasPullReleasedNotifier.value) {
+                        _christmasPullReleasedNotifier.value = false;
+                      }
                     } else if (_christmasPullOffsetNotifier.value != 0) {
                       _christmasPullOffsetNotifier.value = 0;
+                      // Don't reset released here - let fade animation complete
                     }
                   } else if (notification is ScrollEndNotification) {
                     if (_christmasPullOffsetNotifier.value > 0) {

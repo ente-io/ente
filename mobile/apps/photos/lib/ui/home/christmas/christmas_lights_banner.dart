@@ -28,9 +28,10 @@ class _ChristmasLightsBannerState extends State<ChristmasLightsBanner> {
 
   @override
   Widget build(BuildContext context) {
+    const double bannerHeight = 28;
     return SizedBox(
-      height: 10,
       width: double.infinity,
+      height: bannerHeight,
       child: rive.RiveWidgetBuilder(
         fileLoader: _riveFileLoader,
         stateMachineSelector: const rive.StateMachineNamed("State Machine 1"),
@@ -38,7 +39,7 @@ class _ChristmasLightsBannerState extends State<ChristmasLightsBanner> {
           if (state is rive.RiveLoaded) {
             return rive.RiveWidget(
               controller: state.controller,
-              fit: rive.Fit.cover,
+              fit: rive.Fit.fitWidth,
             );
           }
           if (state is rive.RiveFailed) {
