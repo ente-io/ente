@@ -72,6 +72,8 @@ interface Liker {
     id: string;
     userID: number;
     userName: string;
+    /** The actual email for avatar color, even when userName is "You". */
+    email: string;
 }
 
 /** Collection info for the dropdown. */
@@ -104,6 +106,10 @@ export interface LikesSidebarProps extends ModalVisibilityProps {
      */
     collectionSummaries?: CollectionSummaries;
     /**
+     * The current user's ID.
+     */
+    currentUserID?: number;
+    /**
      * Pre-fetched reactions by collection ID (includes both file and comment reactions).
      */
     prefetchedReactions?: Map<number, UnifiedReaction[]>;
@@ -123,6 +129,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     activeCollectionID,
     fileNormalCollectionIDs,
     collectionSummaries,
+    currentUserID,
     prefetchedReactions,
     prefetchedUserIDToEmail,
 }) => {
@@ -204,16 +211,21 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
             reactionsByCollection.get(selectedCollectionInfo.id) ?? [];
         return reactions
             .filter((r) => r.reactionType === "green_heart")
-            .map((r) => ({
-                id: r.id,
-                userID: r.userID,
-                userName:
+            .map((r) => {
+                const email =
                     prefetchedUserIDToEmail?.get(r.userID) ??
-                    `User ${r.userID}`,
-            }));
+                    `User ${r.userID}`;
+                return {
+                    id: r.id,
+                    userID: r.userID,
+                    userName: r.userID === currentUserID ? "You" : email,
+                    email,
+                };
+            });
     }, [
         selectedCollectionInfo,
         reactionsByCollection,
+        currentUserID,
         prefetchedUserIDToEmail,
     ]);
 
@@ -500,11 +512,11 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                         width: 32,
                                         height: 32,
                                         fontSize: 14,
-                                        bgcolor: getAvatarColor(liker.userName),
+                                        bgcolor: getAvatarColor(liker.email),
                                         color: "#fff",
                                     }}
                                 >
-                                    {liker.userName[0]?.toUpperCase() ?? "?"}
+                                    {liker.email[0]?.toUpperCase() ?? "?"}
                                 </Avatar>
                                 <LikerName>{liker.userName}</LikerName>
                                 <HeartFilledIcon />

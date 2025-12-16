@@ -1864,6 +1864,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 activeCollectionID={activeCollectionID}
                 fileNormalCollectionIDs={fileNormalCollectionIDs}
                 collectionSummaries={collectionSummaries}
+                currentUserID={user?.id}
                 prefetchedReactions={allReactions.get(
                     activeAnnotatedFile.file.id,
                 )}

@@ -240,7 +240,7 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     // Get the author name - for deleted comments, fall back to email from userIDToEmail
     const getAuthorName = (): string => {
         if (parentComment.userID === currentUserID) {
-            return "Me";
+            return "You";
         }
         if (!parentComment.isDeleted && parentComment.encData?.userName) {
             return parentComment.encData.userName;
@@ -1361,7 +1361,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 >
                                     Replying to{" "}
                                     {replyingTo.userID === currentUserID
-                                        ? "me"
+                                        ? "yourself"
                                         : replyingTo.encData.userName}
                                     ...
                                 </Typography>
