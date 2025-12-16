@@ -460,8 +460,8 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext dialogContext) {
         return AuthQrDialog(
           data: qrData,
-          title: code.account,
-          subtitle: code.issuer,
+          title: code.issuer,
+          subtitle: code.account,
           shareFileName: 'ente_auth_qr_${code.account}.png',
           shareText: 'QR code for ${code.account}',
           dialogTitle: context.l10n.qrCode,
