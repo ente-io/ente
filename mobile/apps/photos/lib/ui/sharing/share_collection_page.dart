@@ -114,6 +114,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             leadingIcon: Icons.add,
             menuItemColor: getEnteColorScheme(context).fillFaint,
             isTopBorderRadiusRemoved: _sharees.isNotEmpty,
+            isBottomBorderRadiusRemoved: true,
             onTap: () async {
               await routeToPage(
                 context,
@@ -145,7 +146,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           menuItemColor: getEnteColorScheme(context).fillFaint,
           isTopBorderRadiusRemoved:
               adminRoleEnabled ? true : _sharees.isNotEmpty,
-          isBottomBorderRadiusRemoved: false,
+          isBottomBorderRadiusRemoved: true,
           onTap: () async {
             // ignore: unawaited_futures
             routeToPage(
@@ -177,7 +178,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           leadingIcon: Icons.add,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           isTopBorderRadiusRemoved: true,
-          isBottomBorderRadiusRemoved: true,
+          isBottomBorderRadiusRemoved: false,
           onTap: () async {
             await routeToPage(
               context,
