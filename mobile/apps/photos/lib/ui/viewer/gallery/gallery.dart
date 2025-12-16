@@ -96,6 +96,10 @@ class Gallery extends StatefulWidget {
   /// group containing this file.
   final EnteFile? fileToJumpTo;
 
+  /// Callback when scroll offset goes below zero (over-scroll at top).
+  /// Returns true when over-scrolling (offset < 0), false otherwise.
+  final ValueChanged<bool>? onOverScroll;
+
   const Gallery({
     required this.asyncLoader,
     required this.tagPrefix,
@@ -125,6 +129,7 @@ class Gallery extends StatefulWidget {
     this.disableVerticalPaddingForScrollbar = false,
     this.showGallerySettingsCTA = false,
     this.fileToJumpTo,
+    this.onOverScroll,
     super.key,
   });
 
@@ -161,6 +166,7 @@ class GalleryState extends State<Gallery> {
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
   InheritedSearchFilterData? _inheritedSearchFilterData;
+  bool _isOverScrolling = false;
 
   @override
   void initState() {
@@ -245,6 +251,10 @@ class GalleryState extends State<Gallery> {
     }
     if (widget.initialFiles != null && !_sortOrderAsc) {
       _onFilesLoaded(widget.initialFiles!);
+    }
+
+    if (widget.onOverScroll != null) {
+      _scrollController.addListener(_onScrollForOverScroll);
     }
 
     // First load
@@ -551,6 +561,14 @@ class GalleryState extends State<Gallery> {
     }
   }
 
+  void _onScrollForOverScroll() {
+    final isOverScrolling = _scrollController.offset < 0;
+    if (isOverScrolling != _isOverScrolling) {
+      _isOverScrolling = isOverScrolling;
+      widget.onOverScroll?.call(isOverScrolling);
+    }
+  }
+
   @override
   void dispose() {
     // Clear scroll controller reference
@@ -562,6 +580,9 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
+    if (widget.onOverScroll != null) {
+      _scrollController.removeListener(_onScrollForOverScroll);
+    }
     _scrollController.dispose();
     scrollBarInUseNotifier.dispose();
     _headerHeightNotifier.dispose();

@@ -15,6 +15,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
+import "package:photos/ui/components/snow_fall_overlay.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -45,6 +46,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
   late final StreamSubscription<HideSharedItemsFromHomeGalleryEvent>
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
+  final _showSnowOverlayNotifier = ValueNotifier<bool>(false);
 
   /// This deboucner is to delay the UI update of the shared items toggle
   /// since it's expensive (a new differnt key is used for the gallery
@@ -70,9 +72,10 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
 
   @override
   void dispose() {
-    super.dispose();
     _hideSharedFilesFromHomeSubscription.cancel();
     _hideSharedItemsToggleDebouncer.cancelDebounceTimer();
+    _showSnowOverlayNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -135,6 +138,9 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       galleryType: GalleryType.homepage,
       groupType: widget.groupType,
       showGallerySettingsCTA: true,
+      onOverScroll: (isOverScrolling) {
+        _showSnowOverlayNotifier.value = isOverScrolling;
+      },
     );
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -144,6 +150,15 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
             alignment: Alignment.bottomCenter,
             children: [
               gallery,
+              ValueListenableBuilder<bool>(
+                valueListenable: _showSnowOverlayNotifier,
+                builder: (context, showSnow, child) {
+                  if (!showSnow) return const SizedBox.shrink();
+                  return const SnowFallOverlay(
+                    style: SnowflakeStyle.mixed,
+                  );
+                },
+              ),
               FileSelectionOverlayBar(
                 GalleryType.homepage,
                 widget.selectedFiles,
