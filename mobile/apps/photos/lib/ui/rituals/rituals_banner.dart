@@ -11,6 +11,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/rituals/all_rituals_screen.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
+import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/start_new_ritual_card.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -273,7 +274,7 @@ class _RitualIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
-        child: Text(
+        child: RitualEmojiIcon(
           ritual.icon,
           style: textTheme.bodyBold.copyWith(height: 1),
           textHeightBehavior: _tightTextHeightBehavior,
