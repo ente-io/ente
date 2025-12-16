@@ -10,6 +10,7 @@ import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/start_new_ritual_card.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class AllRitualsScreen extends StatelessWidget {
@@ -77,7 +78,8 @@ class AllRitualsScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
               children: [
                 if (rituals.isEmpty)
-                  _CreateRitualCard(
+                  StartNewRitualCard(
+                    variant: StartNewRitualCardVariant.wide,
                     onTap: () async {
                       await showRitualEditor(context, ritual: null);
                     },
@@ -95,70 +97,6 @@ class AllRitualsScreen extends StatelessWidget {
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _CreateRitualCard extends StatelessWidget {
-  const _CreateRitualCard({this.onTap});
-
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final l10n = context.l10n;
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? colorScheme.backgroundElevated2
-            : const Color(0xFFFAFAFA),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? colorScheme.strokeFaint
-              : Colors.black.withValues(alpha: 0.04),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: colorScheme.backgroundElevated,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlusSign,
-                      size: 18,
-                      color: colorScheme.textBase,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.ritualCreateYourOwn,
-                    style: textTheme.bodyBold,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
