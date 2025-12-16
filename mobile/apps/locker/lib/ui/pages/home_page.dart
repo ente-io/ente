@@ -391,7 +391,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     try {
       final initialLink = await appLinks.getInitialLink();
       if (initialLink != null) {
-        _logger.info('Initial deep link received: $initialLink');
+        _logger.info('Initial deep link received');
       }
     } catch (e) {
       _logger.severe('Error getting initial deep link: $e');
@@ -399,7 +399,7 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     _deepLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri uri) {
-        _logger.info('Deep link received via stream: $uri');
+        _logger.info('Deep link received via stream');
       },
       onError: (err) {
         _logger.severe('Error receiving deep link: $err');
