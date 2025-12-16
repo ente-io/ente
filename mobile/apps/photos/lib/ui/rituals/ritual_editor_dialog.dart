@@ -67,14 +67,21 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                       final segmentedBackgroundColor = colorScheme.fillFaint;
                       final localizations =
                           MaterialLocalizations.of(dialogContext);
-                      final int hour = selectedTime.hourOfPeriod == 0
+                      final bool use24HourFormat =
+                          MediaQuery.of(context).alwaysUse24HourFormat;
+                      final int hour12 = selectedTime.hourOfPeriod == 0
                           ? 12
                           : selectedTime.hourOfPeriod;
-                      final String minute =
+                      final String hourText = use24HourFormat
+                          ? selectedTime.hour.toString().padLeft(2, "0")
+                          : hour12.toString();
+                      final String minuteText =
                           selectedTime.minute.toString().padLeft(2, "0");
-                      final String period = selectedTime.period == DayPeriod.am
-                          ? localizations.anteMeridiemAbbreviation
-                          : localizations.postMeridiemAbbreviation;
+                      final String? periodText = use24HourFormat
+                          ? null
+                          : (selectedTime.period == DayPeriod.am
+                              ? localizations.anteMeridiemAbbreviation
+                              : localizations.postMeridiemAbbreviation);
                       final timeTextStyle = textTheme.large.copyWith(
                         fontWeight: FontWeight.w400,
                       );
@@ -385,6 +392,20 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         final result = await showTimePicker(
                                           context: context,
                                           initialTime: selectedTime,
+                                          builder: (context, child) {
+                                            if (child == null) {
+                                              return const SizedBox.shrink();
+                                            }
+                                            final mediaQuery =
+                                                MediaQuery.of(context);
+                                            return MediaQuery(
+                                              data: mediaQuery.copyWith(
+                                                alwaysUse24HourFormat:
+                                                    use24HourFormat,
+                                              ),
+                                              child: child,
+                                            );
+                                          },
                                         );
                                         if (result != null) {
                                           setState(() {
@@ -407,7 +428,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 timeSegment(
-                                                  hour.toString(),
+                                                  hourText,
                                                   style: timeTextStyle,
                                                 ),
                                                 const SizedBox(width: 9),
@@ -417,14 +438,16 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                                 ),
                                                 const SizedBox(width: 9),
                                                 timeSegment(
-                                                  minute,
+                                                  minuteText,
                                                   style: timeTextStyle,
                                                 ),
-                                                const SizedBox(width: 9),
-                                                timeSegment(
-                                                  period,
-                                                  style: timeTextStyle,
-                                                ),
+                                                if (periodText != null) ...[
+                                                  const SizedBox(width: 9),
+                                                  timeSegment(
+                                                    periodText,
+                                                    style: timeTextStyle,
+                                                  ),
+                                                ],
                                               ],
                                             ),
                                             Container(
