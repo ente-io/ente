@@ -28,8 +28,7 @@ class _ChristmasLightsBannerState extends State<ChristmasLightsBanner> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.redAccent,
+    return SizedBox(
       height: 10,
       width: double.infinity,
       child: rive.RiveWidgetBuilder(
