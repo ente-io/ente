@@ -1,4 +1,6 @@
-- Auto backup of 2FA codes with encryption
-- Import codes by scanning QR images from gallery
-- Minimize to tray on desktop platforms
+- App icon picker to customize your home screen appearance
+- New QR code dialog with branded design for sharing codes
+- Import 2FA codes from andOTP encrypted backups
+- Enhanced search and copy with keyboard shortcuts on desktop (press '/' to search, Enter to select, 'C' to copy, 'N' for next code)
+- Refreshed empty home screen when no codes are imported
 - Bug fixes and performance improvements
