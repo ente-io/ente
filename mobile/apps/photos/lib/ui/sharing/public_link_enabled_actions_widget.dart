@@ -41,7 +41,7 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
         leadingIcon: Icons.error_outline,
         leadingIconColor: enteColorScheme.warning500,
         menuItemColor: enteColorScheme.fillFaint,
-        isBottomBorderRadiusRemoved: true,
+        singleBorderRadius: 8,
       );
     }
 
@@ -129,7 +129,7 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
             );
           },
           isTopBorderRadiusRemoved: true,
-          isBottomBorderRadiusRemoved: true,
+          isBottomBorderRadiusRemoved: false,
         ),
       ],
     );
