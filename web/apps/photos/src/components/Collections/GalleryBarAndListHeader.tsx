@@ -11,6 +11,10 @@ import {
     isSaveComplete,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
+import {
+    FeedSidebar,
+    type FeedItemClickInfo,
+} from "ente-gallery/components/viewer/FeedSidebar";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
@@ -18,6 +22,10 @@ import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
@@ -48,10 +56,15 @@ type GalleryBarAndListHeaderProps = Omit<
      */
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
-    activeCollection: Collection;
+    activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
+    files: EnteFile[];
+    /**
+     * Called when a feed item is clicked to navigate to the file.
+     */
+    onFeedItemClick?: (info: FeedItemClickInfo) => void;
 } & Pick<
         CollectionHeaderProps,
         | "onRemotePull"
@@ -116,12 +129,16 @@ export const GalleryBarAndListHeader: React.FC<
     onSelectCollection,
     onSelectPerson,
     setFileListHeader,
+    files,
+    onFeedItemClick,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
+        useModalVisibility();
+    const { show: showCollectionFeed, props: collectionFeedVisibilityProps } =
         useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
@@ -154,9 +171,12 @@ export const GalleryBarAndListHeader: React.FC<
     useEffect(() => {
         if (shouldHide) return;
 
+        const collectionSummary = toShowCollectionSummaries.get(
+            activeCollectionID!,
+        );
         setFileListHeader({
             component:
-                mode != "people" ? (
+                mode != "people" && activeCollection ? (
                     <CollectionHeader
                         {...{
                             activeCollection,
@@ -173,12 +193,18 @@ export const GalleryBarAndListHeader: React.FC<
                             onSelectCollection,
                             onSelectPerson,
                         }}
-                        collectionSummary={
-                            toShowCollectionSummaries.get(activeCollectionID!)!
-                        }
+                        collectionSummary={collectionSummary!}
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
+                        onCollectionFeed={showCollectionFeed}
                     />
+                ) : mode != "people" && collectionSummary ? (
+                    <GalleryItemsHeaderAdapter>
+                        <GalleryItemsSummary
+                            name={collectionSummary.name}
+                            fileCount={collectionSummary.fileCount}
+                        />
+                    </GalleryItemsHeaderAdapter>
                 ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
@@ -194,6 +220,7 @@ export const GalleryBarAndListHeader: React.FC<
         shouldHide,
         mode,
         toShowCollectionSummaries,
+        activeCollection,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
@@ -209,6 +236,7 @@ export const GalleryBarAndListHeader: React.FC<
         collectionNameByID,
         onSelectCollection,
         onSelectPerson,
+        showCollectionFeed,
         // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
@@ -249,24 +277,43 @@ export const GalleryBarAndListHeader: React.FC<
                 isInHiddenSection={mode == "hidden-albums"}
                 onRemotePull={onRemotePull}
             />
-            <CollectionShare
-                {...collectionShareVisibilityProps}
-                collectionSummary={
-                    toShowCollectionSummaries.get(activeCollectionID!)!
-                }
-                collection={activeCollection}
-                {...{
-                    user,
-                    emailByUserID,
-                    shareSuggestionEmails,
-                    setBlockingLoad,
-                    onRemotePull,
-                }}
-            />
-            <AlbumCastDialog
-                {...collectionCastVisibilityProps}
-                collection={activeCollection}
-            />
+            {activeCollection && (
+                <>
+                    <CollectionShare
+                        {...collectionShareVisibilityProps}
+                        collectionSummary={
+                            toShowCollectionSummaries.get(activeCollectionID!)!
+                        }
+                        collection={activeCollection}
+                        {...{
+                            user,
+                            emailByUserID,
+                            shareSuggestionEmails,
+                            setBlockingLoad,
+                            onRemotePull,
+                        }}
+                    />
+                    <AlbumCastDialog
+                        {...collectionCastVisibilityProps}
+                        collection={activeCollection}
+                    />
+                    <FeedSidebar
+                        {...collectionFeedVisibilityProps}
+                        collection={activeCollection}
+                        files={files}
+                        currentUserID={user.id}
+                        emailByUserID={emailByUserID}
+                        onItemClick={
+                            onFeedItemClick
+                                ? (info) => {
+                                      collectionFeedVisibilityProps.onClose();
+                                      onFeedItemClick(info);
+                                  }
+                                : undefined
+                        }
+                    />
+                </>
+            )}
         </>
     );
 };

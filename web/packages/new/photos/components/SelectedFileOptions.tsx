@@ -5,7 +5,6 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
@@ -18,6 +17,7 @@ import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     PseudoCollectionID,
     type CollectionSummary,
@@ -384,7 +384,7 @@ const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("favorite")}>
         <IconButton {...{ onClick }}>
-            <FavoriteBorderIcon />
+            <StarBorderIcon fontSize="small" />
         </IconButton>
     </Tooltip>
 );
