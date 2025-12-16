@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
@@ -28,6 +29,7 @@ class RitualsService {
       ValueNotifier<RitualsState>(RitualsState.loading());
   late SharedPreferences _preferences;
   Timer? _debounce;
+  int _refreshGeneration = 0;
   StreamSubscription<FilesUpdatedEvent>? _filesUpdatedSubscription;
 
   static const _ritualsPrefsKey = "activity_rituals_v1";
@@ -45,6 +47,19 @@ class RitualsService {
     }
     _filesUpdatedSubscription =
         Bus.instance.on<FilesUpdatedEvent>().listen((event) {
+      if (event is CollectionUpdatedEvent &&
+          event.collectionID != null &&
+          (event.type == EventType.deletedFromRemote ||
+              event.type == EventType.deletedFromEverywhere)) {
+        unawaited(_handleCollectionDeleted(event.collectionID!));
+        return;
+      }
+      if (event is CollectionUpdatedEvent &&
+          event.collectionID != null &&
+          event.source == "rename_collection") {
+        unawaited(_handleCollectionRenamed(event.collectionID!));
+        return;
+      }
       _scheduleRefresh();
     });
     _scheduleRefresh(initial: true, scheduleAllRituals: true);
@@ -76,6 +91,7 @@ class RitualsService {
       );
       return;
     }
+    final generation = ++_refreshGeneration;
     try {
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: true,
@@ -90,7 +106,13 @@ class RitualsService {
           await _scheduleRitualNotifications(ritual);
         }
       }
+      if (generation != _refreshGeneration) {
+        return;
+      }
       final summary = await _buildSummary(rituals);
+      if (generation != _refreshGeneration) {
+        return;
+      }
       stateNotifier.value = RitualsState(
         loading: false,
         summary: summary,
@@ -99,11 +121,105 @@ class RitualsService {
       );
     } catch (e, s) {
       _logger.severe("Failed to refresh rituals", e, s);
+      if (generation != _refreshGeneration) {
+        return;
+      }
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: false,
         error: e.toString(),
       );
     }
+  }
+
+  Future<void> _handleCollectionDeleted(int collectionId) async {
+    final state = stateNotifier.value;
+    if (!state.loading &&
+        !_shouldPruneRitualsForDeletedCollection(collectionId)) {
+      return;
+    }
+
+    _debounce?.cancel();
+    final generation = ++_refreshGeneration;
+    final rituals = await _loadRituals();
+    final summary = _filterSummaryForRituals(state.summary, rituals);
+    if (generation != _refreshGeneration) {
+      return;
+    }
+    stateNotifier.value = RitualsState(
+      loading: false,
+      summary: summary,
+      rituals: rituals,
+      error: null,
+    );
+  }
+
+  bool _shouldPruneRitualsForDeletedCollection(int collectionId) {
+    for (final ritual in stateNotifier.value.rituals) {
+      final albumId = ritual.albumId;
+      if (albumId == null || albumId <= 0) {
+        return true;
+      }
+      if (albumId == collectionId) {
+        return true;
+      }
+      final collection = collectionsService.getCollectionByID(albumId);
+      if (collection == null || collection.isDeleted) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _handleCollectionRenamed(int collectionId) async {
+    final state = stateNotifier.value;
+    if (!state.loading &&
+        !state.rituals.any((ritual) => ritual.albumId == collectionId)) {
+      return;
+    }
+
+    _debounce?.cancel();
+    final generation = ++_refreshGeneration;
+    final rituals = await _loadRituals();
+    final summary = _filterSummaryForRituals(state.summary, rituals);
+    if (generation != _refreshGeneration) {
+      return;
+    }
+    stateNotifier.value = RitualsState(
+      loading: false,
+      summary: summary,
+      rituals: rituals,
+      error: null,
+    );
+  }
+
+  RitualsSummary? _filterSummaryForRituals(
+    RitualsSummary? summary,
+    List<Ritual> rituals,
+  ) {
+    if (summary == null) return null;
+    if (summary.ritualProgress.isEmpty) return summary;
+
+    final ritualIds = rituals.map((ritual) => ritual.id).toSet();
+    if (ritualIds.isEmpty) {
+      return RitualsSummary(
+        ritualProgress: const {},
+        generatedAt: summary.generatedAt,
+      );
+    }
+
+    final filtered = <String, RitualProgress>{};
+    for (final entry in summary.ritualProgress.entries) {
+      if (ritualIds.contains(entry.key)) {
+        filtered[entry.key] = entry.value;
+      }
+    }
+    if (filtered.length == summary.ritualProgress.length) {
+      return summary;
+    }
+    return RitualsSummary(
+      ritualProgress: filtered,
+      generatedAt: summary.generatedAt,
+    );
   }
 
   Future<RitualsSummary> _buildSummary(
@@ -223,7 +339,7 @@ class RitualsService {
 
   Future<List<Ritual>> _loadRituals() async {
     final raw = _preferences.getStringList(_ritualsPrefsKey) ?? [];
-    return raw
+    final rituals = raw
         .map(
           (str) => Ritual.fromJson(
             Map<String, dynamic>.from(_decode(str)),
@@ -231,6 +347,57 @@ class RitualsService {
         )
         .where((element) => element.id.isNotEmpty)
         .toList(growable: true);
+    return _pruneOrphanedRituals(rituals);
+  }
+
+  Future<List<Ritual>> _pruneOrphanedRituals(List<Ritual> rituals) async {
+    if (rituals.isEmpty) return rituals;
+
+    final removed = <Ritual>[];
+    final updated = <Ritual>[];
+    bool namesUpdated = false;
+
+    for (final ritual in rituals) {
+      final albumId = ritual.albumId;
+      if (albumId == null || albumId <= 0) {
+        removed.add(ritual);
+        continue;
+      }
+      final collection = collectionsService.getCollectionByID(albumId);
+      if (collection == null || collection.isDeleted) {
+        removed.add(ritual);
+        continue;
+      }
+
+      final currentAlbumName = collection.displayName;
+      if (ritual.albumName != currentAlbumName) {
+        namesUpdated = true;
+        updated.add(ritual.copyWith(albumName: currentAlbumName));
+        continue;
+      }
+
+      updated.add(ritual);
+    }
+
+    if (removed.isEmpty && !namesUpdated) return rituals;
+
+    if (removed.isNotEmpty) {
+      _logger.info(
+        "Pruning ${removed.length} orphaned rituals (missing/deleted album)",
+      );
+    }
+    if (namesUpdated) {
+      _logger.info("Updating ritual album names to match renamed albums");
+    }
+
+    await _persistRituals(updated);
+    for (final ritual in removed) {
+      await NotificationService.instance.clearAllScheduledNotifications(
+        containingPayload: "ritualId=${ritual.id}",
+        logLines: false,
+      );
+    }
+    return updated;
   }
 
   Map<String, dynamic> _decode(String value) {
