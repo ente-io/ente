@@ -291,8 +291,10 @@ export const GalleryBarAndListHeader: React.FC<
                     />
                     <FeedSidebar
                         {...collectionFeedVisibilityProps}
-                        albumName={activeCollection.name}
+                        collection={activeCollection}
                         files={files}
+                        currentUserID={user.id}
+                        emailByUserID={emailByUserID}
                     />
                 </>
             )}
