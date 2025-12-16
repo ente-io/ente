@@ -154,6 +154,24 @@ const LikedReplyIcon: React.FC<{ heartStroke?: string }> = ({
 // Types
 // =============================================================================
 
+/**
+ * Information about a feed item click for navigation purposes.
+ */
+export interface FeedItemClickInfo {
+    /** The type of feed item. */
+    type: FeedItem["type"];
+    /** The file ID to navigate to. */
+    fileID: number;
+    /**
+     * The comment ID to highlight (for comment-related items).
+     * For `replied_comment`, this is the reply's comment ID.
+     * For `liked_comment` and `liked_reply`, this is the target comment ID.
+     */
+    commentID?: string;
+    /** The collection ID where this activity occurred. */
+    collectionID: number;
+}
+
 export interface FeedSidebarProps extends ModalVisibilityProps {
     /**
      * The collection (album) to show feed for.
@@ -171,6 +189,10 @@ export interface FeedSidebarProps extends ModalVisibilityProps {
      * A map from user IDs to their email addresses for display.
      */
     emailByUserID: Map<number, string>;
+    /**
+     * Called when a feed item is clicked for navigation.
+     */
+    onItemClick?: (info: FeedItemClickInfo) => void;
 }
 
 /** A user who performed an action in the feed. */
@@ -202,6 +224,8 @@ interface LikedPhotoFeedItem extends BaseFeedItem {
 interface CommentedPhotoFeedItem extends BaseFeedItem {
     type: "commented_photo";
     fileID: number;
+    /** The ID of the new comment for navigation. */
+    actualCommentID: string;
     thumbnailURL?: string;
     user: FeedUser;
 }
@@ -209,7 +233,10 @@ interface CommentedPhotoFeedItem extends BaseFeedItem {
 /** Someone replied to your comment. */
 interface RepliedCommentFeedItem extends BaseFeedItem {
     type: "replied_comment";
+    /** The parent comment ID. */
     commentID: string;
+    /** The ID of the reply for navigation. */
+    replyID: string;
     fileID?: number;
     thumbnailURL?: string;
     user: FeedUser;
@@ -260,7 +287,6 @@ const getUserDisplayName = (
     }
     return userName;
 };
-
 
 /**
  * Check if a comment is a reply (has a parent).
@@ -316,6 +342,7 @@ const processFeedItems = (
                 id: `replied_comment_${c.id}`,
                 type: "replied_comment",
                 commentID: c.parentCommentID!,
+                replyID: c.id,
                 fileID: c.fileID,
                 thumbnailURL: getThumbnailURL(c.fileID),
                 timestamp: c.createdAt,
@@ -333,6 +360,7 @@ const processFeedItems = (
                 id: `commented_photo_${c.id}`,
                 type: "commented_photo",
                 fileID: c.fileID!,
+                actualCommentID: c.id,
                 thumbnailURL: getThumbnailURL(c.fileID),
                 timestamp: c.createdAt,
                 user: {
@@ -516,12 +544,13 @@ const getFeedIcon = (
 
 interface FeedItemRowProps {
     item: FeedItem;
+    onClick?: () => void;
 }
 
 /**
  * A single row in the feed showing an action.
  */
-const FeedItemRow: React.FC<FeedItemRowProps> = ({ item }) => {
+const FeedItemRow: React.FC<FeedItemRowProps> = ({ item, onClick }) => {
     const { mode, systemMode } = useColorScheme();
     const users =
         item.type === "commented_photo" || item.type === "replied_comment"
@@ -534,7 +563,7 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item }) => {
     const heartStroke = resolvedMode === "dark" ? "#1b1b1b" : "white";
 
     return (
-        <FeedItemContainer>
+        <FeedItemContainer onClick={onClick}>
             <IconContainer>{getFeedIcon(item.type, heartStroke)}</IconContainer>
             <FeedItemContent>
                 <AvatarStack>
@@ -575,6 +604,33 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item }) => {
 /**
  * A sidebar panel for displaying the feed for an album.
  */
+/**
+ * Extracts navigation info from a feed item for click handling.
+ */
+const getFeedItemClickInfo = (
+    item: FeedItem,
+    collectionID: number,
+): FeedItemClickInfo => {
+    const base = { type: item.type, collectionID };
+
+    switch (item.type) {
+        case "liked_photo":
+            return { ...base, fileID: item.fileID };
+        case "commented_photo":
+            return {
+                ...base,
+                fileID: item.fileID,
+                commentID: item.actualCommentID,
+            };
+        case "replied_comment":
+            return { ...base, fileID: item.fileID!, commentID: item.replyID };
+        case "liked_comment":
+            return { ...base, fileID: item.fileID!, commentID: item.commentID };
+        case "liked_reply":
+            return { ...base, fileID: item.fileID!, commentID: item.replyID };
+    }
+};
+
 export const FeedSidebar: React.FC<FeedSidebarProps> = ({
     open,
     onClose,
@@ -582,6 +638,7 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
     files = [],
     currentUserID,
     emailByUserID,
+    onItemClick,
 }) => {
     const [thumbnailCache, setThumbnailCache] = useState<ThumbnailCache>(
         new Map(),
@@ -634,8 +691,10 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
 
             setIsLoading(true);
             try {
-                const { comments: fetchedComments, reactions: fetchedReactions } =
-                    await getAlbumFeed(collection.id, collection.key);
+                const {
+                    comments: fetchedComments,
+                    reactions: fetchedReactions,
+                } = await getAlbumFeed(collection.id, collection.key);
                 setComments(fetchedComments);
                 setReactions(fetchedReactions);
             } catch (e) {
@@ -660,7 +719,14 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
                 emailByUserID,
                 currentUserID,
             ),
-        [comments, reactions, files, thumbnailCache, emailByUserID, currentUserID],
+        [
+            comments,
+            reactions,
+            files,
+            thumbnailCache,
+            emailByUserID,
+            currentUserID,
+        ],
     );
 
     return (
@@ -690,7 +756,22 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
                         <EmptyStateText>No activity yet</EmptyStateText>
                     ) : (
                         feedItems.map((item) => (
-                            <FeedItemRow key={item.id} item={item} />
+                            <FeedItemRow
+                                key={item.id}
+                                item={item}
+                                onClick={
+                                    onItemClick
+                                        ? () => {
+                                              onItemClick(
+                                                  getFeedItemClickInfo(
+                                                      item,
+                                                      collection.id,
+                                                  ),
+                                              );
+                                          }
+                                        : undefined
+                                }
+                            />
                         ))
                     )}
                 </ContentContainer>
@@ -845,9 +926,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
     border: "2px solid #FAFAFA",
     marginLeft: -8,
     "&:first-of-type": { marginLeft: 0 },
-    ...theme.applyStyles("dark", {
-        border: "2px solid #1b1b1b",
-    }),
+    ...theme.applyStyles("dark", { border: "2px solid #1b1b1b" }),
 }));
 
 const UserNameText = styled(Typography)(({ theme }) => ({

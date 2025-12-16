@@ -137,6 +137,9 @@ export interface FileViewerAnnotatedFile {
     itemData: ItemData;
 }
 
+/** The type of sidebar to open initially in the file viewer. */
+export type FileViewerInitialSidebar = "likes" | "comments";
+
 export type FileViewerProps = ModalVisibilityProps & {
     /**
      * The currently logged in user, if any.
@@ -170,6 +173,15 @@ export type FileViewerProps = ModalVisibilityProps & {
      * provided within the file viewer itself.
      */
     initialIndex: number;
+    /**
+     * If set, the specified sidebar will be opened when the file viewer opens.
+     */
+    initialSidebar?: FileViewerInitialSidebar;
+    /**
+     * If set, the comments sidebar will scroll to and highlight this comment.
+     * Only used when initialSidebar is "comments".
+     */
+    highlightCommentID?: string;
     /**
      * If true then the viewer does not show controls for downloading the file.
      */
@@ -321,6 +333,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     user,
     files,
     initialIndex,
+    initialSidebar,
+    highlightCommentID,
     disableDownload,
     showFullscreenButton,
     isInIncomingSharedCollection,
@@ -442,6 +456,25 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     useEffect(() => {
         fileNormalCollectionIDsRef.current = fileNormalCollectionIDs;
     }, [fileNormalCollectionIDs]);
+
+    // Track whether we've already opened the initial sidebar for this open
+    const hasOpenedInitialSidebarRef = useRef(false);
+
+    // Open the initial sidebar when the file viewer opens with initialSidebar set
+    useEffect(() => {
+        if (open && initialSidebar && !hasOpenedInitialSidebarRef.current) {
+            hasOpenedInitialSidebarRef.current = true;
+            if (initialSidebar === "comments") {
+                setOpenComments(true);
+            } else if (initialSidebar === "likes") {
+                setOpenLikes(true);
+            }
+        }
+        // Reset the flag when the viewer closes
+        if (!open) {
+            hasOpenedInitialSidebarRef.current = false;
+        }
+    }, [open, initialSidebar]);
 
     // Helper to get current user's file reactions from allReactions
     const getUserFileReactions = useCallback(
@@ -1856,6 +1889,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onCommentDeleted={handleCommentDeleted}
                 onCommentReactionAdded={handleCommentReactionAdded}
                 onCommentReactionDeleted={handleCommentReactionDeleted}
+                highlightCommentID={highlightCommentID}
             />
             <LikesSidebar
                 open={openLikes}

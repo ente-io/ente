@@ -8,6 +8,7 @@ import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     FileViewer,
+    type FileViewerInitialSidebar,
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
@@ -20,7 +21,7 @@ import type { CollectionSummary } from "ente-new/photos/services/collection-summ
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { t } from "i18next";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
 import {
@@ -57,6 +58,23 @@ export type FileListWithViewerProps = {
     onRemotePull: () => Promise<void>;
     activeCollectionSummary?: CollectionSummary;
     activeCollection?: Collection;
+    /**
+     * If set, the file viewer will open to this file index on mount/update.
+     * Set to undefined after the navigation is complete.
+     */
+    pendingFileIndex?: number;
+    /**
+     * The sidebar to open when navigating to a file from feed.
+     */
+    pendingFileSidebar?: FileViewerInitialSidebar;
+    /**
+     * The comment ID to highlight when navigating from feed.
+     */
+    pendingHighlightCommentID?: string;
+    /**
+     * Called after the pending navigation is consumed.
+     */
+    onPendingNavigationConsumed?: () => void;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -154,9 +172,19 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onAddFileToCollection,
     onScroll,
     onVisibleDateChange,
+    pendingFileIndex,
+    pendingFileSidebar,
+    pendingHighlightCommentID,
+    onPendingNavigationConsumed,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [initialSidebar, setInitialSidebar] = useState<
+        FileViewerInitialSidebar | undefined
+    >(undefined);
+    const [highlightCommentID, setHighlightCommentID] = useState<
+        string | undefined
+    >(undefined);
     const { show: showMapDialog, props: mapDialogVisibilityProps } =
         useModalVisibility();
     const { onGenericError } = useBaseContext();
@@ -168,6 +196,32 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             ? systemMode
             : (colorSchemeMode ?? theme.palette.mode);
     const isDarkMode = resolvedMode === "dark";
+
+    // Handle pending navigation from feed item clicks
+    useEffect(() => {
+        if (pendingFileIndex !== undefined) {
+            setCurrentIndex(pendingFileIndex);
+            setInitialSidebar(pendingFileSidebar);
+            setHighlightCommentID(pendingHighlightCommentID);
+            setOpenFileViewer(true);
+            onSetOpenFileViewer?.(true);
+            onPendingNavigationConsumed?.();
+        }
+    }, [
+        pendingFileIndex,
+        pendingFileSidebar,
+        pendingHighlightCommentID,
+        onSetOpenFileViewer,
+        onPendingNavigationConsumed,
+    ]);
+
+    // Clear initial sidebar state when file viewer closes
+    const handleCloseFileViewerInternal = useCallback(() => {
+        setInitialSidebar(undefined);
+        setHighlightCommentID(undefined);
+        onSetOpenFileViewer?.(false);
+        setOpenFileViewer(false);
+    }, [onSetOpenFileViewer]);
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -186,11 +240,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         },
         [onSetOpenFileViewer],
     );
-
-    const handleCloseFileViewer = useCallback(() => {
-        onSetOpenFileViewer?.(false);
-        setOpenFileViewer(false);
-    }, [onSetOpenFileViewer]);
 
     const handleTriggerRemotePull = useCallback(
         () => void onRemotePull(),
@@ -297,8 +346,10 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             </AutoSizer>
             <FileViewer
                 open={openFileViewer}
-                onClose={handleCloseFileViewer}
+                onClose={handleCloseFileViewerInternal}
                 initialIndex={currentIndex}
+                initialSidebar={initialSidebar}
+                highlightCommentID={highlightCommentID}
                 disableDownload={!enableDownload}
                 isInTrashSection={
                     activeCollectionID == PseudoCollectionID.trash

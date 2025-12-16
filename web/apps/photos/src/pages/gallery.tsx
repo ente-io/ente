@@ -57,6 +57,8 @@ import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
+import { type FeedItemClickInfo } from "ente-gallery/components/viewer/FeedSidebar";
+import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
@@ -190,6 +192,13 @@ const Page: React.FC = () => {
         open: boolean;
         albumId?: number;
     }>({ open: false });
+
+    // Pending navigation from feed item click
+    const [pendingFileNavigation, setPendingFileNavigation] = useState<{
+        fileIndex: number;
+        sidebar?: FileViewerInitialSidebar;
+        commentID?: string;
+    }>();
 
     /**
      * Tracks a pending file addition operation.
@@ -632,6 +641,40 @@ const Page: React.FC = () => {
         showLoadingBar();
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
+
+    /**
+     * Handle click on a feed item to navigate to the file viewer.
+     */
+    const handleFeedItemClick = useCallback(
+        (info: FeedItemClickInfo) => {
+            // Find the file index in filteredFiles by fileID
+            const fileIndex = filteredFiles.findIndex(
+                (f) => f.id === info.fileID,
+            );
+            if (fileIndex === -1) {
+                // File not found in current view - might need to switch to the collection
+                log.warn(
+                    `Feed navigation: file ${info.fileID} not found in current view`,
+                );
+                return;
+            }
+
+            // Determine which sidebar to open
+            const sidebar: FileViewerInitialSidebar =
+                info.type === "liked_photo" ? "likes" : "comments";
+
+            setPendingFileNavigation({
+                fileIndex,
+                sidebar,
+                commentID: info.commentID,
+            });
+        },
+        [filteredFiles],
+    );
+
+    const handlePendingNavigationConsumed = useCallback(() => {
+        setPendingFileNavigation(undefined);
+    }, []);
 
     /**
      * Pull latest collections, collection files and trash items from remote.
@@ -1327,6 +1370,7 @@ const Page: React.FC = () => {
                 onRemotePull={remotePull}
                 onSelectPerson={handleSelectPerson}
                 files={filteredFiles}
+                onFeedItemClick={handleFeedItemClick}
             />
 
             <Upload
@@ -1426,6 +1470,12 @@ const Page: React.FC = () => {
                     onSelectCollection={handleSelectCollection}
                     onSelectPerson={handleSelectPerson}
                     onAddFileToCollection={handleAddSingleFileToCollection}
+                    pendingFileIndex={pendingFileNavigation?.fileIndex}
+                    pendingFileSidebar={pendingFileNavigation?.sidebar}
+                    pendingHighlightCommentID={pendingFileNavigation?.commentID}
+                    onPendingNavigationConsumed={
+                        handlePendingNavigationConsumed
+                    }
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />

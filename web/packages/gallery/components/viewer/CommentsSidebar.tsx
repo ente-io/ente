@@ -381,6 +381,10 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
         collectionID: number,
         reactionID: string,
     ) => void;
+    /**
+     * If set, the sidebar will scroll to and highlight this comment.
+     */
+    highlightCommentID?: string;
 }
 
 /**
@@ -407,6 +411,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     onCommentDeleted,
     onCommentReactionAdded,
     onCommentReactionDeleted,
+    highlightCommentID,
 }) => {
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
@@ -450,12 +455,110 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         Map<number, UnifiedReaction[]>
     >(new Map());
 
+    // Track whether we've scrolled to the highlight comment for this open
+    const hasScrolledToHighlightRef = useRef(false);
+
     // Focus input when replying to a comment
     useEffect(() => {
         if (replyingTo && inputRef.current) {
             inputRef.current.focus();
         }
     }, [replyingTo]);
+
+    // Reset highlight tracking when sidebar closes
+    useEffect(() => {
+        if (!open) {
+            hasScrolledToHighlightRef.current = false;
+        }
+    }, [open]);
+
+    // Scroll to and highlight the target comment when opening from feed
+    useEffect(() => {
+        if (
+            !open ||
+            !highlightCommentID ||
+            hasScrolledToHighlightRef.current ||
+            !commentsContainerRef.current ||
+            loading ||
+            comments.length === 0
+        ) {
+            return;
+        }
+
+        let highlightTimeout: ReturnType<typeof setTimeout> | undefined;
+        let fadeTimeout: ReturnType<typeof setTimeout> | undefined;
+        let cleanupTimeout: ReturnType<typeof setTimeout> | undefined;
+        let blinkInterval: ReturnType<typeof setInterval> | undefined;
+
+        // Wait for DOM to update after comments state change
+        const initialTimeout = setTimeout(() => {
+            const commentWrapper = commentsContainerRef.current?.querySelector(
+                `[data-comment-id="${highlightCommentID}"]`,
+            );
+            if (commentWrapper) {
+                hasScrolledToHighlightRef.current = true;
+
+                // Scroll to the comment
+                commentWrapper.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+
+                // Find the bubble element inside the wrapper
+                const bubbleElement = commentWrapper.querySelector<HTMLElement>(
+                    "[data-comment-bubble]",
+                );
+
+                if (bubbleElement) {
+                    // Wait for scroll to mostly complete, then apply blink highlight
+                    highlightTimeout = setTimeout(() => {
+                        const computedStyle = getComputedStyle(bubbleElement);
+                        const originalBg = computedStyle.backgroundColor;
+
+                        // Parse the RGB values to create 80% opacity version
+                        const rgbMatch = originalBg.match(
+                            /rgba?\((\d+),\s*(\d+),\s*(\d+)/,
+                        );
+                        if (!rgbMatch) return;
+
+                        const [, r, g, b] = rgbMatch;
+                        const dimmedBg = `rgba(${r}, ${g}, ${b}, 0.6)`;
+
+                        bubbleElement.style.transition =
+                            "background-color 0.2s ease-in-out";
+
+                        let isDimmed = false;
+                        blinkInterval = setInterval(() => {
+                            isDimmed = !isDimmed;
+                            bubbleElement.style.backgroundColor = isDimmed
+                                ? dimmedBg
+                                : originalBg;
+                        }, 300);
+
+                        // Stop blinking after 1.5 seconds
+                        fadeTimeout = setTimeout(() => {
+                            if (blinkInterval) clearInterval(blinkInterval);
+                            bubbleElement.style.backgroundColor = originalBg;
+
+                            // Clean up transition style
+                            cleanupTimeout = setTimeout(() => {
+                                bubbleElement.style.transition = "";
+                                bubbleElement.style.backgroundColor = "";
+                            }, 200);
+                        }, 1500);
+                    }, 400);
+                }
+            }
+        }, 100);
+
+        return () => {
+            clearTimeout(initialTimeout);
+            if (highlightTimeout) clearTimeout(highlightTimeout);
+            if (fadeTimeout) clearTimeout(fadeTimeout);
+            if (cleanupTimeout) clearTimeout(cleanupTimeout);
+            if (blinkInterval) clearInterval(blinkInterval);
+        };
+    }, [open, highlightCommentID, loading, comments]);
 
     // Reset selected collection when the file changes (gallery view only)
     useEffect(() => {
@@ -895,8 +998,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 // Update reactionsByCollection
                 setReactionsByCollection((prev) => {
                     const next = new Map(prev);
-                    const reactions =
-                        next.get(selectedCollectionInfo.id) ?? [];
+                    const reactions = next.get(selectedCollectionInfo.id) ?? [];
                     next.set(
                         selectedCollectionInfo.id,
                         reactions.filter((r) => r.id !== existingReactionID),
@@ -934,8 +1036,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 // Update reactionsByCollection
                 setReactionsByCollection((prev) => {
                     const next = new Map(prev);
-                    const reactions =
-                        next.get(selectedCollectionInfo.id) ?? [];
+                    const reactions = next.get(selectedCollectionInfo.id) ?? [];
                     next.set(selectedCollectionInfo.id, [
                         ...reactions,
                         newReaction,
@@ -1208,6 +1309,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         </OwnTimestamp>
                                     )}
                                     <CommentBubbleWrapper
+                                        data-comment-id={comment.id}
                                         isOwn={commentIsOwn}
                                         isFirstOwn={
                                             !showOwnTimestamp &&
