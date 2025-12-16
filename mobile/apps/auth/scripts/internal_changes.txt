@@ -1,3 +1,4 @@
+- Prateek: Fixed taskbar icon not restoring when reopening app from Start Menu/launcher while hidden to tray (Windows/Linux)
 - Prateek: App icon picker to customize home screen appearance; refreshed app icon and splash screen design
 - Prateek: Redesigned empty home screen with improved layout and colors
 - Prateek: New QR code sharing dialog with updated design
