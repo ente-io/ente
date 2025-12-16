@@ -82,9 +82,10 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
     // QR text color - always black for scanability
     const qrTextColor = textBaseLight;
 
-    final dialogBackgroundColor = theme.colorScheme.surface;
+    final dialogBackgroundColor =
+        isDark ? const Color(0xFF212121) : theme.colorScheme.surface;
     final closeBgColor =
-        isDark ? theme.colorScheme.surfaceContainerHighest : qrBoxColor;
+        isDark ? const Color(0xFF292929) : const Color(0xFFF5F5F7);
     final closeIconColor = isDark ? theme.colorScheme.onSurface : qrTextColor;
 
     final dialogTitleStyle = theme.textTheme.titleLarge?.copyWith(
@@ -161,6 +162,19 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
+                        // Ente Auth icon at top right
+                        Positioned(
+                          top: -16,
+                          right: -16,
+                          child: Transform.rotate(
+                            angle: -4 * 3.14159 / 180, // -4 degrees
+                            child: Image.asset(
+                              'assets/qr_logo.png',
+                              height: 64,
+                              width: 64,
+                            ),
+                          ),
+                        ),
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,

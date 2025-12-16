@@ -466,7 +466,7 @@ packages:
     source: path
     version: "0.0.1"
   ente_qr_ui:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       path: "../../packages/qr"
       relative: true
