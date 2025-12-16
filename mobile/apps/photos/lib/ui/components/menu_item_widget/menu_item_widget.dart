@@ -88,7 +88,7 @@ class MenuItemWidget extends StatefulWidget {
     this.isTopBorderRadiusRemoved = false,
     this.isGestureDetectorDisabled = false,
     this.showOnlyLoadingState = false,
-    this.surfaceExecutionStates = true,
+    this.surfaceExecutionStates = false,
     this.alwaysShowSuccessState = false,
     this.padding,
     super.key,
