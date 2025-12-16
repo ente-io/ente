@@ -124,6 +124,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
                   isOwnComment: widget.isOwnComment,
                   isLoadingParent: _isLoadingParent,
                   parentComment: _parentComment,
+                  currentUserID: widget.currentUserID,
                   userResolver: widget.userResolver,
                 ),
                 if (!_isLoadingReactions)
@@ -149,12 +150,14 @@ class _InlineParentQuote extends StatelessWidget {
   final bool isLoading;
   final Comment? parentComment;
   final bool isOwnComment;
+  final int currentUserID;
   final User Function(Comment) userResolver;
 
   const _InlineParentQuote({
     required this.isLoading,
     required this.parentComment,
     required this.isOwnComment,
+    required this.currentUserID,
     required this.userResolver,
   });
 
@@ -177,9 +180,12 @@ class _InlineParentQuote extends StatelessWidget {
     }
 
     final parentText = parentComment?.data ?? "Original comment unavailable";
+    final parentUser =
+        parentComment != null ? userResolver(parentComment!) : null;
     final parentAuthor = parentComment != null
-        ? userResolver(parentComment!).displayName ??
-            userResolver(parentComment!).email
+        ? (parentUser!.id == currentUserID
+            ? 'You'
+            : (parentUser.displayName ?? parentUser.email))
         : null;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -255,6 +261,7 @@ class _CommentBubble extends StatelessWidget {
   final bool isOwnComment;
   final bool isLoadingParent;
   final Comment? parentComment;
+  final int currentUserID;
   final User Function(Comment) userResolver;
 
   const _CommentBubble({
@@ -262,6 +269,7 @@ class _CommentBubble extends StatelessWidget {
     required this.isOwnComment,
     required this.isLoadingParent,
     required this.parentComment,
+    required this.currentUserID,
     required this.userResolver,
   });
 
@@ -300,6 +308,7 @@ class _CommentBubble extends StatelessWidget {
               isLoading: isLoadingParent,
               parentComment: parentComment,
               isOwnComment: isOwnComment,
+              currentUserID: currentUserID,
               userResolver: userResolver,
             ),
           Text(

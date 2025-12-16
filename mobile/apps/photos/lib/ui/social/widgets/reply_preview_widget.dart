@@ -7,11 +7,13 @@ import "package:photos/theme/ente_theme.dart";
 class ReplyPreviewWidget extends StatelessWidget {
   final Comment replyingTo;
   final User replyingToUser;
+  final int currentUserID;
   final VoidCallback onDismiss;
 
   const ReplyPreviewWidget({
     required this.replyingTo,
     required this.replyingToUser,
+    required this.currentUserID,
     required this.onDismiss,
     super.key,
   });
@@ -45,7 +47,7 @@ class ReplyPreviewWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Replying to ${replyingToUser.displayName ?? replyingToUser.email}",
+                  "Replying to ${replyingToUser.id == currentUserID ? 'You' : (replyingToUser.displayName ?? replyingToUser.email)}",
                   style: textTheme.small.copyWith(color: colorScheme.textMuted),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

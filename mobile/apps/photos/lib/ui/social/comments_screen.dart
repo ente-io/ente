@@ -254,6 +254,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
             replyingTo: _replyingTo,
             replyingToUser:
                 _replyingTo != null ? _getUserForComment(_replyingTo!) : null,
+            currentUserID: _currentUserID,
             onDismissReply: _dismissReply,
             controller: _textController,
             focusNode: _inputFocusNode,

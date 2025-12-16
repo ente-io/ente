@@ -7,6 +7,7 @@ import "package:photos/ui/social/widgets/reply_preview_widget.dart";
 class CommentInputWidget extends StatelessWidget {
   final Comment? replyingTo;
   final User? replyingToUser;
+  final int currentUserID;
   final VoidCallback? onDismissReply;
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -15,6 +16,7 @@ class CommentInputWidget extends StatelessWidget {
   const CommentInputWidget({
     this.replyingTo,
     this.replyingToUser,
+    required this.currentUserID,
     this.onDismissReply,
     required this.controller,
     required this.focusNode,
@@ -61,6 +63,7 @@ class CommentInputWidget extends StatelessWidget {
                 ReplyPreviewWidget(
                   replyingTo: replyingTo!,
                   replyingToUser: replyingToUser!,
+                  currentUserID: currentUserID,
                   onDismiss: onDismissReply!,
                 ),
               TextField(

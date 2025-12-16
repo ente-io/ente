@@ -17,8 +17,10 @@ class CommentActionsCapsule extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark ? const Color(0xFF161616) : const Color(0xFFF5F5F7);
-    final iconColor = isDark ? const Color(0xFFFFFFFF) : const Color(0xFF131313);
+    final background =
+        isDark ? const Color(0xFF161616) : const Color(0xFFF5F5F7);
+    final iconColor =
+        isDark ? const Color(0xFFFFFFFF) : const Color(0xFF131313);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
