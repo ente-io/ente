@@ -81,7 +81,7 @@ Learn more about [Map and location](/photos/features/search-and-discovery/map-an
 **From a photo:**
 
 1. Open a photo
-2. Click Info (i)
+2. Tap the overflow menu (⋮) and select **Info**
 3. Select "Add Location"
 4. Enter the location name and define a radius
 
@@ -294,7 +294,7 @@ Yes! Descriptions (captions) you add to photos are searchable, making it easier 
 **To add a description:**
 
 1. Open the photo
-2. Tap the info button (i)
+2. Tap the overflow menu (⋮) and select **Info**
 3. Enter your description
 4. Save
 

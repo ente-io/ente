@@ -399,7 +399,7 @@
   "emergencyContact": "Emergency contact",
   "emergencyContactDescription": "Keep contact info for key people in crises.",
   "noteName": "Title",
-  "noteNameHint": "Hint text",
+  "noteNameHint": "Note title",
   "noteContent": "Content",
   "noteContentHint": "Write down important thoughts or instructions",
   "unsavedNoteChangesTitle": "Discard changes?",
@@ -751,7 +751,7 @@
   "locker": "Locker",
   "loginToEnteAccount": "Log in to your Ente account",
   "unlockLockerNewUserTitle": "Join Ente to use Locker",
-  "unlockLockerNewUserBody": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+  "unlockLockerNewUserBody": "Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.",
   "checkoutEntePhotos": "Checkout Ente Photos",
   "okay": "Okay",
   "noAccountCta": "I don't have an account",
@@ -850,5 +850,8 @@
         "example": "1,000"
       }
     }
-  }
+  },
+  "sorry": "Sorry",
+  "subscribe": "Subscribe",
+  "subscriptionRequiredForSharing": "You need a paid subscription to share links"
 }

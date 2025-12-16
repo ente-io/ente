@@ -326,7 +326,6 @@
   "removeFromAlbumTitle": "アルバムから削除しますか？",
   "removeFromAlbum": "アルバムから削除",
   "itemsWillBeRemovedFromAlbum": "選択したアイテムはこのアルバムから削除されます",
-  "removeShareItemsWarning": "削除したアイテムのいくつかは他の人によって追加されました。あなたはそれらへのアクセスを失います",
   "addingToFavorites": "お気に入りに追加しています...",
   "removingFromFavorites": "お気に入りから削除しています...",
   "sorryCouldNotAddToFavorites": "お気に入りに追加できませんでした。",

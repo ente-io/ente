@@ -47,7 +47,7 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
-import { isHTTPErrorWithStatus } from "ente-base/http";
+import { isHTTPErrorWithStatus, isMuseumHTTPError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
@@ -1817,7 +1817,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
-            setErrorMessage(t("generic_error"));
+            if (await isMuseumHTTPError(e, 403, "LINK_EDIT_NOT_ALLOWED")) {
+                setErrorMessage(t("link_edit_disabled_for_free_accounts"));
+            } else {
+                setErrorMessage(t("generic_error"));
+            }
         } finally {
             setBlockingLoad(false);
         }

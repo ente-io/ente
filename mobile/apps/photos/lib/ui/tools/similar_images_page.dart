@@ -1036,8 +1036,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
       if (groupAtIndexSurvives(topIndex)) {
         anchorGroup = beforeFiltered[topIndex!];
       } else {
-        final visiblePositions = _itemPositionsListener
-            .itemPositions.value
+        final visiblePositions = _itemPositionsListener.itemPositions.value
             .where(
               (p) => p.index >= 0 && p.index < beforeFiltered.length,
             )
@@ -1315,7 +1314,7 @@ class _LoadingScreenState extends State<_LoadingScreen> {
     super.initState();
     _analysisAnimationLoader = rive.FileLoader.fromAsset(
       'assets/ducky_analyze_files.riv',
-      riveFactory: rive.Factory.rive,
+      riveFactory: rive.Factory.flutter,
     );
     _startTextCycling();
   }

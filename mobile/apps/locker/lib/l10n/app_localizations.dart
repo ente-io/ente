@@ -1189,7 +1189,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Hint text'**
+  /// **'Note title'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -2287,7 +2287,7 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerNewUserBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.'**
+  /// **'Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.'**
   String get unlockLockerNewUserBody;
 
   /// No description provided for @checkoutEntePhotos.
@@ -2517,6 +2517,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
+
+  /// No description provided for @sorry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry'**
+  String get sorry;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
 }
 
 class _AppLocalizationsDelegate

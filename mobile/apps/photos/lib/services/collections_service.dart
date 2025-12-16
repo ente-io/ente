@@ -453,8 +453,15 @@ class CollectionsService {
           await CollectionsService.instance.getCollectionIDToNewestFileTime();
     }
 
+    // Sort incoming collections, then separate pinned from rest
     incoming.sort(
       (first, second) {
+        // Sharee-pinned collections should come first
+        final firstPinned = first.hasShareePinned();
+        final secondPinned = second.hasShareePinned();
+        if (firstPinned && !secondPinned) return -1;
+        if (!firstPinned && secondPinned) return 1;
+
         int comparison;
         if (sortKey == AlbumSortKey.albumName) {
           comparison = compareAsciiLowerCaseNatural(
@@ -1277,6 +1284,10 @@ class CollectionsService {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
+      if (e.response?.statusCode == 403 &&
+          e.response?.data?['code'] == 'LINK_EDIT_NOT_ALLOWED') {
+        throw LinkEditNotAllowedError();
+      }
       rethrow;
     } catch (e, s) {
       _logger.severe("failed to update ShareUrl", e, s);
@@ -1389,7 +1400,7 @@ class CollectionsService {
     }
     try {
       await _enteDio.post(
-        "/collection-actions/reject-delete-suggestions/",
+        "/collection-actions/reject-delete-suggestions",
         data: {"fileIDs": fileIDs},
       );
     } catch (e, s) {
@@ -2213,9 +2224,21 @@ class CollectionsService {
       }
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom", type: EventType.deletedFromRemote,));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom", type: EventType.deletedFromRemote,));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collectionID,
+          batch,
+          "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          batch,
+          source: "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
     }
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
@@ -2250,7 +2273,13 @@ class CollectionsService {
         type: EventType.deletedFromRemote,
       ),
     );
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "suggestDelete", type: EventType.deletedFromRemote,));
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: "suggestDelete",
+        type: EventType.deletedFromRemote,
+      ),
+    );
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 

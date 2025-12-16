@@ -8,6 +8,7 @@ class GradientButton extends StatelessWidget {
   final HugeIcon? hugeIcon;
   final double paddingValue;
   final Color? backgroundColor;
+  final Color? textColor;
 
   const GradientButton({
     super.key,
@@ -16,6 +17,7 @@ class GradientButton extends StatelessWidget {
     this.hugeIcon,
     this.paddingValue = 6.0,
     this.backgroundColor,
+    this.textColor,
   });
 
   static const TextStyle _textStyle = TextStyle(
@@ -31,8 +33,10 @@ class GradientButton extends StatelessWidget {
     final bool isEnabled = onTap != null;
     final Color effectiveBackgroundColor = backgroundColor ??
         (isEnabled ? colorScheme.primary700 : colorScheme.fillFaint);
+    final Color effectiveTextColor =
+        textColor ?? (isEnabled ? Colors.white : colorScheme.textMuted);
     final TextStyle effectiveTextStyle = _textStyle.copyWith(
-      color: isEnabled ? Colors.white : colorScheme.textMuted,
+      color: effectiveTextColor,
     );
 
     final Widget textWidget = Text(text, style: effectiveTextStyle);

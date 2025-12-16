@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
   "sorryCouldNotRemoveFromFavorites": "Sorry, could not remove from favorites!",
   "subscribeToEnableSharing": "You need an active paid subscription to enable sharing.",
+  "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
@@ -1206,10 +1207,13 @@
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album",
   "pin": "Pin",
+  "pinPerson": "Pin person",
   "pinToTop": "Pin to top",
   "unpin": "Unpin",
+  "unpinPerson": "Unpin person",
   "visibility": "Visibility",
   "hideFromMemories": "Hide from memories",
+  "showInMemories": "Show in memories",
   "create": "Create",
   "viewAll": "View all",
   "nothingSharedWithYouYet": "Nothing shared with you yet",
@@ -1321,6 +1325,8 @@
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
+  "removePersonTag": "Remove person tag",
+  "areYouSureRemoveThisPersonTag": "Are you sure you want to remove this person tag?",
   "autoPairDesc": "Auto pair works only with devices that support Chromecast.",
   "manualPairDesc": "Pair with PIN works with any screen you wish to view your album on.",
   "connectToDevice": "Connect to device",
@@ -2017,11 +2023,11 @@
   "riverCruises": "River cruise views",
   "facesTimelineBannerTitle": "Memory Lane",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "See {name}'s photos across the years",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,8 +2085,94 @@
   },
   "facesTimelineUnavailable": "Faces timeline is preparing...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Playful kids",
-  "coastalCliffs": "Cliffs by the sea"
+  "coastalCliffs": "Cliffs by the sea",
+  "ritualsTitle": "Rituals",
+  "ritualAddTooltip": "Add ritual",
+  "ritualActivityHeading": "Activity",
+  "ritualDefaultHeatmapTitle": "Take a photo every day",
+  "ritualUntitled": "Untitled ritual",
+  "ritualShareUnavailable": "Unable to share right now. Please try again.",
+  "ritualNotificationMessage": "Take a photo now",
+  "ritualCameraNotFound": "No camera found on this device.",
+  "ritualCameraStartError": "Unable to start camera. Please check permissions.",
+  "ritualCaptureError": "Unable to capture photo. Please try again.",
+  "ritualPhotoLimit": "You can add up to {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Capture at least one photo first.",
+  "ritualAlbumMissing": "Ritual album missing. Edit the ritual to set an album.",
+  "ritualAddedToAlbum": "Added to album",
+  "ritualAddedToAlbumWithName": "Added to {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Couldn't add photos to the album: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Back to rituals",
+  "ritualNoPhotosYet": "No photos yet",
+  "ritualSetAlbumToLaunchCamera": "Set an album for this ritual to launch the camera.",
+  "ritualDefaultCameraTitle": "Take a photo",
+  "ritualBadgeMessage7": "7 days down! Consistency looks good on you. Keep going!",
+  "ritualBadgeMessage14": "14 days in! Your ritual is becoming a habit. Incredible!",
+  "ritualBadgeMessage30": "30 days in a row! Legendary consistency. Take a bow!",
+  "ritualBadgeMessageDefault": "You're on a roll!",
+  "ritualBadgeNewTitle": "New achievement",
+  "ritualBadgePreparing": "Preparing...",
+  "ritualStreaksLabel": "Streaks",
+  "ritualCreateYourOwn": "Create your own ritual",
+  "ritualGetDailyReminders": "Get daily reminders",
+  "ritualAlbumNotSet": "Album not set",
+  "ritualOpenCameraTooltip": "Open ritual camera",
+  "ritualEditorLabel": "Ritual editor",
+  "ritualNew": "New ritual",
+  "ritualEdit": "Edit ritual",
+  "ritualEnterPrompt": "Enter your ritual",
+  "ritualEnterDescription": "Please enter a description",
+  "ritualDayLabel": "Day",
+  "ritualNotificationsOffHint": "Notifications are off. Tap a day to turn them on.",
+  "ritualTimeLabel": "Time",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Save ritual",
+  "ritualUpdate": "Update ritual",
+  "ritualSelectAlbumTitle": "Select album",
+  "ritualSearchOrCreate": "Search or create new",
+  "ritualNoAlbumsYet": "No albums yet",
+  "ritualNoMatchingAlbums": "No matching albums",
+  "ritualCreateAlbumWithName": "Create \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Create new",
+  "ritualAlbumSelectionPlaceholder": "Select album",
+  "ritualPickEmojiTitle": "Pick an emoji",
+  "ritualCustomKeyboardLabel": "Custom (keyboard)",
+  "ritualEmojiKeyboardHint": "Press to open emoji keyboard",
+  "ritualEmojiUseAction": "Use",
+  "ritualSearchEmpty": "Build a ritual to keep your photo habit going."
 }

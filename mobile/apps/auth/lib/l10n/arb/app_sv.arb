@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Säkerhetskopiera dina 2FA-koder",
   "onBoardingGetStarted": "Kom igång",
-  "setupFirstAccount": "Konfigurera ditt första konto",
   "importScanQrCode": "Skanna en QR-kod",
   "importEnterSetupKey": "Ange en konfigurationskod",
   "importAccountPageTitle": "Ange kontodetaljer",

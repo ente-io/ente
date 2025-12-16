@@ -57,11 +57,20 @@ type GalleryBarAndListHeaderProps = Omit<
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
-    /**
-     * The files currently being displayed in the gallery (for the feed sidebar).
-     */
     files: EnteFile[];
-} & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
+} & Pick<
+        CollectionHeaderProps,
+        | "onRemotePull"
+        | "onAddSaveGroup"
+        | "onMarkTempDeleted"
+        | "onAddFileToCollection"
+        | "onRemoteFilesPull"
+        | "onVisualFeedback"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    > &
     Pick<
         CollectionShareProps,
         "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
@@ -104,6 +113,13 @@ export const GalleryBarAndListHeader: React.FC<
     shareSuggestionEmails,
     onRemotePull,
     onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
     onSelectPerson,
     setFileListHeader,
     files,
@@ -160,6 +176,14 @@ export const GalleryBarAndListHeader: React.FC<
                             isActiveCollectionDownloadInProgress,
                             onRemotePull,
                             onAddSaveGroup,
+                            onMarkTempDeleted,
+                            onAddFileToCollection,
+                            onRemoteFilesPull,
+                            onVisualFeedback,
+                            fileNormalCollectionIDs,
+                            collectionNameByID,
+                            onSelectCollection,
+                            onSelectPerson,
                         }}
                         collectionSummary={collectionSummary!}
                         onCollectionShare={showCollectionShare}
@@ -194,6 +218,16 @@ export const GalleryBarAndListHeader: React.FC<
         activePerson,
         showCollectionShare,
         showCollectionCast,
+        onRemotePull,
+        onAddSaveGroup,
+        onMarkTempDeleted,
+        onAddFileToCollection,
+        onRemoteFilesPull,
+        onVisualFeedback,
+        fileNormalCollectionIDs,
+        collectionNameByID,
+        onSelectCollection,
+        onSelectPerson,
         showCollectionFeed,
         // TODO: Cluster
         // This causes a loop since it is an array dep

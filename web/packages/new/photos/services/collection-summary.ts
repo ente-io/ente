@@ -22,7 +22,8 @@ export type CollectionSummaryAttribute =
     | "system"
     | "archived"
     | "hideFromCollectionBar"
-    | "pinned";
+    | "pinned"
+    | "shareePinned";
 
 /**
  * ID of the special {@link CollectionSummary} instances that are not backed by

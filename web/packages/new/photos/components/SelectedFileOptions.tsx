@@ -205,25 +205,59 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             onSelectCollection: createOnSelectForCollectionOp("add"),
         });
 
-    const handleRemoveFromCollection = () => {
-        const remove = () => onRemoveFilesFromCollection(collection!);
+    const isSharedIncoming =
+        collectionSummary?.attributes.has("sharedIncoming");
+    const isSharedOutgoing =
+        collectionSummary?.attributes.has("sharedOutgoing");
+    const isRemovingOthers = selectedFileCount != selectedOwnFileCount;
 
-        if (collectionSummary?.attributes.has("sharedIncoming")) {
-            remove();
-        } else {
-            const onlyUserFiles = selectedFileCount == selectedOwnFileCount;
+    const handleRemoveFromCollection = () => {
+        if (!collection) return;
+        const remove = () => onRemoveFilesFromCollection(collection);
+
+        if (isSharedIncoming) {
+            if (isRemovingOthers) {
+                showMiniDialog({
+                    title: t("remove_from_album"),
+                    message: t("remove_from_album_others_message"),
+                    continue: {
+                        text: t("remove"),
+                        color: "critical",
+                        action: remove,
+                    },
+                    cancel: t("cancel"),
+                });
+            } else {
+                remove();
+            }
+            return;
+        }
+
+        if (isSharedOutgoing && isRemovingOthers) {
             showMiniDialog({
                 title: t("remove_from_album"),
-                message: onlyUserFiles
-                    ? t("confirm_remove_message")
-                    : t("confirm_remove_incl_others_message"),
+                message: t("remove_from_album_others_message"),
                 continue: {
-                    text: t("yes_remove"),
-                    color: onlyUserFiles ? "primary" : "critical",
+                    text: t("remove"),
+                    color: "critical",
                     action: remove,
                 },
             });
+            return;
         }
+
+        const onlyUserFiles = !isRemovingOthers;
+        showMiniDialog({
+            title: t("remove_from_album"),
+            message: onlyUserFiles
+                ? t("confirm_remove_message")
+                : t("confirm_remove_incl_others_message"),
+            continue: {
+                text: t("yes_remove"),
+                color: onlyUserFiles ? "primary" : "critical",
+                action: remove,
+            },
+        });
     };
 
     const handleMoveToCollection = () => {

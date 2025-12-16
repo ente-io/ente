@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
@@ -14,7 +15,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/file/trash_file.dart';
+import "package:photos/models/file/trash_file.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
@@ -23,9 +24,11 @@ import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
@@ -36,14 +39,16 @@ import "package:photos/utils/magic_util.dart";
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
   final Function(EnteFile) onFileRemoved;
-  final bool shouldShowActions;
+  final Function(EnteFile) onEditRequested;
   final ValueNotifier<bool> enableFullScreenNotifier;
+  final DetailPageMode mode;
 
   const FileAppBar(
     this.file,
     this.onFileRemoved,
-    this.shouldShowActions, {
+    this.onEditRequested, {
     required this.enableFullScreenNotifier,
+    this.mode = DetailPageMode.full,
     super.key,
   });
 
@@ -94,9 +99,7 @@ class FileAppBarState extends State<FileAppBar> {
       _getActions();
       _reloadActions = false;
     }
-
-    final isTrashedFile = widget.file is TrashFile;
-    final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
+    final shouldShowActions = !isGuestView;
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: ValueListenableBuilder(
@@ -143,7 +146,7 @@ class FileAppBarState extends State<FileAppBar> {
                         : Navigator.of(context).pop();
                   },
                 ),
-                actions: shouldShowActions && !isGuestView ? _actions : [],
+                actions: shouldShowActions ? _actions : [],
                 elevation: 0,
                 backgroundColor: const Color(0x00000000),
               ),
@@ -178,7 +181,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
-    if (!isFileHidden && isFileUploaded) {
+    if (!isFileHidden && isFileUploaded && widget.file is! TrashFile) {
       _actions.add(
         Center(child: FavoriteWidget(widget.file)),
       );
@@ -193,93 +196,129 @@ class FileAppBarState extends State<FileAppBar> {
     }
 
     final List<PopupMenuItem> items = [];
-    if (widget.file.isRemoteFile) {
-      items.add(
-        EntePopupMenuItem(
-          AppLocalizations.of(context).download,
-          value: 1,
-          icon: Platform.isAndroid
-              ? Icons.download
-              : Icons.cloud_download_outlined,
-          iconColor: Theme.of(context).iconTheme.color,
-        ),
-      );
-    }
-    // options for files owned by the user
-    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-      final bool isArchived =
-          widget.file.magicMetadata.visibility == archiveVisibility;
-      items.add(
-        EntePopupMenuItem(
-          isArchived
-              ? AppLocalizations.of(context).unarchive
-              : AppLocalizations.of(context).archive,
-          value: 2,
-          icon: isArchived ? Icons.unarchive : Icons.archive_outlined,
-          iconColor: Theme.of(context).iconTheme.color,
-        ),
-      );
-    }
+    final bool restrictFileActions =
+        widget.mode == DetailPageMode.minimalistic || widget.file is TrashFile;
 
-    if (widget.file.isUploaded && !isFileHidden) {
+    if (restrictFileActions) {
       items.add(
         EntePopupMenuItem(
-          AppLocalizations.of(context).addToAlbum,
-          value: 10,
-          icon: Icons.add,
+          AppLocalizations.of(context).info,
+          value: 12,
+          icon: Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
           iconColor: Theme.of(context).iconTheme.color,
         ),
       );
-    }
-    if ((widget.file.fileType == FileType.image ||
-            widget.file.fileType == FileType.livePhoto) &&
-        Platform.isAndroid) {
-      items.add(
-        EntePopupMenuItem(
-          AppLocalizations.of(context).setAs,
-          value: 3,
-          icon: Icons.wallpaper_outlined,
-          iconColor: Theme.of(context).iconTheme.color,
-        ),
-      );
-    }
-    if (isOwnedByUser && widget.file.isUploaded) {
-      if (!isFileHidden) {
+    } else {
+      if (widget.file.isRemoteFile) {
         items.add(
           EntePopupMenuItem(
-            AppLocalizations.of(context).hide,
-            value: 4,
-            icon: Icons.visibility_off,
-            iconColor: Theme.of(context).iconTheme.color,
-          ),
-        );
-      } else {
-        items.add(
-          EntePopupMenuItem(
-            AppLocalizations.of(context).unhide,
-            value: 5,
-            icon: Icons.visibility,
+            AppLocalizations.of(context).download,
+            value: 1,
+            icon: Platform.isAndroid
+                ? Icons.download
+                : Icons.cloud_download_outlined,
             iconColor: Theme.of(context).iconTheme.color,
           ),
         );
       }
-    }
+      // Edit option for images, live photos, and videos
+      if (widget.file.fileType == FileType.image ||
+          widget.file.fileType == FileType.livePhoto ||
+          widget.file.fileType == FileType.video) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).edit,
+            value: 11,
+            icon: Icons.tune_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+      // options for files owned by the user
+      if (isOwnedByUser && !isFileHidden && isFileUploaded) {
+        final bool isArchived =
+            widget.file.magicMetadata.visibility == archiveVisibility;
+        items.add(
+          EntePopupMenuItem(
+            isArchived
+                ? AppLocalizations.of(context).unarchive
+                : AppLocalizations.of(context).archive,
+            value: 2,
+            icon: isArchived ? Icons.unarchive : Icons.archive_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
 
-    items.add(
-      EntePopupMenuItem(
-        AppLocalizations.of(context).guestView,
-        value: 6,
-        iconWidget: SvgPicture.asset(
-          "assets/icons/guest_view_icon.svg",
-          colorFilter: ColorFilter.mode(
-            getEnteColorScheme(context).textBase,
-            BlendMode.srcIn,
+      if (widget.file.isUploaded && !isFileHidden) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).addToAlbum,
+            value: 10,
+            icon: Icons.add,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+      if ((widget.file.fileType == FileType.image ||
+              widget.file.fileType == FileType.livePhoto) &&
+          Platform.isAndroid) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).setAs,
+            value: 3,
+            icon: Icons.wallpaper_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+      if (isOwnedByUser && widget.file.isUploaded) {
+        if (!isFileHidden) {
+          items.add(
+            EntePopupMenuItem(
+              AppLocalizations.of(context).hide,
+              value: 4,
+              icon: Icons.visibility_off,
+              iconColor: Theme.of(context).iconTheme.color,
+            ),
+          );
+        } else {
+          items.add(
+            EntePopupMenuItem(
+              AppLocalizations.of(context).unhide,
+              value: 5,
+              icon: Icons.visibility,
+              iconColor: Theme.of(context).iconTheme.color,
+            ),
+          );
+        }
+      }
+
+      items.add(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).guestView,
+          value: 6,
+          iconWidget: SvgPicture.asset(
+            "assets/icons/guest_view_icon.svg",
+            colorFilter: ColorFilter.mode(
+              getEnteColorScheme(context).textBase,
+              BlendMode.srcIn,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    if (widget.file.isVideo) {
+      items.add(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).info,
+          value: 12,
+          icon: Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
+    }
+
+    if (widget.file.isVideo && !restrictFileActions) {
       // Video streaming options
       if (_shouldShowCreateStreamOption()) {
         items.add(
@@ -374,6 +413,10 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('recreate');
             } else if (value == 10) {
               await _handleAddToAlbum();
+            } else if (value == 11) {
+              widget.onEditRequested(widget.file);
+            } else if (value == 12) {
+              await showDetailsSheet(context, widget.file);
             }
           },
         ),

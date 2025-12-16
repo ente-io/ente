@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.21-beta+1221
+version: 1.2.29-beta+1229
 publish_to: none
 
 environment:
@@ -58,6 +58,8 @@ dependencies:
     path: plugins/ente_crypto
   ente_feature_flag:
     path: plugins/ente_feature_flag
+  ente_icons:
+    path: ../../packages/ente_icons
   ente_photos_rust:
     path: rust_builder
   ente_qr_ui:
@@ -147,7 +149,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/ente-io/mobile_ocr
-      ref: 8dba33ad89eea99683780469bc4d0ec4993d61c3
+      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -365,6 +367,11 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: fonts/Montserrat-Bold.ttf
+    - family: Nunito
+      fonts:
+        - asset: fonts/Nunito-Regular.ttf
+        - asset: fonts/Nunito-Black.ttf
+          weight: 900
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
