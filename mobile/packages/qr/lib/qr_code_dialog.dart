@@ -206,11 +206,11 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
     // Round to nearest even number for crisp rendering
     final double qrCodeSizeEven = (qrCodeSize / 2).round() * 2.0;
 
-    final dialogBackgroundColor =
-        widget.backgroundColor ?? theme.colorScheme.surface;
+    final dialogBackgroundColor = widget.backgroundColor ??
+        (isDark ? const Color(0xFF212121) : theme.colorScheme.surface);
     final cardColor = widget.qrCardColor ?? _kDefaultQrBoxColor;
     final closeBgColor = widget.closeButtonBackgroundColor ??
-        (isDark ? theme.colorScheme.surfaceContainerHighest : cardColor);
+        (isDark ? const Color(0xFF292929) : const Color(0xFFF5F5F7));
     final closeIconColor = widget.closeButtonIconColor ??
         (isDark ? theme.colorScheme.onSurface : _kDefaultQrTextColor);
     final shareButtonColor =
