@@ -39,6 +39,7 @@ class FacesItemWidget extends StatefulWidget {
 }
 
 class _FacesItemWidgetState extends State<FacesItemWidget> {
+  static const double _kHeaderActionHeight = 48;
   bool _isEditMode = false;
   bool _showRemainingFaces = false;
   bool _isLoading = true;
@@ -137,7 +138,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
               _editStateButton(),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           _buildPeopleGrid(thumbnailWidth),
           if (_remainingFaces.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -397,23 +398,29 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   Widget _editStateButton() {
     if (_isEditMode) {
       return Padding(
-        padding: const EdgeInsets.only(right: 12.0, top: 11, bottom: 10),
-        child: GestureDetector(
-          onTap: _toggleEditMode,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: getEnteColorScheme(context).primary500,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              AppLocalizations.of(context).done,
-              style: getEnteTextTheme(context).small.copyWith(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: SizedBox(
+          height: _kHeaderActionHeight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _toggleEditMode,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(
                     color: getEnteColorScheme(context).primary500,
+                    width: 1,
                   ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  AppLocalizations.of(context).done,
+                  style: getEnteTextTheme(context).small.copyWith(
+                        color: getEnteColorScheme(context).primary500,
+                      ),
+                ),
+              ),
             ),
           ),
         ),
