@@ -70,7 +70,18 @@ Future<void> deleteFilesFromEverywhere(
     deletedIDs =
         (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
-    _logger.severe("Could not delete file", e, s);
+    _logger.severe("Could not delete files in one shot, trying batch deletion", e, s);
+    // Fallback to batch deletion if one-shot deletion fails
+    try {
+      final batchDeletedIDs = await _deleteWithBatchFallback(localAssetIDs);
+      deletedIDs = batchDeletedIDs.toSet();
+    } catch (batchError, batchStack) {
+      _logger.severe("Batch deletion also failed", batchError, batchStack);
+      if (context.mounted) {
+        await showGenericErrorDialog(context: context, error: batchError);
+      }
+      return;
+    }
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final updatedCollectionIDs = <int>{};
@@ -230,7 +241,18 @@ Future<void> deleteFilesOnDeviceOnly(
     deletedIDs =
         (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
-    _logger.severe("Could not delete file", e, s);
+    _logger.severe("Could not delete files in one shot, trying batch deletion", e, s);
+    // Fallback to batch deletion if one-shot deletion fails
+    try {
+      final batchDeletedIDs = await _deleteWithBatchFallback(localAssetIDs);
+      deletedIDs = batchDeletedIDs.toSet();
+    } catch (batchError, batchStack) {
+      _logger.severe("Batch deletion also failed", batchError, batchStack);
+      if (context.mounted) {
+        await showGenericErrorDialog(context: context, error: batchError);
+      }
+      return;
+    }
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final List<EnteFile> deletedFiles = [];
@@ -677,6 +699,40 @@ Future<void> _recursivelyReduceBatchSizeAndRetryDeletion({
       deletedIDs: deletedIDs,
     );
   }
+}
+
+/// Helper function to attempt batch deletion with retry logic for individual files
+/// Used as a fallback when one-shot deletion fails
+Future<List<String>> _deleteWithBatchFallback(List<String> localAssetIDs) async {
+  if (localAssetIDs.isEmpty) return [];
+
+  _logger.info("Starting batch deletion fallback for ${localAssetIDs.length} files");
+  final List<String> deletedIDs = [];
+  final int batchSize = min(100, max(1, (localAssetIDs.length / 10).round()));
+
+  for (int index = 0; index < localAssetIDs.length; index += batchSize) {
+    final ids = localAssetIDs
+        .getRange(index, min(localAssetIDs.length, index + batchSize))
+        .toList();
+
+    try {
+      deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
+      _logger.info("Batch deleted ${ids.length} files");
+    } catch (e, s) {
+      _logger.warning("Batch deletion failed for ${ids.length} files, trying individually", e, s);
+      // If batch fails, try each file individually
+      for (final id in ids) {
+        try {
+          deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
+        } catch (singleError, singleStack) {
+          _logger.warning("Failed to delete file $id", singleError, singleStack);
+        }
+      }
+    }
+  }
+
+  _logger.info("Batch deletion fallback completed: ${deletedIDs.length}/${localAssetIDs.length} files deleted");
+  return deletedIDs;
 }
 
 Future<bool> _localFileExist(EnteFile file) {
