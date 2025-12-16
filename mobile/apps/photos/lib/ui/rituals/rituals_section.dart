@@ -5,6 +5,7 @@ import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/rituals/all_rituals_screen.dart";
+import "package:photos/ui/rituals/delete_ritual_confirmation_sheet.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -295,6 +296,9 @@ class _RitualCard extends StatelessWidget {
                           await showRitualEditor(context, ritual: ritual);
                           break;
                         case "delete":
+                          final confirmed =
+                              await showDeleteRitualConfirmationSheet(context);
+                          if (!context.mounted || !confirmed) return;
                           await ritualsService.deleteRitual(ritual.id);
                           break;
                       }
