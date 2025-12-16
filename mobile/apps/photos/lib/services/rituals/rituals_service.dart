@@ -464,12 +464,18 @@ class RitualsService {
     _logger.info(
       "Clearing scheduled notifications for ritual ${ritual.id} (save path)",
     );
-    _logger.info(
-      "Scheduling ritual reminders for ritual ${ritual.id} (save path)",
-    );
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: ritual.id,
       logLines: false,
+    );
+    if (!ritual.remindersEnabled) {
+      _logger.info(
+        "Skipping scheduling ritual reminders for ritual ${ritual.id} (reminders disabled)",
+      );
+      return;
+    }
+    _logger.info(
+      "Scheduling ritual reminders for ritual ${ritual.id} (save path)",
     );
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -624,6 +630,7 @@ class RitualsService {
       title: "",
       daysOfWeek: List<bool>.filled(7, true),
       timeOfDay: const TimeOfDay(hour: 9, minute: 0),
+      remindersEnabled: true,
       albumId: null,
       albumName: null,
       icon: "📸",

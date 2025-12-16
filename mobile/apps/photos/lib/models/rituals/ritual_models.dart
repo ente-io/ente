@@ -18,6 +18,7 @@ class Ritual {
     required this.title,
     required this.daysOfWeek, // Sunday-first ordering of length 7
     required this.timeOfDay,
+    required this.remindersEnabled,
     required this.albumId,
     required this.albumName,
     required this.icon,
@@ -28,6 +29,7 @@ class Ritual {
   final String title;
   final List<bool> daysOfWeek;
   final TimeOfDay timeOfDay;
+  final bool remindersEnabled;
   final int? albumId;
   final String? albumName;
   final String icon;
@@ -38,6 +40,7 @@ class Ritual {
     String? title,
     List<bool>? daysOfWeek,
     TimeOfDay? timeOfDay,
+    bool? remindersEnabled,
     int? albumId,
     String? albumName,
     String? icon,
@@ -48,6 +51,7 @@ class Ritual {
       title: title ?? this.title,
       daysOfWeek: daysOfWeek ?? this.daysOfWeek,
       timeOfDay: timeOfDay ?? this.timeOfDay,
+      remindersEnabled: remindersEnabled ?? this.remindersEnabled,
       albumId: albumId ?? this.albumId,
       albumName: albumName ?? this.albumName,
       icon: icon ?? this.icon,
@@ -62,6 +66,7 @@ class Ritual {
       "daysOfWeek": daysOfWeek,
       "hour": timeOfDay.hour,
       "minute": timeOfDay.minute,
+      "remindersEnabled": remindersEnabled,
       "albumId": albumId,
       "albumName": albumName,
       "icon": icon,
@@ -70,6 +75,12 @@ class Ritual {
   }
 
   factory Ritual.fromJson(Map<String, dynamic> json) {
+    final rawRemindersEnabled = json["remindersEnabled"];
+    final remindersEnabled = rawRemindersEnabled is bool
+        ? rawRemindersEnabled
+        : rawRemindersEnabled is num
+            ? rawRemindersEnabled != 0
+            : true;
     return Ritual(
       id: json["id"] as String? ?? newID("ritual"),
       title: json["title"] as String? ?? "",
@@ -80,6 +91,7 @@ class Ritual {
         hour: (json["hour"] as num?)?.toInt() ?? 9,
         minute: (json["minute"] as num?)?.toInt() ?? 0,
       ),
+      remindersEnabled: remindersEnabled,
       albumId: (json["albumId"] as num?)?.toInt(),
       albumName: json["albumName"] as String?,
       icon: json["icon"] as String? ?? "📸",

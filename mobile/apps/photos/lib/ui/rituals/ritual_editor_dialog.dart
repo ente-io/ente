@@ -27,7 +27,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
       ritual?.timeOfDay ?? const TimeOfDay(hour: 9, minute: 0);
   String selectedEmoji = ritual?.icon ?? "📸";
   final formKey = GlobalKey<FormState>();
-  bool sendReminderEnabled = !days.every((selected) => !selected);
+  bool sendReminderEnabled = ritual?.remindersEnabled ?? true;
 
   await showGeneralDialog(
     context: context,
@@ -495,6 +495,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         title: controller.text.trim(),
                                         daysOfWeek: days,
                                         timeOfDay: selectedTime,
+                                        remindersEnabled: sendReminderEnabled,
                                         albumId: selectedAlbumId,
                                         albumName: selectedAlbumName,
                                         icon: selectedEmoji,
