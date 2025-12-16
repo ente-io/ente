@@ -319,7 +319,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final showManualTagOption = flagService.manualTagFileToPerson &&
         reason == NoFacesReason.noFacesFound;
     final label = showManualTagOption
-        ? "No faces detected, tap to add."
+        ? AppLocalizations.of(context).noFacesDetectedTapToAdd
         : getNoFaceReasonText(context, reason);
     return Expanded(
       child: Padding(
