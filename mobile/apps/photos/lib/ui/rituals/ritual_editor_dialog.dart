@@ -62,7 +62,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                           selectedAlbumId != null;
                       final bool allDaysOff =
                           days.every((selected) => !selected);
-                      const widgetBackgroundColor = Color(0xFFFAFAFA);
+                      final widgetBackgroundColor =
+                          colorScheme.backgroundElevated2;
+                      final segmentedBackgroundColor = colorScheme.fillFaint;
                       final localizations =
                           MaterialLocalizations.of(dialogContext);
                       final int hour = selectedTime.hourOfPeriod == 0
@@ -73,9 +75,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                       final String period = selectedTime.period == DayPeriod.am
                           ? localizations.anteMeridiemAbbreviation
                           : localizations.postMeridiemAbbreviation;
-                      const timeTextStyle = TextStyle(
-                        color: Color(0xFF454545),
-                        fontSize: 18,
+                      final timeTextStyle = textTheme.large.copyWith(
                         fontWeight: FontWeight.w400,
                       );
 
@@ -87,7 +87,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                           width: 64,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: segmentedBackgroundColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
@@ -411,7 +411,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                                   style: timeTextStyle,
                                                 ),
                                                 const SizedBox(width: 9),
-                                                const Text(
+                                                Text(
                                                   ":",
                                                   style: timeTextStyle,
                                                 ),
@@ -430,13 +430,13 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.white,
+                                                color: segmentedBackgroundColor,
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.schedule,
-                                                color: Color(0xFF454545),
+                                                color: colorScheme.textMuted,
                                               ),
                                             ),
                                           ],
@@ -773,7 +773,7 @@ class _AlbumPreviewTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
+        color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -889,7 +889,7 @@ class _DayCircle extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: selected ? colorScheme.primary500 : const Color(0xFFFAFAFA),
+          color: selected ? colorScheme.primary500 : colorScheme.fillFaint,
           borderRadius: BorderRadius.circular(size / 2),
         ),
         child: Center(

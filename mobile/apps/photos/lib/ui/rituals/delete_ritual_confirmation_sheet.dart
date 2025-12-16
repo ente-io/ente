@@ -30,9 +30,8 @@ class _DeleteRitualConfirmationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final colorScheme = getEnteColorScheme(context, inverse: isDark);
-    final textTheme = getEnteTextTheme(context, inverse: isDark);
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     final double bottomPadding =
         16 + mediaQuery.padding.bottom.clamp(0.0, 16.0).toDouble();
