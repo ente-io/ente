@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:convert";
 import "dart:math";
 
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -30,23 +29,17 @@ class RitualsService {
   late SharedPreferences _preferences;
   Timer? _debounce;
   StreamSubscription<FilesUpdatedEvent>? _filesUpdatedSubscription;
-  Map<String, Set<int>> _seenRitualBadges = {};
-  final Set<String> _recentlyAddedRitualIds = <String>{};
 
   static const _ritualsPrefsKey = "activity_rituals_v1";
-  static const _ritualBadgesPrefsKey = "activity_seen_ritual_badges_v1";
-  static const _badgeThresholds = [7, 14, 30];
 
   Future<void> init() async {
     _preferences = ServiceLocator.instance.prefs;
-    _seenRitualBadges = _loadSeenRitualBadges();
     if (!flagService.ritualsFlag) {
       stateNotifier.value = const RitualsState(
         loading: false,
         summary: null,
         rituals: [],
         error: null,
-        pendingBadge: null,
       );
       return;
     }
@@ -80,7 +73,6 @@ class RitualsService {
         summary: null,
         rituals: [],
         error: null,
-        pendingBadge: null,
       );
       return;
     }
@@ -88,7 +80,6 @@ class RitualsService {
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: true,
         error: null,
-        pendingBadge: stateNotifier.value.pendingBadge,
       );
       final rituals = await _loadRituals();
       if (scheduleAllRituals) {
@@ -100,21 +91,17 @@ class RitualsService {
         }
       }
       final summary = await _buildSummary(rituals);
-      final pendingBadge =
-          _resolvePendingBadge(rituals, summary.ritualProgress);
       stateNotifier.value = RitualsState(
         loading: false,
         summary: summary,
         rituals: rituals,
         error: null,
-        pendingBadge: pendingBadge,
       );
     } catch (e, s) {
       _logger.severe("Failed to refresh rituals", e, s);
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: false,
         error: e.toString(),
-        pendingBadge: null,
       );
     }
   }
@@ -234,18 +221,6 @@ class RitualsService {
     );
   }
 
-  Set<int> _normalizeBadgeSet(Set<int> seen) {
-    if (seen.isEmpty) return <int>{};
-    final valid =
-        seen.where((value) => _badgeThresholds.contains(value)).toSet();
-    if (valid.isEmpty) return <int>{};
-    final highest = valid.reduce(max);
-    return {
-      for (final threshold in _badgeThresholds)
-        if (threshold <= highest) threshold,
-    };
-  }
-
   Future<List<Ritual>> _loadRituals() async {
     final raw = _preferences.getStringList(_ritualsPrefsKey) ?? [];
     return raw
@@ -286,9 +261,6 @@ class RitualsService {
     } else {
       rituals[existingIndex] = ritual;
     }
-    if (isNew || albumChanged) {
-      _recentlyAddedRitualIds.add(ritual.id);
-    }
     await _persistRituals(rituals);
     unawaited(_scheduleRitualNotifications(ritual));
 
@@ -300,7 +272,6 @@ class RitualsService {
         rituals: rituals,
         loading: false,
         error: null,
-        pendingBadge: stateNotifier.value.pendingBadge,
       );
     }
   }
@@ -309,9 +280,6 @@ class RitualsService {
     final rituals = await _loadRituals();
     rituals.removeWhere((r) => r.id == id);
     await _persistRituals(rituals);
-    if (_seenRitualBadges.remove(id) != null) {
-      unawaited(_persistSeenRitualBadges());
-    }
     _logger.info("Clearing scheduled notifications for ritual $id (delete)");
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: "ritualId=$id",
@@ -379,94 +347,6 @@ class RitualsService {
         logSchedule: false,
       );
       scheduled += 1;
-    }
-  }
-
-  Map<String, Set<int>> _loadSeenRitualBadges() {
-    final raw = _preferences.getString(_ritualBadgesPrefsKey);
-    if (raw == null || raw.isEmpty) {
-      return <String, Set<int>>{};
-    }
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! Map) return <String, Set<int>>{};
-      final Map<String, Set<int>> result = {};
-      bool changed = false;
-      for (final entry in decoded.entries) {
-        final rawSet = Set<int>.from(
-          (entry.value as List<dynamic>? ?? const <int>[]).map(
-            (e) => (e as num).toInt(),
-          ),
-        );
-        final normalized = _normalizeBadgeSet(rawSet);
-        result[entry.key as String] = normalized;
-        if (!setEquals(rawSet, normalized)) {
-          changed = true;
-        }
-      }
-      if (changed) {
-        _seenRitualBadges = result;
-        unawaited(_persistSeenRitualBadges());
-      }
-      return result;
-    } catch (e, s) {
-      _logger.warning("Failed to decode ritual badge prefs", e, s);
-      return <String, Set<int>>{};
-    }
-  }
-
-  Future<void> _persistSeenRitualBadges() async {
-    final encoded = _seenRitualBadges.map(
-      (key, value) => MapEntry(key, value.toList()),
-    );
-    await _preferences.setString(
-      _ritualBadgesPrefsKey,
-      jsonEncode(encoded),
-    );
-  }
-
-  RitualBadgeUnlock? _resolvePendingBadge(
-    List<Ritual> rituals,
-    Map<String, RitualProgress> ritualProgress,
-  ) {
-    _seedSeenBadgesForNewRituals(ritualProgress);
-    RitualBadgeUnlock? unlock;
-    for (final ritual in rituals) {
-      final longest = ritualProgress[ritual.id]?.longestStreakOverall ?? 0;
-      final seen = _seenRitualBadges[ritual.id] ?? <int>{};
-      final newlyUnlocked = _badgeThresholds
-          .where((t) => longest >= t && !seen.contains(t))
-          .toList();
-      if (newlyUnlocked.isEmpty) continue;
-      final highest = newlyUnlocked.reduce(max);
-      if (unlock == null || highest > unlock.days) {
-        unlock = RitualBadgeUnlock(
-          ritual: ritual,
-          days: highest,
-          generatedAt: DateTime.now(),
-        );
-      }
-    }
-    return unlock;
-  }
-
-  Future<void> markRitualBadgeSeen(String ritualId, int days) async {
-    final seen = _seenRitualBadges[ritualId] ?? <int>{};
-    final thresholdsToMark =
-        _badgeThresholds.where((threshold) => threshold <= days);
-    final updated = _normalizeBadgeSet({...seen, ...thresholdsToMark});
-    if (!setEquals(updated, seen)) {
-      _seenRitualBadges[ritualId] = updated;
-      await _persistSeenRitualBadges();
-    }
-    final state = stateNotifier.value;
-    final pending = state.pendingBadge;
-    if (pending != null &&
-        pending.ritual.id == ritualId &&
-        pending.days == days) {
-      stateNotifier.value = state.copyWith(
-        pendingBadge: null,
-      );
     }
   }
 
@@ -570,30 +450,6 @@ class RitualsService {
   DateTime _nextDay(DateTime day) => DateTime(day.year, day.month, day.day + 1);
 
   DateTime _prevDay(DateTime day) => DateTime(day.year, day.month, day.day - 1);
-
-  void _seedSeenBadgesForNewRituals(
-    Map<String, RitualProgress> ritualProgress,
-  ) {
-    if (_recentlyAddedRitualIds.isEmpty) return;
-    bool changed = false;
-    for (final ritualId in _recentlyAddedRitualIds) {
-      final longest = ritualProgress[ritualId]?.longestStreakOverall ?? 0;
-      if (longest <= 0) continue;
-      final thresholds =
-          _badgeThresholds.where((threshold) => longest >= threshold);
-      if (thresholds.isEmpty) continue;
-      final seen = _seenRitualBadges[ritualId] ?? <int>{};
-      final updated = _normalizeBadgeSet({...seen, ...thresholds});
-      if (!setEquals(updated, seen)) {
-        _seenRitualBadges[ritualId] = updated;
-        changed = true;
-      }
-    }
-    _recentlyAddedRitualIds.clear();
-    if (changed) {
-      unawaited(_persistSeenRitualBadges());
-    }
-  }
 
   Ritual createEmptyRitual() {
     return Ritual(

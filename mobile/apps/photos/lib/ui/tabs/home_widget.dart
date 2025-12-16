@@ -33,7 +33,6 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
@@ -65,7 +64,6 @@ import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
-import "package:photos/ui/rituals/ritual_badge_popup.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
@@ -116,9 +114,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
-  RitualBadgeUnlock? _queuedRitualBadge;
-  bool _showingRitualBadge = false;
-  late final VoidCallback _ritualsStateListener;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -140,10 +135,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
-    _ritualsStateListener = () => _maybeShowRitualBadge(
-          ritualsService.stateNotifier.value.pendingBadge,
-        );
-    ritualsService.stateNotifier.addListener(_ritualsStateListener);
 
     if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
@@ -151,11 +142,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
-      if (_selectedTabIndex == 0 && _queuedRitualBadge != null) {
-        final queued = _queuedRitualBadge;
-        _queuedRitualBadge = null;
-        _maybeShowRitualBadge(queued);
-      }
 
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
@@ -299,12 +285,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         .on<HomepageSwipeToSelectInProgressEvent>()
         .listen((inProgress) {
       _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybeShowRitualBadge(
-        ritualsService.stateNotifier.value.pendingBadge,
-      );
     });
   }
 
@@ -536,7 +516,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
-    ritualsService.stateNotifier.removeListener(_ritualsStateListener);
     super.dispose();
   }
 
@@ -908,39 +887,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             Scaffold.of(context).closeDrawer();
           })
         : null;
-  }
-
-  void _maybeShowRitualBadge(RitualBadgeUnlock? badge) {
-    if (!flagService.ritualsFlag) return;
-    if (badge == null) return;
-    if (_showingRitualBadge) {
-      _queuedRitualBadge ??= badge;
-      return;
-    }
-    if (_selectedTabIndex != 0) {
-      _queuedRitualBadge = badge;
-      return;
-    }
-    final badgeToShow = badge;
-    _queuedRitualBadge = null;
-    _showingRitualBadge = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await ritualsService.markRitualBadgeSeen(
-          badgeToShow.ritual.id,
-          badgeToShow.days,
-        );
-        if (!mounted) return;
-        await showRitualBadgePopup(
-          context,
-          badge: badgeToShow,
-        );
-      } catch (e, s) {
-        _logger.severe("Failed to show ritual badge popup", e, s);
-      } finally {
-        _showingRitualBadge = false;
-      }
-    });
   }
 
   Future<bool> _initDeepLinks() async {
