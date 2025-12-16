@@ -3,6 +3,9 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/rituals/ritual_models.dart";
 
+const String _duckyShareArtAsset = "assets/rituals/ritual_ducky_share.svg";
+const String _enteLogoAsset = "assets/ente_io_green_black.svg";
+
 class RitualShareCard extends StatelessWidget {
   const RitualShareCard({
     super.key,
@@ -16,6 +19,13 @@ class RitualShareCard extends StatelessWidget {
   static const double width = 360;
   static const double height = 640;
   static const _duckyShareAspectRatio = 353 / 574;
+
+  static Future<void> precacheAssets(BuildContext context) async {
+    await Future.wait<void>([
+      const SvgAssetLoader(_duckyShareArtAsset).loadBytes(context),
+      const SvgAssetLoader(_enteLogoAsset).loadBytes(context),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +60,7 @@ class RitualShareCard extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               SvgPicture.asset(
-                "assets/ente_io_green_black.svg",
+                _enteLogoAsset,
                 height: 20,
               ),
             ],
@@ -146,7 +156,7 @@ class _RitualDuckyShareArt extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             SvgPicture.asset(
-              "assets/rituals/ritual_ducky_share.svg",
+              _duckyShareArtAsset,
               fit: BoxFit.cover,
             ),
             Positioned(
