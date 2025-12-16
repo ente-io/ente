@@ -63,6 +63,16 @@ class RitualsService {
       _scheduleRefresh();
     });
     _scheduleRefresh(initial: true, scheduleAllRituals: true);
+    try {
+      final rituals = await _loadRituals();
+      stateNotifier.value = stateNotifier.value.copyWith(
+        loading: false,
+        rituals: rituals,
+        error: null,
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to load rituals during init", e, s);
+    }
   }
 
   void dispose() {
