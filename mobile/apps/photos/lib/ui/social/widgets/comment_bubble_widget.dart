@@ -317,6 +317,7 @@ class _CommentBubble extends StatelessWidget {
               color: textColor,
               height: 22 / 14,
               fontWeight: FontWeight.w500,
+              letterSpacing: -0.28,
             ),
           ),
         ],

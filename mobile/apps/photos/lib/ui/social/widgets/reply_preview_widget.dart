@@ -47,15 +47,25 @@ class ReplyPreviewWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Replying to ${replyingToUser.id == currentUserID ? 'You' : (replyingToUser.displayName ?? replyingToUser.email)}",
-                  style: textTheme.small.copyWith(color: colorScheme.textMuted),
+                  replyingToUser.id == currentUserID
+                      ? 'Replying to you'
+                      : 'Replying to ${replyingToUser.displayName ?? replyingToUser.email}',
+                  style: textTheme.tiny.copyWith(
+                    color: colorScheme.textBase,
+                    height: 14 / 10.0,
+                    letterSpacing: -0.3,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   replyingTo.data,
-                  style: textTheme.mini.copyWith(color: colorScheme.textFaint),
+                  style: textTheme.small.copyWith(
+                    color: colorScheme.textBase,
+                    height: 22 / 14.0,
+                    letterSpacing: -0.28,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
