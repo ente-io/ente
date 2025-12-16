@@ -936,8 +936,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       builder: (BuildContext dialogContext) {
         return AuthQrDialog(
           data: qrData,
-          title: widget.code.account,
-          subtitle: widget.code.issuer,
+          title: widget.code.issuer,
+          subtitle: widget.code.account,
           shareFileName: 'ente_auth_qr_${widget.code.account}.png',
           shareText: 'QR code for ${widget.code.account}',
           dialogTitle: context.l10n.qrCode,
