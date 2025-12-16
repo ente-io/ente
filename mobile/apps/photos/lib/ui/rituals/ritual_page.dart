@@ -107,6 +107,7 @@ class _RitualPageState extends State<RitualPage> {
       if (overlay == null) {
         throw StateError("Overlay not available for ritual share");
       }
+      await RitualShareCard.precacheAssets(context);
       final repaintKey = GlobalKey();
       entry = OverlayEntry(
         builder: (_) => Center(
