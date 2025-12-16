@@ -60,9 +60,11 @@ class RitualCameraPage extends StatefulWidget {
 
 class _RitualCameraPageState extends State<RitualCameraPage>
     with WidgetsBindingObserver {
+  static CameraDescription? _cachedPreferredBackCamera;
   CameraController? _controller;
   List<CameraDescription> _cameras = <CameraDescription>[];
   CameraDescription? _activeCamera;
+  CameraDescription? _preferredBackCamera = _cachedPreferredBackCamera;
   late final PageController _pageController;
   late final ScrollController _thumbScrollController;
   Ritual? _ritual;
@@ -221,6 +223,55 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
+  Future<CameraDescription?> _pickPreferredBackCamera() async {
+    if (_preferredBackCamera != null &&
+        _cameras.contains(_preferredBackCamera)) {
+      return _preferredBackCamera;
+    }
+    final List<CameraDescription> backCameras = _cameras
+        .where((camera) => camera.lensDirection == CameraLensDirection.back)
+        .toList(growable: false);
+    if (backCameras.isEmpty) {
+      return null;
+    }
+    if (backCameras.length == 1) {
+      _preferredBackCamera = backCameras.first;
+      return _preferredBackCamera;
+    }
+
+    int bestPixels = -1;
+    CameraDescription? bestCamera;
+    for (final camera in backCameras) {
+      if (!mounted) break;
+      final controller = CameraController(
+        camera,
+        ResolutionPreset.max,
+        enableAudio: false,
+      );
+      try {
+        await controller.initialize();
+        final Size? size = controller.value.previewSize;
+        final int pixels =
+            size == null ? -1 : (size.width * size.height).toInt();
+        if (pixels > bestPixels) {
+          bestPixels = pixels;
+          bestCamera = camera;
+        }
+      } catch (_) {
+        // Ignore cameras that fail to initialize.
+      } finally {
+        try {
+          await controller.dispose();
+        } catch (_) {
+          // Ignore dispose failures.
+        }
+      }
+    }
+    _preferredBackCamera = bestCamera ?? backCameras.first;
+    _cachedPreferredBackCamera = _preferredBackCamera;
+    return _preferredBackCamera;
+  }
+
   Future<void> _initializeCamera([CameraDescription? description]) async {
     if (!flagService.ritualsFlag) return;
     setState(() {
@@ -236,8 +287,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         });
         return;
       }
-      final CameraDescription target =
-          description ?? _preferredCamera() ?? _cameras.first;
+      final CameraDescription target = description ??
+          (_controller == null
+              ? await _pickPreferredBackCamera() ?? _cameras.first
+              : _preferredCamera() ?? _cameras.first);
       final bool reuseExisting = _controller != null;
       if (reuseExisting) {
         await _controller!.setDescription(target);
@@ -274,6 +327,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   }
 
   CameraDescription? _preferredCamera() {
+    if (_preferredBackCamera != null &&
+        _cameras.contains(_preferredBackCamera)) {
+      return _preferredBackCamera;
+    }
     for (final camera in _cameras) {
       if (camera.lensDirection == CameraLensDirection.back) {
         return camera;
