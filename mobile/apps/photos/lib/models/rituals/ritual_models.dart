@@ -121,14 +121,12 @@ class RitualsState {
   final RitualsSummary? summary;
   final List<Ritual> rituals;
   final String? error;
-  final RitualBadgeUnlock? pendingBadge;
 
   const RitualsState({
     required this.loading,
     required this.summary,
     required this.rituals,
     required this.error,
-    required this.pendingBadge,
   });
 
   factory RitualsState.loading() => const RitualsState(
@@ -136,7 +134,6 @@ class RitualsState {
         summary: null,
         rituals: [],
         error: null,
-        pendingBadge: null,
       );
 
   RitualsState copyWith({
@@ -144,26 +141,12 @@ class RitualsState {
     RitualsSummary? summary,
     List<Ritual>? rituals,
     String? error,
-    RitualBadgeUnlock? pendingBadge,
   }) {
     return RitualsState(
       loading: loading ?? this.loading,
       summary: summary ?? this.summary,
       rituals: rituals ?? this.rituals,
       error: error,
-      pendingBadge: pendingBadge,
     );
   }
-}
-
-class RitualBadgeUnlock {
-  const RitualBadgeUnlock({
-    required this.ritual,
-    required this.days,
-    required this.generatedAt,
-  });
-
-  final Ritual ritual;
-  final int days;
-  final DateTime generatedAt;
 }
