@@ -14,7 +14,6 @@ import "package:photos/models/file/trash_file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/social/comments_screen.dart";
@@ -314,9 +313,7 @@ class FileBottomBarState extends State<FileBottomBar> {
                   : (Platform.isAndroid
                       ? Icons.favorite_border
                       : Icons.favorite_border_rounded),
-              color: _hasLiked
-                  ? getEnteColorScheme(context).primary700
-                  : Colors.white,
+              color: _hasLiked ? const Color(0xFF08C225) : Colors.white,
             ),
           ),
         );

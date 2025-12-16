@@ -22,16 +22,26 @@ class ReplyPreviewWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+      padding: const EdgeInsets.fromLTRB(12, 24, 12, 12),
       decoration: const BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(
+              width: 3,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8C8C8C),
+                borderRadius: BorderRadius.circular(1.5),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -49,8 +59,8 @@ class ReplyPreviewWidget extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

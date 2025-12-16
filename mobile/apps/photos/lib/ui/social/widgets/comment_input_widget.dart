@@ -55,6 +55,7 @@ class CommentInputWidget extends StatelessWidget {
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (replyingTo != null && replyingToUser != null)
                 ReplyPreviewWidget(

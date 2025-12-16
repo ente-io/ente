@@ -16,9 +16,9 @@ class CommentActionsCapsule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final background = Theme.of(context).brightness == Brightness.dark
-        ? const Color(0xFF161616)
-        : const Color(0xFFF5F5F7);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? const Color(0xFF161616) : const Color(0xFFF5F5F7);
+    final iconColor = isDark ? const Color(0xFFFFFFFF) : const Color(0xFF131313);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -38,7 +38,7 @@ class CommentActionsCapsule extends StatelessWidget {
             child: Icon(
               isLiked ? Icons.favorite : Icons.favorite_border,
               size: 18,
-              color: isLiked ? colorScheme.primary500 : colorScheme.textMuted,
+              color: isLiked ? const Color(0xFF08C225) : iconColor,
             ),
           ),
           const SizedBox(width: 8),
@@ -47,7 +47,7 @@ class CommentActionsCapsule extends StatelessWidget {
             child: Icon(
               Icons.reply,
               size: 18,
-              color: colorScheme.textMuted,
+              color: iconColor,
             ),
           ),
         ],

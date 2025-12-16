@@ -245,6 +245,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                         onFetchReactions: () =>
                             _getReactionsForComment(comment.id),
                         onReplyTap: () => _onReplyTap(comment),
+                        userResolver: _getUserForComment,
                       );
                     },
                   ),

@@ -19,6 +19,7 @@ class CommentBubbleWidget extends StatefulWidget {
   final Future<Comment?> Function()? onFetchParent;
   final Future<List<Reaction>> Function() onFetchReactions;
   final VoidCallback onReplyTap;
+  final User Function(Comment) userResolver;
 
   const CommentBubbleWidget({
     required this.comment,
@@ -29,6 +30,7 @@ class CommentBubbleWidget extends StatefulWidget {
     this.onFetchParent,
     required this.onFetchReactions,
     required this.onReplyTap,
+    required this.userResolver,
     super.key,
   });
 
@@ -122,6 +124,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
                   isOwnComment: widget.isOwnComment,
                   isLoadingParent: _isLoadingParent,
                   parentComment: _parentComment,
+                  userResolver: widget.userResolver,
                 ),
                 if (!_isLoadingReactions)
                   Positioned(
@@ -146,16 +149,17 @@ class _InlineParentQuote extends StatelessWidget {
   final bool isLoading;
   final Comment? parentComment;
   final bool isOwnComment;
+  final User Function(Comment) userResolver;
 
   const _InlineParentQuote({
     required this.isLoading,
     required this.parentComment,
     required this.isOwnComment,
+    required this.userResolver,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
     if (isLoading) {
@@ -173,39 +177,74 @@ class _InlineParentQuote extends StatelessWidget {
     }
 
     final parentText = parentComment?.data ?? "Original comment unavailable";
+    final parentAuthor = parentComment != null
+        ? userResolver(parentComment!).displayName ??
+            userResolver(parentComment!).email
+        : null;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final lineColor = isOwnComment
         ? (isDarkMode ? const Color(0x33000000) : const Color(0xFF08571C))
         : const Color(0xFF8C8C8C);
 
+    final parentAuthorTextColor = isOwnComment
+        ? textBaseDark
+        : isDarkMode
+            ? const Color(0xCCFFFFFF)
+            : const Color(0xCC000000);
+
+    final parentTextColor = isOwnComment
+        ? const Color(0xCCFFFFFF)
+        : isDarkMode
+            ? const Color(0xB3FFFFFF)
+            : const Color(0xB3000000);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 3,
-            height: 14,
-            decoration: BoxDecoration(
-              color: lineColor,
-              borderRadius: BorderRadius.circular(1.5),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 3,
+              decoration: BoxDecoration(
+                color: lineColor,
+                borderRadius: BorderRadius.circular(1.5),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            parentText,
-            style: textTheme.tiny.copyWith(
-              height: 1.7,
-              color: isOwnComment
-                  ? textBaseDark.withValues(alpha: 0.9)
-                  : colorScheme.textMuted,
+            const SizedBox(width: 10),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (parentAuthor != null)
+                    Text(
+                      parentAuthor,
+                      style: textTheme.mini.copyWith(
+                        color: parentAuthorTextColor,
+                        height: 20 / 12,
+                        letterSpacing: -0.24,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  Text(
+                    parentText,
+                    style: textTheme.tiny.copyWith(
+                      height: 17 / 10,
+                      letterSpacing: -0.3,
+                      color: parentTextColor,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -216,12 +255,14 @@ class _CommentBubble extends StatelessWidget {
   final bool isOwnComment;
   final bool isLoadingParent;
   final Comment? parentComment;
+  final User Function(Comment) userResolver;
 
   const _CommentBubble({
     required this.comment,
     required this.isOwnComment,
     required this.isLoadingParent,
     required this.parentComment,
+    required this.userResolver,
   });
 
   @override
@@ -232,7 +273,7 @@ class _CommentBubble extends StatelessWidget {
 
     final textColor = isOwnComment ? textBaseDark : colorScheme.textBase;
     final bubbleColor = isOwnComment
-        ? const Color(0xFF0DAF35)
+        ? (isDarkMode ? const Color(0xFF056C1F) : const Color(0xFF0DAF35))
         : isDarkMode
             ? const Color(0xFF212121)
             : const Color(0xFFF0F0F0);
@@ -259,6 +300,7 @@ class _CommentBubble extends StatelessWidget {
               isLoading: isLoadingParent,
               parentComment: parentComment,
               isOwnComment: isOwnComment,
+              userResolver: userResolver,
             ),
           Text(
             comment.data,
