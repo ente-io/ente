@@ -731,6 +731,12 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                           color: colorScheme.strokeFaint,
                         ),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: colorScheme.strokeFaint,
+                        ),
+                      ),
                     ),
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) => FocusScope.of(context).unfocus(),
