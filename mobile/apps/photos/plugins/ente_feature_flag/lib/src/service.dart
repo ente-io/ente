@@ -93,7 +93,7 @@ class FlagService {
 
   bool get streamEnabledByDefault => internalUser;
 
-  bool get manualTagFileToPerson => internalUser && hasGrantedMLConsent;
+  bool get manualTagFileToPerson => hasGrantedMLConsent;
 
   bool get enableShareePin => true;
 
