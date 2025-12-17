@@ -165,80 +165,81 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                         children: [
                           // Ente Auth icon at top right - positioned at corner
                           Positioned(
-                            top: -6,
-                            right: -6,
+                            top: -2,
+                            right: -2,
                             child: Transform.rotate(
                               angle: -4 * 3.14159 / 180, // -4 degrees
                               child: Image.asset(
                                 'assets/qr_logo.png',
-                                height: 52,
-                                width: 52,
+                                height: 64,
+                                width: 64,
                               ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                             child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 8),
-                            // Issuer at top center
-                            // Leave space for the logo (64px) + some padding
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: qrSize - 72,
-                              ),
-                              child: Text(
-                                widget.title,
-                                style: enteTextTheme.largeBold.copyWith(
-                                  color: qrTextColor,
-                                  fontSize: 20,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (widget.subtitle != null &&
-                                widget.subtitle!.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth: qrSize,
-                                ),
-                                child: Text(
-                                  widget.subtitle!,
-                                  style: enteTextTheme.small.copyWith(
-                                    color: qrTextColor.withValues(alpha: 0.7),
-                                    fontSize: 14,
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 8),
+                                // Issuer at top center
+                                // Leave space for the logo (64px) + some padding
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: qrSize - 72,
                                   ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  child: Text(
+                                    widget.title,
+                                    style: enteTextTheme.largeBold.copyWith(
+                                      color: qrTextColor,
+                                      fontSize: 20,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                            ],
-                            const SizedBox(height: 20),
+                                if (widget.subtitle != null &&
+                                    widget.subtitle!.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: qrSize,
+                                    ),
+                                    child: Text(
+                                      widget.subtitle!,
+                                      style: enteTextTheme.small.copyWith(
+                                        color:
+                                            qrTextColor.withValues(alpha: 0.7),
+                                        fontSize: 14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 20),
 
-                            // QR Code with square style and purple corners
-                            QrImageView(
-                              data: widget.data,
-                              eyeStyle: const QrEyeStyle(
-                                eyeShape: QrEyeShape.square,
-                                color: accentColor,
-                              ),
-                              dataModuleStyle: const QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.square,
-                                color: qrTextColor,
-                              ),
-                              version: QrVersions.auto,
-                              size: qrSize,
+                                // QR Code with square style and purple corners
+                                QrImageView(
+                                  data: widget.data,
+                                  eyeStyle: const QrEyeStyle(
+                                    eyeShape: QrEyeShape.square,
+                                    color: accentColor,
+                                  ),
+                                  dataModuleStyle: const QrDataModuleStyle(
+                                    dataModuleShape: QrDataModuleShape.square,
+                                    color: qrTextColor,
+                                  ),
+                                  version: QrVersions.auto,
+                                  size: qrSize,
+                                ),
+                                const SizedBox(height: 42),
+                              ],
                             ),
-                              const SizedBox(height: 42),
-                            ],
                           ),
-                        ),
 
                           // Auth branding at bottom right
                           Positioned(
