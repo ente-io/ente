@@ -107,9 +107,8 @@ class _PersonalNotePageState
 
   @override
   bool validateForm() {
-    final title = _nameController.text.trim();
     final content = _contentController.text.trim();
-    return title.isNotEmpty && content.isNotEmpty;
+    return content.isNotEmpty;
   }
 
   @override
@@ -117,10 +116,34 @@ class _PersonalNotePageState
 
   @override
   PersonalNoteData createInfoData() {
+    final content = _contentController.text.trim();
+    var title = _nameController.text.trim();
+
+    if (title.isEmpty && content.isNotEmpty) {
+      title = _generateTitleFromContent(content);
+    }
+
     return PersonalNoteData(
-      title: _nameController.text.trim(),
-      content: _contentController.text.trim(),
+      title: title,
+      content: content,
     );
+  }
+
+  String _generateTitleFromContent(
+    String content, {
+    int maxWords = 5,
+    int maxLength = 40,
+  }) {
+    final firstLine = content.split('\n').first.trim();
+    if (firstLine.isEmpty) return '';
+
+    final words = firstLine.split(RegExp(r'\s+'));
+    final limitedWords = words.take(maxWords).join(' ');
+
+    if (limitedWords.length <= maxLength) {
+      return limitedWords;
+    }
+    return '${limitedWords.substring(0, maxLength).trimRight()}...';
   }
 
   @override
