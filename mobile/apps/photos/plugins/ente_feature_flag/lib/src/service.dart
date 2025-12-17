@@ -95,7 +95,7 @@ class FlagService {
 
   bool get manualTagFileToPerson => internalUser && hasGrantedMLConsent;
 
-  bool get enableShareePin => internalUser;
+  bool get enableShareePin => true;
 
   Future<void> tryRefreshFlags() async {
     try {
