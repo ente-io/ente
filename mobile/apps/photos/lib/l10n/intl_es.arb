@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "¡Lo sentimos, no se pudo añadir a favoritos!",
   "sorryCouldNotRemoveFromFavorites": "¡Lo sentimos, no se pudo quitar de favoritos!",
   "subscribeToEnableSharing": "Necesitas una suscripción activa de pago para habilitar el compartir.",
+  "subscribeToChangeLinkSetting": "Necesitas una suscripción de pago para cambiar la configuración de este enlace.",
   "subscribe": "Suscribirse",
   "canOnlyRemoveFilesOwnedByYou": "Sólo puede eliminar archivos de tu propiedad",
   "deleteSharedAlbum": "¿Borrar álbum compartido?",
@@ -1210,6 +1211,7 @@
   "unpin": "Desanclar",
   "visibility": "Visibilidad",
   "hideFromMemories": "Ocultar de los recuerdos",
+  "showInMemories": "Mostrar en recuerdos",
   "create": "Crear",
   "viewAll": "Ver todo",
   "nothingSharedWithYouYet": "Aún no hay nada compartido contigo",
@@ -2108,6 +2110,7 @@
   "ritualUpdate": "Actualizar ritual",
   "ritualSelectAlbumTitle": "Seleccionar álbum",
   "ritualSearchOrCreate": "Buscar o crear nuevo",
+  "ritualNoMatchingAlbums": "Sin álbumes que coincidan",
   "ritualCreateAlbumWithName": "Crear \"{albumName}\"",
   "@ritualCreateAlbumWithName": {
     "placeholders": {
