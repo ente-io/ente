@@ -1,6 +1,7 @@
+- Fix remove from album [1](https://github.com/ente-io/ente/issues/7705)
 - Laurens: (i) Rituals redesign
 - Laurens: (i) Manual people tagging
-- Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
+- Prateek: Pin/Unpin for "Shared with you" albums (mobile + web)
 - Ashil: New favorite icon
 - Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
