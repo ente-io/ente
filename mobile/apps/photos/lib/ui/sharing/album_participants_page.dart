@@ -77,14 +77,12 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final currentUserID = Configuration.instance.getUserID()!;
     final role = _collection.getRole(currentUserID);
     final bool adminRoleEnabled = flagService.enableAdminRole;
-    final bool surfacePublicLinkEnabled = flagService.surfacePublicLink;
     final bool isOwner = role == CollectionParticipantRole.owner;
     final bool isAdmin = role == CollectionParticipantRole.admin;
     final bool canManageParticipants = isOwner || (adminRoleEnabled && isAdmin);
     final bool hasActivePublicLink = _collection.hasLink &&
         !(_collection.publicURLs.firstOrNull?.isExpired ?? true);
-    final bool shouldShowPublicLink =
-        !isOwner && hasActivePublicLink && surfacePublicLinkEnabled;
+    final bool shouldShowPublicLink = !isOwner && hasActivePublicLink;
     final colorScheme = getEnteColorScheme(context);
     final int participants = 1 + _collection.getSharees().length;
     final User owner = _collection.owner;

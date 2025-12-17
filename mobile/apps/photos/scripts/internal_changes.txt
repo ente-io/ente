@@ -1,10 +1,10 @@
 - Fix remove from album [1](https://github.com/ente-io/ente/issues/7705)
+- Neeraj:  Show public link to album participants
 - Laurens: (i) Rituals redesign
 - Laurens: (i) Manual people tagging
+- Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
 - Prateek: Pin/Unpin for "Shared with you" albums (mobile + web)
 - Ashil: New favorite icon
-- Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Neeraj: (i) Admin Role + Suggest Delete feature
-- Neeraj: (i) Show public link to album participants
