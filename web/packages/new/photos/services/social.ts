@@ -225,3 +225,59 @@ const UnifiedDiffResponse = z.object({
     hasMoreComments: z.boolean(),
     hasMoreReactions: z.boolean(),
 });
+
+/**
+ * Get anonymous user profiles for a collection.
+ *
+ * @param collectionID The ID of the collection.
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @returns Map of anonUserID to decrypted userName.
+ */
+export const getAnonProfiles = async (
+    collectionID: number,
+    collectionKey: string,
+): Promise<Map<string, string>> => {
+    const res = await fetch(
+        await apiURL("/social/anon-profiles", { collectionID }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const { profiles } = GetAnonProfilesResponse.parse(await res.json());
+
+    const anonUserNames = new Map<string, string>();
+    for (const profile of profiles) {
+        if (!profile.cipher || !profile.nonce) continue;
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: profile.cipher, nonce: profile.nonce },
+                collectionKey,
+            );
+            const decryptedStr = new TextDecoder().decode(
+                Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+            );
+            const data = JSON.parse(decryptedStr) as { userName?: string };
+            if (data.userName) {
+                anonUserNames.set(profile.anonUserID, data.userName);
+            }
+        } catch {
+            // Skip profiles that fail to decrypt
+        }
+    }
+    return anonUserNames;
+};
+
+const RemoteAnonProfile = z.object({
+    anonUserID: z.string(),
+    collectionID: z.number(),
+    cipher: z.string().nullish(),
+    nonce: z.string().nullish(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+});
+
+const GetAnonProfilesResponse = z.object({
+    profiles: z
+        .array(RemoteAnonProfile)
+        .nullish()
+        .transform((v) => v ?? []),
+});

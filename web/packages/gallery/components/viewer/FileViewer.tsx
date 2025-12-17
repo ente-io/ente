@@ -47,6 +47,7 @@ import {
     addPublicReaction,
     createAnonIdentity,
     deletePublicReaction,
+    getPublicAnonProfiles,
     getPublicFileReactions,
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
@@ -59,6 +60,7 @@ import type { CollectionSummaries } from "ente-new/photos/services/collection-su
 import { type Comment } from "ente-new/photos/services/comment";
 import { addReaction, deleteReaction } from "ente-new/photos/services/reaction";
 import {
+    getAnonProfiles,
     getUnifiedSocialDiff,
     type UnifiedReaction,
 } from "ente-new/photos/services/social";
@@ -453,6 +455,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         new Map(),
     );
 
+    // Map of anon user ID to decrypted user name for anonymous users.
+    const [anonUserNames, setAnonUserNames] = useState<Map<string, string>>(
+        new Map(),
+    );
+
     // Ref for fileComments to use in callbacks
     const fileCommentsRef = useRef(fileComments);
     useEffect(() => {
@@ -502,14 +509,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const fileReactionsMap = allReactionsRef.current.get(fileId);
             if (!fileReactionsMap) return [];
 
-            // Get stored anonymous identity for public album users
-            const storedAnonIdentity = getStoredAnonIdentity();
-
             const userReactions: {
                 collectionId: number;
                 reactionId: string;
             }[] = [];
             for (const [collectionId, reactions] of fileReactionsMap) {
+                // Get stored anonymous identity for this specific collection
+                const storedAnonIdentity = getStoredAnonIdentity(collectionId);
+
                 const userFileReaction = reactions.find((r) => {
                     if (
                         r.commentID ||
@@ -706,7 +713,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const fileId = file.id;
             const collectionId = file.collectionID;
-            const storedAnonIdentity = getStoredAnonIdentity();
+            const storedAnonIdentity = getStoredAnonIdentity(collectionId);
 
             // Check if already liked by current anon user
             const fileReactionsMap = allReactionsRef.current.get(fileId);
@@ -725,6 +732,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     try {
                         await deletePublicReaction(
                             publicAlbumsCredentials,
+                            collectionId,
                             existingReaction.id,
                         );
                         log.info(
@@ -766,6 +774,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         }
                         const reactionId = await addPublicReaction(
                             publicAlbumsCredentials,
+                            collectionId,
                             fileId,
                             "green_heart",
                             collectionKey,
@@ -1204,11 +1213,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             void (async () => {
                 try {
-                    // Check if we already have an anon identity, otherwise create one
-                    let identity = getStoredAnonIdentity();
+                    // Check if we already have an anon identity for this collection, otherwise create one
+                    let identity = getStoredAnonIdentity(collectionId);
                     if (!identity) {
                         identity = await createAnonIdentity(
                             publicAlbumsCredentials,
+                            collectionId,
                             name,
                             collectionKey,
                         );
@@ -1220,6 +1230,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // Add the public reaction
                     const reactionId = await addPublicReaction(
                         publicAlbumsCredentials,
+                        collectionId,
                         fileId,
                         "green_heart",
                         collectionKey,
@@ -1546,11 +1557,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const fileReactionsMap = allReactions.get(file.id);
         const likedAlbumIDs = new Set<number>();
 
-        // Get stored anonymous identity for public album users
-        const storedAnonIdentity = getStoredAnonIdentity();
-
         if (fileReactionsMap) {
             for (const [collectionId, reactions] of fileReactionsMap) {
+                // Get stored anonymous identity for this specific collection
+                const storedAnonIdentity = getStoredAnonIdentity(collectionId);
+
                 const hasUserLike = reactions.some((r) => {
                     if (r.commentID || r.reactionType !== "green_heart")
                         return false;
@@ -1616,11 +1627,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const fileReactionsMap = allReactions.get(file.id);
             if (!fileReactionsMap) return false;
 
-            // Get stored anonymous identity for public album users
-            const storedAnonIdentity = getStoredAnonIdentity();
-
             // Check if user has liked this file in any collection
-            for (const reactions of fileReactionsMap.values()) {
+            for (const [collectionId, reactions] of fileReactionsMap) {
+                // Get stored anonymous identity for this specific collection
+                const storedAnonIdentity = getStoredAnonIdentity(collectionId);
+
                 const hasUserLike = reactions.some((r) => {
                     if (r.commentID || r.reactionType !== "green_heart")
                         return false;
@@ -1925,6 +1936,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 const commentsMap = new Map<number, Comment[]>();
                 const reactionsMap = new Map<number, UnifiedReaction[]>();
                 const newUserIDToEmail = new Map<number, string>();
+                const newAnonUserNames = new Map<string, string>();
 
                 const collectionIDs = isGalleryView
                     ? (fileNormalCollectionIDs?.get(activeFileID) ?? [])
@@ -1957,6 +1969,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
                         commentsMap.set(collectionId, comments);
                         reactionsMap.set(collectionId, reactions);
+
+                        // Fetch anonymous user profiles only if collection has public links
+                        if (collection.publicURLs.length > 0) {
+                            try {
+                                const anonProfiles = await getAnonProfiles(
+                                    collectionId,
+                                    collection.key,
+                                );
+                                for (const [
+                                    anonUserID,
+                                    userName,
+                                ] of anonProfiles) {
+                                    newAnonUserNames.set(anonUserID, userName);
+                                }
+                            } catch {
+                                // Ignore anon profiles fetch failures
+                            }
+                        }
                     } catch {
                         // Skip collections that fail to fetch
                     }
@@ -1978,6 +2008,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     const next = new Map(prev);
                     for (const [id, email] of newUserIDToEmail) {
                         next.set(id, email);
+                    }
+                    return next;
+                });
+
+                setAnonUserNames((prev) => {
+                    const next = new Map(prev);
+                    for (const [id, name] of newAnonUserNames) {
+                        next.set(id, name);
                     }
                     return next;
                 });
@@ -2049,6 +2087,23 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     next.set(activeFileID, reactionsMap);
                     return next;
                 });
+
+                // Fetch anonymous user profiles for public albums
+                try {
+                    const anonProfiles = await getPublicAnonProfiles(
+                        publicAlbumsCredentials,
+                        collectionKey,
+                    );
+                    setAnonUserNames((prev) => {
+                        const next = new Map(prev);
+                        for (const [id, name] of anonProfiles) {
+                            next.set(id, name);
+                        }
+                        return next;
+                    });
+                } catch {
+                    // Ignore anon profiles fetch failures
+                }
             } catch (e) {
                 log.error("Failed to fetch public reactions", e);
             }
@@ -2197,6 +2252,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     activeAnnotatedFile.file.id,
                 )}
                 prefetchedUserIDToEmail={userIDToEmail}
+                anonUserNames={anonUserNames}
             />
             <LikeAlbumSelectorModal
                 open={openLikeAlbumSelector}

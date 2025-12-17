@@ -37,16 +37,27 @@ export interface AnonIdentity {
 }
 
 /**
- * Storage key for anonymous identity in local storage.
+ * Storage key prefix for anonymous identity in local storage.
+ * The full key is `${prefix}_${collectionID}`.
  */
-const ANON_IDENTITY_STORAGE_KEY = "ente_anon_identity";
+const ANON_IDENTITY_STORAGE_KEY_PREFIX = "ente_anon_identity";
 
 /**
- * Get the stored anonymous identity from local storage, if any.
+ * Get the storage key for a specific collection's anonymous identity.
  */
-export const getStoredAnonIdentity = (): AnonIdentity | undefined => {
+const getStorageKey = (collectionID: number): string =>
+    `${ANON_IDENTITY_STORAGE_KEY_PREFIX}_${collectionID}`;
+
+/**
+ * Get the stored anonymous identity for a specific collection from local storage.
+ *
+ * @param collectionID The collection ID to get the identity for.
+ */
+export const getStoredAnonIdentity = (
+    collectionID: number,
+): AnonIdentity | undefined => {
     if (typeof window === "undefined") return undefined;
-    const stored = localStorage.getItem(ANON_IDENTITY_STORAGE_KEY);
+    const stored = localStorage.getItem(getStorageKey(collectionID));
     if (!stored) return undefined;
     try {
         return JSON.parse(stored) as AnonIdentity;
@@ -56,19 +67,27 @@ export const getStoredAnonIdentity = (): AnonIdentity | undefined => {
 };
 
 /**
- * Store the anonymous identity in local storage.
+ * Store the anonymous identity for a specific collection in local storage.
+ *
+ * @param collectionID The collection ID to store the identity for.
+ * @param identity The anonymous identity to store.
  */
-export const storeAnonIdentity = (identity: AnonIdentity): void => {
+export const storeAnonIdentity = (
+    collectionID: number,
+    identity: AnonIdentity,
+): void => {
     if (typeof window === "undefined") return;
-    localStorage.setItem(ANON_IDENTITY_STORAGE_KEY, JSON.stringify(identity));
+    localStorage.setItem(getStorageKey(collectionID), JSON.stringify(identity));
 };
 
 /**
- * Clear the stored anonymous identity from local storage.
+ * Clear the stored anonymous identity for a specific collection from local storage.
+ *
+ * @param collectionID The collection ID to clear the identity for.
  */
-export const clearAnonIdentity = (): void => {
+export const clearAnonIdentity = (collectionID: number): void => {
     if (typeof window === "undefined") return;
-    localStorage.removeItem(ANON_IDENTITY_STORAGE_KEY);
+    localStorage.removeItem(getStorageKey(collectionID));
 };
 
 /**
@@ -79,12 +98,14 @@ export const clearAnonIdentity = (): void => {
  * anonymous user.
  *
  * @param credentials Public album credentials (access token).
+ * @param collectionID The collection ID this identity is for.
  * @param userName The name entered by the user.
  * @param collectionKey The decrypted collection key (base64 encoded).
  * @returns The anonymous identity containing anonUserID and token.
  */
 export const createAnonIdentity = async (
     credentials: PublicAlbumsCredentials,
+    collectionID: number,
     userName: string,
     collectionKey: string,
 ): Promise<AnonIdentity> => {
@@ -105,8 +126,8 @@ export const createAnonIdentity = async (
     ensureOk(res);
     const identity = AnonIdentityResponse.parse(await res.json());
 
-    // Store the identity for future use
-    storeAnonIdentity(identity);
+    // Store the identity for this collection
+    storeAnonIdentity(collectionID, identity);
 
     return identity;
 };
@@ -121,6 +142,7 @@ const AnonIdentityResponse = z.object({
  * Add a reaction to a file in a public album (as an anonymous user).
  *
  * @param credentials Public album credentials (access token).
+ * @param collectionID The collection ID for looking up stored identity.
  * @param fileID The ID of the file to react to.
  * @param reactionType The type of reaction (e.g., "green_heart").
  * @param collectionKey The decrypted collection key (base64 encoded).
@@ -129,12 +151,13 @@ const AnonIdentityResponse = z.object({
  */
 export const addPublicReaction = async (
     credentials: PublicAlbumsCredentials,
+    collectionID: number,
     fileID: number,
     reactionType: string,
     collectionKey: string,
     anonIdentity?: AnonIdentity,
 ): Promise<string> => {
-    const identity = anonIdentity ?? getStoredAnonIdentity();
+    const identity = anonIdentity ?? getStoredAnonIdentity(collectionID);
     if (!identity) {
         throw new Error("No anonymous identity available");
     }
@@ -167,15 +190,17 @@ export const addPublicReaction = async (
  * Delete a reaction from a public album (as an anonymous user).
  *
  * @param credentials Public album credentials (access token).
+ * @param collectionID The collection ID for looking up stored identity.
  * @param reactionID The ID of the reaction to delete.
  * @param anonIdentity Optional anonymous identity. If not provided, will use stored identity.
  */
 export const deletePublicReaction = async (
     credentials: PublicAlbumsCredentials,
+    collectionID: number,
     reactionID: string,
     anonIdentity?: AnonIdentity,
 ): Promise<void> => {
-    const identity = anonIdentity ?? getStoredAnonIdentity();
+    const identity = anonIdentity ?? getStoredAnonIdentity(collectionID);
     if (!identity) {
         throw new Error("No anonymous identity available");
     }
@@ -256,7 +281,7 @@ export const getPublicFileReactions = async (
             );
             decryptedReactions.push({
                 id: reaction.id,
-                fileID: reaction.fileID,
+                fileID: reaction.fileID ?? fileID,
                 commentID: reaction.commentID ?? undefined,
                 reactionType,
                 userID: reaction.userID,
@@ -275,7 +300,7 @@ export const getPublicFileReactions = async (
 const RemotePublicReaction = z.object({
     id: z.string(),
     collectionID: z.number(),
-    fileID: z.number(),
+    fileID: z.number().nullish(),
     commentID: z.string().nullish(),
     userID: z.number(),
     anonUserID: z.string().nullish(),
@@ -289,4 +314,67 @@ const RemotePublicReaction = z.object({
 const GetPublicReactionsResponse = z.object({
     reactions: z.array(RemotePublicReaction),
     hasMore: z.boolean(),
+});
+
+/**
+ * An anonymous user profile (encrypted).
+ */
+export interface AnonProfile {
+    anonUserID: string;
+    userName: string;
+}
+
+/**
+ * Get anonymous user profiles for a public album.
+ *
+ * @param credentials Public album credentials (access token).
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @returns Map of anonUserID to decrypted userName.
+ */
+export const getPublicAnonProfiles = async (
+    credentials: PublicAlbumsCredentials,
+    collectionKey: string,
+): Promise<Map<string, string>> => {
+    const res = await fetch(
+        await apiURL("/public-collection/anon-profiles"),
+        {
+            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+        },
+    );
+    ensureOk(res);
+    const { profiles } = GetAnonProfilesResponse.parse(await res.json());
+
+    const anonUserNames = new Map<string, string>();
+    for (const profile of profiles) {
+        if (!profile.cipher || !profile.nonce) continue;
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: profile.cipher, nonce: profile.nonce },
+                collectionKey,
+            );
+            const decryptedStr = new TextDecoder().decode(
+                Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+            );
+            const data = JSON.parse(decryptedStr) as { userName?: string };
+            if (data.userName) {
+                anonUserNames.set(profile.anonUserID, data.userName);
+            }
+        } catch {
+            // Skip profiles that fail to decrypt
+        }
+    }
+    return anonUserNames;
+};
+
+const RemoteAnonProfile = z.object({
+    anonUserID: z.string(),
+    collectionID: z.number(),
+    cipher: z.string().nullish(),
+    nonce: z.string().nullish(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+});
+
+const GetAnonProfilesResponse = z.object({
+    profiles: z.array(RemoteAnonProfile),
 });

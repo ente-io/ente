@@ -76,6 +76,8 @@ interface Liker {
     userName: string;
     /** The actual email for avatar color, even when userName is "You". */
     email: string;
+    /** The first letter of the actual name (not "You") for the avatar. */
+    avatarInitial: string;
 }
 
 /** Collection info for the dropdown. */
@@ -119,6 +121,10 @@ export interface LikesSidebarProps extends ModalVisibilityProps {
      * Pre-fetched user ID to email mapping.
      */
     prefetchedUserIDToEmail?: Map<number, string>;
+    /**
+     * Map of anonymous user ID to decrypted user name.
+     */
+    anonUserNames?: Map<string, string>;
 }
 
 /**
@@ -134,6 +140,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     currentUserID,
     prefetchedReactions,
     prefetchedUserIDToEmail,
+    anonUserNames,
 }) => {
     const [loading, setLoading] = useState(false);
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
@@ -219,11 +226,14 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
         const reactions =
             reactionsByCollection.get(selectedCollectionInfo.id) ?? [];
 
-        // Get stored anonymous identity to check if current anon user
-        const storedAnonIdentity = getStoredAnonIdentity();
+        // Get stored anonymous identity for this collection to check if current anon user
+        const storedAnonIdentity = getStoredAnonIdentity(
+            selectedCollectionInfo.id,
+        );
 
         return reactions
             .filter((r) => r.reactionType === "green_heart")
+            .sort((a, b) => b.createdAt - a.createdAt) // Most recent first
             .map((r) => {
                 // Check if this is an anonymous user
                 const isAnonymous =
@@ -237,16 +247,26 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
 
                 let email: string;
                 let userName: string;
+                let actualName: string;
 
                 if (isAnonymous) {
                     email = r.anonUserID ?? "anonymous";
-                    userName =
-                        isCurrentAnonUser ? "You" : `Anonymous ${r.anonUserID?.slice(-4) ?? ""}`;
+                    // Use decrypted name from anonUserNames if available
+                    const decryptedName = r.anonUserID
+                        ? anonUserNames?.get(r.anonUserID)
+                        : undefined;
+                    actualName =
+                        decryptedName ??
+                        `Anonymous ${r.anonUserID?.slice(-4) ?? ""}`;
+                    userName = isCurrentAnonUser ? "You" : actualName;
                 } else {
-                    email =
-                        prefetchedUserIDToEmail?.get(r.userID) ??
-                        `User ${r.userID}`;
-                    userName = isCurrentUser ? "You" : email;
+                    const emailFromMap = prefetchedUserIDToEmail?.get(r.userID);
+                    // Use userID as string for unique avatar color
+                    email = emailFromMap ?? String(r.userID);
+                    // In public albums (no currentUserID), non-anonymous
+                    // users are album owner or collaborators
+                    actualName = emailFromMap ?? "Anonymous";
+                    userName = isCurrentUser ? "You" : actualName;
                 }
 
                 return {
@@ -255,6 +275,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                     anonUserID: r.anonUserID,
                     userName,
                     email,
+                    avatarInitial: actualName[0]?.toUpperCase() ?? "?",
                 };
             });
     }, [
@@ -262,6 +283,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
         reactionsByCollection,
         currentUserID,
         prefetchedUserIDToEmail,
+        anonUserNames,
     ]);
 
     // Load reactions from prefetched data
@@ -551,7 +573,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                         color: "#fff",
                                     }}
                                 >
-                                    {liker.email[0]?.toUpperCase() ?? "?"}
+                                    {liker.avatarInitial}
                                 </Avatar>
                                 <LikerName>{liker.userName}</LikerName>
                                 <HeartFilledIcon />

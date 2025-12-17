@@ -19,6 +19,7 @@ import type { EnteFile } from "ente-media/file";
 import type { Comment } from "ente-new/photos/services/comment";
 import {
     getAlbumFeed,
+    getAnonProfiles,
     type UnifiedReaction,
 } from "ente-new/photos/services/social";
 import React, { useEffect, useMemo, useState } from "react";
@@ -275,7 +276,9 @@ type ThumbnailCache = Map<number, string>;
 // =============================================================================
 
 /**
- * Get the display name for a user, showing "Anonymous" for anonymous users.
+ * Get the display name for a user.
+ * For anonymous users, uses their entered name from userName.
+ * Falls back to "Anonymous" only if userName is empty.
  */
 const getUserDisplayName = (
     userID: number,
@@ -283,7 +286,7 @@ const getUserDisplayName = (
     anonUserID?: string,
 ): string => {
     if (userID === -1 || userID === 0 || anonUserID) {
-        return "Anonymous";
+        return userName || "Anonymous";
     }
     return userName;
 };
@@ -312,6 +315,7 @@ const processFeedItems = (
     _files: EnteFile[],
     thumbnailCache: ThumbnailCache,
     users: Map<number, string>,
+    anonUserNames: Map<string, string>,
     currentUserID: number,
 ): FeedItem[] => {
     const feedItems: FeedItem[] = [];
@@ -319,6 +323,13 @@ const processFeedItems = (
     // Helper to get username from user map
     const getUserName = (userID: number): string =>
         users.get(userID) ?? "Unknown";
+
+    // Helper to get display name for anonymous users
+    const getAnonUserName = (anonUserID: string | undefined): string =>
+        anonUserID
+            ? (anonUserNames.get(anonUserID) ??
+              `Anonymous ${anonUserID.slice(-4)}`)
+            : "Anonymous";
 
     // Helper to get thumbnail URL from cache
     const getThumbnailURL = (fileID: number | undefined): string | undefined =>
@@ -393,11 +404,19 @@ const processFeedItems = (
     for (const r of reactions) {
         if (r.isDeleted) continue;
 
-        const email = getUserName(r.userID);
+        // For anonymous users, look up name from anonUserNames map
+        const isAnonymous = !!r.anonUserID;
+        const userName = isAnonymous
+            ? getAnonUserName(r.anonUserID)
+            : getUserName(r.userID);
+        // Use anonUserID for avatar color (consistent with LikesSidebar)
+        const email = isAnonymous
+            ? (r.anonUserID ?? "anonymous")
+            : getUserName(r.userID);
         const user: FeedUser = {
             userID: r.userID,
             anonUserID: r.anonUserID,
-            userName: email,
+            userName,
             email,
         };
 
@@ -645,6 +664,9 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
     );
     const [comments, setComments] = useState<Comment[]>([]);
     const [reactions, setReactions] = useState<UnifiedReaction[]>([]);
+    const [anonUserNames, setAnonUserNames] = useState<Map<string, string>>(
+        new Map(),
+    );
     const [isLoading, setIsLoading] = useState(false);
 
     // Load thumbnails for files that have reactions/comments
@@ -691,16 +713,22 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
 
             setIsLoading(true);
             try {
-                const {
-                    comments: fetchedComments,
-                    reactions: fetchedReactions,
-                } = await getAlbumFeed(collection.id, collection.key);
-                setComments(fetchedComments);
-                setReactions(fetchedReactions);
+                const hasPublicLink = (collection.publicURLs?.length ?? 0) > 0;
+                const [feedData, anonProfiles] = await Promise.all([
+                    getAlbumFeed(collection.id, collection.key),
+                    // Only fetch anon profiles if collection has public links
+                    hasPublicLink
+                        ? getAnonProfiles(collection.id, collection.key)
+                        : Promise.resolve(new Map<string, string>()),
+                ]);
+                setComments(feedData.comments);
+                setReactions(feedData.reactions);
+                setAnonUserNames(anonProfiles);
             } catch (e) {
                 log.error("Failed to fetch album feed", e);
                 setComments([]);
                 setReactions([]);
+                setAnonUserNames(new Map());
             } finally {
                 setIsLoading(false);
             }
@@ -717,6 +745,7 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
                 files,
                 thumbnailCache,
                 emailByUserID,
+                anonUserNames,
                 currentUserID,
             ),
         [
@@ -725,6 +754,7 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
             files,
             thumbnailCache,
             emailByUserID,
+            anonUserNames,
             currentUserID,
         ],
     );
