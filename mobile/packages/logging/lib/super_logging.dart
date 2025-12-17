@@ -352,7 +352,7 @@ class SuperLogging {
     // choose [logDir]
     if (dirPath == null || dirPath.isEmpty) {
       final root = await getExternalStorageDirectory();
-      dirPath = '${root!.path}/logs';
+      dirPath = join(root!.path, 'logs');
     }
 
     // create [logDir]
@@ -392,7 +392,7 @@ class SuperLogging {
       }
     }
 
-    logFile = File("$dirPath/${config.dateFmt!.format(DateTime.now())}.txt");
+    logFile = File(join(dirPath, "${config.dateFmt!.format(DateTime.now())}.txt"));
   }
 
   /// Current app version, obtained from package_info plugin.

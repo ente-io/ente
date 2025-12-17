@@ -271,6 +271,32 @@ extension GalleyTypeExtension on GalleryType {
     return this == GalleryType.favorite;
   }
 
+  bool showAddToPersonOption() {
+    switch (this) {
+      case GalleryType.homepage:
+      case GalleryType.archive:
+      case GalleryType.uncategorized:
+      case GalleryType.favorite:     
+      case GalleryType.ownedCollection:
+      case GalleryType.searchResults:
+      case GalleryType.locationTag:
+      case GalleryType.peopleTag:
+      case GalleryType.cluster:
+      case GalleryType.magic:
+        return true;
+
+      case GalleryType.trash:
+      case GalleryType.deleteSuggestions:
+      case GalleryType.sharedCollection:
+      case GalleryType.sharedPublicCollection:
+      case GalleryType.quickLink:
+      case GalleryType.localFolder:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
+        return false;
+    }
+  }
+
   bool showRestoreOption() {
     return this == GalleryType.trash;
   }

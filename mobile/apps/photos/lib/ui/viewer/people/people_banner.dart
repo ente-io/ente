@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 
 enum PeopleBannerType {
@@ -59,12 +60,7 @@ class PeopleBanner extends StatelessWidget {
           child: SizedBox(
             width: 56,
             height: 56,
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(40),
-                ),
-              ),
+            child: FaceThumbnailSquircleClip(
               child: faceWidget!,
             ),
           ),

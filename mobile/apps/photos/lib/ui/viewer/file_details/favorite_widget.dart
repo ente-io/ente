@@ -157,14 +157,14 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
   Widget build(BuildContext context) {
     // Show blank while initial state is being fetched
     if (_isFavorite == null || _isLoading) {
-      return const SizedBox(width: 24, height: 24);
+      return const SizedBox(width: 22, height: 22);
     }
 
     return GestureDetector(
       onTap: _onTap,
       child: SizedBox(
-        width: 24,
-        height: 24,
+        width: 22,
+        height: 22,
         child: rive.RiveWidgetBuilder(
           fileLoader: _riveFileLoader,
           stateMachineSelector: const rive.StateMachineNamed(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:app_links/app_links.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -193,6 +194,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   String? _error;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
+  StreamSubscription<Uri>? _deepLinkSubscription;
 
   @override
   void onFileUploadComplete() {
@@ -259,6 +261,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       }
     });
 
+    _initDeepLinks();
+
     // Activate search if initial query is provided (after collections are loaded)
     if (widget.initialSearchQuery != null &&
         widget.initialSearchQuery!.isNotEmpty) {
@@ -280,6 +284,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _deepLinkSubscription?.cancel();
     disposeSharing();
     super.dispose();
   }
@@ -378,6 +383,28 @@ class _HomePageState extends UploaderPageState<HomePage>
     _mediaStreamSubscription?.cancel();
     ReceiveSharingIntent.instance.reset();
     _logger.info('Sharing functionality disposed');
+  }
+
+  Future<void> _initDeepLinks() async {
+    final appLinks = AppLinks();
+
+    try {
+      final initialLink = await appLinks.getInitialLink();
+      if (initialLink != null) {
+        _logger.info('Initial deep link received');
+      }
+    } catch (e) {
+      _logger.severe('Error getting initial deep link: $e');
+    }
+
+    _deepLinkSubscription = appLinks.uriLinkStream.listen(
+      (Uri uri) {
+        _logger.info('Deep link received via stream');
+      },
+      onError: (err) {
+        _logger.severe('Error receiving deep link: $err');
+      },
+    );
   }
 
   Future<void> _loadCollections() async {

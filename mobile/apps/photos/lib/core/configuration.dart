@@ -251,6 +251,18 @@ class Configuration {
       );
     }
 
+    // Reset Ente Rewind caches and services
+    try {
+      wrappedService.resetForLogout();
+    } catch (e) {
+      _logger.info("WrappedService not initialized or failed to reset", e);
+    }
+    try {
+      await wrappedCacheService.clearAll();
+    } catch (e) {
+      _logger.info("WrappedCacheService not initialized or failed to clear", e);
+    }
+
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();

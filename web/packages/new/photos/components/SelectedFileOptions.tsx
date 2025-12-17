@@ -6,6 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
@@ -14,15 +15,21 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
+import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     PseudoCollectionID,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
+import { isMLEnabled } from "ente-new/photos/services/ml";
 import { t } from "i18next";
+import { useMemo } from "react";
+import { useWrapAsyncOperation } from "./utils/use-wrap-async";
 
 /**
  * Operations on selected files.
@@ -133,6 +140,11 @@ interface SelectedFileOptionsProps {
      * @returns
      */
     createFileOpHandler: (op: FileOp) => () => void;
+    /**
+     * If set, then an option to manually associate the selected file(s) with a
+     * person will be shown (when ML is enabled and there are named people).
+     */
+    onAddPersonToSelectedFiles?: (personID: string) => Promise<void>;
 }
 
 /**
@@ -152,8 +164,30 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     createOnCreateForCollectionOp,
     createOnSelectForCollectionOp,
     createFileOpHandler,
+    onAddPersonToSelectedFiles,
 }) => {
     const { showMiniDialog } = useBaseContext();
+
+    const peopleState = usePeopleStateSnapshot();
+    const namedPeople = useMemo(
+        () =>
+            (peopleState?.visiblePeople ?? []).filter(
+                (p) => p.type == "cgroup" && !!p.name,
+            ),
+        [peopleState],
+    );
+    const shouldShowAddPerson =
+        !!onAddPersonToSelectedFiles && isMLEnabled() && namedPeople.length > 0;
+
+    const { show: showAssignPerson, props: assignPersonVisibilityProps } =
+        useModalVisibility();
+    const handleSelectPerson = useWrapAsyncOperation(
+        async (personID: string) => {
+            assignPersonVisibilityProps.onClose();
+            if (!onAddPersonToSelectedFiles) return;
+            await onAddPersonToSelectedFiles(personID);
+        },
+    );
 
     const isUserFavorites =
         !!collectionSummary?.attributes.has("userFavorites");
@@ -280,96 +314,133 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     };
 
     return (
-        <SpacedRow sx={{ flex: 1, gap: 1, flexWrap: "wrap" }}>
-            <IconButton onClick={onClearSelection}>
-                <CloseIcon />
-            </IconButton>
-            <Typography sx={{ mr: "auto" }}>
-                {selectedFileCount == selectedOwnFileCount
-                    ? t("selected_count", { selected: selectedFileCount })
-                    : t("selected_and_yours_count", {
-                          selected: selectedFileCount,
-                          yours: selectedOwnFileCount,
-                      })}
-            </Typography>
+        <>
+            <SpacedRow sx={{ flex: 1, gap: 1, flexWrap: "wrap" }}>
+                <IconButton onClick={onClearSelection}>
+                    <CloseIcon />
+                </IconButton>
+                <Typography sx={{ mr: "auto" }}>
+                    {selectedFileCount == selectedOwnFileCount
+                        ? t("selected_count", { selected: selectedFileCount })
+                        : t("selected_and_yours_count", {
+                              selected: selectedFileCount,
+                              yours: selectedOwnFileCount,
+                          })}
+                </Typography>
 
-            {isInSearchMode ? (
-                <>
-                    <FavoriteButton onClick={handleFavorite} />
-                    <FixTimeButton onClick={handleFixTime} />
-                    <DownloadButton onClick={handleDownload} />
-                    <AddToCollectionButton onClick={handleAddToCollection} />
-                    <ArchiveButton onClick={handleArchive} />
-                    <HideButton onClick={handleHide} />
-                    <DeleteButton onClick={handleDelete} />
-                </>
-            ) : barMode == "people" ? (
-                <>
-                    <FavoriteButton onClick={handleFavorite} />
-                    <DownloadButton onClick={handleDownload} />
-                    <AddToCollectionButton onClick={handleAddToCollection} />
-                    <ArchiveButton onClick={handleArchive} />
-                    <HideButton onClick={handleHide} />
-                    <DeleteButton onClick={handleDelete} />
-                </>
-            ) : collectionSummary?.id == PseudoCollectionID.trash ? (
-                <>
-                    <RestoreButton onClick={handleRestore} />
-                    <DeletePermanentlyButton
-                        onClick={handleDeletePermanently}
-                    />
-                </>
-            ) : collectionSummary?.attributes.has("uncategorized") ? (
-                <>
-                    <DownloadButton onClick={handleDownload} />
-                    <MoveToCollectionButton onClick={handleMoveToCollection} />
-                    <DeleteButton onClick={handleDelete} />
-                </>
-            ) : collectionSummary?.attributes.has("sharedIncoming") ? (
-                <>
-                    <DownloadButton onClick={handleDownload} />
-                    <RemoveFromCollectionButton
-                        onClick={handleRemoveFromCollection}
-                    />
-                </>
-            ) : barMode == "hidden-albums" ? (
-                <>
-                    <DownloadButton onClick={handleDownload} />
-                    <UnhideButton onClick={handleUnhide} />
-                    <DeleteButton onClick={handleDelete} />
-                </>
-            ) : (
-                <>
-                    {!isUserFavorites &&
-                        collectionSummary?.id !=
-                            PseudoCollectionID.archiveItems && (
-                            <FavoriteButton onClick={handleFavorite} />
+                {isInSearchMode ? (
+                    <>
+                        <FavoriteButton onClick={handleFavorite} />
+                        <FixTimeButton onClick={handleFixTime} />
+                        <DownloadButton onClick={handleDownload} />
+                        <AddToCollectionButton
+                            onClick={handleAddToCollection}
+                        />
+                        {shouldShowAddPerson && (
+                            <AddPersonButton onClick={showAssignPerson} />
                         )}
-                    <FixTimeButton onClick={handleFixTime} />
-                    <DownloadButton onClick={handleDownload} />
-                    <AddToCollectionButton onClick={handleAddToCollection} />
-                    {collectionSummary?.id === PseudoCollectionID.all ? (
                         <ArchiveButton onClick={handleArchive} />
-                    ) : collectionSummary?.id ==
-                      PseudoCollectionID.archiveItems ? (
-                        <UnarchiveButton onClick={handleUnarchive} />
-                    ) : (
-                        !isUserFavorites && (
-                            <>
-                                <MoveToCollectionButton
-                                    onClick={handleMoveToCollection}
-                                />
-                                <RemoveFromCollectionButton
-                                    onClick={handleRemoveFromCollection}
-                                />
-                            </>
-                        )
-                    )}
-                    <HideButton onClick={handleHide} />
-                    <DeleteButton onClick={handleDelete} />
-                </>
+                        <HideButton onClick={handleHide} />
+                        <DeleteButton onClick={handleDelete} />
+                    </>
+                ) : barMode == "people" ? (
+                    <>
+                        <FavoriteButton onClick={handleFavorite} />
+                        <DownloadButton onClick={handleDownload} />
+                        <AddToCollectionButton
+                            onClick={handleAddToCollection}
+                        />
+                        {shouldShowAddPerson && (
+                            <AddPersonButton onClick={showAssignPerson} />
+                        )}
+                        <ArchiveButton onClick={handleArchive} />
+                        <HideButton onClick={handleHide} />
+                        <DeleteButton onClick={handleDelete} />
+                    </>
+                ) : collectionSummary?.id == PseudoCollectionID.trash ? (
+                    <>
+                        <RestoreButton onClick={handleRestore} />
+                        <DeletePermanentlyButton
+                            onClick={handleDeletePermanently}
+                        />
+                    </>
+                ) : collectionSummary?.attributes.has("uncategorized") ? (
+                    <>
+                        <DownloadButton onClick={handleDownload} />
+                        {shouldShowAddPerson && (
+                            <AddPersonButton onClick={showAssignPerson} />
+                        )}
+                        <MoveToCollectionButton
+                            onClick={handleMoveToCollection}
+                        />
+                        <DeleteButton onClick={handleDelete} />
+                    </>
+                ) : collectionSummary?.attributes.has("sharedIncoming") ? (
+                    <>
+                        <DownloadButton onClick={handleDownload} />
+                        {shouldShowAddPerson && (
+                            <AddPersonButton onClick={showAssignPerson} />
+                        )}
+                        <RemoveFromCollectionButton
+                            onClick={handleRemoveFromCollection}
+                        />
+                    </>
+                ) : barMode == "hidden-albums" ? (
+                    <>
+                        <DownloadButton onClick={handleDownload} />
+                        {shouldShowAddPerson && (
+                            <AddPersonButton onClick={showAssignPerson} />
+                        )}
+                        <UnhideButton onClick={handleUnhide} />
+                        <DeleteButton onClick={handleDelete} />
+                    </>
+                ) : (
+                    <>
+                        {!isUserFavorites &&
+                            collectionSummary?.id !=
+                                PseudoCollectionID.archiveItems && (
+                                <FavoriteButton onClick={handleFavorite} />
+                            )}
+                        <FixTimeButton onClick={handleFixTime} />
+                        <DownloadButton onClick={handleDownload} />
+                        <AddToCollectionButton
+                            onClick={handleAddToCollection}
+                        />
+                        {shouldShowAddPerson && (
+                            <AddPersonButton onClick={showAssignPerson} />
+                        )}
+                        {collectionSummary?.id === PseudoCollectionID.all ? (
+                            <ArchiveButton onClick={handleArchive} />
+                        ) : collectionSummary?.id ==
+                          PseudoCollectionID.archiveItems ? (
+                            <UnarchiveButton onClick={handleUnarchive} />
+                        ) : (
+                            !isUserFavorites && (
+                                <>
+                                    <MoveToCollectionButton
+                                        onClick={handleMoveToCollection}
+                                    />
+                                    <RemoveFromCollectionButton
+                                        onClick={handleRemoveFromCollection}
+                                    />
+                                </>
+                            )
+                        )}
+                        <HideButton onClick={handleHide} />
+                        <DeleteButton onClick={handleDelete} />
+                    </>
+                )}
+            </SpacedRow>
+
+            {shouldShowAddPerson && (
+                <AssignPersonDialog
+                    {...assignPersonVisibilityProps}
+                    people={namedPeople}
+                    title={t("add_a_person")}
+                    onSelectPerson={handleSelectPerson}
+                />
             )}
-        </SpacedRow>
+        </>
     );
 };
 
@@ -457,6 +528,14 @@ const AddToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("add")}>
         <IconButton {...{ onClick }}>
             <AddIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const AddPersonButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("add_a_person")}>
+        <IconButton {...{ onClick }}>
+            <PersonAddIcon />
         </IconButton>
     </Tooltip>
 );

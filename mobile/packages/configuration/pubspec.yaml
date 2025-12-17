@@ -27,6 +27,7 @@ dependencies:
   # Let's wait till the issue is resolved by the package maintainer.
   # If not resolved and we need to upgrade, write a migration script.
   flutter_secure_storage: 9.0.0
+  path: ^1.9.0
   path_provider: ^2.1.5
   shared_preferences: ^2.5.3
   tuple: ^2.0.2

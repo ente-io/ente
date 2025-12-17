@@ -30,7 +30,6 @@ import "package:photos/events/trigger_logout_event.dart";
 import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
@@ -52,8 +51,6 @@ import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/activity/ritual_badge_popup.dart";
-import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -67,6 +64,7 @@ import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
+import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
@@ -116,9 +114,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
-  RitualBadgeUnlock? _queuedRitualBadge;
-  bool _showingRitualBadge = false;
-  late final VoidCallback _activityStateListener;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -140,9 +135,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
-    _activityStateListener = () =>
-        _maybeShowRitualBadge(activityService.stateNotifier.value.pendingBadge);
-    activityService.stateNotifier.addListener(_activityStateListener);
 
     if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
@@ -150,11 +142,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
-      if (_selectedTabIndex == 0 && _queuedRitualBadge != null) {
-        final queued = _queuedRitualBadge;
-        _queuedRitualBadge = null;
-        _maybeShowRitualBadge(queued);
-      }
 
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
@@ -298,12 +285,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         .on<HomepageSwipeToSelectInProgressEvent>()
         .listen((inProgress) {
       _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
-    });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybeShowRitualBadge(
-        activityService.stateNotifier.value.pendingBadge,
-      );
     });
   }
 
@@ -535,7 +516,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
-    activityService.stateNotifier.removeListener(_activityStateListener);
     super.dispose();
   }
 
@@ -907,39 +887,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             Scaffold.of(context).closeDrawer();
           })
         : null;
-  }
-
-  void _maybeShowRitualBadge(RitualBadgeUnlock? badge) {
-    if (!flagService.ritualsFlag) return;
-    if (badge == null) return;
-    if (_showingRitualBadge) {
-      _queuedRitualBadge ??= badge;
-      return;
-    }
-    if (_selectedTabIndex != 0) {
-      _queuedRitualBadge = badge;
-      return;
-    }
-    final badgeToShow = badge;
-    _queuedRitualBadge = null;
-    _showingRitualBadge = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await activityService.markRitualBadgeSeen(
-          badgeToShow.ritual.id,
-          badgeToShow.days,
-        );
-        if (!mounted) return;
-        await showRitualBadgePopup(
-          context,
-          badge: badgeToShow,
-        );
-      } catch (e, s) {
-        _logger.severe("Failed to show ritual badge popup", e, s);
-      } finally {
-        _showingRitualBadge = false;
-      }
-    });
   }
 
   Future<bool> _initDeepLinks() async {
