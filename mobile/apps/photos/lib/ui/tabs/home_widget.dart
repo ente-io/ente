@@ -60,6 +60,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
+import "package:photos/ui/home/christmas/christmas_utils.dart";
 import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
@@ -765,33 +766,35 @@ class _HomeWidgetState extends State<HomeWidget> {
                   },
                 ),
               ),
-              ValueListenableBuilder<double>(
-                valueListenable: _christmasPullOffsetNotifier,
-                builder: (context, pullOffset, child) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _christmasPullReleasedNotifier,
-                    builder: (context, isReleased, child) {
-                      if (pullOffset <= 0) {
-                        return const SizedBox.shrink();
-                      }
-                      return Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: ChristmasPullOverlay(
-                          pullOffset: pullOffset,
-                          isReleased: isReleased,
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-              Positioned.fill(
-                child: FadingSnowOverlay(
-                  pullOffsetNotifier: _christmasPullOffsetNotifier,
+              if (isChristmasPeriod())
+                ValueListenableBuilder<double>(
+                  valueListenable: _christmasPullOffsetNotifier,
+                  builder: (context, pullOffset, child) {
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: _christmasPullReleasedNotifier,
+                      builder: (context, isReleased, child) {
+                        if (pullOffset <= 0) {
+                          return const SizedBox.shrink();
+                        }
+                        return Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: ChristmasPullOverlay(
+                            pullOffset: pullOffset,
+                            isReleased: isReleased,
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              ),
+              if (isChristmasPeriod())
+                Positioned.fill(
+                  child: FadingSnowOverlay(
+                    pullOffsetNotifier: _christmasPullOffsetNotifier,
+                  ),
+                ),
             ],
           ),
 
@@ -879,6 +882,8 @@ class _HomeWidgetState extends State<HomeWidget> {
               },
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
+                  if (!isChristmasPeriod()) return false;
+
                   const double maxPullOffset = 200.0;
 
                   if (notification is ScrollUpdateNotification) {

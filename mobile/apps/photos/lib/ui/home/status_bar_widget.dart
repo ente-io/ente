@@ -16,6 +16,7 @@ import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_widget.dart';
 import 'package:photos/ui/home/christmas/christmas_lights_banner.dart';
+import 'package:photos/ui/home/christmas/christmas_utils.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
@@ -98,7 +99,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const ChristmasLightsBanner(),
+        if (isChristmasPeriod()) const ChristmasLightsBanner(),
         HomeHeaderWidget(
           centerWidget: _showStatus && !_showErrorBanner
               ? GestureDetector(

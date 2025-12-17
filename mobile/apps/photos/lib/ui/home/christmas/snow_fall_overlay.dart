@@ -365,7 +365,7 @@ class _FadingSnowOverlayState extends State<FadingSnowOverlay>
       _fadeController.forward();
     } else if (!isPulling && _wasPulling && _isVisible && !_isFadingOut) {
       _isFadingOut = true;
-      _fadeController.duration = const Duration(milliseconds: 2000);
+      _fadeController.duration = const Duration(milliseconds: 1000);
       _fadeController.reverse().then((_) {
         if (mounted) {
           setState(() {
