@@ -18,6 +18,9 @@ Future<void> showRitualEditor(BuildContext context, {Ritual? ritual}) async {
 
 Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
   final controller = TextEditingController(text: ritual?.title ?? "");
+  final titleFocusNode = FocusNode();
+  bool titleFocusNodeDisposed = false;
+  double lastKeyboardInset = 0;
   final days = [...(ritual?.daysOfWeek ?? List<bool>.filled(7, true))];
   Collection? selectedAlbum = ritual?.albumId != null
       ? CollectionsService.instance.getCollectionByID(ritual!.albumId!)
@@ -40,6 +43,18 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
       useRootNavigator: false,
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
         final mediaQuery = MediaQuery.of(dialogContext);
+        final keyboardInset = mediaQuery.viewInsets.bottom;
+        if (lastKeyboardInset > 0 &&
+            keyboardInset == 0 &&
+            titleFocusNode.hasFocus) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (titleFocusNodeDisposed) return;
+            if (titleFocusNode.hasFocus) {
+              titleFocusNode.unfocus();
+            }
+          });
+        }
+        lastKeyboardInset = keyboardInset;
         final colorScheme = getEnteColorScheme(dialogContext);
         final textTheme = getEnteTextTheme(dialogContext);
         final bottomPadding = mediaQuery.viewPadding.bottom;
@@ -207,6 +222,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                       Expanded(
                                         child: TextFormField(
                                           controller: controller,
+                                          focusNode: titleFocusNode,
                                           autofocus: false,
                                           textCapitalization:
                                               TextCapitalization.sentences,
@@ -561,6 +577,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
       },
     );
   } finally {
+    titleFocusNodeDisposed = true;
+    titleFocusNode.dispose();
     controller.dispose();
   }
 }
