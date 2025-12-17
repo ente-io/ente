@@ -29,518 +29,538 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
   final formKey = GlobalKey<FormState>();
   bool sendReminderEnabled = ritual?.remindersEnabled ?? true;
 
-  await showGeneralDialog(
-    context: context,
-    barrierLabel: context.l10n.ritualEditorLabel,
-    barrierColor: Colors.black.withValues(alpha: 0.45),
-    barrierDismissible: true,
-    transitionDuration: const Duration(milliseconds: 240),
-    useRootNavigator: false,
-    pageBuilder: (dialogContext, animation, secondaryAnimation) {
-      final mediaQuery = MediaQuery.of(dialogContext);
-      final colorScheme = getEnteColorScheme(dialogContext);
-      final textTheme = getEnteTextTheme(dialogContext);
-      final bottomPadding = mediaQuery.viewPadding.bottom;
-      final maxHeight = mediaQuery.size.height * 0.95;
-      return MediaQuery.removeViewInsets(
-        context: dialogContext,
-        removeBottom: true,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxHeight),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(12, 8, 12, bottomPadding + 16),
-                child: Material(
-                  color: Colors.transparent,
-                  child: StatefulBuilder(
-                    builder: (context, setState) {
-                      final bool canSave = controller.text.trim().isNotEmpty &&
-                          selectedAlbumId != null;
-                      final bool allDaysOff =
-                          days.every((selected) => !selected);
-                      final widgetBackgroundColor =
-                          colorScheme.backgroundElevated2;
-                      final segmentedBackgroundColor = colorScheme.fillFaint;
-                      final localizations =
-                          MaterialLocalizations.of(dialogContext);
-                      final bool use24HourFormat =
-                          MediaQuery.of(context).alwaysUse24HourFormat;
-                      final int hour12 = selectedTime.hourOfPeriod == 0
-                          ? 12
-                          : selectedTime.hourOfPeriod;
-                      final String hourText = use24HourFormat
-                          ? selectedTime.hour.toString().padLeft(2, "0")
-                          : hour12.toString();
-                      final String minuteText =
-                          selectedTime.minute.toString().padLeft(2, "0");
-                      final String? periodText = use24HourFormat
-                          ? null
-                          : (selectedTime.period == DayPeriod.am
-                              ? localizations.anteMeridiemAbbreviation
-                              : localizations.postMeridiemAbbreviation);
-                      final timeTextStyle = textTheme.large.copyWith(
-                        fontWeight: FontWeight.w400,
-                      );
-
-                      Widget timeSegment(
-                        String text, {
-                        required TextStyle style,
-                      }) {
-                        return Container(
-                          width: 64,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: segmentedBackgroundColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(text, style: style),
-                          ),
+  try {
+    await showGeneralDialog(
+      context: context,
+      barrierLabel: context.l10n.ritualEditorLabel,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      barrierDismissible: true,
+      transitionDuration: const Duration(milliseconds: 240),
+      useRootNavigator: false,
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        final mediaQuery = MediaQuery.of(dialogContext);
+        final colorScheme = getEnteColorScheme(dialogContext);
+        final textTheme = getEnteTextTheme(dialogContext);
+        final bottomPadding = mediaQuery.viewPadding.bottom;
+        final maxHeight = mediaQuery.size.height * 0.95;
+        return MediaQuery.removeViewInsets(
+          context: dialogContext,
+          removeBottom: true,
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(12, 8, 12, bottomPadding + 16),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: StatefulBuilder(
+                      builder: (context, setState) {
+                        final bool canSave =
+                            controller.text.trim().isNotEmpty &&
+                                selectedAlbumId != null;
+                        final bool allDaysOff =
+                            days.every((selected) => !selected);
+                        final widgetBackgroundColor =
+                            colorScheme.backgroundElevated2;
+                        final segmentedBackgroundColor = colorScheme.fillFaint;
+                        final localizations =
+                            MaterialLocalizations.of(dialogContext);
+                        final bool use24HourFormat =
+                            MediaQuery.of(context).alwaysUse24HourFormat;
+                        final int hour12 = selectedTime.hourOfPeriod == 0
+                            ? 12
+                            : selectedTime.hourOfPeriod;
+                        final String hourText = use24HourFormat
+                            ? selectedTime.hour.toString().padLeft(2, "0")
+                            : hour12.toString();
+                        final String minuteText =
+                            selectedTime.minute.toString().padLeft(2, "0");
+                        final String? periodText = use24HourFormat
+                            ? null
+                            : (selectedTime.period == DayPeriod.am
+                                ? localizations.anteMeridiemAbbreviation
+                                : localizations.postMeridiemAbbreviation);
+                        final timeTextStyle = textTheme.large.copyWith(
+                          fontWeight: FontWeight.w400,
                         );
-                      }
 
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: colorScheme.backgroundElevated,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 22,
-                              offset: const Offset(0, 12),
+                        Widget timeSegment(
+                          String text, {
+                          required TextStyle style,
+                        }) {
+                          return Container(
+                            width: 64,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: segmentedBackgroundColor,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ],
-                        ),
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                          child: Form(
-                            key: formKey,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      ritual == null
-                                          ? "Create new ritual"
-                                          : context.l10n.ritualEdit,
-                                      style: textTheme.largeBold,
-                                    ),
-                                    const Spacer(),
-                                    IconButton(
-                                      icon: const Icon(Icons.close),
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        Container(
-                                          width: 70,
-                                          height: 70,
-                                          decoration: BoxDecoration(
-                                            color: widgetBackgroundColor,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              selectedEmoji,
-                                              style:
-                                                  const TextStyle(fontSize: 32),
+                            child: Center(
+                              child: Text(text, style: style),
+                            ),
+                          );
+                        }
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.backgroundElevated,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.06),
+                                blurRadius: 22,
+                                offset: const Offset(0, 12),
+                              ),
+                            ],
+                          ),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                            child: Form(
+                              key: formKey,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        ritual == null
+                                            ? context.l10n.ritualCreateNewTitle
+                                            : context.l10n.ritualEdit,
+                                        style: textTheme.largeBold,
+                                      ),
+                                      const Spacer(),
+                                      IconButton(
+                                        icon: const Icon(Icons.close),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          Container(
+                                            width: 70,
+                                            height: 70,
+                                            decoration: BoxDecoration(
+                                              color: widgetBackgroundColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
                                             ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: -4,
-                                          bottom: -4,
-                                          child: Material(
-                                            color:
-                                                colorScheme.backgroundElevated,
-                                            shape: const CircleBorder(),
-                                            elevation: 2,
-                                            child: InkWell(
-                                              customBorder:
-                                                  const CircleBorder(),
-                                              onTap: () async {
-                                                final emoji = await _pickEmoji(
-                                                  context,
-                                                  selectedEmoji,
-                                                );
-                                                if (emoji != null) {
-                                                  setState(() {
-                                                    selectedEmoji = emoji;
-                                                  });
-                                                }
-                                              },
-                                              child: const Padding(
-                                                padding: EdgeInsets.all(6),
-                                                child: HugeIcon(
-                                                  icon: HugeIcons
-                                                      .strokeRoundedEdit03,
-                                                  size: 18,
+                                            child: Center(
+                                              child: Text(
+                                                selectedEmoji,
+                                                style: const TextStyle(
+                                                  fontSize: 32,
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: controller,
-                                        autofocus: false,
-                                        textCapitalization:
-                                            TextCapitalization.sentences,
-                                        onChanged: (_) => setState(() {}),
-                                        decoration: InputDecoration(
-                                          hintText:
-                                              context.l10n.ritualEnterPrompt,
-                                          hintStyle: textTheme.body.copyWith(
-                                            color: const Color(0xFF969696),
+                                          Positioned(
+                                            right: -4,
+                                            bottom: -4,
+                                            child: Material(
+                                              color: colorScheme
+                                                  .backgroundElevated,
+                                              shape: const CircleBorder(),
+                                              elevation: 2,
+                                              child: InkWell(
+                                                customBorder:
+                                                    const CircleBorder(),
+                                                onTap: () async {
+                                                  final emoji =
+                                                      await _pickEmoji(
+                                                    context,
+                                                    selectedEmoji,
+                                                  );
+                                                  if (emoji != null) {
+                                                    setState(() {
+                                                      selectedEmoji = emoji;
+                                                    });
+                                                  }
+                                                },
+                                                child: const Padding(
+                                                  padding: EdgeInsets.all(6),
+                                                  child: HugeIcon(
+                                                    icon: HugeIcons
+                                                        .strokeRoundedEdit03,
+                                                    size: 18,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                          filled: true,
-                                          fillColor: widgetBackgroundColor,
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                            horizontal: 14,
-                                            vertical: 14,
-                                          ),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                        ),
-                                        validator: (value) {
-                                          if (value == null ||
-                                              value.trim().isEmpty) {
-                                            return context
-                                                .l10n.ritualEnterDescription;
-                                          }
-                                          return null;
-                                        },
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 28),
-                                _sectionLabel(
-                                  context,
-                                  "Choose days for ritual",
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: widgetBackgroundColor,
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      const double maxCircleSize = 38;
-                                      const double minCircleSize = 20;
-                                      const double minSpacing = 6;
-                                      final double availableWidth =
-                                          constraints.maxWidth;
-
-                                      double circleSize = maxCircleSize;
-                                      double spacing =
-                                          (availableWidth - circleSize * 7) / 8;
-
-                                      if (spacing < minSpacing) {
-                                        spacing = minSpacing;
-                                        circleSize =
-                                            ((availableWidth - (spacing * 8)) /
-                                                    7)
-                                                .clamp(
-                                          minCircleSize,
-                                          maxCircleSize,
-                                        );
-                                        spacing =
-                                            (availableWidth - circleSize * 7) /
-                                                8;
-                                      }
-
-                                      final children = <Widget>[
-                                        SizedBox(width: spacing),
-                                      ];
-                                      for (int index = 0;
-                                          index < days.length;
-                                          index++) {
-                                        children.add(
-                                          _DayCircle(
-                                            label: _weekLabel(context, index),
-                                            selected: days[index],
-                                            size: circleSize,
-                                            colorScheme: colorScheme,
-                                            onTap: () {
-                                              setState(() {
-                                                days[index] = !days[index];
-                                              });
-                                            },
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: controller,
+                                          autofocus: false,
+                                          textCapitalization:
+                                              TextCapitalization.sentences,
+                                          onChanged: (_) => setState(() {}),
+                                          decoration: InputDecoration(
+                                            hintText:
+                                                context.l10n.ritualEnterPrompt,
+                                            hintStyle: textTheme.body.copyWith(
+                                              color: const Color(0xFF969696),
+                                            ),
+                                            filled: true,
+                                            fillColor: widgetBackgroundColor,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 14,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18),
+                                              borderSide: BorderSide.none,
+                                            ),
                                           ),
-                                        );
-                                        children.add(SizedBox(width: spacing));
-                                      }
-
-                                      return Row(children: children);
-                                    },
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.trim().isEmpty) {
+                                              return context
+                                                  .l10n.ritualEnterDescription;
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                _sectionLabel(
-                                  context,
-                                  "Choose an album",
-                                ),
-                                const SizedBox(height: 8),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final result = await _pickAlbum(context);
-                                    if (result != null) {
-                                      setState(() {
-                                        selectedAlbum = result;
-                                        selectedAlbumId = result.id;
-                                        selectedAlbumName = result.displayName;
-                                      });
-                                    }
-                                  },
-                                  child: _AlbumPreviewTile(
-                                    album: selectedAlbum,
-                                    fallbackName: selectedAlbumName,
+                                  const SizedBox(height: 28),
+                                  _sectionLabel(
+                                    context,
+                                    context.l10n.ritualChooseDaysLabel,
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                if (allDaysOff)
+                                  const SizedBox(height: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 14,
+                                      vertical: 10,
                                     ),
                                     decoration: BoxDecoration(
                                       color: widgetBackgroundColor,
                                       borderRadius: BorderRadius.circular(18),
                                     ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.notifications_off_outlined,
-                                          color: colorScheme.textMuted,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            context.l10n
-                                                .ritualNotificationsOffHint,
-                                            style: textTheme.small.copyWith(
-                                              color: colorScheme.textMuted,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                else ...[
-                                  Row(
-                                    children: [
-                                      _sectionLabel(
-                                        context,
-                                        "Send reminder",
-                                      ),
-                                      const Spacer(),
-                                      Switch.adaptive(
-                                        value: sendReminderEnabled,
-                                        activeColor: colorScheme.primary500,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            sendReminderEnabled = value;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  if (sendReminderEnabled) ...[
-                                    const SizedBox(height: 4),
-                                    GestureDetector(
-                                      onTap: () async {
-                                        final result = await showTimePicker(
-                                          context: context,
-                                          initialTime: selectedTime,
-                                          builder: (context, child) {
-                                            if (child == null) {
-                                              return const SizedBox.shrink();
-                                            }
-                                            final mediaQuery =
-                                                MediaQuery.of(context);
-                                            return MediaQuery(
-                                              data: mediaQuery.copyWith(
-                                                alwaysUse24HourFormat:
-                                                    use24HourFormat,
-                                              ),
-                                              child: child,
-                                            );
-                                          },
-                                        );
-                                        if (result != null) {
-                                          setState(() {
-                                            selectedTime = result;
-                                          });
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        const double maxCircleSize = 38;
+                                        const double minCircleSize = 20;
+                                        const double minSpacing = 6;
+                                        final double availableWidth =
+                                            constraints.maxWidth;
+
+                                        double circleSize = maxCircleSize;
+                                        double spacing =
+                                            (availableWidth - circleSize * 7) /
+                                                8;
+
+                                        if (spacing < minSpacing) {
+                                          spacing = minSpacing;
+                                          circleSize = ((availableWidth -
+                                                      (spacing * 8)) /
+                                                  7)
+                                              .clamp(
+                                            minCircleSize,
+                                            maxCircleSize,
+                                          );
+                                          spacing = (availableWidth -
+                                                  circleSize * 7) /
+                                              8;
                                         }
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: widgetBackgroundColor,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                timeSegment(
-                                                  hourText,
-                                                  style: timeTextStyle,
-                                                ),
-                                                const SizedBox(width: 9),
-                                                Text(
-                                                  ":",
-                                                  style: timeTextStyle,
-                                                ),
-                                                const SizedBox(width: 9),
-                                                timeSegment(
-                                                  minuteText,
-                                                  style: timeTextStyle,
-                                                ),
-                                                if (periodText != null) ...[
-                                                  const SizedBox(width: 9),
-                                                  timeSegment(
-                                                    periodText,
-                                                    style: timeTextStyle,
-                                                  ),
-                                                ],
-                                              ],
+
+                                        final children = <Widget>[
+                                          SizedBox(width: spacing),
+                                        ];
+                                        for (int index = 0;
+                                            index < days.length;
+                                            index++) {
+                                          children.add(
+                                            _DayCircle(
+                                              label: _weekLabel(context, index),
+                                              selected: days[index],
+                                              size: circleSize,
+                                              colorScheme: colorScheme,
+                                              onTap: () {
+                                                setState(() {
+                                                  days[index] = !days[index];
+                                                });
+                                              },
                                             ),
-                                            Container(
-                                              padding: const EdgeInsets.all(8),
-                                              decoration: BoxDecoration(
-                                                color: segmentedBackgroundColor,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Icon(
-                                                Icons.schedule,
+                                          );
+                                          children
+                                              .add(SizedBox(width: spacing));
+                                        }
+
+                                        return Row(children: children);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _sectionLabel(
+                                    context,
+                                    context.l10n.ritualChooseAlbumLabel,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final result = await _pickAlbum(context);
+                                      if (result != null) {
+                                        setState(() {
+                                          selectedAlbum = result;
+                                          selectedAlbumId = result.id;
+                                          selectedAlbumName =
+                                              result.displayName;
+                                        });
+                                      }
+                                    },
+                                    child: _AlbumPreviewTile(
+                                      album: selectedAlbum,
+                                      fallbackName: selectedAlbumName,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  if (allDaysOff)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 14,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: widgetBackgroundColor,
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(
+                                            Icons.notifications_off_outlined,
+                                            color: colorScheme.textMuted,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              context.l10n
+                                                  .ritualNotificationsOffHint,
+                                              style: textTheme.small.copyWith(
                                                 color: colorScheme.textMuted,
                                               ),
                                             ),
-                                          ],
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  else ...[
+                                    Row(
+                                      children: [
+                                        _sectionLabel(
+                                          context,
+                                          context.l10n.ritualSendReminderLabel,
+                                        ),
+                                        const Spacer(),
+                                        Switch.adaptive(
+                                          value: sendReminderEnabled,
+                                          activeColor: colorScheme.primary500,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              sendReminderEnabled = value;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    if (sendReminderEnabled) ...[
+                                      const SizedBox(height: 4),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          final result = await showTimePicker(
+                                            context: context,
+                                            initialTime: selectedTime,
+                                            builder: (context, child) {
+                                              if (child == null) {
+                                                return const SizedBox.shrink();
+                                              }
+                                              final mediaQuery =
+                                                  MediaQuery.of(context);
+                                              return MediaQuery(
+                                                data: mediaQuery.copyWith(
+                                                  alwaysUse24HourFormat:
+                                                      use24HourFormat,
+                                                ),
+                                                child: child,
+                                              );
+                                            },
+                                          );
+                                          if (result != null) {
+                                            setState(() {
+                                              selectedTime = result;
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: widgetBackgroundColor,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  timeSegment(
+                                                    hourText,
+                                                    style: timeTextStyle,
+                                                  ),
+                                                  const SizedBox(width: 9),
+                                                  Text(
+                                                    ":",
+                                                    style: timeTextStyle,
+                                                  ),
+                                                  const SizedBox(width: 9),
+                                                  timeSegment(
+                                                    minuteText,
+                                                    style: timeTextStyle,
+                                                  ),
+                                                  if (periodText != null) ...[
+                                                    const SizedBox(width: 9),
+                                                    timeSegment(
+                                                      periodText,
+                                                      style: timeTextStyle,
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      segmentedBackgroundColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Icon(
+                                                  Icons.schedule,
+                                                  color: colorScheme.textMuted,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                  const SizedBox(height: 20),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: canSave
+                                            ? colorScheme.primary500
+                                            : colorScheme.fillMuted,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 18,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                        ),
+                                        side: BorderSide.none,
+                                        elevation: 0,
+                                      ),
+                                      onPressed: canSave
+                                          ? () async {
+                                              final updated = (ritual ??
+                                                      ritualsService
+                                                          .createEmptyRitual())
+                                                  .copyWith(
+                                                title: controller.text.trim(),
+                                                daysOfWeek: days,
+                                                timeOfDay: selectedTime,
+                                                remindersEnabled:
+                                                    sendReminderEnabled,
+                                                albumId: selectedAlbumId,
+                                                albumName: selectedAlbumName,
+                                                icon: selectedEmoji,
+                                              );
+                                              await ritualsService
+                                                  .saveRitual(updated);
+                                              Navigator.of(context).pop();
+                                            }
+                                          : null,
+                                      child: Text(
+                                        ritual == null
+                                            ? context.l10n.ritualCreateAction
+                                            : context.l10n.ritualUpdate,
+                                        style: textTheme.bodyBold.copyWith(
+                                          color: canSave
+                                              ? Colors.white
+                                              : colorScheme.textMuted,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ],
-                                const SizedBox(height: 20),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: canSave
-                                          ? colorScheme.primary500
-                                          : colorScheme.fillMuted,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 18,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                      side: BorderSide.none,
-                                      elevation: 0,
-                                    ),
-                                    onPressed: () async {
-                                      if (!canSave) return;
-                                      final updated = (ritual ??
-                                              ritualsService
-                                                  .createEmptyRitual())
-                                          .copyWith(
-                                        title: controller.text.trim(),
-                                        daysOfWeek: days,
-                                        timeOfDay: selectedTime,
-                                        remindersEnabled: sendReminderEnabled,
-                                        albumId: selectedAlbumId,
-                                        albumName: selectedAlbumName,
-                                        icon: selectedEmoji,
-                                      );
-                                      await ritualsService.saveRitual(updated);
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text(
-                                      ritual == null
-                                          ? "Create ritual"
-                                          : context.l10n.ritualUpdate,
-                                      style: textTheme.bodyBold
-                                          .copyWith(color: Colors.white),
-                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    },
-    transitionBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
-      return SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 1),
-          end: Offset.zero,
-        ).animate(curved),
-        child: child,
-      );
-    },
-  );
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        );
+      },
+    );
+  } finally {
+    controller.dispose();
+  }
 }
 
 String _weekLabel(BuildContext context, int index) {
@@ -968,172 +988,177 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
   final customEmojiController = TextEditingController(text: current);
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
-  await showModalBottomSheet(
-    context: context,
-    backgroundColor: colorScheme.backgroundElevated,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (context) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    context.l10n.ritualPickEmojiTitle,
-                    style: textTheme.bodyBold,
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 6,
-                childAspectRatio: 1,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                children: emojiOptions.map((emoji) {
-                  final isActive = emoji == customEmoji;
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      selected = emoji;
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? colorScheme.primary500.withValues(alpha: 0.1)
-                            : colorScheme.fillFaint,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isActive
-                              ? colorScheme.primary500
-                              : colorScheme.strokeFaint,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          emoji,
-                          style: const TextStyle(fontSize: 22),
-                        ),
-                      ),
+  try {
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: colorScheme.backgroundElevated,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      context.l10n.ritualPickEmojiTitle,
+                      style: textTheme.bodyBold,
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.l10n.ritualCustomKeyboardLabel,
-                style: textTheme.miniMuted,
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: customEmojiController,
-                      textInputAction: TextInputAction.done,
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 6,
+                  childAspectRatio: 1,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  children: emojiOptions.map((emoji) {
+                    final isActive = emoji == customEmoji;
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(12),
                       onTap: () {
-                        final text = customEmojiController.text;
-                        customEmojiController.selection = TextSelection(
-                          baseOffset: 0,
-                          extentOffset: text.length,
-                        );
-                      },
-                      onChanged: (value) {
-                        final trimmed = value.trim();
-                        final firstGrapheme = trimmed.characters.isEmpty
-                            ? ""
-                            : trimmed.characters.take(1).toString();
-                        if (firstGrapheme.isEmpty) {
-                          customEmoji = "";
-                          customEmojiController.value = const TextEditingValue(
-                            text: "",
-                            selection: TextSelection.collapsed(offset: 0),
-                          );
-                          return;
-                        }
-                        if (!_isEmoji(firstGrapheme)) {
-                          customEmojiController.value = TextEditingValue(
-                            text: customEmoji,
-                            selection: TextSelection.collapsed(
-                              offset: customEmoji.length,
-                            ),
-                          );
-                          return;
-                        }
-                        customEmojiController.value = TextEditingValue(
-                          text: firstGrapheme,
-                          selection: TextSelection.collapsed(
-                            offset: firstGrapheme.length,
-                          ),
-                        );
-                        customEmoji = firstGrapheme;
-                      },
-                      onSubmitted: (value) {
-                        final trimmed = value.trim();
-                        if (trimmed.isEmpty || !_isEmoji(trimmed)) return;
-                        selected = trimmed.characters.take(1).toString();
+                        selected = emoji;
                         Navigator.of(context).pop();
                       },
-                      decoration: InputDecoration(
-                        hintText: context.l10n.ritualEmojiKeyboardHint,
-                        filled: true,
-                        fillColor: colorScheme.fillFaint,
-                        border: OutlineInputBorder(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isActive
+                              ? colorScheme.primary500.withValues(alpha: 0.1)
+                              : colorScheme.fillFaint,
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: colorScheme.strokeFaint,
+                          border: Border.all(
+                            color: isActive
+                                ? colorScheme.primary500
+                                : colorScheme.strokeFaint,
                           ),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: colorScheme.strokeFaint,
+                        child: Center(
+                          child: Text(
+                            emoji,
+                            style: const TextStyle(fontSize: 22),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n.ritualCustomKeyboardLabel,
+                  style: textTheme.miniMuted,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: customEmojiController,
+                        textInputAction: TextInputAction.done,
+                        onTap: () {
+                          final text = customEmojiController.text;
+                          customEmojiController.selection = TextSelection(
+                            baseOffset: 0,
+                            extentOffset: text.length,
+                          );
+                        },
+                        onChanged: (value) {
+                          final trimmed = value.trim();
+                          final firstGrapheme = trimmed.characters.isEmpty
+                              ? ""
+                              : trimmed.characters.take(1).toString();
+                          if (firstGrapheme.isEmpty) {
+                            customEmoji = "";
+                            customEmojiController.value =
+                                const TextEditingValue(
+                              text: "",
+                              selection: TextSelection.collapsed(offset: 0),
+                            );
+                            return;
+                          }
+                          if (!_isEmoji(firstGrapheme)) {
+                            customEmojiController.value = TextEditingValue(
+                              text: customEmoji,
+                              selection: TextSelection.collapsed(
+                                offset: customEmoji.length,
+                              ),
+                            );
+                            return;
+                          }
+                          customEmojiController.value = TextEditingValue(
+                            text: firstGrapheme,
+                            selection: TextSelection.collapsed(
+                              offset: firstGrapheme.length,
+                            ),
+                          );
+                          customEmoji = firstGrapheme;
+                        },
+                        onSubmitted: (value) {
+                          final trimmed = value.trim();
+                          if (trimmed.isEmpty || !_isEmoji(trimmed)) return;
+                          selected = trimmed.characters.take(1).toString();
+                          Navigator.of(context).pop();
+                        },
+                        decoration: InputDecoration(
+                          hintText: context.l10n.ritualEmojiKeyboardHint,
+                          filled: true,
+                          fillColor: colorScheme.fillFaint,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: colorScheme.strokeFaint,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: colorScheme.strokeFaint,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.primary500,
-                      minimumSize: const Size(64, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary500,
+                        minimumSize: const Size(64, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: customEmoji.isEmpty
+                          ? null
+                          : () {
+                              selected = customEmoji;
+                              Navigator.of(context).pop();
+                            },
+                      child: Text(
+                        context.l10n.ritualEmojiUseAction,
+                        style: textTheme.bodyBold.copyWith(color: Colors.white),
                       ),
                     ),
-                    onPressed: customEmoji.isEmpty
-                        ? null
-                        : () {
-                            selected = customEmoji;
-                            Navigator.of(context).pop();
-                          },
-                    child: Text(
-                      context.l10n.ritualEmojiUseAction,
-                      style: textTheme.bodyBold.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
+  } finally {
+    customEmojiController.dispose();
+  }
   return selected;
 }
 
