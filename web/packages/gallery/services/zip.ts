@@ -147,7 +147,7 @@ export type StreamingZipResult =
     | "unavailable";
 
 const STREAM_ZIP_MIN_CONCURRENCY = 2;
-const STREAM_ZIP_MAX_CONCURRENCY = 12;
+const STREAM_ZIP_MAX_CONCURRENCY = 16;
 const STREAM_ZIP_MAX_RETRIES = 3;
 const STREAM_ZIP_CONCURRENCY_REFRESH_MS = 600;
 const STREAM_ZIP_BASE_WRITE_QUEUE_LIMIT = 16;
@@ -164,23 +164,24 @@ const getStreamZipConcurrency = () => {
     let concurrency = 3;
 
     try {
-        // Chrome provides heap info; keep headroom before allowing more parallel work.
+        // Chrome provides heap info; use jsHeapSizeLimit for actual available memory.
         const memory = (
             performance as Performance & {
-                memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+                memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number };
             }
         ).memory;
-        if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
-            const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
+        if (memory?.jsHeapSizeLimit && memory.usedJSHeapSize >= 0) {
+            const free = memory.jsHeapSizeLimit - memory.usedJSHeapSize;
             const freeMB = Math.round(free / (1024 * 1024));
             method = "performance.memory";
             detectedValue = `${freeMB} MB free`;
-            if (free > 2000 * 1024 * 1024) concurrency = 12;
-            else if (free > 1400 * 1024 * 1024) concurrency = 10;
+            if (free > 3000 * 1024 * 1024) concurrency = 16;
+            else if (free > 2000 * 1024 * 1024) concurrency = 12;
+            else if (free > 1200 * 1024 * 1024) concurrency = 10;
             else if (free > 800 * 1024 * 1024) concurrency = 8;
             else if (free > 400 * 1024 * 1024) concurrency = 4;
             else if (free > 160 * 1024 * 1024) concurrency = 3;
-            else concurrency = 1; // very constrained, stream one at a time
+            else concurrency = 2; // constrained, but keep minimum
             log.info(
                 `ZIP concurrency: ${concurrency} (${method}: ${detectedValue})`,
             );
@@ -194,9 +195,10 @@ const getStreamZipConcurrency = () => {
         if (deviceMemory) {
             method = "deviceMemory";
             detectedValue = `${deviceMemory} GB`;
-            if (deviceMemory >= 20) concurrency = 12;
-            else if (deviceMemory >= 16) concurrency = 10;
-            else if (deviceMemory >= 12) concurrency = 8;
+            if (deviceMemory >= 32) concurrency = 16;
+            else if (deviceMemory >= 16) concurrency = 12;
+            else if (deviceMemory >= 12) concurrency = 10;
+            else if (deviceMemory >= 8) concurrency = 8;
             else if (deviceMemory >= 6) concurrency = 4;
             else if (deviceMemory >= 4) concurrency = 3;
             else concurrency = 2;
@@ -228,18 +230,22 @@ const getStreamZipWriteQueueLimit = () => {
     let limit = STREAM_ZIP_BASE_WRITE_QUEUE_LIMIT;
 
     try {
-        // Priority 1: Chrome/Edge/Electron - real-time JS heap memory
+        // Priority 1: Chrome/Edge/Electron - use jsHeapSizeLimit for actual available memory
         const memory = (
             performance as Performance & {
-                memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+                memory?: { usedJSHeapSize: number; jsHeapSizeLimit: number };
             }
         ).memory;
-        if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
-            const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
+        if (memory?.jsHeapSizeLimit && memory.usedJSHeapSize >= 0) {
+            const free = memory.jsHeapSizeLimit - memory.usedJSHeapSize;
             const freeMB = Math.round(free / (1024 * 1024));
             method = "performance.memory";
             detectedValue = `${freeMB} MB free`;
-            if (free > 1200 * 1024 * 1024) {
+            if (free > 3000 * 1024 * 1024) {
+                limit = 128; // >3 GB free
+            } else if (free > 2000 * 1024 * 1024) {
+                limit = 96; // >2 GB free
+            } else if (free > 1200 * 1024 * 1024) {
                 limit = 64; // >1.2 GB free
             } else if (free > 800 * 1024 * 1024) {
                 limit = 48; // >800 MB free
@@ -257,12 +263,16 @@ const getStreamZipWriteQueueLimit = () => {
         if (deviceMemory) {
             method = "deviceMemory";
             detectedValue = `${deviceMemory} GB`;
-            if (deviceMemory >= 16) {
-                limit = 64; // >=16 GB RAM
+            if (deviceMemory >= 32) {
+                limit = 128; // >=32 GB RAM
+            } else if (deviceMemory >= 16) {
+                limit = 96; // >=16 GB RAM
             } else if (deviceMemory >= 12) {
-                limit = 48; // >=12 GB RAM
+                limit = 64; // >=12 GB RAM
             } else if (deviceMemory >= 8) {
-                limit = 32; // >=8 GB RAM
+                limit = 48; // >=8 GB RAM
+            } else if (deviceMemory >= 6) {
+                limit = 32; // >=6 GB RAM
             }
             log.info(`ZIP write queue: ${limit} (${method}: ${detectedValue})`);
             return limit;
@@ -274,12 +284,14 @@ const getStreamZipWriteQueueLimit = () => {
         if (cores) {
             method = "hardwareConcurrency";
             detectedValue = `${cores} cores`;
-            if (cores >= 16) {
-                limit = 48; // >=16 cores - cap at 48, not 64 (conservative)
+            if (cores >= 24) {
+                limit = 96; // >=24 cores (high-end workstation)
+            } else if (cores >= 16) {
+                limit = 64; // >=16 cores
             } else if (cores >= 8) {
-                limit = 32; // >=8 cores
+                limit = 48; // >=8 cores
             } else if (cores >= 4) {
-                limit = 24; // >=4 cores (more conservative than memory-based)
+                limit = 32; // >=4 cores
             }
             log.info(`ZIP write queue: ${limit} (${method}: ${detectedValue})`);
             return limit;
