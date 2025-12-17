@@ -1,3 +1,4 @@
+- Ashil: Move add to album cta in file viewer from popup menu to bottom bar
 - Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
 - Ashil: New favorite icon
 - Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
