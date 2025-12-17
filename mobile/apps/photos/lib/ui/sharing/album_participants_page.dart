@@ -210,8 +210,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   (context, index) {
                     if (index == 0 &&
                         (canManageParticipants || admins.isNotEmpty)) {
-                      return const MenuSectionTitle(
-                        title: '(i) Admins',
+                      return MenuSectionTitle(
+                        title: AppLocalizations.of(context).admins,
                         iconData: Icons.admin_panel_settings_outlined,
                       );
                     } else if (index > 0 && index <= admins.length) {
@@ -265,8 +265,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       return MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: admins.isNotEmpty
-                              ? '(i) Add more admins'
-                              : '(i) Add admin',
+                              ? AppLocalizations.of(context).addMoreAdmins
+                              : AppLocalizations.of(context).addAdmin,
                           makeTextBold: true,
                         ),
                         leadingIcon: Icons.add_outlined,
