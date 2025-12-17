@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/easter_animation_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -154,6 +156,24 @@ class AdvancedSettingsScreen extends StatelessWidget {
                             await SuperLogging.setShouldReportCrashes(
                               !SuperLogging.shouldReportCrashes(),
                             );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      MenuItemWidget(
+                        captionedTextWidget: const CaptionedTextWidget(
+                          title: "Easter animation",
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        singleBorderRadius: 8,
+                        alignCaptionedTextToLeft: true,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => localSettings.isEasterAnimationEnabled,
+                          onChanged: () async {
+                            await localSettings.setEasterAnimationEnabled(
+                              !localSettings.isEasterAnimationEnabled,
+                            );
+                            Bus.instance.fire(EasterAnimationEvent());
                           },
                         ),
                       ),

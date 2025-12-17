@@ -5,6 +5,7 @@ import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/easter_animation_event.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -37,6 +38,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
+  late StreamSubscription<EasterAnimationEvent> _easterAnimationSubscription;
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
@@ -84,6 +86,12 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         setState(() {});
       }
     });
+    _easterAnimationSubscription =
+        Bus.instance.on<EasterAnimationEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
 
     super.initState();
   }
@@ -92,6 +100,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void dispose() {
     _subscription.cancel();
     _notificationSubscription.cancel();
+    _easterAnimationSubscription.cancel();
     super.dispose();
   }
 

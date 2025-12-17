@@ -20,6 +20,7 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/events/account_configured_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/easter_animation_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -135,6 +136,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription _publicAlbumLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
       _homepageSwipeToSelectInProgressEventSubscription;
+  late StreamSubscription<EasterAnimationEvent>
+      _easterAnimationEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
 
@@ -292,6 +295,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         .on<HomepageSwipeToSelectInProgressEvent>()
         .listen((inProgress) {
       _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
+    });
+
+    _easterAnimationEventSubscription =
+        Bus.instance.on<EasterAnimationEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -522,6 +532,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _pageController.dispose();
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
+    _easterAnimationEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
     _christmasPullOffsetNotifier.dispose();
     _christmasPullReleasedNotifier.dispose();
