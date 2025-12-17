@@ -116,11 +116,28 @@ class _RitualOverviewCard extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final days = _lastScheduledDaysInclusive(
+    final pastDays = _lastScheduledDaysInclusive(
       ritual: ritual,
       todayMidnight: today,
       count: 5,
     );
+    final pastCompletions = [
+      for (final day in pastDays) progress?.hasCompleted(day) ?? false,
+    ];
+    final hasTodayInPreview = pastDays.any((day) => _isSameDay(day, today));
+    final createdToday = _isSameDay(ritual.createdAt, today);
+    final showFuturePreview = createdToday &&
+        hasTodayInPreview &&
+        progress != null &&
+        !pastCompletions.any((completed) => completed);
+
+    final days = showFuturePreview
+        ? _nextScheduledDaysInclusive(
+            ritual: ritual,
+            todayMidnight: today,
+            count: 5,
+          )
+        : pastDays;
     final completions = [
       for (final day in days) progress?.hasCompleted(day) ?? false,
     ];
@@ -226,6 +243,7 @@ class _RitualOverviewCard extends StatelessWidget {
                                   ? null
                                   : completions[index + 1],
                               index: index,
+                              showFuturePreview: showFuturePreview,
                             ),
                           ),
                         ),
@@ -248,6 +266,7 @@ class _RitualOverviewCard extends StatelessWidget {
     required bool completed,
     required bool? nextCompleted,
     required int index,
+    required bool showFuturePreview,
   }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -269,7 +288,9 @@ class _RitualOverviewCard extends StatelessWidget {
         ? RitualDayThumbnailVariant.photo
         : (isToday
             ? RitualDayThumbnailVariant.camera
-            : RitualDayThumbnailVariant.empty);
+            : (showFuturePreview && day.isAfter(today)
+                ? RitualDayThumbnailVariant.future
+                : RitualDayThumbnailVariant.empty));
 
     return RitualDayThumbnail(
       day: day,
@@ -395,6 +416,26 @@ List<DateTime> _lastScheduledDaysInclusive({
     result.add(day);
   }
   return result.reversed.toList(growable: false);
+}
+
+List<DateTime> _nextScheduledDaysInclusive({
+  required Ritual ritual,
+  required DateTime todayMidnight,
+  required int count,
+}) {
+  final daysOfWeek = ritual.daysOfWeek;
+  if (daysOfWeek.length != 7 || !daysOfWeek.any((enabled) => enabled)) {
+    return const [];
+  }
+
+  final result = <DateTime>[];
+  for (int offset = 0; result.length < count && offset < 366; offset++) {
+    final day = todayMidnight.add(Duration(days: offset));
+    final weekdayIndex = day.weekday % 7; // Sunday-first
+    if (!daysOfWeek[weekdayIndex]) continue;
+    result.add(day);
+  }
+  return result.toList(growable: false);
 }
 
 bool _isSameDay(DateTime a, DateTime b) {
