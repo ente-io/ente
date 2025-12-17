@@ -1151,6 +1151,12 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                               color: colorScheme.strokeFaint,
                             ),
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: colorScheme.strokeFaint,
+                            ),
+                          ),
                         ),
                       ),
                     ),
