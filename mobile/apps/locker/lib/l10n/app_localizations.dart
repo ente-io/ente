@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @noSharedUsers.
   ///
   /// In en, this message translates to:
-  /// **'No shared users yet'**
+  /// **'Not shared with anyone yet. Share this collection by adding someone\'s email below.'**
   String get noSharedUsers;
 
   /// No description provided for @removeAccess.

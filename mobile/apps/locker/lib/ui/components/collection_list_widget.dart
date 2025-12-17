@@ -179,15 +179,30 @@ class CollectionListWidget extends StatelessWidget {
                                 iconButtonType: IconButtonType.secondary,
                                 iconColor: colorScheme.primary700,
                               )
-                            : hasSharees
-                                ? Padding(
-                                    key: const ValueKey("sharees"),
-                                    padding: const EdgeInsets.only(right: 12.0),
-                                    child: _buildShareesAvatars(
-                                      collection.sharees
-                                          .whereType<User>()
-                                          .toList(),
-                                    ),
+                            : showSharingIndicator
+                                ? Row(
+                                    key: const ValueKey("shared"),
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (hasSharees)
+                                        _buildShareesAvatars(
+                                          collection.sharees
+                                              .whereType<User>()
+                                              .toList(),
+                                        ),
+                                      CollectionPopupMenuWidget(
+                                        collection: collection,
+                                        overflowActions: overflowActions,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: HugeIcon(
+                                            icon: HugeIcons
+                                                .strokeRoundedMoreVertical,
+                                            color: colorScheme.textBase,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   )
                                 : CollectionPopupMenuWidget(
                                     key: const ValueKey("menu"),

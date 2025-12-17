@@ -1497,7 +1497,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNewEmail => 'Add new email';
 
   @override
-  String get noSharedUsers => 'No shared users yet';
+  String get noSharedUsers =>
+      'Not shared with anyone yet. Share this collection by adding someone\'s email below.';
 
   @override
   String get removeAccess => 'Remove access';
