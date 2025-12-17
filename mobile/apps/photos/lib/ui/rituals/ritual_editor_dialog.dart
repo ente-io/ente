@@ -1,3 +1,4 @@
+import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
@@ -382,9 +383,10 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           context.l10n.ritualSendReminderLabel,
                                         ),
                                         const Spacer(),
-                                        Switch.adaptive(
+                                        CupertinoSwitch(
                                           value: sendReminderEnabled,
-                                          activeColor: colorScheme.primary500,
+                                          activeTrackColor:
+                                              colorScheme.primary500,
                                           onChanged: (value) {
                                             setState(() {
                                               sendReminderEnabled = value;
