@@ -51,7 +51,7 @@ class LocalSettings {
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
-  static const _kEasterAnimationEnabled = "ls.easter_animation_enabled";
+  static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
 
   final SharedPreferences _prefs;
 
@@ -313,10 +313,10 @@ class LocalSettings {
     await _prefs.setBool(_kWrapped2025Complete, false);
   }
 
-  bool get isEasterAnimationEnabled =>
-      _prefs.getBool(_kEasterAnimationEnabled) ?? true;
+  bool get isChristmasBannerEnabled =>
+      _prefs.getBool(_kChristmasBannerEnabled) ?? true;
 
-  Future<void> setEasterAnimationEnabled(bool value) async {
-    await _prefs.setBool(_kEasterAnimationEnabled, value);
+  Future<void> setChristmasBannerEnabled(bool value) async {
+    await _prefs.setBool(_kChristmasBannerEnabled, value);
   }
 }

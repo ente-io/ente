@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/easter_animation_event.dart";
+import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -162,18 +162,18 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       MenuItemWidget(
                         captionedTextWidget: const CaptionedTextWidget(
-                          title: "Easter animation",
+                          title: "Christmas banner",
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,
                         alignCaptionedTextToLeft: true,
                         trailingWidget: ToggleSwitchWidget(
-                          value: () => localSettings.isEasterAnimationEnabled,
+                          value: () => localSettings.isChristmasBannerEnabled,
                           onChanged: () async {
-                            await localSettings.setEasterAnimationEnabled(
-                              !localSettings.isEasterAnimationEnabled,
+                            await localSettings.setChristmasBannerEnabled(
+                              !localSettings.isChristmasBannerEnabled,
                             );
-                            Bus.instance.fire(EasterAnimationEvent());
+                            Bus.instance.fire(ChristmasBannerEvent());
                           },
                         ),
                       ),
