@@ -55,7 +55,7 @@ class WrappedService {
   static const int _kWrappedYear = 2025;
   static final DateTime _kAvailabilityStart = DateTime(_kWrappedYear, 12, 6);
   static final DateTime _kAvailabilityEndExclusive =
-      DateTime(_kWrappedYear + 1, 1, 7);
+      DateTime(_kWrappedYear + 1, 1, 16);
   static final DateTime _kFinalComputeCutoff =
       DateTime(_kWrappedYear + 1, 1, 1);
 
