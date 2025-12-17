@@ -114,6 +114,7 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
+import { addManualFileAssignmentsToPerson } from "ente-new/photos/services/ml";
 import {
     savedCollectionFiles,
     savedCollections,
@@ -905,6 +906,18 @@ const Page: React.FC = () => {
         })();
     };
 
+    const handleAddPersonToSelectedFiles = useCallback(
+        async (personID: string) => {
+            const selectedFiles = getSelectedFiles(selected, filteredFiles);
+            await addManualFileAssignmentsToPerson(
+                personID,
+                selectedFiles.map((f) => f.id),
+            );
+            clearSelection();
+        },
+        [selected, filteredFiles, clearSelection],
+    );
+
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
@@ -1269,6 +1282,8 @@ const Page: React.FC = () => {
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
                             createFileOpHandler,
+                            onAddPersonToSelectedFiles:
+                                handleAddPersonToSelectedFiles,
                         }}
                     />
                 ) : barMode == "hidden-albums" ? (
