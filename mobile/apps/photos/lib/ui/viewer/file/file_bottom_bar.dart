@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:io';
 
+import 'package:ente_icons/ente_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -148,8 +149,9 @@ class FileBottomBarState extends State<FileBottomBar> {
               padding: const EdgeInsets.only(top: 12),
               child: IconButton(
                 icon: const Icon(
-                  Icons.add,
+                  EnteIcons.addToAlbum,
                   color: Colors.white,
+                  size: 28,
                 ),
                 onPressed: () {
                   final selectedFiles = SelectedFiles();
