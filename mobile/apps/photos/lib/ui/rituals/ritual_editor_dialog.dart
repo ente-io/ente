@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -988,210 +990,272 @@ Widget _sectionLabel(BuildContext context, String label) {
   );
 }
 
+const List<String> _emojiOptions = [
+  "📸",
+  "😊",
+  "💪",
+  "☕️",
+  "🌅",
+  "🏃",
+  "🧘",
+  "📚",
+  "🏋️",
+  "💅",
+  "🎨",
+  "🥾",
+  "🌙",
+  "📝",
+  "🧠",
+  "🧹",
+  "🌻",
+  "🧩",
+];
+
 Future<String?> _pickEmoji(BuildContext context, String current) async {
-  const emojiOptions = [
-    "📸",
-    "😊",
-    "💪",
-    "☕️",
-    "🌅",
-    "🏃",
-    "🧘",
-    "📚",
-    "🏋️",
-    "💅",
-    "🎨",
-    "🥾",
-    "🌙",
-    "📝",
-    "🧠",
-    "🧹",
-    "🌻",
-    "🧩",
-  ];
-  String? selected;
-  String customEmoji = current;
-  final customEmojiController = TextEditingController(text: current);
   final colorScheme = getEnteColorScheme(context);
-  final textTheme = getEnteTextTheme(context);
-  try {
-    await showModalBottomSheet(
-      context: context,
-      backgroundColor: colorScheme.backgroundElevated,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  return showModalBottomSheet<String>(
+    context: context,
+    backgroundColor: colorScheme.backgroundElevated,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) => _EmojiPickerSheet(initialEmoji: current),
+  );
+}
+
+class _EmojiPickerSheet extends StatefulWidget {
+  const _EmojiPickerSheet({required this.initialEmoji});
+
+  final String initialEmoji;
+
+  @override
+  State<_EmojiPickerSheet> createState() => _EmojiPickerSheetState();
+}
+
+class _EmojiPickerSheetState extends State<_EmojiPickerSheet> {
+  late final TextEditingController _customEmojiController;
+  late final FocusNode _customEmojiFocusNode;
+  late String _customEmoji;
+  bool _didPop = false;
+  bool _isUpdatingController = false;
+  bool _didClearOnFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _customEmoji = widget.initialEmoji;
+    _customEmojiController = TextEditingController(text: widget.initialEmoji);
+    _customEmojiFocusNode = FocusNode()..addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _customEmojiFocusNode.dispose();
+    _customEmojiController.dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (!Platform.isIOS ||
+        !_customEmojiFocusNode.hasFocus ||
+        _didClearOnFocus ||
+        _didPop) {
+      return;
+    }
+    _didClearOnFocus = true;
+    if (_customEmojiController.text.isEmpty) return;
+    _customEmoji = "";
+    _isUpdatingController = true;
+    _customEmojiController.value = const TextEditingValue(
+      text: "",
+      selection: TextSelection.collapsed(offset: 0),
+    );
+    _isUpdatingController = false;
+    setState(() {});
+  }
+
+  void _popWithEmoji(String emoji) {
+    if (_didPop) return;
+    _didPop = true;
+    Navigator.of(context).pop(emoji);
+  }
+
+  void _handleChanged(String value) {
+    if (_isUpdatingController || _didPop) return;
+    final trimmed = value.trim();
+    final firstGrapheme =
+        trimmed.characters.isEmpty ? "" : trimmed.characters.take(1).toString();
+    if (firstGrapheme.isEmpty) {
+      _customEmoji = "";
+      _isUpdatingController = true;
+      _customEmojiController.value = const TextEditingValue(
+        text: "",
+        selection: TextSelection.collapsed(offset: 0),
+      );
+      _isUpdatingController = false;
+      setState(() {});
+      return;
+    }
+    if (!_isEmoji(firstGrapheme)) {
+      _isUpdatingController = true;
+      _customEmojiController.value = TextEditingValue(
+        text: _customEmoji,
+        selection: TextSelection.collapsed(
+          offset: _customEmoji.length,
+        ),
+      );
+      _isUpdatingController = false;
+      return;
+    }
+    _customEmoji = firstGrapheme;
+    _isUpdatingController = true;
+    _customEmojiController.value = TextEditingValue(
+      text: firstGrapheme,
+      selection: TextSelection.collapsed(
+        offset: firstGrapheme.length,
       ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    );
+    _isUpdatingController = false;
+    _popWithEmoji(firstGrapheme);
+  }
+
+  void _handleSubmitted(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty || !_isEmoji(trimmed)) return;
+    _popWithEmoji(trimmed.characters.take(1).toString());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      context.l10n.ritualPickEmojiTitle,
-                      style: textTheme.bodyBold,
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 6,
-                  childAspectRatio: 1,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  children: emojiOptions.map((emoji) {
-                    final isActive = emoji == customEmoji;
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        selected = emoji;
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isActive
-                              ? colorScheme.primary500.withValues(alpha: 0.1)
-                              : colorScheme.fillFaint,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isActive
-                                ? colorScheme.primary500
-                                : colorScheme.strokeFaint,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(fontSize: 22),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 12),
                 Text(
-                  context.l10n.ritualCustomKeyboardLabel,
-                  style: textTheme.miniMuted,
+                  context.l10n.ritualPickEmojiTitle,
+                  style: textTheme.bodyBold,
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: customEmojiController,
-                        textInputAction: TextInputAction.done,
-                        onTap: () {
-                          final text = customEmojiController.text;
-                          customEmojiController.selection = TextSelection(
-                            baseOffset: 0,
-                            extentOffset: text.length,
-                          );
-                        },
-                        onChanged: (value) {
-                          final trimmed = value.trim();
-                          final firstGrapheme = trimmed.characters.isEmpty
-                              ? ""
-                              : trimmed.characters.take(1).toString();
-                          if (firstGrapheme.isEmpty) {
-                            customEmoji = "";
-                            customEmojiController.value =
-                                const TextEditingValue(
-                              text: "",
-                              selection: TextSelection.collapsed(offset: 0),
-                            );
-                            return;
-                          }
-                          if (!_isEmoji(firstGrapheme)) {
-                            customEmojiController.value = TextEditingValue(
-                              text: customEmoji,
-                              selection: TextSelection.collapsed(
-                                offset: customEmoji.length,
-                              ),
-                            );
-                            return;
-                          }
-                          customEmojiController.value = TextEditingValue(
-                            text: firstGrapheme,
-                            selection: TextSelection.collapsed(
-                              offset: firstGrapheme.length,
-                            ),
-                          );
-                          customEmoji = firstGrapheme;
-                        },
-                        onSubmitted: (value) {
-                          final trimmed = value.trim();
-                          if (trimmed.isEmpty || !_isEmoji(trimmed)) return;
-                          selected = trimmed.characters.take(1).toString();
-                          Navigator.of(context).pop();
-                        },
-                        decoration: InputDecoration(
-                          hintText: context.l10n.ritualEmojiKeyboardHint,
-                          filled: true,
-                          fillColor: colorScheme.fillFaint,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary500,
-                        minimumSize: const Size(64, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: customEmoji.isEmpty
-                          ? null
-                          : () {
-                              selected = customEmoji;
-                              Navigator.of(context).pop();
-                            },
-                      child: Text(
-                        context.l10n.ritualEmojiUseAction,
-                        style: textTheme.bodyBold.copyWith(color: Colors.white),
-                      ),
-                    ),
-                  ],
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 12),
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 6,
+              childAspectRatio: 1,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              children: _emojiOptions.map((emoji) {
+                final isActive = emoji == _customEmoji;
+                return InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => _popWithEmoji(emoji),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? colorScheme.primary500.withValues(alpha: 0.1)
+                          : colorScheme.fillFaint,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isActive
+                            ? colorScheme.primary500
+                            : colorScheme.strokeFaint,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        emoji,
+                        style: const TextStyle(fontSize: 22),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.l10n.ritualCustomKeyboardLabel,
+              style: textTheme.miniMuted,
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _customEmojiController,
+                    focusNode: _customEmojiFocusNode,
+                    textInputAction: TextInputAction.done,
+                    onTap: () {
+                      final text = _customEmojiController.text;
+                      _customEmojiController.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: text.length,
+                      );
+                    },
+                    onChanged: _handleChanged,
+                    onSubmitted: _handleSubmitted,
+                    decoration: InputDecoration(
+                      hintText: context.l10n.ritualEmojiKeyboardHint,
+                      filled: true,
+                      fillColor: colorScheme.fillFaint,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colorScheme.strokeFaint,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colorScheme.strokeFaint,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: colorScheme.strokeFaint,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary500,
+                    minimumSize: const Size(64, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: _customEmoji.isEmpty
+                      ? null
+                      : () => _popWithEmoji(
+                            _customEmoji,
+                          ),
+                  child: Text(
+                    context.l10n.ritualEmojiUseAction,
+                    style: textTheme.bodyBold.copyWith(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
-  } finally {
-    customEmojiController.dispose();
   }
-  return selected;
 }
 
 bool _isEmoji(String value) {
