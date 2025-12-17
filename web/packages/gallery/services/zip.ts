@@ -63,7 +63,7 @@ export interface WritableStreamHandle {
  * Get a writable stream for ZIP file. Tries File System Access API first,
  * falls back to StreamSaver.js. Returns null if cancelled, undefined if unavailable.
  */
-const getWritableStreamForZip = async (
+export const getWritableStreamForZip = async (
     fileName: string,
 ): Promise<WritableStreamHandle | null | undefined> => {
     // Try File System Access API first (Chrome/Edge)
@@ -159,6 +159,10 @@ const STREAM_ZIP_RETRY_DELAY_MS = 400;
  * Uses performance.memory (Chrome) or navigator.deviceMemory, defaults to 3.
  */
 const getStreamZipConcurrency = () => {
+    let method = "default";
+    let detectedValue: number | string = "none";
+    let concurrency = 3;
+
     try {
         // Chrome provides heap info; keep headroom before allowing more parallel work.
         const memory = (
@@ -168,12 +172,19 @@ const getStreamZipConcurrency = () => {
         ).memory;
         if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
             const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
-            if (free > 2000 * 1024 * 1024) return 12;
-            if (free > 1400 * 1024 * 1024) return 10;
-            if (free > 800 * 1024 * 1024) return 8;
-            if (free > 400 * 1024 * 1024) return 4;
-            if (free > 160 * 1024 * 1024) return 3;
-            return 1; // very constrained, stream one at a time
+            const freeMB = Math.round(free / (1024 * 1024));
+            method = "performance.memory";
+            detectedValue = `${freeMB} MB free`;
+            if (free > 2000 * 1024 * 1024) concurrency = 12;
+            else if (free > 1400 * 1024 * 1024) concurrency = 10;
+            else if (free > 800 * 1024 * 1024) concurrency = 8;
+            else if (free > 400 * 1024 * 1024) concurrency = 4;
+            else if (free > 160 * 1024 * 1024) concurrency = 3;
+            else concurrency = 1; // very constrained, stream one at a time
+            log.info(
+                `ZIP concurrency: ${concurrency} (${method}: ${detectedValue})`,
+            );
+            return concurrency;
         }
 
         // Fallback: navigator.deviceMemory returns approximate GBs available to JS.
@@ -181,18 +192,25 @@ const getStreamZipConcurrency = () => {
             navigator as Navigator & { deviceMemory?: number }
         ).deviceMemory;
         if (deviceMemory) {
-            if (deviceMemory >= 20) return 12;
-            if (deviceMemory >= 16) return 10;
-            if (deviceMemory >= 12) return 8;
-            if (deviceMemory >= 6) return 4;
-            if (deviceMemory >= 4) return 3;
-            return 2;
+            method = "deviceMemory";
+            detectedValue = `${deviceMemory} GB`;
+            if (deviceMemory >= 20) concurrency = 12;
+            else if (deviceMemory >= 16) concurrency = 10;
+            else if (deviceMemory >= 12) concurrency = 8;
+            else if (deviceMemory >= 6) concurrency = 4;
+            else if (deviceMemory >= 4) concurrency = 3;
+            else concurrency = 2;
+            log.info(
+                `ZIP concurrency: ${concurrency} (${method}: ${detectedValue})`,
+            );
+            return concurrency;
         }
-    } catch {
-        // Ignore and fall back to defaults below.
+    } catch (e) {
+        log.warn("Failed to detect memory for ZIP concurrency", e);
     }
 
-    return 3;
+    log.info(`ZIP concurrency: ${concurrency} (${method})`);
+    return concurrency;
 };
 
 /**
@@ -408,7 +426,7 @@ export const streamFilesToZip = async ({
         return writeChain;
     };
 
-    const zip = new Zip((err, data, _final) => {
+    const zip = new Zip((err, data) => {
         if (err) {
             zipError = err instanceof Error ? err : new Error(String(err));
             return;
@@ -620,7 +638,7 @@ export const streamFilesToZip = async ({
     };
 
     const inFlightEntries = new Set<Promise<void>>();
-    let entryFailure: unknown | null = null;
+    let entryFailure: unknown = null;
 
     const waitForEntrySlot = async () => {
         while (inFlightEntries.size >= targetConcurrency) {
@@ -629,9 +647,8 @@ export const streamFilesToZip = async ({
     };
 
     const startEntry = (file: EnteFile, entry: PreparedEntry) => {
-        let p: Promise<void>;
-        p = addEntryToZipWithRetry(file, entry)
-            .catch((e) => {
+        const p: Promise<void> = addEntryToZipWithRetry(file, entry)
+            .catch((e: unknown) => {
                 entryFailure = entryFailure ?? e;
                 throw e;
             })
@@ -668,7 +685,7 @@ export const streamFilesToZip = async ({
                 fileCompletions.push(
                     Promise.all(entryPromises)
                         .then(() => onFileSuccess(file, prepared.entryCount))
-                        .catch((e) => {
+                        .catch((e: unknown) => {
                             log.error(
                                 `Failed to add file ${file.id} to ZIP`,
                                 e,
@@ -692,7 +709,9 @@ export const streamFilesToZip = async ({
         }
         lastCompletedIndex = files.length - 1;
         if (entryFailure) {
-            throw entryFailure;
+            throw entryFailure instanceof Error
+                ? entryFailure
+                : new Error(JSON.stringify(entryFailure));
         }
 
         // Finalize the ZIP

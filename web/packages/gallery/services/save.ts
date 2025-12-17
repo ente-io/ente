@@ -20,7 +20,12 @@ import type {
     UpdateSaveGroup,
 } from "../components/utils/save-groups";
 import type { WritableStreamHandle } from "./zip";
-import { createNativeZipWritable, streamFilesToZip, zipFileName } from "./zip";
+import {
+    createNativeZipWritable,
+    getWritableStreamForZip,
+    streamFilesToZip,
+    zipFileName,
+} from "./zip";
 
 /**
  * Save the given {@link files} to the user's device.
@@ -115,6 +120,24 @@ const downloadAndSave = async (
         }
     }
 
+    // For web streaming ZIP, get the writable handle first (shows file picker)
+    // so we only show the notification after user confirms the location.
+    let preObtainedWritable: WritableStreamHandle | undefined;
+    if (!electron && files.length > 1) {
+        const zipName = zipFileName(title);
+        const handle = await getWritableStreamForZip(zipName);
+        if (handle === null) {
+            // User cancelled the file picker
+            return;
+        }
+        if (handle === undefined) {
+            // Streaming unavailable, will fall back to individual downloads
+            log.info("Streaming ZIP unavailable, will use individual downloads");
+        } else {
+            preObtainedWritable = handle;
+        }
+    }
+
     const canceller = new AbortController();
     const failedFiles: EnteFile[] = [];
     let isDownloading = false;
@@ -148,7 +171,9 @@ const downloadAndSave = async (
                 retryAttempt > 0 ? `${title}-retry-${retryAttempt}` : title;
 
             if (filesToDownload.length > 1) {
-                let writableOverride: WritableStreamHandle | undefined;
+                let writableOverride: WritableStreamHandle | undefined =
+                    preObtainedWritable;
+
                 if (electron && downloadDirPath) {
                     const zipExportName = await safeFileName(
                         downloadDirPath,
@@ -156,52 +181,67 @@ const downloadAndSave = async (
                         electron.fs.exists,
                     );
                     const zipPath = joinPath(downloadDirPath, zipExportName);
-                    writableOverride = await createNativeZipWritable(
-                        electron,
-                        zipPath,
-                    );
+                    writableOverride = createNativeZipWritable(electron, zipPath);
                 }
 
-                // Try streaming ZIP first
-                const streamingResult = await streamFilesToZip({
-                    files: filesToDownload,
-                    title: zipTitle,
-                    signal: canceller.signal,
-                    writable: writableOverride,
-                    onFileSuccess: (_file, entryCount) => {
-                        updateSaveGroup((g) => ({
-                            ...g,
-                            success: g.success + entryCount,
-                        }));
-                    },
-                    onFileFailure: (file) => {
-                        if (!failedFiles.includes(file)) failedFiles.push(file);
-                        updateSaveGroup((g) => ({
-                            ...g,
-                            failed: g.failed + 1,
-                        }));
-                    },
-                });
-
-                if (streamingResult === "success") {
-                    if (!failedFiles.length) {
-                        updateSaveGroup((g) => ({ ...g, retry: undefined }));
+                // For retries on web, we need to get a new writable handle
+                if (!electron && retryAttempt > 0) {
+                    const retryZipName = zipFileName(zipTitle);
+                    const handle = await getWritableStreamForZip(retryZipName);
+                    if (handle === null) {
+                        // User cancelled retry file picker
+                        canceller.abort();
+                        return;
                     }
-                    return;
+                    if (handle) {
+                        writableOverride = handle;
+                    }
                 }
 
-                if (streamingResult === "cancelled") {
-                    canceller.abort();
-                    return;
+                if (writableOverride) {
+                    const streamingResult = await streamFilesToZip({
+                        files: filesToDownload,
+                        title: zipTitle,
+                        signal: canceller.signal,
+                        writable: writableOverride,
+                        onFileSuccess: (_file, entryCount) => {
+                            updateSaveGroup((g) => ({
+                                ...g,
+                                success: g.success + entryCount,
+                            }));
+                        },
+                        onFileFailure: (file) => {
+                            if (!failedFiles.includes(file))
+                                failedFiles.push(file);
+                            updateSaveGroup((g) => ({
+                                ...g,
+                                failed: g.failed + 1,
+                            }));
+                        },
+                    });
+
+                    if (streamingResult === "success") {
+                        if (!failedFiles.length) {
+                            updateSaveGroup((g) => ({
+                                ...g,
+                                retry: undefined,
+                            }));
+                        }
+                        return;
+                    }
+
+                    if (streamingResult === "cancelled") {
+                        canceller.abort();
+                        return;
+                    }
+
+                    if (streamingResult !== "unavailable") {
+                        // Streaming started but failed; avoid double-downloading
+                        return;
+                    }
                 }
 
-                if (streamingResult !== "unavailable") {
-                    // Streaming started but was cancelled or failed; avoid double-downloading
-                    return;
-                }
-
-                // If streaming ZIP setup was unavailable (picker cancel/streamsaver missing),
-                // fall back to individual downloads
+                // Fall back to individual downloads if streaming unavailable
                 log.info(
                     "Streaming ZIP unavailable, falling back to individual",
                 );
@@ -233,6 +273,7 @@ const downloadAndSave = async (
         void downloadFiles([...failedFiles], true);
     };
 
+    // Only add save group notification after user has confirmed the download location
     updateSaveGroup = onAddSaveGroup({
         title,
         collectionSummaryID,
