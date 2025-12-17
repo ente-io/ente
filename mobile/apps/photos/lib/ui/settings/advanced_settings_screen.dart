@@ -160,7 +160,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           },
                         ),
                       ),
-                      if (isChristmasPeriod()) ...[
+                      if (isChristmasDateRange()) ...[
                         const SizedBox(height: 24),
                         MenuItemWidget(
                           captionedTextWidget: const CaptionedTextWidget(
