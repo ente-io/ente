@@ -1010,6 +1010,12 @@ class GalleryIndexUpdatedEvent {
   GalleryIndexUpdatedEvent(this.tag, this.index);
 }
 
+
+/// Custom scroll physics that extends [BouncingScrollPhysics] to provide
+/// exponential bouncing behavior for scrollable widgets.
+///
+/// TODO: Revert this PR https://github.com/ente-io/ente/pull/8401 after Jan 1, 2026.
+/// This was implemented temporarily for the Christmas banner and should be removed afterwards.
 class ExponentialBouncingScrollPhysics extends BouncingScrollPhysics {
   const ExponentialBouncingScrollPhysics({super.parent});
 
