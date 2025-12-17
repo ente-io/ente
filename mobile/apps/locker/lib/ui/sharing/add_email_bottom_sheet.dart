@@ -2,6 +2,7 @@ import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
+import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
@@ -141,7 +142,7 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.fillFaint,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -173,10 +174,11 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
               textInputAction: TextInputAction.done,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: _buildRoleDropdown(colorScheme, textTheme),
-          ),
+          // TODO: Re-enable role selection when collaborator role is available
+          // Padding(
+          //   padding: const EdgeInsets.only(right: 8),
+          //   child: _buildRoleDropdown(colorScheme, textTheme),
+          // ),
         ],
       ),
     );
@@ -314,6 +316,14 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
                               _email = user.email;
                               _emailIsValid = true;
                               setState(() {});
+                            },
+                            onLongPress: () {
+                              showVerifyIdentitySheet(
+                                context,
+                                self: false,
+                                config: Configuration.instance,
+                                email: user.email,
+                              );
                             },
                             isTopBorderRadiusRemoved: !isFirst,
                             isBottomBorderRadiusRemoved: !isLast,
