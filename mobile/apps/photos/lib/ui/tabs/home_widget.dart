@@ -879,16 +879,25 @@ class _HomeWidgetState extends State<HomeWidget> {
               },
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
+                  const double maxPullOffset = 200.0;
+
                   if (notification is ScrollUpdateNotification) {
-                    final double overscroll = notification.metrics.pixels;
-                    if (overscroll < 0) {
-                      _christmasPullOffsetNotifier.value = -overscroll;
+                    final double pixels = notification.metrics.pixels;
+                    if (pixels < 0) {
+                      if (pixels < -maxPullOffset) {
+                        final scrollPosition =
+                            Scrollable.of(notification.context!).position;
+                        scrollPosition.correctBy(-maxPullOffset - pixels);
+                      }
+
+                      final double clampedOffset =
+                          (-pixels).clamp(0.0, maxPullOffset);
+                      _christmasPullOffsetNotifier.value = clampedOffset;
                       if (_christmasPullReleasedNotifier.value) {
                         _christmasPullReleasedNotifier.value = false;
                       }
                     } else if (_christmasPullOffsetNotifier.value != 0) {
                       _christmasPullOffsetNotifier.value = 0;
-                      // Don't reset released here - let fade animation complete
                     }
                   } else if (notification is ScrollEndNotification) {
                     if (_christmasPullOffsetNotifier.value > 0) {
