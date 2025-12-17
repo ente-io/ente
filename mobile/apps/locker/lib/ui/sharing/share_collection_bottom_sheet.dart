@@ -324,37 +324,27 @@ class _ShareCollectionBottomSheetState
       shadowColor: Colors.black.withValues(alpha: 0.08),
       constraints: const BoxConstraints(minWidth: 120),
       position: PopupMenuPosition.under,
-      offset: const Offset(-50, 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.backdropBase,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: HugeIcon(
-          icon: user.isViewer
-              ? HugeIcons.strokeRoundedView
-              : HugeIcons.strokeRoundedUserMultiple,
-          color: colorScheme.textMuted,
-          size: 20,
-        ),
+      child: HugeIcon(
+        icon: HugeIcons.strokeRoundedMoreVertical,
+        color: colorScheme.textBase,
       ),
       itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: "viewer",
-          height: 0,
-          padding: EdgeInsets.zero,
-          child: PopupMenuItemWidget(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedView,
-              color: colorScheme.textBase,
-              size: 20,
-            ),
-            label: context.l10n.viewer,
-            isFirst: true,
-            isLast: false,
-          ),
-        ),
+        // TODO: Re-enable viewer option when ready
+        // PopupMenuItem<String>(
+        //   value: "viewer",
+        //   height: 0,
+        //   padding: EdgeInsets.zero,
+        //   child: PopupMenuItemWidget(
+        //     icon: HugeIcon(
+        //       icon: HugeIcons.strokeRoundedView,
+        //       color: colorScheme.textBase,
+        //       size: 20,
+        //     ),
+        //     label: context.l10n.viewer,
+        //     isFirst: true,
+        //     isLast: false,
+        //   ),
+        // ),
         // TODO: Re-enable collaborator option when ready
         // PopupMenuItem<String>(
         //   value: "collaborator",
@@ -382,7 +372,7 @@ class _ShareCollectionBottomSheetState
               size: 20,
             ),
             label: context.l10n.removeAccess,
-            isFirst: false,
+            isFirst: true,
             isLast: true,
             isWarning: true,
           ),
