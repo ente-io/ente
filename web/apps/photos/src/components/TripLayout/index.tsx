@@ -514,6 +514,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 onVisualFeedback={() => {
                     // No-op: Trip viewer is read-only and doesn't need visual feedback
                 }}
+                publicAlbumsCredentials={credentials?.current}
+                collectionKey={collectionKey}
             />
 
             {/* Download progress notifications */}

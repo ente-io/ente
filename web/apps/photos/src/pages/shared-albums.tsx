@@ -589,6 +589,8 @@ export default function PublicCollectionGallery() {
                         onRemotePull={publicAlbumsRemotePull}
                         onVisualFeedback={handleVisualFeedback}
                         onAddSaveGroup={onAddSaveGroup}
+                        publicAlbumsCredentials={credentials.current}
+                        collectionKey={collectionKey.current}
                     />
                 </>
             )}

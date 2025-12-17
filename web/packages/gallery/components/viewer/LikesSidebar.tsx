@@ -14,6 +14,7 @@ import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
+import { getStoredAnonIdentity } from "ente-new/albums/services/public-reaction";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
 import React, {
@@ -71,6 +72,7 @@ const HeartFilledIcon: React.FC = () => (
 interface Liker {
     id: string;
     userID: number;
+    anonUserID?: string;
     userName: string;
     /** The actual email for avatar color, even when userName is "You". */
     email: string;
@@ -159,6 +161,13 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     const fileCollectionIDs = useMemo(() => {
         if (!file) return [];
         const allCollectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
+
+        // If no collection IDs from fileNormalCollectionIDs (e.g., public album),
+        // use the file's collection ID directly
+        if (allCollectionIDs.length === 0) {
+            return [file.collectionID];
+        }
+
         // Filter to only include shared collections
         return allCollectionIDs.filter((id) =>
             collectionSummaries?.get(id)?.attributes.has("shared"),
@@ -209,16 +218,42 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
         if (!selectedCollectionInfo) return [];
         const reactions =
             reactionsByCollection.get(selectedCollectionInfo.id) ?? [];
+
+        // Get stored anonymous identity to check if current anon user
+        const storedAnonIdentity = getStoredAnonIdentity();
+
         return reactions
             .filter((r) => r.reactionType === "green_heart")
             .map((r) => {
-                const email =
-                    prefetchedUserIDToEmail?.get(r.userID) ??
-                    `User ${r.userID}`;
+                // Check if this is an anonymous user
+                const isAnonymous =
+                    r.anonUserID || r.userID === 0 || r.userID === -1;
+
+                // Check if this is the current user (logged-in or anonymous)
+                const isCurrentUser = r.userID === currentUserID;
+                const isCurrentAnonUser =
+                    storedAnonIdentity &&
+                    r.anonUserID === storedAnonIdentity.anonUserID;
+
+                let email: string;
+                let userName: string;
+
+                if (isAnonymous) {
+                    email = r.anonUserID ?? "anonymous";
+                    userName =
+                        isCurrentAnonUser ? "You" : `Anonymous ${r.anonUserID?.slice(-4) ?? ""}`;
+                } else {
+                    email =
+                        prefetchedUserIDToEmail?.get(r.userID) ??
+                        `User ${r.userID}`;
+                    userName = isCurrentUser ? "You" : email;
+                }
+
                 return {
                     id: r.id,
                     userID: r.userID,
-                    userName: r.userID === currentUserID ? "You" : email,
+                    anonUserID: r.anonUserID,
+                    userName,
                     email,
                 };
             });
