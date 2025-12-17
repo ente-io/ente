@@ -6,8 +6,6 @@ bool isChristmasPeriod() {
   if (!localSettings.isEasterAnimationEnabled) {
     return false;
   }
-  // TODO: Uncomment before release
-  // final now = DateTime.now();
-  // return now.month == 12 && now.day >= 24 && now.day <= 26;
-  return true;
+  final now = DateTime.now();
+  return now.month == 12 && now.day >= 24 && now.day <= 26;
 }
