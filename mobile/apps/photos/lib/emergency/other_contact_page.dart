@@ -230,7 +230,6 @@ class _OtherContactPageState extends State<OtherContactPage> {
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              surfaceExecutionStates: false,
               onTap: () async {
                 await showRemoveSheet();
               },

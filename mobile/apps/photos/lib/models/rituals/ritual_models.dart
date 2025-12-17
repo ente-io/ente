@@ -1,38 +1,15 @@
 import "package:flutter/material.dart";
 import "package:photos/models/base/id.dart";
+import "package:photos/models/file/file.dart";
 
-class ActivityDay {
-  final DateTime date;
-  final bool hasActivity;
-
-  const ActivityDay({
-    required this.date,
-    required this.hasActivity,
-  });
-}
-
-class ActivitySummary {
-  final List<ActivityDay> last365Days;
-  final List<ActivityDay> last7Days;
-  final int currentStreak;
-  final int longestStreak;
-  final Map<int, bool> badgesUnlocked;
+class RitualsSummary {
   final Map<String, RitualProgress> ritualProgress;
   final DateTime generatedAt;
-  final Map<String, int> ritualLongestStreaks;
 
-  const ActivitySummary({
-    required this.last365Days,
-    required this.last7Days,
-    required this.currentStreak,
-    required this.longestStreak,
-    required this.badgesUnlocked,
+  const RitualsSummary({
     required this.ritualProgress,
     required this.generatedAt,
-    required this.ritualLongestStreaks,
   });
-
-  bool get hasSevenDayFire => last7Days.every((d) => d.hasActivity);
 }
 
 class Ritual {
@@ -41,6 +18,7 @@ class Ritual {
     required this.title,
     required this.daysOfWeek, // Sunday-first ordering of length 7
     required this.timeOfDay,
+    required this.remindersEnabled,
     required this.albumId,
     required this.albumName,
     required this.icon,
@@ -51,6 +29,7 @@ class Ritual {
   final String title;
   final List<bool> daysOfWeek;
   final TimeOfDay timeOfDay;
+  final bool remindersEnabled;
   final int? albumId;
   final String? albumName;
   final String icon;
@@ -61,6 +40,7 @@ class Ritual {
     String? title,
     List<bool>? daysOfWeek,
     TimeOfDay? timeOfDay,
+    bool? remindersEnabled,
     int? albumId,
     String? albumName,
     String? icon,
@@ -71,6 +51,7 @@ class Ritual {
       title: title ?? this.title,
       daysOfWeek: daysOfWeek ?? this.daysOfWeek,
       timeOfDay: timeOfDay ?? this.timeOfDay,
+      remindersEnabled: remindersEnabled ?? this.remindersEnabled,
       albumId: albumId ?? this.albumId,
       albumName: albumName ?? this.albumName,
       icon: icon ?? this.icon,
@@ -85,6 +66,7 @@ class Ritual {
       "daysOfWeek": daysOfWeek,
       "hour": timeOfDay.hour,
       "minute": timeOfDay.minute,
+      "remindersEnabled": remindersEnabled,
       "albumId": albumId,
       "albumName": albumName,
       "icon": icon,
@@ -93,6 +75,12 @@ class Ritual {
   }
 
   factory Ritual.fromJson(Map<String, dynamic> json) {
+    final rawRemindersEnabled = json["remindersEnabled"];
+    final remindersEnabled = rawRemindersEnabled is bool
+        ? rawRemindersEnabled
+        : rawRemindersEnabled is num
+            ? rawRemindersEnabled != 0
+            : true;
     return Ritual(
       id: json["id"] as String? ?? newID("ritual"),
       title: json["title"] as String? ?? "",
@@ -103,6 +91,7 @@ class Ritual {
         hour: (json["hour"] as num?)?.toInt() ?? 9,
         minute: (json["minute"] as num?)?.toInt() ?? 0,
       ),
+      remindersEnabled: remindersEnabled,
       albumId: (json["albumId"] as num?)?.toInt(),
       albumName: json["albumName"] as String?,
       icon: json["icon"] as String? ?? "📸",
@@ -116,72 +105,60 @@ class Ritual {
 
 class RitualProgress {
   final String ritualId;
-  final Set<DateTime> completedDays;
+  final Set<int> completedDayKeys;
+  final Map<int, EnteFile> recentFilesByDay;
+  final Map<int, int> recentFileCountsByDay;
+  final int currentStreak;
+  final int longestStreakOverall;
+  final int longestStreakThisMonth;
 
   const RitualProgress({
     required this.ritualId,
-    required this.completedDays,
+    required this.completedDayKeys,
+    this.recentFilesByDay = const {},
+    this.recentFileCountsByDay = const {},
+    required this.currentStreak,
+    required this.longestStreakOverall,
+    required this.longestStreakThisMonth,
   });
 
   bool hasCompleted(DateTime day) {
-    final dayKey = DateTime(day.year, day.month, day.day);
-    return completedDays.any(
-      (d) =>
-          d.year == dayKey.year &&
-          d.month == dayKey.month &&
-          d.day == dayKey.day,
-    );
+    final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+    return completedDayKeys.contains(key);
   }
 }
 
-class ActivityState {
+class RitualsState {
   final bool loading;
-  final ActivitySummary? summary;
+  final RitualsSummary? summary;
   final List<Ritual> rituals;
   final String? error;
-  final RitualBadgeUnlock? pendingBadge;
 
-  const ActivityState({
+  const RitualsState({
     required this.loading,
     required this.summary,
     required this.rituals,
     required this.error,
-    required this.pendingBadge,
   });
 
-  factory ActivityState.loading() => const ActivityState(
+  factory RitualsState.loading() => const RitualsState(
         loading: true,
         summary: null,
         rituals: [],
         error: null,
-        pendingBadge: null,
       );
 
-  ActivityState copyWith({
+  RitualsState copyWith({
     bool? loading,
-    ActivitySummary? summary,
+    RitualsSummary? summary,
     List<Ritual>? rituals,
     String? error,
-    RitualBadgeUnlock? pendingBadge,
   }) {
-    return ActivityState(
+    return RitualsState(
       loading: loading ?? this.loading,
       summary: summary ?? this.summary,
       rituals: rituals ?? this.rituals,
       error: error,
-      pendingBadge: pendingBadge,
     );
   }
-}
-
-class RitualBadgeUnlock {
-  const RitualBadgeUnlock({
-    required this.ritual,
-    required this.days,
-    required this.generatedAt,
-  });
-
-  final Ritual ritual;
-  final int days;
-  final DateTime generatedAt;
 }

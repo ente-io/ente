@@ -1,9 +1,9 @@
+- Laurens: (i) Rituals redesign
+- Laurens: (i) Manual people tagging
 - Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
 - Ashil: New favorite icon
 - Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
-- Laurens: (i) Manual people tagging
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Neeraj: (i) Admin Role + Suggest Delete feature
-- Laurens: (i) People Memory Lane feature
 - Neeraj: (i) Show public link to album participants

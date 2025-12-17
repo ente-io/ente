@@ -16,6 +16,7 @@ import 'package:ente_events/models/signed_in_event.dart';
 import 'package:ente_events/models/signed_out_event.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,7 +59,8 @@ class BaseConfiguration {
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDocumentsDirPath = "${(await getTemporaryDirectory()).path}/temp/";
+    _tempDocumentsDirPath =
+        "${p.join((await getTemporaryDirectory()).path, "temp")}${p.separator}";
     _preferences = await SharedPreferences.getInstance();
     _secureStorage = const FlutterSecureStorage(
       iOptions: IOSOptions(
@@ -451,7 +453,8 @@ class BaseConfiguration {
     }
     tempDirectory.createSync(recursive: true);
 
-    _cacheDirectory = "$_documentsDirectory/cache/";
+    _cacheDirectory =
+        "${p.join(p.dirname(_tempDocumentsDirPath), "cache")}${p.separator}";
     if (!io.Directory(_cacheDirectory).existsSync()) {
       io.Directory(_cacheDirectory).createSync(recursive: true);
     }

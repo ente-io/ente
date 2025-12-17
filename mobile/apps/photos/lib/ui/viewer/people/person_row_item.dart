@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 
 class PersonGridItem extends StatelessWidget {
@@ -36,13 +37,7 @@ class PersonGridItem extends StatelessWidget {
           SizedBox(
             width: resolvedSize,
             height: resolvedSize,
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: ContinuousRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(82 * (resolvedSize / 102)),
-                ),
-              ),
+            child: FaceThumbnailSquircleClip(
               child: PersonFaceWidget(
                 personId: person.remoteID,
                 key: ValueKey(person.remoteID),

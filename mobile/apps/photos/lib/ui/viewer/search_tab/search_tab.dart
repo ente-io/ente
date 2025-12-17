@@ -12,8 +12,8 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
-import "package:photos/ui/activity/activity_banner.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/rituals/rituals_banner.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
@@ -22,7 +22,6 @@ import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
-import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
@@ -236,14 +235,7 @@ class _RitualsDiscoverySection extends StatelessWidget {
     }
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionHeader(SectionType.ritual, hasMore: false),
-          SizedBox(height: 2),
-          ActivityBanner(),
-        ],
-      ),
+      child: RitualsBanner(),
     );
   }
 }
