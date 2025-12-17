@@ -317,7 +317,7 @@ class RitualsService {
         ritual.daysOfWeek,
         todayMidnight: todayMidnight,
       );
-      final ritualCurrent = _currentScheduledStreakFromDayKeys(
+      final ritualCurrent = currentScheduledStreakFromDayKeys(
         dates,
         ritual.daysOfWeek,
         todayMidnight: todayMidnight,
@@ -533,7 +533,8 @@ class RitualsService {
     }
   }
 
-  int _currentScheduledStreakFromDayKeys(
+  @visibleForTesting
+  int currentScheduledStreakFromDayKeys(
     Set<int> dayKeys,
     List<bool> daysOfWeek, {
     required DateTime todayMidnight,
@@ -550,9 +551,12 @@ class RitualsService {
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
         current += 1;
-      } else {
-        break;
+        continue;
       }
+      if (day == todayMidnight) {
+        continue;
+      }
+      break;
     }
     return current;
   }
