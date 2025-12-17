@@ -70,6 +70,11 @@ class LocalSyncService {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
     }
+    if (backupPreferenceService.hasSkippedOnboardingPermission &&
+        !hasCompletedFirstImport()) {
+      _logger.fine("Skipping local sync, first import pending");
+      return;
+    }
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
       final permissionState =
           await permissionService.requestPhotoMangerPermissions();
@@ -166,6 +171,11 @@ class LocalSyncService {
   Future<bool> syncAll() async {
     if (!Configuration.instance.isLoggedIn()) {
       _logger.warning("syncCall called when user is not logged in");
+      return false;
+    }
+    if (backupPreferenceService.hasSkippedOnboardingPermission &&
+        !hasCompletedFirstImport()) {
+      _logger.fine("Skipping syncAll, first import pending");
       return false;
     }
     final stopwatch = EnteWatch("localSyncAll")..start();

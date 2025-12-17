@@ -121,9 +121,6 @@ class BackupPreferenceService {
       await _setAllFoldersShouldBackup(true);
       await setSelectAllFoldersForBackup(true);
       await setHasSelectedAnyBackupFolder(true);
-      if (hasSkippedOnboardingPermission) {
-        await setOnboardingPermissionSkipped(false);
-      }
       _logger.info('Auto-selected all folders for backup');
     } catch (error, stackTrace) {
       _logger.warning(
