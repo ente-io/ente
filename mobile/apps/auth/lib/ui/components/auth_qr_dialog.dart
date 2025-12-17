@@ -165,24 +165,24 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                         children: [
                           // Ente Auth icon at top right - positioned at corner
                           Positioned(
-                            top: -2,
-                            right: -2,
+                            top: 2,
+                            right: 2,
                             child: Transform.rotate(
                               angle: -4 * 3.14159 / 180, // -4 degrees
                               child: Image.asset(
                                 'assets/qr_logo.png',
-                                height: 64,
-                                width: 64,
+                                height: qrSize * 0.19,
+                                width: qrSize * 0.19,
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                            padding: EdgeInsets.all(qrSize * 0.07),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                const SizedBox(height: 8),
+                                SizedBox(height: qrSize * 0.03),
                                 // Issuer at top center
                                 // Leave space for the logo (64px) + some padding
                                 ConstrainedBox(
@@ -220,7 +220,7 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                                     ),
                                   ),
                                 ],
-                                const SizedBox(height: 20),
+                                SizedBox(height: qrSize * 0.07),
 
                                 // QR Code with square style and purple corners
                                 QrImageView(
@@ -236,22 +236,20 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                                   version: QrVersions.auto,
                                   size: qrSize,
                                 ),
-                                const SizedBox(height: 42),
+                                SizedBox(height: qrSize * 0.07),
+                                // Auth branding at bottom right
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: SvgPicture.asset(
+                                    'assets/svg/auth-logo.svg',
+                                    height: 16,
+                                    colorFilter: const ColorFilter.mode(
+                                      accentColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
                               ],
-                            ),
-                          ),
-
-                          // Auth branding at bottom right
-                          Positioned(
-                            bottom: 12,
-                            right: 22,
-                            child: SvgPicture.asset(
-                              'assets/svg/auth-logo.svg',
-                              height: 16,
-                              colorFilter: const ColorFilter.mode(
-                                accentColor,
-                                BlendMode.srcIn,
-                              ),
                             ),
                           ),
                         ],
