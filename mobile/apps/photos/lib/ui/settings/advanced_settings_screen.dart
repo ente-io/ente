@@ -12,6 +12,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/home/christmas/christmas_utils.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/settings/app_icon_selection_screen.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
@@ -159,24 +160,26 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           },
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      MenuItemWidget(
-                        captionedTextWidget: const CaptionedTextWidget(
-                          title: "Christmas banner",
+                      if (isChristmasPeriod()) ...[
+                        const SizedBox(height: 24),
+                        MenuItemWidget(
+                          captionedTextWidget: const CaptionedTextWidget(
+                            title: "Christmas banner",
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => localSettings.isChristmasBannerEnabled,
+                            onChanged: () async {
+                              await localSettings.setChristmasBannerEnabled(
+                                !localSettings.isChristmasBannerEnabled,
+                              );
+                              Bus.instance.fire(ChristmasBannerEvent());
+                            },
+                          ),
                         ),
-                        menuItemColor: colorScheme.fillFaint,
-                        singleBorderRadius: 8,
-                        alignCaptionedTextToLeft: true,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () => localSettings.isChristmasBannerEnabled,
-                          onChanged: () async {
-                            await localSettings.setChristmasBannerEnabled(
-                              !localSettings.isChristmasBannerEnabled,
-                            );
-                            Bus.instance.fire(ChristmasBannerEvent());
-                          },
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 );
