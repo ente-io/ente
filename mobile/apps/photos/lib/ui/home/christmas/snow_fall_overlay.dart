@@ -3,19 +3,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-/// Visual style for snowflakes
 enum SnowflakeStyle {
-  /// Simple circles - best performance
   circles,
-
-  /// Multi-pointed star shapes
   stars,
-
-  /// Random mix of circles and stars
   mixed,
 }
 
-/// Represents a single snowflake particle
 class _Snowflake {
   double x;
   double y;
@@ -39,11 +32,10 @@ class _Snowflake {
     required this.isStar,
   });
 
-  /// Factory to create a random snowflake
   factory _Snowflake.random(Random random, SnowflakeStyle style) {
     return _Snowflake(
       x: random.nextDouble(),
-      y: -random.nextDouble() * 0.5, // Start above screen, staggered
+      y: -random.nextDouble() * 0.5,
       radius: 1.0 + random.nextDouble() * 3.0,
       speed: 0.3 + random.nextDouble() * 0.7,
       drift: 0.02 + random.nextDouble() * 0.04,
@@ -56,7 +48,6 @@ class _Snowflake {
   }
 }
 
-/// Paints snowflakes on canvas with style-aware rendering
 class _SnowPainter extends CustomPainter {
   final List<_Snowflake> snowflakes;
   final SnowflakeStyle style;
@@ -65,7 +56,6 @@ class _SnowPainter extends CustomPainter {
   final double baseSpeed;
   final Random _random = Random();
 
-  // Pre-built star path for efficiency
   static final Path _starPath = _buildStarPath();
 
   _SnowPainter({
@@ -233,21 +223,15 @@ class _SnowPainter extends CustomPainter {
   bool shouldRepaint(covariant _SnowPainter oldDelegate) => false;
 }
 
-/// A performant snow falling animation overlay widget
 class SnowFallOverlay extends StatefulWidget {
-  /// Number of snowflakes (default: 80)
   final int snowflakeCount;
 
-  /// Visual style of snowflakes
   final SnowflakeStyle style;
 
-  /// Color of snowflakes (defaults to white)
   final Color? color;
 
-  /// Opacity of snowflakes (0.0 - 1.0, default: 0.7)
   final double opacity;
 
-  /// Speed multiplier (default: 1.0)
   final double speedMultiplier;
 
   const SnowFallOverlay({
@@ -326,7 +310,6 @@ class _SnowFallOverlayState extends State<SnowFallOverlay>
   }
 }
 
-/// Wrapper that shows snow overlay with fade animation based on pull offset
 class FadingSnowOverlay extends StatefulWidget {
   final ValueNotifier<double> pullOffsetNotifier;
 
@@ -406,6 +389,7 @@ class _FadingSnowOverlayState extends State<FadingSnowOverlay>
       opacity: _fadeAnimation,
       child: const SnowFallOverlay(
         snowflakeCount: 50,
+        style: SnowflakeStyle.mixed,
         opacity: 0.8,
         speedMultiplier: 0.6,
       ),
