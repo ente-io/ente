@@ -12,6 +12,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/selected_albums.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
@@ -135,59 +136,61 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
           physics: const BouncingScrollPhysics(),
           controller: _scrollController,
           slivers: [
-            SliverToBoxAdapter(
-              child: SectionOptions(
-                onTap: () {
-                  unawaited(
-                    routeToPage(
-                      context,
-                      DeviceFolderVerticalGridView(
-                        appTitle: SectionTitle(
-                          title: AppLocalizations.of(context).onDevice,
+            if (!backupPreferenceService.hasSkippedOnboardingPermission) ...[
+              SliverToBoxAdapter(
+                child: SectionOptions(
+                  onTap: () {
+                    unawaited(
+                      routeToPage(
+                        context,
+                        DeviceFolderVerticalGridView(
+                          appTitle: SectionTitle(
+                            title: AppLocalizations.of(context).onDevice,
+                          ),
+                          tag: "OnDeviceAppTitle",
                         ),
-                        tag: "OnDeviceAppTitle",
                       ),
+                    );
+                  },
+                  Hero(
+                    tag: "OnDeviceAppTitle",
+                    child: SectionTitle(
+                      title: AppLocalizations.of(context).onDevice,
                     ),
-                  );
-                },
-                Hero(
-                  tag: "OnDeviceAppTitle",
-                  child: SectionTitle(
-                    title: AppLocalizations.of(context).onDevice,
+                  ),
+                  trailingWidget: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButtonWidget(
+                        icon: Icons.search,
+                        iconButtonType: IconButtonType.secondary,
+                        iconColor: colorScheme.blurStrokePressed,
+                        onTap: () {
+                          unawaited(
+                            routeToPage(
+                              context,
+                              DeviceFolderVerticalGridView(
+                                appTitle: SectionTitle(
+                                  title: AppLocalizations.of(context).onDevice,
+                                ),
+                                tag: "OnDeviceAppTitle",
+                                startInSearchMode: true,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButtonWidget(
+                        icon: Icons.chevron_right,
+                        iconButtonType: IconButtonType.secondary,
+                        iconColor: colorScheme.blurStrokePressed,
+                      ),
+                    ],
                   ),
                 ),
-                trailingWidget: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButtonWidget(
-                      icon: Icons.search,
-                      iconButtonType: IconButtonType.secondary,
-                      iconColor: colorScheme.blurStrokePressed,
-                      onTap: () {
-                        unawaited(
-                          routeToPage(
-                            context,
-                            DeviceFolderVerticalGridView(
-                              appTitle: SectionTitle(
-                                title: AppLocalizations.of(context).onDevice,
-                              ),
-                              tag: "OnDeviceAppTitle",
-                              startInSearchMode: true,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    IconButtonWidget(
-                      icon: Icons.chevron_right,
-                      iconButtonType: IconButtonType.secondary,
-                      iconColor: colorScheme.blurStrokePressed,
-                    ),
-                  ],
-                ),
               ),
-            ),
-            const SliverToBoxAdapter(child: DeviceFoldersGridView()),
+              const SliverToBoxAdapter(child: DeviceFoldersGridView()),
+            ],
             SliverToBoxAdapter(
               child: SectionOptions(
                 onTap: () {
