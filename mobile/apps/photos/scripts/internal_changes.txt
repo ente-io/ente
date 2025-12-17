@@ -1,13 +1,11 @@
 - Ashil: Move add to album cta in file viewer from popup menu to bottom bar
-- Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
-- Ashil: New favorite icon
-- Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
-- Ashil: Update favorite icon
+- Fix remove from album [1](https://github.com/ente-io/ente/issues/7705)
+- Neeraj:  Show public link to album participants
 - Laurens: (i) Rituals redesign
 - Laurens: (i) Manual people tagging
-- Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
 - Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
+- Prateek: Pin/Unpin for "Shared with you" albums (mobile + web)
+- Ashil: New favorite icon
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Neeraj: (i) Admin Role + Suggest Delete feature
-- Neeraj: (i) Show public link to album participants
