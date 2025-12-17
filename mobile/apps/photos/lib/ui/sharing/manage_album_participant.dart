@@ -76,8 +76,9 @@ class _ManageIndividualParticipantState
             MenuSectionTitle(title: AppLocalizations.of(context).addedAs),
             if (adminRoleEnabled)
               MenuItemWidget(
-                captionedTextWidget:
-                    const CaptionedTextWidget(title: '(i) Admin'),
+                captionedTextWidget: CaptionedTextWidget(
+                  title: AppLocalizations.of(context).admin,
+                ),
                 leadingIcon: Icons.admin_panel_settings_outlined,
                 menuItemColor: colorScheme.fillFaint,
                 trailingIcon: isAdmin ? Icons.check : null,
@@ -189,7 +190,8 @@ class _ManageIndividualParticipantState
             ),
             MenuSectionDescriptionWidget(
               content: adminRoleEnabled
-                  ? '(i) Admins and collaborators can add photos. (i) Admins can also manage photos & participants.'
+                  ? AppLocalizations.of(context)
+                      .adminsAndCollaboratorsCanAddPhotosDescription
                   : AppLocalizations.of(
                       context,
                     ).collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,

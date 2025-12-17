@@ -107,8 +107,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       if (adminRoleEnabled) {
         children.add(
           MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: '(i) Add admin',
+            captionedTextWidget: CaptionedTextWidget(
+              title: AppLocalizations.of(context).addAdmin,
               makeTextBold: true,
             ),
             leadingIcon: Icons.add,
