@@ -65,6 +65,7 @@ import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
+import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
@@ -963,6 +964,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void _onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) async {
+    if (!mounted) return;
     final String? payload = notificationResponse.payload;
     if (payload != null) {
       debugPrint('notification payload: $payload');
@@ -975,6 +977,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
             ? int.tryParse(albumIdRaw)
             : null;
+        if (ritualId.isNotEmpty) {
+          // Ensure the camera is stacked on top of the ritual page so the user
+          // lands on the ritual details after adding photos via a notification.
+          // ignore: unawaited_futures
+          routeToPage(
+            context,
+            RitualPage(ritualId: ritualId),
+          );
+        }
         // ignore: unawaited_futures
         routeToPage(
           context,

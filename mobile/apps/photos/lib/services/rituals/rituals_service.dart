@@ -272,9 +272,10 @@ class RitualsService {
     for (final EnteFile file in files) {
       final bool ownerMatches =
           file.ownerID == null ? true : file.ownerID == userId;
-      final bool uploaded =
-          file.uploadedFileID != null && file.uploadedFileID != -1;
-      if (!(ownerMatches && uploaded)) {
+      final bool eligible =
+          (file.uploadedFileID != null && file.uploadedFileID != -1) ||
+              (file.localID != null && file.localID!.isNotEmpty);
+      if (!(ownerMatches && eligible)) {
         continue;
       }
       if (file.creationTime == null) continue;
