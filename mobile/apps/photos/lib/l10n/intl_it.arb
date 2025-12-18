@@ -1877,6 +1877,14 @@
   "related": "Correlate",
   "hoorayyyy": "Evviva!",
   "nothingToTidyUpHere": "Niente da sistemare qui",
+  "cLTitle1": "Introduzione ai Rituali",
+  "cLDesc1": "Stai pianificando i buoni propositi per il 2026? Con i Rituali, puoi impostare un promemoria su Ente Photos e monitorare i tuoi progressi scattando foto. Usalo per allenamenti, abitudini alimentari, momenti quotidiani con i tuoi cari – qualsiasi cosa tu voglia trasformare in un'abitudine.",
+  "cLTitle2": "Link pubblici, ora per tutti",
+  "cLDesc2": "Tutti gli utenti Ente con piano gratuito possono ora creare e condividere link pubblici a foto e album. Per prevenire abusi, i link avranno limiti sul numero di persone che possono visualizzarli.",
+  "cLTitle3": "Tagga manualmente le persone",
+  "cLDesc3": "Ora puoi taggare le persone anche quando la nostra IA sul dispositivo non rileva un volto. Utile per animali domestici, volti parzialmente visibili, o momenti in cui qualcuno non è realmente nella foto ma dovrebbe comunque essere incluso.",
+  "cLTitle4": "E altro ancora",
+  "cLDesc4": "Ora puoi fissare gli album condivisi. I link degli album sono visibili a collaboratori e visualizzatori per rendere la condivisione ancora più facile. Abbiamo corretto alcuni bug di scorrimento su iOS e aggiornato la visualizzazione delle foto, inclusa una nuova icona preferiti (facendo spazio per le funzionalità in arrivo).",
   "closeBy": "Vicine",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

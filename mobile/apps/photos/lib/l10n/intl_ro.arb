@@ -1516,5 +1516,13 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare"
+  "join": "Alăturare",
+  "cLTitle1": "Prezentăm Ritualuri",
+  "cLDesc1": "Planificați rezoluții pentru 2026? Cu Ritualuri, puteți seta un memento în Ente Photos și vă urmăriți progresul făcând fotografii. Folosiți-l pentru antrenamente, obiceiuri alimentare, momente zilnice cu cei dragi – orice doriți să transformați într-un obicei.",
+  "cLTitle2": "Linkuri publice, acum pentru toată lumea",
+  "cLDesc2": "Toți utilizatorii Ente pe planul gratuit pot crea și partaja linkuri publice către fotografii și albume. Pentru a preveni abuzurile, linkurile vor avea limite privind câte persoane le pot vizualiza.",
+  "cLTitle3": "Etichetați manual persoane",
+  "cLDesc3": "Acum puteți eticheta persoane chiar și când AI-ul nostru pe dispozitiv nu detectează o față. Util pentru animale de companie, fețe parțial vizibile sau momente în care cineva nu este de fapt în fotografie, dar ar trebui să fie inclus.",
+  "cLTitle4": "Și mai multe",
+  "cLDesc4": "Acum puteți fixa albumele partajate. Linkurile albumelor sunt vizibile pentru colaboratori și vizualizatori pentru a face partajarea și mai ușoară. Am reparat câteva bug-uri de glisare pe iOS și am actualizat vizualizarea fotografiilor, inclusiv o nouă pictogramă de favorite (făcând loc pentru funcțiile viitoare)."
 }
