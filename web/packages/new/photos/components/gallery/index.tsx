@@ -9,14 +9,25 @@
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
-import { Paper, Stack, styled, Typography } from "@mui/material";
-import { CenteredFill } from "ente-base/components/containers";
+import SortIcon from "@mui/icons-material/Sort";
+import {
+    IconButton,
+    Menu,
+    Paper,
+    Stack,
+    styled,
+    Tooltip,
+    Typography,
+} from "@mui/material";
+import { CenteredFill, SpacedRow } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { OverflowMenuOption } from "ente-base/components/OverflowMenu";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import type { SearchSuggestion } from "ente-new/photos/services/search/types";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { enableML } from "../../services/ml";
 import { EnableML, FaceConsent } from "../sidebar/MLSettings";
@@ -49,25 +60,110 @@ export type SelectionContext =
 interface SearchResultsHeaderProps {
     searchSuggestion: SearchSuggestion;
     fileCount: number;
+    /** Called when the user changes the sort order. */
+    onSortOrderChange: (asc: boolean) => void;
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     searchSuggestion,
     fileCount,
-}) => (
-    <GalleryItemsHeaderAdapter>
-        <Typography
-            variant="h6"
-            sx={{ fontWeight: "regular", color: "text.muted" }}
+    onSortOrderChange,
+}) => {
+    const sortButtonRef = useRef<HTMLButtonElement | null>(null);
+    const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
+        useModalVisibility();
+
+    const handleAscClick = () => {
+        onSortOrderChange(true);
+    };
+
+    const handleDescClick = () => {
+        onSortOrderChange(false);
+    };
+
+    return (
+        <GalleryItemsHeaderAdapter>
+            <Typography
+                variant="h6"
+                sx={{ fontWeight: "regular", color: "text.muted" }}
+            >
+                {t("search_results")}
+            </Typography>
+            <SpacedRow>
+                <GalleryItemsSummary
+                    name={searchSuggestion.label}
+                    fileCount={fileCount}
+                />
+                {fileCount > 0 && (
+                    <Tooltip title={t("sort_by")}>
+                        <IconButton
+                            ref={sortButtonRef}
+                            onClick={showSortOrderMenu}
+                        >
+                            <SortIcon />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </SpacedRow>
+            <SearchSortOrderMenu
+                {...sortOrderMenuVisibilityProps}
+                sortButtonRef={sortButtonRef}
+                onAscClick={handleAscClick}
+                onDescClick={handleDescClick}
+            />
+        </GalleryItemsHeaderAdapter>
+    );
+};
+
+interface SearchSortOrderMenuProps {
+    open: boolean;
+    onClose: () => void;
+    sortButtonRef: React.RefObject<HTMLButtonElement | null>;
+    onAscClick: () => void;
+    onDescClick: () => void;
+}
+
+const SearchSortOrderMenu: React.FC<SearchSortOrderMenuProps> = ({
+    open,
+    onClose,
+    sortButtonRef,
+    onAscClick,
+    onDescClick,
+}) => {
+    const handleAscClick = () => {
+        onAscClick();
+        onClose();
+    };
+
+    const handleDescClick = () => {
+        onDescClick();
+        onClose();
+    };
+
+    return (
+        <Menu
+            id="search-results-sort"
+            anchorEl={sortButtonRef.current}
+            open={open}
+            onClose={onClose}
+            slotProps={{
+                list: {
+                    disablePadding: true,
+                    "aria-labelledby": "search-results-sort",
+                },
+            }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-            {t("search_results")}
-        </Typography>
-        <GalleryItemsSummary
-            name={searchSuggestion.label}
-            fileCount={fileCount}
-        />
-    </GalleryItemsHeaderAdapter>
-);
+            <OverflowMenuOption onClick={handleDescClick}>
+                {t("newest_first")}
+            </OverflowMenuOption>
+            <OverflowMenuOption onClick={handleAscClick}>
+                {t("oldest_first")}
+            </OverflowMenuOption>
+        </Menu>
+    );
+};
 
 interface GalleryEmptyStateProps {
     /**

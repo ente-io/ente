@@ -442,6 +442,13 @@ export interface GalleryState {
      */
     isInSearchMode: boolean;
     /**
+     * Sort order for search results.
+     *
+     * If `true`, search results are sorted in ascending order (oldest first).
+     * Default is `false` (newest first).
+     */
+    searchSortAsc: boolean;
+    /**
      * The files to show, uniqued and sorted appropriately.
      */
     filteredFiles: EnteFile[];
@@ -486,7 +493,8 @@ export type GalleryAction =
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "exitSearch"; shouldExitSearchMode?: boolean };
+    | { type: "exitSearch"; shouldExitSearchMode?: boolean }
+    | { type: "setSearchSortOrder"; asc: boolean };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -526,6 +534,7 @@ const initialGalleryState: GalleryState = {
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
+    searchSortAsc: false,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -1154,6 +1163,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     : state.isInSearchMode,
             });
         }
+
+        case "setSearchSortOrder":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                searchSortAsc: action.asc,
+            });
     }
 };
 
@@ -1833,7 +1848,9 @@ const stateForUpdatedCollectionFiles = (
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
-        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        const searchFiles = state.searchResults ?? state.filteredFiles;
+        // Create a copy before sorting since sortFiles mutates the array
+        const filteredFiles = sortFiles([...searchFiles], state.searchSortAsc);
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||

@@ -522,6 +522,9 @@ const Page: React.FC = () => {
                     <SearchResultsHeader
                         searchSuggestion={state.searchSuggestion}
                         fileCount={state.searchResults?.length ?? 0}
+                        onSortOrderChange={(asc) =>
+                            dispatch({ type: "setSearchSortOrder", asc })
+                        }
                     />
                 ),
                 height: 104,
