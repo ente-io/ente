@@ -10,12 +10,11 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
-import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
 import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import {
@@ -44,7 +43,6 @@ import {
     leaveSharedCollection,
     renameCollection,
     updateCollectionOrder,
-    updateCollectionSortOrder,
     updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
 import {
@@ -155,8 +153,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const { mapEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
-    const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
-        useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
     const { show: showMapDialog, props: mapDialogVisibilityProps } =
@@ -363,14 +359,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(PseudoCollectionID.hiddenItems);
     });
 
-    const changeSortOrderAsc = wrap(() =>
-        updateCollectionSortOrder(activeCollection, true),
-    );
-
-    const changeSortOrderDesc = wrap(() =>
-        updateCollectionSortOrder(activeCollection, false),
-    );
-
     const handleShowMap = useCallback(async () => {
         if (!mapEnabled) {
             try {
@@ -492,13 +480,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("rename_album")}
                 </OverflowMenuOption>,
-                <OverflowMenuOption
-                    key="sort"
-                    onClick={showSortOrderMenu}
-                    startIcon={<SortIcon />}
-                >
-                    {t("sort_by")}
-                </OverflowMenuOption>,
                 shouldShowMapOption(collectionSummary) && (
                     <OverflowMenuOption
                         key="map"
@@ -598,7 +579,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
                 onShareClick={onCollectionShare}
-                onSortClick={showSortOrderMenu}
             />
             {validMenuOptions.length > 0 && (
                 <OverflowMenu
@@ -610,12 +590,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                     {validMenuOptions}
                 </OverflowMenu>
             )}
-            <CollectionSortOrderMenu
-                {...sortOrderMenuVisibilityProps}
-                overflowMenuIconRef={overflowMenuIconRef}
-                onAscClick={changeSortOrderAsc}
-                onDescClick={changeSortOrderDesc}
-            />
             <CollectionMapDialog
                 {...mapDialogVisibilityProps}
                 collectionSummary={collectionSummary}
@@ -657,14 +631,12 @@ interface QuickOptionsProps {
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
     onShareClick: () => void;
-    onSortClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
-    onSortClick,
     collectionSummary,
     isDownloadInProgress,
 }) => (
@@ -687,9 +659,6 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 collectionSummary={collectionSummary}
                 onClick={onShareClick}
             />
-        )}
-        {showSortQuickOption(collectionSummary) && (
-            <SortQuickOption onClick={onSortClick} />
         )}
     </Stack>
 );
@@ -751,21 +720,6 @@ const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     attributes.has("favorites") ||
     attributes.has("shared");
 
-const showSortQuickOption = ({ type, fileCount }: CollectionSummary) =>
-    fileCount > 0 &&
-    (type == "album" ||
-        type == "folder" ||
-        type == "userFavorites" ||
-        type == "uncategorized");
-
-const SortQuickOption: React.FC<OptionProps> = ({ onClick }) => (
-    <Tooltip title={t("sort_by")}>
-        <IconButton onClick={onClick}>
-            <SortIcon />
-        </IconButton>
-    </Tooltip>
-);
-
 interface ShareQuickOptionProps {
     collectionSummary: CollectionSummary;
     onClick: () => void;
@@ -822,53 +776,3 @@ const DownloadOption: React.FC<
         {children}
     </OverflowMenuOption>
 );
-
-interface CollectionSortOrderMenuProps {
-    open: boolean;
-    onClose: () => void;
-    overflowMenuIconRef: React.RefObject<SVGSVGElement | null>;
-    onAscClick: () => void;
-    onDescClick: () => void;
-}
-
-const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
-    open,
-    onClose,
-    overflowMenuIconRef,
-    onAscClick,
-    onDescClick,
-}) => {
-    const handleAscClick = () => {
-        onAscClick();
-        onClose();
-    };
-
-    const handleDescClick = () => {
-        onDescClick();
-        onClose();
-    };
-
-    return (
-        <Menu
-            id="collection-files-sort"
-            anchorEl={overflowMenuIconRef.current}
-            open={open}
-            onClose={onClose}
-            slotProps={{
-                list: {
-                    disablePadding: true,
-                    "aria-labelledby": "collection-files-sort",
-                },
-            }}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-            <OverflowMenuOption onClick={handleDescClick}>
-                {t("newest_first")}
-            </OverflowMenuOption>
-            <OverflowMenuOption onClick={handleAscClick}>
-                {t("oldest_first")}
-            </OverflowMenuOption>
-        </Menu>
-    );
-};
