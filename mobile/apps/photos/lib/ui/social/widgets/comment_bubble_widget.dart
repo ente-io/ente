@@ -187,7 +187,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
   }) {
     return Padding(
       padding: EdgeInsets.only(
-        right: widget.isOwnComment ? 24 : 0,
+        right: widget.isOwnComment ? 6 : 0,
         top: includePadding ? 8 : 0,
         bottom: includePadding ? 8 : 0,
       ),
@@ -196,30 +196,39 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
         children: [
-          _Header(
-            isOwnComment: widget.isOwnComment,
-            user: widget.user,
-            createdAt: widget.comment.createdAt,
-            currentUserID: widget.currentUserID,
+          Padding(
+            padding: EdgeInsets.only(
+              right: widget.isOwnComment ? 18 : 0,
+            ),
+            child: _Header(
+              isOwnComment: widget.isOwnComment,
+              user: widget.user,
+              createdAt: widget.comment.createdAt,
+              currentUserID: widget.currentUserID,
+            ),
           ),
           const SizedBox(height: 12),
           Padding(
             padding: EdgeInsets.only(left: widget.isOwnComment ? 0 : 24),
             child: Stack(
-              clipBehavior: Clip.none,
               children: [
-                _CommentBubble(
-                  comment: widget.comment,
-                  isOwnComment: widget.isOwnComment,
-                  isLoadingParent: _isLoadingParent,
-                  parentComment: _parentComment,
-                  currentUserID: widget.currentUserID,
-                  userResolver: widget.userResolver,
+                Padding(
+                  padding: showActionsCapsule
+                      ? const EdgeInsets.only(right: 16, bottom: 17)
+                      : EdgeInsets.zero,
+                  child: _CommentBubble(
+                    comment: widget.comment,
+                    isOwnComment: widget.isOwnComment,
+                    isLoadingParent: _isLoadingParent,
+                    parentComment: _parentComment,
+                    currentUserID: widget.currentUserID,
+                    userResolver: widget.userResolver,
+                  ),
                 ),
                 if (!_isLoadingReactions && showActionsCapsule)
                   Positioned(
-                    right: -16,
-                    bottom: -17,
+                    right: 0,
+                    bottom: 0,
                     child: CommentActionsCapsule(
                       isLiked: _isLiked,
                       onLikeTap: _toggleLike,
