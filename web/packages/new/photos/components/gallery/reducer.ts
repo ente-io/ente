@@ -496,7 +496,7 @@ export type GalleryAction =
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
     | { type: "exitSearch"; shouldExitSearchMode?: boolean }
-    | { type: "setSearchSortOrder"; asc: boolean };
+    | { type: "setSearchSortOrder"; asc: boolean | undefined };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
