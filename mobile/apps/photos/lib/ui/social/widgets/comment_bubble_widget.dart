@@ -160,14 +160,14 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
               builder: (context, value, child) {
                 return Opacity(
                   opacity: value,
-                  // child: Transform.scale(
-                  //   scale: 0.95 + (0.05 * value),
-                  //   alignment: widget.isOwnComment
-                  //       ? Alignment.topRight
-                  //       : Alignment.topLeft,
-                  //   child: child,
-                  // ),
-                  child: child,
+                  child: Transform.scale(
+                    scale: 0.95 + (0.05 * value),
+                    alignment: widget.isOwnComment
+                        ? Alignment.topRight
+                        : Alignment.topLeft,
+                    child: child,
+                  ),
+                  // child: child,
                 );
               },
               child: Padding(
@@ -175,6 +175,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
                 child: _buildCommentContent(
                   showActionsCapsule: false,
                   showActionsPopup: true,
+                  showHeader: false,
                 ),
               ),
             ),
@@ -188,6 +189,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     required bool showActionsCapsule,
     bool showActionsPopup = false,
     bool includePadding = true,
+    bool showHeader = true,
   }) {
     return Padding(
       padding: EdgeInsets.only(
@@ -200,15 +202,18 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.only(
-              right: widget.isOwnComment ? 18 : 0,
-            ),
-            child: _Header(
-              isOwnComment: widget.isOwnComment,
-              user: widget.user,
-              createdAt: widget.comment.createdAt,
-              currentUserID: widget.currentUserID,
+          Opacity(
+            opacity: showHeader ? 1 : 0,
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: widget.isOwnComment ? 18 : 0,
+              ),
+              child: _Header(
+                isOwnComment: widget.isOwnComment,
+                user: widget.user,
+                createdAt: widget.comment.createdAt,
+                currentUserID: widget.currentUserID,
+              ),
             ),
           ),
           const SizedBox(height: 12),
