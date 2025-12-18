@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:math";
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -10,7 +11,10 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
+import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/device/device_folder_item.dart";
+import "package:photos/ui/common/backup_flow_helper.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/standalone/debouncer.dart";
@@ -71,6 +75,19 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
             albumsCountInCrossAxis;
 
     debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
+
+    // Check permission status
+    final hasSkippedPermission =
+        backupPreferenceService.hasSkippedOnboardingPermission;
+
+    // If permission was skipped, show add folders prompt
+    if (hasSkippedPermission) {
+      return SizedBox(
+        height: sideOfThumbnail + 46,
+        child: _buildAddFoldersState(context),
+      );
+    }
+
     return SizedBox(
       height: sideOfThumbnail + 46,
       child: Align(
@@ -115,6 +132,38 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
               return const EnteLoadingWidget();
             }
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddFoldersState(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: "Select folders",
+                style: TextStyle(
+                  color: colorScheme.primary500,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () async {
+                    await handleFolderSelectionBackupFlow(context);
+                  },
+              ),
+              const TextSpan(
+                text: " to view and back up on ente",
+              ),
+            ],
+          ),
+          style: textTheme.smallMuted,
+          textAlign: TextAlign.center,
         ),
       ),
     );
