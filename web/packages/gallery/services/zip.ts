@@ -99,7 +99,20 @@ export const getWritableStreamForZip = async (
     // Fall back to StreamSaver.js (Firefox/Safari)
     try {
         // Dynamically import streamsaver to avoid SSR issues (it references document)
-        const streamSaver = await import("streamsaver");
+        // StreamSaver uses CommonJS (module.exports = obj), so the actual object
+        // may be in the default export depending on bundler interop. We need to
+        // set mitm on the actual object, not on the module namespace, because
+        // internal StreamSaver code references its own internal streamSaver.mitm.
+        type StreamSaverModule = typeof import("streamsaver");
+        const streamSaverModule: StreamSaverModule & { default?: StreamSaverModule } =
+            await import("streamsaver");
+        const streamSaver = streamSaverModule.default ?? streamSaverModule;
+
+        // Configure StreamSaver to use our self-hosted mitm.html instead of the
+        // external jimmywarting.github.io endpoint. This avoids cross-origin issues
+        // and ensures the service worker is served from the same origin.
+        streamSaver.mitm = "/streamsaver/mitm.html";
+
         const fileStream = streamSaver.createWriteStream(fileName);
         const writer = fileStream.getWriter();
         return {
@@ -618,63 +631,78 @@ export const streamFilesToZip = async ({
     let entriesAddedToZip = 0;
     let entriesCompletedInZip = 0;
 
-    /** Add entry to ZIP with retries. Streams chunks to avoid buffering full files. */
-    const addEntryToZipWithRetry = async (
-        file: EnteFile,
-        entry: PreparedEntry,
-    ) => {
-        let attempt = 0;
-        while (attempt < STREAM_ZIP_MAX_RETRIES) {
-            attempt++;
+    /**
+     * Add entry to ZIP. Retries only the data fetch, NOT the ZIP write.
+     *
+     * IMPORTANT: Once zip.add() is called, we cannot retry without corrupting
+     * the ZIP (each retry would add a duplicate incomplete entry). So retries
+     * only happen for getData(), and any failure after zip.add() is final.
+     */
+    const addEntryToZip = async (_file: EnteFile, entry: PreparedEntry) => {
+        // Phase 1: Get data with retries (safe to retry - ZIP not modified yet)
+        let resolvedData: Uint8Array | ReadableStream<Uint8Array> | undefined;
+        let lastError: unknown;
+
+        for (let attempt = 1; attempt <= STREAM_ZIP_MAX_RETRIES; attempt++) {
             try {
-                const resolvedData = await entry.getData();
-                const passThrough = new ZipPassThrough(entry.name);
-                zip.add(passThrough);
-                entriesAddedToZip++;
-                if (resolvedData instanceof ReadableStream) {
-                    const reader = resolvedData.getReader();
-                    let shouldCancel = true;
-                    try {
-                        while (true) {
-                            const { done, value } = await reader.read();
-                            if (done) break;
-                            if (signal.aborted) {
-                                void reader.cancel().catch(() => undefined);
-                                throw new DOMException("Aborted", "AbortError");
-                            }
-                            await waitForWriteWindow();
-                            passThrough.push(value);
-                            if (zipError) throw zipError;
-                        }
-                        shouldCancel = false;
-                    } finally {
-                        if (shouldCancel) {
-                            void reader.cancel().catch(() => undefined);
-                        }
-                    }
-                } else {
-                    await waitForWriteWindow();
-                    passThrough.push(resolvedData);
-                }
-
-                await waitForWriteWindow();
-                passThrough.push(new Uint8Array(0), true);
-
-                await writeChain;
-                if (zipError) throw zipError;
-                entriesCompletedInZip++;
-                return;
+                resolvedData = await entry.getData();
+                break;
             } catch (e) {
-                if (signal.aborted || attempt === STREAM_ZIP_MAX_RETRIES) {
-                    throw e;
+                lastError = e;
+                if (signal.aborted) throw e;
+                if (attempt < STREAM_ZIP_MAX_RETRIES) {
+                    log.warn(
+                        `Retrying getData for ${entry.name} (attempt ${attempt})`,
+                        e,
+                    );
+                    await wait(STREAM_ZIP_RETRY_DELAY_MS * attempt);
                 }
-                log.warn(
-                    `Retrying stream for file ${file.id} (attempt ${attempt})`,
-                    e,
-                );
-                await wait(STREAM_ZIP_RETRY_DELAY_MS * attempt);
             }
         }
+
+        if (resolvedData === undefined) {
+            throw lastError ?? new Error("Failed to get entry data");
+        }
+
+        // Phase 2: Write to ZIP (NO retries - would corrupt ZIP with duplicates)
+        const passThrough = new ZipPassThrough(entry.name);
+        zip.add(passThrough);
+        entriesAddedToZip++;
+
+        // Stream or write the data
+        if (resolvedData instanceof ReadableStream) {
+            const reader = resolvedData.getReader();
+            let shouldCancel = true;
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    if (signal.aborted) {
+                        void reader.cancel().catch(() => undefined);
+                        throw new DOMException("Aborted", "AbortError");
+                    }
+                    await waitForWriteWindow();
+                    passThrough.push(value);
+                    if (zipError) throw zipError;
+                }
+                shouldCancel = false;
+            } finally {
+                if (shouldCancel) {
+                    void reader.cancel().catch(() => undefined);
+                }
+            }
+        } else {
+            await waitForWriteWindow();
+            passThrough.push(resolvedData);
+        }
+
+        // Finalize this entry
+        await waitForWriteWindow();
+        passThrough.push(new Uint8Array(0), true);
+
+        await writeChain;
+        if (zipError) throw zipError;
+        entriesCompletedInZip++;
     };
 
     const inFlightEntries = new Set<Promise<void>>();
@@ -687,7 +715,7 @@ export const streamFilesToZip = async ({
     };
 
     const startEntry = (file: EnteFile, entry: PreparedEntry) => {
-        const p: Promise<void> = addEntryToZipWithRetry(file, entry)
+        const p: Promise<void> = addEntryToZip(file, entry)
             .catch((e: unknown) => {
                 entryFailure = entryFailure ?? e;
                 throw e;
@@ -772,6 +800,12 @@ export const streamFilesToZip = async ({
 
         return "success";
     } catch (e) {
+        // Wait for any in-flight entries to settle before checking salvage condition.
+        // This ensures entriesAddedToZip and entriesCompletedInZip are accurate.
+        if (inFlightEntries.size) {
+            await Promise.allSettled([...inFlightEntries]);
+        }
+
         if (!signal.aborted) {
             // Mark any remaining files as failed so counts stay consistent
             for (let i = lastCompletedIndex + 1; i < files.length; i++) {

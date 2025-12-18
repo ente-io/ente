@@ -107,16 +107,23 @@ export const logToDisk = (message: string) => {
     const maxCount = 1000;
     const log: LogEntry = { logLine: message, timestamp: Date.now() };
     try {
-        const logs = logEntries();
-        if (logs.length > maxCount) {
-            logs.slice(logs.length - maxCount);
+        let logs = logEntries();
+        if (logs.length >= maxCount) {
+            // Keep only the most recent entries to stay within limit
+            logs = logs.slice(-maxCount + 1);
         }
         logs.push(log);
         localStorage.setItem(lsKey, JSON.stringify({ logs }));
     } catch (e) {
         console.error("Failed to persist log", e);
         if (e instanceof Error && e.name == "QuotaExceededError") {
+            // Clear logs and retry once to avoid losing this log entry
             localStorage.removeItem(lsKey);
+            try {
+                localStorage.setItem(lsKey, JSON.stringify({ logs: [log] }));
+            } catch {
+                // Storage still full, give up
+            }
         }
     }
 };

@@ -13,5 +13,17 @@ declare module "streamsaver" {
         getWriter(): WritableStreamWriter;
     }
 
-    export function createWriteStream(filename: string): WritableStream;
+    interface StreamSaver {
+        createWriteStream(filename: string): WritableStream;
+        /**
+         * URL to the mitm.html page that hosts the service worker.
+         * Override this to use a self-hosted mitm instead of the default
+         * jimmywarting.github.io endpoint.
+         */
+        mitm: string;
+    }
+
+    const streamSaver: StreamSaver;
+
+    export = streamSaver;
 }
