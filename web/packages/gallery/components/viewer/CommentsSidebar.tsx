@@ -237,17 +237,13 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     currentUserID,
     userIDToEmail,
 }) => {
-    // Get the author name - for deleted comments, fall back to email from userIDToEmail
+    // Get the author name from userID
     const getAuthorName = (): string => {
         if (parentComment.userID === currentUserID) {
             return "You";
         }
-        if (!parentComment.isDeleted && parentComment.encData?.userName) {
-            return parentComment.encData.userName;
-        }
-        // For deleted comments, try to get email from userIDToEmail map
         const email = userIDToEmail?.get(parentComment.userID);
-        return email ?? "Deleted user";
+        return email ?? "User";
     };
 
     return (
@@ -290,7 +286,7 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
                             })),
                     })}
                 >
-                    {truncateCommentText(parentComment.encData.text)}
+                    {truncateCommentText(parentComment.text)}
                 </Typography>
             )}
         </QuotedReplyContainer>
@@ -854,14 +850,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setSending(true);
         try {
             const collection = await getCollectionByID(collectionID);
-            const userName =
-                prefetchedUserIDToEmail?.get(currentUserID ?? 0) ?? "User";
-            const commentData = { text, userName };
 
             const newCommentID = await addComment(
                 collectionID,
                 file.id,
-                commentData,
+                text,
                 collection.key,
                 replyingTo?.id,
             );
@@ -871,7 +864,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 id: newCommentID,
                 collectionID,
                 fileID: file.id,
-                encData: commentData,
+                text,
                 parentCommentID: replyingTo?.id,
                 isDeleted: false,
                 userID: currentUserID ?? 0,
@@ -905,13 +898,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     };
 
-    const addLocalComment = (text: string, userName: string) => {
+    const addLocalComment = (text: string) => {
         // Used for anonymous comments in public albums
         const newComment: Comment = {
             id: String(Date.now()),
             collectionID: selectedCollectionInfo?.id ?? 0,
             fileID: file?.id,
-            encData: { text, userName },
+            text,
             parentCommentID: replyingTo?.id,
             isDeleted: false,
             userID: currentUserID ?? 0,
@@ -940,9 +933,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         window.open("https://web.ente.io", "_blank");
     };
 
-    const handleNameSubmit = (name: string) => {
+    const handleNameSubmit = (_name: string) => {
         setShowAddNameModal(false);
-        addLocalComment(pendingComment, name);
+        // TODO: Store name via anon profile API
+        addLocalComment(pendingComment);
         setPendingComment("");
     };
 
@@ -1299,7 +1293,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 <Box key={comment.id}>
                                     {showHeader && (
                                         <CommentHeader
-                                            userName={comment.encData.userName}
+                                            userName={
+                                                prefetchedUserIDToEmail?.get(
+                                                    comment.userID,
+                                                ) ?? "User"
+                                            }
                                             timestamp={comment.createdAt}
                                         />
                                     )}
@@ -1359,7 +1357,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                 <CommentText
                                                     isOwn={commentIsOwn}
                                                 >
-                                                    {comment.encData.text}
+                                                    {comment.text}
                                                 </CommentText>
                                             </CommentBubble>
                                             {!contextMenu && (
@@ -1464,7 +1462,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     Replying to{" "}
                                     {replyingTo.userID === currentUserID
                                         ? "yourself"
-                                        : replyingTo.encData.userName}
+                                        : (prefetchedUserIDToEmail?.get(
+                                              replyingTo.userID,
+                                          ) ?? "User")}
                                     ...
                                 </Typography>
                                 <Typography
@@ -1479,9 +1479,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         }),
                                     })}
                                 >
-                                    {truncateCommentText(
-                                        replyingTo.encData.text,
-                                    )}
+                                    {truncateCommentText(replyingTo.text)}
                                 </Typography>
                             </Box>
                             <IconButton

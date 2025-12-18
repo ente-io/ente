@@ -4,15 +4,6 @@ import { apiURL } from "ente-base/origins";
 import { z } from "zod";
 
 /**
- * Encrypted comment data structure.
- */
-export interface CommentData {
-    text: string;
-    userName: string;
-    userAvatar?: string;
-}
-
-/**
  * A decrypted comment.
  */
 export interface Comment {
@@ -24,7 +15,8 @@ export interface Comment {
     parentCommentUserID?: number;
     userID: number;
     anonUserID?: string;
-    encData: CommentData;
+    /** The decrypted comment text. */
+    text: string;
     isDeleted: boolean;
     createdAt: number;
     updatedAt: number;
@@ -66,7 +58,7 @@ export const getFileComments = async (
                 parentCommentID: comment.parentCommentID ?? undefined,
                 userID: comment.userID,
                 anonUserID: comment.anonUserID ?? undefined,
-                encData: { text: "", userName: "" },
+                text: "",
                 isDeleted: comment.isDeleted,
                 createdAt: comment.createdAt,
                 updatedAt: comment.updatedAt,
@@ -78,22 +70,22 @@ export const getFileComments = async (
                 { encryptedData: comment.cipher, nonce: comment.nonce },
                 collectionKey,
             );
-            const decryptedStr = new TextDecoder().decode(
+            const text = new TextDecoder().decode(
                 Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
             );
-            const encData = JSON.parse(decryptedStr) as CommentData;
-            decryptedComments.push({
+            const decryptedComment = {
                 id: comment.id,
                 collectionID: comment.collectionID,
                 fileID: comment.fileID ?? undefined,
                 parentCommentID: comment.parentCommentID ?? undefined,
                 userID: comment.userID,
                 anonUserID: comment.anonUserID ?? undefined,
-                encData,
+                text,
                 isDeleted: comment.isDeleted,
                 createdAt: comment.createdAt,
                 updatedAt: comment.updatedAt,
-            });
+            };
+            decryptedComments.push(decryptedComment);
         } catch (e) {
             // Log and skip comments that fail to decrypt
             console.error("Failed to decrypt comment", comment.id, e);
@@ -107,7 +99,7 @@ export const getFileComments = async (
  *
  * @param collectionID The ID of the collection containing the file.
  * @param fileID The ID of the file to comment on.
- * @param commentData The comment data to encrypt.
+ * @param text The comment text to encrypt.
  * @param collectionKey The decrypted collection key (base64 encoded).
  * @param parentCommentID Optional parent comment ID for replies.
  * @returns The ID of the created comment.
@@ -115,12 +107,12 @@ export const getFileComments = async (
 export const addComment = async (
     collectionID: number,
     fileID: number,
-    commentData: CommentData,
+    text: string,
     collectionKey: string,
     parentCommentID?: string,
 ): Promise<string> => {
     const { encryptedData: cipher, nonce } = await encryptBox(
-        new TextEncoder().encode(JSON.stringify(commentData)),
+        new TextEncoder().encode(text),
         collectionKey,
     );
 
@@ -147,16 +139,16 @@ export const addComment = async (
  * Update a comment's content.
  *
  * @param commentID The ID of the comment to update.
- * @param commentData The new comment data.
+ * @param text The new comment text.
  * @param collectionKey The decrypted collection key (base64 encoded).
  */
 export const updateComment = async (
     commentID: string,
-    commentData: CommentData,
+    text: string,
     collectionKey: string,
 ): Promise<void> => {
     const { encryptedData: cipher, nonce } = await encryptBox(
-        new TextEncoder().encode(JSON.stringify(commentData)),
+        new TextEncoder().encode(text),
         collectionKey,
     );
 

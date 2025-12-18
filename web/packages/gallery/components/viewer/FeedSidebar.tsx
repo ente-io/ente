@@ -339,8 +339,8 @@ const processFeedItems = (
     for (const c of comments) {
         if (c.isDeleted) continue;
 
-        // For comments, userName from encData might be an email
-        const email = users.get(c.userID) ?? c.encData.userName;
+        // Look up display name from userID
+        const displayName = users.get(c.userID) ?? "User";
 
         // Only show "Replied to your comment" if the parent comment belongs to
         // the current user. Otherwise show "Commented on your photo".
@@ -360,8 +360,8 @@ const processFeedItems = (
                 user: {
                     userID: c.userID,
                     anonUserID: c.anonUserID,
-                    userName: c.encData.userName,
-                    email,
+                    userName: displayName,
+                    email: displayName,
                 },
             });
         } else {
@@ -377,8 +377,8 @@ const processFeedItems = (
                 user: {
                     userID: c.userID,
                     anonUserID: c.anonUserID,
-                    userName: c.encData.userName,
-                    email,
+                    userName: displayName,
+                    email: displayName,
                 },
             });
         }

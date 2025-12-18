@@ -2,7 +2,7 @@ import { decryptBox } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { z } from "zod";
-import type { Comment, CommentData } from "./comment";
+import type { Comment } from "./comment";
 
 /**
  * Remove null byte padding from a decrypted reaction type.
@@ -115,7 +115,7 @@ const decryptSocialDiff = async (
                 parentCommentUserID: comment.parentCommentUserID ?? undefined,
                 userID: comment.userID,
                 anonUserID: comment.anonUserID ?? undefined,
-                encData: { text: "", userName: "" },
+                text: "",
                 isDeleted: comment.isDeleted,
                 createdAt: comment.createdAt,
                 updatedAt: comment.updatedAt,
@@ -127,11 +127,10 @@ const decryptSocialDiff = async (
                 { encryptedData: comment.cipher, nonce: comment.nonce },
                 collectionKey,
             );
-            const decryptedStr = new TextDecoder().decode(
+            const text = new TextDecoder().decode(
                 Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
             );
-            const encData = JSON.parse(decryptedStr) as CommentData;
-            comments.push({
+            const decryptedComment = {
                 id: comment.id,
                 collectionID: comment.collectionID,
                 fileID: comment.fileID ?? undefined,
@@ -139,11 +138,12 @@ const decryptSocialDiff = async (
                 parentCommentUserID: comment.parentCommentUserID ?? undefined,
                 userID: comment.userID,
                 anonUserID: comment.anonUserID ?? undefined,
-                encData,
+                text,
                 isDeleted: comment.isDeleted,
                 createdAt: comment.createdAt,
                 updatedAt: comment.updatedAt,
-            });
+            };
+            comments.push(decryptedComment);
         } catch {
             // Skip comments that fail to decrypt
         }
@@ -181,12 +181,13 @@ const decryptSocialDiff = async (
         }
     }
 
-    return {
+    const result = {
         comments,
         reactions,
         hasMoreComments: data.hasMoreComments,
         hasMoreReactions: data.hasMoreReactions,
     };
+    return result;
 };
 
 const RemoteComment = z.object({
