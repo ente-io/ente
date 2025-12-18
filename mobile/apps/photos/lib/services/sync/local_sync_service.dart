@@ -227,7 +227,8 @@ class LocalSyncService {
     // Mark first import as complete if not already done.
     // This handles the case where syncAll() is called (e.g., for users who
     // skipped onboarding) and device collections are populated.
-    if (!hasCompletedFirstImport()) {
+    // Only applies when enableOnlyBackupFuturePhotos flag is on.
+    if (flagService.enableOnlyBackupFuturePhotos && !hasCompletedFirstImport()) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       if (backupPreferenceService.hasSkippedOnboardingPermission) {
         await backupPreferenceService.setOnboardingPermissionSkipped(false);
