@@ -1264,6 +1264,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         return next;
                     });
 
+                    // Update anonUserNames so the name shows immediately in likers list
+                    setAnonUserNames((prev) => {
+                        const next = new Map(prev);
+                        next.set(identity.anonUserID, name);
+                        return next;
+                    });
+
                     setOpenAddNameModal(false);
                     setOpenLikes(true);
                 } catch (e) {
