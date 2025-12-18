@@ -2535,6 +2535,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You need a paid subscription to share links'**
   String get subscriptionRequiredForSharing;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get sessionExpired;
+
+  /// No description provided for @pleaseLoginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login again'**
+  String get pleaseLoginAgain;
 }
 
 class _AppLocalizationsDelegate

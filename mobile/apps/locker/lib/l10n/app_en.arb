@@ -853,5 +853,7 @@
   },
   "sorry": "Sorry",
   "subscribe": "Subscribe",
-  "subscriptionRequiredForSharing": "You need a paid subscription to share links"
+  "subscriptionRequiredForSharing": "You need a paid subscription to share links",
+  "sessionExpired": "Session expired",
+  "pleaseLoginAgain": "Please login again"
 }
