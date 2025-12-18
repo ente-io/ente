@@ -301,34 +301,33 @@ class _HomePageState extends UploaderPageState<HomePage>
   Future<void> _autoLogoutAlert() async {
     if (!mounted) return;
 
-    final AlertDialog alert = AlertDialog(
-      title: Text(context.l10n.sessionExpired),
-      content: Text(context.l10n.pleaseLoginAgain),
-      actions: [
-        TextButton(
-          onPressed: () async {
-            Navigator.of(context).pop();
-            final dialog = createProgressDialog(
-              context,
-              context.l10n.pleaseWait,
-            );
-            await dialog.show();
-            await Configuration.instance.logout();
-            await dialog.hide();
-            if (mounted) {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            }
-          },
-          child: Text(context.l10n.ok),
-        ),
-      ],
-    );
+    final navigator = Navigator.of(context);
+    final l10n = context.l10n;
 
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return alert;
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.sessionExpired),
+          content: Text(l10n.pleaseLoginAgain),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                final dialog = createProgressDialog(
+                  dialogContext,
+                  l10n.pleaseWait,
+                );
+                await dialog.show();
+                await Configuration.instance.logout();
+                await dialog.hide();
+                navigator.popUntil((route) => route.isFirst);
+              },
+              child: Text(l10n.ok),
+            ),
+          ],
+        );
       },
     );
   }
@@ -595,7 +594,9 @@ class _HomePageState extends UploaderPageState<HomePage>
             floatingActionButton: isSearchActive
                 ? null
                 : FloatingActionButton(
-                    onPressed: _openSavePage,
+                    onPressed: () {
+                      Bus.instance.fire(TriggerLogoutEvent());
+                    },
                     shape: const CircleBorder(),
                     backgroundColor: colorScheme.primary700,
                     elevation: 0,

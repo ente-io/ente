@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "Немагчыма дадаць у абраныя!",
   "sorryCouldNotRemoveFromFavorites": "Немагчыма выдаліць з абраных!",
   "subscribeToEnableSharing": "У вас павінна быць актыўная платная падпіска, каб уключыць абагульванне.",
+  "subscribeToChangeLinkSetting": "Каб змяніць гэты параметр спасылкі, вам патрэбна платная падпіска.",
   "subscribe": "Падпісацца",
   "canOnlyRemoveFilesOwnedByYou": "Можна выдаляць толькі файлы, якія належаць вам",
   "deleteSharedAlbum": "Выдаліць абагулены альбом?",
@@ -1206,10 +1207,13 @@
   "unpinAlbum": "Адмацаваць альбом",
   "pinAlbum": "Замацаваць альбом",
   "pin": "Замацаваць",
+  "pinPerson": "Замацаваць асобу",
   "pinToTop": "Замацаваць уверсе",
   "unpin": "Адмацаваць",
+  "unpinPerson": "Адмацаваць асобу",
   "visibility": "Бачнасць",
   "hideFromMemories": "Схаваць ад успамінаў",
+  "showInMemories": "Паказаць ва ўспамінах",
   "create": "Стварыць",
   "viewAll": "Паглядзець усе",
   "nothingSharedWithYouYet": "Пакуль з вамі нічога не абагулена",
@@ -1321,6 +1325,8 @@
   "enterDateOfBirth": "Дзень нараджэння (неабавязкова)",
   "birthday": "Дзень нараджэння",
   "removePersonLabel": "Выдаліць метку асобы",
+  "removePersonTag": "Выдаліць тэг асобы",
+  "areYouSureRemoveThisPersonTag": "Вы ўпэўненыя, што хочаце выдаліць гэты тэг чалавека?",
   "autoPairDesc": "Аўтаспалучэнне працуе толькі з прыладамі, якія падтрымліваюць Chromecast.",
   "manualPairDesc": "Спалучэнне з PIN працуе з любым экранам, на якім вы хочаце паглядзець альбом.",
   "connectToDevice": "Падключыцца да прылады",
@@ -2104,5 +2110,35 @@
   },
   "ritualCaptureAtLeastOne": "Спачатку зрабіце хаця б адну фатаграфію.",
   "ritualAlbumMissing": "Адсутнічае альбом рытуалаў. Адрэдагуйце рытуал, каб усталяваць альбом.",
-  "ritualAddedToAlbum": "Дададзена ў альбом"
+  "ritualAddedToAlbum": "Дададзена ў альбом",
+  "ritualAddedToAlbumWithName": "Дададзена ў {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Не атрымалася дадаць фатаграфію ў альбом: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Вернуцца да рытуалаў",
+  "ritualNoPhotosYet": "Фатаграфій пакуль няма",
+  "ritualSetAlbumToLaunchCamera": "Усталюйце альбом для гэтага рытуалу, каб запусціць камеру.",
+  "ritualDefaultCameraTitle": "Зрабіць фота",
+  "ritualBadgeMessage7": "7 дзён прайшло! Паслядоўнасць табе пасуе. Працягвай!",
+  "ritualBadgeMessage14": "14 дзён прайшло! Ваш рытуал становіцца звычкай. Неверагодна!",
+  "ritualBadgeMessage30": "30 дзён запар! Легендарная паслядоўнасць. Пакланіцеся!",
+  "ritualBadgeMessageDefault": "У цябе ўсё атрымліваецца!",
+  "ritualBadgeNewTitle": "Новае дасягненне",
+  "ritualBadgePreparing": "Падрыхтоўка...",
+  "ritualStreaksLabel": "Палоскі",
+  "ritualCreateYourOwn": "Стварыце свой уласны рытуал"
 }

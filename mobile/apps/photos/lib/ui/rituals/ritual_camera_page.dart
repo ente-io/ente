@@ -6,7 +6,6 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
-import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -17,7 +16,6 @@ import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/rituals/all_rituals_screen.dart";
-import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
@@ -454,22 +452,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             : context.l10n
                 .ritualAddedToAlbumWithName(albumName: _album!.displayName),
       );
-      final collection = _album ??
-          CollectionsService.instance.getCollectionByID(widget.albumId!);
-      if (collection != null && mounted) {
-        final thumbnail =
-            await CollectionsService.instance.getCover(collection);
-        if (!mounted) return;
-        replacePage(
-          context,
-          CollectionPage(
-            CollectionWithThumbnail(
-              collection,
-              thumbnail,
-            ),
-          ),
-        );
-      }
+      await ritualsService.refresh();
+      if (!mounted) return;
+      await Navigator.of(context).maybePop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -3,7 +3,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
-enum RitualDayThumbnailVariant { photo, empty, camera }
+enum RitualDayThumbnailVariant { photo, empty, camera, future }
 
 class RitualDayThumbnail extends StatelessWidget {
   const RitualDayThumbnail({
@@ -89,6 +89,8 @@ class _Tile extends StatelessWidget {
   static const _blueFill = Color(0x231DA9FF);
   static const _greenBorder = Color(0xFF1DB954);
   static const _greenFill = Color(0x191DB954);
+  static const _futureBorder = Color(0xFFD3D3D3);
+  static const _futureFill = Color(0x1AD3D3D3);
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +124,12 @@ class _Tile extends StatelessWidget {
             ),
             onPressed: onCameraTap,
           ),
+        ),
+      RitualDayThumbnailVariant.future => _DottedTile(
+          width: width,
+          height: height,
+          borderColor: _futureBorder,
+          fillColor: _futureFill,
         ),
     };
   }

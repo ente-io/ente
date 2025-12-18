@@ -347,7 +347,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                       .where(
                         (element) => element.displayName
                             .toLowerCase()
-                            .contains(_searchQuery),
+                            .contains(_searchQuery.toLowerCase()),
                       )
                       .toList()
                   : collections;
