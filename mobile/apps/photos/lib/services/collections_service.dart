@@ -1713,7 +1713,16 @@ class CollectionsService {
   }) async {
     final splitResult = FilesSplit.split(files, _config.getUserID()!);
     if (splitResult.pendingUploads.isNotEmpty) {
-      throw ArgumentError('File should be already uploaded');
+      _logger.warning(
+        'Skipping ${splitResult.pendingUploads.length} files that are not yet uploaded',
+      );
+      // Skip pending uploads instead of throwing an error
+      // The UI layer handles pending uploads by setting collectionID and saving to DB
+      if (splitResult.ownedByCurrentUser.isEmpty &&
+          splitResult.ownedByOtherUsers.isEmpty) {
+        _logger.info("All files are pending upload, nothing to add");
+        return;
+      }
     }
     if (splitResult.ownedByCurrentUser.isNotEmpty) {
       await _addToCollection(dstCollectionID, splitResult.ownedByCurrentUser);
