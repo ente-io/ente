@@ -223,6 +223,18 @@ class LocalSyncService {
         ),
       );
     }
+
+    // Mark first import as complete if not already done.
+    // This handles the case where syncAll() is called (e.g., for users who
+    // skipped onboarding) and device collections are populated.
+    if (!hasCompletedFirstImport()) {
+      await _prefs.setBool(kHasCompletedFirstImportKey, true);
+      if (backupPreferenceService.hasSkippedOnboardingPermission) {
+        await backupPreferenceService.setOnboardingPermissionSkipped(false);
+      }
+      _logger.info("first import marked complete via syncAll");
+    }
+
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
     return hasUnsyncedFiles;
   }
