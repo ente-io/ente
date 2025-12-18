@@ -82,10 +82,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
 
     // If permission was skipped, show add folders prompt
     if (hasSkippedPermission) {
-      return SizedBox(
-        height: sideOfThumbnail + 46,
-        child: _buildAddFoldersState(context),
-      );
+      return _buildAddFoldersState(context);
     }
 
     return SizedBox(
@@ -138,32 +135,47 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   }
 
   Widget _buildAddFoldersState(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    const selectFoldersGreen = Color(0xFF08C225);
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: "Select folders",
-                style: TextStyle(
-                  color: colorScheme.primary500,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              "assets/ducky_folders.png",
+              width: 138,
+              height: 120,
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: AppLocalizations.of(context).selectFolders,
+                      style: textTheme.small.copyWith(
+                        color: selectFoldersGreen,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () async {
+                          await handleFolderSelectionBackupFlow(context);
+                          if (mounted) setState(() {});
+                        },
+                    ),
+                    TextSpan(
+                      text: AppLocalizations.of(context).toViewAndBackupOnEnte,
+                      style: textTheme.smallMuted,
+                    ),
+                  ],
                 ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () async {
-                    await handleFolderSelectionBackupFlow(context);
-                  },
+                textAlign: TextAlign.center,
               ),
-              const TextSpan(
-                text: " to view and back up on ente",
-              ),
-            ],
-          ),
-          style: textTheme.smallMuted,
-          textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

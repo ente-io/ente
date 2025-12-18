@@ -11,9 +11,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
 import "package:photos/ui/collections/device/device_folder_item.dart";
+import "package:photos/ui/collections/device/device_folders_empty_state.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/searchable_appbar.dart';
-import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/standalone/debouncer.dart";
 
 class DeviceFolderVerticalGridView extends StatefulWidget {
@@ -149,7 +149,9 @@ class _DeviceFolderVerticalGridViewBodyState
                   albumsCountInCrossAxis;
 
           return deviceCollections.isEmpty
-              ? const SliverFillRemaining(child: EmptyState())
+              ? const SliverFillRemaining(
+                  child: DeviceFoldersEmptyState(),
+                )
               : SliverPadding(
                   padding: const EdgeInsets.only(
                     left: horizontalPadding / 2,
