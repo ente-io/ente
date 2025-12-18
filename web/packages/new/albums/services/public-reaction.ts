@@ -378,3 +378,48 @@ const RemoteAnonProfile = z.object({
 const GetAnonProfilesResponse = z.object({
     profiles: z.array(RemoteAnonProfile),
 });
+
+/**
+ * A participant with masked email.
+ */
+export interface Participant {
+    userID: number;
+    emailMasked: string;
+}
+
+/**
+ * Get registered participants' masked emails for a public album.
+ *
+ * This returns masked emails for registered users (album owner/collaborators)
+ * who have interacted with the album (comments/reactions).
+ *
+ * @param credentials Public album credentials (access token).
+ * @returns Map of userID to masked email.
+ */
+export const getPublicParticipantsMaskedEmails = async (
+    credentials: PublicAlbumsCredentials,
+): Promise<Map<number, string>> => {
+    const res = await fetch(
+        await apiURL("/public-collection/participants/masked-emails"),
+        {
+            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+        },
+    );
+    ensureOk(res);
+    const { participants } = GetParticipantsResponse.parse(await res.json());
+
+    const userIDToEmail = new Map<number, string>();
+    for (const participant of participants) {
+        userIDToEmail.set(participant.userID, participant.emailMasked);
+    }
+    return userIDToEmail;
+};
+
+const RemoteParticipant = z.object({
+    userID: z.number(),
+    emailMasked: z.string(),
+});
+
+const GetParticipantsResponse = z.object({
+    participants: z.array(RemoteParticipant),
+});

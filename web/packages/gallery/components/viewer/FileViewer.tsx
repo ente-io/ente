@@ -49,6 +49,7 @@ import {
     deletePublicReaction,
     getPublicAnonProfiles,
     getPublicFileReactions,
+    getPublicParticipantsMaskedEmails,
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
 import {
@@ -2110,6 +2111,23 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     });
                 } catch {
                     // Ignore anon profiles fetch failures
+                }
+
+                // Fetch registered participants' masked emails for public albums
+                try {
+                    const participantEmails =
+                        await getPublicParticipantsMaskedEmails(
+                            publicAlbumsCredentials,
+                        );
+                    setUserIDToEmail((prev) => {
+                        const next = new Map(prev);
+                        for (const [id, email] of participantEmails) {
+                            next.set(id, email);
+                        }
+                        return next;
+                    });
+                } catch {
+                    // Ignore participants fetch failures
                 }
             } catch (e) {
                 log.error("Failed to fetch public reactions", e);
