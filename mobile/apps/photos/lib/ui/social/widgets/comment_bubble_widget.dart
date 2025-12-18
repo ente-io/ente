@@ -160,18 +160,22 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
               builder: (context, value, child) {
                 return Opacity(
                   opacity: value,
-                  child: Transform.scale(
-                    scale: 0.95 + (0.05 * value),
-                    alignment: widget.isOwnComment
-                        ? Alignment.topRight
-                        : Alignment.topLeft,
-                    child: child,
-                  ),
+                  // child: Transform.scale(
+                  //   scale: 0.95 + (0.05 * value),
+                  //   alignment: widget.isOwnComment
+                  //       ? Alignment.topRight
+                  //       : Alignment.topLeft,
+                  //   child: child,
+                  // ),
+                  child: child,
                 );
               },
-              child: _buildCommentContent(
-                showActionsCapsule: false,
-                showActionsPopup: true,
+              child: Padding(
+                padding: EdgeInsets.only(right: widget.isOwnComment ? 16 : 0),
+                child: _buildCommentContent(
+                  showActionsCapsule: false,
+                  showActionsPopup: true,
+                ),
               ),
             ),
           ),
