@@ -1,27 +1,26 @@
 import "dart:async";
 
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
-import "package:ente_ui/components/dialog_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
-import "package:ente_ui/components/user_dialogs.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/email_util.dart";
-import "package:ente_utils/share_utils.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
-import "package:locker/extensions/user_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
+import "package:locker/ui/components/alert_bottom_sheet.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
 import "package:locker/ui/components/subscription_required_dialog.dart";
 import 'package:logging/logging.dart';
@@ -331,44 +330,38 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final confirmed = await showAlertBottomSheet(
+      context,
+      title: context.l10n.leaveCollection,
+      message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.leaveCollection,
-          onTap: () async {
-            await CollectionApiClient.instance.leaveCollection(collection);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        SizedBox(
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
         ),
       ],
-      title: context.l10n.leaveCollection,
-      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
     );
-    if (actionResult?.action != null && context.mounted) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      } else if (actionResult.action == ButtonAction.first) {
-        onSuccess?.call();
-        Navigator.of(context).pop();
-        showToast(
-          context,
-          "Leave collection successfully",
-        );
+    if (confirmed == true) {
+      try {
+        await CollectionApiClient.instance.leaveCollection(collection);
+        if (context.mounted) {
+          onSuccess?.call();
+          showToast(
+            context,
+            "Leave collection successfully",
+          );
+        }
+      } catch (e) {
+        _logger.severe("Failed to leave collection", e);
+        if (context.mounted) {
+          showToast(
+            context,
+            context.l10n.somethingWentWrong,
+          );
+        }
       }
     }
   }
@@ -515,7 +508,7 @@ class CollectionActions {
     if (publicKey == null || publicKey == '') {
       // todo: neeraj replace this as per the design where a new screen
       // is used for error. Do this change along with handling of network errors
-      await showInviteDialog(context, email);
+      await showInviteSheet(context, email: email);
       return false;
     } else {
       return true;
@@ -531,17 +524,19 @@ class CollectionActions {
     bool showProgress = false,
   }) async {
     if (!isValidEmail(email)) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.l10n.invalidEmailAddress,
-        context.l10n.enterValidEmail,
+        title: context.l10n.invalidEmailAddress,
+        message: context.l10n.enterValidEmail,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.l10n.oops,
-        context.l10n.youCannotShareWithYourself,
+        title: context.l10n.oops,
+        message: context.l10n.youCannotShareWithYourself,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     }
@@ -568,30 +563,8 @@ class CollectionActions {
     // getPublicKey can return null when no user is associated with given
     // email id
     if (publicKey == null || publicKey == '') {
-      // todo: neeraj replace this as per the design where a new screen
-      // is used for error. Do this change along with handling of network errors
-      await showDialogWidget(
-        context: context,
-        title: context.l10n.inviteToEnte,
-        icon: Icons.info_outline,
-        body: context.l10n.emailNoEnteAccount(email),
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.neutral,
-            icon: Icons.adaptive.share,
-            labelText: context.l10n.sendInvite,
-            isInAlert: true,
-            onTap: () async {
-              unawaited(
-                shareText(
-                  context.l10n.shareTextRecommendUsingEnte,
-                ),
-              );
-            },
-          ),
-        ],
-      );
+      await dialog?.hide();
+      await showInviteSheet(context, email: email);
       return false;
     } else {
       try {
@@ -619,42 +592,15 @@ class CollectionActions {
     Collection collection,
     User user,
   ) async {
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.yesRemove,
-          onTap: () async {
-            final newSharees = await CollectionApiClient.instance
-                .unshare(collection.id, user.email);
-            collection.updateSharees(newSharees);
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
-        ),
-      ],
-      title: context.l10n.removeWithQuestionMark,
-      body: context.l10n.removeParticipantBody(user.displayName ?? user.email),
-    );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      }
-      return actionResult.action == ButtonAction.first;
+    try {
+      final newSharees =
+          await CollectionApiClient.instance.unshare(collection.id, user.email);
+      collection.updateSharees(newSharees);
+      return true;
+    } catch (e) {
+      _logger.severe("Failed to remove participant", e);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
     }
-    return false;
   }
 }
