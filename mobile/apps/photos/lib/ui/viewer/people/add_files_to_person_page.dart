@@ -16,11 +16,13 @@ import "package:photos/utils/dialog_util.dart";
 
 class AddFilesToPersonPage extends StatefulWidget {
   final List<EnteFile> files;
+  final List<GenericSearchResult>? initialPersons;
 
   static final Logger _logger = Logger("AddFilesToPersonPage");
 
   const AddFilesToPersonPage({
     required this.files,
+    this.initialPersons,
     super.key,
   });
 
@@ -36,28 +38,40 @@ class AddFilesToPersonPage extends StatefulWidget {
     return named;
   }
 
-  static Future<bool> ensureNamedPersonsExist(BuildContext context) async {
+  static Future<List<GenericSearchResult>?> prefetchNamedPersons(
+    BuildContext context,
+  ) async {
     try {
       final persons = await loadNamedPersons();
       if (!context.mounted) {
-        return false;
+        return null;
       }
       if (persons.isEmpty) {
         showShortToast(
           context,
           AppLocalizations.of(context).pleaseNamePersonInPeopleSectionFirst,
         );
-        return false;
       }
-      return true;
+      return persons;
     } catch (error, stackTrace) {
       _logger.severe(
         "Failed to load persons for manual tagging pre-check",
         error,
         stackTrace,
       );
+      return null;
+    }
+  }
+
+  static Future<bool> ensureNamedPersonsExist(BuildContext context) async {
+    final persons = await prefetchNamedPersons(context);
+    if (!context.mounted) {
+      return false;
+    }
+    if (persons == null) {
       return true;
     }
+    return persons.isNotEmpty;
   }
 
   @override
@@ -71,7 +85,9 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
   void initState() {
     super.initState();
     assert(widget.files.isNotEmpty);
-    _personsFuture = AddFilesToPersonPage.loadNamedPersons();
+    _personsFuture = widget.initialPersons != null
+        ? Future.value(widget.initialPersons!)
+        : AddFilesToPersonPage.loadNamedPersons();
   }
 
   @override

@@ -555,15 +555,21 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       setState(() => _showRemainingFaces = !_showRemainingFaces);
 
   Future<void> _openAddFilesToPersonPage() async {
-    final hasPersons =
-        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
-    if (!mounted || !hasPersons) {
+    final namedPersons =
+        await AddFilesToPersonPage.prefetchNamedPersons(context);
+    if (!mounted) {
+      return;
+    }
+    if (namedPersons != null && namedPersons.isEmpty) {
       return;
     }
     final result =
         await Navigator.of(context).push<ManualPersonAssignmentResult>(
       MaterialPageRoute(
-        builder: (context) => AddFilesToPersonPage(files: [widget.file]),
+        builder: (context) => AddFilesToPersonPage(
+          files: [widget.file],
+          initialPersons: namedPersons,
+        ),
       ),
     );
     if (result != null) {
