@@ -270,12 +270,14 @@ class _RitualOverviewCard extends StatelessWidget {
   }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
     final dayKey =
         DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
     final file = progress?.recentFilesByDay[dayKey];
     final count =
         progress?.recentFileCountsByDay[dayKey] ?? (completed ? 1 : 0);
-    final fadePhoto = completed && nextCompleted == false;
+    final isYesterday = _isSameDay(day, yesterday);
+    final fadePhoto = completed && nextCompleted == false && !isYesterday;
     final isToday = _isSameDay(day, today);
     final rotation = switch (index % 4) {
       0 => -0.05,
