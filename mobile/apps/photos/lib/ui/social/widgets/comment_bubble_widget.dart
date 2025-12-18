@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
@@ -39,7 +40,8 @@ class CommentBubbleWidget extends StatefulWidget {
   State<CommentBubbleWidget> createState() => _CommentBubbleWidgetState();
 }
 
-class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
+class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
+    with SingleTickerProviderStateMixin {
   Comment? _parentComment;
   List<Reaction> _reactions = [];
   bool _isLiked = false;
@@ -50,9 +52,20 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
   final LayerLink _layerLink = LayerLink();
   final GlobalKey _contentKey = GlobalKey();
 
+  late final AnimationController _overlayAnimationController;
+  late final Animation<double> _overlayAnimation;
+
   @override
   void initState() {
     super.initState();
+    _overlayAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _overlayAnimation = CurvedAnimation(
+      parent: _overlayAnimationController,
+      curve: Curves.fastOutSlowIn,
+    );
     _loadData();
   }
 
@@ -65,6 +78,12 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
       _isLiked = false;
       _loadData();
     }
+  }
+
+  @override
+  void dispose() {
+    _overlayAnimationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -100,11 +119,14 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
   }
 
   void _showHighlight() {
+    HapticFeedback.mediumImpact();
     _overlayController.show();
+    _overlayAnimationController.forward();
   }
 
-  void _hideHighlight() {
-    _overlayController.hide();
+  Future<void> _hideHighlight() async {
+    await _overlayAnimationController.reverse();
+    if (mounted) _overlayController.hide();
   }
 
   @override
@@ -131,57 +153,45 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
         _contentKey.currentContext?.findRenderObject() as RenderBox?;
     final size = renderBox?.size;
 
-    return Stack(
-      children: [
-        // Full-screen barrier with black opacity 0.7
-        GestureDetector(
-          onTap: _hideHighlight,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Container(
+    return AnimatedBuilder(
+      animation: _overlayAnimation,
+      builder: (context, _) {
+        final value = _overlayAnimation.value;
+        final isReversing =
+            _overlayAnimationController.status == AnimationStatus.reverse;
+        return Stack(
+          children: [
+            // Full-screen barrier with black opacity 0.7
+            GestureDetector(
+              onTap: _hideHighlight,
+              child: Container(
                 color: Colors.black.withValues(alpha: 0.7 * value),
-              );
-            },
-          ),
-        ),
-        // Highlighted comment + popup menu
-        CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          child: SizedBox(
-            width: size?.width,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.scale(
-                    scale: 0.95 + (0.05 * value),
-                    alignment: widget.isOwnComment
-                        ? Alignment.topRight
-                        : Alignment.topLeft,
-                    child: child,
+              ),
+            ),
+            // Highlighted comment + popup menu
+            CompositedTransformFollower(
+              link: _layerLink,
+              showWhenUnlinked: false,
+              child: SizedBox(
+                width: size?.width,
+                child: Opacity(
+                  opacity: isReversing ? 1.0 : value,
+                  child: Padding(
+                    padding:
+                        EdgeInsets.only(right: widget.isOwnComment ? 16 : 0),
+                    child: _buildCommentContent(
+                      showActionsCapsule: false,
+                      showActionsPopup: true,
+                      showHeader: false,
+                      bubbleScale: 1 + (0.025 * value),
+                    ),
                   ),
-                  // child: child,
-                );
-              },
-              child: Padding(
-                padding: EdgeInsets.only(right: widget.isOwnComment ? 16 : 0),
-                child: _buildCommentContent(
-                  showActionsCapsule: false,
-                  showActionsPopup: true,
-                  showHeader: false,
                 ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -190,6 +200,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     bool showActionsPopup = false,
     bool includePadding = true,
     bool showHeader = true,
+    double bubbleScale = 1.0,
   }) {
     return Padding(
       padding: EdgeInsets.only(
@@ -225,13 +236,19 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
                   padding: showActionsCapsule
                       ? const EdgeInsets.only(right: 16, bottom: 17)
                       : EdgeInsets.zero,
-                  child: _CommentBubble(
-                    comment: widget.comment,
-                    isOwnComment: widget.isOwnComment,
-                    isLoadingParent: _isLoadingParent,
-                    parentComment: _parentComment,
-                    currentUserID: widget.currentUserID,
-                    userResolver: widget.userResolver,
+                  child: Transform.scale(
+                    scale: bubbleScale,
+                    alignment: widget.isOwnComment
+                        ? Alignment.topRight
+                        : Alignment.topLeft,
+                    child: _CommentBubble(
+                      comment: widget.comment,
+                      isOwnComment: widget.isOwnComment,
+                      isLoadingParent: _isLoadingParent,
+                      parentComment: _parentComment,
+                      currentUserID: widget.currentUserID,
+                      userResolver: widget.userResolver,
+                    ),
                   ),
                 ),
                 if (!_isLoadingReactions && showActionsCapsule)
