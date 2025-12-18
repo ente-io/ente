@@ -1931,7 +1931,14 @@
   "hoorayyyy": "Hoeraaaa!",
   "nothingToTidyUpHere": "Niks op te schonen hier",
   "deletingDash": "Verwijderen - ",
-  "cLTitle3": "Nieuwe herinneringen",
+  "cLTitle1": "Introductie van Rituelen",
+  "cLDesc1": "Plannen voor 2026? Met Rituelen kun je een herinnering instellen in Ente Photos en je voortgang bijhouden door foto's te maken. Gebruik het voor workouts, eetgewoonten, dagelijkse momenten met dierbaren – alles wat je tot een gewoonte wilt maken.",
+  "cLTitle2": "Openbare links, nu voor iedereen",
+  "cLDesc2": "Alle Ente-gebruikers op het gratis abonnement kunnen nu openbare links naar foto's en albums maken en delen. Om misbruik te voorkomen, hebben links limieten voor hoeveel mensen ze kunnen bekijken.",
+  "cLTitle3": "Handmatig mensen taggen",
+  "cLDesc3": "Je kunt nu mensen taggen, zelfs als onze on-device AI geen gezicht detecteert. Handig voor huisdieren, gedeeltelijk zichtbare gezichten, of momenten waar iemand niet echt op de foto staat maar toch moet worden opgenomen.",
+  "cLTitle4": "En meer",
+  "cLDesc4": "Je kunt nu gedeelde albums vastpinnen. Albumlinks zijn zichtbaar voor medewerkers en kijkers om delen nog gemakkelijker te maken. We hebben enkele iOS-veegbugs opgelost en de fotoweergave bijgewerkt, inclusief een nieuw favorietenpictogram (ruimte maken voor komende functies).",
   "closeBy": "Nauw verwant",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
