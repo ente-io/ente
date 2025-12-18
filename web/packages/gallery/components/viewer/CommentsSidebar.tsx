@@ -47,6 +47,7 @@ import React, {
 } from "react";
 import { AddNameModal } from "./AddNameModal";
 import { PublicCommentModal } from "./PublicCommentModal";
+import { PublicLikeModal } from "./PublicLikeModal";
 
 // =============================================================================
 // Icons
@@ -484,7 +485,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [comments, setComments] = useState<Comment[]>([]);
     const [showPublicCommentModal, setShowPublicCommentModal] = useState(false);
     const [showAddNameModal, setShowAddNameModal] = useState(false);
+    const [showPublicLikeModal, setShowPublicLikeModal] = useState(false);
     const [pendingComment, setPendingComment] = useState("");
+    const [pendingCommentLike, setPendingCommentLike] =
+        useState<Comment | null>(null);
+    /** Tracks whether the AddNameModal was triggered by a comment like action */
+    const [addNameForCommentLike, setAddNameForCommentLike] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -578,7 +584,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         const originalBg = computedStyle.backgroundColor;
 
                         // Parse the RGB values to create 80% opacity version
-                        const rgbMatch = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(originalBg);
+                        const rgbMatch = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(
+                            originalBg,
+                        );
                         if (!rgbMatch) return;
 
                         const [, r, g, b] = rgbMatch;
@@ -675,7 +683,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     coverFile: summary?.coverFile,
                 };
             });
-    }, [isPublicAlbum, file, fileCollectionIDs, collectionSummaries, commentsByCollection]);
+    }, [
+        isPublicAlbum,
+        file,
+        fileCollectionIDs,
+        collectionSummaries,
+        commentsByCollection,
+    ]);
 
     // Collections sorted by comment count (descending) for dropdown
     const sortedCollectionsInfo = useMemo(() => {
@@ -906,10 +920,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         // Find comment reactions that are likes from the current user (or anon user)
         const newLikedComments = new Map<string, string>();
         for (const reaction of reactions) {
-            if (
-                reaction.commentID &&
-                reaction.reactionType === "green_heart"
-            ) {
+            if (reaction.commentID && reaction.reactionType === "green_heart") {
                 // Check if this is the current user's reaction
                 const isCurrentUserReaction =
                     reaction.userID === currentUserID ||
@@ -921,7 +932,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             }
         }
         setLikedComments(newLikedComments);
-    }, [open, selectedCollectionInfo, reactionsByCollection, currentUserID, isPublicAlbum]);
+    }, [
+        open,
+        selectedCollectionInfo,
+        reactionsByCollection,
+        currentUserID,
+        isPublicAlbum,
+    ]);
 
     const handleSend = async () => {
         if (!commentText.trim() || !file || !selectedCollectionInfo) return;
@@ -1080,20 +1097,92 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         window.open("https://web.ente.io", "_blank");
     };
 
+    const handleLikeAnonymously = () => {
+        setShowPublicLikeModal(false);
+        setAddNameForCommentLike(true);
+        setShowAddNameModal(true);
+    };
+
+    const handleSignInAndLike = () => {
+        setShowPublicLikeModal(false);
+        setPendingCommentLike(null);
+        // Redirect to web.ente.io for sign in
+        window.open("https://web.ente.io", "_blank");
+    };
+
     const handleNameSubmit = async (name: string) => {
         setShowAddNameModal(false);
 
         if (
-            !file ||
             !selectedCollectionInfo ||
             !publicAlbumsCredentials ||
             !collectionKey
         ) {
             setPendingComment("");
+            setPendingCommentLike(null);
+            setAddNameForCommentLike(false);
             return;
         }
 
         const collectionID = selectedCollectionInfo.id;
+
+        // Check if this is for a comment like action
+        if (addNameForCommentLike && pendingCommentLike) {
+            try {
+                // Create anonymous identity with the provided name
+                const identity = await createAnonIdentity(
+                    publicAlbumsCredentials,
+                    collectionID,
+                    name,
+                    collectionKey,
+                );
+
+                // Now like the comment using the new identity
+                const reactionID = await addPublicCommentReaction(
+                    publicAlbumsCredentials,
+                    collectionID,
+                    pendingCommentLike.id,
+                    "green_heart",
+                    collectionKey,
+                    identity,
+                );
+                const newReaction: UnifiedReaction = {
+                    id: reactionID,
+                    collectionID,
+                    commentID: pendingCommentLike.id,
+                    reactionType: "green_heart",
+                    userID: 0,
+                    anonUserID: identity.anonUserID,
+                    isDeleted: false,
+                    createdAt: Date.now() * 1000,
+                    updatedAt: Date.now() * 1000,
+                };
+                setLikedComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(pendingCommentLike.id, reactionID);
+                    return next;
+                });
+                setReactionsByCollection((prev) => {
+                    const next = new Map(prev);
+                    const reactions = next.get(collectionID) ?? [];
+                    next.set(collectionID, [...reactions, newReaction]);
+                    return next;
+                });
+                onCommentReactionAdded?.(newReaction);
+            } catch (e) {
+                log.error("Failed to create identity and like comment", e);
+            } finally {
+                setPendingCommentLike(null);
+                setAddNameForCommentLike(false);
+            }
+            return;
+        }
+
+        // Handle comment action
+        if (!file) {
+            setPendingComment("");
+            return;
+        }
 
         setSending(true);
         try {
@@ -1199,13 +1288,17 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             if (isPublicAlbum) {
                 // Public album - use public APIs
                 if (!publicAlbumsCredentials || !collectionKey) {
-                    log.error("Missing credentials for public album comment like");
+                    log.error(
+                        "Missing credentials for public album comment like",
+                    );
                     return;
                 }
 
                 const storedIdentity = getStoredAnonIdentity(collectionID);
                 if (!storedIdentity) {
-                    log.error("No stored identity for public album comment like");
+                    // No identity - show modal to set name
+                    setPendingCommentLike(targetComment);
+                    setShowPublicLikeModal(true);
                     return;
                 }
 
@@ -1227,11 +1320,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         const reactions = next.get(collectionID) ?? [];
                         next.set(
                             collectionID,
-                            reactions.filter((r) => r.id !== existingReactionID),
+                            reactions.filter(
+                                (r) => r.id !== existingReactionID,
+                            ),
                         );
                         return next;
                     });
-                    onCommentReactionDeleted?.(collectionID, existingReactionID);
+                    onCommentReactionDeleted?.(
+                        collectionID,
+                        existingReactionID,
+                    );
                 } else {
                     // Like - add a reaction
                     const reactionID = await addPublicCommentReaction(
@@ -1283,11 +1381,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         const reactions = next.get(collectionID) ?? [];
                         next.set(
                             collectionID,
-                            reactions.filter((r) => r.id !== existingReactionID),
+                            reactions.filter(
+                                (r) => r.id !== existingReactionID,
+                            ),
                         );
                         return next;
                     });
-                    onCommentReactionDeleted?.(collectionID, existingReactionID);
+                    onCommentReactionDeleted?.(
+                        collectionID,
+                        existingReactionID,
+                    );
                 } else {
                     // Like - add a reaction
                     const reactionID = await addCommentReaction(
@@ -1617,7 +1720,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 return {
                                     name: email,
                                     // Use email or userID for avatar color
-                                    avatarColorKey: email !== "User" ? email : String(comment.userID),
+                                    avatarColorKey:
+                                        email !== "User"
+                                            ? email
+                                            : String(comment.userID),
                                     isMaskedEmail: email.startsWith("*"),
                                 };
                             };
@@ -1630,8 +1736,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         <CommentHeader
                                             userName={authorInfo.name}
                                             timestamp={comment.createdAt}
-                                            isMaskedEmail={authorInfo.isMaskedEmail}
-                                            avatarColorKey={authorInfo.avatarColorKey}
+                                            isMaskedEmail={
+                                                authorInfo.isMaskedEmail
+                                            }
+                                            avatarColorKey={
+                                                authorInfo.avatarColorKey
+                                            }
                                         />
                                     )}
                                     {showOwnTimestamp && (
@@ -1893,21 +2003,32 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 </InputContainer>
             </DrawerContentWrapper>
 
-            {/* Public album comment modals */}
+            {/* Public album modals */}
             <PublicCommentModal
                 open={showPublicCommentModal}
                 onClose={() => setShowPublicCommentModal(false)}
                 onCommentAnonymously={handleCommentAnonymously}
                 onSignInAndComment={handleSignInAndComment}
             />
+            <PublicLikeModal
+                open={showPublicLikeModal}
+                onClose={() => {
+                    setShowPublicLikeModal(false);
+                    setPendingCommentLike(null);
+                }}
+                onLikeAnonymously={handleLikeAnonymously}
+                onSignInAndLike={handleSignInAndLike}
+            />
             <AddNameModal
                 open={showAddNameModal}
                 onClose={() => {
                     setShowAddNameModal(false);
                     setPendingComment("");
+                    setPendingCommentLike(null);
+                    setAddNameForCommentLike(false);
                 }}
                 onSubmit={handleNameSubmit}
-                actionType="comment"
+                actionType={addNameForCommentLike ? "like" : "comment"}
             />
         </SidebarDrawer>
     );
