@@ -598,6 +598,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
                 onShareClick={onCollectionShare}
+                onSortClick={showSortOrderMenu}
             />
             {validMenuOptions.length > 0 && (
                 <OverflowMenu
@@ -656,12 +657,14 @@ interface QuickOptionsProps {
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
     onShareClick: () => void;
+    onSortClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
+    onSortClick,
     collectionSummary,
     isDownloadInProgress,
 }) => (
@@ -684,6 +687,9 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 collectionSummary={collectionSummary}
                 onClick={onShareClick}
             />
+        )}
+        {showSortQuickOption(collectionSummary) && (
+            <SortQuickOption onClick={onSortClick} />
         )}
     </Stack>
 );
@@ -744,6 +750,21 @@ const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "folder" ||
     attributes.has("favorites") ||
     attributes.has("shared");
+
+const showSortQuickOption = ({ type, fileCount }: CollectionSummary) =>
+    fileCount > 0 &&
+    (type == "album" ||
+        type == "folder" ||
+        type == "userFavorites" ||
+        type == "uncategorized");
+
+const SortQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("sort_by")}>
+        <IconButton onClick={onClick}>
+            <SortIcon />
+        </IconButton>
+    </Tooltip>
+);
 
 interface ShareQuickOptionProps {
     collectionSummary: CollectionSummary;

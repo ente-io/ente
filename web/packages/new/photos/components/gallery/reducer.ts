@@ -417,6 +417,11 @@ export interface GalleryState {
      * discarded when we get around to processing these.
      */
     pendingSearchSuggestions: SearchSuggestion[];
+    /**
+     * Whether search results should be sorted in ascending order (oldest
+     * first). Default is `false` (newest first).
+     */
+    searchResultsSortAsc: boolean;
 
     /*--<  Transient UI state  >--*/
 
@@ -485,7 +490,8 @@ export type GalleryAction =
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "exitSearch"; shouldExitSearchMode?: boolean };
+    | { type: "exitSearch"; shouldExitSearchMode?: boolean }
+    | { type: "setSearchResultsSortAsc"; sortAsc: boolean };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -522,6 +528,7 @@ const initialGalleryState: GalleryState = {
     searchResults: undefined,
     isRecomputingSearchResults: false,
     pendingSearchSuggestions: [],
+    searchResultsSortAsc: false,
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
@@ -1153,6 +1160,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     : state.isInSearchMode,
             });
         }
+
+        case "setSearchResultsSortAsc":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                searchResultsSortAsc: action.sortAsc,
+            });
     }
 };
 
@@ -1822,7 +1835,11 @@ const stateForUpdatedCollectionFiles = (
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
-        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        let filteredFiles = state.searchResults ?? state.filteredFiles;
+        // Sort search results if needed (default is newest first / descending)
+        if (state.searchResultsSortAsc && state.searchResults) {
+            filteredFiles = sortFiles(filteredFiles, true);
+        }
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||

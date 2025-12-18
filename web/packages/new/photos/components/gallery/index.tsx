@@ -9,14 +9,24 @@
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
-import { Paper, Stack, styled, Typography } from "@mui/material";
-import { CenteredFill } from "ente-base/components/containers";
+import SortIcon from "@mui/icons-material/Sort";
+import {
+    IconButton,
+    Menu,
+    Paper,
+    Stack,
+    styled,
+    Tooltip,
+    Typography,
+} from "@mui/material";
+import { CenteredFill, SpacedRow } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { OverflowMenuOption } from "ente-base/components/OverflowMenu";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import type { SearchSuggestion } from "ente-new/photos/services/search/types";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { enableML } from "../../services/ml";
 import { EnableML, FaceConsent } from "../sidebar/MLSettings";
@@ -49,25 +59,89 @@ export type SelectionContext =
 interface SearchResultsHeaderProps {
     searchSuggestion: SearchSuggestion;
     fileCount: number;
+    /** Whether results are sorted ascending (oldest first). Default is false (newest first). */
+    sortAsc: boolean;
+    /** Callback when user changes sort order to ascending (oldest first) */
+    onSortAsc: () => void;
+    /** Callback when user changes sort order to descending (newest first) */
+    onSortDesc: () => void;
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     searchSuggestion,
     fileCount,
-}) => (
-    <GalleryItemsHeaderAdapter>
-        <Typography
-            variant="h6"
-            sx={{ fontWeight: "regular", color: "text.muted" }}
-        >
-            {t("search_results")}
-        </Typography>
-        <GalleryItemsSummary
-            name={searchSuggestion.label}
-            fileCount={fileCount}
-        />
-    </GalleryItemsHeaderAdapter>
-);
+    sortAsc,
+    onSortAsc,
+    onSortDesc,
+}) => {
+    const [sortMenuOpen, setSortMenuOpen] = useState(false);
+    const sortButtonRef = useRef<HTMLButtonElement | null>(null);
+
+    const handleSortClick = () => setSortMenuOpen(true);
+    const handleSortMenuClose = () => setSortMenuOpen(false);
+
+    const handleSortAsc = () => {
+        onSortAsc();
+        handleSortMenuClose();
+    };
+
+    const handleSortDesc = () => {
+        onSortDesc();
+        handleSortMenuClose();
+    };
+
+    return (
+        <GalleryItemsHeaderAdapter>
+            <SpacedRow>
+                <div>
+                    <Typography
+                        variant="h6"
+                        sx={{ fontWeight: "regular", color: "text.muted" }}
+                    >
+                        {t("search_results")}
+                    </Typography>
+                    <GalleryItemsSummary
+                        name={searchSuggestion.label}
+                        fileCount={fileCount}
+                    />
+                </div>
+                {fileCount > 0 && (
+                    <Tooltip
+                        title={sortAsc ? t("oldest_first") : t("newest_first")}
+                    >
+                        <IconButton
+                            ref={sortButtonRef}
+                            onClick={handleSortClick}
+                        >
+                            <SortIcon />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </SpacedRow>
+            <Menu
+                id="search-results-sort"
+                anchorEl={sortButtonRef.current}
+                open={sortMenuOpen}
+                onClose={handleSortMenuClose}
+                slotProps={{
+                    list: {
+                        disablePadding: true,
+                        "aria-labelledby": "search-results-sort",
+                    },
+                }}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <OverflowMenuOption onClick={handleSortDesc}>
+                    {t("newest_first")}
+                </OverflowMenuOption>
+                <OverflowMenuOption onClick={handleSortAsc}>
+                    {t("oldest_first")}
+                </OverflowMenuOption>
+            </Menu>
+        </GalleryItemsHeaderAdapter>
+    );
+};
 
 interface GalleryEmptyStateProps {
     /**
