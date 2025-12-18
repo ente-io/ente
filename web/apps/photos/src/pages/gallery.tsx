@@ -522,6 +522,7 @@ const Page: React.FC = () => {
                     <SearchResultsHeader
                         searchSuggestion={state.searchSuggestion}
                         fileCount={state.searchResults?.length ?? 0}
+                        sortAsc={state.searchSortAsc}
                         onSortOrderChange={(asc) =>
                             dispatch({ type: "setSearchSortOrder", asc })
                         }
@@ -530,7 +531,12 @@ const Page: React.FC = () => {
                 height: 104,
             });
         }
-    }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
+    }, [
+        isInSearchMode,
+        state.searchSuggestion,
+        state.searchResults,
+        state.searchSortAsc,
+    ]);
 
     useEffect(() => {
         const pendingSearchSuggestion = state.pendingSearchSuggestions.at(-1);

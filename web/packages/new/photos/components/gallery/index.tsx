@@ -8,6 +8,7 @@
  */
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import CheckIcon from "@mui/icons-material/Check";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import {
@@ -60,6 +61,13 @@ export type SelectionContext =
 interface SearchResultsHeaderProps {
     searchSuggestion: SearchSuggestion;
     fileCount: number;
+    /**
+     * Current sort order.
+     * - `undefined`: No sort selected (keeps original order, e.g. CLIP relevance)
+     * - `true`: Ascending (oldest first)
+     * - `false`: Descending (newest first)
+     */
+    sortAsc: boolean | undefined;
     /** Called when the user changes the sort order. */
     onSortOrderChange: (asc: boolean) => void;
 }
@@ -67,6 +75,7 @@ interface SearchResultsHeaderProps {
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     searchSuggestion,
     fileCount,
+    sortAsc,
     onSortOrderChange,
 }) => {
     const sortButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -108,6 +117,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
             <SearchSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 sortButtonRef={sortButtonRef}
+                sortAsc={sortAsc}
                 onAscClick={handleAscClick}
                 onDescClick={handleDescClick}
             />
@@ -119,6 +129,7 @@ interface SearchSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
     sortButtonRef: React.RefObject<HTMLButtonElement | null>;
+    sortAsc: boolean | undefined;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -127,6 +138,7 @@ const SearchSortOrderMenu: React.FC<SearchSortOrderMenuProps> = ({
     open,
     onClose,
     sortButtonRef,
+    sortAsc,
     onAscClick,
     onDescClick,
 }) => {
@@ -155,10 +167,16 @@ const SearchSortOrderMenu: React.FC<SearchSortOrderMenuProps> = ({
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-            <OverflowMenuOption onClick={handleDescClick}>
+            <OverflowMenuOption
+                onClick={handleDescClick}
+                endIcon={sortAsc === false ? <CheckIcon /> : undefined}
+            >
                 {t("newest_first")}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={handleAscClick}>
+            <OverflowMenuOption
+                onClick={handleAscClick}
+                endIcon={sortAsc === true ? <CheckIcon /> : undefined}
+            >
                 {t("oldest_first")}
             </OverflowMenuOption>
         </Menu>

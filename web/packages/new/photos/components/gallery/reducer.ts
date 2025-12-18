@@ -444,10 +444,12 @@ export interface GalleryState {
     /**
      * Sort order for search results.
      *
-     * If `true`, search results are sorted in ascending order (oldest first).
-     * Default is `false` (newest first).
+     * - `undefined`: No explicit sort selected, keep original order (preserves
+     *   CLIP relevance sorting for ML searches)
+     * - `true`: Ascending order (oldest first)
+     * - `false`: Descending order (newest first)
      */
-    searchSortAsc: boolean;
+    searchSortAsc: boolean | undefined;
     /**
      * The files to show, uniqued and sorted appropriately.
      */
@@ -534,7 +536,7 @@ const initialGalleryState: GalleryState = {
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
-    searchSortAsc: false,
+    searchSortAsc: undefined,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -1849,8 +1851,12 @@ const stateForUpdatedCollectionFiles = (
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
         const searchFiles = state.searchResults ?? state.filteredFiles;
-        // Create a copy before sorting since sortFiles mutates the array
-        const filteredFiles = sortFiles([...searchFiles], state.searchSortAsc);
+        // Only apply time-based sorting if user explicitly selected a sort order.
+        // When undefined, keep original order (preserves CLIP relevance sorting).
+        const filteredFiles =
+            state.searchSortAsc !== undefined
+                ? sortFiles([...searchFiles], state.searchSortAsc)
+                : searchFiles;
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||
