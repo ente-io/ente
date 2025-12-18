@@ -8,7 +8,6 @@ import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/sync/local_sync_service.dart";
 import 'package:photos/ui/common/bottom_shadow.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
@@ -79,18 +78,6 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         curve: Curves.easeIn,
       );
     });
-
-    // For non-onboarding flows (e.g., user skipped permission during onboarding
-    // and later enabled backup from settings), we need to trigger local sync here.
-    // The skip flag was cleared before navigating to this widget, so sync will
-    // now proceed with first import.
-    // We use LocalSyncService.sync() directly because:
-    // 1. It has its own _existingSync guard - returns existing future if already running
-    // 2. It's all we need for first import (fires completedFirstGalleryImport event)
-    // 3. Avoids race conditions with SyncService._doSync() calling syncAll()
-    if (!widget.isOnboardingFlow) {
-      unawaited(LocalSyncService.instance.sync());
-    }
   }
 
   Future<void> _goToFolderSelection() async {
