@@ -324,7 +324,7 @@ class BackupSettingsScreen extends StatelessWidget {
           isInAlert: true,
         ),
       ],
-      title: "Only backup new photos",
+      title: "Backup only new photos",
       body: hasAllFoldersSelected
           ? "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
           : allowContinueAnyway
