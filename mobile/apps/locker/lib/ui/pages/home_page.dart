@@ -4,6 +4,7 @@ import 'dart:io';
 import "package:app_links/app_links.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
+import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/states/user_details_state.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -304,31 +306,30 @@ class _HomePageState extends UploaderPageState<HomePage>
     final navigator = Navigator.of(context);
     final l10n = context.l10n;
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.sessionExpired),
-          content: Text(l10n.pleaseLoginAgain),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                final dialog = createProgressDialog(
-                  dialogContext,
-                  l10n.pleaseWait,
-                );
-                await dialog.show();
-                await Configuration.instance.logout();
-                await dialog.hide();
-                navigator.popUntil((route) => route.isFirst);
-              },
-              child: Text(l10n.ok),
-            ),
-          ],
-        );
-      },
+    await showAlertBottomSheet(
+      context,
+      title: l10n.sessionExpired,
+      message: l10n.pleaseLoginAgain,
+      assetPath: "assets/warning-grey.png",
+      buttons: [
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            text: context.l10n.ok,
+            onTap: () async {
+              navigator.pop();
+              final dialog = createProgressDialog(
+                context,
+                l10n.pleaseWait,
+              );
+              await dialog.show();
+              await Configuration.instance.logout();
+              await dialog.hide();
+              navigator.popUntil((route) => route.isFirst);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -594,9 +595,7 @@ class _HomePageState extends UploaderPageState<HomePage>
             floatingActionButton: isSearchActive
                 ? null
                 : FloatingActionButton(
-                    onPressed: () {
-                      Bus.instance.fire(TriggerLogoutEvent());
-                    },
+                    onPressed: _openSavePage,
                     shape: const CircleBorder(),
                     backgroundColor: colorScheme.primary700,
                     elevation: 0,
