@@ -5,6 +5,7 @@ import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/christmas_banner_event.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -15,6 +16,8 @@ import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_widget.dart';
+import 'package:photos/ui/home/christmas/christmas_lights_banner.dart';
+import 'package:photos/ui/home/christmas/christmas_utils.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
@@ -35,6 +38,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
+  late StreamSubscription<ChristmasBannerEvent> _christmasBannerSubscription;
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
@@ -82,6 +86,12 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         setState(() {});
       }
     });
+    _christmasBannerSubscription =
+        Bus.instance.on<ChristmasBannerEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
 
     super.initState();
   }
@@ -90,6 +100,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void dispose() {
     _subscription.cancel();
     _notificationSubscription.cancel();
+    _christmasBannerSubscription.cancel();
     super.dispose();
   }
 
@@ -97,6 +108,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        if (isChristmasPeriod()) const ChristmasLightsBanner(),
         HomeHeaderWidget(
           centerWidget: _showStatus && !_showErrorBanner
               ? GestureDetector(

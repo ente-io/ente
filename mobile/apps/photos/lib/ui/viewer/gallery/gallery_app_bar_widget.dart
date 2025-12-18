@@ -103,6 +103,7 @@ enum AlbumPopupAction {
   setCover,
   addPhotos,
   pinAlbum,
+  shareePinAlbum,
   removeLink,
   cleanUncategorized,
   downloadAlbum,
@@ -601,6 +602,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
+          widget.collection!.hasShareePinned()
+              ? AppLocalizations.of(context).unpinAlbum
+              : AppLocalizations.of(context).pinAlbum,
+          value: AlbumPopupAction.shareePinAlbum,
+          iconWidget: widget.collection!.hasShareePinned()
+              ? const Icon(CupertinoIcons.pin_slash)
+              : Transform.rotate(
+                  angle: 45 * math.pi / 180,
+                  child: const Icon(CupertinoIcons.pin),
+                ),
+        ),
+      if (galleryType == GalleryType.sharedCollection)
+        EntePopupMenuItem(
           widget.collection!.hasShareeArchived()
               ? AppLocalizations.of(context).unarchiveAlbum
               : AppLocalizations.of(context).archiveAlbum,
@@ -649,6 +663,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               context,
               widget.collection!,
               widget.collection!.isPinned ? 0 : 1,
+            );
+            if (mounted) setState(() {});
+          } else if (value == AlbumPopupAction.shareePinAlbum) {
+            await updateShareeOrder(
+              context,
+              widget.collection!,
+              widget.collection!.hasShareePinned() ? 0 : 1,
             );
             if (mounted) setState(() {});
           } else if (value == AlbumPopupAction.ownedArchive) {

@@ -1,4 +1,5 @@
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
@@ -643,6 +644,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 overflowMenuIconRef={overflowMenuIconRef}
+                sortAsc={activeCollection.pubMagicMetadata?.data.asc ?? false}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
@@ -837,6 +839,7 @@ interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
     overflowMenuIconRef: React.RefObject<SVGSVGElement | null>;
+    sortAsc: boolean;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -845,6 +848,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     open,
     onClose,
     overflowMenuIconRef,
+    sortAsc,
     onAscClick,
     onDescClick,
 }) => {
@@ -873,10 +877,16 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-            <OverflowMenuOption onClick={handleDescClick}>
+            <OverflowMenuOption
+                onClick={handleDescClick}
+                endIcon={!sortAsc ? <CheckIcon /> : undefined}
+            >
                 {t("newest_first")}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={handleAscClick}>
+            <OverflowMenuOption
+                onClick={handleAscClick}
+                endIcon={sortAsc ? <CheckIcon /> : undefined}
+            >
                 {t("oldest_first")}
             </OverflowMenuOption>
         </Menu>

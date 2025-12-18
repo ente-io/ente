@@ -65,15 +65,20 @@ import {
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
 import { FilePeopleList } from "ente-new/photos/components/PeopleList";
-import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    usePeopleStateSnapshot,
+    useSettingsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
 import {
     updateFileCaption,
     updateFileFileName,
     updateFilePublicMagicMetadata,
 } from "ente-new/photos/services/file";
 import {
+    addManualFileAssignmentsToPerson,
     getAnnotatedFacesForFile,
     isMLEnabled,
     type AnnotatedFaceID,
@@ -194,11 +199,40 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onSelectPerson,
 }) => {
     const { mapEnabled } = useSettingsSnapshot();
+    const peopleState = usePeopleStateSnapshot();
+    const { onGenericError } = useBaseContext();
 
     const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
 
     const { show: showRawExif, props: rawExifVisibilityProps } =
         useModalVisibility();
+    const { show: showAssignPerson, props: assignPersonVisibilityProps } =
+        useModalVisibility();
+
+    const assignablePeople = useMemo(
+        () =>
+            (peopleState?.visiblePeople ?? []).filter(
+                (p) => p.type == "cgroup" && !!p.name,
+            ),
+        [peopleState],
+    );
+
+    const manuallyAssignedPeople = useMemo(() => {
+        if (!isMLEnabled()) return [];
+
+        const detectedPersonIDs = new Set(
+            annotatedFaces.map((f) => f.personID),
+        );
+        return (peopleState?.people ?? []).filter(
+            (p) =>
+                p.type == "cgroup" &&
+                !!p.name &&
+                p.cgroup.data.manuallyAssigned.includes(file.id) &&
+                !detectedPersonIDs.has(p.id),
+        );
+    }, [peopleState, file.id, annotatedFaces]);
+
+    const canAddPerson = isMLEnabled() && assignablePeople.length > 0;
 
     const location = useMemo(
         // Prefer the location in the EnteFile, then fall back to Exif.
@@ -240,6 +274,15 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const handleSelectFace = ({ personID, faceID }: AnnotatedFaceID) => {
         log.info(`Selected person ${personID} for faceID ${faceID}`);
         onSelectPerson?.(personID);
+    };
+
+    const handleAddPerson = async (personID: string) => {
+        assignPersonVisibilityProps.onClose();
+        try {
+            await addManualFileAssignmentsToPerson(personID, [file.id]);
+        } catch (e) {
+            onGenericError(e);
+        }
     };
 
     const uploaderName = file.pubMagicMetadata?.data.uploaderName;
@@ -336,15 +379,25 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         )
                     }
                 />
-                {annotatedFaces.length > 0 && (
-                    <InfoItem icon={<FaceRetouchingNaturalIcon />}>
-                        <FilePeopleList
-                            file={file}
-                            annotatedFaceIDs={annotatedFaces}
-                            onSelectFace={handleSelectFace}
-                        />
-                    </InfoItem>
-                )}
+                {isMLEnabled() &&
+                    (annotatedFaces.length > 0 ||
+                        manuallyAssignedPeople.length > 0 ||
+                        canAddPerson) && (
+                        <InfoItem icon={<FaceRetouchingNaturalIcon />}>
+                            <FilePeopleList
+                                file={file}
+                                annotatedFaceIDs={annotatedFaces}
+                                onSelectFace={handleSelectFace}
+                                manuallyAssignedPeople={manuallyAssignedPeople}
+                                onSelectPerson={onSelectPerson}
+                                onAddPerson={
+                                    canAddPerson ? showAssignPerson : undefined
+                                }
+                                addPersonTitle={t("add_a_person")}
+                                addPersonLabel={t("add")}
+                            />
+                        </InfoItem>
+                    )}
                 {showCollections &&
                     fileCollectionIDs &&
                     collectionNameByID &&
@@ -373,6 +426,15 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 tags={exif?.tags}
                 fileName={fileFileName(file)}
             />
+
+            {canAddPerson && (
+                <AssignPersonDialog
+                    {...assignPersonVisibilityProps}
+                    people={assignablePeople}
+                    title={t("add_a_person")}
+                    onSelectPerson={handleAddPerson}
+                />
+            )}
         </FileInfoSidebar>
     );
 };

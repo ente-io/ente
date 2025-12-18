@@ -19,6 +19,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/account_configured_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
+import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
@@ -56,6 +57,9 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
+import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
+import "package:photos/ui/home/christmas/christmas_utils.dart";
+import "package:photos/ui/home/christmas/snow_fall_overlay.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
 import "package:photos/ui/home/home_bottom_nav_bar.dart";
@@ -65,6 +69,7 @@ import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
+import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
@@ -102,6 +107,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
+  final ValueNotifier<double> _christmasPullOffsetNotifier =
+      ValueNotifier<double>(0);
+  final ValueNotifier<bool> _christmasPullReleasedNotifier =
+      ValueNotifier<bool>(false);
 
   // for receiving media files
   // ignore: unused_field
@@ -128,6 +137,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription _publicAlbumLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
       _homepageSwipeToSelectInProgressEventSubscription;
+  late StreamSubscription<ChristmasBannerEvent>
+      _christmasBannerEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
 
@@ -285,6 +296,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         .on<HomepageSwipeToSelectInProgressEvent>()
         .listen((inProgress) {
       _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
+    });
+
+    _christmasBannerEventSubscription =
+        Bus.instance.on<ChristmasBannerEvent>().listen((_) {
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -515,7 +533,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     _pageController.dispose();
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
+    _christmasBannerEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
+    _christmasPullOffsetNotifier.dispose();
+    _christmasPullReleasedNotifier.dispose();
     super.dispose();
   }
 
@@ -727,13 +748,46 @@ class _HomeWidgetState extends State<HomeWidget> {
                 )
               : null,
           onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
-          body: SafeArea(
-            bottom: false,
-            child: Builder(
-              builder: (context) {
-                return _getBody(context);
-              },
-            ),
+          body: Stack(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: Builder(
+                  builder: (context) {
+                    return _getBody(context);
+                  },
+                ),
+              ),
+              if (isChristmasPeriod())
+                ValueListenableBuilder<double>(
+                  valueListenable: _christmasPullOffsetNotifier,
+                  builder: (context, pullOffset, child) {
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: _christmasPullReleasedNotifier,
+                      builder: (context, isReleased, child) {
+                        if (pullOffset <= 0) {
+                          return const SizedBox.shrink();
+                        }
+                        return Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: ChristmasPullOverlay(
+                            pullOffset: pullOffset,
+                            isReleased: isReleased,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              if (isChristmasPeriod())
+                Positioned.fill(
+                  child: FadingSnowOverlay(
+                    pullOffsetNotifier: _christmasPullOffsetNotifier,
+                  ),
+                ),
+            ],
           ),
 
           ///To fix the status bar not adapting it's color when switching
@@ -818,12 +872,44 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ],
                 );
               },
-              child: HomeGalleryWidget(
-                header: const HeaderWidget(),
-                footer: const SizedBox(
-                  height: 160,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (!isChristmasPeriod()) return false;
+
+                  const double maxPullOffset = 200.0;
+
+                  if (notification is ScrollUpdateNotification) {
+                    final double pixels = notification.metrics.pixels;
+                    if (pixels < 0) {
+                      if (pixels < -maxPullOffset) {
+                        final scrollPosition =
+                            Scrollable.of(notification.context!).position;
+                        scrollPosition.correctBy(-maxPullOffset - pixels);
+                      }
+
+                      final double clampedOffset =
+                          (-pixels).clamp(0.0, maxPullOffset);
+                      _christmasPullOffsetNotifier.value = clampedOffset;
+                      if (_christmasPullReleasedNotifier.value) {
+                        _christmasPullReleasedNotifier.value = false;
+                      }
+                    } else if (_christmasPullOffsetNotifier.value != 0) {
+                      _christmasPullOffsetNotifier.value = 0;
+                    }
+                  } else if (notification is ScrollEndNotification) {
+                    if (_christmasPullOffsetNotifier.value > 0) {
+                      _christmasPullReleasedNotifier.value = true;
+                    }
+                  }
+                  return false;
+                },
+                child: HomeGalleryWidget(
+                  header: const HeaderWidget(),
+                  footer: const SizedBox(
+                    height: 160,
+                  ),
+                  selectedFiles: _selectedFiles,
                 ),
-                selectedFiles: _selectedFiles,
               ),
             );
           },
@@ -963,6 +1049,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void _onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) async {
+    if (!mounted) return;
     final String? payload = notificationResponse.payload;
     if (payload != null) {
       debugPrint('notification payload: $payload');
@@ -975,6 +1062,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
             ? int.tryParse(albumIdRaw)
             : null;
+        if (ritualId.isNotEmpty) {
+          // Ensure the camera is stacked on top of the ritual page so the user
+          // lands on the ritual details after adding photos via a notification.
+          // ignore: unawaited_futures
+          routeToPage(
+            context,
+            RitualPage(ritualId: ritualId),
+          );
+        }
         // ignore: unawaited_futures
         routeToPage(
           context,

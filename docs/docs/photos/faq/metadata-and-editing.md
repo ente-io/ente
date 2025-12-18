@@ -255,6 +255,10 @@ We have considered modifying our desktop and CLI clients to write back the photo
 
 Ente is a photos app, not a file system backup app. Customers for whom the creation time of the file on disk is paramount might be better served by file backup apps.
 
+### Does the date taken of a file change when the file is downloaded or exported? {#date-taken-preservation}
+
+No, the date taken (or "date time") remains the same and is preserved in the EXIF of the file. However, the creation date and modification date are changed as stated in the above FAQ.
+
 ### Can I modify the original files during export? {#modify-originals}
 
 No. Ente guarantees that you will get back the _exact_ same original photos and videos that you imported. The modifications (e.g. date changes) you make within Ente will be written into a separate metadata JSON file during export so as to not modify the original.
