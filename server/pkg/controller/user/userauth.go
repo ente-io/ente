@@ -148,10 +148,6 @@ func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose
 			return err
 		}
 	}
-	app := auth.GetApp(ctx)
-	if app == ente.Locker && purpose == ente.SignUpOTTPurpose {
-		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, "signup ott restricted for locker")
-	}
 	isSignUpComplete, err := c.isSignUpComplete(email)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -362,19 +358,6 @@ func (c *UserController) ensureLockerAccess(userID int64, app ente.App) error {
 		return nil
 	}
 
-	// Check if user has completed registration (has key_attributes)
-	// This is permanent data that persists even if user logs out of all sessions
-	// Free tier: Users with existing Ente account can use Locker with limited features
-	// Paid tier: Users with paid Photos subscription get full Locker features
-	_, err := c.UserRepo.GetKeyAttributes(userID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled,
-				"locker is available only to existing Ente users")
-		}
-		return stacktrace.Propagate(err, "failed to check user key attributes")
-	}
-
 	// Check rollout limit
 	if err := c.UserAuthRepo.EnsureLockerRolloutAccess(userID); err != nil {
 		return stacktrace.Propagate(err, "locker access: rollout check failed")
@@ -445,9 +428,6 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			if app == ente.Locker {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, "locker signup is restricted to paid users")
-			}
 			if viper.GetBool("internal.disable-registration") {
 				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			} else {
