@@ -160,6 +160,26 @@ class CollectionService {
     return collections.where((collection) => !collection.isDeleted).toList();
   }
 
+  Future<List<Collection>> getCollectionsForUI({
+    bool includeViewerCollections = false,
+    bool includeUncategorized = false,
+  }) async {
+    final collections = await getCollections();
+    final int userID = Configuration.instance.getUserID()!;
+
+    return collections.where((c) {
+      if (!includeUncategorized && c.type == CollectionType.uncategorized) {
+        return false;
+      }
+
+      if (includeViewerCollections) {
+        return true;
+      }
+
+      return c.canAdd(userID);
+    }).toList();
+  }
+
   Future<Collection?> getCollectionByID(int collectionID) async {
     if (_collectionIDToCollections.containsKey(collectionID)) {
       return _collectionIDToCollections[collectionID];

@@ -2530,6 +2530,60 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get subscribe;
 
+  /// No description provided for @sharedWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with'**
+  String get sharedWith;
+
+  /// No description provided for @shareLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Share later'**
+  String get shareLater;
+
+  /// No description provided for @enterNameOrEmailToShareWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name or email to share with'**
+  String get enterNameOrEmailToShareWith;
+
+  /// No description provided for @chooseFromAnExistingContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from an existing contact'**
+  String get chooseFromAnExistingContact;
+
+  /// No description provided for @scheduleShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule share'**
+  String get scheduleShare;
+
+  /// No description provided for @addEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get addEmail;
+
+  /// No description provided for @addNewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new email'**
+  String get addNewEmail;
+
+  /// No description provided for @noSharedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Not shared with anyone yet. Share this collection by adding someone\'s email below.'**
+  String get noSharedUsers;
+
+  /// No description provided for @removeAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove access'**
+  String get removeAccess;
+
   /// No description provided for @subscriptionRequiredForSharing.
   ///
   /// In en, this message translates to:
