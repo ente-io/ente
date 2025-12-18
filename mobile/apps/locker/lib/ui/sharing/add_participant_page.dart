@@ -352,7 +352,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             controller: _textController,
             focusNode: textFieldFocusNode,
             style: getEnteTextTheme(context).body,
-            autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
                 borderRadius: const BorderRadius.all(Radius.circular(4.0)),

@@ -4,17 +4,21 @@ import 'dart:io';
 import "package:app_links/app_links.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
+import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/states/user_details_state.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -195,6 +199,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
   StreamSubscription<Uri>? _deepLinkSubscription;
+  StreamSubscription<TriggerLogoutEvent>? _triggerLogoutSubscription;
 
   @override
   void onFileUploadComplete() {
@@ -279,14 +284,53 @@ class _HomePageState extends UploaderPageState<HomePage>
     Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       await _loadCollections();
     });
+
+    _triggerLogoutSubscription =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+      await _autoLogoutAlert();
+    });
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose();
     _deepLinkSubscription?.cancel();
+    _triggerLogoutSubscription?.cancel();
     disposeSharing();
     super.dispose();
+  }
+
+  Future<void> _autoLogoutAlert() async {
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+    final l10n = context.l10n;
+
+    await showAlertBottomSheet(
+      context,
+      title: l10n.sessionExpired,
+      message: l10n.pleaseLoginAgain,
+      assetPath: "assets/warning-grey.png",
+      buttons: [
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            text: context.l10n.ok,
+            onTap: () async {
+              navigator.pop();
+              final dialog = createProgressDialog(
+                context,
+                l10n.pleaseWait,
+              );
+              await dialog.show();
+              await Configuration.instance.logout();
+              await dialog.hide();
+              navigator.popUntil((route) => route.isFirst);
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   void initializeSharing() {

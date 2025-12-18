@@ -16,6 +16,7 @@ import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 
@@ -151,7 +152,6 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     return TextFormField(
       controller: _textController,
       focusNode: textFieldFocusNode,
-      autofillHints: const [AutofillHints.email],
       decoration: InputDecoration(
         fillColor: colorScheme.fillFaint,
         filled: true,
@@ -368,16 +368,23 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       _selectedRecoveryDays,
     );
     if (confirmed == true) {
+      final dialog = createProgressDialog(
+        context,
+        context.strings.pleaseWait,
+      );
+      await dialog.show();
       try {
         final r = await EmergencyContactService.instance.addContact(
           context,
           emailToAdd,
           _selectedRecoveryDays,
         );
+        await dialog.hide();
         if (r && mounted) {
           Navigator.of(context).pop(true);
         }
       } catch (e) {
+        await dialog.hide();
         _logger.severe("Failed to add contact", e);
         if (mounted) {
           await showAlertBottomSheet(
