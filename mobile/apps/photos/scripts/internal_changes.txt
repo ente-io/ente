@@ -1,4 +1,3 @@
-- Prateek: Fix backup folder selection page UI spacing and typography
 - Ashil: Move add to album cta in file viewer from popup menu to bottom bar
 - Fix remove from album [1](https://github.com/ente-io/ente/issues/7705)
 - Neeraj:  Show public link to album participants
