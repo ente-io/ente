@@ -187,6 +187,54 @@ export const addPublicReaction = async (
 };
 
 /**
+ * Add a reaction to a comment in a public album (as an anonymous user).
+ *
+ * @param credentials Public album credentials (access token).
+ * @param collectionID The collection ID for looking up stored identity.
+ * @param commentID The ID of the comment to react to.
+ * @param reactionType The type of reaction (e.g., "green_heart").
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @param anonIdentity Optional anonymous identity. If not provided, will use stored identity.
+ * @returns The ID of the created reaction.
+ */
+export const addPublicCommentReaction = async (
+    credentials: PublicAlbumsCredentials,
+    collectionID: number,
+    commentID: string,
+    reactionType: string,
+    collectionKey: string,
+    anonIdentity?: AnonIdentity,
+): Promise<string> => {
+    const identity = anonIdentity ?? getStoredAnonIdentity(collectionID);
+    if (!identity) {
+        throw new Error("No anonymous identity available");
+    }
+
+    const { encryptedData: cipher, nonce } = await encryptBox(
+        new TextEncoder().encode(padReaction(reactionType)),
+        collectionKey,
+    );
+
+    const res = await fetch(await apiURL("/public-collection/reactions"), {
+        method: "POST",
+        headers: {
+            ...authenticatedPublicAlbumsRequestHeaders(credentials),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            commentID,
+            cipher,
+            nonce,
+            anonUserID: identity.anonUserID,
+            anonToken: identity.token,
+        }),
+    });
+    ensureOk(res);
+    const { id } = UpsertReactionResponse.parse(await res.json());
+    return id;
+};
+
+/**
  * Delete a reaction from a public album (as an anonymous user).
  *
  * @param credentials Public album credentials (access token).
@@ -258,9 +306,7 @@ export const getPublicFileReactions = async (
             sinceTime: 0,
             limit: 100,
         }),
-        {
-            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-        },
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);
     const { reactions } = GetPublicReactionsResponse.parse(await res.json());
@@ -335,12 +381,9 @@ export const getPublicAnonProfiles = async (
     credentials: PublicAlbumsCredentials,
     collectionKey: string,
 ): Promise<Map<string, string>> => {
-    const res = await fetch(
-        await apiURL("/public-collection/anon-profiles"),
-        {
-            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-        },
-    );
+    const res = await fetch(await apiURL("/public-collection/anon-profiles"), {
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+    });
     ensureOk(res);
     const { profiles } = GetAnonProfilesResponse.parse(await res.json());
 
@@ -401,9 +444,7 @@ export const getPublicParticipantsMaskedEmails = async (
 ): Promise<Map<number, string>> => {
     const res = await fetch(
         await apiURL("/public-collection/participants/masked-emails"),
-        {
-            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-        },
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);
     const { participants } = GetParticipantsResponse.parse(await res.json());
@@ -422,4 +463,155 @@ const RemoteParticipant = z.object({
 
 const GetParticipantsResponse = z.object({
     participants: z.array(RemoteParticipant),
+});
+
+// =============================================================================
+// Unified Social Diff
+// =============================================================================
+
+/**
+ * A decrypted public comment.
+ */
+export interface PublicComment {
+    id: string;
+    collectionID: number;
+    fileID?: number;
+    parentCommentID?: string;
+    userID: number;
+    anonUserID?: string;
+    text: string;
+    isDeleted: boolean;
+    createdAt: number;
+    updatedAt: number;
+}
+
+/**
+ * Result of fetching unified social diff.
+ */
+export interface PublicSocialDiff {
+    comments: PublicComment[];
+    reactions: PublicReaction[];
+}
+
+/**
+ * Get both comments and reactions for a file in a public album in a single API call.
+ *
+ * @param credentials Public album credentials (access token).
+ * @param fileID The ID of the file to get social data for.
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @returns Object containing both decrypted comments and reactions.
+ */
+export const getPublicSocialDiff = async (
+    credentials: PublicAlbumsCredentials,
+    fileID: number,
+    collectionKey: string,
+): Promise<PublicSocialDiff> => {
+    const res = await fetch(
+        await apiURL("/public-collection/social/diff", {
+            fileID,
+            sinceTime: 0,
+            limit: 1000,
+        }),
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+    );
+    ensureOk(res);
+    const data = GetPublicSocialDiffResponse.parse(await res.json());
+
+    // Decrypt comments
+    const comments: PublicComment[] = [];
+    for (const comment of data.comments) {
+        // Include deleted comments with empty text
+        if (comment.isDeleted || !comment.cipher || !comment.nonce) {
+            comments.push({
+                id: comment.id,
+                collectionID: comment.collectionID,
+                fileID: comment.fileID ?? undefined,
+                parentCommentID: comment.parentCommentID ?? undefined,
+                userID: comment.userID,
+                anonUserID: comment.anonUserID ?? undefined,
+                text: "",
+                isDeleted: comment.isDeleted,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+            });
+            continue;
+        }
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: comment.cipher, nonce: comment.nonce },
+                collectionKey,
+            );
+            const text = new TextDecoder().decode(
+                Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+            );
+            comments.push({
+                id: comment.id,
+                collectionID: comment.collectionID,
+                fileID: comment.fileID ?? undefined,
+                parentCommentID: comment.parentCommentID ?? undefined,
+                userID: comment.userID,
+                anonUserID: comment.anonUserID ?? undefined,
+                text,
+                isDeleted: comment.isDeleted,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+            });
+        } catch {
+            // Skip comments that fail to decrypt
+        }
+    }
+
+    // Decrypt reactions
+    const reactions: PublicReaction[] = [];
+    for (const reaction of data.reactions) {
+        // Skip deleted reactions (they have null cipher/nonce)
+        if (reaction.isDeleted || !reaction.cipher || !reaction.nonce) continue;
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: reaction.cipher, nonce: reaction.nonce },
+                collectionKey,
+            );
+            const reactionType = unpadReaction(
+                new TextDecoder().decode(
+                    Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+                ),
+            );
+            reactions.push({
+                id: reaction.id,
+                fileID: reaction.fileID ?? fileID,
+                commentID: reaction.commentID ?? undefined,
+                reactionType,
+                userID: reaction.userID,
+                anonUserID: reaction.anonUserID ?? undefined,
+                isDeleted: reaction.isDeleted,
+                createdAt: reaction.createdAt,
+                updatedAt: reaction.updatedAt,
+            });
+        } catch {
+            // Skip reactions that fail to decrypt
+        }
+    }
+
+    return { comments, reactions };
+};
+
+const RemotePublicComment = z.object({
+    id: z.string(),
+    collectionID: z.number(),
+    fileID: z.number().nullish(),
+    parentCommentID: z.string().nullish(),
+    userID: z.number(),
+    anonUserID: z.string().nullish(),
+    cipher: z.string().nullish(),
+    nonce: z.string().nullish(),
+    isDeleted: z.boolean(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+});
+
+const GetPublicSocialDiffResponse = z.object({
+    comments: z.array(RemotePublicComment),
+    reactions: z.array(RemotePublicReaction),
+    hasMoreComments: z.boolean(),
+    hasMoreReactions: z.boolean(),
 });

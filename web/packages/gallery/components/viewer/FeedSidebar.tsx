@@ -339,8 +339,15 @@ const processFeedItems = (
     for (const c of comments) {
         if (c.isDeleted) continue;
 
-        // Look up display name from userID
-        const displayName = users.get(c.userID) ?? "User";
+        // Look up display name - check for anonymous users first
+        const isAnonymous = !!c.anonUserID;
+        const displayName = isAnonymous
+            ? getAnonUserName(c.anonUserID)
+            : getUserName(c.userID);
+        // Use anonUserID for avatar color (consistent with LikesSidebar)
+        const avatarColorKey = isAnonymous
+            ? (c.anonUserID ?? "anonymous")
+            : getUserName(c.userID);
 
         // Only show "Replied to your comment" if the parent comment belongs to
         // the current user. Otherwise show "Commented on your photo".
@@ -361,7 +368,7 @@ const processFeedItems = (
                     userID: c.userID,
                     anonUserID: c.anonUserID,
                     userName: displayName,
-                    email: displayName,
+                    email: avatarColorKey,
                 },
             });
         } else {
@@ -378,7 +385,7 @@ const processFeedItems = (
                     userID: c.userID,
                     anonUserID: c.anonUserID,
                     userName: displayName,
-                    email: displayName,
+                    email: avatarColorKey,
                 },
             });
         }

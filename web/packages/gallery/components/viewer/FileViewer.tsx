@@ -48,8 +48,8 @@ import {
     createAnonIdentity,
     deletePublicReaction,
     getPublicAnonProfiles,
-    getPublicFileReactions,
     getPublicParticipantsMaskedEmails,
+    getPublicSocialDiff,
     getStoredAnonIdentity,
 } from "ente-new/albums/services/public-reaction";
 import {
@@ -2050,7 +2050,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         isFileInSharedCollection,
     ]);
 
-    // Fetch reactions for public albums (when viewing as anonymous user).
+    // Fetch social data (comments + reactions) for public albums (when viewing as anonymous user).
     useEffect(() => {
         if (
             !open ||
@@ -2065,11 +2065,35 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         void (async () => {
             try {
-                const reactions = await getPublicFileReactions(
+                // Fetch both comments and reactions in a single API call
+                const { comments, reactions } = await getPublicSocialDiff(
                     publicAlbumsCredentials,
                     activeFileID,
                     collectionKey,
                 );
+
+                // Convert PublicComment to Comment format
+                const commentsForFile: Comment[] = comments.map((c) => ({
+                    id: c.id,
+                    collectionID: c.collectionID,
+                    fileID: c.fileID,
+                    parentCommentID: c.parentCommentID,
+                    userID: c.userID,
+                    anonUserID: c.anonUserID,
+                    text: c.text,
+                    isDeleted: c.isDeleted,
+                    createdAt: c.createdAt,
+                    updatedAt: c.updatedAt,
+                }));
+
+                const commentsMap = new Map<number, Comment[]>();
+                commentsMap.set(file.collectionID, commentsForFile);
+
+                setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(activeFileID, commentsMap);
+                    return next;
+                });
 
                 // Convert PublicReaction to UnifiedReaction format
                 const unifiedReactions: UnifiedReaction[] = reactions.map(
@@ -2130,7 +2154,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // Ignore participants fetch failures
                 }
             } catch (e) {
-                log.error("Failed to fetch public reactions", e);
+                log.error("Failed to fetch public social data", e);
             }
         })();
     }, [open, activeFileID, publicAlbumsCredentials, collectionKey, files]);
@@ -2264,6 +2288,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onCommentReactionAdded={handleCommentReactionAdded}
                 onCommentReactionDeleted={handleCommentReactionDeleted}
                 highlightCommentID={highlightCommentID}
+                publicAlbumsCredentials={publicAlbumsCredentials}
+                collectionKey={collectionKey}
+                anonUserNames={anonUserNames}
             />
             <LikesSidebar
                 open={openLikes}
