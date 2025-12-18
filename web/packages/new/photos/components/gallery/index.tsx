@@ -68,8 +68,11 @@ interface SearchResultsHeaderProps {
      * - `false`: Descending (newest first)
      */
     sortAsc: boolean | undefined;
-    /** Called when the user changes the sort order. */
-    onSortOrderChange: (asc: boolean) => void;
+    /**
+     * Called when the user changes the sort order.
+     * Pass `undefined` to reset to the original order (e.g., CLIP relevance).
+     */
+    onSortOrderChange: (asc: boolean | undefined) => void;
 }
 
 export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
@@ -81,6 +84,12 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     const sortButtonRef = useRef<HTMLButtonElement | null>(null);
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
+
+    const isClipSearch = searchSuggestion.type === "clip";
+
+    const handleRelevanceClick = () => {
+        onSortOrderChange(undefined);
+    };
 
     const handleAscClick = () => {
         onSortOrderChange(true);
@@ -118,6 +127,8 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
                 {...sortOrderMenuVisibilityProps}
                 sortButtonRef={sortButtonRef}
                 sortAsc={sortAsc}
+                isClipSearch={isClipSearch}
+                onRelevanceClick={handleRelevanceClick}
                 onAscClick={handleAscClick}
                 onDescClick={handleDescClick}
             />
@@ -130,6 +141,10 @@ interface SearchSortOrderMenuProps {
     onClose: () => void;
     sortButtonRef: React.RefObject<HTMLButtonElement | null>;
     sortAsc: boolean | undefined;
+    /** Whether the current search is a CLIP (magic) search. */
+    isClipSearch: boolean;
+    /** Called when the user selects "Most Relevant" (only shown for CLIP searches). */
+    onRelevanceClick: () => void;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -139,9 +154,16 @@ const SearchSortOrderMenu: React.FC<SearchSortOrderMenuProps> = ({
     onClose,
     sortButtonRef,
     sortAsc,
+    isClipSearch,
+    onRelevanceClick,
     onAscClick,
     onDescClick,
 }) => {
+    const handleRelevanceClick = () => {
+        onRelevanceClick();
+        onClose();
+    };
+
     const handleAscClick = () => {
         onAscClick();
         onClose();
@@ -167,6 +189,14 @@ const SearchSortOrderMenu: React.FC<SearchSortOrderMenuProps> = ({
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
+            {isClipSearch && (
+                <OverflowMenuOption
+                    onClick={handleRelevanceClick}
+                    endIcon={sortAsc === undefined ? <CheckIcon /> : undefined}
+                >
+                    {t("most_relevant")}
+                </OverflowMenuOption>
+            )}
             <OverflowMenuOption
                 onClick={handleDescClick}
                 endIcon={sortAsc === false ? <CheckIcon /> : undefined}
