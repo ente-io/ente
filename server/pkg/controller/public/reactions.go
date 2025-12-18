@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const maxReactionPayloadSize = 2 * 1024
+const reactionCipherLength = 156
 
 // ReactionsController exposes reactions for public collections.
 type ReactionsController struct {
@@ -36,10 +36,7 @@ type ReactionDeleteRequest struct {
 }
 
 func (c *ReactionsController) UpsertReaction(ctx *gin.Context, collectionID int64, req ReactionRequest) (string, error) {
-	if len(req.Cipher) == 0 || len(req.Cipher) > maxReactionPayloadSize {
-		return "", ente.ErrBadRequest
-	}
-	if len(req.Nonce) == 0 {
+	if len(req.Cipher) != reactionCipherLength || len(req.Nonce) == 0 {
 		return "", ente.ErrBadRequest
 	}
 	if req.FileID != nil && req.CommentID != nil {

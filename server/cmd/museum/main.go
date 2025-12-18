@@ -578,6 +578,7 @@ func main() {
 
 	privateAPI.GET("/social/diff", socialHandler.UnifiedDiff)
 	privateAPI.GET("/social/anon-profiles", socialHandler.AnonProfiles)
+	privateAPI.GET("/social/album-feed", socialHandler.AlbumFeed)
 	privateAPI.GET("/comments-reactions/counts", socialHandler.Counts)
 
 	emergencyCtrl := &emergency.Controller{
@@ -699,6 +700,7 @@ func main() {
 	publicCollectionAPI.GET("/multipart-upload-urls", publicCollectionHandler.GetMultipartUploadURLs)
 	publicCollectionAPI.POST("/file", publicCollectionHandler.CreateFile)
 	publicCollectionAPI.POST("/verify-password", publicCollectionHandler.VerifyPassword)
+	publicCollectionAPI.GET("/social/diff", publicSocialHandler.SocialDiff)
 	publicCollectionAPI.GET("/comments/diff", publicSocialHandler.CommentDiff)
 	publicCollectionAPI.POST("/comments", publicSocialHandler.CreateComment)
 	publicCollectionAPI.PUT("/comments/:commentID", publicSocialHandler.UpdateComment)

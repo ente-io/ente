@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const maxReactionPayloadBytes = 2 * 1024
+const reactionCipherLength = 156
 
 // ReactionsHandler exposes authenticated reaction APIs.
 type ReactionsHandler struct {
@@ -33,7 +33,7 @@ func (h *ReactionsHandler) Upsert(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxReactionPayloadBytes || len(payload.Nonce) == 0 {
+	if len(payload.Cipher) != reactionCipherLength || len(payload.Nonce) == 0 {
 		handler.Error(c, ente.ErrBadRequest)
 		return
 	}

@@ -123,8 +123,12 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
         FROM reactions
         WHERE collection_id = $1
           AND updated_at > $2
-          AND ($3 IS NULL OR file_id IS NOT DISTINCT FROM $3)
-          AND ($4 IS NULL OR comment_id = $4)
+          AND (
+              $3::bigint IS NULL
+              OR file_id = $3::bigint
+              OR comment_id IN (SELECT id FROM comments WHERE collection_id = $1 AND file_id = $3::bigint)
+          )
+          AND ($4::text IS NULL OR comment_id = $4::text)
         ORDER BY updated_at ASC
         LIMIT $5
     `
@@ -256,4 +260,100 @@ func buildActorKey(userID int64, anonUserID *string) (string, error) {
 		return "", stacktrace.Propagate(ente.ErrBadRequest, "anon_user_id must be empty for authenticated actor")
 	}
 	return fmt.Sprintf("U:%d", userID), nil
+}
+
+// GetAlbumFeedReactions returns reactions relevant to the feed for a user:
+// 1. Reactions on files owned by the user
+// 2. Reactions on user's comments
+// For reactions on comments, file_id is populated from the comment's file_id.
+func (repo *ReactionsRepository) GetAlbumFeedReactions(ctx context.Context, collectionID int64, userID int64, since int64, limit int) ([]socialentity.Reaction, bool, error) {
+	query := `
+        SELECT r.id, r.collection_id,
+               COALESCE(r.file_id, c.file_id) as file_id,
+               r.comment_id, (c.parent_comment_id IS NOT NULL) as is_comment_reply,
+               r.user_id, r.anon_user_id, r.cipher, r.nonce, r.is_deleted, r.created_at, r.updated_at
+        FROM reactions r
+        LEFT JOIN comments c ON r.comment_id = c.id
+        WHERE r.collection_id = $1
+          AND r.updated_at > $2
+          AND r.is_deleted = FALSE
+          AND r.user_id != $3
+          AND (
+              -- Reactions on files owned by the user
+              (r.file_id IS NOT NULL AND r.comment_id IS NULL AND r.file_id IN (
+                  SELECT file_id FROM collection_files
+                  WHERE collection_id = $1 AND f_owner_id = $3 AND is_deleted = FALSE
+              ))
+              OR
+              -- Reactions on user's comments
+              (r.comment_id IS NOT NULL AND r.comment_id IN (
+                  SELECT id FROM comments WHERE collection_id = $1 AND user_id = $3
+              ))
+          )
+        ORDER BY r.updated_at DESC
+        LIMIT $4
+    `
+	rows, err := repo.DB.QueryContext(ctx, query, collectionID, since, userID, limit+1)
+	if err != nil {
+		return nil, false, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	reactions := make([]socialentity.Reaction, 0, limit+1)
+	for rows.Next() {
+		var (
+			file           sql.NullInt64
+			comment        sql.NullString
+			isCommentReply sql.NullBool
+			anon           sql.NullString
+			cipher         sql.NullString
+			nonce          sql.NullString
+			reaction       socialentity.Reaction
+		)
+		if err := rows.Scan(
+			&reaction.ID,
+			&reaction.CollectionID,
+			&file,
+			&comment,
+			&isCommentReply,
+			&reaction.UserID,
+			&anon,
+			&cipher,
+			&nonce,
+			&reaction.IsDeleted,
+			&reaction.CreatedAt,
+			&reaction.UpdatedAt,
+		); err != nil {
+			return nil, false, stacktrace.Propagate(err, "")
+		}
+		if file.Valid {
+			reaction.FileID = &file.Int64
+		}
+		if comment.Valid {
+			reaction.CommentID = &comment.String
+		}
+		if isCommentReply.Valid {
+			reaction.IsCommentReply = &isCommentReply.Bool
+		}
+		if anon.Valid {
+			reaction.AnonUserID = &anon.String
+		}
+		if cipher.Valid {
+			reaction.Cipher = cipher.String
+		}
+		if nonce.Valid {
+			reaction.Nonce = nonce.String
+		}
+		reactions = append(reactions, reaction)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, false, stacktrace.Propagate(err, "")
+	}
+
+	hasMore := false
+	if len(reactions) > limit {
+		hasMore = true
+		reactions = reactions[:limit]
+	}
+	return reactions, hasMore, nil
 }

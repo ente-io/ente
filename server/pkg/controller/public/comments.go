@@ -51,6 +51,7 @@ type CommentDeleteRequest struct {
 }
 
 type participant struct {
+	UserID      int64  `json:"userID"`
 	EmailMasked string `json:"emailMasked"`
 }
 
@@ -148,19 +149,21 @@ func (c *CommentsController) Participants(ctx context.Context, collectionID int6
 	for _, id := range reactionIDs {
 		ids[id] = struct{}{}
 	}
-	masked := make([]string, 0, len(ids))
+	participants := make([]participant, 0, len(ids))
 	for id := range ids {
 		user, err := c.UserRepo.GetUserByIDInternal(id)
 		if err != nil {
 			continue
 		}
-		masked = append(masked, emailUtil.GetMaskedEmail(user.Email))
+		participants = append(participants, participant{
+			UserID:      id,
+			EmailMasked: emailUtil.GetMaskedEmail(user.Email),
+		})
 	}
-	sort.Strings(masked)
-	participants := make([]participant, len(masked))
-	for idx, maskedEmail := range masked {
-		participants[idx] = participant{EmailMasked: maskedEmail}
-	}
+	// Sort by userID for consistent ordering
+	sort.Slice(participants, func(i, j int) bool {
+		return participants[i].UserID < participants[j].UserID
+	})
 	return participants, nil
 }
 

@@ -137,3 +137,38 @@ func (c *Controller) ListAnonProfiles(ctx *gin.Context, req AnonProfilesRequest)
 	}
 	return c.AnonUsersRepo.ListByCollection(ctx.Request.Context(), req.CollectionID)
 }
+
+// AlbumFeedRequest describes the parameters for getting a user's album feed.
+type AlbumFeedRequest struct {
+	CollectionID int64
+	Since        int64
+	Limit        int
+}
+
+// AlbumFeed returns comments and reactions relevant to the current user's feed.
+// This includes:
+// - Comments on files owned by the user (excluding user's own comments)
+// - Replies to user's comments
+// - Reactions on files owned by the user
+// - Reactions on user's comments
+func (c *Controller) AlbumFeed(ctx *gin.Context, userID int64, req AlbumFeedRequest) ([]socialentity.Comment, []socialentity.Reaction, bool, bool, error) {
+	// Verify user has access to the collection
+	if _, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+		CollectionID: req.CollectionID,
+		ActorUserID:  userID,
+	}); err != nil {
+		return nil, nil, false, false, stacktrace.Propagate(err, "")
+	}
+
+	comments, moreComments, err := c.CommentsRepo.GetAlbumFeedComments(ctx.Request.Context(), req.CollectionID, userID, req.Since, req.Limit)
+	if err != nil {
+		return nil, nil, false, false, stacktrace.Propagate(err, "")
+	}
+
+	reactions, moreReactions, err := c.ReactionsRepo.GetAlbumFeedReactions(ctx.Request.Context(), req.CollectionID, userID, req.Since, req.Limit)
+	if err != nil {
+		return nil, nil, false, false, stacktrace.Propagate(err, "")
+	}
+
+	return comments, reactions, moreComments, moreReactions, nil
+}

@@ -294,3 +294,42 @@ func (h *PublicCommentsHandler) AnonProfiles(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"profiles": profiles})
 }
+
+// SocialDiff returns both comments and reactions in a single response.
+func (h *PublicCommentsHandler) SocialDiff(c *gin.Context) {
+	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
+	since, err := parseDiffSinceTime(c.Query("sinceTime"))
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	limit, err := parseDiffLimit(c.Query("limit"))
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	fileID, err := parseOptionalInt64(c.Query("fileID"))
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+
+	comments, hasMoreComments, err := h.CommentsCtrl.ListComments(c, collectionID, since, limit, fileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+
+	reactions, hasMoreReactions, err := h.ReactionsCtrl.ListReactions(c, collectionID, since, limit, fileID, nil)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"comments":         comments,
+		"reactions":        reactions,
+		"hasMoreComments":  hasMoreComments,
+		"hasMoreReactions": hasMoreReactions,
+	})
+}
