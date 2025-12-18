@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/l10n/l10n.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -288,6 +289,12 @@ class BackupSettingsScreen extends StatelessWidget {
 
     final hasAllFoldersSelected =
         backupPreferenceService.hasSelectedAllFoldersForBackup;
+
+    // Hide "Continue anyway" if user skipped permission and first import not done
+    final allowContinueAnyway =
+        !backupPreferenceService.hasSkippedOnboardingPermission ||
+            LocalSyncService.instance.hasCompletedFirstImport();
+
     final result = await showActionSheet(
       context: context,
       buttons: [
@@ -299,14 +306,15 @@ class BackupSettingsScreen extends StatelessWidget {
           shouldStickToDarkTheme: true,
           isInAlert: true,
         ),
-        ButtonWidget(
-          labelText: context.l10n.continueLabel,
-          buttonType: ButtonType.neutral,
-          buttonAction: ButtonAction.second,
-          shouldSurfaceExecutionStates: false,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
+        if (allowContinueAnyway)
+          ButtonWidget(
+            labelText: context.l10n.continueLabel,
+            buttonType: ButtonType.neutral,
+            buttonAction: ButtonAction.second,
+            shouldSurfaceExecutionStates: false,
+            shouldStickToDarkTheme: true,
+            isInAlert: true,
+          ),
         ButtonWidget(
           labelText: context.l10n.cancel,
           buttonType: ButtonType.secondary,
@@ -316,10 +324,12 @@ class BackupSettingsScreen extends StatelessWidget {
           isInAlert: true,
         ),
       ],
-      title: "Only backup new photos",
+      title: "Backup only new photos",
       body: hasAllFoldersSelected
           ? "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
-          : "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders.",
+          : allowContinueAnyway
+              ? "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
+              : "No folders are currently selected for backup.\n\nPlease select folders to continue.",
     );
 
     if (result?.action == null || result!.action == ButtonAction.cancel) {
