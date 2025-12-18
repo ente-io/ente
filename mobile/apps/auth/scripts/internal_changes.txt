@@ -1,5 +1,13 @@
-- Prateek: App icon picker, refreshed Auth icon/splash, Windows taskbar blur fix, and Linux icon assignment (StartupWMClass)
-- Prateek: Polished empty/initial home screen with unified buttons and refreshed accent; updated primary color to a darker shade
-- Prateek: Branded QR code design and shared dialog (pretty QR) aligned with Photos
-- Prateek: Added andOTP import with encrypted backup support; fixed encrypted import password re-entry regression
-- Prateek: Fixed search bar padding and back navigation handling
+- Prateek: Fixed taskbar icon not restoring when reopening app from Start Menu/launcher while hidden to tray (Windows/Linux)
+- Prateek: App icon picker to customize home screen appearance; refreshed app icon and splash screen design
+- Prateek: Redesigned empty home screen with improved layout and colors
+- Prateek: New QR code sharing dialog with updated design
+- Joice Joseph: Added support for importing 2FA codes from andOTP backups (including encrypted backups)
+- Prateek: Various UI/UX bug fixes (search bar, back navigation, import password re-entry)
+- Aman Raj: Fixed Windows file path issue; cleaned up unused assets
+- Jude Cooray: Added keyboard shortcuts for desktop (/ for search, C to copy code, N for next code)
+
+**Icons**
+- Added: Dupe, Hytale, US Army
+- Updated: Best Buy (renamed slug), Borrowell, Bybit, Ubisoft
+- Deleted: best_buy.svg (consolidated to bestbuy.svg)

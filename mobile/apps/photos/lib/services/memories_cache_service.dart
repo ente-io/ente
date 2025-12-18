@@ -224,8 +224,16 @@ class MemoriesCacheService {
     }
     return _memoriesGetLock.synchronized(() async {
       if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
-        _logger.info("Found memories in memory cache");
-        return _cachedMemories!;
+        final currentMemories = _cachedMemories!
+            .where((memory) => memory.shouldShowNow())
+            .toList();
+        if (currentMemories.isNotEmpty) {
+          _logger.info("Found memories in memory cache");
+          return currentMemories;
+        }
+        _logger.info(
+          "In-memory memories not valid for current window, refreshing cache",
+        );
       } else if (onlyUseCache) {
         _logger.info("Only using cache, no memories found");
         return [];
@@ -237,6 +245,10 @@ class MemoriesCacheService {
         }
         _cachedMemories = await _getMemoriesFromCache();
         if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+          if (onlyUseCache) {
+            _logger.info("Only using cache, no memories found");
+            return [];
+          }
           _logger.warning(
             "No memories found in cache, force updating cache. Possible severe caching issue",
           );

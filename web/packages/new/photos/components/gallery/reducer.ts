@@ -20,6 +20,7 @@ import {
     isArchivedCollection,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
@@ -441,6 +442,15 @@ export interface GalleryState {
      */
     isInSearchMode: boolean;
     /**
+     * Sort order for search results.
+     *
+     * - `undefined`: No explicit sort selected, keep original order (preserves
+     *   CLIP relevance sorting for ML searches)
+     * - `true`: Ascending order (oldest first)
+     * - `false`: Descending order (newest first)
+     */
+    searchSortAsc: boolean | undefined;
+    /**
      * The files to show, uniqued and sorted appropriately.
      */
     filteredFiles: EnteFile[];
@@ -485,7 +495,8 @@ export type GalleryAction =
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "exitSearch"; shouldExitSearchMode?: boolean };
+    | { type: "exitSearch"; shouldExitSearchMode?: boolean }
+    | { type: "setSearchSortOrder"; asc: boolean | undefined };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -525,6 +536,7 @@ const initialGalleryState: GalleryState = {
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
+    searchSortAsc: undefined,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -1153,6 +1165,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     : state.isInSearchMode,
             });
         }
+
+        case "setSearchSortOrder":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                searchSortAsc: action.asc,
+            });
     }
 };
 
@@ -1536,6 +1554,16 @@ const createCollectionSummaries = (
             attributes.add("pinned");
             sortPriority = CollectionSummarySortPriority.pinned;
         }
+        // Check for sharee pinned (for incoming shared collections)
+        // Only apply when the feature flag is enabled
+        if (
+            settingsSnapshot().isShareePinEnabled &&
+            type == "sharedIncoming" &&
+            collection.sharedMagicMetadata?.data.order == CollectionOrder.pinned
+        ) {
+            attributes.add("shareePinned");
+            sortPriority = CollectionSummarySortPriority.pinned;
+        }
 
         if (type == "sharedIncoming" && collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.
@@ -1822,7 +1850,13 @@ const stateForUpdatedCollectionFiles = (
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
-        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        const searchFiles = state.searchResults ?? state.filteredFiles;
+        // Only apply time-based sorting if user explicitly selected a sort order.
+        // When undefined, keep original order (preserves CLIP relevance sorting).
+        const filteredFiles =
+            state.searchSortAsc !== undefined
+                ? sortFiles([...searchFiles], state.searchSortAsc)
+                : searchFiles;
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||

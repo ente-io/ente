@@ -853,7 +853,6 @@
   },
   "sorry": "Sorry",
   "subscribe": "Subscribe",
-  "subscriptionRequiredForSharing": "You need a paid subscription to share links",
   "sharedWith": "Shared with",
   "shareLater": "Share later",
   "enterNameOrEmailToShareWith": "Enter name or email to share with",
@@ -861,6 +860,9 @@
   "scheduleShare": "Schedule share",
   "addEmail": "Add email",
   "addNewEmail": "Add new email",
-  "noSharedUsers": "No shared users yet",
-  "removeAccess": "Remove access"
+  "noSharedUsers": "Not shared with anyone yet. Share this collection by adding someone's email below.",
+  "removeAccess": "Remove access",
+  "subscriptionRequiredForSharing": "You need a paid subscription to share links",
+  "sessionExpired": "Session expired",
+  "pleaseLoginAgain": "Please login again"
 }

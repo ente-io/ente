@@ -1834,7 +1834,14 @@
   "almostDone": "Neredeyse tamam...",
   "all": "Hepsi",
   "hoorayyyy": "Hoorayyyy!",
-  "cLTitle3": "Yeni anılar",
+  "cLTitle1": "Ritüeller Tanıtılıyor",
+  "cLDesc1": "2026 için kararlar mı planlıyorsunuz? Ritüeller ile Ente Photos'ta hatırlatıcı ayarlayabilir ve fotoğraf çekerek ilerlemenizi takip edebilirsiniz. Egzersizler, beslenme alışkanlıkları, sevdiklerinizle günlük anlar için kullanın – alışkanlık haline getirmek istediğiniz her şey için.",
+  "cLTitle2": "Herkese açık bağlantılar, artık herkes için",
+  "cLDesc2": "Ücretsiz plandaki tüm Ente kullanıcıları artık fotoğraflara ve albümlere herkese açık bağlantılar oluşturabilir ve paylaşabilir. Kötüye kullanımı önlemek için bağlantıların kaç kişinin görüntüleyebileceğine dair sınırları olacak.",
+  "cLTitle3": "Kişileri manuel olarak etiketle",
+  "cLDesc3": "Artık cihaz üzerindeki yapay zekamız yüz algılamasa bile kişileri etiketleyebilirsiniz. Evcil hayvanlar, kısmen görünen yüzler veya birinin aslında fotoğrafta olmadığı ama yine de dahil edilmesi gereken anlar için kullanışlı.",
+  "cLTitle4": "Ve daha fazlası",
+  "cLDesc4": "Artık paylaşılan albümleri sabitleyebilirsiniz. Albüm bağlantıları, paylaşımı daha da kolaylaştırmak için ortak çalışanlar ve izleyiciler tarafından görülebilir. Bazı iOS kaydırma hatalarını düzelttik ve yeni bir favori simgesi dahil fotoğraf görünümünü güncelledik (gelecek özellikler için yer açıyoruz).",
   "closeBy": "Kapat",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

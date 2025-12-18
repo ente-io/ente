@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.29-beta+1229
+version: 1.2.30+1230
 publish_to: none
 
 environment:
@@ -58,6 +58,8 @@ dependencies:
     path: plugins/ente_crypto
   ente_feature_flag:
     path: plugins/ente_feature_flag
+  ente_icons:
+    path: ../../packages/ente_icons
   ente_photos_rust:
     path: rust_builder
   ente_qr_ui:

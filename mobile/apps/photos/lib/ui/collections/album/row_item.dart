@@ -104,6 +104,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                               final bool isSelected =
                                   selectedAlbums?.isAlbumSelected(c) ?? false;
                               final String heroTag = tagPrefix + thumbnail.tag;
+                              // Show pin icon for owner's pinned albums OR sharee's pinned albums
+                              final bool showPin =
+                                  isOwner ? c.isPinned : c.hasShareePinned();
                               final thumbnailWidget = ThumbnailWidget(
                                 thumbnail,
                                 shouldShowArchiveStatus: isOwner
@@ -111,7 +114,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                     : c.hasShareeArchived(),
                                 showFavForAlbumOnly: true,
                                 shouldShowSyncStatus: false,
-                                shouldShowPinIcon: isOwner && c.isPinned,
+                                shouldShowPinIcon: showPin,
                                 key: Key(heroTag),
                               );
                               return Hero(
@@ -187,13 +190,12 @@ class AlbumRowItemWidget extends StatelessWidget {
                         ),
                         if (!isOwner)
                           Align(
-                            alignment: Alignment.bottomRight,
+                            alignment: Alignment.topLeft,
                             child: Hero(
                               tag: tagPrefix + "_owner_other",
                               transitionOnUserGestures: true,
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 4, bottom: 4),
+                                padding: const EdgeInsets.only(left: 4, top: 4),
                                 child: UserAvatarWidget(
                                   c.owner,
                                   thumbnailView: true,

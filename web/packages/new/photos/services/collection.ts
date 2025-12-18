@@ -1037,6 +1037,22 @@ export const updateCollectionOrder = async (
 ) => updateCollectionPrivateMagicMetadata(collection, { order });
 
 /**
+ * Change the order (pin/unpin) of a shared collection on remote for the sharee.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections shared with the user (not owned).
+ *
+ * @param collection The shared collection whose order we want to change.
+ *
+ * @param order Whether on not the collection is pinned by the sharee.
+ */
+export const updateShareeCollectionOrder = async (
+    collection: Collection,
+    order: CollectionOrder,
+) => updateCollectionShareeMagicMetadata(collection, { order });
+
+/**
  * Change the sort order of the files with a collection on remote.
  *
  * Remote only, does not modify local state.

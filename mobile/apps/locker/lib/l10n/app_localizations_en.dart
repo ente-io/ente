@@ -1472,10 +1472,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscribe => 'Subscribe';
 
   @override
-  String get subscriptionRequiredForSharing =>
-      'You need a paid subscription to share links';
-
-  @override
   String get sharedWith => 'Shared with';
 
   @override
@@ -1497,8 +1493,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNewEmail => 'Add new email';
 
   @override
-  String get noSharedUsers => 'No shared users yet';
+  String get noSharedUsers =>
+      'Not shared with anyone yet. Share this collection by adding someone\'s email below.';
 
   @override
   String get removeAccess => 'Remove access';
+
+  @override
+  String get subscriptionRequiredForSharing =>
+      'You need a paid subscription to share links';
+
+  @override
+  String get sessionExpired => 'Session expired';
+
+  @override
+  String get pleaseLoginAgain => 'Please login again';
 }

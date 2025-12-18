@@ -1946,10 +1946,14 @@
   "hoorayyyy": "Uuhuuuulll!",
   "nothingToTidyUpHere": "Nada para arrumar aqui",
   "deletingDash": "Apagando - ",
-  "cLTitle3": "Novas recordações",
-  "cLDesc3": "“Crianças brincalhonas”, “Aventuras de inverno”, “Noites neon” e muito mais.",
-  "cLTitle4": "Galeria de paisagens e muito mais",
-  "cLDesc4": "Suporte para layout paisagem na galeria principal do aplicativo. Mostrar pessoas sem fotos associadas em vez de filtrá-las. Melhorar a detecção do aspecto do vídeo quando compartilhado a partir de aplicativos externos.",
+  "cLTitle1": "Apresentando Rituais",
+  "cLDesc1": "Planejando resoluções para 2026? Com Rituais, você pode definir um lembrete no Ente Photos e acompanhar seu progresso tirando fotos. Use para treinos, hábitos alimentares, momentos diários com entes queridos – qualquer coisa que você queira transformar em hábito.",
+  "cLTitle2": "Links públicos, agora para todos",
+  "cLDesc2": "Todos os usuários Ente no plano gratuito agora podem criar e compartilhar links públicos para fotos e álbuns. Para prevenir abusos, os links terão limites de quantas pessoas podem visualizá-los.",
+  "cLTitle3": "Marcar pessoas manualmente",
+  "cLDesc3": "Agora você pode marcar pessoas mesmo quando nossa IA no dispositivo não detecta um rosto. Útil para animais de estimação, rostos parcialmente visíveis, ou momentos onde alguém não está realmente na foto mas deveria ser incluído.",
+  "cLTitle4": "E mais",
+  "cLDesc4": "Agora você pode fixar álbuns compartilhados. Links de álbuns são visíveis para colaboradores e visualizadores para facilitar ainda mais o compartilhamento. Corrigimos alguns bugs de deslizamento no iOS e atualizamos a visualização de fotos, incluindo um novo ícone de favoritos (abrindo espaço para recursos futuros).",
   "closeBy": "Parecida",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

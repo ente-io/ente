@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "Xin lỗi, không thể thêm vào mục yêu thích!",
   "sorryCouldNotRemoveFromFavorites": "Xin lỗi, không thể xóa khỏi mục yêu thích!",
   "subscribeToEnableSharing": "Bạn phải dùng gói trả phí mới có thể chia sẻ.",
+  "subscribeToChangeLinkSetting": "Bạn cần mua gói trả phí để thay đổi cài đặt liên kết này.",
   "subscribe": "Đăng ký gói",
   "canOnlyRemoveFilesOwnedByYou": "Chỉ có thể xóa các tệp thuộc sở hữu của bạn",
   "deleteSharedAlbum": "Xóa album chia sẻ?",
@@ -411,7 +412,7 @@
       }
     }
   },
-  "selectedPhotos": "{count} đã chọn",
+  "selectedPhotos": "Đã chọn {count} mục",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
     "type": "text",
@@ -1206,10 +1207,13 @@
   "unpinAlbum": "Bỏ ghim album",
   "pinAlbum": "Ghim album",
   "pin": "Ghim",
+  "pinPerson": "Ghim người này",
   "pinToTop": "Ghim lên đầu",
   "unpin": "Bỏ ghim",
+  "unpinPerson": "Bỏ ghim người này",
   "visibility": "Hiển thị",
   "hideFromMemories": "Ẩn khỏi kỷ niệm",
+  "showInMemories": "Hiện trong kỷ niệm",
   "create": "Tạo",
   "viewAll": "Xem tất cả",
   "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
@@ -1321,6 +1325,8 @@
   "enterDateOfBirth": "Sinh nhật (tùy chọn)",
   "birthday": "Sinh nhật",
   "removePersonLabel": "Xóa nhãn người",
+  "removePersonTag": "Xóa nhãn người",
+  "areYouSureRemoveThisPersonTag": "Bạn có chắc muốn xóa nhãn người này?",
   "autoPairDesc": "Kết nối tự động chỉ hoạt động với các thiết bị hỗ trợ Chromecast.",
   "manualPairDesc": "Kết nối bằng PIN hoạt động với bất kỳ màn hình nào bạn muốn.",
   "connectToDevice": "Kết nối với thiết bị",
@@ -1768,7 +1774,7 @@
   "pastYearsMemories": "Kỷ niệm năm ngoái",
   "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) có trong {count} album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
   "addParticipants": "Thêm người tham gia",
-  "selectedAlbums": "{count} đã chọn",
+  "selectedAlbums": "Đã chọn {count} album",
   "actionNotSupportedOnFavouritesAlbum": "Hành động không áp dụng trong album Đã thích",
   "onThisDayMemories": "Kỷ niệm hôm nay",
   "onThisDay": "Vào ngày này",
@@ -1972,14 +1978,14 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Chuyển đến ngày",
-  "cLDesc1": "Xem các ảnh xung quanh cho bất kỳ ảnh nào bằng cách chọn tùy chọn chuyển đến ngày trong ngăn thông tin của tệp.",
-  "cLTitle2": "Chỉnh sửa video nhanh hơn",
-  "cLDesc2": "Trình chỉnh sửa video đã được cải tiến để cải thiện đáng kể tốc độ khi chỉnh sửa video lớn cũng như cải thiện UX.",
-  "cLTitle3": "Kỷ niệm mới",
-  "cLDesc3": "\"Những đứa trẻ vui tươi\", \"Cuộc phiêu lưu mùa đông\", \"Đêm neon\" và hơn thế nữa.",
-  "cLTitle4": "Phòng trưng bày phong cảnh và hơn thế nữa",
-  "cLDesc4": "Hỗ trợ bố cục ngang trong thư viện chính của ứng dụng. Hiển thị những người không có bất kỳ ảnh liên quan nào thay vì lọc chúng ra. Cải thiện khả năng phát hiện khía cạnh video khi được chia sẻ từ các ứng dụng bên ngoài.",
+  "cLTitle1": "Giới thiệu Nghi thức",
+  "cLDesc1": "Bạn đang lên kế hoạch cho năm 2026? Với Nghi thức, bạn có thể đặt lời nhắc trên Ente Photos và theo dõi tiến trình bằng cách chụp ảnh. Sử dụng cho tập luyện, thói quen ăn uống, những khoảnh khắc hàng ngày với người thân – bất cứ điều gì bạn muốn biến thành thói quen.",
+  "cLTitle2": "Liên kết công khai, giờ dành cho tất cả",
+  "cLDesc2": "Tất cả người dùng Ente trên gói miễn phí giờ đây có thể tạo và chia sẻ liên kết công khai đến ảnh và album. Để ngăn chặn lạm dụng, liên kết sẽ có giới hạn về số người có thể xem.",
+  "cLTitle3": "Gắn thẻ người thủ công",
+  "cLDesc3": "Bạn giờ có thể gắn thẻ người ngay cả khi AI trên thiết bị không phát hiện khuôn mặt. Tiện lợi cho thú cưng, khuôn mặt nhìn thấy một phần, hoặc những khoảnh khắc mà ai đó không thực sự trong ảnh nhưng vẫn nên được bao gồm.",
+  "cLTitle4": "Và hơn thế nữa",
+  "cLDesc4": "Bạn giờ có thể ghim album chia sẻ. Liên kết album hiển thị cho cộng tác viên và người xem để chia sẻ dễ dàng hơn. Chúng tôi đã sửa một số lỗi vuốt trên iOS và cập nhật chế độ xem ảnh, bao gồm biểu tượng yêu thích mới (chuẩn bị cho các tính năng sắp tới).",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2017,11 +2023,11 @@
   "riverCruises": "Cảnh quan trên sông",
   "facesTimelineBannerTitle": "Hồi Ức",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Xem ảnh của {name} qua từng năm",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,7 +2085,7 @@
   },
   "facesTimelineUnavailable": "Đang chuẩn bị dòng thời gian...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Trẻ em vui chơi",
   "coastalCliffs": "Vách đá bên bờ biển",

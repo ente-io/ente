@@ -20,6 +20,7 @@ import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
@@ -144,7 +145,6 @@ class SelectablePersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = 82 * (size / 102);
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
     final bool isPinnedPerson =
@@ -173,12 +173,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  ClipPath(
-                    clipper: ShapeBorderClipper(
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(borderRadius),
-                      ),
-                    ),
+                  FaceThumbnailSquircleClip(
                     child: Container(
                       width: size,
                       height: size,
@@ -209,15 +204,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                       return SizedBox(
                         width: size - 2,
                         height: size - 2,
-                        child: ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius:
-                                  searchResult.previewThumbnail() != null
-                                      ? BorderRadius.circular(borderRadius - 1)
-                                      : BorderRadius.circular(81),
-                            ),
-                          ),
+                        child: FaceThumbnailSquircleClip(
                           child: Stack(
                             fit: StackFit.expand,
                             children: [

@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "Désolé, impossible d'ajouter aux favoris !",
   "sorryCouldNotRemoveFromFavorites": "Désolé, impossible de supprimer des favoris !",
   "subscribeToEnableSharing": "Vous avez besoin d'un abonnement payant actif pour activer le partage.",
+  "subscribeToChangeLinkSetting": "Vous avez besoin d'un abonnement payant pour modifier le paramètre de ce lien.",
   "subscribe": "S'abonner",
   "canOnlyRemoveFilesOwnedByYou": "Vous ne pouvez supprimer que les fichiers que vous possédez",
   "deleteSharedAlbum": "Supprimer l'album partagé ?",
@@ -1206,10 +1207,13 @@
   "unpinAlbum": "Désépingler l'album",
   "pinAlbum": "Épingler l'album",
   "pin": "Épingler",
+  "pinPerson": "Épingler une personne",
   "pinToTop": "Épingler en haut",
   "unpin": "Désépingler",
+  "unpinPerson": "Désépingler une personne",
   "visibility": "Visibilité",
   "hideFromMemories": "Masquer des souvenirs",
+  "showInMemories": "Afficher dans les souvenirs",
   "create": "Créer",
   "viewAll": "Tout afficher",
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
@@ -1321,6 +1325,8 @@
   "enterDateOfBirth": "Anniversaire (facultatif)",
   "birthday": "Anniversaire",
   "removePersonLabel": "Supprimer le libellé d'une personne",
+  "removePersonTag": "Supprimer le tag d'une personne",
+  "areYouSureRemoveThisPersonTag": "Voulez-vous vraiment supprimer le tag de cette personne ?",
   "autoPairDesc": "L'appairage automatique ne fonctionne qu'avec les appareils qui prennent en charge Chromecast.",
   "manualPairDesc": "L'appairage avec le code PIN fonctionne avec n'importe quel écran sur lequel vous souhaitez voir votre album.",
   "connectToDevice": "Connexion à l'appareil",
@@ -1972,14 +1978,14 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Aller à la date",
-  "cLDesc1": "Voyez les photos environnantes pour toute photo en sélectionnant l'option \"Aller à la date\" dans le panneau d'information du fichier.",
-  "cLTitle2": "Éditeur vidéo plus rapide",
-  "cLDesc2": "L'éditeur de vidéos a été remanié pour améliorer considérablement sa vitesse lors de l'édition de vidéos plus longues, et aussi améliorer l'expérience utilisateur.",
-  "cLTitle3": "Nouveaux souvenirs",
-  "cLDesc3": "\"Enfants qui jouent\", \"Aventures d'hiver\", \"Nuits sous les néons\", et plus encore.",
-  "cLTitle4": "Galerie paysage et plus encore",
-  "cLDesc4": "Prise en charge de la mise en page paysage dans la galerie principale de l'application. Affiche les personnes sans photos associées au lieu de les filtrer. Améliorer la détection d'aspect vidéo lorsque partagé à partir d'applications externes.",
+  "cLTitle1": "Présentation des Rituels",
+  "cLDesc1": "Vous préparez des résolutions pour 2026 ? Avec Rituels, vous pouvez définir un rappel sur Ente Photos et suivre vos progrès en prenant des photos. Utilisez-le pour les entraînements, les habitudes alimentaires, les moments quotidiens avec vos proches – tout ce que vous voulez transformer en habitude.",
+  "cLTitle2": "Liens publics, maintenant pour tous",
+  "cLDesc2": "Tous les utilisateurs Ente sur le plan gratuit peuvent désormais créer et partager des liens publics vers des photos et des albums. Pour prévenir les abus, les liens auront des limites sur le nombre de personnes pouvant les consulter.",
+  "cLTitle3": "Taguer manuellement des personnes",
+  "cLDesc3": "Vous pouvez maintenant taguer des personnes même quand notre IA embarquée ne détecte pas de visage. Pratique pour les animaux de compagnie, les visages partiellement visibles, ou les moments où quelqu'un n'est pas vraiment sur la photo mais devrait quand même y être inclus.",
+  "cLTitle4": "Et plus encore",
+  "cLDesc4": "Vous pouvez maintenant épingler des albums partagés. Les liens d'albums sont visibles pour les collaborateurs et les spectateurs pour faciliter encore plus le partage. Nous avons corrigé quelques bugs de balayage iOS et mis à jour la vue photo, y compris une nouvelle icône de favori (préparant la place pour les fonctionnalités à venir).",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2017,11 +2023,11 @@
   "riverCruises": "Vue sur le fleuve",
   "facesTimelineBannerTitle": "Souvenirs",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Voir les photos de {name}au fil des années",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,7 +2085,7 @@
   },
   "facesTimelineUnavailable": "L'historique des visages est en préparation...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Enfants amusants",
   "coastalCliffs": "Falaises au bord de mer",

@@ -2530,12 +2530,6 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get subscribe;
 
-  /// No description provided for @subscriptionRequiredForSharing.
-  ///
-  /// In en, this message translates to:
-  /// **'You need a paid subscription to share links'**
-  String get subscriptionRequiredForSharing;
-
   /// No description provided for @sharedWith.
   ///
   /// In en, this message translates to:
@@ -2581,7 +2575,7 @@ abstract class AppLocalizations {
   /// No description provided for @noSharedUsers.
   ///
   /// In en, this message translates to:
-  /// **'No shared users yet'**
+  /// **'Not shared with anyone yet. Share this collection by adding someone\'s email below.'**
   String get noSharedUsers;
 
   /// No description provided for @removeAccess.
@@ -2589,6 +2583,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove access'**
   String get removeAccess;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get sessionExpired;
+
+  /// No description provided for @pleaseLoginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login again'**
+  String get pleaseLoginAgain;
 }
 
 class _AppLocalizationsDelegate

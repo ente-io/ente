@@ -160,9 +160,10 @@
       "title": "Belo"
     },
     {
-      "title": "bestbuy",
+      "title": "Best Buy",
+      "slug": "bestbuy",
       "altNames": [
-        "Best Buy",
+        "BestBuy",
         "bestbuy.com"
       ]
     },
@@ -1837,6 +1838,10 @@
     },
     {
       "title": "Upstox"
+    },
+    {
+      "title": "US Army",
+      "slug": "us_army"
     },
     {
       "title": "US Mobile",

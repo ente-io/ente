@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:io';
 
+import 'package:ente_icons/ente_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -11,6 +12,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -85,6 +87,12 @@ class FileBottomBarState extends State<FileBottomBar> {
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    final bool isFileHidden = widget.file.isOwner &&
+        widget.file.isUploaded &&
+        (CollectionsService.instance
+                .getCollectionByID(widget.file.collectionID!)
+                ?.isHidden() ??
+            false);
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
@@ -132,6 +140,33 @@ class FileBottomBarState extends State<FileBottomBar> {
           ),
         ),
       );
+
+      if (widget.file.isUploaded && !isFileHidden) {
+        children.add(
+          Tooltip(
+            message: AppLocalizations.of(context).addToAlbum,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: IconButton(
+                icon: const Icon(
+                  EnteIcons.addToAlbum,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  final selectedFiles = SelectedFiles();
+                  selectedFiles.files.add(widget.file);
+                  showCollectionActionSheet(
+                    context,
+                    selectedFiles: selectedFiles,
+                    actionType: CollectionActionType.addFiles,
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
     }
     return ValueListenableBuilder(
       valueListenable: widget.enableFullScreenNotifier,

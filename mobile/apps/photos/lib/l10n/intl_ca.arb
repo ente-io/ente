@@ -2017,11 +2017,11 @@
   "riverCruises": "Vistes de creuer fluvial",
   "facesTimelineBannerTitle": "Camí dels records",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Veure les fotos de {name} a través dels anys",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,7 +2079,7 @@
   },
   "facesTimelineUnavailable": "El camí dels records s'està preparant...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Nens juganers",
   "coastalCliffs": "Penya-segats vora el mar",

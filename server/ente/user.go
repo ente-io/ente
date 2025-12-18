@@ -98,6 +98,9 @@ func (sk *SetUserAttributesRequest) Validate() error {
 	if strength != ExpectedKDFStrength {
 		return NewBadRequestWithMessage("Unexpected KDF strength")
 	}
+	if sk.KeyAttributes.MemLimit < 128*1024*1024 {
+		return NewBadRequestWithMessage("memory limit must be at least 128MB")
+	}
 	return nil
 }
 
@@ -119,6 +122,9 @@ func (u *UpdateKeysRequest) Validate() error {
 	strength := u.MemLimit * u.OpsLimit
 	if strength != ExpectedKDFStrength {
 		return NewBadRequestWithMessage("Unexpected KDF strength")
+	}
+	if u.MemLimit < 128*1024*1024 {
+		return NewBadRequestWithMessage("memory limit must be at least 128MB")
 	}
 	return nil
 }

@@ -51,6 +51,8 @@ Create a shareable link without creating an album first:
 - Quick links can be converted to regular albums if needed
 - Removing a link doesn't delete the photos
 
+Quick link is not supported on web/desktop.
+
 ## Link features
 
 Public links support powerful customization, security, and control features:

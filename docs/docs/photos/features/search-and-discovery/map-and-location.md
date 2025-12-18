@@ -102,7 +102,7 @@ Location tags are custom labels you create to organize photos by location. Unlik
 **From a photo:**
 
 1. Open a photo
-2. Click **Info** (i)
+2. Tap the overflow menu (⋮) and select **Info**
 3. Select **Add Location**
 4. Enter the location name and define a radius
 

@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -42,7 +43,8 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
         ]),
         editOnTap: ((widget.file.ownerID == null ||
                     widget.file.ownerID == widget.currentUserID) &&
-                widget.file.uploadedFileID != null)
+                widget.file.uploadedFileID != null &&
+                !widget.file.isTrash)
             ? () {
                 _showDateTimePicker(widget.file);
               }

@@ -1,4 +1,5 @@
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
@@ -46,6 +47,7 @@ import {
     updateCollectionOrder,
     updateCollectionSortOrder,
     updateCollectionVisibility,
+    updateShareeCollectionOrder,
 } from "ente-new/photos/services/collection";
 import {
     PseudoCollectionID,
@@ -152,7 +154,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const { mapEnabled } = useSettingsSnapshot();
+    const { mapEnabled, isShareePinEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
@@ -347,6 +349,14 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         updateCollectionOrder(activeCollection, CollectionOrder.default),
     );
 
+    const pinSharedAlbum = wrap(() =>
+        updateShareeCollectionOrder(activeCollection, CollectionOrder.pinned),
+    );
+
+    const unpinSharedAlbum = wrap(() =>
+        updateShareeCollectionOrder(activeCollection, CollectionOrder.default),
+    );
+
     const hideAlbum = wrap(async () => {
         await updateCollectionVisibility(
             activeCollection,
@@ -449,6 +459,28 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "sharedIncoming":
             menuOptions = [
+                // Pin/Unpin for shared incoming collections (behind feature flag)
+                ...(isShareePinEnabled
+                    ? [
+                          collectionSummary.attributes.has("shareePinned") ? (
+                              <OverflowMenuOption
+                                  key="unpin"
+                                  onClick={unpinSharedAlbum}
+                                  startIcon={<PushPinOutlinedIcon />}
+                              >
+                                  {t("unpin_album")}
+                              </OverflowMenuOption>
+                          ) : (
+                              <OverflowMenuOption
+                                  key="pin"
+                                  onClick={pinSharedAlbum}
+                                  startIcon={<PushPinIcon />}
+                              >
+                                  {t("pin_album")}
+                              </OverflowMenuOption>
+                          ),
+                      ]
+                    : []),
                 collectionSummary.attributes.has("archived") ? (
                     <OverflowMenuOption
                         key="unarchive"
@@ -612,6 +644,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 overflowMenuIconRef={overflowMenuIconRef}
+                sortAsc={activeCollection.pubMagicMetadata?.data.asc ?? false}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
@@ -806,6 +839,7 @@ interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
     overflowMenuIconRef: React.RefObject<SVGSVGElement | null>;
+    sortAsc: boolean;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -814,6 +848,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     open,
     onClose,
     overflowMenuIconRef,
+    sortAsc,
     onAscClick,
     onDescClick,
 }) => {
@@ -842,10 +877,16 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-            <OverflowMenuOption onClick={handleDescClick}>
+            <OverflowMenuOption
+                onClick={handleDescClick}
+                endIcon={!sortAsc ? <CheckIcon /> : undefined}
+            >
                 {t("newest_first")}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={handleAscClick}>
+            <OverflowMenuOption
+                onClick={handleAscClick}
+                endIcon={sortAsc ? <CheckIcon /> : undefined}
+            >
                 {t("oldest_first")}
             </OverflowMenuOption>
         </Menu>

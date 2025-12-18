@@ -349,7 +349,6 @@ class CollectionActions {
         await CollectionApiClient.instance.leaveCollection(collection);
         if (context.mounted) {
           onSuccess?.call();
-          Navigator.of(context).pop();
           showToast(
             context,
             "Leave collection successfully",
