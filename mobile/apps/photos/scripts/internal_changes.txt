@@ -1,11 +1,12 @@
 - Prateek: Fix backup folder selection page UI spacing and typography
-- Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
-- Ashil: New favorite icon
-- Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
+- Ashil: Move add to album cta in file viewer from popup menu to bottom bar
+- Fix remove from album [1](https://github.com/ente-io/ente/issues/7705)
+- Neeraj:  Show public link to album participants
+- Laurens: (i) Rituals redesign
 - Laurens: (i) Manual people tagging
+- Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
+- Prateek: Pin/Unpin for "Shared with you" albums (mobile + web)
+- Ashil: New favorite icon
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Neeraj: (i) Admin Role + Suggest Delete feature
-- Laurens: (i) People Memory Lane feature
-- Neeraj: (i) Show public link to album participants
-- Prateek: Fix backup folder selection page UI spacing and typography

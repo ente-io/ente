@@ -11,6 +11,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -630,36 +631,31 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                border: Border.all(
-                  color: getEnteColorScheme(context).strokeFainter,
-                  width: 1,
+              decoration: ShapeDecoration(
+                shape: faceThumbnailSquircleBorder(
+                  side: 72,
+                  borderSide: BorderSide(
+                    color: getEnteColorScheme(context).strokeFainter,
+                    width: 1,
+                  ),
                 ),
               ),
-              child: ClipRRect(
-                child: ClipPath(
-                  clipper: ShapeBorderClipper(
-                    shape: ContinuousRectangleBorder(
-                      borderRadius: BorderRadius.circular(52),
-                    ),
-                  ),
-                  child: (i == -1)
-                      ? PersonFaceWidget(
-                          personId: suggestPerson.remoteID,
-                          key: ValueKey('person_${suggestPerson.remoteID}'),
-                        )
-                      : FileFaceWidget(
-                          key: ValueKey(
-                            'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
-                          ),
-                          file,
-                          faceCrop: faceCrop,
-                          clusterID: currentSuggestion.clusterIDToMerge,
-                          useFullFile: true,
-                          thumbnailFallback: true,
+              child: FaceThumbnailSquircleClip(
+                child: (i == -1)
+                    ? PersonFaceWidget(
+                        personId: suggestPerson.remoteID,
+                        key: ValueKey('person_${suggestPerson.remoteID}'),
+                      )
+                    : FileFaceWidget(
+                        key: ValueKey(
+                          'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
                         ),
-                ),
+                        file,
+                        faceCrop: faceCrop,
+                        clusterID: currentSuggestion.clusterIDToMerge,
+                        useFullFile: true,
+                        thumbnailFallback: true,
+                      ),
               ),
             ),
             if (i == -1) const SizedBox(height: 8),

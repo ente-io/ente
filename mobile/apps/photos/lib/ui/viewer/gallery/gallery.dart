@@ -1,6 +1,5 @@
 import 'dart:async';
 import "dart:io";
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1011,39 +1010,17 @@ class GalleryIndexUpdatedEvent {
   GalleryIndexUpdatedEvent(this.tag, this.index);
 }
 
-/// Scroll physics similar to [BouncingScrollPhysics] but with exponentially
-/// increasing friction when scrolling out of bounds.
-///
-/// This creates a stronger resistance to overscrolling the further you go
-/// past the scroll boundary.
-class ExponentialBouncingScrollPhysics extends BouncingScrollPhysics {
-  const ExponentialBouncingScrollPhysics({
-    this.frictionExponent = 7.0,
-    super.decelerationRate,
-    super.parent,
-  });
 
-  /// The exponent used in the friction calculation.
-  ///
-  /// A higher value will result in a more rapid increase in friction as the
-  /// user overscrolls. Defaults to 7.0.
-  final double frictionExponent;
+/// Custom scroll physics that extends [BouncingScrollPhysics] to provide
+/// exponential bouncing behavior for scrollable widgets.
+///
+/// TODO: Revert this PR https://github.com/ente-io/ente/pull/8401 after Jan 1, 2026.
+/// This was implemented temporarily for the Christmas banner and should be removed afterwards.
+class ExponentialBouncingScrollPhysics extends BouncingScrollPhysics {
+  const ExponentialBouncingScrollPhysics({super.parent});
 
   @override
   ExponentialBouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return ExponentialBouncingScrollPhysics(
-      parent: buildParent(ancestor),
-      decelerationRate: decelerationRate,
-      frictionExponent: frictionExponent,
-    );
-  }
-
-  @override
-  double frictionFactor(double overscrollFraction) {
-    final double baseFactor = switch (decelerationRate) {
-      ScrollDecelerationRate.fast => 0.26,
-      ScrollDecelerationRate.normal => 0.52,
-    };
-    return baseFactor * math.exp(-overscrollFraction * frictionExponent);
+    return ExponentialBouncingScrollPhysics(parent: buildParent(ancestor));
   }
 }

@@ -1,3 +1,4 @@
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Skeleton, styled, Typography } from "@mui/material";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { EnteFile } from "ente-media/file";
@@ -85,6 +86,27 @@ export interface FilePeopleListProps {
      * Called when the user selects a face in the list.
      */
     onSelectFace: (annotatedFaceID: AnnotatedFaceID) => void;
+    /**
+     * People that were manually associated with the file, and should be shown
+     * in addition to detected faces.
+     */
+    manuallyAssignedPeople?: Person[];
+    /**
+     * Called when the user selects a person (used for manually assigned people).
+     */
+    onSelectPerson?: (personID: string) => void;
+    /**
+     * If set, show an option to manually associate the file with a person.
+     */
+    onAddPerson?: () => void;
+    /**
+     * Title/tooltip for the "add person" button (if shown).
+     */
+    addPersonTitle?: string;
+    /**
+     * Label shown under the "add person" button (if shown).
+     */
+    addPersonLabel?: string;
 }
 
 /**
@@ -95,6 +117,11 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
     file,
     annotatedFaceIDs,
     onSelectFace,
+    manuallyAssignedPeople,
+    onSelectPerson,
+    onAddPerson,
+    addPersonTitle,
+    addPersonLabel,
 }) => (
     <FilePeopleList_>
         {annotatedFaceIDs.map((annotatedFaceID) => (
@@ -112,6 +139,35 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
                 </Typography>
             </AnnotatedFaceButton>
         ))}
+        {manuallyAssignedPeople?.map((person) => (
+            <ManuallyAssignedPersonButton
+                key={person.id}
+                onClick={() => onSelectPerson?.(person.id)}
+            >
+                <FaceCropImageView
+                    faceID={person.displayFaceID}
+                    file={person.displayFaceFile}
+                    placeholderDimension={65}
+                />
+                <Typography variant="small" sx={{ color: "text.muted" }}>
+                    {person.name}
+                </Typography>
+            </ManuallyAssignedPersonButton>
+        ))}
+        {onAddPerson && (
+            <AddPersonButton
+                onClick={onAddPerson}
+                title={addPersonTitle}
+                aria-label={addPersonTitle}
+            >
+                <AddPersonAvatar>
+                    <PersonAddIcon />
+                </AddPersonAvatar>
+                <Typography variant="small" sx={{ color: "text.muted" }}>
+                    {addPersonLabel}
+                </Typography>
+            </AddPersonButton>
+        )}
     </FilePeopleList_>
 );
 
@@ -138,6 +194,37 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
         outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
+`,
+);
+
+const ManuallyAssignedPersonButton = AnnotatedFaceButton;
+
+const AddPersonButton = styled(UnstyledButton)(
+    ({ theme }) => `
+    width: 65px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    & > div {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+    & > div:hover {
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
+        outline-offset: 2px;
+    }
+`,
+);
+
+const AddPersonAvatar = styled("div")(
+    ({ theme }) => `
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.vars.palette.text.muted};
+    border: 1px dashed ${theme.vars.palette.stroke.faint};
 `,
 );
 

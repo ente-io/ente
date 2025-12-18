@@ -57,7 +57,7 @@ class NotificationBannerWidget extends StatelessWidget {
                 contents.addAll(
                   [
                     BannerWidget(
-                      text: l10n.free5GB,
+                      text: l10n.free10GB,
                       subText: l10n.loginWithAuthAccount,
                       type: BannerType.freeStorage,
                     ),
