@@ -613,6 +613,11 @@ export const streamFilesToZip = async ({
 
     let lastCompletedIndex = -1;
 
+    // Track ZIP entry state for salvage logic on error.
+    // If all started entries are complete, we can finalize the ZIP cleanly.
+    let entriesAddedToZip = 0;
+    let entriesCompletedInZip = 0;
+
     /** Add entry to ZIP with retries. Streams chunks to avoid buffering full files. */
     const addEntryToZipWithRetry = async (
         file: EnteFile,
@@ -625,6 +630,7 @@ export const streamFilesToZip = async ({
                 const resolvedData = await entry.getData();
                 const passThrough = new ZipPassThrough(entry.name);
                 zip.add(passThrough);
+                entriesAddedToZip++;
                 if (resolvedData instanceof ReadableStream) {
                     const reader = resolvedData.getReader();
                     let shouldCancel = true;
@@ -656,6 +662,7 @@ export const streamFilesToZip = async ({
 
                 await writeChain;
                 if (zipError) throw zipError;
+                entriesCompletedInZip++;
                 return;
             } catch (e) {
                 if (signal.aborted || attempt === STREAM_ZIP_MAX_RETRIES) {
@@ -728,6 +735,10 @@ export const streamFilesToZip = async ({
                 );
             }
 
+            // Track that this file's preparation is complete (success or failure)
+            // so the catch block won't double-count it
+            lastCompletedIndex = i;
+
             if (zipError) {
                 throw zipError;
             }
@@ -770,8 +781,38 @@ export const streamFilesToZip = async ({
         }
 
         log.error("Streaming ZIP creation failed", e);
-        abortWriter();
         stopConcurrencyRefresh();
+
+        // Try to salvage the ZIP if all started entries are complete.
+        // This produces a valid partial ZIP with successfully downloaded files.
+        if (
+            !signal.aborted &&
+            entriesAddedToZip > 0 &&
+            entriesAddedToZip === entriesCompletedInZip
+        ) {
+            log.info(
+                `Attempting to salvage ZIP with ${entriesCompletedInZip} complete entries`,
+            );
+            try {
+                zip.end();
+                await flushWrites();
+                allowWrites = false;
+                await closeWriter();
+                log.info("ZIP salvaged successfully");
+                return "error";
+            } catch (salvageError) {
+                log.warn("Failed to salvage ZIP", salvageError);
+                abortWriter();
+            }
+        } else {
+            if (entriesAddedToZip !== entriesCompletedInZip) {
+                log.info(
+                    `Cannot salvage ZIP: ${entriesAddedToZip - entriesCompletedInZip} entries incomplete`,
+                );
+            }
+            abortWriter();
+        }
+
         return signal.aborted ? "cancelled" : "error";
     }
 };

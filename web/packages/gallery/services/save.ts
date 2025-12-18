@@ -132,7 +132,9 @@ const downloadAndSave = async (
         }
         if (handle === undefined) {
             // Streaming unavailable, will fall back to individual downloads
-            log.info("Streaming ZIP unavailable, will use individual downloads");
+            log.info(
+                "Streaming ZIP unavailable, will use individual downloads",
+            );
         } else {
             preObtainedWritable = handle;
         }
@@ -181,7 +183,10 @@ const downloadAndSave = async (
                         electron.fs.exists,
                     );
                     const zipPath = joinPath(downloadDirPath, zipExportName);
-                    writableOverride = createNativeZipWritable(electron, zipPath);
+                    writableOverride = createNativeZipWritable(
+                        electron,
+                        zipPath,
+                    );
                 }
 
                 // For retries on web, we need to get a new writable handle
