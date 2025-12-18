@@ -47,6 +47,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
       setState(() {
         _isFavorite = isFavorite;
       });
+      _updateAnimationState();
     }
   }
 
@@ -79,11 +80,15 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
   void _setInitialAnimationState() {
     if (_isFavorite == null || _hasSetInitialState) return;
     _hasSetInitialState = true;
+    _updateAnimationState();
+  }
 
+  void _updateAnimationState() {
+    if (_isFavorite == null || _stateMachine == null) return;
     if (_isFavorite!) {
-      _stateMachine?.trigger("Filled")?.fire();
+      _stateMachine!.trigger("Filled")?.fire();
     } else {
-      _stateMachine?.trigger("Stroke")?.fire();
+      _stateMachine!.trigger("Stroke")?.fire();
     }
   }
 
