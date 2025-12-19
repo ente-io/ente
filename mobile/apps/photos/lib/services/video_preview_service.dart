@@ -139,25 +139,23 @@ class VideoPreviewService {
     _items.clear();
   }
 
-  bool get _isStopped => _streamingCancelToken?.isCancelled ?? false;
-
   /// Stop streaming immediately, cancels FFmpeg and network requests.
-  Future<void> stop() async {
+  void stop(String reason) {
+    _logger.info("Stopping streaming: $reason");
     _streamingCancelToken?.cancel();
     uploadingFileId = -1;
     clearQueue();
     computeController.releaseCompute(stream: true);
 
     if (_currentFfmpegSessionId != null) {
-      await FFmpegKit.cancel(_currentFfmpegSessionId!);
+      unawaited(FFmpegKit.cancel(_currentFfmpegSessionId!));
       _currentFfmpegSessionId = null;
     }
   }
 
-  Future<void> stopForLogout() async {
+  void stopForLogout() {
     if (!flagService.stopStreamOnLogOut) return;
-    _logger.info("Stopping streaming due to logout");
-    await stop();
+    stop("logout");
   }
 
   void _fireVideoPreviewStateChange(int fileId, PreviewItemStatus status) {
@@ -328,7 +326,7 @@ class VideoPreviewService {
     // not used currently
     bool forceUpload = false,
   }) async {
-    if (_isStopped) return;
+    if (_items.isEmpty) return;
     _streamingCancelToken ??= CancelToken();
 
     // Check if file upload is happening before processing video for streaming
@@ -438,7 +436,7 @@ class VideoPreviewService {
 
       // get file
       file ??= await getFile(enteFile, isOrigin: true);
-      if (_isStopped) return;
+      if (_items.isEmpty) return;
       if (file == null) {
         error = "Unable to fetch file";
         return;
@@ -546,7 +544,7 @@ class VideoPreviewService {
         return {};
       });
 
-      if (_isStopped) {
+      if (_items.isEmpty) {
         Directory(prefix).delete(recursive: true).ignore();
         return;
       }

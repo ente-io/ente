@@ -191,7 +191,7 @@ class Configuration {
 
   Future<void> logout({bool autoLogout = false}) async {
     _logger.info("Logging out, autoLogout: $autoLogout");
-    unawaited(VideoPreviewService.instance.stopForLogout());
+    VideoPreviewService.instance.stopForLogout();
     if (!autoLogout) {
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();
