@@ -603,6 +603,7 @@
     "sort_by": "排序方式",
     "newest_first": "最新在前",
     "oldest_first": "最旧在前",
+    "most_relevant": "",
     "pin_album": "置顶相册",
     "unpin_album": "取消置顶相册",
     "pin_person": "置顶人物",
