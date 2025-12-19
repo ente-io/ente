@@ -21,50 +21,49 @@ class CommentActionsPopup extends StatelessWidget {
 
     final backgroundColor = isDarkMode ? const Color(0xFF1C1C1E) : Colors.white;
 
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: IntrinsicWidth(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _ActionItem(
+              icon: isLiked ? Icons.favorite : Icons.favorite_border,
+              iconColor: isLiked ? const Color(0xFFE25454) : null,
+              label: "Like",
+              onTap: onLikeTap,
+              textStyle: textTheme.mini.copyWith(
+                height: 19 / 12,
+                letterSpacing: -0.36,
+              ),
+              defaultIconColor: colorScheme.textBase,
+            ),
+            _ActionItem(
+              icon: Icons.reply,
+              label: "Reply",
+              onTap: onReplyTap,
+              textStyle: textTheme.mini.copyWith(
+                height: 19 / 12,
+                letterSpacing: -0.36,
+              ),
+              defaultIconColor: colorScheme.textBase,
+            ),
+            _ActionItem(
+              icon: Icons.delete_outline_rounded,
+              label: "Delete",
+              onTap: () {},
+              textStyle: textTheme.mini.copyWith(
+                height: 19 / 12,
+                letterSpacing: -0.36,
+              ),
+              defaultIconColor: colorScheme.textBase,
             ),
           ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: IntrinsicWidth(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _ActionItem(
-                  icon: isLiked ? Icons.favorite : Icons.favorite_border,
-                  iconColor: isLiked ? const Color(0xFFE25454) : null,
-                  label: "Like",
-                  onTap: onLikeTap,
-                  textStyle: textTheme.body,
-                  defaultIconColor: colorScheme.textBase,
-                ),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: colorScheme.strokeFaint,
-                ),
-                _ActionItem(
-                  icon: Icons.reply,
-                  label: "Reply",
-                  onTap: onReplyTap,
-                  textStyle: textTheme.body,
-                  defaultIconColor: colorScheme.textBase,
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -93,16 +92,16 @@ class _ActionItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 4, 40, 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 20,
+              size: 16,
               color: iconColor ?? defaultIconColor,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Text(
               label,
               style: textStyle.copyWith(
