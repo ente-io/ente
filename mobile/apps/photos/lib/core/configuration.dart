@@ -35,6 +35,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
@@ -190,6 +191,10 @@ class Configuration {
 
   Future<void> logout({bool autoLogout = false}) async {
     _logger.info("Logging out, autoLogout: $autoLogout");
+
+    // Stop streaming service on logout
+    unawaited(VideoPreviewService.instance.stopForLogout());
+
     if (!autoLogout) {
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();

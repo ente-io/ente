@@ -6,7 +6,7 @@ import "dart:io";
 import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
-import "package:ffmpeg_kit_flutter/return_code.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
@@ -96,6 +96,13 @@ class VideoPreviewService {
 
   int uploadingFileId = -1;
 
+  // Streaming cancellation fields
+  CancelToken? _streamingCancelToken;
+  bool _stopRequested = false;
+
+  // Track active streaming FFmpeg sessions for targeted cancellation
+  final Set<int> _activeStreamingSessionIds = {};
+
   final Configuration config;
   final ServiceLocator serviceLocator;
   final FilesDB filesDB;
@@ -136,8 +143,61 @@ class VideoPreviewService {
     _items.clear();
   }
 
+  /// Stop streaming for logout
+  Future<void> stopForLogout() async {
+    _logger.info(
+      "Stopping streaming for logout - "
+      "uploading: ${uploadingFileId >= 0}, "
+      "queue: ${fileQueue.length}",
+    );
+    _stopRequested = true;
+    _streamingCancelToken?.cancel("logout");
+    _streamingCancelToken = null;
+
+    // Cancel only streaming FFmpeg sessions (not video editor, etc.)
+    if (_activeStreamingSessionIds.isNotEmpty) {
+      _logger.info(
+        "Cancelling ${_activeStreamingSessionIds.length} streaming FFmpeg session(s): $_activeStreamingSessionIds",
+      );
+
+      for (final sessionId in _activeStreamingSessionIds.toList()) {
+        await FFmpegKit.cancel(sessionId);
+        _logger.info("Sent cancel to FFmpeg session $sessionId");
+      }
+
+      _activeStreamingSessionIds.clear();
+    } else {
+      _logger.info("No active streaming FFmpeg sessions to cancel");
+    }
+
+    uploadingFileId = -1;
+    clearQueue();
+    computeController.releaseCompute(stream: true);
+  }
+
   void _fireVideoPreviewStateChange(int fileId, PreviewItemStatus status) {
     Bus.instance.fire(VideoPreviewStateChangedEvent(fileId, status));
+  }
+
+  /// Run FFmpeg command in isolate with session tracking for targeted cancellation.
+  /// This ensures only streaming sessions are cancelled, not video editor etc.
+  /// Uses isolate-based execution for performance while tracking session IDs.
+  Future<Map<String, dynamic>> _runStreamingFfmpeg(String command) async {
+    final result = await ffmpegService.runFfmpegWithSessionTracking(
+      command,
+      onSessionStarted: (sessionId) {
+        _activeStreamingSessionIds.add(sessionId);
+        _logger.fine("Started streaming FFmpeg session $sessionId (isolate)");
+      },
+    );
+
+    // Remove session ID when FFmpeg completes
+    final sessionId = result["sessionId"] as int?;
+    if (sessionId != null) {
+      _activeStreamingSessionIds.remove(sessionId);
+    }
+
+    return Map<String, dynamic>.from(result);
   }
 
   // Return value indicates file was successfully added to queue or not
@@ -304,6 +364,13 @@ class VideoPreviewService {
     // not used currently
     bool forceUpload = false,
   }) async {
+    if (_stopRequested) {
+      _logger.fine("Aborting streaming - stop was requested");
+      return;
+    }
+
+    _streamingCancelToken ??= CancelToken();
+
     // Check if file upload is happening before processing video for streaming
     if (flagService.pauseStreamDuringUpload &&
         FileUploader.instance.isUploading) {
@@ -506,26 +573,29 @@ class VideoPreviewService {
 
       _logger.info(command);
 
-      final playlistGenResult = await ffmpegService
-          .runFfmpeg(
-        // input file path
+      final playlistGenResult = await _runStreamingFfmpeg(
         '-i "${file.path}" ' +
             // main params for streaming
             command +
             // output file path
             '$prefix/output.m3u8',
-      )
-          .onError((error, stackTrace) {
+      ).onError((error, stackTrace) {
         _logger.warning("FFmpeg command failed", error, stackTrace);
-        return {};
+        return <String, dynamic>{};
       });
 
       final playlistGenReturnCode = playlistGenResult["returnCode"] as int?;
 
+      if (_stopRequested) {
+        _logger.fine("Aborting streaming - stop requested after FFmpeg");
+        Directory(prefix).delete(recursive: true).ignore();
+        return;
+      }
+
       String? objectId;
       int? objectSize;
 
-      if (ReturnCode.success == playlistGenReturnCode) {
+      if (playlistGenReturnCode == 0) {
         try {
           _items[enteFile.uploadedFileID!] = PreviewItem(
             status: PreviewItemStatus.uploading,
@@ -548,23 +618,21 @@ class VideoPreviewService {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final playlistFrameResult = await ffmpegService
-              .runFfmpeg(
+          final playlistFrameResult = await _runStreamingFfmpeg(
             '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
-          )
-              .onError((error, stackTrace) {
+          ).onError((error, stackTrace) {
             _logger.warning(
               "FFmpeg command failed for frame",
               error,
               stackTrace,
             );
-            return {};
+            return <String, dynamic>{};
           });
           final playlistFrameReturnCode =
               playlistFrameResult["returnCode"] as int?;
           int? width, height;
           try {
-            if (ReturnCode.success == playlistFrameReturnCode) {
+            if (playlistFrameReturnCode == 0) {
               FFProbeProps? playlistFrameProps;
               final file2 = File("$prefix/frame.ts");
 
@@ -590,9 +658,6 @@ class VideoPreviewService {
           error = "Failed to upload video preview\nError: $err";
           _logger.shout("Something went wrong with preview upload", err, sT);
         }
-      } else if (ReturnCode.cancel == playlistGenReturnCode) {
-        _logger.warning("FFmpeg command cancelled");
-        error = "FFmpeg command cancelled";
       } else {
         final output = playlistGenResult["output"] as String?;
         _logger.shout(
@@ -775,6 +840,7 @@ class VideoPreviewService {
   }) async {
     _logger.fine("Pushing playlist for ${file.uploadedFileID}");
     try {
+      final token = _streamingCancelToken;
       final encryptionKey = getFileKey(file);
       final playlistContent = playlist.readAsStringSync();
       final result = await gzipAndEncryptJson(
@@ -796,6 +862,7 @@ class VideoPreviewService {
           "playlist": result.encData,
           "playlistHeader": result.header,
         },
+        cancelToken: token,
       );
     } catch (e, s) {
       _logger.severe("Failed to report video preview", e, s);
@@ -806,12 +873,14 @@ class VideoPreviewService {
   Future<(String, int)> _uploadPreviewVideo(EnteFile file, File preview) async {
     _logger.fine("Pushing preview for $file");
     try {
+      final token = _streamingCancelToken;
       final response = await serviceLocator.enteDio.get(
         "/files/data/preview-upload-url",
         queryParameters: {
           "fileID": file.uploadedFileID!,
           "type": "vid_preview",
         },
+        cancelToken: token,
       );
       final uploadURL = response.data["url"];
       final String objectID = response.data["objectID"];
@@ -820,6 +889,7 @@ class VideoPreviewService {
         uploadURL,
         data: preview.openRead(),
         options: Options(headers: {Headers.contentLengthHeader: objectSize}),
+        cancelToken: token,
       );
       return (objectID, objectSize);
     } catch (e) {
@@ -1280,6 +1350,9 @@ class VideoPreviewService {
     bool forceProcess = false,
   }) {
     Future.delayed(duration, () async {
+      // Reset stop flag for new streaming session
+      _stopRequested = false;
+
       if (_hasQueuedFile && !forceProcess) return;
 
       // Don't start streaming if file uploads are in progress

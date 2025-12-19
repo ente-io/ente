@@ -97,6 +97,8 @@ class FlagService {
 
   bool get enableShareePin => internalUser;
 
+  bool get stopStreamOnLogOut => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
