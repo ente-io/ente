@@ -1,7 +1,6 @@
 import 'dart:async';
 import "dart:math";
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -18,6 +17,7 @@ import "package:photos/ui/common/backup_flow_helper.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/standalone/debouncer.dart";
+import "package:styled_text/styled_text.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
   const DeviceFoldersGridView({
@@ -152,27 +152,21 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: AppLocalizations.of(context).selectFolders,
-                      style: textTheme.small.copyWith(
-                        color: selectFoldersGreen,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () async {
-                          await handleFolderSelectionBackupFlow(context);
-                          if (mounted) setState(() {});
-                        },
-                    ),
-                    TextSpan(
-                      text: AppLocalizations.of(context).toViewAndBackupOnEnte,
-                      style: textTheme.smallMuted,
-                    ),
-                  ],
-                ),
+              child: StyledText(
+                text: AppLocalizations.of(context).selectFoldersToBackup,
+                style: textTheme.smallMuted,
                 textAlign: TextAlign.center,
+                tags: {
+                  'action': StyledTextActionTag(
+                    (String? text, Map<String?, String?> attrs) async {
+                      await handleFolderSelectionBackupFlow(context);
+                      if (mounted) setState(() {});
+                    },
+                    style: textTheme.small.copyWith(
+                      color: selectFoldersGreen,
+                    ),
+                  ),
+                },
               ),
             ),
           ],
