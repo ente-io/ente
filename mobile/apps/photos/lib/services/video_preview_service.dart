@@ -7,8 +7,6 @@ import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
-import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
-import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
@@ -100,7 +98,6 @@ class VideoPreviewService {
   CancelToken? _streamingCancelToken;
   bool _stopRequested = false;
   int? _currentFfmpegSessionId;
-  int? _currentVideoDurationMs;
 
   final Configuration config;
   final ServiceLocator serviceLocator;
@@ -146,29 +143,10 @@ class VideoPreviewService {
     _stopRequested = false;
     _streamingCancelToken = null;
     _currentFfmpegSessionId = null;
-    _currentVideoDurationMs = null;
     uploadingFileId = -1;
   }
 
-  /// Get current FFmpeg progress (0.0 to 1.0), returns null if unavailable.
-  Future<double?> _getFfmpegProgress() async {
-    final sessionId = _currentFfmpegSessionId;
-    final totalDuration = _currentVideoDurationMs;
-    if (sessionId == null || totalDuration == null || totalDuration <= 0) {
-      return null;
-    }
-
-    final session = await FFmpegKitConfig.getSession(sessionId);
-    if (session == null || session is! FFmpegSession) return null;
-
-    final stats = await session.getStatistics();
-    if (stats.isEmpty) return null;
-
-    final processedMs = stats.last.getTime();
-    return (processedMs / totalDuration).clamp(0.0, 1.0);
-  }
-
-  /// Stop streaming immediately, cancels FFmpeg regardless of progress.
+  /// Stop streaming immediately, cancels FFmpeg and network requests.
   Future<void> stop() async {
     _stopRequested = true;
     _streamingCancelToken?.cancel();
@@ -180,18 +158,6 @@ class VideoPreviewService {
     uploadingFileId = -1;
     clearQueue();
     computeController.releaseCompute(stream: true);
-  }
-
-  /// Stop streaming only if < 75% processed (for thermal throttling).
-  /// Returns true if stopped, false if skipped due to progress >= 75%.
-  Future<bool> stopSafely({double threshold = 0.75}) async {
-    final progress = await _getFfmpegProgress();
-    // If we can't determine progress or progress < threshold, stop
-    if (progress == null || progress < threshold) {
-      await stop();
-      return true;
-    }
-    return false;
   }
 
   Future<void> stopForLogout() async {
@@ -572,7 +538,6 @@ class VideoPreviewService {
 
       _logger.info(command);
 
-      _currentVideoDurationMs = props?.duration?.inMilliseconds;
       final playlistGenResult = await ffmpegService
           .runFfmpegCancellable(
             '-i "${file.path}" $command$prefix/output.m3u8',
