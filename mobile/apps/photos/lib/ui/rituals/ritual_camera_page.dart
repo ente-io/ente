@@ -758,6 +758,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 previewRect.top + _focusPointRel!.dy * previewRect.height,
               );
 
+        final bool shouldUnmirrorPreview =
+            _activeCamera?.lensDirection == CameraLensDirection.front;
+        final cameraPreview = CameraPreview(_controller!);
+
         return Stack(
           fit: StackFit.expand,
           children: [
@@ -767,7 +771,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 child: SizedBox(
                   width: rotatedPreviewSize.width,
                   height: rotatedPreviewSize.height,
-                  child: CameraPreview(_controller!),
+                  child: shouldUnmirrorPreview
+                      ? Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                          child: cameraPreview,
+                        )
+                      : cameraPreview,
                 ),
               ),
             ),
@@ -1067,8 +1077,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         offset.dx.clamp(0.0, 1.0),
         offset.dy.clamp(0.0, 1.0),
       );
-      controller.setExposurePoint(clamped);
-      controller.setFocusPoint(clamped);
+      final bool shouldUnmirrorPreview =
+          _activeCamera?.lensDirection == CameraLensDirection.front;
+      final Offset cameraPoint = shouldUnmirrorPreview
+          ? Offset(1.0 - clamped.dx, clamped.dy)
+          : clamped;
+      controller.setExposurePoint(cameraPoint);
+      controller.setFocusPoint(cameraPoint);
       _showFocusIndicator(clamped);
     } catch (_) {
       // Best effort; not all devices support focus/exposure points.

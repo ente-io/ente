@@ -33,6 +33,7 @@ import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -210,6 +211,11 @@ class Configuration {
     _cachedToken = null;
     _secretKey = null;
     _volatilePassword = null;
+
+    // Clear all scheduled notifications (ritual reminders, memories, etc.)
+    await NotificationService.instance.clearAllScheduledNotifications(
+      logLines: false,
+    );
 
     // Clear all database tables
     await FilesDB.instance.clearTable();
