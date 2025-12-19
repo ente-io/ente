@@ -752,6 +752,8 @@ class VideoPreviewService {
       shouldRetry = false;
     }
 
+    if (_items.isEmpty) return;
+
     if (shouldRetry &&
         _items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
       _items[enteFile.uploadedFileID!] = PreviewItem(
