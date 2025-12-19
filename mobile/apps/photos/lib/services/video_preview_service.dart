@@ -148,9 +148,8 @@ class VideoPreviewService {
     clearQueue();
     computeController.releaseCompute(stream: true);
 
-    final sessionId = _currentFfmpegSessionId;
-    if (sessionId != null) {
-      await FFmpegKit.cancel(sessionId);
+    if (_currentFfmpegSessionId != null) {
+      await FFmpegKit.cancel(_currentFfmpegSessionId!);
       _currentFfmpegSessionId = null;
     }
   }
