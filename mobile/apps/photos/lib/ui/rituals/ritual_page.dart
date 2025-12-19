@@ -685,28 +685,14 @@ class _RecentDaysCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final pastDays = _lastScheduledDaysInclusive(
+    final preview = _ritualPreviewDays(
       ritual: ritual,
+      progress: progress,
       todayMidnight: today,
       count: 4,
     );
-    final pastCompletions = [
-      for (final day in pastDays) progress?.hasCompleted(day) ?? false,
-    ];
-    final hasTodayInPreview = pastDays.any((day) => _isSameDay(day, today));
-    final createdToday = _isSameDay(ritual.createdAt, today);
-    final showFuturePreview = createdToday &&
-        hasTodayInPreview &&
-        progress != null &&
-        !pastCompletions.any((completed) => completed);
-
-    final days = showFuturePreview
-        ? _nextScheduledDaysInclusive(
-            ritual: ritual,
-            todayMidnight: today,
-            count: 4,
-          )
-        : pastDays;
+    final days = preview.days;
+    final showFuturePreview = preview.showFuturePreview;
     final completions = [
       for (final day in days) progress?.hasCompleted(day) ?? false,
     ];
@@ -777,13 +763,16 @@ class _RecentDaysCard extends StatelessWidget {
   }) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
     final dayKey =
         DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
     final file = progress?.recentFilesByDay[dayKey];
     final count =
         progress?.recentFileCountsByDay[dayKey] ?? (completed ? 1 : 0);
-    final fadePhoto = completed && nextCompleted == false;
     final isToday = _isSameDay(day, today);
+    final isYesterday = _isSameDay(day, yesterday);
+    final fadePhoto =
+        completed && nextCompleted == false && !isYesterday && !isToday;
     final rotation = switch (index % 4) {
       0 => -0.05,
       1 => 0.10,
@@ -1466,6 +1455,98 @@ List<DateTime> _nextScheduledDaysInclusive({
 
 bool _isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+({List<DateTime> days, bool showFuturePreview}) _ritualPreviewDays({
+  required Ritual ritual,
+  required RitualProgress? progress,
+  required DateTime todayMidnight,
+  required int count,
+}) {
+  final pastDays = _lastScheduledDaysInclusive(
+    ritual: ritual,
+    todayMidnight: todayMidnight,
+    count: count,
+  );
+  final todayScheduled = pastDays.any((day) => _isSameDay(day, todayMidnight));
+
+  if (progress == null || count <= 1) {
+    return (days: pastDays, showFuturePreview: false);
+  }
+
+  final createdAt = ritual.createdAt.toLocal();
+  final createdDayMidnight =
+      DateTime(createdAt.year, createdAt.month, createdAt.day);
+
+  final lookbackCount = count - 1;
+  final daysBeforeCreation = _lastScheduledDaysInclusive(
+    ritual: ritual,
+    todayMidnight: createdDayMidnight.subtract(const Duration(days: 1)),
+    count: lookbackCount,
+  );
+  final hadCompletionsBeforeCreation =
+      daysBeforeCreation.any(progress.hasCompleted);
+  if (hadCompletionsBeforeCreation) {
+    return (days: pastDays, showFuturePreview: false);
+  }
+
+  final maxShift = count - 1;
+  final shiftSlots = _scheduledSlotsSinceCreation(
+    ritual: ritual,
+    createdDayMidnight: createdDayMidnight,
+    todayMidnight: todayMidnight,
+    maxSlots: maxShift,
+  );
+  if (shiftSlots >= maxShift) {
+    return (days: pastDays, showFuturePreview: false);
+  }
+
+  final shiftedPast = todayScheduled
+      ? _lastScheduledDaysInclusive(
+          ritual: ritual,
+          todayMidnight: todayMidnight,
+          count: shiftSlots + 1,
+        )
+      : _lastScheduledDaysInclusive(
+          ritual: ritual,
+          todayMidnight: todayMidnight,
+          count: shiftSlots,
+        );
+  final shiftedFuture = _nextScheduledDaysInclusive(
+    ritual: ritual,
+    todayMidnight: todayMidnight,
+    count: count - shiftSlots,
+  );
+  final days = [
+    ...shiftedPast,
+    ...(todayScheduled ? shiftedFuture.skip(1) : shiftedFuture),
+  ];
+  return (days: days, showFuturePreview: true);
+}
+
+int _scheduledSlotsSinceCreation({
+  required Ritual ritual,
+  required DateTime createdDayMidnight,
+  required DateTime todayMidnight,
+  required int maxSlots,
+}) {
+  if (maxSlots <= 0) return 0;
+  if (todayMidnight.isBefore(createdDayMidnight)) return 0;
+
+  final daysOfWeek = ritual.daysOfWeek;
+  if (daysOfWeek.length != 7 || !daysOfWeek.any((enabled) => enabled)) {
+    return 0;
+  }
+
+  int slots = 0;
+  for (int offset = 1; slots < maxSlots && offset < 366; offset++) {
+    final day = todayMidnight.subtract(Duration(days: offset));
+    if (day.isBefore(createdDayMidnight)) break;
+    final weekdayIndex = day.weekday % 7; // Sunday-first
+    if (!daysOfWeek[weekdayIndex]) continue;
+    slots += 1;
+  }
+  return slots;
 }
 
 bool _isEnabledDay(Ritual ritual, DateTime day) {
