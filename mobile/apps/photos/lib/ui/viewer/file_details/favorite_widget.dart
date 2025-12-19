@@ -3,7 +3,6 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/favorites_service.dart";
@@ -36,7 +35,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
     _logger = Logger("_FavoriteWidgetState");
     _riveFileLoader = rive.FileLoader.fromAsset(
       "assets/favorite_icon.riv",
-      riveFactory: rive.Factory.flutter,
+      riveFactory: rive.Factory.rive,
     );
     _initializeFavoriteState();
   }
@@ -67,14 +66,19 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
   }
 
   void _handleRiveLoaded(rive.RiveLoaded loaded) {
-    if (!mounted || _hasSetInitialState) return;
+    if (!mounted) return;
 
     _stateMachine = loaded.controller.stateMachine;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _stateMachine == null || _isFavorite == null) return;
-      _setInitialAnimationState();
-    });
+    if (_hasSetInitialState) {
+      // Re-sync animation state after rebuild (e.g., when loading state clears)
+      _updateAnimationState();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _stateMachine == null || _isFavorite == null) return;
+        _setInitialAnimationState();
+      });
+    }
   }
 
   void _setInitialAnimationState() {
@@ -98,8 +102,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
     final bool currentlyFavorite = _isFavorite!;
     final bool newFavoriteState = !currentlyFavorite;
 
-    if (widget.file.uploadedFileID == null ||
-        widget.file.ownerID != Configuration.instance.getUserID()!) {
+    if (widget.file.uploadedFileID == null) {
       setState(() {
         _isLoading = true;
       });
@@ -167,9 +170,11 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
 
     return GestureDetector(
       onTap: _onTap,
-      child: SizedBox(
-        width: 22,
-        height: 22,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        width: 34,
+        height: 30,
         child: rive.RiveWidgetBuilder(
           fileLoader: _riveFileLoader,
           stateMachineSelector: const rive.StateMachineNamed(
