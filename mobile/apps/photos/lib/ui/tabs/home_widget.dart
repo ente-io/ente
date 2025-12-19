@@ -876,6 +876,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                 onNotification: (notification) {
                   if (!isChristmasPeriod()) return false;
 
+                  if (notification.metrics.axis != Axis.vertical) return false;
+
                   const double maxPullOffset = 200.0;
 
                   if (notification is ScrollUpdateNotification) {
