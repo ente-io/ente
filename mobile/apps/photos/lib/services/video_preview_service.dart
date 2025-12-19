@@ -143,14 +143,15 @@ class VideoPreviewService {
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   Future<void> stop() async {
     _streamingCancelToken?.cancel();
+    uploadingFileId = -1;
+    clearQueue();
+    computeController.releaseCompute(stream: true);
+
     final sessionId = _currentFfmpegSessionId;
     if (sessionId != null) {
       await FFmpegKit.cancel(sessionId);
       _currentFfmpegSessionId = null;
     }
-    uploadingFileId = -1;
-    clearQueue();
-    computeController.releaseCompute(stream: true);
   }
 
   Future<void> stopForLogout() async {
