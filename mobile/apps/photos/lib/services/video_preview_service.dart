@@ -98,6 +98,7 @@ class VideoPreviewService {
   int uploadingFileId = -1;
   CancelToken? _streamingCancelToken;
   int? _currentFfmpegSessionId;
+  bool _stopped = false;
 
   final Configuration config;
   final ServiceLocator serviceLocator;
@@ -139,10 +140,11 @@ class VideoPreviewService {
     _items.clear();
   }
 
-  bool get _isStopped => _streamingCancelToken?.isCancelled ?? false;
+  bool get _isStopped => _stopped;
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   Future<void> stop() async {
+    _stopped = true;
     _streamingCancelToken?.cancel();
     uploadingFileId = -1;
     clearQueue();
@@ -1313,7 +1315,8 @@ class VideoPreviewService {
     bool forceProcess = false,
   }) {
     Future.delayed(duration, () async {
-      _streamingCancelToken = null; // Reset for new session
+      _stopped = false;
+      _streamingCancelToken = null;
       if (_hasQueuedFile && !forceProcess) return;
 
       // Don't start streaming if file uploads are in progress
