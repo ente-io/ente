@@ -639,7 +639,7 @@ class VideoPreviewService {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.uploaded,
           file: enteFile,
-          retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
+          retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
         _fireVideoPreviewStateChange(
