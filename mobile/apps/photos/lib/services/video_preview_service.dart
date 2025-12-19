@@ -7,6 +7,7 @@ import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
@@ -553,7 +554,7 @@ class VideoPreviewService {
       String? objectId;
       int? objectSize;
 
-      if (playlistGenReturnCode == 0) {
+      if (ReturnCode.success == playlistGenReturnCode) {
         try {
           _items[enteFile.uploadedFileID!] = PreviewItem(
             status: PreviewItemStatus.uploading,
@@ -582,7 +583,7 @@ class VideoPreviewService {
           )
               .onError((error, stackTrace) {
             _logger.warning(
-              "FFmpeg frame extraction failed",
+              "FFmpeg command failed for frame",
               error,
               stackTrace,
             );
@@ -592,7 +593,7 @@ class VideoPreviewService {
               playlistFrameResult["returnCode"] as int?;
           int? width, height;
           try {
-            if (playlistFrameReturnCode == 0) {
+            if (ReturnCode.success == playlistFrameReturnCode) {
               FFProbeProps? playlistFrameProps;
               final file2 = File("$prefix/frame.ts");
 
