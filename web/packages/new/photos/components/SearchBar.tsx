@@ -17,6 +17,7 @@ import {
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import log from "ente-base/log";
 import {
     hlsGenerationStatusSnapshot,
     isHLSGenerationSupported,
@@ -186,6 +187,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     }, []);
 
     const handleChange = (value: SearchOption | null) => {
+        log.debug(() => `[SearchBar] Option selected"`);
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
@@ -222,6 +224,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 
             // If the input is cleared, also clear the selected value.
             if (value === "") {
+                log.debug(
+                    () => "[SearchBar] Input cleared, resetting selection",
+                );
                 setValue(null);
                 setInputValue("");
                 // Notify parent but don't exit search mode on mobile
@@ -233,6 +238,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const resetSearch = () => {
+        log.debug(() => "[SearchBar] Resetting search state");
         // Dismiss the search menu if it is open.
         selectRef.current?.blur();
 
@@ -255,11 +261,15 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleFocus = () => {
+        log.debug(() => "[SearchBar] Search input focused");
         setIsFocused(true);
         // A workaround to show the suggestions again for the current non-empty
         // search string if the user focuses back on the input field after
         // moving focus elsewhere.
         if (inputValue) {
+            log.debug(
+                () => `[SearchBar] Re-triggering search for existing input"`,
+            );
             selectRef.current?.onInputChange(inputValue, {
                 action: "set-value",
                 prevInputValue: "",
@@ -268,6 +278,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleBlur = () => {
+        log.debug(() => "[SearchBar] Search input blurred");
         setIsFocused(false);
     };
 
@@ -288,16 +299,38 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 placeholder={t("search_hint")}
-                noOptionsMessage={({ inputValue }) =>
-                    inputValue ? (
-                        t("no_results")
-                    ) : shouldShowEmptyState(inputValue) ? (
-                        <EmptyState
-                            onSelectPeople={handleSelectPeople}
-                            onSelectPerson={handleSelectPerson}
-                        />
-                    ) : null
-                }
+                loadingMessage={() => {
+                    log.debug(
+                        () => `[SearchBar] loadingMessage: Loading results"`,
+                    );
+                    return t("loading");
+                }}
+                noOptionsMessage={({ inputValue }) => {
+                    if (inputValue) {
+                        log.debug(
+                            () =>
+                                `[SearchBar] noOptionsMessage: No results found"`,
+                        );
+                        return t("no_results");
+                    }
+                    if (shouldShowEmptyState(inputValue)) {
+                        log.debug(
+                            () =>
+                                "[SearchBar] noOptionsMessage: Showing empty state",
+                        );
+                        return (
+                            <EmptyState
+                                onSelectPeople={handleSelectPeople}
+                                onSelectPerson={handleSelectPerson}
+                            />
+                        );
+                    }
+                    log.debug(
+                        () =>
+                            "[SearchBar] noOptionsMessage: Returning null (no menu content)",
+                    );
+                    return null;
+                }}
             />
 
             {isInSearchMode && (
@@ -321,12 +354,32 @@ const SearchInputWrapper = styled("div")`
 `;
 
 const loadOptions = pDebounce(async (input: string) => {
-    const [sidebarActions, photoOptions] = await Promise.all([
-        sidebarSearchOptionsForString(input),
-        searchOptionsForString(input),
-    ]);
+    log.debug(() => ["[SearchBar] Loading search options"]);
+    const startTime = performance.now();
 
-    return [...photoOptions, ...sidebarActions];
+    try {
+        const [sidebarActions, photoOptions] = await Promise.all([
+            sidebarSearchOptionsForString(input),
+            searchOptionsForString(input),
+        ]);
+
+        const duration = performance.now() - startTime;
+        log.debug(
+            () =>
+                `[SearchBar] Search options loaded in ${duration.toFixed(0)}ms: ` +
+                `${photoOptions.length} photo options, ${sidebarActions.length} sidebar actions`,
+        );
+
+        return [...photoOptions, ...sidebarActions];
+    } catch (e) {
+        const duration = performance.now() - startTime;
+        log.error(
+            `[SearchBar] Failed to load search options after ${duration.toFixed(0)}ms`,
+            e,
+        );
+        // Re-throw so react-select can handle it, but now we have visibility
+        throw e;
+    }
 }, 250);
 
 // const loadOptions = pDebounce(searchOptionsForString, 250);
@@ -482,11 +535,26 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported && !isHLSGenerationSupported) {
         // Neither of ML or HLS generation is supported on current client. This
         // is the code path for web.
+        log.debug(
+            () =>
+                "[SearchBar] shouldShowEmptyState: false (ML and HLS not supported)",
+        );
         return false;
     }
 
     const mlStatus = mlStatusSnapshot();
     const vpStatus = hlsGenerationStatusSnapshot();
+    log.debug(() => [
+        "[SearchBar] shouldShowEmptyState check",
+        {
+            isMLSupported,
+            isHLSGenerationSupported,
+            mlPhase: mlStatus?.phase ?? "undefined",
+            vpEnabled: vpStatus?.enabled ?? false,
+            vpStatus: vpStatus?.enabled ? vpStatus.status : "disabled",
+        },
+    ]);
+
     if (
         (!mlStatus || mlStatus.phase == "disabled") &&
         (!vpStatus?.enabled || vpStatus.status != "processing")
@@ -494,10 +562,15 @@ const shouldShowEmptyState = (inputValue: string) => {
         // ML is either not supported or currently disabled AND video processing
         // is either not supported or currently not happening. Don't show the
         // empty state.
+        log.debug(
+            () =>
+                "[SearchBar] shouldShowEmptyState: false (ML disabled, no video processing)",
+        );
         return false;
     }
 
     // Show it otherwise.
+    log.debug(() => "[SearchBar] shouldShowEmptyState: true");
     return true;
 };
 
@@ -512,6 +585,16 @@ const EmptyState: React.FC<
     const people = usePeopleStateSnapshot()?.visiblePeople;
     const vpStatus = useHLSGenerationStatusSnapshot();
 
+    log.debug(() => [
+        "[SearchBar] EmptyState render",
+        {
+            mlPhase: mlStatus?.phase ?? "undefined",
+            peopleCount: people?.length ?? 0,
+            vpEnabled: vpStatus?.enabled ?? false,
+            vpStatus: vpStatus?.enabled ? vpStatus.status : "disabled",
+        },
+    ]);
+
     let label: string | undefined;
     switch (mlStatus?.phase) {
         case undefined:
@@ -520,19 +603,26 @@ const EmptyState: React.FC<
             // If ML is not running, see if video processing is.
             if (vpStatus?.enabled && vpStatus.status == "processing") {
                 label = t("processing_videos_status");
+                log.debug(
+                    () => "[SearchBar] Status: Processing videos in progress",
+                );
             }
             break;
         case "scheduled":
             label = t("indexing_scheduled");
+            log.debug(() => "[SearchBar] Status: Photo indexing scheduled");
             break;
         case "indexing":
             label = t("indexing_photos");
+            log.debug(() => "[SearchBar] Status: Indexing photos in progress");
             break;
         case "fetching":
             label = t("indexing_fetching");
+            log.debug(() => "[SearchBar] Status: Fetching data for indexing");
             break;
         case "clustering":
             label = t("indexing_people");
+            log.debug(() => "[SearchBar] Status: Clustering people/faces");
             break;
     }
 
