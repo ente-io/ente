@@ -167,9 +167,11 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
 
     return GestureDetector(
       onTap: _onTap,
-      child: SizedBox(
-        width: 22,
-        height: 22,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        width: 34,
+        height: 30,
         child: rive.RiveWidgetBuilder(
           fileLoader: _riveFileLoader,
           stateMachineSelector: const rive.StateMachineNamed(
