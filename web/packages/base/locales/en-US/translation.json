@@ -497,6 +497,7 @@
     "enter_two_factor_otp": "Enter the 6-digit code from your authenticator app.",
     "create_account": "Create account",
     "copied": "Copied",
+    "upgrade": "Upgrade",
     "upgrade_now": "Upgrade now",
     "renew_now": "Renew now",
     "storage": "Storage",

@@ -600,7 +600,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                             variant="small"
                             sx={{ color: "text.base", fontWeight: "medium" }}
                         >
-                            {ut("Upgrade")}
+                            {t("upgrade")}
                         </Typography>
                         <ChevronRightIcon
                             sx={{ fontSize: "18px", color: "text.muted" }}
