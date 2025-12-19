@@ -6,6 +6,7 @@ import "dart:io";
 import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
+import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
@@ -95,6 +96,8 @@ class VideoPreviewService {
       VideoPreviewService._privateConstructor();
 
   int uploadingFileId = -1;
+  CancelToken? _streamingCancelToken;
+  int? _currentFfmpegSessionId;
 
   final Configuration config;
   final ServiceLocator serviceLocator;
@@ -134,6 +137,25 @@ class VideoPreviewService {
     }
     fileQueue.clear();
     _items.clear();
+  }
+
+  /// Stop streaming immediately, cancels FFmpeg and network requests.
+  void stop(String reason) {
+    _logger.info("Stopping streaming: $reason");
+    _streamingCancelToken?.cancel();
+    uploadingFileId = -1;
+    clearQueue();
+    computeController.releaseCompute(stream: true);
+
+    if (_currentFfmpegSessionId != null) {
+      unawaited(FFmpegKit.cancel(_currentFfmpegSessionId!));
+      _currentFfmpegSessionId = null;
+    }
+  }
+
+  void stopForLogout() {
+    if (!flagService.stopStreamOnLogOut) return;
+    stop("logout");
   }
 
   void _fireVideoPreviewStateChange(int fileId, PreviewItemStatus status) {
@@ -304,6 +326,9 @@ class VideoPreviewService {
     // not used currently
     bool forceUpload = false,
   }) async {
+    if (_items.isEmpty) return;
+    _streamingCancelToken ??= CancelToken();
+
     // Check if file upload is happening before processing video for streaming
     if (flagService.pauseStreamDuringUpload &&
         FileUploader.instance.isUploading) {
@@ -411,6 +436,7 @@ class VideoPreviewService {
 
       // get file
       file ??= await getFile(enteFile, isOrigin: true);
+      if (_items.isEmpty) return;
       if (file == null) {
         error = "Unable to fetch file";
         return;
@@ -504,21 +530,24 @@ class VideoPreviewService {
           '-f hls -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} ';
 
-      _logger.info(command);
-
       final playlistGenResult = await ffmpegService
-          .runFfmpeg(
-        // input file path
-        '-i "${file.path}" ' +
-            // main params for streaming
-            command +
-            // output file path
-            '$prefix/output.m3u8',
-      )
+          .runFfmpegCancellable(
+            '-i "${file.path}" $command$prefix/output.m3u8',
+            (id) {
+              _currentFfmpegSessionId = id;
+              _logger.info("FFmpeg[$id]: $command");
+            },
+          )
+          .whenComplete(() => _currentFfmpegSessionId = null)
           .onError((error, stackTrace) {
         _logger.warning("FFmpeg command failed", error, stackTrace);
         return {};
       });
+
+      if (_items.isEmpty) {
+        Directory(prefix).delete(recursive: true).ignore();
+        return;
+      }
 
       final playlistGenReturnCode = playlistGenResult["returnCode"] as int?;
 
@@ -590,9 +619,6 @@ class VideoPreviewService {
           error = "Failed to upload video preview\nError: $err";
           _logger.shout("Something went wrong with preview upload", err, sT);
         }
-      } else if (ReturnCode.cancel == playlistGenReturnCode) {
-        _logger.warning("FFmpeg command cancelled");
-        error = "FFmpeg command cancelled";
       } else {
         final output = playlistGenResult["output"] as String?;
         _logger.shout(
@@ -613,7 +639,7 @@ class VideoPreviewService {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.uploaded,
           file: enteFile,
-          retryCount: _items[enteFile.uploadedFileID!]!.retryCount,
+          retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
         _fireVideoPreviewStateChange(
@@ -721,6 +747,8 @@ class VideoPreviewService {
       shouldRetry = false;
     }
 
+    if (_items.isEmpty) return;
+
     if (shouldRetry &&
         _items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
       _items[enteFile.uploadedFileID!] = PreviewItem(
@@ -796,6 +824,7 @@ class VideoPreviewService {
           "playlist": result.encData,
           "playlistHeader": result.header,
         },
+        cancelToken: _streamingCancelToken,
       );
     } catch (e, s) {
       _logger.severe("Failed to report video preview", e, s);
@@ -812,6 +841,7 @@ class VideoPreviewService {
           "fileID": file.uploadedFileID!,
           "type": "vid_preview",
         },
+        cancelToken: _streamingCancelToken,
       );
       final uploadURL = response.data["url"];
       final String objectID = response.data["objectID"];
@@ -820,6 +850,7 @@ class VideoPreviewService {
         uploadURL,
         data: preview.openRead(),
         options: Options(headers: {Headers.contentLengthHeader: objectSize}),
+        cancelToken: _streamingCancelToken,
       );
       return (objectID, objectSize);
     } catch (e) {
@@ -1280,6 +1311,7 @@ class VideoPreviewService {
     bool forceProcess = false,
   }) {
     Future.delayed(duration, () async {
+      _streamingCancelToken = null; // Reset for new session
       if (_hasQueuedFile && !forceProcess) return;
 
       // Don't start streaming if file uploads are in progress

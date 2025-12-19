@@ -17,6 +17,32 @@ class IsolatedFfmpegService {
     return await Isolate.run<Map>(() => _ffmpegRun(command, rootIsolateToken));
   }
 
+  /// Run FFmpeg with session ID callback for cancellation support.
+  Future<Map> runFfmpegCancellable(
+    String command,
+    void Function(int sessionId) onSessionStarted,
+  ) async {
+    final rootIsolateToken = RootIsolateToken.instance!;
+    final port = ReceivePort();
+    final completer = Completer<Map>();
+
+    port.listen((msg) {
+      if (msg is int) {
+        onSessionStarted(msg);
+      } else if (msg is Map) {
+        completer.complete(msg);
+        port.close();
+      }
+    });
+
+    await Isolate.spawn(
+      _ffmpegRunCancellable,
+      (command, port.sendPort, rootIsolateToken),
+    );
+
+    return completer.future;
+  }
+
   Future<Map> getVideoInfo(String file) async {
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _getVideoProps(file, rootIsolateToken));
@@ -51,4 +77,24 @@ Future<Map> _ffmpegRun(String value, RootIsolateToken rootIsolateToken) async {
     "returnCode": returnCode?.getValue(),
     "output": output,
   };
+}
+
+@pragma('vm:entry-point')
+Future<void> _ffmpegRunCancellable(
+  (String, SendPort, RootIsolateToken) params,
+) async {
+  final (command, sendPort, token) = params;
+  BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+
+  final completer = Completer<Map>();
+  final session = await FFmpegKit.executeAsync(command, (s) async {
+    completer.complete({
+      "returnCode": (await s.getReturnCode())?.getValue(),
+      "output": await s.getOutput(),
+    });
+  });
+
+  final sessionId = session.getSessionId();
+  if (sessionId != null) sendPort.send(sessionId);
+  sendPort.send(await completer.future);
 }
