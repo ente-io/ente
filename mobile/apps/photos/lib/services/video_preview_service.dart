@@ -532,14 +532,12 @@ class VideoPreviewService {
           '-f hls -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} ';
 
-      _logger.info(command);
-
       final playlistGenResult = await ffmpegService
           .runFfmpegCancellable(
             '-i "${file.path}" $command$prefix/output.m3u8',
             (id) {
               _currentFfmpegSessionId = id;
-              _logger.info("FFmpeg session started: $id");
+              _logger.info("FFmpeg[$id]: $command");
             },
           )
           .whenComplete(() => _currentFfmpegSessionId = null)
