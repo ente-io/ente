@@ -187,10 +187,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     }, []);
 
     const handleChange = (value: SearchOption | null) => {
-        log.debug(
-            () =>
-                `[SearchBar] Option selected: ${value?.suggestion.type ?? "none"} - "${value?.suggestion.label ?? ""}"`,
-        );
+        log.debug(() => `[SearchBar] Option selected"`);
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
@@ -223,7 +220,6 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
         if (actionMeta.action == "input-change") {
-            log.debug(() => `[SearchBar] Input changed: "${value}"`);
             setInputValue(value);
 
             // If the input is cleared, also clear the selected value.
@@ -272,8 +268,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         // moving focus elsewhere.
         if (inputValue) {
             log.debug(
-                () =>
-                    `[SearchBar] Re-triggering search for existing input: "${inputValue}"`,
+                () => `[SearchBar] Re-triggering search for existing input"`,
             );
             selectRef.current?.onInputChange(inputValue, {
                 action: "set-value",
@@ -304,10 +299,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 placeholder={t("search_hint")}
-                loadingMessage={({ inputValue }) => {
+                loadingMessage={() => {
                     log.debug(
-                        () =>
-                            `[SearchBar] loadingMessage: Loading results for "${inputValue}"`,
+                        () => `[SearchBar] loadingMessage: Loading results"`,
                     );
                     return t("loading");
                 }}
@@ -315,7 +309,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                     if (inputValue) {
                         log.debug(
                             () =>
-                                `[SearchBar] noOptionsMessage: No results for "${inputValue}"`,
+                                `[SearchBar] noOptionsMessage: No results found}"`,
                         );
                         return t("no_results");
                     }
@@ -360,7 +354,7 @@ const SearchInputWrapper = styled("div")`
 `;
 
 const loadOptions = pDebounce(async (input: string) => {
-    log.debug(() => ["[SearchBar] Loading search options", { input }]);
+    log.debug(() => ["[SearchBar] Loading search options"]);
     const startTime = performance.now();
 
     try {
