@@ -497,6 +497,7 @@
     "enter_two_factor_otp": "Ingrese el código de seis dígitos de su aplicación de autenticación a continuación.",
     "create_account": "Crear cuenta",
     "copied": "Copiado",
+    "upgrade": "",
     "upgrade_now": "Mejorar ahora",
     "renew_now": "Renovar ahora",
     "storage": "Almacén",

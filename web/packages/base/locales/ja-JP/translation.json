@@ -497,6 +497,7 @@
     "enter_two_factor_otp": "認証アプリに表示された 6 桁のコードを入力してください。",
     "create_account": "アカウント作成",
     "copied": "コピーしました",
+    "upgrade": "",
     "upgrade_now": "今すぐアップグレード",
     "renew_now": "今すぐ更新",
     "storage": "ストレージ",
