@@ -156,6 +156,7 @@ class VideoPreviewService {
 
   Future<void> stopForLogout() async {
     if (!flagService.stopStreamOnLogOut) return;
+    _logger.info("Stopping streaming due to logout");
     await stop();
   }
 
@@ -536,7 +537,10 @@ class VideoPreviewService {
       final playlistGenResult = await ffmpegService
           .runFfmpegCancellable(
             '-i "${file.path}" $command$prefix/output.m3u8',
-            (id) => _currentFfmpegSessionId = id,
+            (id) {
+              _currentFfmpegSessionId = id;
+              _logger.info("FFmpeg session started: $id");
+            },
           )
           .whenComplete(() => _currentFfmpegSessionId = null)
           .onError((error, stackTrace) {
