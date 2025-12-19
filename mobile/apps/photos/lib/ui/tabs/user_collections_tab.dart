@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/album_sort_order_change_event.dart";
+import "package:photos/events/backup_folders_updated_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -12,6 +13,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/selected_albums.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
@@ -50,6 +52,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   late StreamSubscription<FavoritesServiceInitCompleteEvent>
       _favoritesServiceInitCompleteEvent;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
+  late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
 
   String _loadReason = "init";
   final _scrollController = ScrollController();
@@ -97,6 +100,11 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       _loadReason = event.reason;
       setState(() {});
     });
+    _backupFoldersUpdatedEvent =
+        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
+      _loadReason = event.reason;
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -137,33 +145,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
           slivers: [
             SliverToBoxAdapter(
               child: SectionOptions(
-                onTap: () {
-                  unawaited(
-                    routeToPage(
-                      context,
-                      DeviceFolderVerticalGridView(
-                        appTitle: SectionTitle(
-                          title: AppLocalizations.of(context).onDevice,
-                        ),
-                        tag: "OnDeviceAppTitle",
-                      ),
-                    ),
-                  );
-                },
-                Hero(
-                  tag: "OnDeviceAppTitle",
-                  child: SectionTitle(
-                    title: AppLocalizations.of(context).onDevice,
-                  ),
-                ),
-                trailingWidget: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButtonWidget(
-                      icon: Icons.search,
-                      iconButtonType: IconButtonType.secondary,
-                      iconColor: colorScheme.blurStrokePressed,
-                      onTap: () {
+                onTap: backupPreferenceService.hasSkippedOnboardingPermission
+                    ? null
+                    : () {
                         unawaited(
                           routeToPage(
                             context,
@@ -172,19 +156,49 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                                 title: AppLocalizations.of(context).onDevice,
                               ),
                               tag: "OnDeviceAppTitle",
-                              startInSearchMode: true,
                             ),
                           ),
                         );
                       },
-                    ),
-                    IconButtonWidget(
-                      icon: Icons.chevron_right,
-                      iconButtonType: IconButtonType.secondary,
-                      iconColor: colorScheme.blurStrokePressed,
-                    ),
-                  ],
+                Hero(
+                  tag: "OnDeviceAppTitle",
+                  child: SectionTitle(
+                    title: AppLocalizations.of(context).onDevice,
+                  ),
                 ),
+                trailingWidget: backupPreferenceService
+                        .hasSkippedOnboardingPermission
+                    ? null
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButtonWidget(
+                            icon: Icons.search,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                            onTap: () {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  DeviceFolderVerticalGridView(
+                                    appTitle: SectionTitle(
+                                      title:
+                                          AppLocalizations.of(context).onDevice,
+                                    ),
+                                    tag: "OnDeviceAppTitle",
+                                    startInSearchMode: true,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButtonWidget(
+                            icon: Icons.chevron_right,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                          ),
+                        ],
+                      ),
               ),
             ),
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
@@ -295,6 +309,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _scrollController.dispose();
     _debouncer.cancelDebounceTimer();
     _albumSortOrderChangeEvent.cancel();
+    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 

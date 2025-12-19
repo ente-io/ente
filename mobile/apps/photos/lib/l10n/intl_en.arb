@@ -892,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Click on the overflow menu",
   "click": "• Click",
   "nothingToSeeHere": "Nothing to see here! 👀",
+  "selectFoldersToBackup": "<action>Select folders</action> to view and\nbackup on ente.",
   "unarchiveAlbum": "Unarchive album",
   "archiveAlbum": "Archive album",
   "calculating": "Calculating...",
