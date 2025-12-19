@@ -235,10 +235,8 @@ class HomeWidgetService {
       final String widgetPath = '$widgetParent/$WIDGET_DIRECTORY';
       final dir = Directory(widgetPath);
 
-      if (await dir.exists()) {
-        await dir.delete(recursive: true);
-        _logger.info("Widget directory cleared successfully");
-      }
+      await dir.delete(recursive: true);
+      _logger.info("Widget directory cleared successfully");
     } catch (e) {
       _logger.severe("Failed to clear widget directory", e);
     }
