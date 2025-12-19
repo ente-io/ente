@@ -7,17 +7,17 @@ class EnteIcons {
   static const String _kFontPkg = 'ente_icons';
 
   static const IconData addToAlbum = IconData(
-    0xe800,
+    0xe805,
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );
   static const IconData favoriteStroke = IconData(
-    0xe806,
+    0xe807,
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );
   static const IconData favoriteFilled = IconData(
-    0xe807,
+    0xe806,
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );
