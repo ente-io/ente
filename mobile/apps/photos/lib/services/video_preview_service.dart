@@ -99,6 +99,10 @@ class VideoPreviewService {
   bool _stopRequested = false;
   int? _currentFfmpegSessionId;
 
+  /// Override this to customize when to cancel FFmpeg (e.g., after 75% progress).
+  /// Returns true if FFmpeg should be cancelled.
+  bool shouldCancelFfmpeg() => _stopRequested;
+
   final Configuration config;
   final ServiceLocator serviceLocator;
   final FilesDB filesDB;
@@ -139,14 +143,27 @@ class VideoPreviewService {
     _items.clear();
   }
 
-  Future<void> stopForLogout() async {
-    _stopRequested = true;
-    _streamingCancelToken?.cancel();
+  void _resetState() {
+    _stopRequested = false;
     _streamingCancelToken = null;
-    if (_currentFfmpegSessionId != null) {
-      await FFmpegKit.cancel(_currentFfmpegSessionId!);
+    _currentFfmpegSessionId = null;
+    uploadingFileId = -1;
+  }
+
+  Future<void> _cancelCurrentFfmpeg() async {
+    final sessionId = _currentFfmpegSessionId;
+    if (sessionId != null) {
+      await FFmpegKit.cancel(sessionId);
       _currentFfmpegSessionId = null;
     }
+  }
+
+  Future<void> stopForLogout() async {
+    if (!flagService.stopStreamOnLogOut) return;
+
+    _stopRequested = true;
+    _streamingCancelToken?.cancel();
+    await _cancelCurrentFfmpeg();
     uploadingFileId = -1;
     clearQueue();
     computeController.releaseCompute(stream: true);
@@ -527,16 +544,16 @@ class VideoPreviewService {
 
       final playlistGenResult = await ffmpegService
           .runFfmpegCancellable(
-        '-i "${file.path}" $command$prefix/output.m3u8',
-        (id) => _currentFfmpegSessionId = id,
-      )
+            '-i "${file.path}" $command$prefix/output.m3u8',
+            (id) => _currentFfmpegSessionId = id,
+          )
+          .whenComplete(() => _currentFfmpegSessionId = null)
           .onError((error, stackTrace) {
         _logger.warning("FFmpeg command failed", error, stackTrace);
         return {};
       });
-      _currentFfmpegSessionId = null;
 
-      if (_stopRequested) {
+      if (shouldCancelFfmpeg()) {
         Directory(prefix).delete(recursive: true).ignore();
         return;
       }
@@ -1301,7 +1318,7 @@ class VideoPreviewService {
     bool forceProcess = false,
   }) {
     Future.delayed(duration, () async {
-      _stopRequested = false;
+      _resetState();
       if (_hasQueuedFile && !forceProcess) return;
 
       // Don't start streaming if file uploads are in progress
