@@ -309,7 +309,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                     if (inputValue) {
                         log.debug(
                             () =>
-                                `[SearchBar] noOptionsMessage: No results found}"`,
+                                `[SearchBar] noOptionsMessage: No results found"`,
                         );
                         return t("no_results");
                     }
