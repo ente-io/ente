@@ -438,8 +438,8 @@ class VideoPreviewService {
 
       // get file
       file ??= await getFile(enteFile, isOrigin: true);
-      if (file == null) {
-        error = "Unable to fetch file";
+      if (_isStopped || file == null) {
+        if (file == null) error = "Unable to fetch file";
         return;
       }
 
