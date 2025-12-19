@@ -224,17 +224,6 @@ class LocalSyncService {
       );
     }
 
-    // Mark first import as complete if user had skipped onboarding permission.
-    // This handles the case where syncAll() is called for users who skipped
-    // onboarding permission and later granted it - device collections get
-    // populated via syncAll but first import flag was never set.
-    // Permission must be granted for syncAll to reach this point.
-    if (backupPreferenceService.hasSkippedOnboardingPermission) {
-      await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      await backupPreferenceService.setOnboardingPermissionSkipped(false);
-      _logger.info("first import marked complete via syncAll");
-    }
-
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
     return hasUnsyncedFiles;
   }

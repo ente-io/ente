@@ -83,13 +83,6 @@ Future<bool?> _handleFirstImportFlow(BuildContext context) async {
     return null;
   }
 
-  // Clear skip flag to allow sync to proceed for first import.
-  // This is the entry point when user explicitly chooses to set up backup
-  // after having skipped permission during onboarding.
-  if (backupPreferenceService.hasSkippedOnboardingPermission) {
-    await backupPreferenceService.setOnboardingPermissionSkipped(false);
-  }
-
   // Trigger local sync before showing the loading widget.
   // The skip flag was cleared above, so sync will now proceed with first import.
   // We use LocalSyncService.sync() directly because:
