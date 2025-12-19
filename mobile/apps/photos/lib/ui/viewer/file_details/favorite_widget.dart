@@ -36,7 +36,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
     _logger = Logger("_FavoriteWidgetState");
     _riveFileLoader = rive.FileLoader.fromAsset(
       "assets/favorite_icon.riv",
-      riveFactory: rive.Factory.flutter,
+      riveFactory: rive.Factory.rive,
     );
     _initializeFavoriteState();
   }
