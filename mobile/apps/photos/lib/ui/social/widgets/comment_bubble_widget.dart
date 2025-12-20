@@ -178,7 +178,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       try {
         await SocialDataProvider.instance.deleteComment(widget.comment.id);
         if (mounted) {
-          showShortToast(context, "Comment deleted");
           widget.onCommentDeleted?.call();
         }
       } catch (e) {
