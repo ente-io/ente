@@ -138,9 +138,17 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         overlayChildBuilder: _buildOverlayContent,
         child: GestureDetector(
           onLongPress: _showHighlight,
-          child: KeyedSubtree(
-            key: _contentKey,
-            child: _buildCommentContent(showActionsCapsule: true),
+          child: AnimatedBuilder(
+            animation: _overlayAnimation,
+            builder: (context, _) {
+              return KeyedSubtree(
+                key: _contentKey,
+                child: _buildCommentContent(
+                  showActionsCapsule: true,
+                  capsuleOpacity: 1 - _overlayAnimation.value,
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -201,6 +209,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     bool includePadding = true,
     bool showHeader = true,
     double bubbleScale = 1.0,
+    double capsuleOpacity = 1.0,
   }) {
     return Padding(
       padding: EdgeInsets.only(
@@ -259,10 +268,13 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           Positioned(
                             right: 0,
                             bottom: 0,
-                            child: CommentActionsCapsule(
-                              isLiked: _isLiked,
-                              onLikeTap: _toggleLike,
-                              onReplyTap: widget.onReplyTap,
+                            child: Opacity(
+                              opacity: capsuleOpacity,
+                              child: CommentActionsCapsule(
+                                isLiked: _isLiked,
+                                onLikeTap: _toggleLike,
+                                onReplyTap: widget.onReplyTap,
+                              ),
                             ),
                           ),
                       ],
