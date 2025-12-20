@@ -4,7 +4,7 @@ import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/social/widgets/reply_preview_widget.dart";
 
-class CommentInputWidget extends StatelessWidget {
+class CommentInputWidget extends StatefulWidget {
   final Comment? replyingTo;
   final User? replyingToUser;
   final int currentUserID;
@@ -23,6 +23,57 @@ class CommentInputWidget extends StatelessWidget {
     required this.onSend,
     super.key,
   });
+
+  @override
+  State<CommentInputWidget> createState() => _CommentInputWidgetState();
+}
+
+class _CommentInputWidgetState extends State<CommentInputWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  bool _showReplyPreview = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
+    _showReplyPreview = widget.replyingTo != null;
+    if (_showReplyPreview) {
+      _animationController.value = 1.0;
+    }
+  }
+
+  @override
+  void didUpdateWidget(CommentInputWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.replyingTo != null && oldWidget.replyingTo == null) {
+      setState(() => _showReplyPreview = true);
+      _animationController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _handleDismiss() {
+    _animationController.reverse().then((_) {
+      if (mounted) {
+        setState(() => _showReplyPreview = false);
+        widget.onDismissReply?.call();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,18 +110,25 @@ class CommentInputWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (replyingTo != null && replyingToUser != null)
-                ReplyPreviewWidget(
-                  replyingTo: replyingTo!,
-                  replyingToUser: replyingToUser!,
-                  currentUserID: currentUserID,
-                  onDismiss: onDismissReply!,
+              if (_showReplyPreview && widget.replyingToUser != null)
+                SizeTransition(
+                  sizeFactor: _animation,
+                  axisAlignment: -1.0,
+                  child: FadeTransition(
+                    opacity: _animation,
+                    child: ReplyPreviewWidget(
+                      replyingTo: widget.replyingTo!,
+                      replyingToUser: widget.replyingToUser!,
+                      currentUserID: widget.currentUserID,
+                      onDismiss: _handleDismiss,
+                    ),
+                  ),
                 ),
               TextField(
-                controller: controller,
-                focusNode: focusNode,
+                controller: widget.controller,
+                focusNode: widget.focusNode,
                 textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
+                onSubmitted: (_) => widget.onSend(),
                 textAlignVertical: TextAlignVertical.center,
                 style: textTheme.body.copyWith(
                   height: 15 / 16,
@@ -92,7 +150,7 @@ class CommentInputWidget extends StatelessWidget {
                   suffixIcon: Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: GestureDetector(
-                      onTap: onSend,
+                      onTap: widget.onSend,
                       child: Icon(
                         Icons.send_rounded,
                         color: colorScheme.textBase.withValues(alpha: 0.8),
