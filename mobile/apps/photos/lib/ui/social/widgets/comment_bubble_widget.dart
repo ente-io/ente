@@ -68,6 +68,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   late final StreamSubscription<CommentDeletedEvent>
       _commentDeletedSubscription;
 
+  bool get _isOverlayDismissed =>
+      _overlayAnimationController.status == AnimationStatus.dismissed;
+
   @override
   void initState() {
     super.initState();
@@ -200,10 +203,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
             key: _contentKey,
             child: _buildCommentContent(
               showActionsCapsule: true,
-              capsuleOpacity: _overlayAnimationController.status ==
-                      AnimationStatus.dismissed
-                  ? 1.0
-                  : 0.0,
+              capsuleOpacity: _isOverlayDismissed ? 1.0 : 0.0,
             ),
           ),
         ),
