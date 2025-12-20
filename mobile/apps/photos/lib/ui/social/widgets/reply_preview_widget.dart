@@ -32,6 +32,7 @@ class ReplyPreviewWidget extends StatelessWidget {
       ),
       child: IntrinsicHeight(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 3,
@@ -41,35 +42,45 @@ class ReplyPreviewWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  replyingToUser.id == currentUserID
-                      ? 'Replying to you'
-                      : 'Replying to ${replyingToUser.displayName ?? replyingToUser.email}',
-                  style: textTheme.tiny.copyWith(
-                    color: colorScheme.textBase,
-                    height: 14 / 10.0,
-                    letterSpacing: -0.3,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    replyingToUser.id == currentUserID
+                        ? 'Replying to you'
+                        : 'Replying to ${replyingToUser.displayName ?? replyingToUser.email}',
+                    style: textTheme.tiny.copyWith(
+                      color: colorScheme.textBase,
+                      height: 14 / 10.0,
+                      letterSpacing: -0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  replyingTo.data,
-                  style: textTheme.small.copyWith(
-                    color: colorScheme.textBase,
-                    height: 22 / 14.0,
-                    letterSpacing: -0.28,
+                  const SizedBox(height: 2),
+                  Text(
+                    replyingTo.data,
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textBase,
+                      height: 22 / 14.0,
+                      letterSpacing: -0.28,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: onDismiss,
+              child: Icon(
+                Icons.close,
+                size: 18,
+                color: colorScheme.textMuted,
+              ),
             ),
           ],
         ),
@@ -77,12 +88,3 @@ class ReplyPreviewWidget extends StatelessWidget {
     );
   }
 }
-
-// GestureDetector(
-//             onTap: onDismiss,
-//             child: Icon(
-//               Icons.close,
-//               size: 18,
-//               color: colorScheme.textMuted,
-//             ),
-//           ),
