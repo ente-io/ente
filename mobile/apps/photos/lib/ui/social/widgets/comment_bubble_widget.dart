@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:logging/logging.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
@@ -7,10 +8,14 @@ import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/social/widgets/comment_actions_capsule.dart";
 import "package:photos/ui/social/widgets/comment_actions_popup.dart";
+import "package:photos/ui/social/widgets/delete_comment_confirmation_dialog.dart";
 import "package:photos/utils/social/relative_time_formatter.dart";
+
+final _logger = Logger("CommentBubbleWidget");
 
 class CommentBubbleWidget extends StatefulWidget {
   final Comment comment;
@@ -22,6 +27,7 @@ class CommentBubbleWidget extends StatefulWidget {
   final Future<List<Reaction>> Function() onFetchReactions;
   final VoidCallback onReplyTap;
   final User Function(Comment) userResolver;
+  final VoidCallback? onCommentDeleted;
 
   const CommentBubbleWidget({
     required this.comment,
@@ -33,6 +39,7 @@ class CommentBubbleWidget extends StatefulWidget {
     required this.onFetchReactions,
     required this.onReplyTap,
     required this.userResolver,
+    this.onCommentDeleted,
     super.key,
   });
 
@@ -148,6 +155,28 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   Future<void> _hideHighlight() async {
     await _overlayAnimationController.reverse();
     if (mounted) _overlayController.hide();
+  }
+
+  Future<void> _handleDelete() async {
+    await _hideHighlight();
+    if (!mounted) return;
+
+    final confirmed = await showDeleteCommentConfirmationDialog(context);
+
+    if (confirmed == true) {
+      try {
+        await SocialDataProvider.instance.deleteComment(widget.comment.id);
+        if (mounted) {
+          showShortToast(context, "Comment deleted");
+          widget.onCommentDeleted?.call();
+        }
+      } catch (e) {
+        _logger.severe("Failed to delete comment", e);
+        if (mounted) {
+          showShortToast(context, "Failed to delete comment");
+        }
+      }
+    }
   }
 
   @override
@@ -313,6 +342,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                             _hideHighlight();
                             widget.onReplyTap();
                           },
+                          onDeleteTap: _handleDelete,
+                          showDelete: widget.isOwnComment,
                         ),
                       ),
                   ],

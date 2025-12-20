@@ -5,11 +5,15 @@ class CommentActionsPopup extends StatelessWidget {
   final bool isLiked;
   final VoidCallback onLikeTap;
   final VoidCallback onReplyTap;
+  final VoidCallback? onDeleteTap;
+  final bool showDelete;
 
   const CommentActionsPopup({
     required this.isLiked,
     required this.onLikeTap,
     required this.onReplyTap,
+    this.onDeleteTap,
+    this.showDelete = true,
     super.key,
   });
 
@@ -53,16 +57,17 @@ class CommentActionsPopup extends StatelessWidget {
               ),
               defaultIconColor: colorScheme.textBase,
             ),
-            _ActionItem(
-              icon: Icons.delete_outline_rounded,
-              label: "Delete",
-              onTap: () {},
-              textStyle: textTheme.mini.copyWith(
-                height: 19 / 12,
-                letterSpacing: -0.36,
+            if (showDelete)
+              _ActionItem(
+                icon: Icons.delete_outline_rounded,
+                label: "Delete",
+                onTap: onDeleteTap!,
+                textStyle: textTheme.mini.copyWith(
+                  height: 19 / 12,
+                  letterSpacing: -0.36,
+                ),
+                defaultIconColor: colorScheme.textBase,
               ),
-              defaultIconColor: colorScheme.textBase,
-            ),
           ],
         ),
       ),
