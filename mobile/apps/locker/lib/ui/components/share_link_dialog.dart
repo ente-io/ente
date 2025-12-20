@@ -1,14 +1,18 @@
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
-import "package:locker/ui/components/delete_share_link_dialog.dart";
 import "package:locker/ui/components/gradient_button.dart";
 
 Future<void> showShareLinkDialog(
@@ -151,10 +155,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
               child: GradientButton(
                 onTap: () async {
                   Navigator.of(context).pop();
-                  await deleteShareLink(
-                    widget.rootContext,
-                    widget.file.uploadedFileID!,
-                  );
+                  await _deleteShareLink(widget.rootContext);
                 },
                 backgroundColor: colorScheme.warning400,
                 text: l10n.deleteLink,
@@ -164,6 +165,51 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> _deleteShareLink(BuildContext context) async {
+    final colorScheme = getEnteColorScheme(context);
+    final l10n = context.l10n;
+
+    final result = await showAlertBottomSheet<ButtonResult>(
+      context,
+      title: l10n.deleteShareLinkDialogTitle,
+      message: l10n.deleteShareLinkConfirmation,
+      assetPath: 'assets/file_delete_icon.png',
+      buttons: [
+        GradientButton(
+          text: l10n.delete,
+          backgroundColor: colorScheme.warning400,
+          onTap: () => Navigator.of(context).pop(
+            ButtonResult(ButtonAction.first),
+          ),
+        ),
+      ],
+    );
+
+    if (result?.action == ButtonAction.first && context.mounted) {
+      final dialog = createProgressDialog(
+        context,
+        l10n.deletingShareLink,
+        isDismissible: false,
+      );
+
+      try {
+        await dialog.show();
+        await LinksService.instance.deleteLink(widget.file.uploadedFileID!);
+        await dialog.hide();
+
+        if (context.mounted) {
+          showToast(context, l10n.shareLinkDeletedSuccessfully);
+        }
+      } catch (e) {
+        await dialog.hide();
+
+        if (context.mounted) {
+          showToast(context, '${l10n.failedToDeleteShareLink}: $e');
+        }
+      }
+    }
   }
 
   Future<void> _copyToClipboard() async {
