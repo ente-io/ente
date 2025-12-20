@@ -270,7 +270,7 @@ class FileActions {
 
       if (context.mounted) {
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await showSubscriptionRequiredDialog(context);
+          await showSubscriptionRequiredSheet(context);
         } else {
           showToast(
             context,

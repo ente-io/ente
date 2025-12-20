@@ -428,7 +428,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (e is SharingNotPermittedForFreeAccountsError) {
-        await showSubscriptionRequiredDialog(context);
+        await showSubscriptionRequiredSheet(context);
       } else {
         _logger.severe("Failed to update shareUrl collection", e);
         await showGenericErrorDialog(context: context, error: e);
@@ -576,7 +576,7 @@ class CollectionActions {
       } catch (e) {
         await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await showSubscriptionRequiredDialog(context);
+          await showSubscriptionRequiredSheet(context);
         } else {
           _logger.severe("failed to share collection", e);
           await showGenericErrorDialog(context: context, error: e);
