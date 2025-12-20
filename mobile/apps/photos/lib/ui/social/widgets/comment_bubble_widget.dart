@@ -52,7 +52,7 @@ class CommentBubbleWidget extends StatefulWidget {
 }
 
 class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   Comment? _parentComment;
   List<Reaction> _reactions = [];
   bool _isLiked = false;
@@ -65,8 +65,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   late final AnimationController _overlayAnimationController;
   late final Animation<double> _overlayAnimation;
-  late final AnimationController _capsuleAnimationController;
-  late final Animation<double> _capsuleAnimation;
   late final StreamSubscription<CommentDeletedEvent>
       _commentDeletedSubscription;
 
@@ -81,16 +79,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       parent: _overlayAnimationController,
       curve: Curves.fastOutSlowIn,
     );
-    _capsuleAnimationController = AnimationController(
-      vsync: this,
-      value: 1.0,
-      duration: const Duration(milliseconds: 200),
-    );
-    _capsuleAnimation = CurvedAnimation(
-      parent: _capsuleAnimationController,
-      curve: Curves.fastOutSlowIn,
-    );
-    _overlayAnimationController.addStatusListener(_onOverlayAnimationStatus);
+    _overlayAnimationController.addStatusListener(_onOverlayStatusChange);
     _commentDeletedSubscription =
         Bus.instance.on<CommentDeletedEvent>().listen((event) {
       if (mounted && _parentComment?.id == event.commentId) {
@@ -98,12 +87,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       }
     });
     _loadData();
-  }
-
-  void _onOverlayAnimationStatus(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed) {
-      _capsuleAnimationController.forward();
-    }
   }
 
   @override
@@ -120,10 +103,16 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   @override
   void dispose() {
     _commentDeletedSubscription.cancel();
-    _overlayAnimationController.removeStatusListener(_onOverlayAnimationStatus);
+    _overlayAnimationController.removeStatusListener(_onOverlayStatusChange);
     _overlayAnimationController.dispose();
-    _capsuleAnimationController.dispose();
     super.dispose();
+  }
+
+  void _onOverlayStatusChange(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed ||
+        status == AnimationStatus.forward) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadData() async {
@@ -167,7 +156,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   void _showHighlight() {
     HapticFeedback.mediumImpact();
-    _capsuleAnimationController.value = 0;
     _overlayController.show();
     _overlayAnimationController.forward();
   }
@@ -208,17 +196,15 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         overlayChildBuilder: _buildOverlayContent,
         child: GestureDetector(
           onLongPress: _showHighlight,
-          child: AnimatedBuilder(
-            animation: _capsuleAnimation,
-            builder: (context, _) {
-              return KeyedSubtree(
-                key: _contentKey,
-                child: _buildCommentContent(
-                  showActionsCapsule: true,
-                  capsuleOpacity: _capsuleAnimation.value,
-                ),
-              );
-            },
+          child: KeyedSubtree(
+            key: _contentKey,
+            child: _buildCommentContent(
+              showActionsCapsule: true,
+              capsuleOpacity: _overlayAnimationController.status ==
+                      AnimationStatus.dismissed
+                  ? 1.0
+                  : 0.0,
+            ),
           ),
         ),
       ),
@@ -254,15 +240,12 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                 width: size?.width,
                 child: Opacity(
                   opacity: isReversing ? 1.0 : value,
-                  child: Padding(
-                    padding:
-                        EdgeInsets.only(right: widget.isOwnComment ? 16 : 0),
-                    child: _buildCommentContent(
-                      showActionsCapsule: false,
-                      showActionsPopup: true,
-                      showHeader: false,
-                      bubbleScale: 1 + (0.025 * value),
-                    ),
+                  child: _buildCommentContent(
+                    showActionsCapsule: isReversing,
+                    showActionsPopup: !isReversing,
+                    showHeader: false,
+                    bubbleScale: 1 + (0.025 * value),
+                    capsuleOpacity: 1 - value,
                   ),
                 ),
               ),
@@ -324,7 +307,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                         Padding(
                           padding: showActionsCapsule
                               ? const EdgeInsets.only(right: 16, bottom: 17)
-                              : EdgeInsets.zero,
+                              : const EdgeInsets.only(right: 16),
                           child: _CommentBubble(
                             comment: widget.comment,
                             isOwnComment: widget.isOwnComment,
