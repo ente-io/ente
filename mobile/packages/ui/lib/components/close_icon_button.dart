@@ -1,10 +1,6 @@
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
-/// A reusable close button for bottom sheets and dialogs.
-///
-/// Displays a circular button with an X icon that calls [onTap] when pressed.
-/// If [onTap] is not provided, defaults to `Navigator.of(context).pop()`.
 class CloseIconButton extends StatelessWidget {
   final VoidCallback? onTap;
   final double size;
