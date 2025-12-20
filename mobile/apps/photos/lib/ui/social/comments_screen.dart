@@ -180,6 +180,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
     await SocialDataProvider.instance.addComment(newComment);
   }
 
+  void _handleCommentDeleted(String commentId) {
+    setState(() {
+      _comments.removeWhere((c) => c.id == commentId);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -246,6 +252,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                             _getReactionsForComment(comment.id),
                         onReplyTap: () => _onReplyTap(comment),
                         userResolver: _getUserForComment,
+                        onCommentDeleted: () =>
+                            _handleCommentDeleted(comment.id),
                       );
                     },
                   ),
