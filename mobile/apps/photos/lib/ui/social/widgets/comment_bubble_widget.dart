@@ -1,6 +1,10 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/comment_deleted_event.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
@@ -63,6 +67,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   late final Animation<double> _overlayAnimation;
   late final AnimationController _capsuleAnimationController;
   late final Animation<double> _capsuleAnimation;
+  late final StreamSubscription<CommentDeletedEvent>
+      _commentDeletedSubscription;
 
   @override
   void initState() {
@@ -85,6 +91,12 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       curve: Curves.fastOutSlowIn,
     );
     _overlayAnimationController.addStatusListener(_onOverlayAnimationStatus);
+    _commentDeletedSubscription =
+        Bus.instance.on<CommentDeletedEvent>().listen((event) {
+      if (mounted && _parentComment?.id == event.commentId) {
+        _fetchParentComment();
+      }
+    });
     _loadData();
   }
 
@@ -107,6 +119,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   @override
   void dispose() {
+    _commentDeletedSubscription.cancel();
     _overlayAnimationController.removeStatusListener(_onOverlayAnimationStatus);
     _overlayAnimationController.dispose();
     _capsuleAnimationController.dispose();
@@ -128,6 +141,13 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       (r) => r.userID == widget.currentUserID && !r.isDeleted,
     );
     if (mounted) setState(() => _isLoadingReactions = false);
+  }
+
+  Future<void> _fetchParentComment() async {
+    if (!mounted || widget.onFetchParent == null) return;
+    setState(() => _isLoadingParent = true);
+    _parentComment = await widget.onFetchParent!();
+    if (mounted) setState(() => _isLoadingParent = false);
   }
 
   Future<void> _toggleLike() async {

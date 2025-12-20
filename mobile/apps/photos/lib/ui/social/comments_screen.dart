@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/comment_deleted_event.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/reaction.dart";
@@ -181,6 +183,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   }
 
   void _handleCommentDeleted(String commentId) {
+    Bus.instance.fire(CommentDeletedEvent(commentId));
     setState(() {
       _comments.removeWhere((c) => c.id == commentId);
     });
