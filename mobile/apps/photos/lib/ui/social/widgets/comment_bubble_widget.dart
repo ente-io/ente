@@ -41,7 +41,7 @@ class CommentBubbleWidget extends StatefulWidget {
 }
 
 class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   Comment? _parentComment;
   List<Reaction> _reactions = [];
   bool _isLiked = false;
@@ -54,6 +54,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   late final AnimationController _overlayAnimationController;
   late final Animation<double> _overlayAnimation;
+  late final AnimationController _capsuleAnimationController;
+  late final Animation<double> _capsuleAnimation;
 
   @override
   void initState() {
@@ -66,7 +68,23 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       parent: _overlayAnimationController,
       curve: Curves.fastOutSlowIn,
     );
+    _capsuleAnimationController = AnimationController(
+      vsync: this,
+      value: 1.0,
+      duration: const Duration(milliseconds: 200),
+    );
+    _capsuleAnimation = CurvedAnimation(
+      parent: _capsuleAnimationController,
+      curve: Curves.fastOutSlowIn,
+    );
+    _overlayAnimationController.addStatusListener(_onOverlayAnimationStatus);
     _loadData();
+  }
+
+  void _onOverlayAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed) {
+      _capsuleAnimationController.forward();
+    }
   }
 
   @override
@@ -82,7 +100,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   @override
   void dispose() {
+    _overlayAnimationController.removeStatusListener(_onOverlayAnimationStatus);
     _overlayAnimationController.dispose();
+    _capsuleAnimationController.dispose();
     super.dispose();
   }
 
@@ -120,6 +140,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   void _showHighlight() {
     HapticFeedback.mediumImpact();
+    _capsuleAnimationController.value = 0;
     _overlayController.show();
     _overlayAnimationController.forward();
   }
@@ -139,13 +160,13 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         child: GestureDetector(
           onLongPress: _showHighlight,
           child: AnimatedBuilder(
-            animation: _overlayAnimation,
+            animation: _capsuleAnimation,
             builder: (context, _) {
               return KeyedSubtree(
                 key: _contentKey,
                 child: _buildCommentContent(
                   showActionsCapsule: true,
-                  capsuleOpacity: 1 - _overlayAnimation.value,
+                  capsuleOpacity: _capsuleAnimation.value,
                 ),
               );
             },
