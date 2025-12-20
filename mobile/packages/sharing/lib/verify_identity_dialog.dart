@@ -8,20 +8,18 @@ import "package:ente_sharing/components/gradient_button.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/loading_widget.dart";
-import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_ui/theme/text_style.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 
-/// Shows the verify identity bottom sheet
 Future<void> showVerifyIdentitySheet(
   BuildContext context, {
   required bool self,
   String email = '',
   required BaseConfiguration config,
+  String? title,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -31,6 +29,7 @@ Future<void> showVerifyIdentitySheet(
       self: self,
       email: email,
       config: config,
+      title: title,
     ),
   );
 }
@@ -44,11 +43,15 @@ class VerifyIdentityDialog extends StatefulWidget {
   final bool self;
   final BaseConfiguration config;
 
+  // Optional custom title, defaults to context.strings.verify if not provided
+  final String? title;
+
   VerifyIdentityDialog({
     super.key,
     required this.self,
     this.email = '',
     required this.config,
+    this.title,
   }) {
     if (!self && email.isEmpty) {
       throw ArgumentError("email cannot be empty when self is false");
@@ -86,7 +89,16 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(context, colorScheme, textStyle),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.title ?? context.strings.verify,
+                    style: textStyle.largeBold,
+                  ),
+                  const CloseIconButton(),
+                ],
+              ),
               const SizedBox(height: 20),
               FutureBuilder<String>(
                 future: _getPublicKey(),
@@ -94,19 +106,44 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
                   if (snapshot.hasData) {
                     final publicKey = snapshot.data!;
                     if (publicKey.isEmpty) {
-                      return _buildNoAccountContent(
-                        context,
-                        colorScheme,
-                        textStyle,
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context.strings.emailNoEnteAccount(widget.email),
+                            style: textStyle.small
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
+                          const SizedBox(height: 20),
+                          GradientButton(
+                            text: context.strings.sendInvite,
+                            onTap: () {
+                              shareText(
+                                context.strings.shareTextRecommendUsingEnte,
+                              );
+                            },
+                          ),
+                        ],
                       );
                     } else {
-                      return _buildVerificationContent(
-                        context,
-                        colorScheme,
-                        textStyle,
-                        publicKey,
-                        subTitle,
-                        bottomText,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            subTitle,
+                            style: textStyle.small
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
+                          const SizedBox(height: 20),
+                          _verificationIDWidget(context, publicKey),
+                          const SizedBox(height: 20),
+                          Text(
+                            bottomText,
+                            style: textStyle.small
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
+                        ],
                       );
                     }
                   } else if (snapshot.hasError) {
@@ -128,73 +165,6 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textStyle,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          context.strings.verify,
-          style: textStyle.largeBold,
-        ),
-        const CloseIconButton(),
-      ],
-    );
-  }
-
-  Widget _buildNoAccountContent(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textStyle,
-  ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          context.strings.emailNoEnteAccount(widget.email),
-          style: textStyle.small.copyWith(color: colorScheme.textMuted),
-        ),
-        const SizedBox(height: 20),
-        GradientButton(
-          text: context.strings.sendInvite,
-          onTap: () {
-            shareText(context.strings.shareTextRecommendUsingEnte);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVerificationContent(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textStyle,
-    String publicKey,
-    String subTitle,
-    String bottomText,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          subTitle,
-          style: textStyle.small.copyWith(color: colorScheme.textMuted),
-        ),
-        const SizedBox(height: 20),
-        _verificationIDWidget(context, publicKey),
-        const SizedBox(height: 20),
-        Text(
-          bottomText,
-          style: textStyle.small.copyWith(color: colorScheme.textMuted),
-        ),
-      ],
     );
   }
 

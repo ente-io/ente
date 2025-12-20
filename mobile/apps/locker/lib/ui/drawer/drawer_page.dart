@@ -1,5 +1,7 @@
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_events/event_bus.dart";
+import "package:ente_sharing/verify_identity_dialog.dart";
+import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
@@ -7,7 +9,6 @@ import "package:locker/events/user_details_refresh_event.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
-import "package:locker/ui/components/verify_identity_dialog.dart";
 import "package:locker/ui/drawer/app_version_widget.dart";
 import "package:locker/ui/drawer/drawer_title_bar_widget.dart";
 import "package:locker/ui/drawer/settings_widgets.dart";
@@ -49,8 +50,18 @@ class DrawerPage extends StatelessWidget {
     if (hasLoggedIn) {
       contents.add(
         GestureDetector(
-          onDoubleTap: () => showVerifyIdentityDialog(context),
-          onLongPress: () => showVerifyIdentityDialog(context),
+          onDoubleTap: () => showVerifyIdentitySheet(
+            context,
+            self: true,
+            config: Configuration.instance,
+            title: context.strings.verifyIDLabel,
+          ),
+          onLongPress: () => showVerifyIdentitySheet(
+            context,
+            self: true,
+            config: Configuration.instance,
+            title: context.strings.verifyIDLabel,
+          ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Align(
