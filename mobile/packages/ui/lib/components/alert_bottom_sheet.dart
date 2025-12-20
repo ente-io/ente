@@ -2,6 +2,16 @@ import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
+/// Shows a standardized alert bottom sheet with icon, title, message, and action buttons.
+///
+/// This is the standard pattern for alerts, warnings, confirmations, and error dialogs.
+///
+/// Standard configuration:
+/// - `isScrollControlled: true`
+/// - `isDismissible: true`
+/// - `backgroundColor: Colors.transparent` (Container handles decoration)
+/// - Container background: `colorScheme.backgroundElevated2`
+/// - Border radius: 24
 Future<T?> showAlertBottomSheet<T>(
   BuildContext context, {
   required String title,
@@ -13,6 +23,7 @@ Future<T?> showAlertBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     isDismissible: true,
+    backgroundColor: Colors.transparent,
     builder: (context) => AlertBottomSheet<T>(
       title: title,
       message: message,
@@ -22,6 +33,16 @@ Future<T?> showAlertBottomSheet<T>(
   );
 }
 
+/// A standardized alert bottom sheet widget.
+///
+/// Use [showAlertBottomSheet] to display this widget.
+///
+/// Layout:
+/// - Close button (top right)
+/// - Icon/Image (centered)
+/// - Title (h3Bold, centered)
+/// - Message (body, textMuted, centered)
+/// - Action buttons (with 12px spacing between them)
 class AlertBottomSheet<T> extends StatelessWidget {
   final String title;
   final String message;
@@ -50,6 +71,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
         ),
       ),
       child: SafeArea(
+        top: false,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -78,17 +100,26 @@ class AlertBottomSheet<T> extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (buttons != null && buttons!.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                for (int i = 0; i < buttons!.length; i++) ...[
-                  buttons![i],
-                  if (i < buttons!.length - 1) const SizedBox(height: 12),
-                ],
-              ],
+              ..._buildButtonsSection(),
             ],
           ),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildButtonsSection() {
+    if (buttons == null || buttons!.isEmpty) return [];
+
+    return [
+      const SizedBox(height: 20),
+      ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: buttons!.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, index) => buttons![index],
+      ),
+    ];
   }
 }

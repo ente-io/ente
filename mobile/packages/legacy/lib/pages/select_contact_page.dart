@@ -1,7 +1,6 @@
 import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/components/recovery_date_selector.dart";
 import "package:ente_legacy/models/emergency_models.dart";
@@ -10,6 +9,7 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/divider_widget.dart";
