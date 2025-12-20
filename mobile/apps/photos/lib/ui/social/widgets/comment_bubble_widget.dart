@@ -302,7 +302,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                     ),
                     if (showActionsPopup)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.only(top: 4),
                         child: CommentActionsPopup(
                           isLiked: _isLiked,
                           onLikeTap: () {
