@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:bip39/bip39.dart" as bip39;
 import "package:crypto/crypto.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
@@ -41,21 +42,7 @@ class VerifyIdentityDialog extends StatelessWidget {
                 TitleBarTitleWidget(
                   title: context.strings.verifyIDLabel,
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.fillFaint,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 20,
-                      color: colorScheme.textMuted,
-                    ),
-                  ),
-                ),
+                const CloseIconButton(),
               ],
             ),
             const SizedBox(height: 16),

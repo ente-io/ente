@@ -1,5 +1,6 @@
 import "package:ente_sharing/components/gradient_button.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
@@ -68,21 +69,7 @@ class InviteDialog extends StatelessWidget {
           context.strings.inviteToEnte,
           style: textTheme.largeBold,
         ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.close,
-              size: 20,
-              color: colorScheme.textBase,
-            ),
-          ),
-        ),
+        const CloseIconButton(),
       ],
     );
   }

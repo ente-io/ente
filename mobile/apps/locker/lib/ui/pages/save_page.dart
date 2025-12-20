@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -104,23 +105,7 @@ class SaveBottomSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: colorScheme.backgroundElevated,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.close,
-                        size: 24,
-                        color: colorScheme.textBase,
-                      ),
-                    ),
-                  ),
+                  const CloseIconButton(),
                 ],
               ),
               const SizedBox(height: 24),

@@ -6,6 +6,7 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_sharing/components/gradient_button.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/loading_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -142,21 +143,7 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
           context.strings.verify,
           style: textStyle.largeBold,
         ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.close,
-              size: 20,
-              color: colorScheme.textBase,
-            ),
-          ),
-        ),
+        const CloseIconButton(),
       ],
     );
   }

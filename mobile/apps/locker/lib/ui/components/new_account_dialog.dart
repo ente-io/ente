@@ -1,5 +1,6 @@
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -72,24 +73,10 @@ class _CreateNewAccountBottomSheet extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 8),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: colorScheme.backgroundElevated,
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            child: Icon(
-                              Icons.close,
-                              size: 24,
-                              color: colorScheme.textBase,
-                            ),
-                          ),
-                        ),
+                        CloseIconButton(),
                       ],
                     ),
                     const SizedBox(height: 8),

@@ -11,6 +11,7 @@ import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/colors.dart";
@@ -129,21 +130,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           context.strings.addTrustedContact,
           style: textTheme.largeBold,
         ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.close,
-              size: 20,
-              color: colorScheme.textBase,
-            ),
-          ),
-        ),
+        const CloseIconButton(),
       ],
     );
   }
@@ -425,26 +412,12 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: double.infinity,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorScheme.fillFaint,
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            child: Icon(
-                              Icons.close,
-                              size: 20,
-                              color: colorScheme.textBase,
-                            ),
-                          ),
-                        ),
+                        CloseIconButton(),
                       ],
                     ),
                   ),

@@ -4,6 +4,7 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -119,21 +120,7 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
           context.l10n.addNewEmail,
           style: textTheme.largeBold,
         ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.close,
-              size: 20,
-              color: colorScheme.textBase,
-            ),
-          ),
-        ),
+        const CloseIconButton(),
       ],
     );
   }

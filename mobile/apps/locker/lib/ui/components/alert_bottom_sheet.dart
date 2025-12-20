@@ -1,3 +1,4 @@
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
@@ -55,7 +56,12 @@ class AlertBottomSheet<T> extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildCloseButton(context, colorScheme),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CloseIconButton(),
+                ],
+              ),
               const SizedBox(height: 12),
               Center(child: Image.asset(assetPath)),
               const SizedBox(height: 20),
@@ -82,32 +88,6 @@ class AlertBottomSheet<T> extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCloseButton(BuildContext context, colorScheme) {
-    return SizedBox(
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.fillFaint,
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Icon(
-                Icons.close,
-                size: 20,
-                color: colorScheme.textBase,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
