@@ -258,7 +258,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        await showShareLinkDialog(
+        await showShareLinkSheet(
           context,
           shareableLink.fullURL!,
           shareableLink.linkID,
