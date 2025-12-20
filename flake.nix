@@ -86,6 +86,17 @@
             doCheck = false;
           };
 
+          ente-cli = buildGoModule {
+            pname = "ente-cli";
+            version = "main";
+            src = ./cli;
+            nativeBuildInputs = [ pkg-config ];
+            buildInputs = [ libsodium ];
+            vendorHash = "sha256-Gg1mifMVt6Ma8yQ/t0R5nf6NXbzLZBpuZrYsW48p0mw=";
+            doCheck = false;
+            postInstall = "cp -R ./* $out/";
+          };
+
           ente-server = buildGoModule {
             pname = "ente-server";
             version = "main";
@@ -183,13 +194,38 @@
             apps = mkOption {
               type = types.attrs;
               default = {
-                accounts = "accounts";
-                auth = "auth";
-                cast = "cast";
-                embed-albums = "embed";
-                photos = "photos";
-                public-locker = "share";
-                family = "family";
+                accounts = {
+                  subdomain = "accounts";
+                  serve = "accounts";
+                };
+                auth = {
+                  subdomain = "auth";
+                  serve = "auth";
+                };
+                cast = {
+                  subdomain = "cast";
+                  serve = "cast";
+                };
+                embed-albums = {
+                  subdomain = "embed";
+                  serve = "embed";
+                };
+                public-albums = {
+                  subdomain = "albums";
+                  serve = "photos";
+                };
+                photos = {
+                  subdomain = "photos";
+                  serve = "photos";
+                };
+                public-locker = {
+                  subdomain = "share";
+                  serve = "share";
+                };
+                family = {
+                  subdomain = "family";
+                  serve = "family";
+                };
               };
             };
             port = mkOption {
@@ -225,7 +261,7 @@
             systemd.services.ente-server = let
               museumConfig = {
                 http.port = cfg.port;
-                apps = mapAttrs (n: v: "https://${v}.${cfg.domain}") cfg.apps;
+                apps = mapAttrs (n: v: "https://${v.subdomain}.${cfg.domain}") cfg.apps;
               };
               configDir = pkgs.symlinkJoin {
                 name = "ente-config";
@@ -241,7 +277,7 @@
             in {
               wantedBy = [ "multi-user.target" ];
               environment = {
-                ENVIRONMENT = "production";
+                ENVIRONMENT = "local";
                 ENTE_CREDENTIALS_FILE = cfg.credentialsFile;
               };
               serviceConfig = {
@@ -269,11 +305,11 @@
                 locations."/".proxyPass =
                   "http://localhost:${toString cfg.port}";
               };
-            } // mapAttrs' (n: subdomain:
-              (nameValuePair "${subdomain}.${cfg.domain}" {
+            } // mapAttrs' (n: v:
+              (nameValuePair "${v.subdomain}.${cfg.domain}" {
                 forceSSL = true;
                 enableACME = true;
-                root = "${perSystem.config.packages.ente-web}/${subdomain}";
+                root = "${perSystem.config.packages.ente-web}/${v.serve}";
                 locations."=/env.js" = {
                   alias = "${envPolyfill}";
                   extraConfig = ''
