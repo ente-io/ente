@@ -41,6 +41,7 @@ class EnteFile {
   String? thumbnailDecryptionHeader;
   String? metadataDecryptionHeader;
   int? fileSize;
+  String? queueSource;
 
   String? mMdEncodedJson;
   int mMdVersion = 0;
@@ -387,6 +388,7 @@ class EnteFile {
     String? thumbnailDecryptionHeader,
     String? metadataDecryptionHeader,
     int? fileSize,
+    String? queueSource,
     String? mMdEncodedJson,
     int? mMdVersion,
     MagicMetadata? magicMetadata,
@@ -421,6 +423,7 @@ class EnteFile {
       ..metadataDecryptionHeader =
           metadataDecryptionHeader ?? this.metadataDecryptionHeader
       ..fileSize = fileSize ?? this.fileSize
+      ..queueSource = queueSource ?? this.queueSource
       ..mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson
       ..mMdVersion = mMdVersion ?? this.mMdVersion
       ..magicMetadata = magicMetadata ?? this.magicMetadata
