@@ -83,18 +83,14 @@ class _ShareCollectionBottomSheetState
             child: GradientButton(
               text: context.l10n.addEmail,
               onTap: () async {
-                await showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
-                  builder: (context) => AddEmailBottomSheet(
-                    collection: widget.collection,
-                    onShareAdded: () {
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    },
-                  ),
+                await showAddEmailSheet(
+                  context,
+                  collection: widget.collection,
+                  onShareAdded: () {
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
                 );
               },
             ),

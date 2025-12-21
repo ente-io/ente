@@ -14,6 +14,7 @@ Future<T?> showBaseBottomSheet<T>(
   EdgeInsets padding = const EdgeInsets.all(16),
   bool isDismissible = true,
   bool enableDrag = true,
+  bool isKeyboardAware = false,
 }) {
   return showModalBottomSheet<T>(
     context: context,
@@ -29,6 +30,7 @@ Future<T?> showBaseBottomSheet<T>(
       backgroundColor: backgroundColor,
       crossAxisAlignment: crossAxisAlignment,
       padding: padding,
+      isKeyboardAware: isKeyboardAware,
       child: child,
     ),
   );
@@ -43,6 +45,7 @@ class BaseBottomSheet extends StatelessWidget {
   final EdgeInsets padding;
   final Color? backgroundColor;
   final double headerSpacing;
+  final bool isKeyboardAware;
 
   const BaseBottomSheet({
     required this.child,
@@ -53,6 +56,7 @@ class BaseBottomSheet extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.backgroundColor,
     this.headerSpacing = 0,
+    this.isKeyboardAware = false,
     super.key,
   });
 
@@ -60,6 +64,8 @@ class BaseBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final bottomInset =
+        isKeyboardAware ? MediaQuery.of(context).viewInsets.bottom : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -69,27 +75,30 @@ class BaseBottomSheet extends StatelessWidget {
           topRight: Radius.circular(24),
         ),
       ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: padding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: crossAxisAlignment,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(title, style: textTheme.largeBold),
-                  if (showCloseButton)
-                    CloseIconButton(onTap: onClose)
-                  else
-                    const SizedBox.shrink(),
-                ],
-              ),
-              if (headerSpacing > 0) SizedBox(height: headerSpacing),
-              child,
-            ],
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: padding,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: crossAxisAlignment,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title, style: textTheme.largeBold),
+                    if (showCloseButton)
+                      CloseIconButton(onTap: onClose)
+                    else
+                      const SizedBox.shrink(),
+                  ],
+                ),
+                if (headerSpacing > 0) SizedBox(height: headerSpacing),
+                child,
+              ],
+            ),
           ),
         ),
       ),
