@@ -19,7 +19,7 @@ import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
 import "package:locker/ui/components/subscription_required_dialog.dart";
@@ -123,7 +123,7 @@ class CollectionActions {
   }) async {
     if (collections.isEmpty) return;
 
-    final dialogChoice = await showDeleteConfirmationDialog(
+    final dialogChoice = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body:
@@ -277,7 +277,7 @@ class CollectionActions {
 
     final collectionName = collection.name ?? 'this collection';
 
-    final result = await showDeleteConfirmationDialog(
+    final result = await showDeleteConfirmationSheet(
       context,
       title: l10n.areYouSure,
       body: l10n.deleteCollectionDialogBody(collectionName),

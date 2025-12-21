@@ -13,7 +13,7 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/add_to_collection_dialog.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/file_actions.dart";
@@ -572,7 +572,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       return;
     }
 
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(files.length),
