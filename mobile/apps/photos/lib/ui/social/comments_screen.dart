@@ -1,14 +1,20 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/events/comment_deleted_event.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
 import "package:uuid/uuid.dart";
@@ -28,6 +34,8 @@ class FileCommentsScreen extends StatefulWidget {
 }
 
 class _FileCommentsScreenState extends State<FileCommentsScreen> {
+  static final _logger = Logger('FileCommentsScreen');
+
   final List<Comment> _comments = [];
 
   Comment? _replyingTo;
@@ -36,6 +44,9 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
+
+  List<CollectionCommentInfo> _sharedCollections = [];
+  late int _selectedCollectionID;
 
   late final TextEditingController _textController;
   late final FocusNode _inputFocusNode;
@@ -51,7 +62,8 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     _inputFocusNode = FocusNode();
     _scrollController = ScrollController()..addListener(_onScroll);
     _currentUserID = Configuration.instance.getUserID()!;
-    _loadInitialComments();
+    _selectedCollectionID = widget.collectionID;
+    _loadSharedCollections();
   }
 
   @override
@@ -62,12 +74,67 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     super.dispose();
   }
 
+  Future<void> _loadSharedCollections() async {
+    final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
+      widget.fileID,
+    );
+
+    // Filter to shared collections first (sync operation)
+    final sharedCollectionsList = collectionIDs
+        .map((id) => CollectionsService.instance.getCollectionByID(id))
+        .whereType<Collection>()
+        .where(
+          (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
+        )
+        .toList();
+
+    // Fetch data in parallel
+    final sharedCollections = await Future.wait(
+      sharedCollectionsList.map((collection) async {
+        final commentCount = await SocialDataProvider.instance
+            .getCommentCountForFileInCollection(widget.fileID, collection.id);
+        final thumbnail =
+            await CollectionsService.instance.getCover(collection);
+        return CollectionCommentInfo(
+          collection: collection,
+          commentCount: commentCount,
+          thumbnail: thumbnail,
+        );
+      }),
+    );
+
+    if (mounted) {
+      if (sharedCollections.isEmpty) {
+        _logger.warning(
+          'FileCommentsScreen opened for file ${widget.fileID} with no shared collections',
+        );
+        Navigator.of(context).pop();
+        return;
+      }
+
+      final isSelectedInShared = sharedCollections.any(
+        (info) => info.collection.id == _selectedCollectionID,
+      );
+
+      setState(() {
+        _sharedCollections = sharedCollections;
+
+        if (!isSelectedInShared) {
+          _selectedCollectionID = sharedCollections.first.collection.id;
+        }
+      });
+
+      unawaited(_loadInitialComments());
+    }
+  }
+
   Future<void> _loadInitialComments() async {
     setState(() => _isLoading = true);
 
     final comments =
         await SocialDataProvider.instance.getCommentsForFilePaginated(
       widget.fileID,
+      collectionID: _selectedCollectionID,
       limit: _pageSize,
       offset: 0,
     );
@@ -85,17 +152,13 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
     setState(() => _isLoadingMore = true);
 
-    final comments = widget.fileID != null
-        ? await SocialDataProvider.instance.getCommentsForFilePaginated(
-            widget.fileID!,
-            limit: _pageSize,
-            offset: _offset,
-          )
-        : await SocialDataProvider.instance.getCommentsForCollectionPaginated(
-            widget.collectionID,
-            limit: _pageSize,
-            offset: _offset,
-          );
+    final comments =
+        await SocialDataProvider.instance.getCommentsForFilePaginated(
+      widget.fileID,
+      collectionID: _selectedCollectionID,
+      limit: _pageSize,
+      offset: _offset,
+    );
 
     setState(() {
       _comments.addAll(comments);
@@ -110,6 +173,17 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreComments();
     }
+  }
+
+  void _onCollectionSelected(int collectionID) {
+    setState(() {
+      _selectedCollectionID = collectionID;
+      _comments.clear();
+      _offset = 0;
+      _hasMoreComments = true;
+      _userCache.clear();
+    });
+    _loadInitialComments();
   }
 
   Future<Comment?> _getParentComment(String parentCommentId) {
@@ -141,7 +215,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     }
 
     final user = CollectionsService.instance
-        .getFileOwner(comment.userID, widget.collectionID);
+        .getFileOwner(comment.userID, _selectedCollectionID);
     _userCache[comment.userID] = user;
     return user;
   }
@@ -157,7 +231,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     final now = DateTime.now().millisecondsSinceEpoch;
     final newComment = Comment(
       id: const Uuid().v4(),
-      collectionID: widget.collectionID,
+      collectionID: _selectedCollectionID,
       fileID: widget.fileID,
       data: text,
       parentCommentID: _replyingTo?.id,
@@ -166,21 +240,53 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       updatedAt: now,
     );
 
-    // Optimistic update
-    setState(() {
-      _comments.insert(0, newComment);
-      _replyingTo = null;
-    });
-    _textController.clear();
+    // Persist first
+    final result = await SocialDataProvider.instance.addComment(newComment);
+    if (result == null) {
+      _logger.warning('Failed to save comment');
+      return;
+    }
 
-    // Persist
-    await SocialDataProvider.instance.addComment(newComment);
+    // Update UI only after successful persistence
+    if (mounted) {
+      setState(() {
+        _comments.insert(0, newComment);
+        _replyingTo = null;
+
+        // Update comment count in shared collections list
+        final index = _sharedCollections.indexWhere(
+          (c) => c.collection.id == _selectedCollectionID,
+        );
+        if (index != -1) {
+          final old = _sharedCollections[index];
+          _sharedCollections[index] = CollectionCommentInfo(
+            collection: old.collection,
+            commentCount: old.commentCount + 1,
+            thumbnail: old.thumbnail,
+          );
+        }
+      });
+      _textController.clear();
+    }
   }
 
   void _handleCommentDeleted(String commentId) {
     Bus.instance.fire(CommentDeletedEvent(commentId));
     setState(() {
       _comments.removeWhere((c) => c.id == commentId);
+
+      // Decrement comment count in shared collections list
+      final index = _sharedCollections.indexWhere(
+        (c) => c.collection.id == _selectedCollectionID,
+      );
+      if (index != -1) {
+        final old = _sharedCollections[index];
+        _sharedCollections[index] = CollectionCommentInfo(
+          collection: old.collection,
+          commentCount: old.commentCount - 1,
+          thumbnail: old.thumbnail,
+        );
+      }
     });
   }
 
@@ -192,13 +298,19 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        titleSpacing: 28,
+        titleSpacing: _sharedCollections.length > 1 ? 16 : 28,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
-        title: Text(
-          "${_comments.length} comments",
-          style: textTheme.bodyBold,
-        ),
+        title: _sharedCollections.length > 1
+            ? CollectionSelectorWidget(
+                sharedCollections: _sharedCollections,
+                selectedCollectionID: _selectedCollectionID,
+                onCollectionSelected: _onCollectionSelected,
+              )
+            : Text(
+                "${_comments.length} comments",
+                style: textTheme.bodyBold,
+              ),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -242,7 +354,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
                         user: _getUserForComment(comment),
                         isOwnComment: comment.userID == _currentUserID,
                         currentUserID: _currentUserID,
-                        collectionID: widget.collectionID,
+                        collectionID: _selectedCollectionID,
                         onFetchParent: comment.isReply
                             ? () => _getParentComment(comment.parentCommentID!)
                             : null,

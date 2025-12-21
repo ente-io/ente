@@ -142,6 +142,20 @@ class SocialDB {
     return comments.length;
   }
 
+  /// Get comment count for a specific file within a specific collection
+  Future<int> getCommentCountForFileInCollection(
+    int fileID,
+    int collectionID,
+  ) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $commentsTable '
+      'WHERE file_id = ? AND collection_id = ? AND is_deleted = 0',
+      [fileID, collectionID],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
   Future<List<Comment>> getCommentsForCollection(int collectionID) async {
     final db = await database;
     final rows = await db.query(
@@ -174,17 +188,18 @@ class SocialDB {
     return _rowToComment(rows.first);
   }
 
-  /// Paginated fetch for file comments
+  /// Paginated fetch for file comments within a specific collection
   Future<List<Comment>> getCommentsForFilePaginated(
     int fileID, {
+    required int collectionID,
     int limit = 20,
     int offset = 0,
   }) async {
     final db = await database;
     final rows = await db.query(
       commentsTable,
-      where: 'file_id = ? AND is_deleted = 0',
-      whereArgs: [fileID],
+      where: 'file_id = ? AND collection_id = ? AND is_deleted = 0',
+      whereArgs: [fileID, collectionID],
       orderBy: 'created_at DESC',
       limit: limit,
       offset: offset,

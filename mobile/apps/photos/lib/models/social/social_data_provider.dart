@@ -18,6 +18,10 @@ class SocialDataProvider {
     return _db.getCommentCountForFile(fileID);
   }
 
+  Future<int> getCommentCountForFileInCollection(int fileID, int collectionID) {
+    return _db.getCommentCountForFileInCollection(fileID, collectionID);
+  }
+
   Future<List<Reaction>> getReactionsForFile(int fileID) {
     return _db.getReactionsForFile(fileID);
   }
@@ -36,11 +40,13 @@ class SocialDataProvider {
 
   Future<List<Comment>> getCommentsForFilePaginated(
     int fileID, {
+    required int collectionID,
     int limit = 20,
     int offset = 0,
   }) {
     return _db.getCommentsForFilePaginated(
       fileID,
+      collectionID: collectionID,
       limit: limit,
       offset: offset,
     );
