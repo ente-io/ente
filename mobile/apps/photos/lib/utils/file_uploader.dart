@@ -142,6 +142,9 @@ class FileUploader {
       UploadLocksDB.instance,
       flagService,
     );
+    if (flagService.queueSourceEnabled) {
+      await RemoteSyncService.instance.ensureSelectedPathIdsCache();
+    }
     if (currentTime - (_prefs.getInt(_lastStaleFileCleanupTime) ?? 0) >
         tempDirCleanUpInterval) {
       await removeStaleFiles();

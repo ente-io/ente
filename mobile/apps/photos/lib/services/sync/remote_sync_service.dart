@@ -506,6 +506,10 @@ class RemoteSyncService {
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
+  Future<void> ensureSelectedPathIdsCache() async {
+    await _ensureSelectedPathIdsCache();
+  }
+
   Future<void> _ensureSelectedPathIdsCache() async {
     if (_selectedDevicePathIdsCache != null) {
       return;
@@ -533,9 +537,6 @@ class RemoteSyncService {
   bool isDevicePathSelected(String pathId) {
     if (!flagService.queueSourceEnabled) {
       return true;
-    }
-    if (_selectedDevicePathIdsCache == null) {
-      unawaited(_ensureSelectedPathIdsCache());
     }
     return _selectedDevicePathIdsCache?.contains(pathId) ?? true;
   }
