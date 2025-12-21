@@ -184,13 +184,15 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            Flexible(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _likes.isEmpty
-                      ? _buildEmptyState()
-                      : _buildLikesList(),
-            ),
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 48),
+                child: CircularProgressIndicator(),
+              )
+            else if (_likes.isEmpty)
+              _buildEmptyState()
+            else
+              Flexible(child: _buildLikesList()),
           ],
         ),
       ),
