@@ -6,8 +6,7 @@ import "package:ente_legacy/components/invite_reject_bottom_sheet.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
-import "package:ente_legacy/pages/select_contact_page.dart"
-    show showAddContactBottomSheet;
+import "package:ente_legacy/pages/select_contact_page.dart";
 import "package:ente_legacy/services/emergency_service.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_strings/ente_strings.dart";
@@ -266,7 +265,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             GradientButton(
                               text: context.strings.addTrustedContact,
                               onTap: () async {
-                                final result = await showAddContactBottomSheet(
+                                final result = await showAddContactSheet(
                                   context,
                                   emergencyInfo: info!,
                                   config: widget.config,
@@ -285,7 +284,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           GradientButton(
                             text: context.strings.addTrustedContact,
                             onTap: () async {
-                              final result = await showAddContactBottomSheet(
+                              final result = await showAddContactSheet(
                                 context,
                                 emergencyInfo: info!,
                                 config: widget.config,
@@ -410,7 +409,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     BuildContext context,
     EmergencyContact contact,
   ) async {
-    final result = await showTrustedContactBottomSheet(
+    final result = await showTrustedContactSheet(
       context,
       contact: contact,
     );

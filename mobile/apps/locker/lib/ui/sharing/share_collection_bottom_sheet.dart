@@ -25,25 +25,23 @@ Future<void> showShareCollectionSheet(
     context,
     title: context.l10n.sharedWith,
     headerSpacing: 20,
-    child: ShareCollectionBottomSheet(collection: collection),
+    child: ShareCollectionSheet(collection: collection),
   );
 }
 
-class ShareCollectionBottomSheet extends StatefulWidget {
+class ShareCollectionSheet extends StatefulWidget {
   final Collection collection;
 
-  const ShareCollectionBottomSheet({
+  const ShareCollectionSheet({
     super.key,
     required this.collection,
   });
 
   @override
-  State<ShareCollectionBottomSheet> createState() =>
-      _ShareCollectionBottomSheetState();
+  State<ShareCollectionSheet> createState() => _ShareCollectionSheetState();
 }
 
-class _ShareCollectionBottomSheetState
-    extends State<ShareCollectionBottomSheet> {
+class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
   late CollectionActions _collectionActions;
   final ScrollController _scrollController = ScrollController();
 

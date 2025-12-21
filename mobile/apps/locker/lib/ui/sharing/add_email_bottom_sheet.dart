@@ -30,28 +30,28 @@ Future<void> showAddEmailSheet(
     title: context.l10n.addNewEmail,
     headerSpacing: 20,
     isKeyboardAware: true,
-    child: AddEmailBottomSheet(
+    child: AddEmailSheet(
       collection: collection,
       onShareAdded: onShareAdded,
     ),
   );
 }
 
-class AddEmailBottomSheet extends StatefulWidget {
+class AddEmailSheet extends StatefulWidget {
   final Collection collection;
   final VoidCallback onShareAdded;
 
-  const AddEmailBottomSheet({
+  const AddEmailSheet({
     super.key,
     required this.collection,
     required this.onShareAdded,
   });
 
   @override
-  State<AddEmailBottomSheet> createState() => _AddEmailBottomSheetState();
+  State<AddEmailSheet> createState() => _AddEmailSheetState();
 }
 
-class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
+class _AddEmailSheetState extends State<AddEmailSheet> {
   bool _shareLater = false;
   String _email = "";
   bool _emailIsValid = false;
