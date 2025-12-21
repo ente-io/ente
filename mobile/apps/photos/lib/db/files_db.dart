@@ -1125,7 +1125,7 @@ class FilesDB with SqlDbBase {
   }) async {
     final db = await instance.sqliteAsyncDB;
     await db.writeTransaction((tx) async {
-      final hasUnmapped = await tx.get(
+      final hasUnmapped = await tx.getAll(
         'SELECT 1 FROM $filesTable WHERE $columnLocalID = ? '
         'AND ($columnCollectionID IS NULL OR $columnCollectionID = -1) '
         'AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1) '
@@ -1133,7 +1133,7 @@ class FilesDB with SqlDbBase {
         [localID],
       );
 
-      if (hasUnmapped != null) {
+      if (hasUnmapped.isNotEmpty) {
         await tx.execute(
           'DELETE FROM $filesTable WHERE $columnLocalID = ? '
           'AND $columnCollectionID = ? AND $columnQueueSource = ? '
