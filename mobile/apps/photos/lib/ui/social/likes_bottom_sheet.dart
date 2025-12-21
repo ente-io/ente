@@ -203,8 +203,9 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 12, 8),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
+          Flexible(
             child: _sharedCollections.length > 1
                 ? LikesCollectionSelectorWidget(
                     sharedCollections: _sharedCollections,
