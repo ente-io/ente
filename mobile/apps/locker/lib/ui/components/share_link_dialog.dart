@@ -1,7 +1,7 @@
 import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
-import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
@@ -22,17 +22,15 @@ Future<void> showShareLinkSheet(
 ) async {
   final rootContext = context;
 
-  await showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext sheetContext) {
-      return ShareLinkSheet(
-        url: url,
-        file: file,
-        rootContext: rootContext,
-      );
-    },
+  await showBaseBottomSheet<void>(
+    context,
+    title: context.l10n.share,
+    headerSpacing: 20,
+    child: ShareLinkSheet(
+      url: url,
+      file: file,
+      rootContext: rootContext,
+    ),
   );
 }
 
@@ -59,120 +57,94 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
     final textTheme = getEnteTextTheme(context);
     final l10n = context.l10n;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.shareThisLink,
+          style: textTheme.body.copyWith(
+            color: colorScheme.textMuted,
+          ),
         ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 24),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundElevated,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Stack(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.share,
-                    style: textTheme.largeBold,
-                  ),
-                  const CloseIconButton(),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.shareThisLink,
-                style: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.backgroundElevated,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Stack(
+                child: Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 16,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: SelectableText(
-                              widget.url,
-                              style: textTheme.small.copyWith(
-                                color: colorScheme.textBase,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Center(
-                        child: IconButton(
-                          onPressed: () => _copyToClipboard(),
-                          visualDensity: VisualDensity.compact,
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCopy01,
-                            color: colorScheme.textBase,
-                            size: 18,
-                          ),
-                          tooltip: 'Copy link',
+                    Expanded(
+                      child: SelectableText(
+                        widget.url,
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textBase,
+                          fontFamily: 'monospace',
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  onTap: () async {
-                    Navigator.of(context).pop();
-                    await shareText(
-                      widget.url,
-                      context: widget.rootContext,
-                    );
-                  },
-                  text: l10n.shareLink,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: GestureDetector(
-                  onTap: () async {
-                    Navigator.of(context).pop();
-                    await _deleteShareLink(widget.rootContext);
-                  },
-                  child: Text(
-                    l10n.deleteLink,
-                    style: textTheme.bodyBold.copyWith(
-                      color: colorScheme.warning500,
-                      decoration: TextDecoration.underline,
-                      decorationColor: colorScheme.warning500,
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Center(
+                  child: IconButton(
+                    onPressed: () => _copyToClipboard(),
+                    visualDensity: VisualDensity.compact,
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCopy01,
+                      color: colorScheme.textBase,
+                      size: 18,
                     ),
+                    tooltip: 'Copy link',
                   ),
                 ),
               ),
             ],
           ),
         ),
-      ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            onTap: () async {
+              Navigator.of(context).pop();
+              await shareText(
+                widget.url,
+                context: widget.rootContext,
+              );
+            },
+            text: l10n.shareLink,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: GestureDetector(
+            onTap: () async {
+              Navigator.of(context).pop();
+              await _deleteShareLink(widget.rootContext);
+            },
+            child: Text(
+              l10n.deleteLink,
+              style: textTheme.bodyBold.copyWith(
+                color: colorScheme.warning500,
+                decoration: TextDecoration.underline,
+                decorationColor: colorScheme.warning500,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
