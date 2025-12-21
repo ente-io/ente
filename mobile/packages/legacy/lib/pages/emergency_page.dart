@@ -490,7 +490,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    final result = await showEmailBottomSheet<String>(
+    final result = await showEmailSheet<String>(
       context,
       email: contact.user.email,
       message: context.strings.legacyInvite(contact.user.email),
@@ -541,7 +541,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final String emergencyContactEmail = session.emergencyContact.email;
     final colorScheme = getEnteColorScheme(context);
 
-    final confirmed = await showEmailBottomSheet<bool>(
+    final confirmed = await showEmailSheet<bool>(
       context,
       email: emergencyContactEmail,
       message: context.strings.recoveryWarningBody(emergencyContactEmail),
