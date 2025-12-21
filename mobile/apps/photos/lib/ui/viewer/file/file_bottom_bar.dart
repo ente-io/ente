@@ -406,9 +406,9 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     routeToPage(
       context,
-      CommentsScreen(
+      FileCommentsScreen(
         collectionID: file.collectionID!,
-        fileID: file.uploadedFileID,
+        fileID: file.uploadedFileID!,
       ),
     ).then((_) {
       // Refresh comment count when returning from comments screen

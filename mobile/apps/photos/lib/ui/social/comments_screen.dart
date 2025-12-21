@@ -13,21 +13,21 @@ import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
 import "package:uuid/uuid.dart";
 
-class CommentsScreen extends StatefulWidget {
+class FileCommentsScreen extends StatefulWidget {
   final int collectionID;
-  final int? fileID;
+  final int fileID;
 
-  const CommentsScreen({
+  const FileCommentsScreen({
     required this.collectionID,
-    this.fileID,
+    required this.fileID,
     super.key,
   });
 
   @override
-  State<CommentsScreen> createState() => _CommentsScreenState();
+  State<FileCommentsScreen> createState() => _FileCommentsScreenState();
 }
 
-class _CommentsScreenState extends State<CommentsScreen> {
+class _FileCommentsScreenState extends State<FileCommentsScreen> {
   final List<Comment> _comments = [];
 
   Comment? _replyingTo;
@@ -65,17 +65,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
   Future<void> _loadInitialComments() async {
     setState(() => _isLoading = true);
 
-    final comments = widget.fileID != null
-        ? await SocialDataProvider.instance.getCommentsForFilePaginated(
-            widget.fileID!,
-            limit: _pageSize,
-            offset: 0,
-          )
-        : await SocialDataProvider.instance.getCommentsForCollectionPaginated(
-            widget.collectionID,
-            limit: _pageSize,
-            offset: 0,
-          );
+    final comments =
+        await SocialDataProvider.instance.getCommentsForFilePaginated(
+      widget.fileID,
+      limit: _pageSize,
+      offset: 0,
+    );
 
     setState(() {
       _comments.addAll(comments);
