@@ -361,17 +361,6 @@
   "@verifyEmail": {
     "description": "Verify email title"
   },
-  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
-  "@weHaveSendEmailTo": {
-    "description": "Text to indicate that we have sent a mail to the user",
-    "placeholders": {
-      "email": {
-        "description": "The email address of the user",
-        "type": "String",
-        "example": "example@ente.io"
-      }
-    }
-  },
   "toResetVerifyEmail": "To reset your password, please verify your email first.",
   "@toResetVerifyEmail": {
     "description": "Message asking user to verify email before password reset"
@@ -380,6 +369,15 @@
   "@checkInboxAndSpamFolder": {
     "description": "Message asking user to check inbox and spam folder"
   },
+  "weHaveSentCode": "We have sent a code to {email}",
+  "@weHaveSentCode": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "resendCode": "Resend Code",
   "tapToEnterCode": "Tap to enter code",
   "@tapToEnterCode": {
     "description": "Hint for entering verification code"
