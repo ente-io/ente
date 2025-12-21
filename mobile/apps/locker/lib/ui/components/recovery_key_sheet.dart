@@ -4,7 +4,7 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
 import 'package:ente_strings/ente_strings.dart';
-import "package:ente_ui/components/close_icon_button.dart";
+import "package:ente_ui/components/base_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -62,101 +62,73 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.strings.recoveryKeyOnForgotPassword,
+          style: textTheme.body.copyWith(
+            color: colorScheme.textMuted,
+          ),
         ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 24),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.primary700,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    context.strings.recoveryKey,
-                    style: textTheme.largeBold,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 24,
+                ),
+                child: SelectableText(
+                  recoveryKeyMnemonic,
+                  style: textTheme.body.copyWith(
+                    color: Colors.white,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
+                    height: 1.5,
                   ),
-                  CloseIconButton(
-                    onTap: () => _handleClose(),
+                  textAlign: TextAlign.justify,
+                ),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: IconButton(
+                  onPressed: () => _copyToClipboard(recoveryKeyMnemonic),
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(
+                    Icons.copy_rounded,
+                    size: 20,
+                    color: colorScheme.primary500,
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                context.strings.recoveryKeyOnForgotPassword,
-                style: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.primary700,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 22,
-                        vertical: 24,
-                      ),
-                      child: SelectableText(
-                        recoveryKeyMnemonic,
-                        style: textTheme.body.copyWith(
-                          color: Colors.white,
-                          fontFamily: 'monospace',
-                          letterSpacing: 0.5,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.justify,
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: IconButton(
-                        onPressed: () => _copyToClipboard(recoveryKeyMnemonic),
-                        visualDensity: VisualDensity.compact,
-                        icon: Icon(
-                          Icons.copy_rounded,
-                          size: 20,
-                          color: colorScheme.primary500,
-                        ),
-                        tooltip: 'Copy to clipboard',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                context.strings.recoveryKeySaveDescription,
-                style: textTheme.small.copyWith(
-                  color: colorScheme.textMuted,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  onTap: () => _shareRecoveryKey(recoveryKeyMnemonic),
-                  text: 'Share recovery key',
+                  tooltip: 'Copy to clipboard',
                 ),
               ),
             ],
           ),
         ),
-      ),
+        const SizedBox(height: 16),
+        Text(
+          context.strings.recoveryKeySaveDescription,
+          style: textTheme.small.copyWith(
+            color: colorScheme.textMuted,
+          ),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            onTap: () => _shareRecoveryKey(recoveryKeyMnemonic),
+            text: 'Share recovery key',
+          ),
+        ),
+      ],
     );
   }
 
@@ -188,26 +160,18 @@ class _RecoveryKeySheetState extends State<RecoveryKeySheet> {
       }
     }
   }
-
-  void _handleClose() {
-    Navigator.of(context).pop();
-  }
 }
 
 Future<void> showRecoveryKeySheet(
   BuildContext context, {
   required String recoveryKey,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
+  return showBaseBottomSheet<void>(
+    context,
+    title: context.strings.recoveryKey,
+    headerSpacing: 20,
     isDismissible: false,
     enableDrag: false,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return RecoveryKeySheet(
-        recoveryKey: recoveryKey,
-      );
-    },
+    child: RecoveryKeySheet(recoveryKey: recoveryKey),
   );
 }
