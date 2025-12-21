@@ -17,6 +17,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/social/comments_screen.dart";
+import "package:photos/ui/social/likes_bottom_sheet.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/panorama_util.dart";
@@ -305,6 +306,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           padding: const EdgeInsets.only(top: 12),
           child: GestureDetector(
             onTap: _toggleReaction,
+            onLongPress: _showLikesBottomSheet,
             child: Icon(
               _hasLiked
                   ? (Platform.isAndroid
@@ -337,6 +339,17 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     _hasLiked = !_hasLiked;
     safeRefresh();
+  }
+
+  void _showLikesBottomSheet() {
+    final file = widget.file;
+    if (file.uploadedFileID == null || file.collectionID == null) return;
+
+    showLikesBottomSheet(
+      context,
+      fileID: file.uploadedFileID!,
+      initialCollectionID: file.collectionID!,
+    );
   }
 
   Widget _buildCommentIcon() {

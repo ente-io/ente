@@ -26,6 +26,13 @@ class SocialDataProvider {
     return _db.getReactionsForFile(fileID);
   }
 
+  Future<List<Reaction>> getReactionsForFileInCollection(
+    int fileID,
+    int collectionID,
+  ) {
+    return _db.getReactionsForFileInCollection(fileID, collectionID);
+  }
+
   Future<List<Comment>> getRepliesForComment(String commentID) {
     return _db.getRepliesForComment(commentID);
   }

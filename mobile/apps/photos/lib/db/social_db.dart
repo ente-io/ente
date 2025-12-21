@@ -325,6 +325,21 @@ class SocialDB {
     return rows.map(_rowToReaction).toList();
   }
 
+  /// Get reactions for a file within a specific collection (file-level likes only)
+  Future<List<Reaction>> getReactionsForFileInCollection(
+    int fileID,
+    int collectionID,
+  ) async {
+    final db = await database;
+    final rows = await db.query(
+      reactionsTable,
+      where:
+          'file_id = ? AND collection_id = ? AND comment_id IS NULL AND is_deleted = 0',
+      whereArgs: [fileID, collectionID],
+    );
+    return rows.map(_rowToReaction).toList();
+  }
+
   Future<List<Reaction>> getReactionsForComment(String commentID) async {
     final db = await database;
     final rows = await db.query(
