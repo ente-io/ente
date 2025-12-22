@@ -317,6 +317,10 @@
   "@logInLabel": {
     "description": "Log in button label"
   },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Text asking if user already has an account"
+  },
   "welcomeBack": "Welcome back!",
   "@welcomeBack": {
     "description": "Welcome back message"
