@@ -223,6 +223,7 @@ class LocalSyncService {
         ),
       );
     }
+
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
     return hasUnsyncedFiles;
   }
