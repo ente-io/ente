@@ -197,6 +197,15 @@
   "publicLinkEnabled": "Ο δημόσιος σύνδεσμος ενεργοποιήθηκε",
   "shareALink": "Μοιραστείτε έναν σύνδεσμο",
   "sharedAlbumSectionDescription": "Δημιουργία κοινόχρηστων και συνεργατικών άλμπουμ με άλλους χρήστες Ente, συμπεριλαμβανομένων των χρηστών με δωρεάν συνδρομή.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "thisIsYourVerificationId": "Αυτός είναι ο κωδικός επαλήθευσής σας",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Κάποιος που μοιράζεται άλμπουμ με εσάς θα πρέπει να δει τον ίδιο κωδικό στη συσκευή του.",
   "howToViewShareeVerificationID": "Παρακαλώ ζητήστε από τον άλλο χρήστη να πιέσει παρατεταμένα τη διεύθυνση ηλεκτρονικού ταχυδρομείου του στην οθόνη ρυθμίσεων και βεβαιωθείτε ότι οι κωδικοί και στις δύο συσκευές ταιριάζουν.",
