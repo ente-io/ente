@@ -147,6 +147,8 @@ class VideoPreviewService {
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   void stop(String reason) {
+    if (uploadingFileId == -1) return;
+
     _logger.info("Stopping streaming: $reason");
     _streamingCancelToken?.cancel();
     uploadingFileId = -1;
@@ -162,11 +164,13 @@ class VideoPreviewService {
   // Stop streaming process if ffmpeg not started or if ffmpeg progress < 75%
   Future<void> stopSafely(String reason) async {
     final item = uploadingFileId >= 0 ? _items[uploadingFileId] : null;
-    final status = item?.status;
+    if (item == null) return;
+
+    final status = item.status;
     double? progress;
 
     if (status == PreviewItemStatus.compressing) {
-      final durationInSeconds = item?.file.duration;
+      final durationInSeconds = item.file.duration;
       progress = await ffmpegService.getSessionProgress(
         sessionId: _currentFfmpegSessionId,
         duration: durationInSeconds == null
