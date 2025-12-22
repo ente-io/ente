@@ -18,7 +18,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/events/compute_control_event.dart";
+import "package:photos/events/device_health_changed_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
@@ -83,10 +83,10 @@ class VideoPreviewService {
       }
     });
 
-    Bus.instance.on<ComputeControlEvent>().listen((event) {
-      if (!computeController.isDeviceHealthy) {
+    Bus.instance.on<DeviceHealthChangedEvent>().listen((event) {
+      if (!event.isHealthy) {
         stopSafely("device unhealthy").ignore();
-      } else if (event.shouldRun && isVideoStreamingEnabled) {
+      } else if (isVideoStreamingEnabled) {
         _logger.info("Device healthy, resuming stream processing");
         queueFiles(duration: Duration.zero);
       }
