@@ -130,22 +130,17 @@ class VideoPreviewService {
   }
 
   // Clear queue - will be rebuilt from DB when processing resumes
-  // Optionally exclude a fileId (e.g., current uploading item) from being cleared
-  void clearQueue({int? excludeFileId}) {
+  void clearQueue() {
     // Fire events for all items being cleared so UI can reset
     // Use paused status when flag is enabled (items will resume), otherwise uploaded
     final status = flagService.stopStreamProcess
         ? PreviewItemStatus.paused
         : PreviewItemStatus.uploaded;
     for (final fileId in _items.keys) {
-      if (fileId != excludeFileId) {
-        _fireVideoPreviewStateChange(fileId, status);
-      }
+      _fireVideoPreviewStateChange(fileId, status);
     }
     fileQueue.clear();
-    final excludedItem = excludeFileId != null ? _items[excludeFileId] : null;
     _items.clear();
-    if (excludedItem != null) _items[excludeFileId!] = excludedItem;
   }
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
@@ -197,7 +192,7 @@ class VideoPreviewService {
       _logger.fine(
         "stopSafely: letting current task finish, clearing queue. status: $status, progress: $progressStr, reason: $reason",
       );
-      clearQueue(excludeFileId: uploadingFileId);
+      fileQueue.clear();
       return;
     }
 
@@ -768,7 +763,7 @@ class VideoPreviewService {
       shouldRetry = false;
     }
 
-    if (_items.isEmpty) return;
+    if (!_items.containsKey(enteFile.uploadedFileID!)) return;
 
     if (shouldRetry &&
         _items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
