@@ -267,19 +267,19 @@ Public links are end-to-end encrypted, but with an important caveat:
 
 ## Availability
 
-Public links (including collect links and quick links) are available to all users, with some limitations for free accounts to prevent abuse.
+Public links (including collect links and quick links) are available on all plans, including the free tier. Free plan users can create public links with a device limit of 5.
 
 **Free users can:**
 
-- Create public links with a maximum device limit of 5
+- Create public links (device limit of 5)
 - View public links shared with them
 - Add photos to collect links shared with them
-- Receive shared albums from other Ente users
+- Create and receive shared albums
 
 **Paid users can:**
 
-- Create public links with higher or no device limits
-- Access all sharing features without restrictions
+- Create public links with no device limit
+- Access all other premium features
 
 ## Related topics
 
