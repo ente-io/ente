@@ -230,13 +230,6 @@ class _LoginPasswordVerificationPageState
                     children: [
                       const SizedBox(height: 24),
                       Text(
-                        email ?? '',
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
                         context.strings.password,
                         style: textTheme.bodyBold.copyWith(
                           color: colorScheme.textBase,
