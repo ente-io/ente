@@ -132,9 +132,11 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final likes = await SocialDataProvider.instance
-          .getReactionsForFileInCollection(
-              widget.fileID, _selectedCollectionID);
+      final likes =
+          await SocialDataProvider.instance.getReactionsForFileInCollection(
+        widget.fileID,
+        _selectedCollectionID,
+      );
 
       if (mounted) {
         setState(() {
@@ -358,7 +360,7 @@ class _LikeListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -368,12 +370,21 @@ class _LikeListItem extends StatelessWidget {
             user,
             currentUserID: currentUserID,
             type: AvatarType.lg,
+            addStroke: false,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              user.displayName ?? user.email,
-              style: textTheme.body,
+              user.id == currentUserID
+                  ? "You"
+                  : (user.displayName ?? user.email),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                height: 20 / 14,
+                letterSpacing: 14 * -0.02,
+                color: colorScheme.textMuted,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),

@@ -133,6 +133,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                               currentUserID: widget.currentUserID,
                               thumbnailView: widget.thumbnailView,
                               type: widget.type,
+                              addStroke: widget.addStroke,
                             ),
                     );
                   } else if (snapshot.hasError) {
@@ -142,6 +143,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
+                      addStroke: widget.addStroke,
                     );
                   } else if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data == null) {
@@ -150,6 +152,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
+                      addStroke: widget.addStroke,
                     );
                   }
                   return const SizedBox.shrink();
@@ -162,6 +165,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             currentUserID: widget.currentUserID,
             thumbnailView: widget.thumbnailView,
             type: widget.type,
+            addStroke: widget.addStroke,
           );
   }
 }
@@ -171,11 +175,13 @@ class _FirstLetterCircularAvatar extends StatefulWidget {
   final int currentUserID;
   final bool thumbnailView;
   final AvatarType type;
+  final bool addStroke;
   const _FirstLetterCircularAvatar({
     required this.user,
     required this.currentUserID,
     required this.thumbnailView,
     required this.type,
+    required this.addStroke,
   });
 
   @override
@@ -207,17 +213,19 @@ class _FirstLetterCircularAvatarState
     final double size = avatarStyle.item1;
     final TextStyle textStyle = avatarStyle.item2;
     return Container(
-      padding: const EdgeInsets.all(0.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
-          width: UserAvatarWidget.strokeWidth,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-      ),
+      padding: widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+      decoration: widget.addStroke
+          ? BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: widget.thumbnailView
+                    ? strokeMutedDark
+                    : getEnteColorScheme(context).strokeMuted,
+                width: UserAvatarWidget.strokeWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            )
+          : null,
       child: SizedBox(
         height: size,
         width: size,
