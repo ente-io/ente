@@ -71,7 +71,7 @@ void main() async {
   debugRepaintRainbowEnabled = false;
   await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
-  await FFmpegKitConfig.init();
+  FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 

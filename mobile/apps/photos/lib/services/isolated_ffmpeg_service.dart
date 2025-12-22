@@ -29,8 +29,6 @@ class IsolatedFfmpegService {
       return await runFfmpeg(command);
     }
 
-    // Ensure EventChannel subscription exists on root isolate.
-    await FFmpegKitConfig.init();
     final rootIsolateToken = RootIsolateToken.instance!;
     final port = ReceivePort();
     final completionPort = ReceivePort();
