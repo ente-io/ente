@@ -4,6 +4,7 @@ import {
     ensureOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
+import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import {
     decryptRemoteCollection,
@@ -215,10 +216,19 @@ export const pullPublicCollectionFiles = async (
             if (change.isDeleted) {
                 filesByID.delete(change.id);
             } else {
-                filesByID.set(
-                    change.id,
-                    await decryptRemoteFile(change, collection.key),
-                );
+                try {
+                    filesByID.set(
+                        change.id,
+                        await decryptRemoteFile(change, collection.key),
+                    );
+                } catch (e) {
+                    log.warn(
+                        `Skipping file ${change.id} due to decryption error`,
+                        e,
+                    );
+                    // Continue with other files even if one fails to decrypt
+                    // (e.g., corrupted base64 data)
+                }
             }
         }
 
