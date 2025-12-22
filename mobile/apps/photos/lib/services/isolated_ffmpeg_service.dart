@@ -67,6 +67,8 @@ class IsolatedFfmpegService {
   }
 
   Future<Map> getVideoInfo(String file) async {
+    // Ensure EventChannel subscription exists on root isolate.
+    await FFmpegKitConfig.init();
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _getVideoProps(file, rootIsolateToken));
   }
