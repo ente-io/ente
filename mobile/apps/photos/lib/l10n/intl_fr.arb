@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Confirmer la clé de récupération",
   "addViewer": "Ajouter un observateur",
   "addCollaborator": "Ajouter un collaborateur",
+  "admin": "Admin",
+  "admins": "Admins",
+  "addAdmin": "Ajouter un administrateur",
+  "addMoreAdmins": "Ajouter d'autres administrateurs",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Les administrateurs et les collaborateurs peuvent ajouter des photos. Les administrateurs peuvent en plus gérer les photos et les participants.",
   "addANewEmail": "Ajouter un nouvel email",
   "orPickAnExistingOne": "Ou sélectionner un email existant",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Les collaborateurs peuvent ajouter des photos et des vidéos à l'album partagé.",
@@ -887,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Cliquez sur le menu de débordement",
   "click": "• Cliquez sur",
   "nothingToSeeHere": "Il n'y a encore rien à voir ici 👀",
+  "selectFoldersToBackup": "<action>Sélectionnez les dossiers</action> pour afficher et\nsauvegarder sur ente.",
   "unarchiveAlbum": "Désarchiver l'album",
   "archiveAlbum": "Archiver l'album",
   "calculating": "Calcul en cours...",
@@ -1411,6 +1417,54 @@
   "loadingYourPhotos": "Chargement de vos photos...",
   "processingImport": "Traitement de {folderName}...",
   "personName": "Nom de la personne",
+  "addPerson": "Ajouter une personne",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Ajouter à la personne",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Veuillez d'abord nommer une personne dans la section Personnes",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Seuls les fichiers chargés peuvent être ajoutés à une personne",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Aucun visage détecté, appuyez pour ajouter.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, one {}=1 {Ajout d'un fichier à {personName}} other { {count} fichiers ajoutés à {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, one {}=1 {Un fichier est déjà lié à {personName}} other {{count} fichiers sont déjà liés à {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Ajouter une nouvelle personne",
   "addNameOrMerge": "Ajouter un nom ou fusionner",
   "mergeWithExisting": "Fusionner avec existant",
@@ -1978,14 +2032,14 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Présentation des Rituels",
-  "cLDesc1": "Vous préparez des résolutions pour 2026 ? Avec Rituels, vous pouvez définir un rappel sur Ente Photos et suivre vos progrès en prenant des photos. Utilisez-le pour les entraînements, les habitudes alimentaires, les moments quotidiens avec vos proches – tout ce que vous voulez transformer en habitude.",
-  "cLTitle2": "Liens publics, maintenant pour tous",
-  "cLDesc2": "Tous les utilisateurs Ente sur le plan gratuit peuvent désormais créer et partager des liens publics vers des photos et des albums. Pour prévenir les abus, les liens auront des limites sur le nombre de personnes pouvant les consulter.",
-  "cLTitle3": "Taguer manuellement des personnes",
-  "cLDesc3": "Vous pouvez maintenant taguer des personnes même quand notre IA embarquée ne détecte pas de visage. Pratique pour les animaux de compagnie, les visages partiellement visibles, ou les moments où quelqu'un n'est pas vraiment sur la photo mais devrait quand même y être inclus.",
+  "cLTitle1": "Présentation des routines",
+  "cLDesc1": "Vous prenez de bonnes résolutions pour 2026 ? Avec Routines, vous pouvez définir un rappel sur Ente Photos et suivre vos progrès en prenant des photos. Utilisez-le pour faire vos entraînements, prendre des habitudes alimentaires, des moments aux quotidiens avec vos proches, tout ce que vous souhaitez qui devienne une habitude.",
+  "cLTitle2": "Liens publics, maintenant pour tout le monde",
+  "cLDesc2": "Tous les utilisateurs de Ente avec un plan gratuit peuvent maintenant créer et partager des liens publics vers des photos et des albums. Pour prévenir les abus, les liens auront des limites sur le nombre de personnes qui peuvent les voir.",
+  "cLTitle3": "Taguer manuellement une personne",
+  "cLDesc3": "Vous pouvez maintenant taguer des personnes même si notre IA sur l'appareil ne détecte pas de visage. Pratique pour les animaux de compagnie, les visages partiellement visibles ou bien les moments où quelqu'un n'est pas réellement dans la photo mais peut toujours y être inclus.",
   "cLTitle4": "Et plus encore",
-  "cLDesc4": "Vous pouvez maintenant épingler des albums partagés. Les liens d'albums sont visibles pour les collaborateurs et les spectateurs pour faciliter encore plus le partage. Nous avons corrigé quelques bugs de balayage iOS et mis à jour la vue photo, y compris une nouvelle icône de favori (préparant la place pour les fonctionnalités à venir).",
+  "cLDesc4": "Vous pouvez maintenant épingler les albums partagés. Les liens vers les albums sont visibles aux collaborateurs et aux spectateurs pour faciliter le partage. Nous avons corrigé quelques bugs de balayage sur iOS et mis à jour la vue photo, y compris un nouvel icône de favoris (faisant de la place pour des fonctionnalités à venir).",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2145,17 +2199,22 @@
   "ritualAlbumNotSet": "Album non configuré",
   "ritualOpenCameraTooltip": "Ouvrir la routine caméra",
   "ritualEditorLabel": "Éditeur de routine",
-  "ritualNew": "Nouvelle routine",
+  "ritualNew": "Créer une nouvelle routine",
+  "ritualCreateNewTitle": "Créer une nouvelle routine",
   "ritualEdit": "Modifier la routine",
   "ritualEnterPrompt": "Saisissez votre routine",
   "ritualEnterDescription": "Veuillez saisir une description",
+  "ritualChooseDaysLabel": "Choisir les jours pour la routine",
   "ritualDayLabel": "Jour",
   "ritualNotificationsOffHint": "Les notifications sont désactivées. Appuyez sur un jour pour les activer.",
   "ritualTimeLabel": "Date et heure",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Enregistrer la routine",
+  "ritualCreateAction": "Créer la routine",
   "ritualUpdate": "Mettre à jour la routine",
   "ritualSelectAlbumTitle": "Sélectionner un album",
+  "ritualChooseAlbumLabel": "Choisir un album",
+  "ritualSendReminderLabel": "Envoyer un rappel",
   "ritualSearchOrCreate": "Rechercher ou créer un nouveau",
   "ritualNoAlbumsYet": "Pas encore d'albums",
   "ritualNoMatchingAlbums": "Aucuns albums correspondants",

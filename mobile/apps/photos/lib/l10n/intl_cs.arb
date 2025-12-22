@@ -1978,14 +1978,6 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
-  "cLTitle1": "Přejít na datum",
-  "cLDesc1": "Podívejte se na okolní fotografie tak, že v informačním panelu souboru zvolíte možnost přejít na datum.",
-  "cLTitle2": "Rychlejší video editor",
-  "cLDesc2": "Video editor byl přepracován na drastické zvýšení jeho rychlosti při úpravách větších videí a také na vylepšení UX.",
-  "cLTitle3": "Nové vzpomínky",
-  "cLDesc3": "\"Hravé děti\", \"Zimní dobrodružství\", \"Neonové noci\" a další.",
-  "cLTitle4": "Galerie na šířku a více",
-  "cLDesc4": "Podpora rozložení na šířku v hlavní galerii aplikace. Zobrazit osoby bez přidružených fotografií namísto jejich filtrování. Zlepšit detekci video aspektů, když je sdíleno z externích aplikací.",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2145,7 +2137,6 @@
   "ritualAlbumNotSet": "Album není nastaveno",
   "ritualOpenCameraTooltip": "Otevřít fotoaparát rituálu",
   "ritualEditorLabel": "Editor rituálů",
-  "ritualNew": "Nový rituál",
   "ritualEdit": "Upravit rituál",
   "ritualEnterPrompt": "Zadejte svůj rituál",
   "ritualEnterDescription": "Zadejte prosím popis",

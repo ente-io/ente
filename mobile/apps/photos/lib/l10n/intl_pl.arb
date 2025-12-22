@@ -1859,13 +1859,5 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Przedstawiamy Rytuały",
-  "cLDesc1": "Planujesz postanowienia na 2026? Dzięki Rytuałom możesz ustawić przypomnienie w Ente Photos i śledzić swoje postępy, robiąc zdjęcia. Użyj do treningów, nawyków żywieniowych, codziennych chwil z bliskimi – wszystkiego, co chcesz zamienić w nawyk.",
-  "cLTitle2": "Linki publiczne, teraz dla wszystkich",
-  "cLDesc2": "Wszyscy użytkownicy Ente na darmowym planie mogą teraz tworzyć i udostępniać publiczne linki do zdjęć i albumów. Aby zapobiec nadużyciom, linki będą miały limity liczby osób, które mogą je wyświetlać.",
-  "cLTitle3": "Ręczne tagowanie osób",
-  "cLDesc3": "Teraz możesz tagować osoby nawet wtedy, gdy nasza AI na urządzeniu nie wykryje twarzy. Przydatne dla zwierząt, częściowo widocznych twarzy lub momentów, gdy ktoś nie jest faktycznie na zdjęciu, ale powinien zostać uwzględniony.",
-  "cLTitle4": "I więcej",
-  "cLDesc4": "Teraz możesz przypinać udostępnione albumy. Linki do albumów są widoczne dla współpracowników i widzów, aby ułatwić udostępnianie. Naprawiliśmy niektóre błędy przesuwania na iOS i zaktualizowaliśmy widok zdjęć, w tym nową ikonę ulubionych (robiąc miejsce na nadchodzące funkcje)."
+  "deletingDash": "Usuwanie - "
 }

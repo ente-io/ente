@@ -1731,13 +1731,5 @@
   "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
-  "pastYearsMemories": "Tidligere års minner",
-  "cLTitle1": "Introduserer Ritualer",
-  "cLDesc1": "Planlegger du nyttårsforsetter for 2026? Med Ritualer kan du sette en påminnelse i Ente Photos og spore fremgangen din ved å ta bilder. Bruk det til trening, spisevaner, daglige øyeblikk med kjære – alt du vil gjøre til en vane.",
-  "cLTitle2": "Offentlige lenker, nå for alle",
-  "cLDesc2": "Alle Ente-brukere på gratisplanen kan nå opprette og dele offentlige lenker til bilder og album. For å forhindre misbruk vil lenker ha begrensninger på hvor mange som kan se dem.",
-  "cLTitle3": "Merk personer manuelt",
-  "cLDesc3": "Du kan nå merke personer selv når vår AI på enheten ikke oppdager et ansikt. Nyttig for kjæledyr, delvis synlige ansikter, eller øyeblikk der noen ikke faktisk er på bildet men likevel bør inkluderes.",
-  "cLTitle4": "Og mer",
-  "cLDesc4": "Du kan nå feste delte album. Albumlenker er synlige for samarbeidspartnere og seere for å gjøre deling enda enklere. Vi har fikset noen iOS-sveipefeil og oppdatert fotovisningen, inkludert et nytt favorittikon (gjør plass til kommende funksjoner)."
+  "pastYearsMemories": "Tidligere års minner"
 }
