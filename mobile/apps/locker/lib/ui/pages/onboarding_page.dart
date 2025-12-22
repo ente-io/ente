@@ -119,37 +119,36 @@ class _OnboardingPageState extends State<OnboardingPage> {
         scrolledUnderElevation: 0,
         centerTitle: true,
       ),
-      body: GestureDetector(
-        onTap: () async {
-          _developerModeTapCount++;
-          if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
-            _developerModeTapCount = 0;
-            final result = await showChoiceDialog(
-              context,
-              title: l10n.developerSettings,
-              firstButtonLabel: l10n.yes,
-              body: l10n.developerSettingsWarning,
-              isDismissible: false,
-            );
-            if (result?.action == ButtonAction.first) {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return DeveloperSettingsPage(Configuration.instance);
-                  },
-                ),
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () async {
+            _developerModeTapCount++;
+            if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
+              _developerModeTapCount = 0;
+              final result = await showChoiceDialog(
+                context,
+                title: l10n.developerSettings,
+                firstButtonLabel: l10n.yes,
+                body: l10n.developerSettingsWarning,
+                isDismissible: false,
               );
-              setState(() {});
+              if (result?.action == ButtonAction.first) {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return DeveloperSettingsPage(Configuration.instance);
+                    },
+                  ),
+                );
+                setState(() {});
+              }
             }
-          }
-        },
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
+          },
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
                 child: Column(
                   children: [
                     const SizedBox(height: 28),
@@ -185,45 +184,51 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ),
                     const SizedBox(height: 48),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: GradientButton(
-                        text: l10n.loginToEnteAccount,
-                        backgroundColor: Colors.white,
-                        textColor: colorScheme.primary700,
-                        onTap: _navigateToSignInPage,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: GestureDetector(
-                        onTap: _navigateToSignUpPage,
-                        child: Text.rich(
-                          TextSpan(
-                            text: "${l10n.dontHaveAccount} ",
-                            style: getEnteTextTheme(context).body.copyWith(
-                                  color: Colors.white,
-                                ),
-                            children: [
-                              TextSpan(
-                                text: l10n.signUp,
-                                style:
-                                    getEnteTextTheme(context).bodyBold.copyWith(
-                                          color: Colors.white,
-                                          decoration: TextDecoration.underline,
-                                          decorationColor: Colors.white,
-                                        ),
-                              ),
-                            ],
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          GradientButton(
+                            text: l10n.loginToEnteAccount,
+                            backgroundColor: Colors.white,
+                            textColor: colorScheme.primary700,
+                            onTap: _navigateToSignInPage,
                           ),
-                        ),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: GestureDetector(
+                              onTap: _navigateToSignUpPage,
+                              child: Text.rich(
+                                TextSpan(
+                                  text: "${l10n.dontHaveAccount} ",
+                                  style:
+                                      getEnteTextTheme(context).body.copyWith(
+                                            color: Colors.white,
+                                          ),
+                                  children: [
+                                    TextSpan(
+                                      text: l10n.signUp,
+                                      style: getEnteTextTheme(context)
+                                          .bodyBold
+                                          .copyWith(
+                                            color: Colors.white,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor: Colors.white,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
