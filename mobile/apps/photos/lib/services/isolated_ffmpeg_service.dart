@@ -24,6 +24,10 @@ class IsolatedFfmpegService {
     String command,
     void Function(int sessionId) onSessionStarted,
   ) async {
+    if (!flagService.stopStreamProcess) {
+      return await runFfmpeg(command);
+    }
+
     final rootIsolateToken = RootIsolateToken.instance!;
     final port = ReceivePort();
     final completer = Completer<Map>();
