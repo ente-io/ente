@@ -71,8 +71,7 @@ class VideoPreviewService {
 
   void _registerStopSafelyListeners() {
     Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      if (event.status == SyncStatus.preparingForUpload ||
-          event.status == SyncStatus.inProgress) {
+      if (event.status == SyncStatus.preparingForUpload) {
         stopSafely("sync").ignore();
       }
     });
