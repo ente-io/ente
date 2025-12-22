@@ -303,7 +303,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                     log.debug(
                         () => `[SearchBar] loadingMessage: Loading results"`,
                     );
-                    return t("loading");
+                    return null;
                 }}
                 noOptionsMessage={({ inputValue }) => {
                     if (inputValue) {
