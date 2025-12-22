@@ -1,3 +1,4 @@
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';
@@ -82,11 +83,37 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         ),
       ),
       body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _pinController.text.length == 6,
-        buttonText: context.strings.verify,
-        onPressedFunction: onPressed,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.isCreateAccountScreen && !isKeypadOpen)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: DotsIndicator(
+                dotsCount: 3,
+                position: 1,
+                decorator: DotsDecorator(
+                  activeColor: colorScheme.primary700,
+                  color: colorScheme.primary700.withValues(alpha: 0.32),
+                  activeShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  size: const Size(10, 10),
+                  activeSize: const Size(20, 10),
+                  spacing: const EdgeInsets.all(6),
+                ),
+              ),
+            ),
+          DynamicFAB(
+            isKeypadOpen: isKeypadOpen,
+            isFormValid: _pinController.text.length == 6,
+            buttonText: context.strings.verify,
+            onPressedFunction: onPressed,
+          ),
+        ],
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -143,7 +170,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 24),
-              Image.asset('assets/file_lock.png'),
+              Image.asset('assets/upload_file.png'),
               const SizedBox(height: 24),
               Text(
                 context.strings.weHaveSentCode(widget.email),

@@ -91,12 +91,12 @@ class _LoginPageState extends State<LoginPage> {
           'assets/locker-logo-blue.png',
           height: 24,
         ),
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(
-            Icons.arrow_back,
-            color: colorScheme.primary700,
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.primary700,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
       ),
       body: _getBody(),
@@ -226,7 +226,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        const Padding(padding: EdgeInsets.all(8)),
       ],
     );
   }

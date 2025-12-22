@@ -1,3 +1,4 @@
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
@@ -82,6 +83,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
         title: Image.asset('assets/locker-logo-blue.png', height: 24),
@@ -92,22 +94,48 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         ),
       ),
       body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _isFormValid(),
-        buttonText: context.strings.createAccount,
-        onPressedFunction: () {
-          UserService.instance.setEmail(_email!);
-          widget.config.setVolatilePassword(_passwordController1.text);
-          UserService.instance.setRefSource(_referralSource);
-          UserService.instance.sendOtt(
-            context,
-            _email!,
-            isCreateAccountScreen: true,
-            purpose: "signup",
-          );
-          FocusScope.of(context).unfocus();
-        },
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isKeypadOpen)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: DotsIndicator(
+                dotsCount: 3,
+                position: 0,
+                decorator: DotsDecorator(
+                  activeColor: colorScheme.primary700,
+                  color: colorScheme.primary700.withValues(alpha: 0.32),
+                  activeShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  size: const Size(10, 10),
+                  activeSize: const Size(20, 10),
+                  spacing: const EdgeInsets.all(6),
+                ),
+              ),
+            ),
+          DynamicFAB(
+            isKeypadOpen: isKeypadOpen,
+            isFormValid: _isFormValid(),
+            buttonText: context.strings.createAccount,
+            onPressedFunction: () {
+              UserService.instance.setEmail(_email!);
+              widget.config.setVolatilePassword(_passwordController1.text);
+              UserService.instance.setRefSource(_referralSource);
+              UserService.instance.sendOtt(
+                context,
+                _email!,
+                isCreateAccountScreen: true,
+                purpose: "signup",
+              );
+              FocusScope.of(context).unfocus();
+            },
+          ),
+        ],
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),

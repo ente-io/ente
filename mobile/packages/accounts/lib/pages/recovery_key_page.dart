@@ -90,10 +90,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         elevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
-        title: Image.asset(
-          'assets/locker-logo-blue.png',
-          height: 24,
-        ),
+        title: Image.asset('assets/locker-logo-blue.png', height: 24),
+        leading: widget.showAppBar == false
+            ? const SizedBox.shrink()
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                color: colorScheme.primary700,
+              ),
       ),
       body: SafeArea(
         child: Column(
