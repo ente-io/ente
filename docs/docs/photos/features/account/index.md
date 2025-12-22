@@ -101,11 +101,11 @@ Ente offers **10 GB of storage for free, forever**. The free plan includes:
 - ✅ Machine learning features
 - ✅ Map view and location tags
 - ✅ Background sync
-- ✅ Receiving shared albums
+- ✅ Creating /receiving shared albums
+- ✅ Public links (device limit of 5)
 
 **Free plan limitations:**
 
-- ❌ Cannot create shared albums or public links
 - ❌ Cannot create family plans
 
 ### Paid plans
@@ -114,7 +114,7 @@ Paid plans unlock additional features and storage:
 
 - Multiple storage tiers from 50 GB to multiple TBs
 - Monthly and annual billing (annual plans offer better value)
-- Ability to share albums and create public links
+- Ability to create public links with no device limit
 - Family plan capability to share storage with 5 family members
 - Priority support
 
