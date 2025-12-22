@@ -12,7 +12,7 @@
   "featureOpenSource": "Oprogramowanie typu open source,\naudytowane przez ekspertów ds. bezpieczeństwa",
   "signUp": "Zarejestruj się",
   "onBoardingGetStarted": "Wprowadzenie",
-  "setupFirstAccount": "Skonfiguruj pierwsze konto",
+  "setupFirstAccount": "Skonfiguruj pierwsze\nkonto",
   "allTabEmptyHint": "Nic tu nie ma. Stuknij +, aby dodać kod lub otwórz kosz, aby go odzyskać.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -525,7 +525,7 @@
   "dropReviewAndroid": "Napisz recenzję w Play Store",
   "supportEnte": "Wesprzyj <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Daj nam gwiazdkę na Githubie",
-  "free5GB": "5 GB za darmo na zdjęcia <bold-green>ente</bold-green>",
+  "free10GB": "10 GB za darmo na zdjęcia <bold-green>ente</bold-green>",
   "loginWithAuthAccount": "Zaloguj się przy użyciu konta Auth",
   "freeStorageOffer": "10% zniżki na zdjęcia <bold-green>ente</bold-green>",
   "freeStorageOfferDescription": "Użyj kodu „AUTH”, aby uzyskać 10% zniżki na pierwszy rok",
@@ -621,5 +621,9 @@
   "chooseIcon": "Wybierz ikonę",
   "customOrder": "Kolejność niestandardowa",
   "selectAnOption": "Wybierz opcję",
-  "todaysLogs": "Dzisiejsze logi"
+  "todaysLogs": "Dzisiejsze logi",
+  "appIcon": "Ikona aplikacji",
+  "importAndOTPGuide": "Eksportuj kopię zapasową z andOTP za pomocą opcji „Kopia zapasowa” w Ustawieniach.\n\nJeśli kopia zapasowa jest zaszyfrowana, musisz wprowadzić hasło kopii zapasowej, aby ją odszyfrować.",
+  "enterPasswordToDecryptAndOTP": "Wpisz hasło, aby odszyfrować kopię zapasową andOTP",
+  "failedToDecryptAndOTPBackup": "Nie udało się odszyfrować kopii zapasowej andOTP"
 }

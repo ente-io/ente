@@ -27,9 +27,15 @@ class BackupFolderSelectionPage extends StatefulWidget {
   final bool isFirstBackup;
   final bool isOnboarding;
 
+  /// When true, skip the "only new backup" warning dialog.
+  /// This is used when coming from the "backup only new photos" toggle
+  /// to prevent recursive navigation back to backup settings.
+  final bool fromOnlyNewPhotosToggle;
+
   const BackupFolderSelectionPage({
     required this.isFirstBackup,
     this.isOnboarding = false,
+    this.fromOnlyNewPhotosToggle = false,
     super.key,
   });
 
@@ -249,8 +255,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         await backupPreferenceService.setOnboardingPermissionSkipped(false);
       }
 
+      // Skip the warning dialog if we came from the "backup only new photos"
+      // toggle to avoid recursive navigation back to backup settings.
       final onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
-      if (onlyNewSinceEpoch != null) {
+      if (onlyNewSinceEpoch != null && !widget.fromOnlyNewPhotosToggle) {
         final shouldContinue =
             await _showOnlyNewBackupWarning(onlyNewSinceEpoch);
 

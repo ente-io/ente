@@ -88,7 +88,13 @@ class MultiPartUploader {
     List<String>? partMd5s,
   }) async {
     try {
-      if (flagService.internalUser && partMd5s != null && partMd5s.isNotEmpty) {
+      // Expected number of parts for given content and part length
+      final recomputedCount = (contentLength / partLength).ceil();
+
+      MultipartUploadURLs urls;
+      if (flagService.enableUploadV2 &&
+          partMd5s != null &&
+          partMd5s.isNotEmpty) {
         final response = await _enteDio.post(
           "/files/multipart-upload-url",
           data: {
@@ -97,20 +103,34 @@ class MultiPartUploader {
             "partMd5s": partMd5s,
           },
         );
-        return MultipartUploadURLs.fromMap(
+        urls = MultipartUploadURLs.fromMap(
+          (response.data as Map).cast<String, dynamic>(),
+        );
+      } else {
+        final response = await _enteDio.get(
+          "/files/multipart-upload-urls",
+          queryParameters: {
+            "count": count,
+          },
+        );
+        urls = MultipartUploadURLs.fromMap(
           (response.data as Map).cast<String, dynamic>(),
         );
       }
+      // Validate server respected the requested count/segmentation
+      if (urls.partsURLs.length != recomputedCount ||
+          count != recomputedCount) {
+        _logger.severe(
+          'Multipart URL count mismatch. Requested count=$count, '
+          'expected (from sizes)=$recomputedCount (contentLength=$contentLength, partLength=$partLength), '
+          'received=${urls.partsURLs.length} for objectKey=${urls.objectKey}',
+        );
+        throw MultiPartError(
+          'multipart url count mismatch: expected $recomputedCount, count $count, got ${urls.partsURLs.length}',
+        );
+      }
 
-      final response = await _enteDio.get(
-        "/files/multipart-upload-urls",
-        queryParameters: {
-          "count": count,
-        },
-      );
-      return MultipartUploadURLs.fromMap(
-        (response.data as Map).cast<String, dynamic>(),
-      );
+      return urls;
     } on Exception catch (e) {
       _logger.severe('failed to get multipart url', e);
       rethrow;
@@ -268,6 +288,16 @@ class MultiPartUploader {
         "File size mismatch. Expected ${partInfo.encFileSize} but got $encFileLength",
       );
     }
+    // Ensure the number of URLs matches what we expect from the part size
+    final expectedCount = (encFileLength / partSize).ceil();
+    if (partsLength != expectedCount) {
+      _logger.severe(
+        'Multipart parts mismatch for key ${partInfo.urls.objectKey}. '
+        'Expected $expectedCount parts (encFileLength=$encFileLength, partSize=$partSize) '
+        'but got $partsLength',
+      );
+      throw MultiPartError('multipart url count mismatch');
+    }
     // Start parts upload
     int count = 0;
     while (i < partsLength) {
@@ -276,7 +306,7 @@ class MultiPartUploader {
       final isLastPart = i == partsLength - 1;
       final fileSize = isLastPart ? encFileLength % partSize : partSize;
       _logger.info(
-        "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size $encFileLength).",
+        "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size $encFileLength). ObjectKey=${partInfo.urls.objectKey}",
       );
       if (kDebugMode && count > 3) {
         throw Exception(

@@ -48,7 +48,7 @@ If we are unable to decipher the creation time from these 3 sources, we will set
 **On mobile and web:**
 
 1. Open the photo
-2. Tap/click the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web
 3. Scroll down to see basic metadata
 4. Tap "View all Exif data" to see complete EXIF information
 
@@ -86,7 +86,7 @@ You can add descriptions (captions) to your photos in Ente:
 **On mobile and web:**
 
 1. Open the photo
-2. Tap/click the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web
 3. Tap/click "Add description" or the description field
 4. Type your description
 5. Save
@@ -168,7 +168,7 @@ You can rename photos in Ente:
 **On mobile and web:**
 
 1. Open the photo
-2. Tap/click the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web
 3. Tap/click on the filename
 4. Enter the new name
 5. Save
@@ -254,6 +254,10 @@ There are two reasons for this:
 We have considered modifying our desktop and CLI clients to write back the photo's creation time into the creation time of the filesystem file during export. But it is not clear if this would be less or more confusing due to inconsistencies across platforms.
 
 Ente is a photos app, not a file system backup app. Customers for whom the creation time of the file on disk is paramount might be better served by file backup apps.
+
+### Does the date taken of a file change when the file is downloaded or exported? {#date-taken-preservation}
+
+No, the date taken (or "date time") remains the same and is preserved in the EXIF of the file. However, the creation date and modification date are changed as stated in the above FAQ.
 
 ### Can I modify the original files during export? {#modify-originals}
 

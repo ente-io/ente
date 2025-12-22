@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/ente-io/stacktrace"
 )
@@ -37,8 +38,10 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 	}
 
 	// Constructing query parameters
+	// Escape single quotes to prevent SQL-like injection in Listmonk's query syntax
+	sanitizedEmail := strings.ReplaceAll(subscriberEmail, "'", "''")
 	queryParams := url.Values{}
-	queryParams.Set("query", fmt.Sprintf("subscribers.email = '%s'", subscriberEmail))
+	queryParams.Set("query", fmt.Sprintf("subscribers.email = '%s'", sanitizedEmail))
 
 	// Constructing the URL with query parameters
 	endpointURL, err := url.Parse(endpoint)

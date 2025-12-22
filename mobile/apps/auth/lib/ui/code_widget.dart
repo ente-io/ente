@@ -13,10 +13,11 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
+import 'package:ente_auth/ui/home/shortcuts.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -25,7 +26,6 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
-import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
@@ -40,6 +40,7 @@ class CodeWidget extends StatefulWidget {
   final bool isReordering;
   final bool enableDesktopContextActions;
   final List<Code> Function()? selectedCodesBuilder;
+  final FocusNode? focusNode;
 
   const CodeWidget(
     this.code, {
@@ -49,6 +50,7 @@ class CodeWidget extends StatefulWidget {
     this.isReordering = false,
     this.enableDesktopContextActions = false,
     this.selectedCodesBuilder,
+    this.focusNode,
   });
 
   @override
@@ -70,6 +72,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   bool ignorePin = false;
   // Cached localization string to avoid BuildContext access in async callbacks
   String _errorText = 'Error';
+  bool _isFocused = false;
 
   @override
   void initState() {
@@ -235,49 +238,76 @@ class _CodeWidgetState extends State<CodeWidget> {
 
           return Stack(
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeInOut,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: isSelected
-                      ? colorScheme.primary400.withValues(alpha: 0.10)
-                      : Theme.of(context).colorScheme.codeCardBackgroundColor,
-                  boxShadow: (widget.code.isPinned && !isSelected)
-                      ? colorScheme.pinnedCardBoxShadow
-                      : [],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+              Actions(
+                actions: {
+                  CopyIntent: CallbackAction<CopyIntent>(
+                    onInvoke: (intent) => _copyCurrentOTPToClipboard(),
+                  ),
+                  CopyNextIntent: CallbackAction<CopyNextIntent>(
+                    onInvoke: (intent) {
+                      if (!widget.code.type.isTOTPCompatible) {
+                        showToast(context, context.l10n.notSupportedForHOTP);
+                        return null;
+                      }
+                      _copyNextToClipboard();
+                      return null;
+                    },
+                  ),
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeInOut,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: isSelected
+                        ? colorScheme.primary400.withValues(alpha: 0.10)
+                        : Theme.of(context).colorScheme.codeCardBackgroundColor,
+                    boxShadow: (widget.code.isPinned && !isSelected)
+                        ? colorScheme.pinnedCardBoxShadow
+                        : [],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        focusNode: widget.focusNode,
+                        customBorder: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        // InkWell handles focus natively.
+                        canRequestFocus: true,
+                        onFocusChange: (hasFocus) {
+                          if (_isFocused != hasFocus) {
+                            setState(() {
+                              _isFocused = hasFocus;
+                            });
+                          }
+                        },
+                        onTap: () {
+                          final store = CodeDisplayStore.instance;
+                          if (store.isSelectionModeActive.value) {
+                            store.toggleSelection(widget.code.selectionKey);
+                          } else {
+                            _copyCurrentOTPToClipboard();
+                          }
+                        },
+                        onDoubleTap: isMaskingEnabled
+                            ? () {
+                                setState(() {
+                                  _hideCode = !_hideCode;
+                                });
+                              }
+                            : null,
+                        onLongPress: widget.isReordering
+                            ? null
+                            : () {
+                                CodeDisplayStore.instance.toggleSelection(
+                                  widget.code.selectionKey,
+                                );
+                              },
+                        child: getCardContents(l10n, isSelected: isSelected),
                       ),
-                      onTap: () {
-                        final store = CodeDisplayStore.instance;
-                        if (store.isSelectionModeActive.value) {
-                          store.toggleSelection(widget.code.selectionKey);
-                        } else {
-                          _copyCurrentOTPToClipboard();
-                        }
-                      },
-                      onDoubleTap: isMaskingEnabled
-                          ? () {
-                              setState(() {
-                                _hideCode = !_hideCode;
-                              });
-                            }
-                          : null,
-                      onLongPress: widget.isReordering
-                          ? null
-                          : () {
-                              CodeDisplayStore.instance.toggleSelection(
-                                widget.code.selectionKey,
-                              );
-                            },
-                      child: getCardContents(l10n, isSelected: isSelected),
                     ),
                   ),
                 ),
@@ -904,20 +934,14 @@ class _CodeWidgetState extends State<CodeWidget> {
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return QrCodeDialog(
+        return AuthQrDialog(
           data: qrData,
-          title: widget.code.account,
-          subtitle: widget.code.issuer,
-          accentColor: accentColor,
+          title: widget.code.issuer,
+          subtitle: widget.code.account,
           shareFileName: 'ente_auth_qr_${widget.code.account}.png',
           shareText: 'QR code for ${widget.code.account}',
           dialogTitle: context.l10n.qrCode,
           shareButtonText: context.l10n.share,
-          logoAssetPath: 'assets/qr_logo.png',
-          branding: const QrSvgBranding(
-            assetPath: 'assets/svg/auth-logo.svg',
-            height: 12,
-          ),
         );
       },
     );

@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Partager avec des utilisateurs non-Ente",
   "createPublicLink": "Créer un lien public",
   "sendLink": "Envoyer le lien",
+  "qrCode": "QR Code",
   "sendQrCode": "Envoyer le QR code",
   "copyLink": "Copier le lien",
   "copyEmbedHtml": "Copier le code HTML intégré",
@@ -350,12 +351,13 @@
   "removeFromAlbumTitle": "Retirer de l'album ?",
   "removeFromAlbum": "Retirer de l'album",
   "itemsWillBeRemovedFromAlbum": "Les éléments sélectionnés seront supprimés de cet album",
-  "removeShareItemsWarning": "Certains des éléments que vous êtes en train de retirer ont été ajoutés par d'autres personnes, vous perdrez l'accès vers ces éléments",
+  "removeShareItemsWarning": "Les photos sélectionnées ne seront accessibles par aucun spectateur de cet album, à l'exception des propriétaires de photos.",
   "addingToFavorites": "Ajout aux favoris...",
   "removingFromFavorites": "Suppression des favoris…",
   "sorryCouldNotAddToFavorites": "Désolé, impossible d'ajouter aux favoris !",
   "sorryCouldNotRemoveFromFavorites": "Désolé, impossible de supprimer des favoris !",
   "subscribeToEnableSharing": "Vous avez besoin d'un abonnement payant actif pour activer le partage.",
+  "subscribeToChangeLinkSetting": "Vous avez besoin d'un abonnement payant pour modifier le paramètre de ce lien.",
   "subscribe": "S'abonner",
   "canOnlyRemoveFilesOwnedByYou": "Vous ne pouvez supprimer que les fichiers que vous possédez",
   "deleteSharedAlbum": "Supprimer l'album partagé ?",
@@ -1205,10 +1207,13 @@
   "unpinAlbum": "Désépingler l'album",
   "pinAlbum": "Épingler l'album",
   "pin": "Épingler",
+  "pinPerson": "Épingler une personne",
   "pinToTop": "Épingler en haut",
   "unpin": "Désépingler",
+  "unpinPerson": "Désépingler une personne",
   "visibility": "Visibilité",
   "hideFromMemories": "Masquer des souvenirs",
+  "showInMemories": "Afficher dans les souvenirs",
   "create": "Créer",
   "viewAll": "Tout afficher",
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
@@ -1320,6 +1325,8 @@
   "enterDateOfBirth": "Anniversaire (facultatif)",
   "birthday": "Anniversaire",
   "removePersonLabel": "Supprimer le libellé d'une personne",
+  "removePersonTag": "Supprimer le tag d'une personne",
+  "areYouSureRemoveThisPersonTag": "Voulez-vous vraiment supprimer le tag de cette personne ?",
   "autoPairDesc": "L'appairage automatique ne fonctionne qu'avec les appareils qui prennent en charge Chromecast.",
   "manualPairDesc": "L'appairage avec le code PIN fonctionne avec n'importe quel écran sur lequel vous souhaitez voir votre album.",
   "connectToDevice": "Connexion à l'appareil",
@@ -1971,14 +1978,14 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Aller à la date",
-  "cLDesc1": "Voyez les photos environnantes pour toute photo en sélectionnant l'option \"Aller à la date\" dans le panneau d'information du fichier.",
-  "cLTitle2": "Éditeur vidéo plus rapide",
-  "cLDesc2": "L'éditeur de vidéos a été remanié pour améliorer considérablement sa vitesse lors de l'édition de vidéos plus longues, et aussi améliorer l'expérience utilisateur.",
-  "cLTitle3": "Nouveaux souvenirs",
-  "cLDesc3": "\"Enfants qui jouent\", \"Aventures d'hiver\", \"Nuits sous les néons\", et plus encore.",
-  "cLTitle4": "Galerie paysage et plus encore",
-  "cLDesc4": "Prise en charge de la mise en page paysage dans la galerie principale de l'application. Affiche les personnes sans photos associées au lieu de les filtrer. Améliorer la détection d'aspect vidéo lorsque partagé à partir d'applications externes.",
+  "cLTitle1": "Présentation des Rituels",
+  "cLDesc1": "Vous préparez des résolutions pour 2026 ? Avec Rituels, vous pouvez définir un rappel sur Ente Photos et suivre vos progrès en prenant des photos. Utilisez-le pour les entraînements, les habitudes alimentaires, les moments quotidiens avec vos proches – tout ce que vous voulez transformer en habitude.",
+  "cLTitle2": "Liens publics, maintenant pour tous",
+  "cLDesc2": "Tous les utilisateurs Ente sur le plan gratuit peuvent désormais créer et partager des liens publics vers des photos et des albums. Pour prévenir les abus, les liens auront des limites sur le nombre de personnes pouvant les consulter.",
+  "cLTitle3": "Taguer manuellement des personnes",
+  "cLDesc3": "Vous pouvez maintenant taguer des personnes même quand notre IA embarquée ne détecte pas de visage. Pratique pour les animaux de compagnie, les visages partiellement visibles, ou les moments où quelqu'un n'est pas vraiment sur la photo mais devrait quand même y être inclus.",
+  "cLTitle4": "Et plus encore",
+  "cLDesc4": "Vous pouvez maintenant épingler des albums partagés. Les liens d'albums sont visibles pour les collaborateurs et les spectateurs pour faciliter encore plus le partage. Nous avons corrigé quelques bugs de balayage iOS et mis à jour la vue photo, y compris une nouvelle icône de favori (préparant la place pour les fonctionnalités à venir).",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2016,11 +2023,11 @@
   "riverCruises": "Vue sur le fleuve",
   "facesTimelineBannerTitle": "Souvenirs",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Voir les photos de {name}au fil des années",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2078,8 +2085,94 @@
   },
   "facesTimelineUnavailable": "L'historique des visages est en préparation...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Enfants amusants",
-  "coastalCliffs": "Falaises au bord de mer"
+  "coastalCliffs": "Falaises au bord de mer",
+  "ritualsTitle": "Routines",
+  "ritualAddTooltip": "Ajouter une routine",
+  "ritualActivityHeading": "Activité",
+  "ritualDefaultHeatmapTitle": "Prendre une photo chaque jour",
+  "ritualUntitled": "Routine sans titre",
+  "ritualShareUnavailable": "Impossible de partager pour le moment. Veuillez réessayer.",
+  "ritualNotificationMessage": "Prendre une photo maintenant",
+  "ritualCameraNotFound": "Aucune caméra trouvée sur cet appareil.",
+  "ritualCameraStartError": "Impossible de démarrer la caméra. Veuillez vérifier les autorisations.",
+  "ritualCaptureError": "Impossible de prendre la photo. Veuillez réessayer.",
+  "ritualPhotoLimit": "Vous pouvez ajouter jusqu'à {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Prenez au moins une photo d'abord.",
+  "ritualAlbumMissing": "Routine d'album manquante. Modifiez-la pour définir un album.",
+  "ritualAddedToAlbum": "Ajouté à l'album",
+  "ritualAddedToAlbumWithName": "Ajouté à {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Échec lors de l'ajout des photos à l'album : {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Retour aux routines",
+  "ritualNoPhotosYet": "Aucune photo pour l'instant",
+  "ritualSetAlbumToLaunchCamera": "Définissez un album pour que cette routine lance la caméra.",
+  "ritualDefaultCameraTitle": "Prendre une photo",
+  "ritualBadgeMessage7": "7 jours passé ! La régularité semble bonne pour vous. Continuez !",
+  "ritualBadgeMessage14": "14 jours plus tard ! Votre routine devient une habitude. Incroyable !",
+  "ritualBadgeMessage30": "30 jours de suite ! Régularité légendaire. Prends un arc !",
+  "ritualBadgeMessageDefault": "Vous êtes bien parti !",
+  "ritualBadgeNewTitle": "Nouveau succès",
+  "ritualBadgePreparing": "Préparation...",
+  "ritualStreaksLabel": "Séries",
+  "ritualCreateYourOwn": "Créez votre propre routine",
+  "ritualGetDailyReminders": "Recevez des rappels quotidiens",
+  "ritualAlbumNotSet": "Album non configuré",
+  "ritualOpenCameraTooltip": "Ouvrir la routine caméra",
+  "ritualEditorLabel": "Éditeur de routine",
+  "ritualNew": "Nouvelle routine",
+  "ritualEdit": "Modifier la routine",
+  "ritualEnterPrompt": "Saisissez votre routine",
+  "ritualEnterDescription": "Veuillez saisir une description",
+  "ritualDayLabel": "Jour",
+  "ritualNotificationsOffHint": "Les notifications sont désactivées. Appuyez sur un jour pour les activer.",
+  "ritualTimeLabel": "Date et heure",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Enregistrer la routine",
+  "ritualUpdate": "Mettre à jour la routine",
+  "ritualSelectAlbumTitle": "Sélectionner un album",
+  "ritualSearchOrCreate": "Rechercher ou créer un nouveau",
+  "ritualNoAlbumsYet": "Pas encore d'albums",
+  "ritualNoMatchingAlbums": "Aucuns albums correspondants",
+  "ritualCreateAlbumWithName": "Créer \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Créer un nouveau",
+  "ritualAlbumSelectionPlaceholder": "Sélectionner un album",
+  "ritualPickEmojiTitle": "Choisir un émoji",
+  "ritualCustomKeyboardLabel": "Personnalisé (clavier)",
+  "ritualEmojiKeyboardHint": "Appuyez pour ouvrir le clavier emoji",
+  "ritualEmojiUseAction": "Utiliser",
+  "ritualSearchEmpty": "Construisez un rituel pour garder votre habitude de photographie."
 }

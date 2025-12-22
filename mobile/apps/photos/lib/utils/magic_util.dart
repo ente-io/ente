@@ -141,6 +141,27 @@ Future<void> updateOrder(
   }
 }
 
+Future<void> updateShareeOrder(
+  BuildContext context,
+  Collection collection,
+  int order,
+) async {
+  try {
+    final Map<String, dynamic> update = {
+      orderKey: order,
+    };
+    await CollectionsService.instance
+        .updateShareeMagicMetadata(collection, update);
+    Bus.instance.fire(
+      CollectionMetaEvent(collection.id, CollectionMetaEventType.orderChanged),
+    );
+  } catch (e, s) {
+    _logger.severe("failed to update sharee order", e, s);
+    showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
+    rethrow;
+  }
+}
+
 // changeCoverPhoto is used to change cover photo for a collection. To reset to
 // default cover photo, pass uploadedFileID as 0
 Future<void> changeCoverPhoto(

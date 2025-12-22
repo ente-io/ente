@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 39;
+  static const currentChangeLogVersion = 40;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");

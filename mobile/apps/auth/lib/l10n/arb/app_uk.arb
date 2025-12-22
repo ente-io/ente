@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Безпечно зробіть резервну копію кодів 2FA",
   "onBoardingGetStarted": "Розпочати",
-  "setupFirstAccount": "Налаштуйте свій перший обліковий запис",
   "importScanQrCode": "Відскануйте QR-код",
   "importEnterSetupKey": "Введіть ключ налаштування",
   "importAccountPageTitle": "Введіть дані облікового запису",

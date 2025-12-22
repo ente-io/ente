@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_icons/ente_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
@@ -40,6 +41,7 @@ import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
+import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -146,6 +148,8 @@ class _FileSelectionActionsWidgetState
         ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
+    final bool hasUploadedFileIDs =
+        widget.selectedFiles.files.any((file) => file.uploadedFileID != null);
     final showCollageOption = CollageCreatorPage.isValidCount(
           widget.selectedFiles.files.length,
         ) &&
@@ -167,7 +171,22 @@ class _FileSelectionActionsWidgetState
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-    if (widget.type == GalleryType.deleteSuggestions) {
+    if (widget.type == GalleryType.trash) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.restore_outlined,
+          labelText: AppLocalizations.of(context).restore,
+          onTap: _restore,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_forever_outlined,
+          labelText: AppLocalizations.of(context).permanentlyDelete,
+          onTap: _permanentlyDelete,
+        ),
+      );
+    } else if (widget.type == GalleryType.deleteSuggestions) {
       items.add(
         SelectionActionButton(
           icon: Icons.delete_outline,
@@ -334,7 +353,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.favorite_border_rounded,
+            icon: EnteIcons.favoriteStroke,
             labelText: AppLocalizations.of(context).favorite,
             onTap: anyUploadedFiles ? _onFavoriteClick : null,
             shouldShow: ownedFilesCount > 0,
@@ -343,7 +362,7 @@ class _FileSelectionActionsWidgetState
       } else if (widget.type.showUnFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.favorite,
+            icon: EnteIcons.favoriteFilled,
             labelText: AppLocalizations.of(context).removeFromFavorite,
             onTap: _onUnFavoriteClick,
             shouldShow: ownedFilesCount > 0,
@@ -357,6 +376,18 @@ class _FileSelectionActionsWidgetState
           onTap: _onGuestViewClick,
         ),
       );
+
+      if (flagService.manualTagFileToPerson &&
+          widget.type.showAddToPersonOption()) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.person_add_alt_1_outlined,
+            labelText: AppLocalizations.of(context).addToPerson,
+            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
+            shouldShow: hasUploadedFileIDs,
+          ),
+        );
+      }
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
@@ -746,6 +777,72 @@ class _FileSelectionActionsWidgetState
     );
     if (result) {
       widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _onAddFilesToPerson() async {
+    final filesWithIds = widget.selectedFiles.files
+        .where((file) => file.uploadedFileID != null)
+        .toList();
+    if (filesWithIds.isEmpty) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).onlyUploadedFilesCanBeAddedToPerson,
+      );
+      return;
+    }
+    final hasPersons =
+        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
+    if (!mounted || !hasPersons) {
+      return;
+    }
+    final result = await routeToPage(
+      context,
+      AddFilesToPersonPage(files: filesWithIds),
+      forceCustomPageRoute: true,
+    );
+    if (result is! ManualPersonAssignmentResult) {
+      return;
+    }
+    final addedCount = result.addedFileIds.length;
+    if (addedCount > 0) {
+      final addedFiles = filesWithIds
+          .where(
+            (file) =>
+                file.uploadedFileID != null &&
+                result.addedFileIds.contains(file.uploadedFileID),
+          )
+          .toList();
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "manual-add-files-to-person",
+          person: result.person,
+          relevantFiles: addedFiles,
+        ),
+      );
+      showToast(
+        context,
+        AppLocalizations.of(context).addedFilesToPerson(
+          count: addedCount,
+          personName: result.person.data.name,
+        ),
+      );
+      widget.selectedFiles.clearAll();
+      if (mounted) {
+        setState(() => {});
+      }
+      return;
+    }
+    final alreadyCount = result.alreadyAssignedFileIds.length;
+    if (alreadyCount > 0) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).filesAlreadyLinkedToPerson(
+          count: alreadyCount,
+          personName: result.person.data.name,
+        ),
+      );
     }
   }
 

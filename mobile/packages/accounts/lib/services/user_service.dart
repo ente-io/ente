@@ -217,6 +217,7 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
+        await _preferences.setString(keyUserDetails, userDetails.toJson());
         if (userDetails.profileData != null) {
           await _preferences.setBool(
             kIsEmailMFAEnabled,
@@ -288,8 +289,7 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        await Navigator.of(context)
-            .pushNamedAndRemoveUntil('/', (route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       } else {
         throw Exception("Log out action failed");
       }
@@ -298,8 +298,7 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        await Navigator.of(context)
-            .pushNamedAndRemoveUntil('/', (route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
@@ -394,7 +393,7 @@ class UserService {
         await dialog.hide();
         return;
       }
-      final navigator = Navigator.of(context, rootNavigator: true);
+      final navigator = Navigator.of(context);
       if (userPassword == null) {
         await dialog.hide();
         if (!context.mounted) {
@@ -410,7 +409,7 @@ class UserService {
               );
             },
           ),
-          (route) => route.isFirst,
+          (route) => false,
         );
         return;
       } else {
@@ -437,7 +436,7 @@ class UserService {
               return page;
             },
           ),
-          (route) => route.isFirst,
+          (route) => false,
         );
         return;
       }

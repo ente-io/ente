@@ -12,7 +12,6 @@
   "featureOpenSource": "Open source e\nverificato da esperti di sicurezza",
   "signUp": "Iscriviti",
   "onBoardingGetStarted": "Per iniziare",
-  "setupFirstAccount": "Configura il tuo primo account",
   "allTabEmptyHint": "Non c'è ancora nulla qui. Tocca + per aggiungere un codice o apri il Cestino per recuperarne uno.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -525,7 +524,7 @@
   "dropReviewAndroid": "Lascia una recensione sul Play Store",
   "supportEnte": "Supporta <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Dacci una stella su Github",
-  "free5GB": "5GB gratis su <bold-green>ente</bold-green> Foto",
+  "free10GB": "10GB gratis su <bold-green>ente</bold-green> Foto",
   "loginWithAuthAccount": "Accedi con il tuo account Auth",
   "freeStorageOffer": "10% di sconto su <bold-green>ente</bold-green> Foto",
   "freeStorageOfferDescription": "Utilizzare il codice \"AUTH\" per ottenere il 10% di sconto al primo anno",
@@ -598,6 +597,17 @@
         "description": "Number of items pinned",
         "type": "int",
         "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{1 elemento sganciato} other{{count} elementi sganciati}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
       }
     }
   },

@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:io';
 
+import 'package:ente_icons/ente_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -9,10 +10,9 @@ import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
-
+import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -21,17 +21,13 @@ import 'package:photos/utils/share_util.dart';
 
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
-  final Function(EnteFile) onEditRequested;
   final Function(EnteFile) onFileRemoved;
-  final bool showOnlyInfoButton;
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
   final bool isLocalOnlyContext;
 
   const FileBottomBar(
-    this.file,
-    this.onEditRequested,
-    this.showOnlyInfoButton, {
+    this.file, {
     required this.onFileRemoved,
     required this.enableFullScreenNotifier,
     this.userID,
@@ -87,52 +83,21 @@ class FileBottomBarState extends State<FileBottomBar> {
   Widget _getBottomBar() {
     Logger("FileBottomBar")
         .fine("building bottom bar ${widget.file.generatedID}");
+
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
-    children.add(
-      Tooltip(
-        message: AppLocalizations.of(context).info,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: IconButton(
-            icon: Icon(
-              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
-              color: Colors.white,
-            ),
-            onPressed: () async {
-              await _displayDetails(widget.file);
-            },
-          ),
-        ),
-      ),
-    );
+    final bool isFileHidden = widget.file.isOwner &&
+        widget.file.isUploaded &&
+        (CollectionsService.instance
+                .getCollectionByID(widget.file.collectionID!)
+                ?.isHidden() ??
+            false);
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
 
-    if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
-      if (widget.file.fileType == FileType.image ||
-          widget.file.fileType == FileType.livePhoto ||
-          (widget.file.fileType == FileType.video)) {
-        children.add(
-          Tooltip(
-            message: AppLocalizations.of(context).edit,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.tune_outlined,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  widget.onEditRequested(widget.file);
-                },
-              ),
-            ),
-          ),
-        );
-      }
+    if (widget.file is! TrashFile) {
       if (isOwnedByUser) {
         children.add(
           Tooltip(
@@ -175,6 +140,33 @@ class FileBottomBarState extends State<FileBottomBar> {
           ),
         ),
       );
+
+      if (widget.file.isUploaded && !isFileHidden) {
+        children.add(
+          Tooltip(
+            message: AppLocalizations.of(context).addToAlbum,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: IconButton(
+                icon: const Icon(
+                  EnteIcons.addToAlbum,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  final selectedFiles = SelectedFiles();
+                  selectedFiles.files.add(widget.file);
+                  showCollectionActionSheet(
+                    context,
+                    selectedFiles: selectedFiles,
+                    actionType: CollectionActionType.addFiles,
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
     }
     return ValueListenableBuilder(
       valueListenable: widget.enableFullScreenNotifier,
@@ -272,9 +264,5 @@ class FileBottomBarState extends State<FileBottomBar> {
         ),
       ),
     );
-  }
-
-  Future<void> _displayDetails(EnteFile file) async {
-    await showDetailsSheet(context, file);
   }
 }

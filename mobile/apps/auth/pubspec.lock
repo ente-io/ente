@@ -465,13 +465,6 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  ente_qr_ui:
-    dependency: "direct main"
-    description:
-      path: "../../packages/qr"
-      relative: true
-    source: path
-    version: "0.0.1"
   ente_strings:
     dependency: "direct main"
     description:
@@ -1027,6 +1020,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.9.5"
+  launcher_icon_switcher:
+    dependency: "direct main"
+    description:
+      name: launcher_icon_switcher
+      sha256: a1e0778ed016107077f54f22b4987f322315de8d3df31a6ed494134f55c0ff41
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   leak_tracker:
     dependency: transitive
     description:
@@ -1356,15 +1357,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
-  pretty_qr_code:
-    dependency: transitive
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "80ebafb9c99ac22520092b008579013d2fcffbe1"
-      url: "https://github.com/ente-io/flutter_pretty_qr_fork"
-    source: git
-    version: "3.5.0"
   privacy_screen:
     dependency: "direct main"
     description:

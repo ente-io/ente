@@ -1,10 +1,11 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/home/widgets/rounded_action_buttons.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onScanTap;
@@ -19,101 +20,132 @@ class HomeEmptyStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return SingleChildScrollView(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-            minWidth: 450,
-          ),
+    final colorScheme = getEnteColorScheme(context);
+    final isDarkTheme = !colorScheme.isLightTheme;
+    final bgSvgPath = isDarkTheme
+        ? 'assets/svg/empty-state-bg-dark.svg'
+        : 'assets/svg/empty-state-bg-light.svg';
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final extraBottomPadding = PlatformUtil.isMobile()
+        ? (bottomPadding > 0 ? bottomPadding : 24.0)
+        : 24.0;
+
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 24,
+              bottom: extraBottomPadding,
+            ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  children: [
-                    Image.asset(
-                      "assets/wallet-front-gradient.png",
-                      width: 200,
-                      height: 200,
-                    ),
-                    Text(
-                      l10n.setupFirstAccount,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 64),
-                    if (PlatformUtil.isMobile())
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       SizedBox(
-                        width: 400,
-                        child: OutlinedButton(
-                          onPressed: onScanTap,
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 0),
-                          ),
-                          child: Text(
-                            l10n.importScanQrCode,
-                            textAlign: TextAlign.center,
-                          ),
+                        height: 188,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              bottom: 6,
+                              child: SvgPicture.asset(
+                                bgSvgPath,
+                                width: 224,
+                                height: 142,
+                              ),
+                            ),
+                            Image.asset(
+                              'assets/onboarding-2.png',
+                              height: 188,
+                            ),
+                          ],
                         ),
                       ),
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: 400,
-                      child: OutlinedButton(
-                        onPressed: onManuallySetupTap,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 0),
-                        ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: 221,
                         child: Text(
-                          l10n.importEnterSetupKey,
+                          l10n.setupFirstAccount,
                           textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: colorScheme.textBase,
+                            fontSize: 20,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w700,
+                            height: 1.05,
+                            letterSpacing: -1,
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 48),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 360),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (PlatformUtil.isMobile()) ...[
+                          RoundedButton(
+                            label: l10n.importScanQrCode,
+                            onPressed: onScanTap,
+                            width: double.infinity,
+                          ),
+                          const SizedBox(height: 12),
+                          RoundedButton(
+                            label: l10n.importEnterSetupKey,
+                            onPressed: onManuallySetupTap,
+                            width: double.infinity,
+                            type: RoundedButtonType.secondary,
+                          ),
+                        ] else
+                          RoundedButton(
+                            label: l10n.importEnterSetupKey,
+                            onPressed: onManuallySetupTap,
+                            width: double.infinity,
+                          ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextLinkButton(
+                              label: l10n.importCodes,
+                              onTap: () {
+                                routeToPage(context, const ImportCodePage());
+                              },
+                            ),
+                            TextLinkButton(
+                              label: l10n.faq,
+                              onTap: () {
+                                PlatformUtil.openWebView(
+                                  context,
+                                  context.l10n.faq,
+                                  'https://ente.io/help/auth/faq',
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 54),
-                    InkWell(
-                      onTap: () {
-                        routeToPage(context, const ImportCodePage());
-                      },
-                      child: Text(
-                        l10n.importCodes,
-                        textAlign: TextAlign.center,
-                        style: getEnteTextTheme(context)
-                            .bodyFaint
-                            .copyWith(decoration: TextDecoration.underline),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    InkWell(
-                      onTap: () {
-                        try {
-                          PlatformUtil.openWebView(
-                            context,
-                            context.l10n.faq,
-                            "https://ente.io/help/auth/faq",
-                          );
-                        } catch (e) {
-                          Logger("HomeEmptyStateWidget")
-                              .severe("Failed to open FAQ", e);
-                        }
-                      },
-                      child: Text(
-                        l10n.faq,
-                        textAlign: TextAlign.center,
-                        style: getEnteTextTheme(context)
-                            .bodyFaint
-                            .copyWith(decoration: TextDecoration.underline),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

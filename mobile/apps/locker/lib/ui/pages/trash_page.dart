@@ -74,15 +74,9 @@ class _TrashPageState extends State<TrashPage> {
   }
 
   void _restoreFile(BuildContext context, EnteFile file) async {
-    final collections = await CollectionService.instance.getCollections();
+    final collections = await CollectionService.instance.getCollectionsForUI();
 
-    final availableCollections = uniqueCollectionsById(
-      collections
-          .where(
-            (c) => !c.isDeleted && c.type != CollectionType.uncategorized,
-          )
-          .toList(),
-    );
+    final availableCollections = uniqueCollectionsById(collections);
 
     if (availableCollections.isEmpty) {
       showToast(

@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "与非 Ente 用户共享",
   "createPublicLink": "创建公开链接",
   "sendLink": "发送链接",
+  "qrCode": "二维码",
   "sendQrCode": "发送二维码",
   "copyLink": "复制链接",
   "copyEmbedHtml": "复制嵌入 HTML",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "要从相册中移除吗？",
   "removeFromAlbum": "从相册中移除",
   "itemsWillBeRemovedFromAlbum": "所选项目将从此相册中移除",
-  "removeShareItemsWarning": "您要删除的某些项目是由其他人添加的，您将无法访问它们",
+  "removeShareItemsWarning": "除了照片所有者之外，本相册中的部分照片将不对任何其他浏览者开放。",
   "addingToFavorites": "正在添加到收藏...",
   "removingFromFavorites": "正在从收藏中删除...",
   "sorryCouldNotAddToFavorites": "抱歉，无法添加到收藏！",
@@ -1971,14 +1972,14 @@
   "hoorayyyy": "耶～～！",
   "nothingToTidyUpHere": "这里没什么可清理的",
   "deletingDash": "正在删除 - ",
-  "cLTitle1": "跳转到日期",
-  "cLDesc1": "在文件信息面板中选择“跳转到日期”选项，即可查看该文件日期附近的所有照片。",
-  "cLTitle2": "更快的视频编辑器",
-  "cLDesc2": "视频编辑器进行了全面改进，不仅大幅提高了编辑大型视频的速度，还改善了用户体验。",
-  "cLTitle3": "新回忆",
-  "cLDesc3": "“顽皮的孩子”、“冬季冒险”、“霓虹之夜”等等。",
-  "cLTitle4": "风景图库及更多内容",
-  "cLDesc4": "在应用主图库中支持横向布局。显示未关联任何照片的人物，而不是将其过滤掉。改进从外部应用共享视频时的长宽比检测。",
+  "cLTitle1": "介绍仪式",
+  "cLDesc1": "计划2026年的目标？通过仪式功能，您可以在Ente Photos中设置提醒并通过拍照追踪进度。用于健身、饮食习惯、与亲人的日常时刻——任何您想养成习惯的事情。",
+  "cLTitle2": "公开链接，现在人人可用",
+  "cLDesc2": "所有免费计划的Ente用户现在都可以创建和分享照片和相册的公开链接。为防止滥用，链接将限制可查看人数。",
+  "cLTitle3": "手动标记人物",
+  "cLDesc3": "即使设备端AI未检测到人脸，您现在也可以标记人物。适用于宠物、部分可见的面孔，或者某人实际上不在照片中但仍应被包含的时刻。",
+  "cLTitle4": "更多更新",
+  "cLDesc4": "您现在可以置顶共享相册。相册链接对协作者和查看者可见，使分享更加便捷。我们修复了一些iOS滑动问题并更新了照片视图，包括新的收藏图标（为即将推出的功能腾出空间）。",
   "closeBy": "关闭",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2016,11 +2017,11 @@
   "riverCruises": "河上游览美景",
   "facesTimelineBannerTitle": "和 TA 的回忆",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "一起看看 {name} 这些年的样子",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2078,8 +2079,94 @@
   },
   "facesTimelineUnavailable": "和 TA 们的回忆正在准备中……",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "童趣时光",
-  "coastalCliffs": "海边峭壁"
+  "coastalCliffs": "海边峭壁",
+  "ritualsTitle": "仪式",
+  "ritualAddTooltip": "添加仪式",
+  "ritualActivityHeading": "活动",
+  "ritualDefaultHeatmapTitle": "每日一拍",
+  "ritualUntitled": "未命名仪式",
+  "ritualShareUnavailable": "暂时无法分享，请稍后重试。",
+  "ritualNotificationMessage": "立即拍照",
+  "ritualCameraNotFound": "在此设备上未找到相机。",
+  "ritualCameraStartError": "无法启动相机，请检查权限",
+  "ritualCaptureError": "无法拍摄照片。请重试。",
+  "ritualPhotoLimit": "您最多可以添加 {maxPhotos, plural, other {# 张照片。}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "先至少拍一张照片。",
+  "ritualAlbumMissing": "仪式相册缺失。请编辑仪式以设置相册。",
+  "ritualAddedToAlbum": "已添加到相册",
+  "ritualAddedToAlbumWithName": "已添加到 {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "无法向此相册添加照片： {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "回到仪式",
+  "ritualNoPhotosYet": "暂无照片",
+  "ritualSetAlbumToLaunchCamera": "设置一个相册，记录下这个启动相机的仪式。",
+  "ritualDefaultCameraTitle": "拍照",
+  "ritualBadgeMessage7": "7天过去了！坚持不懈让你看起来状态很好。继续加油！",
+  "ritualBadgeMessage14": "已经坚持了14天！你的仪式正在变成一种习惯。太棒了！",
+  "ritualBadgeMessage30": "连续30天！真是传奇般的稳定性。太棒了！",
+  "ritualBadgeMessageDefault": "你最近状态超好！",
+  "ritualBadgeNewTitle": "新成就",
+  "ritualBadgePreparing": "准备中...",
+  "ritualStreaksLabel": "连胜",
+  "ritualCreateYourOwn": "创建你自己的仪式",
+  "ritualGetDailyReminders": "每日提醒",
+  "ritualAlbumNotSet": "相册未设置",
+  "ritualOpenCameraTooltip": "打开仪式相机",
+  "ritualEditorLabel": "仪式编辑器",
+  "ritualNew": "新仪式",
+  "ritualEdit": "编辑仪式",
+  "ritualEnterPrompt": "输入您的仪式",
+  "ritualEnterDescription": "请输入描述",
+  "ritualDayLabel": "天",
+  "ritualNotificationsOffHint": "通知已关闭。点击日期即可开启通知。",
+  "ritualTimeLabel": "时间",
+  "ritualAlbumLabel": "相册",
+  "ritualSave": "保存仪式",
+  "ritualUpdate": "更新仪式",
+  "ritualSelectAlbumTitle": "选择相册",
+  "ritualSearchOrCreate": "搜索或新建",
+  "ritualNoAlbumsYet": "暂无相册",
+  "ritualNoMatchingAlbums": "没有匹配的相册",
+  "ritualCreateAlbumWithName": "创建“{albumName}“",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "新建",
+  "ritualAlbumSelectionPlaceholder": "选择相册",
+  "ritualPickEmojiTitle": "选择一个表情",
+  "ritualCustomKeyboardLabel": "自定义（键盘）",
+  "ritualEmojiKeyboardHint": "按下即可打开表情符号键盘",
+  "ritualEmojiUseAction": "使用",
+  "ritualSearchEmpty": "养成拍照的习惯，并为此建立一套仪式。"
 }

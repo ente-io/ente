@@ -80,7 +80,7 @@ class WrappedViewerPage extends StatefulWidget {
 }
 
 class _WrappedViewerPageState extends State<WrappedViewerPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late PageController _pageController;
   late AnimationController _progressController;
   late WrappedEntryState _state;
@@ -127,6 +127,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _state = widget.initialState;
     _cards = _buildCards(_state.result?.cards);
     final int initialPage = _initialPageForState(_state);
@@ -166,6 +167,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (_stateListener != null) {
       wrappedService.stateListenable.removeListener(_stateListener!);
     }
@@ -186,6 +188,22 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       wakeLockFor: WakeLockFor.rewindViewer,
     );
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _syncMusicPlayback();
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        unawaited(_fadeOutAndStopMusic());
+        break;
+    }
   }
 
   int _initialPageForState(WrappedEntryState state) {

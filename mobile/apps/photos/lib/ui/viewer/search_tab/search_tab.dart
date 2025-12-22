@@ -12,9 +12,8 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/activity/activity_banner.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/rituals/rituals_banner.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
@@ -234,20 +233,9 @@ class _RitualsDiscoverySection extends StatelessWidget {
     if (!flagService.ritualsFlag) {
       return const SizedBox.shrink();
     }
-    final textTheme = getEnteTextTheme(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: Text(
-            AppLocalizations.of(context).ritualsTitle,
-            style: textTheme.largeBold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        const ActivityBanner(),
-      ],
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: RitualsBanner(),
     );
   }
 }

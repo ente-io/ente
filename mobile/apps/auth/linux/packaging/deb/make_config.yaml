@@ -9,7 +9,7 @@ priority: optional
 section: x11
 essential: false
 license: GPLv3
-icon: assets/icons/io.ente.auth.png
+icon: assets/generation-icons/icon-windows-linux.png
 installed_size: 36000
 
 metainfo: linux/packaging/enteauth.appdata.xml

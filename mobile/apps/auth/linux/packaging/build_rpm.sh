@@ -66,7 +66,7 @@ cp linux/packaging/enteauth.appdata.xml "$STAGING_DIR/usr/share/metainfo/"
 
 # Copy icon
 echo -e "${YELLOW}Copying icon...${NC}"
-cp "assets/icons/io.ente.auth.png" "$STAGING_DIR/usr/share/pixmaps/io.ente.auth.png"
+cp "assets/generation-icons/icon-windows-linux.png" "$STAGING_DIR/usr/share/pixmaps/io.ente.auth.png"
 
 # Copy desktop file
 echo -e "${YELLOW}Copying desktop file...${NC}"

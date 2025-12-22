@@ -585,7 +585,8 @@ class CollectionActions {
     final isCollectionOwner = collection.owner.id == currentUserID;
     final bool canRemoveAllParticipants =
         collectionsService.canRemoveFilesFromAllParticipants(collection);
-    final bool isCollectionAdmin = canRemoveAllParticipants && !isCollectionOwner;
+    final bool isCollectionAdmin =
+        canRemoveAllParticipants && !isCollectionOwner;
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
@@ -644,6 +645,21 @@ class CollectionActions {
 
     final Map<int, List<EnteFile>> collectionToFilesMap =
         await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
+
+    // Fix files in pendingAssignMap with correct collectionID entries.
+    // This is needed when files are selected after filtering by another album,
+    // as the file's collectionID might point to the filtered album instead of
+    // the current collection.
+    final filesInCurrentCollection = collectionToFilesMap[collection.id];
+    if (filesInCurrentCollection != null) {
+      for (final file in filesInCurrentCollection) {
+        if (file.uploadedFileID != null &&
+            pendingAssignMap.containsKey(file.uploadedFileID) &&
+            file.ownerID == currentUserID) {
+          pendingAssignMap[file.uploadedFileID!] = file;
+        }
+      }
+    }
 
     // Find and map the files from current collection to to entries in other
     // collections. This mapping is done to avoid moving all the files to

@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:io";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -29,6 +28,7 @@ import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_util.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
@@ -157,12 +157,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                               SizedBox(
                                 height: 110,
                                 width: 110,
-                                child: ClipPath(
-                                  clipper: ShapeBorderClipper(
-                                    shape: ContinuousRectangleBorder(
-                                      borderRadius: BorderRadius.circular(80),
-                                    ),
-                                  ),
+                                child: FaceThumbnailSquircleClip(
                                   child: PersonFaceWidget(
                                     key: ValueKey(
                                       person?.data.avatarFaceID ?? "",
@@ -225,12 +220,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           SizedBox(
                             height: 110,
                             width: 110,
-                            child: ClipPath(
-                              clipper: ShapeBorderClipper(
-                                shape: ContinuousRectangleBorder(
-                                  borderRadius: BorderRadius.circular(80),
-                                ),
-                              ),
+                            child: FaceThumbnailSquircleClip(
                               child: widget.file != null
                                   ? PersonFaceWidget(
                                       clusterID: widget.clusterID,
@@ -361,7 +351,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   Future<dynamic> _saveChangesPrompt(BuildContext context) async {
     PersonEntity? updatedPersonEntity;
     return await showActionSheet(
-      useRootNavigator: Platform.isIOS ? true : false,
       body: context.l10n.saveChangesBeforeLeavingQuestion,
       context: context,
       buttons: [
@@ -655,11 +644,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     }
     final List<(PersonEntity, EnteFile, int)> personFileCounts = [];
     for (final person in persons) {
-      final clustersToFiles =
-          await SearchService.instance.getClusterFilesForPersonID(
+      final files = await SearchService.instance.getFilesForPersonID(
         person.remoteID,
+        sortOnTime: true,
       );
-      final files = clustersToFiles.values.expand((e) => e).toList();
       if (files.isEmpty) {
         debugPrint(
           "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",

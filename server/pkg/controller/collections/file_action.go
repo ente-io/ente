@@ -2,6 +2,7 @@ package collections
 
 import (
 	"fmt"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -285,19 +286,24 @@ func (c *CollectionController) isRemoveAllowed(ctx *gin.Context,
 
 func (c *CollectionController) IsCopyAllowed(ctx *gin.Context, actorUserID int64, req ente.CopyFileSyncRequest) error {
 	// verify that srcCollectionID is accessible by actorUserID
-	if _, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+	srcCollection, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: req.SrcCollectionID,
 		ActorUserID:  actorUserID,
-	}); err != nil {
+	})
+	if err != nil {
 		return stacktrace.Propagate(err, "failed to verify srcCollection access")
 	}
 	// verify that dstCollectionID is owned by actorUserID
-	if _, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+	dstCollection, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: req.DstCollection,
 		ActorUserID:  actorUserID,
 		VerifyOwner:  true,
-	}); err != nil {
+	})
+	if err != nil {
 		return stacktrace.Propagate(err, "failed to ownership of the dstCollection access")
+	}
+	if srcCollection.Collection.App != dstCollection.Collection.App {
+		return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("copy across app not supported %s to %s", srcCollection.Collection.App, dstCollection.Collection.App))
 	}
 	// verify that all FileIDs exists in the srcCollection
 	fileIDs := make([]int64, len(req.CollectionFileItems))
