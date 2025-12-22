@@ -34,10 +34,10 @@ class _LoginPasswordVerificationPageState
     extends State<LoginPasswordVerificationPage> {
   final _logger = Logger((_LoginPasswordVerificationPageState).toString());
   final _passwordController = TextEditingController();
-  final FocusNode _passwordFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   String? email;
-  bool _passwordInFocus = false;
   bool _passwordVisible = false;
+  bool _passwordInFocus = false;
 
   Future<void> onPressed() async {
     FocusScope.of(context).unfocus();
@@ -58,6 +58,7 @@ class _LoginPasswordVerificationPageState
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -69,11 +70,18 @@ class _LoginPasswordVerificationPageState
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: Image.asset(
+          'assets/locker-logo-blue.png',
+          height: 24,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.primary700,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -206,6 +214,9 @@ class _LoginPasswordVerificationPageState
   }
 
   Widget _getBody() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Column(
       children: [
         Expanded(
@@ -213,142 +224,137 @@ class _LoginPasswordVerificationPageState
             child: ListView(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
-                  child: Text(
-                    context.strings.enterPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 30,
-                    left: 22,
-                    right: 20,
-                  ),
-                  child: Text(
-                    email ?? '',
-                    style: getEnteTextTheme(context).smallMuted,
-                  ),
-                ),
-                Visibility(
-                  // hidden textForm for suggesting auto-fill service for saving
-                  // password
-                  visible: false,
-                  child: TextFormField(
-                    autofillHints: const [
-                      AutofillHints.email,
-                    ],
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    initialValue: email,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: TextFormField(
-                    onFieldSubmitted: _passwordController.text.isNotEmpty
-                        ? (_) => onPressed()
-                        : null,
-                    key: const ValueKey("passwordInputField"),
-                    autofillHints: const [AutofillHints.password],
-                    decoration: InputDecoration(
-                      hintText: context.strings.enterYourPasswordHint,
-                      filled: true,
-                      contentPadding: const EdgeInsets.all(20),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _passwordInFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _passwordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _passwordVisible = !_passwordVisible;
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                    ),
-                    controller: _passwordController,
-                    autofocus: true,
-                    autocorrect: false,
-                    obscureText: !_passwordVisible,
-                    keyboardType: TextInputType.visiblePassword,
-                    focusNode: _passwordFocusNode,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    thickness: 1,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          await UserService.instance.sendOtt(
-                            context,
-                            email!,
-                            isResetPasswordScreen: true,
-                          );
-                        },
-                        child: Center(
-                          child: Text(
-                            context.strings.forgotPassword,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
+                      const SizedBox(height: 24),
+                      Text(
+                        email ?? '',
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
                         ),
                       ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          final dialog = createProgressDialog(
-                            context,
-                            context.strings.pleaseWait,
-                          );
-                          await dialog.show();
-                          await widget.config.logout();
-                          await dialog.hide();
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
-                        },
-                        child: Center(
-                          child: Text(
-                            context.strings.changeEmail,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
+                      const SizedBox(height: 16),
+                      Text(
+                        context.strings.password,
+                        style: textTheme.bodyBold.copyWith(
+                          color: colorScheme.textBase,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Visibility(
+                        // hidden textForm for suggesting auto-fill service for saving
+                        // password
+                        visible: false,
+                        child: TextFormField(
+                          autofillHints: const [
+                            AutofillHints.email,
+                          ],
+                          autocorrect: false,
+                          keyboardType: TextInputType.emailAddress,
+                          initialValue: email,
+                          textInputAction: TextInputAction.next,
+                        ),
+                      ),
+                      TextFormField(
+                        onFieldSubmitted: _passwordController.text.isNotEmpty
+                            ? (_) => onPressed()
+                            : null,
+                        key: const ValueKey("passwordInputField"),
+                        autofillHints: const [AutofillHints.password],
+                        decoration: InputDecoration(
+                          fillColor: colorScheme.backdropBase,
+                          filled: true,
+                          hintText: context.strings.enterYourPasswordHint,
+                          hintStyle: TextStyle(color: colorScheme.textMuted),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: _passwordInFocus
+                              ? IconButton(
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: colorScheme.textMuted,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                )
+                              : null,
+                        ),
+                        style: textTheme.body.copyWith(
+                          color: colorScheme.textBase,
+                        ),
+                        controller: _passwordController,
+                        autofocus: true,
+                        autocorrect: false,
+                        obscureText: !_passwordVisible,
+                        keyboardType: TextInputType.visiblePassword,
+                        focusNode: _passwordFocusNode,
+                        onChanged: (_) {
+                          setState(() {});
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () async {
+                              await UserService.instance.sendOtt(
+                                context,
+                                email!,
+                                isResetPasswordScreen: true,
+                              );
+                            },
+                            child: Text(
+                              "${context.strings.forgotPassword}?",
+                              style: textTheme.body.copyWith(
+                                color: colorScheme.primary700,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colorScheme.primary700,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () async {
+                              final dialog = createProgressDialog(
+                                context,
+                                context.strings.pleaseWait,
+                              );
+                              await dialog.show();
+                              await widget.config.logout();
+                              await dialog.hide();
+                              Navigator.of(context)
+                                  .popUntil((route) => route.isFirst);
+                            },
+                            child: Text(
+                              context.strings.changeEmail,
+                              style: textTheme.body.copyWith(
+                                color: colorScheme.primary700,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colorScheme.primary700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
