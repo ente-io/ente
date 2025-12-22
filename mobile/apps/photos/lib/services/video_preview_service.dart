@@ -135,6 +135,7 @@ class VideoPreviewService {
       queueFiles(duration: Duration.zero);
     } else {
       clearQueue();
+      computeController.releaseCompute(stream: true);
     }
   }
 
@@ -152,8 +153,6 @@ class VideoPreviewService {
     }
     fileQueue.clear();
     _items.clear();
-
-    computeController.releaseCompute(stream: true);
   }
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
@@ -161,6 +160,7 @@ class VideoPreviewService {
     _logger.info("Stopping streaming: $reason");
     _streamingCancelToken?.cancel();
     clearQueue();
+    computeController.releaseCompute(stream: true);
 
     if (_currentFfmpegSessionId != null) {
       unawaited(FFmpegKit.cancel(_currentFfmpegSessionId!));
@@ -172,25 +172,34 @@ class VideoPreviewService {
   Future<void> stopSafely(String reason) async {
     final item = uploadingFileId >= 0 ? _items[uploadingFileId] : null;
     final status = item?.status;
-
-    if (status == PreviewItemStatus.uploading) {
-      return;
-    }
+    double? progress;
 
     if (status == PreviewItemStatus.compressing) {
       final durationInSeconds = item?.file.duration;
-      final progress = await ffmpegService.getSessionProgress(
+      progress = await ffmpegService.getSessionProgress(
         sessionId: _currentFfmpegSessionId,
         duration: durationInSeconds == null
             ? null
             : Duration(seconds: durationInSeconds),
       );
-      if (progress != null && progress >= 0.75) {
-        return;
-      }
     }
 
-    stop(reason);
+    final progressStr =
+        progress != null ? "${(progress * 100).toStringAsFixed(1)}%" : "N/A";
+
+    // Don't interrupt upload or compression >= 75%, but clear queue for next turn
+    if (status == PreviewItemStatus.uploading ||
+        (status == PreviewItemStatus.compressing &&
+            progress != null &&
+            progress >= 0.75)) {
+      _logger.fine(
+        "stopSafely: letting current task finish, clearing queue. status: $status, progress: $progressStr, reason: $reason",
+      );
+      clearQueue();
+      return;
+    }
+
+    stop("$reason (status: $status, progress: $progressStr)");
   }
 
   void stopForLogout() {
@@ -386,6 +395,7 @@ class VideoPreviewService {
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
       clearQueue();
+      computeController.releaseCompute(stream: true);
       return;
     }
 
@@ -725,6 +735,7 @@ class VideoPreviewService {
           );
         }
         clearQueue();
+        computeController.releaseCompute(stream: true);
       }
     }
   }
