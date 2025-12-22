@@ -363,16 +363,20 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Direct (peer-to-peer) album sharing is now available on every plan, including the free tier. Public links are only available to paid customers. This limitation helps safeguard against potential platform abuse.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a device limit of 5.
 
 Free users can:
 
+- Create and receive shared albums
 - Share albums directly with other Ente users
-- Receive and view albums shared with them
+- Create public links (device limit of 5)
 - View public links shared with them
 - Add photos to collect links that allow uploads
 
-To create public links, you'll need a paid subscription.
+Paid users can:
+
+- Create public links with no device limit
+- Access all other premium features
 
 ### Can I change permissions for collaborators after sharing? {#change-permissions}
 
