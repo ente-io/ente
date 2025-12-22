@@ -16,12 +16,13 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/core/cache/video_cache_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import 'package:photos/db/files_db.dart';
+import "package:photos/db/files_db.dart";
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/events/device_health_changed_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
-import 'package:photos/generated/intl/app_localizations.dart';
+import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
@@ -51,7 +52,6 @@ class VideoPreviewService {
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
-  bool _pausedDueToUpload = false;
 
   bool get _hasQueuedFile => fileQueue.isNotEmpty;
 
@@ -64,19 +64,21 @@ class VideoPreviewService {
         cacheManager = DefaultCacheManager(),
         videoCacheManager = VideoCacheManager.instance,
         config = Configuration.instance {
-    if (flagService.pauseStreamDuringUpload) {
-      _listenToSyncCompletion();
+    if (flagService.stopStreamProcess) {
+      _registerStopSafelyListeners();
     }
   }
 
-  void _listenToSyncCompletion() {
+  void _registerStopSafelyListeners() {
     Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      if (event.status == SyncStatus.completedBackup &&
-          isVideoStreamingEnabled &&
-          _pausedDueToUpload) {
-        _logger.info("Sync completed, resuming stream processing");
-        _pausedDueToUpload = false;
-        queueFiles(duration: const Duration(seconds: 2));
+      if (event.status == SyncStatus.preparingForUpload) {
+        stopSafely("sync").ignore();
+      }
+    });
+
+    Bus.instance.on<DeviceHealthChangedEvent>().listen((event) {
+      if (!event.isHealthy) {
+        stopSafely("device unhealthy").ignore();
       }
     });
   }
@@ -122,14 +124,15 @@ class VideoPreviewService {
     if (isVideoStreamingEnabled) {
       queueFiles(duration: Duration.zero);
     } else {
-      clearQueue();
+      stop("streaming disabled");
     }
   }
 
+  // Clear queue - will be rebuilt from DB when processing resumes
   void clearQueue() {
     // Fire events for all items being cleared so UI can reset
     // Use paused status when flag is enabled (items will resume), otherwise uploaded
-    final status = flagService.pauseStreamDuringUpload
+    final status = flagService.stopStreamProcess
         ? PreviewItemStatus.paused
         : PreviewItemStatus.uploaded;
     for (final fileId in _items.keys) {
@@ -141,21 +144,58 @@ class VideoPreviewService {
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   void stop(String reason) {
+    if (_items.isEmpty) return;
+
     _logger.info("Stopping streaming: $reason");
-    _streamingCancelToken?.cancel();
+    if (flagService.stopStreamProcess) {
+      _streamingCancelToken?.cancel();
+    }
     uploadingFileId = -1;
     clearQueue();
     computeController.releaseCompute(stream: true);
 
-    if (_currentFfmpegSessionId != null) {
+    if (flagService.stopStreamProcess && _currentFfmpegSessionId != null) {
       unawaited(FFmpegKit.cancel(_currentFfmpegSessionId!));
       _currentFfmpegSessionId = null;
     }
   }
 
-  void stopForLogout() {
-    if (!flagService.stopStreamOnLogOut) return;
-    stop("logout");
+  // Stop streaming process if ffmpeg not started or if ffmpeg progress < 75%
+  Future<void> stopSafely(String reason) async {
+    if (!flagService.stopStreamProcess) return;
+
+    final item = uploadingFileId >= 0 ? _items[uploadingFileId] : null;
+    if (item == null) return;
+
+    final status = item.status;
+    double? progress;
+
+    if (status == PreviewItemStatus.compressing) {
+      final durationInSeconds = item.file.duration;
+      progress = await ffmpegService.getSessionProgress(
+        sessionId: _currentFfmpegSessionId,
+        duration: durationInSeconds == null
+            ? null
+            : Duration(seconds: durationInSeconds),
+      );
+    }
+
+    final progressStr =
+        progress != null ? "${(progress * 100).toStringAsFixed(1)}%" : "N/A";
+
+    // Don't interrupt upload or compression >= 75%, but clear queue
+    if (status == PreviewItemStatus.uploading ||
+        (status == PreviewItemStatus.compressing &&
+            progress != null &&
+            progress >= 0.75)) {
+      _logger.fine(
+        "stopSafely: letting current task finish, clearing queue. status: $status, progress: $progressStr, reason: $reason",
+      );
+      fileQueue.clear();
+      return;
+    }
+
+    stop("$reason (status: $status, progress: $progressStr)");
   }
 
   void _fireVideoPreviewStateChange(int fileId, PreviewItemStatus status) {
@@ -330,30 +370,13 @@ class VideoPreviewService {
     _streamingCancelToken ??= CancelToken();
 
     // Check if file upload is happening before processing video for streaming
-    if (flagService.pauseStreamDuringUpload &&
-        FileUploader.instance.isUploading) {
-      _logger.info(
-        "Pausing video streaming because file upload is in progress",
-      );
-      _pausedDueToUpload = true;
-      uploadingFileId = -1;
-      // Clear queue - will be rebuilt from DB when processing resumes
-      clearQueue();
-      computeController.releaseCompute(stream: true);
+    if (flagService.stopStreamProcess && FileUploader.instance.isUploading) {
+      stop("upload in progress");
       return;
     }
 
-    final bool isManual =
-        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
-    final canStream = _isPermissionGranted();
-    if (!canStream) {
-      _logger.info(
-        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
-      );
-      uploadingFileId = -1;
-      computeController.releaseCompute(stream: true);
-      // Clear queue - will be rebuilt from DB when processing resumes
-      clearQueue();
+    if (!_isPermissionGranted()) {
+      stop("disabled streaming or no compute permission");
       return;
     }
 
@@ -393,6 +416,8 @@ class VideoPreviewService {
         "Starting video preview generation for ${enteFile.displayName}",
       );
       // elimination case for <=10 MB with H.264
+      final isManual =
+          await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
       var (props, result, file) =
           await _checkFileForPreviewCreation(enteFile, isManual);
       if (result) {
@@ -540,9 +565,9 @@ class VideoPreviewService {
           )
           .whenComplete(() => _currentFfmpegSessionId = null)
           .onError((error, stackTrace) {
-        _logger.warning("FFmpeg command failed", error, stackTrace);
-        return {};
-      });
+            _logger.warning("FFmpeg command failed", error, stackTrace);
+            return {};
+          });
 
       if (_items.isEmpty) {
         Directory(prefix).delete(recursive: true).ignore();
@@ -683,17 +708,7 @@ class VideoPreviewService {
         );
       } else {
         // Release compute when queue is empty or network is unavailable
-        if (shouldStopProcessing) {
-          _logger.warning(
-            "[chunk] Network error detected, stopping queue processing. ${fileQueue.length} items pending",
-          );
-        } else {
-          _logger.info(
-            "[chunk] Nothing to process, releasing compute",
-          );
-        }
-        computeController.releaseCompute(stream: true);
-        uploadingFileId = -1;
+        stop(shouldStopProcessing ? "network error" : "nothing to process");
       }
     }
   }
@@ -747,7 +762,7 @@ class VideoPreviewService {
       shouldRetry = false;
     }
 
-    if (_items.isEmpty) return;
+    if (!_items.containsKey(enteFile.uploadedFileID!)) return;
 
     if (shouldRetry &&
         _items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
@@ -1315,18 +1330,9 @@ class VideoPreviewService {
       if (_hasQueuedFile && !forceProcess) return;
 
       // Don't start streaming if file uploads are in progress
-      if (flagService.pauseStreamDuringUpload &&
-          FileUploader.instance.isUploading) {
+      if (flagService.stopStreamProcess && FileUploader.instance.isUploading) {
         _logger.info("Skipping stream queue - file upload in progress");
-        _pausedDueToUpload = true;
-        // Clear queue to ensure clean state when resuming
-        clearQueue();
         return;
-      }
-
-      // Reset flag - streaming is resuming (either from sync listener or other flow)
-      if (flagService.pauseStreamDuringUpload) {
-        _pausedDueToUpload = false;
       }
 
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();

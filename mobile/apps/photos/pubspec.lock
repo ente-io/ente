@@ -737,8 +737,8 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: remove-event-sub
-      resolved-ref: "2c0f34797df830ef61e6ed479583b368c342cb37"
+      ref: "2bbef7d"
+      resolved-ref: "2bbef7d03361d104e26fbe648de31f1f6a4d7e44"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
@@ -746,8 +746,8 @@ packages:
     dependency: transitive
     description:
       path: "flutter/flutter_platform_interface"
-      ref: remove-event-sub
-      resolved-ref: "2c0f34797df830ef61e6ed479583b368c342cb37"
+      ref: "2bbef7d"
+      resolved-ref: "2bbef7d03361d104e26fbe648de31f1f6a4d7e44"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "0.2.1"
