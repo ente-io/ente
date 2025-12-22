@@ -138,7 +138,10 @@ class VideoPreviewService {
     }
   }
 
+  // Clear queue - will be rebuilt from DB when processing resumes
   void clearQueue() {
+    uploadingFileId = -1;
+
     // Fire events for all items being cleared so UI can reset
     // Use paused status when flag is enabled (items will resume), otherwise uploaded
     final status = flagService.stopStreamProcess
@@ -149,15 +152,15 @@ class VideoPreviewService {
     }
     fileQueue.clear();
     _items.clear();
+
+    computeController.releaseCompute(stream: true);
   }
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   void stop(String reason) {
     _logger.info("Stopping streaming: $reason");
     _streamingCancelToken?.cancel();
-    uploadingFileId = -1;
     clearQueue();
-    computeController.releaseCompute(stream: true);
 
     if (_currentFfmpegSessionId != null) {
       unawaited(FFmpegKit.cancel(_currentFfmpegSessionId!));
@@ -165,6 +168,7 @@ class VideoPreviewService {
     }
   }
 
+  // Stop streaming process if ffmpeg not started or if ffmpeg progress < 75%
   Future<void> stopSafely(String reason) async {
     final item = uploadingFileId >= 0 ? _items[uploadingFileId] : null;
     final status = item?.status;
@@ -381,9 +385,6 @@ class VideoPreviewService {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
-      uploadingFileId = -1;
-      computeController.releaseCompute(stream: true);
-      // Clear queue - will be rebuilt from DB when processing resumes
       clearQueue();
       return;
     }
@@ -571,9 +572,9 @@ class VideoPreviewService {
           )
           .whenComplete(() => _currentFfmpegSessionId = null)
           .onError((error, stackTrace) {
-        _logger.warning("FFmpeg command failed", error, stackTrace);
-        return {};
-      });
+            _logger.warning("FFmpeg command failed", error, stackTrace);
+            return {};
+          });
 
       if (_items.isEmpty) {
         Directory(prefix).delete(recursive: true).ignore();
@@ -723,8 +724,7 @@ class VideoPreviewService {
             "[chunk] Nothing to process, releasing compute",
           );
         }
-        computeController.releaseCompute(stream: true);
-        uploadingFileId = -1;
+        clearQueue();
       }
     }
   }
