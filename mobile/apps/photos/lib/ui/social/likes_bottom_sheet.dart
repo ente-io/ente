@@ -51,7 +51,6 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   List<CollectionLikeInfo> _sharedCollections = [];
   late int _selectedCollectionID;
   late final int _currentUserID;
-  final Map<int, User> _userCache = {};
 
   @override
   void initState() {
@@ -137,30 +136,8 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
       setState(() {
         _selectedCollectionID = collectionID;
         _likes = likes;
-        _userCache.clear();
       });
     }
-  }
-
-  User _getUserForReaction(Reaction reaction) {
-    if (_userCache.containsKey(reaction.userID)) {
-      return _userCache[reaction.userID]!;
-    }
-
-    if (reaction.isAnonymous) {
-      final user = User(
-        id: reaction.userID,
-        email: "${reaction.anonUserID ?? "anonymous"}@unknown.com",
-        name: reaction.anonUserID ?? "Anonymous",
-      );
-      _userCache[reaction.userID] = user;
-      return user;
-    }
-
-    final user = CollectionsService.instance
-        .getFileOwner(reaction.userID, _selectedCollectionID);
-    _userCache[reaction.userID] = user;
-    return user;
   }
 
   @override
@@ -180,26 +157,61 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(),
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 48),
-                child: CircularProgressIndicator(),
-              )
-            else if (_likes.isEmpty)
-              _buildEmptyState()
-            else
-              Flexible(child: _buildLikesList()),
-          ],
+        child: AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.fastOutSlowIn,
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _LikesHeader(
+                sharedCollections: _sharedCollections,
+                selectedCollectionID: _selectedCollectionID,
+                likesCount: _likes.length,
+                onCollectionSelected: _onCollectionSelected,
+                onClose: () => Navigator.of(context).pop(),
+              ),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 48),
+                  child: CircularProgressIndicator(),
+                )
+              else if (_likes.isEmpty)
+                const _EmptyState()
+              else
+                Flexible(
+                  child: _LikesList(
+                    likes: _likes,
+                    currentUserID: _currentUserID,
+                    selectedCollectionID: _selectedCollectionID,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeader() {
+class _LikesHeader extends StatelessWidget {
+  final List<CollectionLikeInfo> sharedCollections;
+  final int selectedCollectionID;
+  final int likesCount;
+  final ValueChanged<int> onCollectionSelected;
+  final VoidCallback onClose;
+
+  const _LikesHeader({
+    required this.sharedCollections,
+    required this.selectedCollectionID,
+    required this.likesCount,
+    required this.onCollectionSelected,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
@@ -208,28 +220,33 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: _sharedCollections.length > 1
+            child: sharedCollections.length > 1
                 ? LikesCollectionSelectorWidget(
-                    sharedCollections: _sharedCollections,
-                    selectedCollectionID: _selectedCollectionID,
-                    onCollectionSelected: _onCollectionSelected,
+                    sharedCollections: sharedCollections,
+                    selectedCollectionID: selectedCollectionID,
+                    onCollectionSelected: onCollectionSelected,
                   )
                 : Text(
-                    "${_likes.length} ${_likes.length == 1 ? 'like' : 'likes'}",
+                    "$likesCount ${likesCount == 1 ? 'like' : 'likes'}",
                     style: textTheme.bodyBold,
                   ),
           ),
           IconButtonWidget(
             iconButtonType: IconButtonType.rounded,
             icon: Icons.close_rounded,
-            onTap: () => Navigator.of(context).pop(),
+            onTap: onClose,
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildEmptyState() {
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
@@ -241,18 +258,44 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
       ),
     );
   }
+}
 
-  Widget _buildLikesList() {
+class _LikesList extends StatelessWidget {
+  final List<Reaction> likes;
+  final int currentUserID;
+  final int selectedCollectionID;
+
+  const _LikesList({
+    required this.likes,
+    required this.currentUserID,
+    required this.selectedCollectionID,
+  });
+
+  User _getUserForReaction(Reaction reaction) {
+    if (reaction.isAnonymous) {
+      return User(
+        id: reaction.userID,
+        email: "${reaction.anonUserID ?? "anonymous"}@unknown.com",
+        name: reaction.anonUserID ?? "Anonymous",
+      );
+    }
+
+    return CollectionsService.instance
+        .getFileOwner(reaction.userID, selectedCollectionID);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
-      shrinkWrap: _likes.length <= 30,
+      shrinkWrap: likes.length <= 30,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      itemCount: _likes.length,
+      itemCount: likes.length,
       itemBuilder: (context, index) {
-        final reaction = _likes[index];
+        final reaction = likes[index];
         final user = _getUserForReaction(reaction);
         return _LikeListItem(
           user: user,
-          currentUserID: _currentUserID,
+          currentUserID: currentUserID,
         );
       },
     );
