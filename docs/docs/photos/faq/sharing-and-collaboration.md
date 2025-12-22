@@ -363,7 +363,7 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a device limit of 5.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a device limit of 5. This limitation helps safeguard against potential platform abuse.
 
 Free users can:
 
