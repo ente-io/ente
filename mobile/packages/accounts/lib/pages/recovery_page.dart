@@ -3,6 +3,7 @@ import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,9 @@ class _RecoveryPageState extends State<RecoveryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
@@ -65,11 +69,18 @@ class _RecoveryPageState extends State<RecoveryPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: Image.asset(
+          'assets/locker-logo-blue.png',
+          height: 24,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.primary700,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -78,7 +89,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
-        buttonText: 'Recover',
+        buttonText: context.strings.logInLabel,
         onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
@@ -89,73 +100,74 @@ class _RecoveryPageState extends State<RecoveryPage> {
             child: ListView(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(
-                    context.strings.forgotPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      hintText: "Enter your recovery key",
-                      contentPadding: const EdgeInsets.all(20),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 24),
+                      Text(
+                        context.strings.recoveryKey,
+                        style: textTheme.bodyBold.copyWith(
+                          color: colorScheme.textBase,
+                        ),
                       ),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
-                    controller: _recoveryKey,
-                    autofocus: false,
-                    autocorrect: false,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    thickness: 1,
-                  ),
-                ),
-                Row(
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        showErrorDialog(
-                          context,
-                          "Sorry",
-                          "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Center(
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          fillColor: colorScheme.backdropBase,
+                          filled: true,
+                          hintText: context.strings.enterRecoveryKeyHint,
+                          hintStyle: TextStyle(color: colorScheme.textMuted),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        style: textTheme.body.copyWith(
+                          color: colorScheme.textBase,
+                          fontFeatures: [const FontFeature.tabularFigures()],
+                        ),
+                        controller: _recoveryKey,
+                        autofocus: false,
+                        autocorrect: false,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                        onChanged: (_) {
+                          setState(() {});
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            showErrorDialog(
+                              context,
+                              "Sorry",
+                              "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+                            );
+                          },
                           child: Text(
                             context.strings.noRecoveryKeyTitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                            style: textTheme.body.copyWith(
+                              color: colorScheme.primary700,
+                              decoration: TextDecoration.underline,
+                              decorationColor: colorScheme.primary700,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
