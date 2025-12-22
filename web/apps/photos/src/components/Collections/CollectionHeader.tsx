@@ -321,12 +321,18 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
     const archiveAlbum = wrap(async () => {
         if (!activeCollection) return;
-        await updateCollectionVisibility(activeCollection, ItemVisibility.archived);
+        await updateCollectionVisibility(
+            activeCollection,
+            ItemVisibility.archived,
+        );
     });
 
     const unarchiveAlbum = wrap(async () => {
         if (!activeCollection) return;
-        await updateCollectionVisibility(activeCollection, ItemVisibility.visible);
+        await updateCollectionVisibility(
+            activeCollection,
+            ItemVisibility.visible,
+        );
     });
 
     const confirmLeaveSharedAlbum = () =>
@@ -358,12 +364,18 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
     const pinSharedAlbum = wrap(async () => {
         if (!activeCollection) return;
-        await updateShareeCollectionOrder(activeCollection, CollectionOrder.pinned);
+        await updateShareeCollectionOrder(
+            activeCollection,
+            CollectionOrder.pinned,
+        );
     });
 
     const unpinSharedAlbum = wrap(async () => {
         if (!activeCollection) return;
-        await updateShareeCollectionOrder(activeCollection, CollectionOrder.default);
+        await updateShareeCollectionOrder(
+            activeCollection,
+            CollectionOrder.default,
+        );
     });
 
     const hideAlbum = wrap(async () => {
