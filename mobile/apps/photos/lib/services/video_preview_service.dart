@@ -74,21 +74,12 @@ class VideoPreviewService {
       if (event.status == SyncStatus.preparingForUpload ||
           event.status == SyncStatus.inProgress) {
         stopSafely("sync").ignore();
-        return;
-      }
-      if (event.status == SyncStatus.completedBackup &&
-          isVideoStreamingEnabled) {
-        _logger.info("Sync completed, resuming stream processing");
-        queueFiles(duration: Duration.zero);
       }
     });
 
     Bus.instance.on<DeviceHealthChangedEvent>().listen((event) {
       if (!event.isHealthy) {
         stopSafely("device unhealthy").ignore();
-      } else if (isVideoStreamingEnabled) {
-        _logger.info("Device healthy, resuming stream processing");
-        queueFiles(duration: Duration.zero);
       }
     });
   }
@@ -134,6 +125,7 @@ class VideoPreviewService {
     if (isVideoStreamingEnabled) {
       queueFiles(duration: Duration.zero);
     } else {
+      uploadingFileId = -1;
       clearQueue();
       computeController.releaseCompute(stream: true);
     }
@@ -141,8 +133,6 @@ class VideoPreviewService {
 
   // Clear queue - will be rebuilt from DB when processing resumes
   void clearQueue() {
-    uploadingFileId = -1;
-
     // Fire events for all items being cleared so UI can reset
     // Use paused status when flag is enabled (items will resume), otherwise uploaded
     final status = flagService.stopStreamProcess
@@ -159,6 +149,7 @@ class VideoPreviewService {
   void stop(String reason) {
     _logger.info("Stopping streaming: $reason");
     _streamingCancelToken?.cancel();
+    uploadingFileId = -1;
     clearQueue();
     computeController.releaseCompute(stream: true);
 
@@ -187,7 +178,7 @@ class VideoPreviewService {
     final progressStr =
         progress != null ? "${(progress * 100).toStringAsFixed(1)}%" : "N/A";
 
-    // Don't interrupt upload or compression >= 75%, but clear queue for next turn
+    // Don't interrupt upload or compression >= 75%, but clear queue
     if (status == PreviewItemStatus.uploading ||
         (status == PreviewItemStatus.compressing &&
             progress != null &&
@@ -394,6 +385,7 @@ class VideoPreviewService {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
+      uploadingFileId = -1;
       clearQueue();
       computeController.releaseCompute(stream: true);
       return;
@@ -734,6 +726,7 @@ class VideoPreviewService {
             "[chunk] Nothing to process, releasing compute",
           );
         }
+        uploadingFileId = -1;
         clearQueue();
         computeController.releaseCompute(stream: true);
       }
