@@ -147,6 +147,8 @@ class VideoPreviewService {
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   void stop(String reason) {
+    if (!flagService.stopStreamProcess) return;
+
     if (uploadingFileId == -1) return;
 
     _logger.info("Stopping streaming: $reason");
@@ -163,6 +165,8 @@ class VideoPreviewService {
 
   // Stop streaming process if ffmpeg not started or if ffmpeg progress < 75%
   Future<void> stopSafely(String reason) async {
+    if (!flagService.stopStreamProcess) return;
+
     final item = uploadingFileId >= 0 ? _items[uploadingFileId] : null;
     if (item == null) return;
 
@@ -195,11 +199,6 @@ class VideoPreviewService {
     }
 
     stop("$reason (status: $status, progress: $progressStr)");
-  }
-
-  void stopForLogout() {
-    if (!flagService.stopStreamProcess) return;
-    stop("logout");
   }
 
   void _fireVideoPreviewStateChange(int fileId, PreviewItemStatus status) {
@@ -375,9 +374,6 @@ class VideoPreviewService {
 
     // Check if file upload is happening before processing video for streaming
     if (flagService.stopStreamProcess && FileUploader.instance.isUploading) {
-      _logger.info(
-        "Pausing video streaming because file upload is in progress",
-      );
       await stopSafely("upload in progress");
       return;
     }
