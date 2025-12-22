@@ -270,7 +270,7 @@ Make sure you have sufficient storage available if you're expecting many people 
 Yes! Public links (including collect links) support several protective features:
 
 - **Link expiry**: Set the link to automatically expire after a duration you define
-- **Device limits**: Prevent people from forwarding your link to too many devices
+- **Device limits**: Limit how many devices can access the link (a "device" is identified by the combination of IP address and browser/app, so the same browser on a different network counts as a separate device)
 - **Password protection**: Add an additional password that users must enter to access the link
 - **Prevent downloads**: Disable the option to download original photos (though screenshots can't be prevented)
 
@@ -363,16 +363,16 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Direct (peer-to-peer) album sharing is now available on every plan, including the free tier. Public links are only available to paid customers. This limitation helps safeguard against potential platform abuse.
+Both collaborative albums and public links are available on every plan, including the free tier.
 
 Free users can:
 
 - Share albums directly with other Ente users
+- Create public links with a maximum device limit of 5 (to prevent abuse)
 - Receive and view albums shared with them
-- View public links shared with them
 - Add photos to collect links that allow uploads
 
-To create public links, you'll need a paid subscription.
+Paid users can create public links with higher or no device limits.
 
 ### Can I change permissions for collaborators after sharing? {#change-permissions}
 
