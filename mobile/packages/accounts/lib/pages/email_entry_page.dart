@@ -1,4 +1,3 @@
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
@@ -405,27 +404,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ),
                 const SizedBox(height: 16),
                 _getAgreement(),
-                const SizedBox(height: 16),
-                // Dots indicator
-                Center(
-                  child: DotsIndicator(
-                    dotsCount: 3,
-                    position: 0,
-                    decorator: DotsDecorator(
-                      activeColor: colorScheme.primary700,
-                      color: colorScheme.primary700.withValues(alpha: 0.32),
-                      activeShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      size: const Size(10, 10),
-                      activeSize: const Size(20, 10),
-                      spacing: const EdgeInsets.all(6),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 40),
               ],
             ),
@@ -557,6 +535,4 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _hasAgreedToE2E &&
         _passwordIsValid;
   }
-
-  void showToast(BuildContext context, String hearUsExplanation) {}
 }

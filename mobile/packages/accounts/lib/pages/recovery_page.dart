@@ -135,11 +135,12 @@ class _RecoveryPageState extends State<RecoveryPage> {
                           color: colorScheme.textBase,
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),
+                        minLines: 4,
+                        maxLines: 4,
                         controller: _recoveryKey,
                         autofocus: false,
                         autocorrect: false,
                         keyboardType: TextInputType.multiline,
-                        maxLines: null,
                         onChanged: (_) {
                           setState(() {});
                         },
