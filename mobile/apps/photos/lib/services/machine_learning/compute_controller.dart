@@ -51,7 +51,6 @@ class ComputeController {
   void _setDeviceHealth(bool healthy) {
     if (_isDeviceHealthy == healthy) return;
     _isDeviceHealthy = healthy;
-    _logger.info("Device health changed: $healthy");
     Bus.instance.fire(DeviceHealthChangedEvent(healthy));
   }
 
