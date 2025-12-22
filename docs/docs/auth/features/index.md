@@ -129,41 +129,6 @@ Ente Auth offers various import and export options for your codes.
 
 For detailed instructions, refer to the [migration guides](../migration/).
 
-### Local backup
-
-Ente Auth supports continuous on-device local backups to protect your codes even
-when offline. This feature creates encrypted backups on your device
-automatically.
-
-**How it works:**
-
-- **Automatic daily backups:** When enabled, Ente Auth creates one local backup
-  per day when you open the app.
-- **Password-protected:** All local backups are encrypted with a password you
-  set. This password is stored securely on your device.
-- **Custom backup location:** Choose where to store your backups on your device.
-- **Backup retention:** The app keeps up to 5 most recent backups and
-  automatically removes older ones.
-
-**Setting up local backups:**
-
-1. Go to **Settings → Data → Local backup**.
-2. Enable **Automatic backups**.
-3. Set a backup password (minimum 8 characters).
-4. Select a folder where backups will be stored.
-
-**Manual backups:**
-
-You can trigger a manual backup at any time using the **Create backup now**
-button. Manual backups are useful before making significant changes to your
-codes.
-
-**Restoring from local backups:**
-
-To restore your codes from a local backup, use **Settings → Data → Import
-Codes → Ente Encrypted export** and select your backup file. You will need to
-enter the backup password you set when creating the backup.
-
 ### Deduplicate codes
 
 If you import codes and end up with duplicates, you can easily remove them. Go
