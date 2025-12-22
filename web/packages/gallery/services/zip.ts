@@ -39,8 +39,9 @@ const isSafari = () => {
 
 const encodeFileNameForContentDisposition = (name: string) =>
     encodeURIComponent(name.replace(/\//g, ":"))
-        .replace(/['()]/g, (c) =>
-            `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+        .replace(
+            /['()]/g,
+            (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
         )
         .replace(/\*/g, "%2A");
 
@@ -80,14 +81,18 @@ const createStreamSaverServiceWorkerWritable = async (
                 scope: "/",
             }));
         if (!registration) return undefined;
-        const serviceWorker = await waitForServiceWorkerActivation(registration);
+        const serviceWorker =
+            await waitForServiceWorkerActivation(registration);
         if (!serviceWorker) return undefined;
 
         const encodedName = encodeFileNameForContentDisposition(fileName);
         const downloadPath = `streamsaver-${Date.now()}-${Math.random()
             .toString(36)
             .slice(2)}/${encodedName}`;
-        const downloadUrl = new URL(downloadPath, registration.scope).toString();
+        const downloadUrl = new URL(
+            downloadPath,
+            registration.scope,
+        ).toString();
 
         const channel = new MessageChannel();
         let downloadHref: string | undefined = downloadUrl;
@@ -252,8 +257,9 @@ export const getWritableStreamForZip = async (
         // set mitm on the actual object, not on the module namespace, because
         // internal StreamSaver code references its own internal streamSaver.mitm.
         type StreamSaverModule = typeof import("streamsaver");
-        const streamSaverModule: StreamSaverModule & { default?: StreamSaverModule } =
-            await import("streamsaver");
+        const streamSaverModule: StreamSaverModule & {
+            default?: StreamSaverModule;
+        } = await import("streamsaver");
         const streamSaver = streamSaverModule.default ?? streamSaverModule;
 
         // Configure StreamSaver to use our self-hosted mitm.html instead of the
@@ -359,23 +365,16 @@ const getStreamZipConcurrency = () => {
             return concurrency;
         }
 
-        // Fallback: navigator.deviceMemory returns approximate GBs (capped at 8 max).
-        const deviceMemory = (
-            navigator as Navigator & { deviceMemory?: number }
-        ).deviceMemory;
-        if (deviceMemory) {
-            method = "deviceMemory";
-            detectedValue = `${deviceMemory} GB`;
-            // deviceMemory is capped at 8 GB by browsers for privacy
-            if (deviceMemory >= 8)
-                concurrency = 20; // 8 GB (max reported)
-            else if (deviceMemory >= 4)
-                concurrency = 12; // 4 GB
-            else if (deviceMemory >= 2)
-                concurrency = 8; // 2 GB
-            else if (deviceMemory >= 1)
-                concurrency = 4; // 1 GB
-            else concurrency = 2; // <1 GB
+        // Fallback: hardwareConcurrency is widely available (Firefox/Safari).
+        // Use a cautious multiplier with clamp to avoid overcommitting memory.
+        const cores = navigator.hardwareConcurrency;
+        if (cores) {
+            method = "hardwareConcurrency";
+            detectedValue = `${cores} cores`;
+            concurrency = Math.min(
+                STREAM_ZIP_MAX_CONCURRENCY,
+                Math.max(STREAM_ZIP_MIN_CONCURRENCY, cores * 2),
+            );
             log.info(
                 `ZIP concurrency: ${concurrency} (${method}: ${detectedValue})`,
             );
