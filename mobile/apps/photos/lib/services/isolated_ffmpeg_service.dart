@@ -2,6 +2,8 @@ import "dart:async";
 import "dart:isolate";
 
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
 import "package:flutter/services.dart";
 import "package:photos/utils/ffprobe_util.dart";
@@ -46,6 +48,23 @@ class IsolatedFfmpegService {
   Future<Map> getVideoInfo(String file) async {
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _getVideoProps(file, rootIsolateToken));
+  }
+
+  Future<double?> getSessionProgress({
+    required int? sessionId,
+    required Duration? duration,
+  }) async {
+    if (sessionId == null || duration == null) return null;
+    if (duration.inMilliseconds <= 0) return null;
+
+    final session = await FFmpegKitConfig.getSession(sessionId);
+    if (session == null || session is! FFmpegSession) return null;
+
+    final stats = await session.getStatistics();
+    if (stats.isEmpty) return null;
+
+    final ms = stats.last.getTime().toDouble();
+    return (ms / duration.inMilliseconds).clamp(0.0, 1.0);
   }
 }
 
