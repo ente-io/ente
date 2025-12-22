@@ -350,20 +350,44 @@ export const createNativeZipWritable = (
     const transform = new TransformStream<Uint8Array, Uint8Array>();
     const writer = transform.writable.getWriter();
 
+    // Track if native write stream has failed so we can fail fast on subsequent writes
+    let streamError: Error | undefined;
+    let aborted = false;
+
     const writePromise = writeStream(electron, filePath, transform.readable);
 
+    // Monitor writePromise for failures - if native stream fails, capture error immediately
+    // so we stop accumulating data in memory
+    writePromise.catch((e: unknown) => {
+        streamError = e instanceof Error ? e : new Error(String(e));
+        // Abort the writer to stop any pending writes from queuing more data
+        if (!aborted) {
+            aborted = true;
+            void writer.abort(streamError).catch(() => undefined);
+        }
+    });
+
     const close = async () => {
+        // Check for stream error before closing
+        if (streamError) throw streamError;
         await writer.close();
         await writePromise;
     };
 
     const abort = () => {
+        if (aborted) return;
+        aborted = true;
         void writer.abort().catch(() => undefined);
     };
 
     return {
         stream: new WritableStream<Uint8Array>({
-            write: (chunk) => writer.write(chunk),
+            write: async (chunk) => {
+                // Fail fast if native stream has already failed
+                if (streamError) throw streamError;
+                if (aborted) throw new Error("Stream aborted");
+                return writer.write(chunk);
+            },
             close,
             abort,
         }),
