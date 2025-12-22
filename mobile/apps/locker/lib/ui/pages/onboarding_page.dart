@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:ente_accounts/pages/email_entry_page.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import "package:ente_ui/pages/developer_settings_page.dart";
-import "package:ente_ui/pages/web_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -194,38 +193,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         onTap: _navigateToSignInPage,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Center(
-                      child: TextButton(
-                        onPressed: () async {
-                          final result = await showCreateNewAccountDialog(
-                            context,
-                            title: l10n.unlockLockerNewUserTitle,
-                            body: l10n.unlockLockerNewUserBody,
-                            buttonLabel: l10n.checkoutEntePhotos,
-                            assetPath: "assets/file_lock.png",
-                          );
-
-                          if (result?.action == ButtonAction.first) {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return WebPage(
-                                    l10n.checkoutEntePhotos,
-                                    "https://ente.io/",
-                                  );
-                                },
+                      child: GestureDetector(
+                        onTap: _navigateToSignUpPage,
+                        child: Text.rich(
+                          TextSpan(
+                            text: "${l10n.dontHaveAccount} ",
+                            style: getEnteTextTheme(context).body.copyWith(
+                                  color: Colors.white,
+                                ),
+                            children: [
+                              TextSpan(
+                                text: l10n.signUp,
+                                style:
+                                    getEnteTextTheme(context).bodyBold.copyWith(
+                                          color: Colors.white,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: Colors.white,
+                                        ),
                               ),
-                            );
-                          }
-                        },
-                        child: Text(
-                          l10n.noAccountCta,
-                          style: getEnteTextTheme(context).bodyBold.copyWith(
-                                color: Colors.white,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.white,
-                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -265,6 +254,39 @@ class _OnboardingPageState extends State<OnboardingPage> {
             _activeDotIndex = index % _featureCount;
           });
           _startAutoScroll();
+        },
+      ),
+    );
+  }
+
+  void _navigateToSignUpPage() {
+    Widget page;
+    if (Configuration.instance.getEncryptedToken() == null) {
+      page = EmailEntryPage(Configuration.instance);
+    } else {
+      // No key
+      if (Configuration.instance.getKeyAttributes() == null) {
+        // Never had a key
+        page = PasswordEntryPage(
+          Configuration.instance,
+          PasswordEntryMode.set,
+          const HomePage(),
+        );
+      } else if (Configuration.instance.getKey() == null) {
+        // Yet to decrypt the key
+        page = PasswordReentryPage(
+          Configuration.instance,
+          const HomePage(),
+        );
+      } else {
+        // All is well
+        page = const HomePage();
+      }
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
         },
       ),
     );
