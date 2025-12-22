@@ -270,7 +270,7 @@ Make sure you have sufficient storage available if you're expecting many people 
 Yes! Public links (including collect links) support several protective features:
 
 - **Link expiry**: Set the link to automatically expire after a duration you define
-- **Device limits**: Prevent people from forwarding your link to too many devices
+- **Device limits**: Limit how many devices can access the link (a "device" is identified by the combination of IP address and browser/app, so the same browser on a different network counts as a separate device)
 - **Password protection**: Add an additional password that users must enter to access the link
 - **Prevent downloads**: Disable the option to download original photos (though screenshots can't be prevented)
 

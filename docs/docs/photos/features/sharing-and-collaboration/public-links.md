@@ -107,6 +107,15 @@ Set an expiration date for your link. After this time, the link automatically st
 
 Limit how many devices can access the link. This prevents the link from being widely forwarded.
 
+**How devices are identified:**
+
+A "device" is determined by the combination of IP address and browser/app (User-Agent). This means:
+
+- Same browser on the same network = 1 device
+- Different browsers on the same device = separate devices
+- Same browser from different networks (e.g., home vs mobile data) = separate devices
+- Once a device has accessed the link, it can continue accessing it even if the limit is later reached
+
 **When to use:**
 
 - Sharing with a known small group
