@@ -26,6 +26,148 @@ export const zipFileName = (title: string, part?: number) => {
     return `${nameWithPart}.zip`;
 };
 
+const isSafari = () => {
+    if (typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent;
+    return (
+        ua.includes("Safari/") &&
+        !ua.includes("Chrome/") &&
+        !ua.includes("Chromium/") &&
+        !ua.includes("Edg/")
+    );
+};
+
+const encodeFileNameForContentDisposition = (name: string) =>
+    encodeURIComponent(name.replace(/\//g, ":"))
+        .replace(/['()]/g, (c) =>
+            `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+        )
+        .replace(/\*/g, "%2A");
+
+const waitForServiceWorkerActivation = async (
+    registration: ServiceWorkerRegistration,
+) => {
+    const sw =
+        registration.active ?? registration.waiting ?? registration.installing;
+    if (!sw) return null;
+    if (sw.state === "activated") return sw;
+    await new Promise<void>((resolve) => {
+        const listener = () => {
+            if (sw.state === "activated" || sw.state === "redundant") {
+                sw.removeEventListener("statechange", listener);
+                resolve();
+            }
+        };
+        sw.addEventListener("statechange", listener);
+    });
+    return registration.active ?? null;
+};
+
+const createStreamSaverServiceWorkerWritable = async (
+    fileName: string,
+): Promise<WritableStreamHandle | undefined> => {
+    if (
+        typeof navigator === "undefined" ||
+        !("serviceWorker" in navigator) ||
+        typeof WritableStream !== "function"
+    )
+        return undefined;
+
+    try {
+        const registration =
+            (await navigator.serviceWorker.getRegistration("/")) ??
+            (await navigator.serviceWorker.register("/streamsaver/sw.js", {
+                scope: "/",
+            }));
+        if (!registration) return undefined;
+        const serviceWorker = await waitForServiceWorkerActivation(registration);
+        if (!serviceWorker) return undefined;
+
+        const encodedName = encodeFileNameForContentDisposition(fileName);
+        const downloadPath = `streamsaver-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}/${encodedName}`;
+        const downloadUrl = new URL(downloadPath, registration.scope).toString();
+
+        const channel = new MessageChannel();
+        let downloadHref: string | undefined = downloadUrl;
+        let downloadTriggered = false;
+        let hasWrittenData = false;
+        let portClosed = false;
+
+        const triggerDownload = () => {
+            if (downloadTriggered || !downloadHref) return;
+            downloadTriggered = true;
+            if (typeof document === "undefined") return;
+            const iframe = document.createElement("iframe");
+            iframe.hidden = true;
+            iframe.src = downloadHref;
+            iframe.onload = () => iframe.remove();
+            document.body.appendChild(iframe);
+        };
+
+        channel.port1.onmessage = (event) => {
+            if (event.data?.download) {
+                downloadHref = event.data.download;
+                if (hasWrittenData) triggerDownload();
+            }
+        };
+
+        serviceWorker.postMessage(
+            {
+                url: downloadUrl,
+                headers: {
+                    "Content-Type": "application/zip",
+                    "Content-Disposition": `attachment; filename*=UTF-8''${encodedName}`,
+                },
+            },
+            [channel.port2],
+        );
+
+        const stream = new WritableStream<Uint8Array>({
+            write(chunk) {
+                hasWrittenData = true;
+                channel.port1.postMessage(chunk);
+                if (!downloadTriggered && downloadHref) triggerDownload();
+            },
+            close() {
+                if (portClosed) return;
+                channel.port1.postMessage("end");
+                channel.port1.close();
+                portClosed = true;
+                triggerDownload();
+            },
+            abort() {
+                if (portClosed) return;
+                channel.port1.postMessage("abort");
+                channel.port1.close();
+                portClosed = true;
+            },
+        });
+
+        log.info("Using streamed ZIP download via service worker");
+        return {
+            stream,
+            close: async () => {
+                triggerDownload();
+                if (!portClosed) {
+                    channel.port1.close();
+                    portClosed = true;
+                }
+            },
+            abort: () => {
+                if (portClosed) return;
+                channel.port1.postMessage("abort");
+                channel.port1.close();
+                portClosed = true;
+            },
+        };
+    } catch (e) {
+        log.warn("Failed to set up stream saver service worker path", e);
+        return undefined;
+    }
+};
+
 // ============================================================================
 // Streaming ZIP support
 // ============================================================================
@@ -97,6 +239,12 @@ export const getWritableStreamForZip = async (
     }
 
     // Fall back to StreamSaver.js (Firefox/Safari)
+    if (isSafari()) {
+        const safariHandle =
+            await createStreamSaverServiceWorkerWritable(fileName);
+        if (safariHandle) return safariHandle;
+    }
+
     try {
         // Dynamically import streamsaver to avoid SSR issues (it references document)
         // StreamSaver uses CommonJS (module.exports = obj), so the actual object
