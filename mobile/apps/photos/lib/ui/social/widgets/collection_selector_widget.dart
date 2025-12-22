@@ -126,7 +126,7 @@ class _CollectionSelectorWidgetState extends State<CollectionSelectorWidget> {
       context: context,
       position: RelativeRect.fromLTRB(
         widgetPosition.dx,
-        widgetPosition.dy + widgetSize.height + 12,
+        widgetPosition.dy + widgetSize.height + 10,
         screenSize.width - widgetPosition.dx - widgetSize.width,
         0,
       ),
@@ -318,7 +318,7 @@ class _LikesCollectionSelectorWidgetState
       context: context,
       position: RelativeRect.fromLTRB(
         widgetPosition.dx,
-        widgetPosition.dy + widgetSize.height + 12,
+        widgetPosition.dy + widgetSize.height + 10,
         screenSize.width - widgetPosition.dx - widgetSize.width,
         0,
       ),

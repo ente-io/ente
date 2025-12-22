@@ -14,6 +14,8 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 
+const _shrinkWrapThreshold = 30;
+
 /// Shows the likes bottom sheet for a file
 Future<void> showLikesBottomSheet(
   BuildContext context, {
@@ -46,8 +48,12 @@ class LikesBottomSheet extends StatefulWidget {
 }
 
 class _LikesBottomSheetState extends State<LikesBottomSheet> {
+  static const _maxHeightFraction = 0.7;
+  static const _animationDuration = Duration(milliseconds: 200);
+
   List<Reaction> _likes = [];
   bool _isLoading = true;
+  bool _hasError = false;
   List<CollectionLikeInfo> _sharedCollections = [];
   late int _selectedCollectionID;
   late final int _currentUserID;
@@ -61,36 +67,38 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   }
 
   Future<void> _loadSharedCollections() async {
-    // Get all collections containing this file
-    final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
-      widget.fileID,
-    );
+    try {
+      // Get all collections containing this file
+      final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
+        widget.fileID,
+      );
 
-    // Filter to shared collections only
-    final sharedCollectionsList = collectionIDs
-        .map((id) => CollectionsService.instance.getCollectionByID(id))
-        .whereType<Collection>()
-        .where(
-          (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
-        )
-        .toList();
+      // Filter to shared collections only
+      final sharedCollectionsList = collectionIDs
+          .map((id) => CollectionsService.instance.getCollectionByID(id))
+          .whereType<Collection>()
+          .where(
+            (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
+          )
+          .toList();
 
-    // Fetch like counts and thumbnails in parallel
-    final sharedCollections = await Future.wait(
-      sharedCollectionsList.map((collection) async {
-        final likes = await SocialDataProvider.instance
-            .getReactionsForFileInCollection(widget.fileID, collection.id);
-        final thumbnail =
-            await CollectionsService.instance.getCover(collection);
-        return CollectionLikeInfo(
-          collection: collection,
-          likeCount: likes.length,
-          thumbnail: thumbnail,
-        );
-      }),
-    );
+      // Fetch like counts and thumbnails in parallel
+      final sharedCollections = await Future.wait(
+        sharedCollectionsList.map((collection) async {
+          final likes = await SocialDataProvider.instance
+              .getReactionsForFileInCollection(widget.fileID, collection.id);
+          final thumbnail =
+              await CollectionsService.instance.getCover(collection);
+          return CollectionLikeInfo(
+            collection: collection,
+            likeCount: likes.length,
+            thumbnail: thumbnail,
+          );
+        }),
+      );
 
-    if (mounted) {
+      if (!mounted) return;
+
       // If no shared collections, close the sheet
       if (sharedCollections.isEmpty) {
         Navigator.of(context).pop();
@@ -110,20 +118,37 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
       });
 
       unawaited(_loadLikes());
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _loadLikes() async {
     setState(() => _isLoading = true);
 
-    final likes = await SocialDataProvider.instance
-        .getReactionsForFileInCollection(widget.fileID, _selectedCollectionID);
+    try {
+      final likes = await SocialDataProvider.instance
+          .getReactionsForFileInCollection(
+              widget.fileID, _selectedCollectionID);
 
-    if (mounted) {
-      setState(() {
-        _likes = likes;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _likes = likes;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -147,7 +172,7 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: mediaQuery.size.height * 0.7,
+        maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
         color: colorScheme.backgroundBase,
@@ -158,7 +183,7 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
       child: SafeArea(
         top: false,
         child: AnimatedSize(
-          duration: const Duration(milliseconds: 200),
+          duration: _animationDuration,
           curve: Curves.fastOutSlowIn,
           clipBehavior: Clip.none,
           alignment: Alignment.topCenter,
@@ -177,6 +202,8 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
                   padding: EdgeInsets.symmetric(vertical: 48),
                   child: CircularProgressIndicator(),
                 )
+              else if (_hasError)
+                const _ErrorState()
               else if (_likes.isEmpty)
                 const _EmptyState()
               else
@@ -260,6 +287,24 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+class _ErrorState extends StatelessWidget {
+  const _ErrorState();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      child: Text(
+        "Could not load likes",
+        style: textTheme.smallMuted,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
 class _LikesList extends StatelessWidget {
   final List<Reaction> likes;
   final int currentUserID;
@@ -287,7 +332,7 @@ class _LikesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      shrinkWrap: likes.length <= 30,
+      shrinkWrap: likes.length <= _shrinkWrapThreshold,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       itemCount: likes.length,
       itemBuilder: (context, index) {
