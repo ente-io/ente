@@ -84,16 +84,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         elevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
-        title: Image.asset(
-          'assets/locker-logo-blue.png',
-          height: 24,
-        ),
+        title: Image.asset('assets/locker-logo-blue.png', height: 24),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: colorScheme.primary700,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: _getBody(),
@@ -132,300 +127,294 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       passwordStrengthText = context.strings.moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
-    return Column(
-      children: [
-        Expanded(
-          child: AutofillGroup(
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 24),
-                      // Email field
-                      Text(
-                        context.strings.email,
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorScheme.textBase,
+    return SafeArea(
+      child: Column(
+        children: [
+          Expanded(
+            child: AutofillGroup(
+              child: ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 24),
+                        Text(
+                          context.strings.email,
+                          style: textTheme.bodyBold.copyWith(
+                            color: colorScheme.textBase,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        autofillHints: const [AutofillHints.email],
-                        decoration: InputDecoration(
-                          fillColor: _emailIsValid
-                              ? _validFieldValueColor
-                              : colorScheme.backdropBase,
-                          filled: true,
-                          hintText: context.strings.emailHint,
-                          hintStyle: TextStyle(color: colorScheme.textMuted),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textBase,
                           ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          suffixIcon: _emailIsValid
-                              ? Icon(
-                                  Icons.check,
-                                  size: 20,
-                                  color: colorScheme.primary700,
-                                )
-                              : null,
-                        ),
-                        onChanged: (value) {
-                          _email = value.trim();
-                          if (_emailIsValid !=
-                              EmailValidator.validate(_email!)) {
-                            setState(() {
-                              _emailIsValid = EmailValidator.validate(_email!);
-                            });
-                          }
-                        },
-                        autocorrect: false,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 16),
-                      // Password field
-                      Text(
-                        context.strings.password,
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                        controller: _passwordController1,
-                        obscureText: !_password1Visible,
-                        enableSuggestions: true,
-                        autofillHints: const [AutofillHints.newPassword],
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        decoration: InputDecoration(
-                          fillColor: _passwordIsValid
-                              ? _validFieldValueColor
-                              : colorScheme.backdropBase,
-                          filled: true,
-                          hintText: context.strings.enterYourPasswordHint,
-                          hintStyle: TextStyle(color: colorScheme.textMuted),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          suffixIcon: _password1InFocus
-                              ? IconButton(
-                                  icon: Icon(
-                                    _password1Visible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: colorScheme.textMuted,
+                          autofillHints: const [AutofillHints.email],
+                          decoration: InputDecoration(
+                            fillColor: _emailIsValid
+                                ? _validFieldValueColor
+                                : colorScheme.backdropBase,
+                            filled: true,
+                            hintText: context.strings.emailHint,
+                            hintStyle: TextStyle(color: colorScheme.textMuted),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: _emailIsValid
+                                ? Icon(
+                                    Icons.check,
                                     size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _password1Visible = !_password1Visible;
-                                    });
-                                  },
-                                )
-                              : _passwordIsValid
-                                  ? Icon(
-                                      Icons.check,
-                                      color: colorScheme.primary700,
-                                    )
-                                  : null,
-                        ),
-                        focusNode: _password1FocusNode,
-                        onChanged: (password) {
-                          if (password != _password) {
-                            setState(() {
-                              _password = password;
-                              _passwordStrength =
-                                  estimatePasswordStrength(password);
-                              _passwordIsValid = _passwordStrength >=
-                                  kMildPasswordStrengthThreshold;
-                              _passwordsMatch = _password == _cnfPassword;
-                            });
-                          }
-                        },
-                        onEditingComplete: () {
-                          _password1FocusNode.unfocus();
-                          _password2FocusNode.requestFocus();
-                          TextInput.finishAutofillContext();
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // Confirm Password field
-                      Text(
-                        context.strings.confirmPassword,
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        keyboardType: TextInputType.visiblePassword,
-                        controller: _passwordController2,
-                        obscureText: !_password2Visible,
-                        autofillHints: const [AutofillHints.newPassword],
-                        onEditingComplete: () =>
-                            TextInput.finishAutofillContext(),
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        decoration: InputDecoration(
-                          fillColor: _passwordsMatch && _passwordIsValid
-                              ? _validFieldValueColor
-                              : colorScheme.backdropBase,
-                          filled: true,
-                          hintText: context.strings.reEnterPassword,
-                          hintStyle: TextStyle(color: colorScheme.textMuted),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
+                                    color: colorScheme.primary700,
+                                  )
+                                : null,
                           ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          suffixIcon: _password2InFocus
-                              ? IconButton(
-                                  icon: Icon(
-                                    _password2Visible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: colorScheme.textMuted,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _password2Visible = !_password2Visible;
-                                    });
-                                  },
-                                )
-                              : _passwordsMatch
-                                  ? Icon(
-                                      Icons.check,
-                                      color: colorScheme.primary700,
-                                    )
-                                  : null,
-                        ),
-                        focusNode: _password2FocusNode,
-                        onChanged: (cnfPassword) {
-                          setState(() {
-                            _cnfPassword = cnfPassword;
-                            if (_password != null || _password != '') {
-                              _passwordsMatch = _password == _cnfPassword;
+                          onChanged: (value) {
+                            _email = value.trim();
+                            if (_emailIsValid !=
+                                EmailValidator.validate(_email!)) {
+                              setState(() {
+                                _emailIsValid =
+                                    EmailValidator.validate(_email!);
+                              });
                             }
-                          });
-                        },
-                      ),
-                      Opacity(
-                        opacity: (_password != '') && _password1InFocus ? 1 : 0,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            context.strings
-                                .passwordStrength(passwordStrengthText),
-                            style: TextStyle(
-                              color: passwordStrengthColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
+                          },
+                          autocorrect: false,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.strings.password,
+                          style: textTheme.bodyBold.copyWith(
+                            color: colorScheme.textBase,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.next,
+                          controller: _passwordController1,
+                          obscureText: !_password1Visible,
+                          enableSuggestions: true,
+                          autofillHints: const [AutofillHints.newPassword],
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textBase,
+                          ),
+                          decoration: InputDecoration(
+                            fillColor: _passwordIsValid
+                                ? _validFieldValueColor
+                                : colorScheme.backdropBase,
+                            filled: true,
+                            hintText: context.strings.enterYourPasswordHint,
+                            hintStyle: TextStyle(color: colorScheme.textMuted),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: _password1InFocus
+                                ? IconButton(
+                                    icon: Icon(
+                                      _password1Visible
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: colorScheme.textMuted,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _password1Visible = !_password1Visible;
+                                      });
+                                    },
+                                  )
+                                : _passwordIsValid
+                                    ? Icon(
+                                        Icons.check,
+                                        color: colorScheme.primary700,
+                                      )
+                                    : null,
+                          ),
+                          focusNode: _password1FocusNode,
+                          onChanged: (password) {
+                            if (password != _password) {
+                              setState(() {
+                                _password = password;
+                                _passwordStrength =
+                                    estimatePasswordStrength(password);
+                                _passwordIsValid = _passwordStrength >=
+                                    kMildPasswordStrengthThreshold;
+                                _passwordsMatch = _password == _cnfPassword;
+                              });
+                            }
+                          },
+                          onEditingComplete: () {
+                            _password1FocusNode.unfocus();
+                            _password2FocusNode.requestFocus();
+                            TextInput.finishAutofillContext();
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.strings.confirmPassword,
+                          style: textTheme.bodyBold.copyWith(
+                            color: colorScheme.textBase,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          keyboardType: TextInputType.visiblePassword,
+                          controller: _passwordController2,
+                          obscureText: !_password2Visible,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onEditingComplete: () =>
+                              TextInput.finishAutofillContext(),
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textBase,
+                          ),
+                          decoration: InputDecoration(
+                            fillColor: _passwordsMatch && _passwordIsValid
+                                ? _validFieldValueColor
+                                : colorScheme.backdropBase,
+                            filled: true,
+                            hintText: context.strings.reEnterPassword,
+                            hintStyle: TextStyle(color: colorScheme.textMuted),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: _password2InFocus
+                                ? IconButton(
+                                    icon: Icon(
+                                      _password2Visible
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: colorScheme.textMuted,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _password2Visible = !_password2Visible;
+                                      });
+                                    },
+                                  )
+                                : _passwordsMatch
+                                    ? Icon(
+                                        Icons.check,
+                                        color: colorScheme.primary700,
+                                      )
+                                    : null,
+                          ),
+                          focusNode: _password2FocusNode,
+                          onChanged: (cnfPassword) {
+                            setState(() {
+                              _cnfPassword = cnfPassword;
+                              if (_password != null || _password != '') {
+                                _passwordsMatch = _password == _cnfPassword;
+                              }
+                            });
+                          },
+                        ),
+                        Opacity(
+                          opacity:
+                              (_password != '') && _password1InFocus ? 1 : 0,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              context.strings
+                                  .passwordStrength(passwordStrengthText),
+                              style: TextStyle(
+                                color: passwordStrengthColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Referral source field
-                      Text(
-                        context.strings.hearUsWhereTitle,
-                        style: textTheme.bodyBold.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        decoration: InputDecoration(
-                          fillColor: colorScheme.backdropBase,
-                          filled: true,
-                          hintText: context.strings.emailHint,
-                          hintStyle: TextStyle(color: colorScheme.textMuted),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.strings.hearUsWhereTitle,
+                          style: textTheme.bodyBold.copyWith(
+                            color: colorScheme.textBase,
                           ),
                         ),
-                        onChanged: (value) {
-                          _referralSource = value.trim();
-                        },
-                        autocorrect: false,
-                        keyboardType: TextInputType.text,
-                        textInputAction: TextInputAction.next,
-                      ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textBase,
+                          ),
+                          decoration: InputDecoration(
+                            fillColor: colorScheme.backdropBase,
+                            filled: true,
+                            hintStyle: TextStyle(color: colorScheme.textMuted),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            _referralSource = value.trim();
+                          },
+                          autocorrect: false,
+                          keyboardType: TextInputType.text,
+                          textInputAction: TextInputAction.next,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Column(
+                    children: [
+                      _getTOSAgreement(),
+                      _getPasswordAgreement(),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                _getAgreement(),
-                const SizedBox(height: 40),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Container _getAgreement() {
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-      child: Column(
-        children: [
-          _getTOSAgreement(),
-          _getPasswordAgreement(),
         ],
       ),
     );
   }
 
   Widget _getTOSAgreement() {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -438,6 +427,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Checkbox(
             value: _hasAgreedToTOS,
             side: CheckboxTheme.of(context).side,
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return colorScheme.primary700;
+              }
+              return Colors.transparent;
+            }),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             onChanged: (value) {
               setState(() {
                 _hasAgreedToTOS = value!;
@@ -447,10 +445,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: context.strings.signUpTerms,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: textTheme.small.copyWith(color: colorScheme.textMuted),
               tags: {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
@@ -483,6 +478,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   Widget _getPasswordAgreement() {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -495,6 +493,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Checkbox(
             value: _hasAgreedToE2E,
             side: CheckboxTheme.of(context).side,
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return colorScheme.primary700;
+              }
+              return Colors.transparent;
+            }),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             onChanged: (value) {
               setState(() {
                 _hasAgreedToE2E = value!;
@@ -504,10 +511,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: context.strings.ackPasswordLostWarning,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: textTheme.small.copyWith(color: colorScheme.textMuted),
               tags: {
                 'underline': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
