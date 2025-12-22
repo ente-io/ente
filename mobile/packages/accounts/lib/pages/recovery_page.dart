@@ -136,7 +136,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                           fontFeatures: [const FontFeature.tabularFigures()],
                         ),
                         minLines: 4,
-                        maxLines: 4,
+                        maxLines: 5,
                         controller: _recoveryKey,
                         autofocus: false,
                         autocorrect: false,
