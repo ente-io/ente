@@ -125,39 +125,42 @@ class VideoPreviewService {
     if (isVideoStreamingEnabled) {
       queueFiles(duration: Duration.zero);
     } else {
-      uploadingFileId = -1;
-      clearQueue();
-      computeController.releaseCompute(stream: true);
+      stop("streaming disabled");
     }
   }
 
   // Clear queue - will be rebuilt from DB when processing resumes
-  void clearQueue() {
+  // Optionally exclude a fileId (e.g., current uploading item) from being cleared
+  void clearQueue({int? excludeFileId}) {
     // Fire events for all items being cleared so UI can reset
     // Use paused status when flag is enabled (items will resume), otherwise uploaded
     final status = flagService.stopStreamProcess
         ? PreviewItemStatus.paused
         : PreviewItemStatus.uploaded;
     for (final fileId in _items.keys) {
-      _fireVideoPreviewStateChange(fileId, status);
+      if (fileId != excludeFileId) {
+        _fireVideoPreviewStateChange(fileId, status);
+      }
     }
     fileQueue.clear();
+    final excludedItem = excludeFileId != null ? _items[excludeFileId] : null;
     _items.clear();
+    if (excludedItem != null) _items[excludeFileId!] = excludedItem;
   }
 
   /// Stop streaming immediately, cancels FFmpeg and network requests.
   void stop(String reason) {
-    if (!flagService.stopStreamProcess) return;
-
-    if (uploadingFileId == -1) return;
+    if (_items.isEmpty) return;
 
     _logger.info("Stopping streaming: $reason");
-    _streamingCancelToken?.cancel();
+    if (flagService.stopStreamProcess) {
+      _streamingCancelToken?.cancel();
+    }
     uploadingFileId = -1;
     clearQueue();
     computeController.releaseCompute(stream: true);
 
-    if (_currentFfmpegSessionId != null) {
+    if (flagService.stopStreamProcess && _currentFfmpegSessionId != null) {
       unawaited(FFmpegKit.cancel(_currentFfmpegSessionId!));
       _currentFfmpegSessionId = null;
     }
@@ -194,7 +197,7 @@ class VideoPreviewService {
       _logger.fine(
         "stopSafely: letting current task finish, clearing queue. status: $status, progress: $progressStr, reason: $reason",
       );
-      clearQueue();
+      clearQueue(excludeFileId: uploadingFileId);
       return;
     }
 
@@ -374,20 +377,12 @@ class VideoPreviewService {
 
     // Check if file upload is happening before processing video for streaming
     if (flagService.stopStreamProcess && FileUploader.instance.isUploading) {
-      await stopSafely("upload in progress");
+      stop("upload in progress");
       return;
     }
 
-    final bool isManual =
-        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
-    final canStream = _isPermissionGranted();
-    if (!canStream) {
-      _logger.info(
-        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
-      );
-      uploadingFileId = -1;
-      clearQueue();
-      computeController.releaseCompute(stream: true);
+    if (!_isPermissionGranted()) {
+      stop("disabled streaming or no compute permission");
       return;
     }
 
@@ -427,6 +422,8 @@ class VideoPreviewService {
         "Starting video preview generation for ${enteFile.displayName}",
       );
       // elimination case for <=10 MB with H.264
+      final isManual =
+          await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
       var (props, result, file) =
           await _checkFileForPreviewCreation(enteFile, isManual);
       if (result) {
@@ -717,18 +714,7 @@ class VideoPreviewService {
         );
       } else {
         // Release compute when queue is empty or network is unavailable
-        if (shouldStopProcessing) {
-          _logger.warning(
-            "[chunk] Network error detected, stopping queue processing. ${fileQueue.length} items pending",
-          );
-        } else {
-          _logger.info(
-            "[chunk] Nothing to process, releasing compute",
-          );
-        }
-        uploadingFileId = -1;
-        clearQueue();
-        computeController.releaseCompute(stream: true);
+        stop(shouldStopProcessing ? "network error" : "nothing to process");
       }
     }
   }
