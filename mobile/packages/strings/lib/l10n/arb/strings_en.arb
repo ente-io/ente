@@ -270,6 +270,10 @@
   "@password": {
     "description": "Password field label"
   },
+  "enterThePasswordFor": "Enter the password for",
+  "@enterThePasswordFor": {
+    "description": "Text shown before email on login password verification page"
+  },
   "confirmPassword": "Confirm password",
   "@confirmPassword": {
     "description": "Confirm password field label"

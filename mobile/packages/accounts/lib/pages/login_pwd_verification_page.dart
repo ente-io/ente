@@ -229,6 +229,23 @@ class _LoginPasswordVerificationPageState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 24),
+                      Text.rich(
+                        TextSpan(
+                          text: "${context.strings.enterThePasswordFor} ",
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: email,
+                              style: textTheme.body.copyWith(
+                                color: colorScheme.primary700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       Text(
                         context.strings.password,
                         style: textTheme.bodyBold.copyWith(
