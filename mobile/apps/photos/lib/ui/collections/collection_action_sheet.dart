@@ -449,7 +449,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           recentlyCreated.add(collection);
           continue;
         }
-        if (collection.isPinned) {
+        final bool isPinned =
+            collection.isPinned || collection.hasShareePinned();
+        if (isPinned) {
           pinned.add(collection);
         } else {
           unpinned.add(collection);
