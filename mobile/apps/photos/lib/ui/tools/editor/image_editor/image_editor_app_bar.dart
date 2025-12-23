@@ -3,7 +3,7 @@ import "package:flutter_svg/svg.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart";
+import "package:pro_image_editor/pro_image_editor.dart";
 
 class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ImageEditorAppBar({
