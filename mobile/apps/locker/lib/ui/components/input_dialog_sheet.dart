@@ -1,4 +1,5 @@
 import "package:ente_base/typedefs.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
@@ -107,20 +108,8 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
                 TitleBarTitleWidget(
                   title: widget.title,
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.backgroundElevated,
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(6),
-                    child: Icon(
-                      Icons.close,
-                      color: colorScheme.textBase,
-                      size: 20,
-                    ),
-                  ),
+                CloseIconButton(
+                  backgroundColor: colorScheme.backgroundElevated,
                 ),
               ],
             ),

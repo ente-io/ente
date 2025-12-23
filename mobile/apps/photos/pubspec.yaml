@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.30+1230
+version: 1.2.32+1232
 publish_to: none
 
 environment:
@@ -81,7 +81,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: remove-event-sub
+      ref: 2bbef7d
   figma_squircle: ^0.6.3
   file_saver: ^0.2.14
   firebase_core: ^3.6.0

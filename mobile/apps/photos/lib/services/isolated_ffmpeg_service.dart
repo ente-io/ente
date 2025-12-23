@@ -1,9 +1,11 @@
 import "dart:async";
 import "dart:isolate";
-
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
 import "package:flutter/services.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/utils/ffprobe_util.dart";
 
 class IsolatedFfmpegService {
@@ -18,21 +20,40 @@ class IsolatedFfmpegService {
   }
 
   /// Run FFmpeg with session ID callback for cancellation support.
+  /// Uses a completion port registered on the root isolate.
   Future<Map> runFfmpegCancellable(
     String command,
     void Function(int sessionId) onSessionStarted,
   ) async {
+    if (!flagService.stopStreamProcess) {
+      return await runFfmpeg(command);
+    }
+
     final rootIsolateToken = RootIsolateToken.instance!;
     final port = ReceivePort();
+    final completionPort = ReceivePort();
     final completer = Completer<Map>();
 
     port.listen((msg) {
       if (msg is int) {
+        FFmpegKit.registerSessionCompletionPort(
+          msg,
+          completionPort.sendPort,
+        );
         onSessionStarted(msg);
-      } else if (msg is Map) {
-        completer.complete(msg);
-        port.close();
       }
+    });
+
+    // ignore: unawaited_futures
+    completionPort.first.then((result) {
+      if (result is Map) {
+        completer.complete({
+          "returnCode": result["returnCode"],
+          "output": result["output"],
+        });
+      }
+      completionPort.close();
+      port.close();
     });
 
     await Isolate.spawn(
@@ -46,6 +67,23 @@ class IsolatedFfmpegService {
   Future<Map> getVideoInfo(String file) async {
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _getVideoProps(file, rootIsolateToken));
+  }
+
+  Future<double?> getSessionProgress({
+    required int? sessionId,
+    required Duration? duration,
+  }) async {
+    if (sessionId == null || duration == null) return null;
+    if (duration.inMilliseconds <= 0) return null;
+
+    final session = await FFmpegKitConfig.getSession(sessionId);
+    if (session == null || session is! FFmpegSession) return null;
+
+    final stats = await session.getStatistics();
+    if (stats.isEmpty) return null;
+
+    final ms = stats.last.getTime().toDouble();
+    return (ms / duration.inMilliseconds).clamp(0.0, 1.0);
   }
 }
 
@@ -86,15 +124,7 @@ Future<void> _ffmpegRunCancellable(
   final (command, sendPort, token) = params;
   BackgroundIsolateBinaryMessenger.ensureInitialized(token);
 
-  final completer = Completer<Map>();
-  final session = await FFmpegKit.executeAsync(command, (s) async {
-    completer.complete({
-      "returnCode": (await s.getReturnCode())?.getValue(),
-      "output": await s.getOutput(),
-    });
-  });
-
+  final session = await FFmpegKit.executeAsync(command);
   final sessionId = session.getSessionId();
   if (sessionId != null) sendPort.send(sessionId);
-  sendPort.send(await completer.future);
 }

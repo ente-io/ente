@@ -6,27 +6,26 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_sharing/components/gradient_button.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/loading_widget.dart";
-import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_ui/theme/text_style.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 
-/// Shows the verify identity bottom sheet
 Future<void> showVerifyIdentitySheet(
   BuildContext context, {
   required bool self,
   String email = '',
   required BaseConfiguration config,
+  String? title,
 }) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => VerifyIdentityDialog(
+  return showBaseBottomSheet<void>(
+    context,
+    title: title ?? context.strings.verify,
+    headerSpacing: 20,
+    child: VerifyIdentitySheet(
       self: self,
       email: email,
       config: config,
@@ -34,7 +33,7 @@ Future<void> showVerifyIdentitySheet(
   );
 }
 
-class VerifyIdentityDialog extends StatefulWidget {
+class VerifyIdentitySheet extends StatefulWidget {
   // email id of the user who's verification ID is being displayed for
   // verification
   final String email;
@@ -43,7 +42,7 @@ class VerifyIdentityDialog extends StatefulWidget {
   final bool self;
   final BaseConfiguration config;
 
-  VerifyIdentityDialog({
+  VerifyIdentitySheet({
     super.key,
     required this.self,
     this.email = '',
@@ -55,10 +54,10 @@ class VerifyIdentityDialog extends StatefulWidget {
   }
 
   @override
-  State<VerifyIdentityDialog> createState() => _VerifyIdentityDialogState();
+  State<VerifyIdentitySheet> createState() => _VerifyIdentitySheetState();
 }
 
-class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
+class _VerifyIdentitySheetState extends State<VerifyIdentitySheet> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -70,144 +69,66 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
         ? context.strings.someoneSharingAlbumsWithYouShouldSeeTheSameId
         : context.strings.howToViewShareeVerificationID;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(context, colorScheme, textStyle),
-              const SizedBox(height: 20),
-              FutureBuilder<String>(
-                future: _getPublicKey(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final publicKey = snapshot.data!;
-                    if (publicKey.isEmpty) {
-                      return _buildNoAccountContent(
-                        context,
-                        colorScheme,
-                        textStyle,
-                      );
-                    } else {
-                      return _buildVerificationContent(
-                        context,
-                        colorScheme,
-                        textStyle,
-                        publicKey,
-                        subTitle,
-                        bottomText,
-                      );
-                    }
-                  } else if (snapshot.hasError) {
-                    Logger("VerificationID")
-                        .severe("failed to end userID", snapshot.error);
-                    return Text(
-                      context.strings.somethingWentWrong,
-                      style: textStyle.bodyMuted,
+    return FutureBuilder<String>(
+      future: _getPublicKey(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final publicKey = snapshot.data!;
+          if (publicKey.isEmpty) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.strings.emailNoEnteAccount(widget.email),
+                  style:
+                      textStyle.small.copyWith(color: colorScheme.textMuted),
+                ),
+                const SizedBox(height: 20),
+                GradientButton(
+                  text: context.strings.sendInvite,
+                  onTap: () {
+                    shareText(
+                      context.strings.shareTextRecommendUsingEnte,
                     );
-                  } else {
-                    return const SizedBox(
-                      height: 200,
-                      child: EnteLoadingWidget(),
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textStyle,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          context.strings.verify,
-          style: textStyle.largeBold,
-        ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.close,
-              size: 20,
-              color: colorScheme.textBase,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNoAccountContent(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textStyle,
-  ) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          context.strings.emailNoEnteAccount(widget.email),
-          style: textStyle.small.copyWith(color: colorScheme.textMuted),
-        ),
-        const SizedBox(height: 20),
-        GradientButton(
-          text: context.strings.sendInvite,
-          onTap: () {
-            shareText(context.strings.shareTextRecommendUsingEnte);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVerificationContent(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textStyle,
-    String publicKey,
-    String subTitle,
-    String bottomText,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          subTitle,
-          style: textStyle.small.copyWith(color: colorScheme.textMuted),
-        ),
-        const SizedBox(height: 20),
-        _verificationIDWidget(context, publicKey),
-        const SizedBox(height: 20),
-        Text(
-          bottomText,
-          style: textStyle.small.copyWith(color: colorScheme.textMuted),
-        ),
-      ],
+                  },
+                ),
+              ],
+            );
+          } else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  subTitle,
+                  style:
+                      textStyle.small.copyWith(color: colorScheme.textMuted),
+                ),
+                const SizedBox(height: 20),
+                _verificationIDWidget(context, publicKey),
+                const SizedBox(height: 20),
+                Text(
+                  bottomText,
+                  style:
+                      textStyle.small.copyWith(color: colorScheme.textMuted),
+                ),
+              ],
+            );
+          }
+        } else if (snapshot.hasError) {
+          Logger("VerificationID")
+              .severe("failed to end userID", snapshot.error);
+          return Text(
+            context.strings.somethingWentWrong,
+            style: textStyle.bodyMuted,
+          );
+        } else {
+          return const SizedBox(
+            height: 200,
+            child: EnteLoadingWidget(),
+          );
+        }
+      },
     );
   }
 

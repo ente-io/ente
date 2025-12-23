@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Confirma tu clave de recuperación",
   "addViewer": "Añadir espectador",
   "addCollaborator": "Agregar colaborador",
+  "admin": "Administrador",
+  "admins": "Administradores",
+  "addAdmin": "Añadir administrador",
+  "addMoreAdmins": "Añadir más administradores",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Los administradores y colaboradores pueden añadir fotos. Los administradores también pueden administrar fotos y participantes.",
   "addANewEmail": "Agregar nuevo correo electrónico",
   "orPickAnExistingOne": "O elige uno existente",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Colaboradores pueden añadir fotos y vídeos al álbum compartido.",
@@ -887,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Haga clic en el menú desbordante",
   "click": "• Clic",
   "nothingToSeeHere": "¡No hay nada que ver aquí! 👀",
+  "selectFoldersToBackup": "<action>Selecciona carpetas</action> para ver\ny copiar en Ente.",
   "unarchiveAlbum": "Desarchivar álbum",
   "archiveAlbum": "Archivar álbum",
   "calculating": "Calculando...",
@@ -1207,8 +1213,10 @@
   "unpinAlbum": "Dejar de fijar álbum",
   "pinAlbum": "Fijar álbum",
   "pin": "Anclar",
+  "pinPerson": "Anclar persona",
   "pinToTop": "Anclar al principio",
   "unpin": "Desanclar",
+  "unpinPerson": "Desanclar persona",
   "visibility": "Visibilidad",
   "hideFromMemories": "Ocultar de los recuerdos",
   "showInMemories": "Mostrar en recuerdos",
@@ -1323,6 +1331,8 @@
   "enterDateOfBirth": "Cumpleaños (opcional)",
   "birthday": "Cumpleaños",
   "removePersonLabel": "Eliminar etiqueta de persona",
+  "removePersonTag": "Eliminar etiqueta de persona",
+  "areYouSureRemoveThisPersonTag": "¿Estás seguro de que quieres eliminar esta etiqueta de persona?",
   "autoPairDesc": "El emparejamiento automático funciona sólo con dispositivos compatibles con Chromecast.",
   "manualPairDesc": "El emparejamiento con PIN funciona con cualquier pantalla en la que desees ver tu álbum.",
   "connectToDevice": "Conectar a dispositivo",
@@ -1407,6 +1417,54 @@
   "loadingYourPhotos": "Cargando tus fotos...",
   "processingImport": "Procesando {folderName}...",
   "personName": "Nombre de la persona",
+  "addPerson": "Añadir persona",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Añadir a persona",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Por favor, primero nombra a una persona en la sección de Personas",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Sólo los archivos subidos pueden ser añadidos a una persona",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "No se detectaron caras, pulsa para añadir.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, one {}=1 {Añadido 1 archivo a {personName}} other {Añadidos {count} archivos a {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, one {}=1 {1 archivo ya está enlazado a {personName}} other {{count} archivos ya están enlazados a {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Añadir nueva persona",
   "addNameOrMerge": "Añadir nombre o combinar",
   "mergeWithExisting": "Combinar con existente",
@@ -1974,14 +2032,14 @@
   "hoorayyyy": "¡Hurraaaa!",
   "nothingToTidyUpHere": "Nada que limpiar aquí",
   "deletingDash": "Eliminando - ",
-  "cLTitle1": "Presentamos Rituales",
-  "cLDesc1": "¿Planeas propósitos para 2026? Con Rituales, puedes configurar un recordatorio en Ente Photos y seguir tu progreso tomando fotos. Úsalo para entrenamientos, hábitos alimenticios, momentos diarios con tus seres queridos, cualquier cosa que quieras convertir en hábito.",
+  "cLTitle1": "Presentando rituales",
+  "cLDesc1": "¿Planeando metas para 2026? Con los Rituales, puedes establecer un recordatorio en Ente Photos y rastrear tu progreso tomando fotos. Úsalos para entrenamientos, hábitos alimenticios, momentos diarios con seres queridos — cualquier cosa que quieras convertir en un hábito.",
   "cLTitle2": "Enlaces públicos, ahora para todos",
-  "cLDesc2": "Todos los usuarios de Ente en el plan gratuito ahora pueden crear y compartir enlaces públicos a fotos y álbumes. Para prevenir abusos, los enlaces tendrán límites en cuántas personas pueden verlos.",
-  "cLTitle3": "Etiquetar personas manualmente",
-  "cLDesc3": "Ahora puedes etiquetar personas incluso cuando nuestra IA en el dispositivo no detecta un rostro. Útil para mascotas, rostros parcialmente visibles, o momentos donde alguien no está realmente en la foto pero debería ser incluido.",
+  "cLDesc2": "Todos los usuarios de Ente en el plan gratuito ahora pueden crear y compartir enlaces públicos a fotos y álbumes. Para prevenir el abuso, los enlaces tendrán límites sobre cuántas personas pueden verlos.",
+  "cLTitle3": "Etiqueta manualmente a personas",
+  "cLDesc3": "Ahora puedes etiquetar a la gente incluso cuando nuestra IA en el dispositivo no detecta una cara. Perfecto para mascotas, rostros parcialmente visibles o momentos en los que alguien no está realmente en la foto, pero deba incluirse.",
   "cLTitle4": "Y más",
-  "cLDesc4": "Ahora puedes fijar álbumes compartidos. Los enlaces de álbumes son visibles para colaboradores y espectadores para facilitar aún más el compartir. Hemos corregido algunos errores de deslizamiento en iOS y actualizado la vista de fotos, incluyendo un nuevo ícono de favoritos (preparando espacio para próximas funciones).",
+  "cLDesc4": "Ahora puedes fijar álbumes compartidos. Los enlaces de álbumes son visibles para los colaboradores y los espectadores para facilitar aún más el compartimiento. Hemos solucionado algunos errores de deslizamiento de iOS y hemos actualizado la vista de fotos, incluyendo un nuevo icono favorito (dando cabida a las próximas características).",
   "closeBy": "Cerrar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2089,27 +2147,76 @@
   "ritualAddTooltip": "Añadir ritual",
   "ritualActivityHeading": "Actividad",
   "ritualDefaultHeatmapTitle": "Toma una foto cada día",
+  "ritualUntitled": "Ritual sin título",
   "ritualShareUnavailable": "No se puede compartir ahora. Por favor, inténtalo de nuevo.",
   "ritualNotificationMessage": "Tomar una foto ahora",
   "ritualCameraNotFound": "No se ha encontrado ninguna cámara en este dispositivo.",
   "ritualCameraStartError": "No se puede iniciar la cámara. Por favor, comprueba los permisos.",
   "ritualCaptureError": "No se puede capturar la foto. Por favor, inténtalo de nuevo.",
+  "ritualPhotoLimit": "Puedes añadir hasta {maxPhotos, plural, one {# foto.} other {# fotos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
   "ritualCaptureAtLeastOne": "Captura al menos una foto primero.",
+  "ritualAlbumMissing": "Falta un álbum en el ritual. Edita el ritual para establecer un álbum.",
+  "ritualAddedToAlbum": "Añadido al álbum",
+  "ritualAddedToAlbumWithName": "Añadido a {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "No se pudo añadir fotos al álbum: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Volver a rituales",
+  "ritualNoPhotosYet": "Aún no hay fotos",
+  "ritualSetAlbumToLaunchCamera": "Establece un álbum para este ritual para iniciar la cámara.",
   "ritualDefaultCameraTitle": "Tomar una foto",
+  "ritualBadgeMessage7": "¡7 días! La consistencia se ve bien en ti. ¡Sigue adelante!",
+  "ritualBadgeMessage14": "¡14 días! Tu ritual se está convirtiendo en un hábito. ¡Increíble!",
+  "ritualBadgeMessage30": "¡30 días seguidos! Consistencia legendaria. ¡Haz una reverencia!",
   "ritualBadgeMessageDefault": "¡Estás en buena racha!",
   "ritualBadgeNewTitle": "Nuevo logro",
   "ritualBadgePreparing": "Preparando...",
   "ritualStreaksLabel": "Rachas",
+  "ritualCreateYourOwn": "Crea tu propio ritual",
   "ritualGetDailyReminders": "Obtener recordatorios diarios",
   "ritualAlbumNotSet": "Álbum no establecido",
+  "ritualOpenCameraTooltip": "Abre la cámara de rituales",
+  "ritualEditorLabel": "Editor de rituales",
+  "ritualNew": "Crear nuevo ritual",
+  "ritualCreateNewTitle": "Crear nuevo ritual",
+  "ritualEdit": "Editar ritual",
+  "ritualEnterPrompt": "Introduce tu ritual",
   "ritualEnterDescription": "Por favor, ingresa una descripción",
+  "ritualChooseDaysLabel": "Elige días para el ritual",
   "ritualDayLabel": "Día",
   "ritualNotificationsOffHint": "Las notificaciones están apagadas. Toca en un día para activarlas.",
+  "ritualTimeLabel": "Hora",
   "ritualAlbumLabel": "Álbum",
   "ritualSave": "Guardar ritual",
+  "ritualCreateAction": "Crear ritual",
   "ritualUpdate": "Actualizar ritual",
   "ritualSelectAlbumTitle": "Seleccionar álbum",
+  "ritualChooseAlbumLabel": "Elige un álbum",
+  "ritualSendReminderLabel": "Enviar recordatorio",
   "ritualSearchOrCreate": "Buscar o crear nuevo",
+  "ritualNoAlbumsYet": "Aún no hay álbumes",
   "ritualNoMatchingAlbums": "Sin álbumes que coincidan",
   "ritualCreateAlbumWithName": "Crear \"{albumName}\"",
   "@ritualCreateAlbumWithName": {
@@ -2125,5 +2232,6 @@
   "ritualPickEmojiTitle": "Elegir un emoji",
   "ritualCustomKeyboardLabel": "Personalizado (teclado)",
   "ritualEmojiKeyboardHint": "Presiona para abrir el teclado de emojis",
+  "ritualEmojiUseAction": "Uso",
   "ritualSearchEmpty": "Construye un ritual para mantener tu hábito fotográfico."
 }

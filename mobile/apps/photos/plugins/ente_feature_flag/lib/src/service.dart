@@ -88,7 +88,7 @@ class FlagService {
   bool get facesTimeline => internalUser;
   bool get ritualsFlag => true;
 
-  bool get pauseStreamDuringUpload => internalUser;
+  bool get stopStreamProcess => internalUser;
 
   bool get streamEnabledByDefault => internalUser;
 
@@ -96,7 +96,6 @@ class FlagService {
 
   bool get enableShareePin => true;
 
-  bool get stopStreamOnLogOut => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {

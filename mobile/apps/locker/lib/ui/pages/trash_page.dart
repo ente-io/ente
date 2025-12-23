@@ -13,7 +13,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/services/trash/trash_service.dart';
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/file_restore_dialog.dart';
 import 'package:locker/ui/components/item_list_view.dart';
@@ -160,7 +160,7 @@ class _TrashPageState extends State<TrashPage> {
   }
 
   Future<void> _emptyTrash() async {
-    final result = await showDeleteConfirmationDialog(
+    final result = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.emptyTrash,
       body: context.l10n.emptyTrashConfirmation,

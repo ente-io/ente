@@ -106,7 +106,6 @@ Yes, we offer 10 GB of storage for free, forever.
 
 On the free plan, you cannot:
 
-- Create public links
 - Set up family plans
 
 All other features work on the free plan, including:
@@ -115,9 +114,9 @@ All other features work on the free plan, including:
 - End-to-end encryption
 - Map view
 - Machine learning (face recognition, magic search)
-- Share albums
+- Creating /receiving shared albums
+- Public links (device limit of 5)
 - Background sync
-- Receiving shared albums from others
 
 ### Is there an x GB plan? {#specific-plan-size}
 

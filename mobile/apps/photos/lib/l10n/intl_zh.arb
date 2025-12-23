@@ -29,7 +29,7 @@
   "deleteRequestSLAText": "您的请求将在 72 小时内处理。",
   "deleteEmailRequest": "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.io</warning>。",
   "entePhotosPerm": "Ente <i>需要许可</i>才能保存您的照片",
-  "ok": "OK",
+  "ok": "Ok",
   "createAccount": "创建账户",
   "createNewAccount": "创建新账号",
   "password": "密码",
@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "确认您的恢复密钥",
   "addViewer": "添加查看者",
   "addCollaborator": "添加协作者",
+  "admin": "管理员",
+  "admins": "管理员",
+  "addAdmin": "添加管理员",
+  "addMoreAdmins": "添加更多管理员",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "管理员和合作员可以添加照片。管理员也可以管理照片和参与者。",
   "addANewEmail": "添加新的电子邮件",
   "orPickAnExistingOne": "或者选择一个现有的",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "协作者可以将照片和视频添加到共享相册中。",
@@ -357,6 +362,7 @@
   "sorryCouldNotAddToFavorites": "抱歉，无法添加到收藏！",
   "sorryCouldNotRemoveFromFavorites": "抱歉，无法从收藏中移除！",
   "subscribeToEnableSharing": "您需要有效的付费订阅才能启用共享。",
+  "subscribeToChangeLinkSetting": "您需要付费订阅才能更改此链接设置。",
   "subscribe": "订阅",
   "canOnlyRemoveFilesOwnedByYou": "只能删除您拥有的文件",
   "deleteSharedAlbum": "要删除共享相册吗？",
@@ -886,6 +892,7 @@
   "clickOnTheOverflowMenu": "• 点击溢出菜单",
   "click": "• 点击",
   "nothingToSeeHere": "这里空空如也! 👀",
+  "selectFoldersToBackup": "<action>选择要查看的文件夹</action> 和\n备份。",
   "unarchiveAlbum": "取消存档相册",
   "archiveAlbum": "存档相册",
   "calculating": "正在计算...",
@@ -1206,10 +1213,13 @@
   "unpinAlbum": "取消置顶相册",
   "pinAlbum": "置顶相册",
   "pin": "置顶",
+  "pinPerson": "置顶人员",
   "pinToTop": "置顶到最上",
   "unpin": "取消置顶",
+  "unpinPerson": "取消置顶人员",
   "visibility": "可见范围",
   "hideFromMemories": "从回忆中隐藏",
+  "showInMemories": "显示回忆",
   "create": "创建",
   "viewAll": "查看全部",
   "nothingSharedWithYouYet": "尚未与您共享任何内容",
@@ -1321,6 +1331,8 @@
   "enterDateOfBirth": "生日(可选)",
   "birthday": "生日",
   "removePersonLabel": "移除人物标签",
+  "removePersonTag": "移除人物标签",
+  "areYouSureRemoveThisPersonTag": "您确定要从此人中移除这个人物标签吗？",
   "autoPairDesc": "自动配对仅适用于支持 Chromecast 的设备。",
   "manualPairDesc": "用 PIN 码配对适用于您希望在其上查看相册的任何屏幕。",
   "connectToDevice": "连接到设备",
@@ -1405,6 +1417,54 @@
   "loadingYourPhotos": "正在加载您的照片...",
   "processingImport": "正在处理 {folderName}...",
   "personName": "人物名称",
+  "addPerson": "添加人员",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "添加到人员",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "请先在人员部分中命名一个人",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "只能将上传的文件添加到一个人",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "未检测到面部，点击添加。",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {添加1个文件到 {personName}} other {添加 {count} 文件到 {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1个文件已链接到 {personName}} other {{count} 文件已链接到 {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "添加新人物",
   "addNameOrMerge": "添加名称或合并",
   "mergeWithExisting": "与现有的合并",
@@ -1709,7 +1769,7 @@
   "selectOneDateAndTimeForAll": "为所有项选择一个日期和时间",
   "selectStartOfRange": "选择起始图片",
   "thisWillMakeTheDateAndTimeOfAllSelected": "这将使所有选定的照片的日期和时间相同。",
-  "allWillShiftRangeBasedOnFirst": "这张照片是该组中的第一张。其他已选择的照片将根据此新日期自动调整。",
+  "allWillShiftRangeBasedOnFirst": "这张照片是该组中的第一张。其他已选择的照片将根据此新日期自动调整",
   "newRange": "新起始图片",
   "selectOneDateAndTime": "选择一个日期和时间",
   "moveSelectedPhotosToOneDate": "将选定的照片调整到某一日期",
@@ -1743,7 +1803,7 @@
   "roadtripWithThem": "与 {name} 一起的自驾游",
   "spotlightOnYourself": "聚光灯下的自己",
   "spotlightOnThem": "聚光灯下的 {name}",
-  "personIsAge": "{name}  {age} 岁啦！",
+  "personIsAge": "{name} {age} 岁啦！",
   "personTurningAge": "{name} 快满 {age} 岁啦",
   "lastTimeWithThem": "最后一次与 {name} 相聚",
   "tripToLocation": "前往 {location} 的旅行",
@@ -1821,7 +1881,7 @@
   "gettingReady": "准备就绪",
   "addSomePhotosDesc1": "添加一些照片或者选择 ",
   "addSomePhotosDesc2": "熟悉的面孔",
-  "addSomePhotosDesc3": "首先",
+  "addSomePhotosDesc3": "\n首先",
   "ignorePerson": "忽略此人",
   "mixedGrouping": "混合分组？",
   "analysis": "分析",
@@ -1973,13 +2033,13 @@
   "nothingToTidyUpHere": "这里没什么可清理的",
   "deletingDash": "正在删除 - ",
   "cLTitle1": "介绍仪式",
-  "cLDesc1": "计划2026年的目标？通过仪式功能，您可以在Ente Photos中设置提醒并通过拍照追踪进度。用于健身、饮食习惯、与亲人的日常时刻——任何您想养成习惯的事情。",
-  "cLTitle2": "公开链接，现在人人可用",
-  "cLDesc2": "所有免费计划的Ente用户现在都可以创建和分享照片和相册的公开链接。为防止滥用，链接将限制可查看人数。",
-  "cLTitle3": "手动标记人物",
-  "cLDesc3": "即使设备端AI未检测到人脸，您现在也可以标记人物。适用于宠物、部分可见的面孔，或者某人实际上不在照片中但仍应被包含的时刻。",
-  "cLTitle4": "更多更新",
-  "cLDesc4": "您现在可以置顶共享相册。相册链接对协作者和查看者可见，使分享更加便捷。我们修复了一些iOS滑动问题并更新了照片视图，包括新的收藏图标（为即将推出的功能腾出空间）。",
+  "cLDesc1": "2026年的规划决议？通过Rituals，您可以在Ente Photos上设置提醒，并通过拍照跟踪您的进展。将其用于锻炼、饮食习惯、与亲人的日常时光--任何您想养成习惯的事情。",
+  "cLTitle2": "现在向所有人公开链接",
+  "cLDesc2": "所有在免费计划中输入的用户现在都可以创建和分享到照片和相册的公共链接。 为了防止滥用，链接会限制多少人可以查看。",
+  "cLTitle3": "手动标记人员",
+  "cLDesc3": "即使我们的 AI 在设备上没有检测到脸部，您现在也可以给人们添加标签。 宠物、部分可见面、或某人实际上不在照片中，但仍应包括在内的时刻。",
+  "cLTitle4": "以及更多",
+  "cLDesc4": "您现在可以固定共享的相册。相册链接对合作者和观众来说是可见的，使分享更加容易。 我们修复了一些iOS滑动漏洞并更新了照片视图，包括一个新收藏的图标 (为即将到来的功能留出空间)。",
   "closeBy": "关闭",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2091,7 +2151,7 @@
   "ritualShareUnavailable": "暂时无法分享，请稍后重试。",
   "ritualNotificationMessage": "立即拍照",
   "ritualCameraNotFound": "在此设备上未找到相机。",
-  "ritualCameraStartError": "无法启动相机，请检查权限",
+  "ritualCameraStartError": "无法启动相机，请检查权限。",
   "ritualCaptureError": "无法拍摄照片。请重试。",
   "ritualPhotoLimit": "您最多可以添加 {maxPhotos, plural, other {# 张照片。}}",
   "@ritualPhotoLimit": {
@@ -2139,17 +2199,22 @@
   "ritualAlbumNotSet": "相册未设置",
   "ritualOpenCameraTooltip": "打开仪式相机",
   "ritualEditorLabel": "仪式编辑器",
-  "ritualNew": "新仪式",
+  "ritualNew": "创建新仪式",
+  "ritualCreateNewTitle": "创建新仪式",
   "ritualEdit": "编辑仪式",
   "ritualEnterPrompt": "输入您的仪式",
   "ritualEnterDescription": "请输入描述",
+  "ritualChooseDaysLabel": "选择仪式日期",
   "ritualDayLabel": "天",
   "ritualNotificationsOffHint": "通知已关闭。点击日期即可开启通知。",
   "ritualTimeLabel": "时间",
   "ritualAlbumLabel": "相册",
   "ritualSave": "保存仪式",
+  "ritualCreateAction": "创建仪式",
   "ritualUpdate": "更新仪式",
   "ritualSelectAlbumTitle": "选择相册",
+  "ritualChooseAlbumLabel": "选择相册",
+  "ritualSendReminderLabel": "发送提醒",
   "ritualSearchOrCreate": "搜索或新建",
   "ritualNoAlbumsYet": "暂无相册",
   "ritualNoMatchingAlbums": "没有匹配的相册",

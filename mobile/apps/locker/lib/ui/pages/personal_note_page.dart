@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -467,87 +468,19 @@ class _PersonalNotePageState
   }
 
   Future<bool> _showDiscardChangesDialog() async {
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        final colorScheme = getEnteColorScheme(dialogContext);
-        final textTheme = getEnteTextTheme(dialogContext);
-
-        return Dialog(
-          backgroundColor: colorScheme.backgroundElevated2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 24,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.backgroundElevated2,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.l10n.unsavedNoteChangesTitle,
-                        style: textTheme.h3Bold,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: () => Navigator.of(dialogContext).pop(false),
-                      child: Container(
-                        height: 36,
-                        width: 36,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colorScheme.backgroundElevated,
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.unsavedNoteChangesDescription,
-                  style: textTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  child: GradientButton(
-                    text: context.l10n.discardChanges,
-                    backgroundColor: colorScheme.warning400,
-                    onTap: () => Navigator.of(dialogContext).pop(true),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    final colorScheme = getEnteColorScheme(context);
+    final result = await showAlertBottomSheet<bool>(
+      context,
+      title: context.l10n.unsavedNoteChangesTitle,
+      message: context.l10n.unsavedNoteChangesDescription,
+      assetPath: 'assets/warning-grey.png',
+      buttons: [
+        GradientButton(
+          text: context.l10n.discardChanges,
+          backgroundColor: colorScheme.warning400,
+          onTap: () => Navigator.of(context).pop(true),
+        ),
+      ],
     );
 
     return result ?? false;

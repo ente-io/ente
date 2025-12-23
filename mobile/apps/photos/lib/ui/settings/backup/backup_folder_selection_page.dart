@@ -233,9 +233,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
       await backupPreferenceService.setHasManualFolderSelection(true);
-      if (backupPreferenceService.hasSkippedOnboardingPermission) {
-        await backupPreferenceService.setOnboardingPermissionSkipped(false);
-      }
 
       // Skip the warning dialog if we came from the "backup only new photos"
       // toggle to avoid recursive navigation back to backup settings.

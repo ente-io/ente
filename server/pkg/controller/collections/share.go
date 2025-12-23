@@ -226,14 +226,6 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
-		// Free user - check @ente.io domain restriction
-		user, userErr := c.UserRepo.Get(userID)
-		if userErr != nil {
-			return ente.PublicURL{}, stacktrace.Propagate(userErr, "")
-		}
-		if !strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
-			return ente.PublicURL{}, stacktrace.Propagate(err, "")
-		}
 		// Override device limit for free users
 		req.DeviceLimit = public.FreeUserDeviceLimit
 	}

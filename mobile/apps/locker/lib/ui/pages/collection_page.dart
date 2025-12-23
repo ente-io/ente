@@ -210,14 +210,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         );
       }
 
-      await showModalBottomSheet(
-        context: context,
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
-        isScrollControlled: true,
-        builder: (context) => ShareCollectionBottomSheet(
-          collection: _collection,
-        ),
-      );
+      await showShareCollectionSheet(context, collection: _collection);
       // Refresh state after share sheet closes
       if (mounted) {
         setState(() {});
