@@ -912,25 +912,7 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      final dynamic data = e.response?.data;
-      final String? enteErrCode =
-          data is Map<String, dynamic> ? data["code"] as String? : null;
-      if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
-        // ignore: unawaited_futures
-        showErrorDialog(
-          context,
-          context.strings.oops,
-          context.strings.lockerExistingUserRequired,
-        );
-      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
-        // ignore: unawaited_futures
-        showErrorDialog(
-          context,
-          "We're out of beta seats for now",
-          "This preview access has reached capacity. We'll be opening it to more users soon.",
-        );
-      } else if (e.response != null && e.response!.statusCode == 404) {
+      if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
@@ -943,20 +925,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.incorrectCode,
-          context.strings.authenticationFailedPleaseTryAgain,
+          title: context.strings.incorrectCode,
+          message: context.strings.authenticationFailedPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.authenticationFailedPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.authenticationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }

@@ -26,6 +26,7 @@ class _TwoFactorAuthenticationPageState
 
   @override
   void initState() {
+    super.initState();
     _lifecycleEventHandler = LifecycleEventHandler(
       resumeCallBack: () async {
         if (mounted) {
@@ -40,7 +41,6 @@ class _TwoFactorAuthenticationPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pinFocusNode.requestFocus();
     });
-    super.initState();
   }
 
   @override
