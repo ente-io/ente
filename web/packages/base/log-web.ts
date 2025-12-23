@@ -107,9 +107,9 @@ export const logToDisk = (message: string) => {
     const maxCount = 1000;
     const log: LogEntry = { logLine: message, timestamp: Date.now() };
     try {
-        let logs = logEntries();
-        if (logs.length >= maxCount) {
-            logs = logs.slice(-maxCount + 1);
+        const logs = logEntries();
+        if (logs.length > maxCount) {
+            logs.slice(logs.length - maxCount);
         }
         logs.push(log);
         localStorage.setItem(lsKey, JSON.stringify({ logs }));
