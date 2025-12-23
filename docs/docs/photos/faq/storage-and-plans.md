@@ -114,7 +114,6 @@ All other features work on the free plan, including:
 - End-to-end encryption
 - Map view
 - Machine learning (face recognition, magic search)
-- Creating /receiving shared albums
 - Public links (device limit of 5)
 - Background sync
 
