@@ -535,6 +535,10 @@
   "@noRecoveryKeyTitle": {
     "description": "No recovery key title"
   },
+  "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+  "@noRecoveryKeyNoDecryption": {
+    "description": "Explanation that data cannot be decrypted without password or recovery key"
+  },
   "twoFactorAuthTitle": "Two-factor authentication",
   "@twoFactorAuthTitle": {
     "description": "Two-factor authentication title"
@@ -1021,5 +1025,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "sorry": "Sorry"
 }
