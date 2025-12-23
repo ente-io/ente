@@ -15,7 +15,6 @@ enum AppIcon {
     "assets/launcher_icon/icon-default.png",
   ),
   iconLight("Light", "IconLight", "assets/launcher_icon/icon-light.png"),
-  iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png"),
   iconOG("Shield", "IconOG", "assets/launcher_icon/icon-og.png");
 
   final String name;
