@@ -512,47 +512,32 @@ class UserService {
     } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
-      final dynamic data = e.response?.data;
-      final String? enteErrCode =
-          data is Map<String, dynamic> ? data["code"] as String? : null;
-      if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
-        await showErrorDialog(
+      if (e.response != null && e.response!.statusCode == 410) {
+        await showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.lockerExistingUserRequired,
-        );
-        return;
-      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
-        await showErrorDialog(
-          context,
-          "We're out of beta seats for now",
-          "This preview access has reached capacity. We'll be opening it to more users soon.",
-        );
-        return;
-      } else if (e.response != null && e.response!.statusCode == 410) {
-        await showErrorDialog(
-          context,
-          context.strings.oops,
-          context.strings.yourVerificationCodeHasExpired,
+          title: context.strings.oops,
+          message: context.strings.yourVerificationCodeHasExpired,
+          assetPath: 'assets/warning-grey.png',
         );
         Navigator.of(context).pop();
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.incorrectCode,
-          context.strings.sorryTheCodeYouveEnteredIsIncorrect,
+          title: context.strings.incorrectCode,
+          message: context.strings.sorryTheCodeYouveEnteredIsIncorrect,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.verificationFailedPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.verificationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
