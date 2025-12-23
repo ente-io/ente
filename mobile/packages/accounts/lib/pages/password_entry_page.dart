@@ -483,7 +483,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   Navigator.of(bottomSheetContext).pop();
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
                   logOutFromOther = true;
