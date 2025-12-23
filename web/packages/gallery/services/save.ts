@@ -204,12 +204,13 @@ const downloadAndSave = async (
                             }));
                         },
                         onFileFailure: (file) => {
-                            if (!failedFiles.includes(file))
+                            if (!failedFiles.includes(file)) {
                                 failedFiles.push(file);
-                            updateSaveGroup((g) => ({
-                                ...g,
-                                failed: g.failed + 1,
-                            }));
+                                updateSaveGroup((g) => ({
+                                    ...g,
+                                    failed: g.failed + 1,
+                                }));
+                            }
                         },
                     });
 

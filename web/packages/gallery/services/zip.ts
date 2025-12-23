@@ -780,18 +780,19 @@ export const streamFilesToZip = async ({
 
         return "success";
     } catch (e) {
-        // Wait for any in-flight entries to settle before checking salvage condition.
-        // This ensures entriesAddedToZip and entriesCompletedInZip are accurate.
-        if (inFlightEntries.size) {
-            await Promise.allSettled([...inFlightEntries]);
-        }
-
+        // Mark remaining files as failed IMMEDIATELY so UI progress updates.
+        // This prevents the progress from appearing stuck during network failures.
         if (!signal.aborted) {
-            // Mark any remaining files as failed so counts stay consistent
             for (let i = lastCompletedIndex + 1; i < files.length; i++) {
                 const file = files[i]!;
                 onFileFailure(file, e);
             }
+        }
+
+        // Now wait for any in-flight entries to settle before checking salvage condition.
+        // This ensures entriesAddedToZip and entriesCompletedInZip are accurate.
+        if (inFlightEntries.size) {
+            await Promise.allSettled([...inFlightEntries]);
         }
 
         log.error("Streaming ZIP creation failed", e);

@@ -52,14 +52,15 @@ export const performFileOp = async (
     markTempHidden: (files: EnteFile[]) => void,
     clearTempHidden: () => void,
     fixCreationTime: (files: EnteFile[]) => void,
+    collectionName?: string,
 ) => {
     switch (op) {
         case "download": {
-            await downloadAndSaveFiles(
-                files,
-                t("files_count", { count: files.length }),
-                onAddSaveGroup,
-            );
+            const filesCountTitle = t("files_count", { count: files.length });
+            const title = collectionName
+                ? `${collectionName} - ${filesCountTitle}`
+                : filesCountTitle;
+            await downloadAndSaveFiles(files, title, onAddSaveGroup);
             break;
         }
         case "fixTime":

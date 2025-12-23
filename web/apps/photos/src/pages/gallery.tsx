@@ -886,6 +886,7 @@ const Page: React.FC = () => {
                             setFixCreationTimeFiles(files);
                             showFixCreationTime();
                         },
+                        activeCollectionSummary?.name,
                     );
                 }
                 // Apart from download, the other operations currently only work
