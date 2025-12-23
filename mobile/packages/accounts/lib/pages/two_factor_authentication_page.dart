@@ -20,7 +20,6 @@ class TwoFactorAuthenticationPage extends StatefulWidget {
 class _TwoFactorAuthenticationPageState
     extends State<TwoFactorAuthenticationPage> {
   final _pinController = TextEditingController();
-  final _pinFocusNode = FocusNode();
   String _code = "";
   late LifecycleEventHandler _lifecycleEventHandler;
 
@@ -38,15 +37,12 @@ class _TwoFactorAuthenticationPageState
       },
     );
     WidgetsBinding.instance.addObserver(_lifecycleEventHandler);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pinFocusNode.requestFocus();
-    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(_lifecycleEventHandler);
-    _pinFocusNode.dispose();
+    _pinController.dispose();
     super.dispose();
   }
 
@@ -170,8 +166,8 @@ class _TwoFactorAuthenticationPageState
               Pinput(
                 length: 6,
                 controller: _pinController,
-                focusNode: _pinFocusNode,
                 autofocus: true,
+                keyboardType: TextInputType.number,
                 defaultPinTheme: defaultPinTheme,
                 focusedPinTheme: focusedPinTheme,
                 submittedPinTheme: submittedPinTheme,
