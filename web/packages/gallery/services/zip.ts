@@ -90,10 +90,7 @@ export const getWritableStreamForZip = async (
             if (e instanceof DOMException && e.name === "AbortError") {
                 return null;
             }
-            log.warn(
-                "File System Access API failed",
-                e,
-            );
+            log.warn("File System Access API failed", e);
         }
     }
 
@@ -642,7 +639,9 @@ export const streamFilesToZip = async ({
         }
 
         if (resolvedData === undefined) {
-            throw lastError ?? new Error("Failed to get entry data");
+            throw lastError instanceof Error
+                ? lastError
+                : new Error("Failed to get entry data");
         }
 
         // Phase 2: Write to ZIP (NO retries - would corrupt ZIP with duplicates)

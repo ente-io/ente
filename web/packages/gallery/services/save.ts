@@ -10,10 +10,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import {
-    safeDirectoryName,
-    safeFileName,
-} from "ente-new/photos/utils/native-fs";
+import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
 import type {
     AddSaveGroup,
@@ -79,7 +76,6 @@ export const downloadAndSaveCollectionFiles = async (
         files,
         collectionSummaryName,
         onAddSaveGroup,
-        collectionSummaryName,
         collectionSummaryID,
         isHiddenCollectionSummary,
     );
@@ -91,7 +87,6 @@ const downloadAndSave = async (
     files: EnteFile[],
     title: string,
     onAddSaveGroup: AddSaveGroup,
-    collectionSummaryName?: string,
     collectionSummaryID?: number,
     isHiddenCollectionSummary?: boolean,
 ) => {
@@ -110,13 +105,6 @@ const downloadAndSave = async (
         if (!downloadDirPath) {
             // The user cancelled on the directory selection dialog.
             return;
-        }
-        if (collectionSummaryName) {
-            downloadDirPath = await mkdirCollectionDownloadFolder(
-                electron,
-                downloadDirPath,
-                collectionSummaryName,
-            );
         }
     }
 
@@ -341,32 +329,6 @@ const createTypedObjectURL = async (
         }
     }
     return URL.createObjectURL(new Blob([blob], { type: mimeType }));
-};
-
-/**
- * Create a new directory on the user's file system with the same name as the
- * provided {@link collectionName} under the provided {@link downloadDirPath},
- * and return the full path to the created directory.
- *
- * This function can be used only when running in the context of our desktop
- * app, and so such requires an {@link Electron} instance as the witness.
- */
-const mkdirCollectionDownloadFolder = async (
-    { fs }: Electron,
-    downloadDirPath: string,
-    collectionName: string,
-) => {
-    const collectionDownloadName = await safeDirectoryName(
-        downloadDirPath,
-        collectionName,
-        fs.exists,
-    );
-    const collectionDownloadPath = joinPath(
-        downloadDirPath,
-        collectionDownloadName,
-    );
-    await fs.mkdirIfNeeded(collectionDownloadPath);
-    return collectionDownloadPath;
 };
 
 /**
