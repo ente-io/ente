@@ -268,6 +268,49 @@ class CollectionsService {
     return false;
   }
 
+  /// Returns the count of shared collections containing this file.
+  /// Uses early exit optimization - stops counting at 2.
+  ///
+  /// Returns:
+  /// - 0: File not in any shared collection
+  /// - 1: File in exactly one shared collection
+  /// - 2: File in multiple shared collections (early exit)
+  Future<int> getSharedCollectionCountForFile(int uploadedFileID) async {
+    final Set<int> collectionIDs =
+        await _filesDB.getAllCollectionIDsOfFile(uploadedFileID);
+
+    if (collectionIDs.isEmpty) {
+      return 0;
+    }
+
+    final int? currentUserID = _config.getUserID();
+    if (currentUserID == null) {
+      return 0;
+    }
+
+    int sharedCount = 0;
+    for (final int collectionID in collectionIDs) {
+      final Collection? collection = _collectionIDToCollections[collectionID];
+
+      if (collection == null || collection.isDeleted) {
+        continue;
+      }
+
+      // Same logic as isFileInSharedCollection
+      if (collection.hasSharees ||
+          collection.hasLink ||
+          !collection.isOwner(currentUserID)) {
+        sharedCount++;
+        // Early exit: we only need to distinguish between 0, 1, and >1
+        if (sharedCount > 1) {
+          return 2;
+        }
+      }
+    }
+
+    return sharedCount;
+  }
+
   Future<List<Collection>> getArchivedCollection() async {
     final allCollections = getCollectionsForUI();
     return allCollections

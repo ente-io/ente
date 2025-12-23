@@ -1,13 +1,16 @@
 import "dart:async";
 import "dart:io";
 
+import "package:collection/collection.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/trash_file.dart";
@@ -16,7 +19,9 @@ import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/comments_screen.dart";
+import "package:photos/ui/social/like_collection_selector_sheet.dart";
 import "package:photos/ui/social/likes_bottom_sheet.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -331,14 +336,110 @@ class FileBottomBarState extends State<FileBottomBar> {
       return;
     }
 
-    await SocialDataProvider.instance.toggleReaction(
-      userID: widget.userID!,
-      collectionID: file.collectionID!,
-      fileID: file.uploadedFileID,
-    );
+    // If already liked, unlike from ALL shared collections
+    if (_hasLiked) {
+      await _unlikeFromAllCollections();
+      return;
+    }
 
-    _hasLiked = !_hasLiked;
+    // Check how many shared collections contain this file
+    final sharedCount = await CollectionsService.instance
+        .getSharedCollectionCountForFile(file.uploadedFileID!);
+
+    if (sharedCount <= 1) {
+      // Single shared collection: like directly (existing behavior)
+      await SocialDataProvider.instance.toggleReaction(
+        userID: widget.userID!,
+        collectionID: file.collectionID!,
+        fileID: file.uploadedFileID,
+      );
+      _hasLiked = true;
+      safeRefresh();
+    } else {
+      // Multiple shared collections: show selector bottom sheet
+      await showLikeCollectionSelectorSheet(
+        context,
+        fileID: file.uploadedFileID!,
+        currentUserID: widget.userID!,
+        file: file,
+      );
+      // Refresh state after sheet closes to sync heart icon
+      await _updateSocialState();
+    }
+  }
+
+  /// Removes the user's like from all shared collections containing this file
+  Future<void> _unlikeFromAllCollections() async {
+    final file = widget.file;
+    if (file.uploadedFileID == null || widget.userID == null) return;
+
+    final currentUserID = widget.userID!;
+    final fileID = file.uploadedFileID!;
+
+    // Optimistic UI update
+    final previousState = _hasLiked;
+    _hasLiked = false;
     safeRefresh();
+
+    try {
+      // Get all collections containing this file
+      final collectionIDs = await FilesDB.instance.getAllCollectionIDsOfFile(
+        fileID,
+      );
+
+      // Filter to shared collections
+      final sharedCollections = collectionIDs
+          .map((id) => CollectionsService.instance.getCollectionByID(id))
+          .whereType<Collection>()
+          .where(
+            (c) => c.hasSharees || c.hasLink || !c.isOwner(currentUserID),
+          )
+          .toList();
+
+      // Track failures
+      int failedCount = 0;
+
+      // Unlike from each collection where user has an active like
+      for (final collection in sharedCollections) {
+        try {
+          final reactions = await SocialDataProvider.instance
+              .getReactionsForFileInCollection(fileID, collection.id);
+
+          final userReaction = reactions.firstWhereOrNull(
+            (r) => r.userID == currentUserID && !r.isDeleted,
+          );
+
+          if (userReaction != null) {
+            await SocialDataProvider.instance.toggleReaction(
+              userID: currentUserID,
+              collectionID: collection.id,
+              fileID: fileID,
+            );
+          }
+        } catch (e) {
+          failedCount++;
+          debugPrint("Failed to unlike from ${collection.displayName}: $e");
+        }
+      }
+
+      // Show toast and rollback if any failed
+      if (failedCount > 0 && mounted) {
+        _hasLiked = previousState;
+        safeRefresh();
+        final msg = failedCount == 1
+            ? "Failed to remove like from 1 album"
+            : "Failed to remove like from $failedCount albums";
+        showShortToast(context, msg);
+      }
+    } catch (e) {
+      // Rollback on error (e.g., fetching collections failed)
+      debugPrint("Failed to unlike from all collections: $e");
+      if (mounted) {
+        _hasLiked = previousState;
+        safeRefresh();
+        showShortToast(context, "Failed to remove like");
+      }
+    }
   }
 
   void _showLikesBottomSheet() {

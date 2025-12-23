@@ -387,8 +387,9 @@ class SocialDB {
       where = 'user_id = ? AND comment_id = ?';
       whereArgs = [userID, commentID];
     } else if (fileID != null) {
-      where = 'user_id = ? AND file_id = ? AND comment_id IS NULL';
-      whereArgs = [userID, fileID];
+      where =
+          'user_id = ? AND collection_id = ? AND file_id = ? AND comment_id IS NULL';
+      whereArgs = [userID, collectionID, fileID];
     } else {
       where =
           'user_id = ? AND collection_id = ? AND file_id IS NULL AND comment_id IS NULL';
