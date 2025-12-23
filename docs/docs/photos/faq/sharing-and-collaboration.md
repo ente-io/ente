@@ -108,6 +108,12 @@ Regular albums continue to work perfectly on your custom domain - only the Trip 
 
 Learn more in the [Custom domains guide](/photos/features/sharing-and-collaboration/custom-domains/).
 
+### Does Ente have a shared library feature where all photos are shared with another account (similar to Google Photos Partner Sharing/iCloud Shared Photo Library)? {#shared-library}
+
+Ente has shared albums but does not support sharing your entire library. However, you can organize all your photos into albums and share all albums by selecting one album and then choosing the "all" option on the bottom right, which selects all albums and then you can share in one go with a partner (they can be [viewer or collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)).
+
+[Smart albums](/photos/features/albums-and-organization/auto-add-people#auto-add-people-to-albums-smart-albums) let you auto-add specific people to albums as well.
+
 ## Collaboration
 
 ### How do I share an album with other Ente users? {#share-with-users}
