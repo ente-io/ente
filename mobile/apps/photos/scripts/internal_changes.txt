@@ -1,3 +1,4 @@
+- Neeraj: Show recent move/add to collections on top (in memory)
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out
 - Ashil: Move add to album cta in file viewer from popup menu to bottom bar
