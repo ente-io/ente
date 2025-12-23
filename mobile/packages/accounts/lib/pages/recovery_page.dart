@@ -89,7 +89,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
-        buttonText: context.strings.logInLabel,
+        buttonText: context.strings.recover,
         onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
