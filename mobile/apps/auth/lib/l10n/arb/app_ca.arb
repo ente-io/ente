@@ -525,7 +525,7 @@
   "dropReviewAndroid": "Deixa una ressenya a la Play Store",
   "supportEnte": "Donar suport a <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Dona'ns una estrella a Github",
-  "free10GB": "10 GB gratuïts a <bold-green>ente</bold-green> Photos",
+  "free10GB": "10GB gratuïts a <bold-green>ente</bold-green> Fotos",
   "loginWithAuthAccount": "Inicieu sessió amb el vostre compte Auth",
   "freeStorageOffer": "10% de descompte a <bold-green>ente</bold-green> photos",
   "freeStorageOfferDescription": "Utilitzeu el codi \"AUTH\" per obtenir un 10% de descompte el primer any",
@@ -625,5 +625,6 @@
   "appIcon": "Icona de l'aplicació",
   "importAndOTPGuide": "Exporta la teva còpia de seguretat des d'andOTP mitjançant l'opció \"Còpia de seguretat\" a la Configuració.\n\nSi la teva còpia de seguretat està xifrada, hauràs d'introduir la contrasenya de la còpia de seguretat per desxifrar-la.",
   "enterPasswordToDecryptAndOTP": "Introduïu la contrasenya per desxifrar la còpia de seguretat andOTP",
-  "failedToDecryptAndOTPBackup": "No s'ha pogut desxifrar la còpia de seguretat d'andOTP"
+  "failedToDecryptAndOTPBackup": "No s'ha pogut desxifrar la còpia de seguretat d'andOTP",
+  "notSupportedForHOTP": "No compatible amb HOTP"
 }

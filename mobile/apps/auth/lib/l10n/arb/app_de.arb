@@ -524,7 +524,6 @@
   "dropReviewAndroid": "Hinterlassen Sie eine Rezension im Google Play Store",
   "supportEnte": "Unterstütze <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Gib uns einen Stern auf Github",
-  "free10GB": "10GB kostenlos auf <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Mit Ihrem Auth Account anmelden",
   "freeStorageOffer": "10% Rabatt für <bold-green>ente</bold-green> Photos",
   "freeStorageOfferDescription": "Verwende den Code \"AUTH\", um 10% im ersten Jahr zu sparen",
@@ -542,18 +541,24 @@
   "errorGenericBody": "Beim Importieren ist ein unerwarteter Fehler aufgetreten.",
   "localBackupSettingsTitle": "Lokales Backup",
   "localBackupSidebarTitle": "Lokales Backup",
+  "enableAutomaticBackups": "Automatische Backups",
   "backupDescription": "Dadurch werden Ihre Daten automatisch an einem Speicherort auf dem Gerät gesichert. Backups werden aktualisiert, wenn Einträge hinzugefügt, editiert oder gelöscht werden",
   "currentLocation": "Aktueller Backup Standort:",
   "securityNotice": "Sicherheitshinweis",
   "backupSecurityNotice": "Diese verschlüsselte Sicherung enthält Ihre 2FA-Schlüssel. Wenn Sie verloren gehen, können Sie Ihre Konten nicht wiederherstellen. Bewahren Sie sie sicher!",
   "locationUpdatedAndBackupCreated": "Speicherort übernommen und erstes Backup erstellt!",
   "initialBackupCreated": "Initiale Sicherung erstellt!",
+  "backupCreated": "Backup erstellt!",
   "noDefaultBackupFolder": "Standard Backup Ordner konnte nicht erstellt werden.",
   "backupLocationChoiceDescription": "Wo möchten sie ihre Backups speichern?",
   "chooseBackupLocation": "Sicherungsort festlegen",
   "loadDefaultLocation": "Lade Standard Speicherort...",
   "couldNotDetermineLocation": "Standort konnte nicht ermittelt werden...",
   "saveBackup": "Backup speichern",
+  "createBackupNow": "Backup jetzt erstellen",
+  "clearBackupFolder": "Leere Backup-Ordner",
+  "selectFolder": "Ordner auswählen",
+  "selectFolderToContinue": "Wähle zum Fortfahren einen Ordner aus",
   "done": "Fertig",
   "addNew": "Hinzufügen",
   "selected": "ausgewählt",
@@ -590,5 +595,6 @@
         "example": "2"
       }
     }
-  }
+  },
+  "notSupportedForHOTP": "HOTP wird nicht unterstützt"
 }
