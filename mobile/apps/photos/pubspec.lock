@@ -572,14 +572,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  emoji_picker_flutter:
-    dependency: transitive
-    description:
-      name: emoji_picker_flutter
-      sha256: "08567e6f914d36c32091a96cf2f51d2558c47aa2bd47a590dc4f50e42e0965f6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   encrypt:
     dependency: "direct main"
     description:
@@ -2227,10 +2219,10 @@ packages:
     dependency: "direct main"
     description:
       name: pro_image_editor
-      sha256: "27190b0333af71e9949f366ac303496511ef6d67607f6f9797c9f136371a321f"
+      sha256: df25475c7df5fb90c36f7ede774c7c14b83d862148ed5ab77f09a0dd120ec159
       url: "https://pub.dev"
     source: hosted
-    version: "6.2.3"
+    version: "11.3.0"
   process:
     dependency: transitive
     description:
@@ -2941,22 +2933,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  vibration:
-    dependency: transitive
-    description:
-      name: vibration
-      sha256: "3b08a0579c2f9c18d5d78cb5c74f1005f731e02eeca6d72561a2e8059bf98ec3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
-  vibration_platform_interface:
-    dependency: transitive
-    description:
-      name: vibration_platform_interface
-      sha256: "6ffeee63547562a6fef53c05a41d4fdcae2c0595b83ef59a4813b0612cd2bc36"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
   video_editor:
     dependency: "direct main"
     description:
