@@ -6,8 +6,9 @@ import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_strings/ente_strings.dart';
-import 'package:ente_ui/components/buttons/button_widget.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -117,13 +118,22 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     } on KeyDerivationError catch (e, s) {
       _logger.severe("Password verification failed", e, s);
       await dialog.hide();
-      final dialogChoice = await showChoiceDialog(
+
+      final result = await showAlertBottomSheet<bool>(
         context,
         title: context.strings.recreatePasswordTitle,
-        body: context.strings.recreatePasswordBody,
-        firstButtonLabel: context.strings.useRecoveryKey,
+        message: context.strings.recreatePasswordBody,
+        assetPath: 'assets/warning-grey.png',
+        buttons: [
+          GradientButton(
+            text: context.strings.useRecoveryKey,
+            onTap: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+        ],
       );
-      if (dialogChoice!.action == ButtonAction.first) {
+      if (result == true) {
         // ignore: unawaited_futures
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -140,14 +150,22 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     } catch (e, s) {
       _logger.severe("Password verification failed", e, s);
       await dialog.hide();
-      final dialogChoice = await showChoiceDialog(
+
+      final result = await showAlertBottomSheet<bool>(
         context,
         title: context.strings.incorrectPasswordTitle,
-        body: context.strings.pleaseTryAgain,
-        firstButtonLabel: context.strings.contactSupport,
-        secondButtonLabel: context.strings.ok,
+        message: context.strings.pleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
+        buttons: [
+          GradientButton(
+            text: context.strings.contactSupport,
+            onTap: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+        ],
       );
-      if (dialogChoice!.action == ButtonAction.first) {
+      if (result == true) {
         await sendLogs(
           context,
           "support@ente.io",
