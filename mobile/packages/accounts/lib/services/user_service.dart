@@ -993,20 +993,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.somethingWentWrongPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.somethingWentWrongPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
@@ -1042,10 +1044,11 @@ class UserService {
       );
     } catch (e) {
       await dialog.hide();
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.strings.incorrectRecoveryKey,
-        context.strings.theRecoveryKeyYouEnteredIsIncorrect,
+        title: context.strings.incorrectRecoveryKey,
+        message: context.strings.theRecoveryKeyYouEnteredIsIncorrect,
+        assetPath: 'assets/warning-grey.png',
       );
       return;
     }
@@ -1094,20 +1097,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.somethingWentWrongPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.somethingWentWrongPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
