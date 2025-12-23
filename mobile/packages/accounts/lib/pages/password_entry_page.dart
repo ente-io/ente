@@ -1,8 +1,10 @@
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_strings/ente_strings.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/base_bottom_sheet.dart";
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -87,7 +89,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-    _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -98,6 +99,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     }
 
     final colorScheme = getEnteColorScheme(context);
+    _validFieldValueColor = colorScheme.primary700.withValues(alpha: 0.2);
 
     String title = context.strings.setPasswordTitle;
     if (widget.mode == PasswordEntryMode.update) {
@@ -457,21 +459,51 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   Future<bool> logOutFromOtherDevices(BuildContext context) async {
     bool logOutFromOther = true;
-    await showChoiceDialog(
+
+    await showBaseBottomSheet(
       context,
+      headerSpacing: 20,
       title: context.strings.signOutFromOtherDevices,
-      body: context.strings.signOutOtherBody,
-      isDismissible: false,
-      firstButtonLabel: context.strings.signOutOtherDevices,
-      firstButtonType: ButtonType.critical,
-      firstButtonOnTap: () async {
-        logOutFromOther = true;
-      },
-      secondButtonLabel: context.strings.doNotSignOut,
-      secondButtonOnTap: () async {
-        logOutFromOther = false;
-      },
+      child: Builder(
+        builder: (bottomSheetContext) {
+          final colorScheme = getEnteColorScheme(bottomSheetContext);
+          final textTheme = getEnteTextTheme(bottomSheetContext);
+          return Column(
+            children: [
+              Text(
+                context.strings.signOutOtherBody,
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              ),
+              const SizedBox(height: 20),
+              GradientButton(
+                text: context.strings.doNotSignOut,
+                backgroundColor: colorScheme.primary700,
+                onTap: () {
+                  logOutFromOther = false;
+                  Navigator.of(bottomSheetContext).pop();
+                },
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () {
+                  logOutFromOther = true;
+                  Navigator.of(bottomSheetContext).pop();
+                },
+                child: Text(
+                  context.strings.signOutOtherDevices,
+                  style: textTheme.bodyBold.copyWith(
+                    color: colorScheme.warning400,
+                    decoration: TextDecoration.underline,
+                    decorationColor: colorScheme.warning400,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
+
     return logOutFromOther;
   }
 
@@ -537,10 +569,12 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       await dialog.hide();
       if (e is UnsupportedError) {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.insecureDevice,
-          context.strings.sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
+          title: context.strings.insecureDevice,
+          message: context
+              .strings.sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
+          assetPath: 'assets/warning-grey.png',
         );
       } else {
         // ignore: unawaited_futures

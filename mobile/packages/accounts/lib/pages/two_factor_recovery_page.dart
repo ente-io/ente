@@ -103,7 +103,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
                   SizedBox(
@@ -131,19 +131,15 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                     onTap: () async {
                       await openSupportPage(null, null);
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        context.strings.noRecoveryKeyTitle,
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.primary700,
-                          decoration: TextDecoration.underline,
-                          decorationColor: colorScheme.primary700,
-                        ),
+                    child: Text(
+                      context.strings.noRecoveryKeyTitle,
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.primary700,
+                        decoration: TextDecoration.underline,
+                        decorationColor: colorScheme.primary700,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
                 ],
               ),
             ),
