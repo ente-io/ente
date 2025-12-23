@@ -13,7 +13,7 @@ import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/trash_service.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/ui/components/subscription_required_dialog.dart";
@@ -258,7 +258,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        await showShareLinkDialog(
+        await showShareLinkSheet(
           context,
           shareableLink.fullURL!,
           shareableLink.linkID,
@@ -270,7 +270,7 @@ class FileActions {
 
       if (context.mounted) {
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await showSubscriptionRequiredDialog(context);
+          await showSubscriptionRequiredSheet(context);
         } else {
           showToast(
             context,
@@ -287,7 +287,7 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(1),
@@ -346,7 +346,7 @@ class FileActions {
       return;
     }
 
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(files.length),
