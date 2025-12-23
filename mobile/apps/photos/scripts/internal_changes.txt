@@ -1,3 +1,4 @@
+- Neeraj: Fixed order for [pinned albums](https://github.com/ente-io/ente/discussions/5979)
 - Neeraj: Show recent move/add to collections on top (in memory)
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out
