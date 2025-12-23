@@ -363,13 +363,13 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a device limit of 5. This limitation helps safeguard against potential platform abuse.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
 
 Free users can:
 
 - Create and receive shared albums
 - Share albums directly with other Ente users
-- Create public links (device limit of 5)
+- Create public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 - View public links shared with them
 - Add photos to collect links that allow uploads
 
