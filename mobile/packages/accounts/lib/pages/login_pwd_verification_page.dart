@@ -8,6 +8,7 @@ import "package:ente_ui/components/buttons/dynamic_fab.dart";
 import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 
@@ -119,28 +120,25 @@ class _LoginPasswordVerificationPageState
 
       if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
-        await showAlertBottomSheet(
+        await _showContactSupportDialog(
           context,
           title: context.strings.incorrectPasswordTitle,
           message: context.strings.pleaseTryAgain,
-          assetPath: 'assets/warning-grey.png',
         );
       } else {
         _logger.severe('API failure during SRP login', e, s);
         if (e.type == DioExceptionType.connectionError) {
-          await showAlertBottomSheet(
+          await _showContactSupportDialog(
             context,
             title: context.strings.noInternetConnection,
             message:
                 context.strings.pleaseCheckYourInternetConnectionAndTryAgain,
-            assetPath: 'assets/warning-grey.png',
           );
         } else {
-          await showAlertBottomSheet(
+          await _showContactSupportDialog(
             context,
             title: context.strings.oops,
             message: context.strings.verificationFailedPleaseTryAgain,
-            assetPath: 'assets/warning-grey.png',
           );
         }
       }
@@ -182,13 +180,40 @@ class _LoginPasswordVerificationPageState
         return;
       } else {
         _logger.severe('unexpected error while verifying password', e, s);
-        await showAlertBottomSheet(
+        await _showContactSupportDialog(
           context,
           title: context.strings.oops,
           message: context.strings.verificationFailedPleaseTryAgain,
-          assetPath: 'assets/warning-grey.png',
         );
       }
+    }
+  }
+
+  Future<void> _showContactSupportDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async {
+    final result = await showAlertBottomSheet<bool>(
+      context,
+      title: title,
+      message: message,
+      assetPath: 'assets/warning-grey.png',
+      buttons: [
+        GradientButton(
+          text: context.strings.contactSupport,
+          onTap: () {
+            Navigator.of(context).pop(true);
+          },
+        ),
+      ],
+    );
+    if (result == true) {
+      await sendLogs(
+        context,
+        "support@ente.io",
+        postShare: () {},
+      );
     }
   }
 
