@@ -5,9 +5,7 @@ import 'package:ente_accounts/pages/email_entry_page.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
-import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
-import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/pages/developer_settings_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -220,53 +218,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     ),
                                   ],
                                 ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: GradientButton(
-                        text: l10n.loginToEnteAccount,
-                        backgroundColor: Colors.white,
-                        textColor: colorScheme.primary700,
-                        onTap: _navigateToSignInPage,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () async {
-                          final result =
-                              await showAlertBottomSheet<ButtonResult>(
-                            context,
-                            title: l10n.unlockLockerNewUserTitle,
-                            message: l10n.unlockLockerNewUserBody,
-                            assetPath: "assets/file_lock.png",
-                            buttons: [
-                              GradientButton(
-                                text: l10n.checkoutEntePhotos,
-                                onTap: () => Navigator.of(context).pop(
-                                  ButtonResult(ButtonAction.first),
-                                ),
-                              ),
-                            ],
-                          );
-
-                          if (result?.action == ButtonAction.first) {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return WebPage(
-                                    l10n.checkoutEntePhotos,
-                                    "https://ente.io/",
-                                  );
-                                },
-                              ),
-                            );
-                          }
-                        },
-                        child: Text(
-                          l10n.noAccountCta,
-                          style: getEnteTextTheme(context).bodyBold.copyWith(
-                                color: Colors.white,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.white,
                               ),
                             ),
                           ),
