@@ -68,7 +68,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
     // Initialize theme-aware color
     final colorScheme = getEnteColorScheme(context);
-    _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
+    _validFieldValueColor = colorScheme.primary700.withValues(alpha: 0.2);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {

@@ -3,11 +3,11 @@ import "package:ente_accounts/ente_accounts.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/dynamic_fab.dart";
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
-import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 
@@ -116,40 +116,31 @@ class _LoginPasswordVerificationPageState
       );
     } on DioException catch (e, s) {
       await dialog.hide();
-      final String? enteErrCode = e.response?.data["code"];
-      if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
-        await _showContactSupportDialog(
-          context,
-          context.strings.oops,
-          context.strings.lockerExistingUserRequired,
-        );
-      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
-        await _showContactSupportDialog(
-          context,
-          "We're out of beta seats for now",
-          "This preview access has reached capacity. We'll be opening it to more users soon.",
-        );
-      } else if (e.response != null && e.response!.statusCode == 401) {
+
+      if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
-        await _showContactSupportDialog(
+        await showAlertBottomSheet(
           context,
-          context.strings.incorrectPasswordTitle,
-          context.strings.pleaseTryAgain,
+          title: context.strings.incorrectPasswordTitle,
+          message: context.strings.pleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       } else {
         _logger.severe('API failure during SRP login', e, s);
         if (e.type == DioExceptionType.connectionError) {
-          await _showContactSupportDialog(
+          await showAlertBottomSheet(
             context,
-            context.strings.noInternetConnection,
-            context.strings.pleaseCheckYourInternetConnectionAndTryAgain,
+            title: context.strings.noInternetConnection,
+            message:
+                context.strings.pleaseCheckYourInternetConnectionAndTryAgain,
+            assetPath: 'assets/warning-grey.png',
           );
         } else {
-          await _showContactSupportDialog(
+          await showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.verificationFailedPleaseTryAgain,
+            title: context.strings.oops,
+            message: context.strings.verificationFailedPleaseTryAgain,
+            assetPath: 'assets/warning-grey.png',
           );
         }
       }
@@ -167,13 +158,21 @@ class _LoginPasswordVerificationPageState
         return;
       } else if (e is KeyDerivationError) {
         // device is not powerful enough to perform derive key
-        final dialogChoice = await showChoiceDialog(
+        final result = await showAlertBottomSheet<bool>(
           context,
           title: context.strings.recreatePasswordTitle,
-          body: context.strings.recreatePasswordBody,
-          firstButtonLabel: context.strings.useRecoveryKey,
+          message: context.strings.recreatePasswordBody,
+          assetPath: 'assets/warning-grey.png',
+          buttons: [
+            GradientButton(
+              text: context.strings.useRecoveryKey,
+              onTap: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
         );
-        if (dialogChoice!.action == ButtonAction.first) {
+        if (result == true) {
           await UserService.instance.sendOtt(
             context,
             email!,
@@ -183,33 +182,13 @@ class _LoginPasswordVerificationPageState
         return;
       } else {
         _logger.severe('unexpected error while verifying password', e, s);
-        await _showContactSupportDialog(
+        await showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.verificationFailedPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.verificationFailedPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
-    }
-  }
-
-  Future<void> _showContactSupportDialog(
-    BuildContext context,
-    String title,
-    String message,
-  ) async {
-    final dialogChoice = await showChoiceDialog(
-      context,
-      title: title,
-      body: message,
-      firstButtonLabel: context.strings.contactSupport,
-      secondButtonLabel: context.strings.ok,
-    );
-    if (dialogChoice!.action == ButtonAction.first) {
-      await sendLogs(
-        context,
-        "support@ente.io",
-        postShare: () {},
-      );
     }
   }
 

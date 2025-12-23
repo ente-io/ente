@@ -30,6 +30,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/user_details_changed_event.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_strings/ente_strings.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/components/progress_dialog.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -126,43 +127,29 @@ class UserService {
       final String? enteErrCode = e.response?.data["code"];
       if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.emailAlreadyRegistered,
+            title: context.strings.oops,
+            message: context.strings.emailAlreadyRegistered,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.emailNotRegistered,
-          ),
-        );
-      } else if (enteErrCode != null &&
-          enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
-        unawaited(
-          showErrorDialog(
-            context,
-            context.strings.oops,
-            context.strings.lockerExistingUserRequired,
-          ),
-        );
-      } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
-        unawaited(
-          showErrorDialog(
-            context,
-            "We're out of beta seats for now",
-            "This preview access has reached capacity. We'll be opening it to more users soon.",
+            title: context.strings.oops,
+            message: context.strings.emailNotRegistered,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.thisEmailIsAlreadyInUse,
+            title: context.strings.oops,
+            message: context.strings.thisEmailIsAlreadyInUse,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else {
