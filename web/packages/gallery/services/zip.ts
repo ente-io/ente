@@ -382,6 +382,9 @@ export const streamFilesToZip = async ({
     let shuttingDown = false;
     let writeChain = Promise.resolve();
     let writeQueueDepth = 0;
+    // Track writes requested vs actually queued to detect silent drops
+    let writesRequested = 0;
+    let writesQueued = 0;
 
     const closeWriter = async () => {
         if (writerClosed || writerClosing) return;
@@ -434,9 +437,22 @@ export const streamFilesToZip = async ({
 
     /** Queue write, serialize through promise chain, capture errors in zipError. */
     const enqueueWrite = async (data: Uint8Array) => {
-        if (!allowWrites || writerClosed || writerClosing) return;
+        // If writes are blocked or a previous error occurred, don't queue.
+        // This prevents silent data loss that would cause ZIP corruption.
+        if (!allowWrites || writerClosed || writerClosing || zipError) {
+            if (!zipError) {
+                zipError = new Error("Write dropped: stream closed");
+            }
+            return;
+        }
         await waitForWriteWindow();
+        // Re-check after await: concurrent writes may have failed and set zipError.
+        // waitForWriteWindow() only checks zipError inside its loop, so if queue
+        // wasn't full, it returns immediately without checking. We must verify here.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (zipError) return;
         writeQueueDepth++;
+        writesQueued++;
         writeChain = writeChain
             .then(() => writer.write(data))
             .catch((e: unknown) => {
@@ -455,6 +471,7 @@ export const streamFilesToZip = async ({
             zipError = err instanceof Error ? err : new Error(String(err));
             return;
         }
+        writesRequested++;
         void enqueueWrite(data);
     });
 
@@ -609,6 +626,10 @@ export const streamFilesToZip = async ({
     let entriesAddedToZip = 0;
     let entriesCompletedInZip = 0;
 
+    // Batch failure tracking to avoid flooding logs (prevents localStorage quota errors)
+    const failedFileIds: number[] = [];
+    let retryCount = 0;
+
     /**
      * Add entry to ZIP. Retries only the data fetch, NOT the ZIP write.
      *
@@ -629,10 +650,8 @@ export const streamFilesToZip = async ({
                 lastError = e;
                 if (signal.aborted) throw e;
                 if (attempt < STREAM_ZIP_MAX_RETRIES) {
-                    log.warn(
-                        `Retrying getData for ${entry.name} (attempt ${attempt})`,
-                        e,
-                    );
+                    // Track retries without logging each one to avoid localStorage quota
+                    retryCount++;
                     await wait(STREAM_ZIP_RETRY_DELAY_MS * attempt);
                 }
             }
@@ -734,10 +753,8 @@ export const streamFilesToZip = async ({
                     Promise.all(entryPromises)
                         .then(() => onFileSuccess(file, prepared.entryCount))
                         .catch((e: unknown) => {
-                            log.error(
-                                `Failed to add file ${file.id} to ZIP`,
-                                e,
-                            );
+                            // Track failed file IDs for batched logging (avoid localStorage quota)
+                            failedFileIds.push(file.id);
                             onFileFailure(file, e);
                         }),
                 );
@@ -773,18 +790,37 @@ export const streamFilesToZip = async ({
         await flushWrites();
         if (zipError) throw zipError;
 
+        // Verify write integrity - all requested writes must have been queued
+        if (writesRequested !== writesQueued) {
+            throw new Error(
+                `ZIP write integrity check failed: ${writesRequested - writesQueued} writes dropped`,
+            );
+        }
+
         allowWrites = false;
 
         await closeWriter();
         stopConcurrencyRefresh();
 
+        // Log batched summary of any issues encountered during successful ZIP creation
+        if (retryCount > 0 || failedFileIds.length > 0) {
+            log.info(
+                `ZIP completed with issues: ${failedFileIds.length} files failed, ${retryCount} retries`,
+                failedFileIds.length > 0
+                    ? { failedIds: failedFileIds.slice(0, 100) }
+                    : undefined,
+            );
+        }
+
         return "success";
     } catch (e) {
         // Mark remaining files as failed IMMEDIATELY so UI progress updates.
         // This prevents the progress from appearing stuck during network failures.
+        // Track IDs for batched logging instead of logging each one.
         if (!signal.aborted) {
             for (let i = lastCompletedIndex + 1; i < files.length; i++) {
                 const file = files[i]!;
+                failedFileIds.push(file.id);
                 onFileFailure(file, e);
             }
         }
@@ -795,15 +831,26 @@ export const streamFilesToZip = async ({
             await Promise.allSettled([...inFlightEntries]);
         }
 
-        log.error("Streaming ZIP creation failed", e);
+        // Log single summary with failed file IDs (capped to avoid quota issues)
+        log.error(
+            `ZIP creation failed: ${failedFileIds.length} files failed, ${retryCount} retries`,
+            {
+                error: e instanceof Error ? e.message : String(e),
+                failedIds: failedFileIds.slice(0, 50),
+                totalFailed: failedFileIds.length,
+            },
+        );
         stopConcurrencyRefresh();
 
-        // Try to salvage the ZIP if all started entries are complete.
+        // Try to salvage the ZIP if all started entries are complete AND
+        // all writes were actually queued (no silent drops).
         // This produces a valid partial ZIP with successfully downloaded files.
+        const writesDropped = writesRequested !== writesQueued;
         if (
             !signal.aborted &&
             entriesAddedToZip > 0 &&
-            entriesAddedToZip === entriesCompletedInZip
+            entriesAddedToZip === entriesCompletedInZip &&
+            !writesDropped
         ) {
             log.info(
                 `Attempting to salvage ZIP with ${entriesCompletedInZip} complete entries`,
@@ -811,6 +858,10 @@ export const streamFilesToZip = async ({
             try {
                 zip.end();
                 await flushWrites();
+                // Verify no writes were dropped during zip.end()
+                if (writesRequested !== writesQueued) {
+                    throw new Error("Writes dropped during ZIP finalization");
+                }
                 allowWrites = false;
                 await closeWriter();
                 log.info("ZIP salvaged successfully");
@@ -823,6 +874,11 @@ export const streamFilesToZip = async ({
             if (entriesAddedToZip !== entriesCompletedInZip) {
                 log.info(
                     `Cannot salvage ZIP: ${entriesAddedToZip - entriesCompletedInZip} entries incomplete`,
+                );
+            }
+            if (writesDropped) {
+                log.info(
+                    `Cannot salvage ZIP: ${writesRequested - writesQueued} writes were dropped`,
                 );
             }
             abortWriter();
