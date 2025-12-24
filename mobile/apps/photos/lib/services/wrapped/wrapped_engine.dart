@@ -246,10 +246,11 @@ class WrappedEngine {
           if (isMe) {
             selfPersonID = person.remoteID;
           }
+          final bool isHidden = data.isHidden || data.hideFromMemories;
           personEntries[person.remoteID] = WrappedPersonEntry(
             personID: person.remoteID,
             displayName: data.name,
-            isHidden: data.isHidden,
+            isHidden: isHidden,
             clusterFaceCounts: clusterFaceCounts,
             isMe: isMe,
           );

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:ente_icons/ente_icons.dart';
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -68,7 +69,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const _BottomLeftOverlayIcon(
-      Icons.favorite_rounded,
+      EnteIcons.favoriteFilled,
       baseSize: 22,
     );
   }

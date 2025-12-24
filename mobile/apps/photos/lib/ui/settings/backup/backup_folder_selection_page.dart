@@ -4,6 +4,7 @@ import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -15,16 +16,26 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
   final bool isFirstBackup;
   final bool isOnboarding;
 
+  /// When true, skip the "only new backup" warning dialog.
+  /// This is used when coming from the "backup only new photos" toggle
+  /// to prevent recursive navigation back to backup settings.
+  final bool fromOnlyNewPhotosToggle;
+
   const BackupFolderSelectionPage({
     required this.isFirstBackup,
     this.isOnboarding = false,
+    this.fromOnlyNewPhotosToggle = false,
     super.key,
   });
 
@@ -76,6 +87,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     return Scaffold(
       appBar: _treatAsOnboarding
           ? null
@@ -83,139 +95,120 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               elevation: 0,
               title: const Text(""),
             ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 0,
-          ),
-          SafeArea(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-              child: Text(
-                AppLocalizations.of(context).selectFoldersForBackup,
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontFamily: 'Inter-Bold',
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+      body: SafeArea(
+        top: _treatAsOnboarding,
+        bottom: false,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                _treatAsOnboarding ? 8 : 0,
+                24,
+                8,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  AppLocalizations.of(context).selectFoldersForBackup,
+                  textAlign: TextAlign.left,
+                  style: textTheme.h2Bold,
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 24, right: 48),
-            child: Text(
-              AppLocalizations.of(context)
-                  .selectedFoldersWillBeEncryptedAndBackedUp,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(height: 1.3),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(10),
-          ),
-          _deviceCollections == null
-              ? const SizedBox.shrink()
-              : GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 6, 64, 12),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        _selectedDevicePathIDs.length ==
-                                _allDevicePathIDs.length
-                            ? AppLocalizations.of(context).unselectAll
-                            : AppLocalizations.of(context).selectAll,
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          decoration: TextDecoration.underline,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    final hasSelectedAll = _selectedDevicePathIDs.length ==
-                        _allDevicePathIDs.length;
-                    // Flip selection
-                    if (hasSelectedAll) {
-                      _selectedDevicePathIDs.clear();
-                    } else {
-                      _selectedDevicePathIDs.addAll(_allDevicePathIDs);
-                    }
-                    _deviceCollections!.sort((first, second) {
-                      return first.name
-                          .toLowerCase()
-                          .compareTo(second.name.toLowerCase());
-                    });
-                    setState(() {});
-                  },
+            Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  AppLocalizations.of(context)
+                      .selectedFoldersWillBeEncryptedAndBackedUp,
+                  style: textTheme.smallMuted,
                 ),
-          Expanded(child: _getFolders()),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: getEnteColorScheme(context).backgroundBase,
-                          blurRadius: 24,
-                          offset: const Offset(0, -8),
-                          spreadRadius: 4,
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.only(left: 20, right: 20),
-                    child: OutlinedButton(
-                      onPressed:
-                          _treatAsOnboarding && _selectedDevicePathIDs.isEmpty
-                              ? null
-                              : () async {
-                                  await updateFolderSettings();
-                                },
-                      child: Text(
-                        widget.isFirstBackup
-                            ? AppLocalizations.of(context).startBackup
-                            : AppLocalizations.of(context).backup,
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (_deviceCollections != null)
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  final hasSelectedAll =
+                      _selectedDevicePathIDs.length == _allDevicePathIDs.length;
+                  if (hasSelectedAll) {
+                    _selectedDevicePathIDs.clear();
+                  } else {
+                    _selectedDevicePathIDs.addAll(_allDevicePathIDs);
+                  }
+                  _deviceCollections!.sort((first, second) {
+                    return first.name
+                        .toLowerCase()
+                        .compareTo(second.name.toLowerCase());
+                  });
+                  setState(() {});
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 6, 64, 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _selectedDevicePathIDs.length == _allDevicePathIDs.length
+                          ? AppLocalizations.of(context).unselectAll
+                          : AppLocalizations.of(context).selectAll,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        fontSize: 16,
                       ),
                     ),
                   ),
-                  _treatAsOnboarding
-                      ? const SizedBox(height: 20)
-                      : const SizedBox.shrink(),
-                  _treatAsOnboarding
-                      ? GestureDetector(
-                          key: const ValueKey("skipBackupButton"),
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            Navigator.of(context).pop(false);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              AppLocalizations.of(context).skip,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall!
-                                  .copyWith(
-                                    decoration: TextDecoration.underline,
-                                  ),
-                            ),
+                ),
+              ),
+            Expanded(child: _getFolders()),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed:
+                            _treatAsOnboarding && _selectedDevicePathIDs.isEmpty
+                                ? null
+                                : () async {
+                                    await updateFolderSettings();
+                                  },
+                        child: Text(
+                          widget.isFirstBackup
+                              ? AppLocalizations.of(context).startBackup
+                              : AppLocalizations.of(context).backup,
+                        ),
+                      ),
+                    ),
+                    if (_treatAsOnboarding) ...[
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        key: const ValueKey("skipBackupButton"),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: Text(
+                          AppLocalizations.of(context).skip,
+                          style: textTheme.smallMuted.copyWith(
+                            decoration: TextDecoration.underline,
                           ),
-                        )
-                      : const SizedBox.shrink(),
-                ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -240,9 +233,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
       await backupPreferenceService.setHasManualFolderSelection(true);
-      if (backupPreferenceService.hasSkippedOnboardingPermission) {
-        await backupPreferenceService.setOnboardingPermissionSkipped(false);
+
+      // Skip the warning dialog if we came from the "backup only new photos"
+      // toggle to avoid recursive navigation back to backup settings.
+      final onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
+      if (onlyNewSinceEpoch != null && !widget.fromOnlyNewPhotosToggle) {
+        final shouldContinue =
+            await _showOnlyNewBackupWarning(onlyNewSinceEpoch);
+
+        if (!shouldContinue) return;
       }
+
       if (context.mounted) {
         Navigator.of(context).pop(true);
       }
@@ -253,6 +254,31 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     }
   }
 
+  Future<bool> _showOnlyNewBackupWarning(int onlyNewSinceEpoch) async {
+    final date = DateTime.fromMicrosecondsSinceEpoch(onlyNewSinceEpoch);
+    final locale = Localizations.localeOf(context).languageCode;
+    final formattedDate = DateFormat.yMMMd(locale).format(date);
+
+    final result = await showChoiceDialog(
+      context,
+      title: AppLocalizations.of(context).warning,
+      body:
+          "You are currently backing up photos from $formattedDate. Please update your settings to backup all photos.",
+      firstButtonLabel: "Update settings",
+      firstButtonOnTap: () async {
+        await routeToPage(
+          context,
+          const BackupSettingsScreen(),
+        );
+      },
+      firstButtonType: ButtonType.neutral,
+      secondButtonLabel: AppLocalizations.of(context).ok,
+      secondButtonAction: ButtonAction.second,
+    );
+
+    return result?.action == ButtonAction.second;
+  }
+
   Widget _getFolders() {
     if (_deviceCollections == null) {
       return const EnteLoadingWidget();
@@ -260,7 +286,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     _sortFiles();
     final scrollController = ScrollController();
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 8),
       child: Scrollbar(
         controller: scrollController,
         thumbVisibility: true,
@@ -315,7 +341,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         ? _pathIDToItemCount![deviceCollection.id] ?? 0
         : -1;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 1, right: 1),
+      padding: const EdgeInsets.only(bottom: 8, right: 1),
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(

@@ -346,7 +346,6 @@
   "removeFromAlbumTitle": "Remover do álbum?",
   "removeFromAlbum": "Remover do álbum",
   "itemsWillBeRemovedFromAlbum": "Os itens selecionados serão removidos deste álbum",
-  "removeShareItemsWarning": "Alguns dos itens que você está removendo foram adicionados por outras pessoas, e você perderá o acesso a eles",
   "addingToFavorites": "Adicionando aos favoritos...",
   "removingFromFavorites": "Removendo dos favoritos...",
   "sorryCouldNotAddToFavorites": "Desculpe, não foi possível adicionar aos favoritos!",
@@ -1947,10 +1946,6 @@
   "hoorayyyy": "Uuhuuuulll!",
   "nothingToTidyUpHere": "Nada para arrumar aqui",
   "deletingDash": "Apagando - ",
-  "cLTitle3": "Novas recordações",
-  "cLDesc3": "“Crianças brincalhonas”, “Aventuras de inverno”, “Noites neon” e muito mais.",
-  "cLTitle4": "Galeria de paisagens e muito mais",
-  "cLDesc4": "Suporte para layout paisagem na galeria principal do aplicativo. Mostrar pessoas sem fotos associadas em vez de filtrá-las. Melhorar a detecção do aspecto do vídeo quando compartilhado a partir de aplicativos externos.",
   "closeBy": "Parecida",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

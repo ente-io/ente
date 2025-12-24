@@ -2,19 +2,21 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
+import "package:locker/core/errors.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/trash_service.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
+import "package:locker/ui/components/subscription_required_dialog.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -41,16 +43,20 @@ class FileActions {
       'Opening edit dialog for file ${file.uploadedFileID}',
     );
 
-    final allCollections = await CollectionService.instance.getCollections();
+    final int currentUserID = Configuration.instance.getUserID()!;
+    if (file.ownerID != currentUserID) {
+      showToast(context, "Edit feature coming soon");
+      return;
+    }
+
+    final editableCollections =
+        await CollectionService.instance.getCollectionsForUI();
+
     final currentCollections =
         await CollectionService.instance.getCollectionsForFile(file);
 
     final favoriteCollection =
         await CollectionService.instance.getOrCreateImportantCollection();
-
-    final editableCollections = allCollections
-        .where((c) => c.type != CollectionType.uncategorized)
-        .toList();
 
     final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 
@@ -252,7 +258,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        await showShareLinkDialog(
+        await showShareLinkSheet(
           context,
           shareableLink.fullURL!,
           shareableLink.linkID,
@@ -263,10 +269,14 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
-        );
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          await showSubscriptionRequiredSheet(context);
+        } else {
+          showToast(
+            context,
+            context.l10n.failedToCreateShareLink,
+          );
+        }
       }
     }
   }
@@ -277,7 +287,7 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(1),
@@ -336,7 +346,7 @@ class FileActions {
       return;
     }
 
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(files.length),

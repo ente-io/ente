@@ -94,6 +94,10 @@ We offer:
 - **Monthly and annual billing**: Annual plans offer better value
 - **Family plans**: Share your storage with up to 5 family members
 
+### Does Ente offer regional pricing? {#regional-pricing}
+
+No. We keep a single price globally because our infrastructure and payment costs are billed to us in USD/EUR and remain constant across regions. This helps us maintain predictable, sustainable pricing for everyone. If our cost structure changes in the future, we will reassess and update our pricing fairly.
+
 ### Is there a forever-free plan? {#free-plan}
 
 Yes, we offer 10 GB of storage for free, forever.
@@ -102,7 +106,6 @@ Yes, we offer 10 GB of storage for free, forever.
 
 On the free plan, you cannot:
 
-- Create public links
 - Set up family plans
 
 All other features work on the free plan, including:
@@ -111,9 +114,9 @@ All other features work on the free plan, including:
 - End-to-end encryption
 - Map view
 - Machine learning (face recognition, magic search)
-- Share albums
+- Creating /receiving shared albums
+- Public links (device limit of 5)
 - Background sync
-- Receiving shared albums from others
 
 ### Is there an x GB plan? {#specific-plan-size}
 

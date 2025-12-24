@@ -33,8 +33,10 @@ import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/video_preview_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
@@ -130,6 +132,7 @@ class Configuration {
         await _migrateSecurityStorageToFirstUnlock();
       }
       SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+      _logger.info('User ID: ${getUserID()}');
     } catch (e, s) {
       _logger.severe("Configuration init failed", e, s);
       /*
@@ -189,6 +192,9 @@ class Configuration {
 
   Future<void> logout({bool autoLogout = false}) async {
     _logger.info("Logging out, autoLogout: $autoLogout");
+    if (flagService.stopStreamProcess) {
+      VideoPreviewService.instance.stop('logout');
+    }
     if (!autoLogout) {
       if (SyncService.instance.isSyncInProgress()) {
         SyncService.instance.stopSync();
@@ -209,6 +215,11 @@ class Configuration {
     _cachedToken = null;
     _secretKey = null;
     _volatilePassword = null;
+
+    // Clear all scheduled notifications (ritual reminders, memories, etc.)
+    await NotificationService.instance.clearAllScheduledNotifications(
+      logLines: false,
+    );
 
     // Clear all database tables
     await FilesDB.instance.clearTable();
@@ -248,6 +259,18 @@ class Configuration {
         "MemoriesCacheService not initialized or failed to clear",
         e,
       );
+    }
+
+    // Reset Ente Rewind caches and services
+    try {
+      wrappedService.resetForLogout();
+    } catch (e) {
+      _logger.info("WrappedService not initialized or failed to reset", e);
+    }
+    try {
+      await wrappedCacheService.clearAll();
+    } catch (e) {
+      _logger.info("WrappedCacheService not initialized or failed to clear", e);
     }
 
     if (!autoLogout) {

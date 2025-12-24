@@ -197,7 +197,7 @@
   "publicLinkEnabled": "Ο δημόσιος σύνδεσμος ενεργοποιήθηκε",
   "shareALink": "Μοιραστείτε έναν σύνδεσμο",
   "sharedAlbumSectionDescription": "Δημιουργία κοινόχρηστων και συνεργατικών άλμπουμ με άλλους χρήστες Ente, συμπεριλαμβανομένων των χρηστών με δωρεάν συνδρομή.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -282,7 +282,6 @@
   "removeFromAlbumTitle": "Αφαίρεση από το άλμπουμ;",
   "removeFromAlbum": "Αφαίρεση από το άλμπουμ",
   "itemsWillBeRemovedFromAlbum": "Τα επιλεγμένα αντικείμενα θα αφαιρεθούν από αυτό το άλμπουμ",
-  "removeShareItemsWarning": "Μερικά από τα αντικείμενα που αφαιρείτε έχουν προστεθεί από άλλα άτομα και θα χάσετε την πρόσβαση σε αυτά",
   "addingToFavorites": "Προσθήκη στα αγαπημένα...",
   "removingFromFavorites": "Αφαίρεση από τα αγαπημένα...",
   "sorryCouldNotAddToFavorites": "Συγγνώμη, δεν ήταν δυνατή η προσθήκη στα αγαπημένα!",

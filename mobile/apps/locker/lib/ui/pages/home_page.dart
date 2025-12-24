@@ -1,18 +1,24 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:app_links/app_links.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/states/user_details_state.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -20,7 +26,6 @@ import "package:locker/ui/drawer/drawer_page.dart";
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/save_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
-import "package:locker/ui/utils/legacy_utils.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -81,6 +86,7 @@ class CustomLockerAppBar extends StatelessWidget
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedMenu01,
                           color: Colors.white,
+                          strokeWidth: 2.25,
                         ),
                       ),
                     ),
@@ -88,26 +94,6 @@ class CustomLockerAppBar extends StatelessWidget
                   Image.asset(
                     'assets/locker-logo.png',
                     height: 28,
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InkWell(
-                      onTap: () => openLegacyPage(context),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
-                        ),
-                        child: Icon(
-                          Icons.favorite_rounded,
-                          color: colorScheme.primary700,
-                          size: 20,
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -212,6 +198,8 @@ class _HomePageState extends UploaderPageState<HomePage>
   String? _error;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
+  StreamSubscription<Uri>? _deepLinkSubscription;
+  StreamSubscription<TriggerLogoutEvent>? _triggerLogoutSubscription;
 
   @override
   void onFileUploadComplete() {
@@ -278,6 +266,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       }
     });
 
+    _initDeepLinks();
+
     // Activate search if initial query is provided (after collections are loaded)
     if (widget.initialSearchQuery != null &&
         widget.initialSearchQuery!.isNotEmpty) {
@@ -294,13 +284,53 @@ class _HomePageState extends UploaderPageState<HomePage>
     Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       await _loadCollections();
     });
+
+    _triggerLogoutSubscription =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+      await _autoLogoutAlert();
+    });
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _deepLinkSubscription?.cancel();
+    _triggerLogoutSubscription?.cancel();
     disposeSharing();
     super.dispose();
+  }
+
+  Future<void> _autoLogoutAlert() async {
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+    final l10n = context.l10n;
+
+    await showAlertBottomSheet(
+      context,
+      title: l10n.sessionExpired,
+      message: l10n.pleaseLoginAgain,
+      assetPath: "assets/warning-grey.png",
+      buttons: [
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            text: context.l10n.ok,
+            onTap: () async {
+              navigator.pop();
+              final dialog = createProgressDialog(
+                context,
+                l10n.pleaseWait,
+              );
+              await dialog.show();
+              await Configuration.instance.logout();
+              await dialog.hide();
+              navigator.popUntil((route) => route.isFirst);
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   void initializeSharing() {
@@ -397,6 +427,28 @@ class _HomePageState extends UploaderPageState<HomePage>
     _mediaStreamSubscription?.cancel();
     ReceiveSharingIntent.instance.reset();
     _logger.info('Sharing functionality disposed');
+  }
+
+  Future<void> _initDeepLinks() async {
+    final appLinks = AppLinks();
+
+    try {
+      final initialLink = await appLinks.getInitialLink();
+      if (initialLink != null) {
+        _logger.info('Initial deep link received');
+      }
+    } catch (e) {
+      _logger.severe('Error getting initial deep link: $e');
+    }
+
+    _deepLinkSubscription = appLinks.uriLinkStream.listen(
+      (Uri uri) {
+        _logger.info('Deep link received via stream');
+      },
+      onError: (err) {
+        _logger.severe('Error receiving deep link: $err');
+      },
+    );
   }
 
   Future<void> _loadCollections() async {
@@ -499,57 +551,60 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return PopScope(
-      canPop: !isSearchActive && !_isSettingsOpen,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          return;
-        }
+    return UserDetailsStateWidget(
+      child: PopScope(
+        canPop: !isSearchActive && !_isSettingsOpen,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) {
+            return;
+          }
 
-        if (isSearchActive) {
-          _handleClearSearch();
-          return;
-        }
+          if (isSearchActive) {
+            _handleClearSearch();
+            return;
+          }
 
-        if (_isSettingsOpen) {
-          scaffoldKey.currentState!.closeDrawer();
-          return;
-        }
-      },
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: handleKeyEvent,
-        child: Scaffold(
-          key: scaffoldKey,
-          backgroundColor: colorScheme.backgroundBase,
-          drawer: Drawer(
-            width: 428,
+          if (_isSettingsOpen) {
+            scaffoldKey.currentState!.closeDrawer();
+            return;
+          }
+        },
+        child: KeyboardListener(
+          focusNode: FocusNode(),
+          onKeyEvent: handleKeyEvent,
+          child: Scaffold(
+            key: scaffoldKey,
             backgroundColor: colorScheme.backgroundBase,
-            child: _settingsPage,
-          ),
-          drawerEnableOpenDragGesture: !Platform.isAndroid,
-          onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-          appBar: CustomLockerAppBar(
-            scaffoldKey: scaffoldKey,
-            isSearchActive: isSearchActive,
-            searchController: searchController,
-            searchFocusNode: _searchFocusNode,
-            onSearchFocused: _handleSearchFocused,
-            onClearSearch: _handleClearSearch,
-            onSearchChanged: _handleSearchChange,
-          ),
-          body: _buildBody(),
-          floatingActionButton: isSearchActive
-              ? null
-              : FloatingActionButton(
-                  onPressed: _openSavePage,
-                  shape: const CircleBorder(),
-                  backgroundColor: colorScheme.primary700,
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlusSign,
-                    color: Colors.white,
+            drawer: Drawer(
+              width: 428,
+              backgroundColor: colorScheme.backgroundBase,
+              child: _settingsPage,
+            ),
+            drawerEnableOpenDragGesture: !Platform.isAndroid,
+            onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+            appBar: CustomLockerAppBar(
+              scaffoldKey: scaffoldKey,
+              isSearchActive: isSearchActive,
+              searchController: searchController,
+              searchFocusNode: _searchFocusNode,
+              onSearchFocused: _handleSearchFocused,
+              onClearSearch: _handleClearSearch,
+              onSearchChanged: _handleSearchChange,
+            ),
+            body: _buildBody(),
+            floatingActionButton: isSearchActive
+                ? null
+                : FloatingActionButton(
+                    onPressed: _openSavePage,
+                    shape: const CircleBorder(),
+                    backgroundColor: colorScheme.primary700,
+                    elevation: 0,
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlusSign,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
     );
@@ -617,41 +672,33 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final scrollBottomPadding =
-            MediaQuery.of(context).padding.bottom + 120.0;
+        final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 32.0,
-            bottom: scrollBottomPadding,
-          ),
-          child: _recentFiles.isEmpty
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: HomeEmptyStateWidget(),
-                  ),
-                )
-              : SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RecentsSectionWidget(
-                          collections: _filterOutUncategorized(_collections),
-                          recentFiles: _recentFiles,
-                        ),
-                      ],
-                    ),
-                  ),
+        return _recentFiles.isEmpty
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(),
                 ),
-        );
+              )
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 32.0,
+                  bottom: scrollBottomPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RecentsSectionWidget(
+                      collections: _filterOutUncategorized(_collections),
+                      recentFiles: _recentFiles,
+                    ),
+                  ],
+                ),
+              );
       },
     );
   }

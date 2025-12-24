@@ -19,6 +19,7 @@ type FileLinkController struct {
 	FileController *controller.FileController
 	FileLinkRepo   *public.FileLinkRepository
 	FileRepo       *repo.FileRepository
+	BillingCtrl    *controller.BillingController
 	JwtSecret      []byte
 }
 
@@ -34,6 +35,10 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 	}
 	if actorUserID != file.OwnerID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
+	}
+	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(actorUserID, true)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
 	}
 	for attempt := 0; attempt < 5; attempt++ {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
@@ -101,8 +106,13 @@ func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFi
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to get file link info")
 	}
-	if fileLinkRow.OwnerID != auth.GetUserID(ctx.Request.Header) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	if fileLinkRow.OwnerID != userID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
+	}
+	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
 	}
 	if req.ValidTill != nil {
 		fileLinkRow.ValidTill = *req.ValidTill

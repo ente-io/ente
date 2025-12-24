@@ -345,7 +345,6 @@
   "removeFromAlbumTitle": "Uit album verwijderen?",
   "removeFromAlbum": "Verwijder uit album",
   "itemsWillBeRemovedFromAlbum": "Geselecteerde items zullen worden verwijderd uit dit album",
-  "removeShareItemsWarning": "Sommige van de items die je verwijdert zijn door andere mensen toegevoegd, en je verliest de toegang daartoe",
   "addingToFavorites": "Toevoegen aan favorieten...",
   "removingFromFavorites": "Verwijderen uit favorieten...",
   "sorryCouldNotAddToFavorites": "Sorry, kon niet aan favorieten worden toegevoegd!",
@@ -1932,7 +1931,6 @@
   "hoorayyyy": "Hoeraaaa!",
   "nothingToTidyUpHere": "Niks op te schonen hier",
   "deletingDash": "Verwijderen - ",
-  "cLTitle3": "Nieuwe herinneringen",
   "closeBy": "Nauw verwant",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

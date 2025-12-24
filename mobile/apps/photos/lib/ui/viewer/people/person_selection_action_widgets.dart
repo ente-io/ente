@@ -16,6 +16,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
@@ -370,8 +371,6 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
     required this.personEntity,
   });
 
-  double get borderRadius => 82 * (itemSize / 102);
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -385,12 +384,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(borderRadius),
-                  ),
-                ),
+              FaceThumbnailSquircleClip(
                 child: Container(
                   width: itemSize,
                   height: itemSize,
@@ -405,14 +399,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
                 child: SizedBox(
                   width: itemSize - 2,
                   height: itemSize - 2,
-                  child: ClipPath(
-                    clipper: ShapeBorderClipper(
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          borderRadius - 1,
-                        ),
-                      ),
-                    ),
+                  child: FaceThumbnailSquircleClip(
                     child: PersonFaceWidget(
                       personId: personEntity.remoteID,
                       useFullFile: true,

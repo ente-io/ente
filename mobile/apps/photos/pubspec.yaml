@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.21-beta+1221
+version: 1.2.32+1232
 publish_to: none
 
 environment:
@@ -58,6 +58,14 @@ dependencies:
     path: plugins/ente_crypto
   ente_feature_flag:
     path: plugins/ente_feature_flag
+  ente_icons:
+    path: ../../packages/ente_icons
+  ente_photos_rust:
+    path: rust_builder
+  ente_qr_ui:
+    path: ../../packages/qr
+  ente_rust:
+    path: ../../packages/rust
   equatable: ^2.0.5
   event_bus: ^2.0.0
   exif_reader:
@@ -73,7 +81,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: remove-event-sub
+      ref: 2bbef7d
   figma_squircle: ^0.6.3
   file_saver: ^0.2.14
   firebase_core: ^3.6.0
@@ -113,6 +121,7 @@ dependencies:
   home_widget: ^0.8.0
   html_unescape: ^2.0.0
   http: ^1.1.0
+  hugeicons: ^1.1.2
   image: ^4.0.17
   in_app_purchase: 3.2.1
   intl: ^0.19.0
@@ -140,7 +149,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/ente-io/mobile_ocr
-      ref: 8dba33ad89eea99683780469bc4d0ec4993d61c3
+      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -183,15 +192,12 @@ dependencies:
     git:
       url: https://github.com/ente-io/privacy_screen.git
       ref: v2-only
-  pro_image_editor: ^6.0.0
-  qr_flutter: ^4.1.0
+  pro_image_editor: ^11.3.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
   rive: 0.14.0-dev.13
-  rust_lib_photos:
-    path: rust_builder
   screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
   sentry: ^8.14.1
@@ -361,6 +367,11 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: fonts/Montserrat-Bold.ttf
+    - family: Nunito
+      fonts:
+        - asset: fonts/Nunito-Regular.ttf
+        - asset: fonts/Nunito-Black.ttf
+          weight: 900
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

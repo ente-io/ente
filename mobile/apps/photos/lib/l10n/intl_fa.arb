@@ -34,7 +34,12 @@
   "password": "رمز عبور",
   "confirmPassword": "تایید رمز عبور",
   "activeSessions": "دستگاه‌های فعال",
+  "ocrProcessingOverlayMessage": "در حال شناسایی متن...",
   "ocrLoadingIndicatorLabel": "در حال شناسایی متن",
+  "ocrNoTextDetected": "متنی شناسایی نشد",
+  "ocrRetryButtonLabel": "تلاش دوباره",
+  "ocrModelsNetworkRequiredError": "در استفاده اول برای بارگیری مدل‌های OCR ارتباط شبکه لازم است",
+  "ocrModelsPrepareFailed": "مدل‌های OCR آماده نشدند",
   "oops": "اوه",
   "somethingWentWrongPleaseTryAgain": "مشکلی پیش آمده، لطفا دوباره تلاش کنید",
   "thisWillLogYouOutOfThisDevice": "این کار شما را از این دستگاه خارج می‌کند!",
@@ -132,7 +137,12 @@
       }
     }
   },
+  "enterCode": "کد را وارد کنید",
+  "scanCode": "کد را شناسایی کنید",
+  "tapToCopy": "برای رونویسی ضربه بزنید",
   "confirm": "تایید",
+  "setupComplete": "آماده‌سازی کامل شد",
+  "lostDevice": "دستگاه را گم کرده‌اید؟",
   "invalidKey": "کلید نامعتبر",
   "tryAgain": "دوباره امتحان کنید",
   "viewRecoveryKey": "نمایش کلید بازیابی",
@@ -143,6 +153,10 @@
   "addANewEmail": "افزودن ایمیل جدید",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "همکاران می‌توانند عکس‌ها و ویدیوها را به آلبوم اشتراک گذاری شده اضافه کنند.",
   "enterEmail": "ایمیل را وارد کنید",
+  "albumOwner": "مالک",
+  "@albumOwner": {
+    "description": "Role of the album owner"
+  },
   "you": "شما",
   "collaborator": "همکار",
   "addMore": "افزودن بیشتر",
@@ -150,14 +164,38 @@
     "description": "Button text to add more collaborators/viewers"
   },
   "viewer": "بیننده",
+  "remove": "برداشتن",
+  "removeParticipant": "برداشتن شرکت‌کننده",
+  "@removeParticipant": {
+    "description": "menuSectionTitle for removing a participant"
+  },
   "manage": "مدیریت",
   "addedAs": "اضافه شده به عنوان",
+  "changePermissions": "تغییر مجوزها؟",
   "yesConvertToViewer": "بله، تبدیل به بیننده شود",
   "allowAddingPhotos": "اجازه اضافه کردن عکس",
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "مجاز کردن پیوستن به آلبوم",
   "allowAddPhotosDescription": "به افراد که این پیوند را دارند، اجازه دهید عکس‌ها را به آلبوم اشتراک گذاری شده اضافه کنند.",
+  "passwordLock": "قفل گذرواژه",
+  "canNotOpenTitle": "نمی‌توان این آلبوم را باز کرد",
+  "canNotOpenBody": "متأسفانه، این آلبوم در برنامه قابل باز شدن نیست.",
+  "disableDownloadWarningTitle": "لطفا توجه کنید",
+  "disableDownloadWarningBody": "بینندگان همچنان می‌توانند با استفاده از ابزارهای خارجی از صفحه عکس بگیرند یا نسخه‌ای از عکس‌های شما را ذخیره کنند",
+  "allowDownloads": "اجازه بارگیری",
+  "linkDeviceLimit": "محدودیت دستگاه",
+  "noDeviceLimit": "هیچ‌کدام",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
+  "albumLayout": "چینش آلبوم",
+  "layoutGrouped": "گروه‌بندی شده",
+  "layoutContinuous": "دامه‌دار",
+  "layoutTrip": "سفر",
+  "preview": "پیش‌نمایش",
+  "linkExpiry": "انقضا پیوند",
   "lockButtonLabel": "قفل",
   "enterPassword": "رمز عبور را وارد کنید",
   "removeLink": "حذف پیوند",

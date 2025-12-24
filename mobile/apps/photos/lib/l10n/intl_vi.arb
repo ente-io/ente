@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Xác nhận mã khôi phục của bạn",
   "addViewer": "Thêm người xem",
   "addCollaborator": "Thêm cộng tác viên",
+  "admin": "Quản trị",
+  "admins": "Quản trị viên",
+  "addAdmin": "Thêm quản trị viên",
+  "addMoreAdmins": "Thêm quản trị viên khác",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Quản trị viên và cộng tác viên có thể thêm ảnh. Quản trị viên có thể quản lý ảnh và người tham gia.",
   "addANewEmail": "Thêm một email mới",
   "orPickAnExistingOne": "Hoặc chọn một cái có sẵn",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ.",
@@ -258,6 +263,7 @@
   "shareWithNonenteUsers": "Chia sẻ với người không dùng Ente",
   "createPublicLink": "Tạo liên kết công khai",
   "sendLink": "Gửi liên kết",
+  "qrCode": "Mã QR",
   "sendQrCode": "Gửi mã QR",
   "copyLink": "Sao chép liên kết",
   "copyEmbedHtml": "Sao chép mã nhúng HTML",
@@ -350,17 +356,18 @@
   "removeFromAlbumTitle": "Xóa khỏi album?",
   "removeFromAlbum": "Xóa khỏi album",
   "itemsWillBeRemovedFromAlbum": "Các mục đã chọn sẽ bị xóa khỏi album này",
-  "removeShareItemsWarning": "Vài mục mà bạn đang xóa được thêm bởi người khác, và bạn sẽ mất quyền truy cập vào chúng",
+  "removeShareItemsWarning": "Những ảnh đã chọn sẽ không thể được xem bởi bất kỳ người xem nào của album này, ngoại trừ chủ sở hữu ảnh.",
   "addingToFavorites": "Đang thêm vào mục yêu thích...",
   "removingFromFavorites": "Đang xóa khỏi mục yêu thích...",
   "sorryCouldNotAddToFavorites": "Xin lỗi, không thể thêm vào mục yêu thích!",
   "sorryCouldNotRemoveFromFavorites": "Xin lỗi, không thể xóa khỏi mục yêu thích!",
   "subscribeToEnableSharing": "Bạn phải dùng gói trả phí mới có thể chia sẻ.",
+  "subscribeToChangeLinkSetting": "Bạn cần mua gói trả phí để thay đổi cài đặt liên kết này.",
   "subscribe": "Đăng ký gói",
   "canOnlyRemoveFilesOwnedByYou": "Chỉ có thể xóa các tệp thuộc sở hữu của bạn",
   "deleteSharedAlbum": "Xóa album chia sẻ?",
   "deleteAlbum": "Xóa album",
-  "deleteAlbumDialog": "Xóa luôn ảnh (và video) trong album này <bold>khỏi toàn bộ album khác</bold> cũng đang chứa chúng?",
+  "deleteAlbumDialog": "Xóa luôn ảnh (và video) có trong album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
   "deleteSharedAlbumDialogBody": "Album sẽ bị xóa với tất cả mọi người\n\nBạn sẽ mất quyền truy cập vào các ảnh chia sẻ trong album này mà thuộc sở hữu của người khác",
   "yesRemove": "Có, xóa",
   "creatingLink": "Đang tạo liên kết...",
@@ -410,7 +417,7 @@
       }
     }
   },
-  "selectedPhotos": "{count} đã chọn",
+  "selectedPhotos": "Đã chọn {count} mục",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
     "type": "text",
@@ -885,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Nhấn vào menu xổ xuống",
   "click": "• Nhấn",
   "nothingToSeeHere": "Ở đây không có gì để xem! 👀",
+  "selectFoldersToBackup": "<action>Chọn các thư mục</action> để xem\nvà sao lưu trên ente.",
   "unarchiveAlbum": "Bỏ lưu trữ album",
   "archiveAlbum": "Lưu trữ album",
   "calculating": "Đang tính toán...",
@@ -1205,10 +1213,13 @@
   "unpinAlbum": "Bỏ ghim album",
   "pinAlbum": "Ghim album",
   "pin": "Ghim",
+  "pinPerson": "Ghim người này",
   "pinToTop": "Ghim lên đầu",
   "unpin": "Bỏ ghim",
+  "unpinPerson": "Bỏ ghim người này",
   "visibility": "Hiển thị",
   "hideFromMemories": "Ẩn khỏi kỷ niệm",
+  "showInMemories": "Hiện trong kỷ niệm",
   "create": "Tạo",
   "viewAll": "Xem tất cả",
   "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
@@ -1320,6 +1331,8 @@
   "enterDateOfBirth": "Sinh nhật (tùy chọn)",
   "birthday": "Sinh nhật",
   "removePersonLabel": "Xóa nhãn người",
+  "removePersonTag": "Xóa nhãn người",
+  "areYouSureRemoveThisPersonTag": "Bạn có chắc muốn xóa nhãn người này?",
   "autoPairDesc": "Kết nối tự động chỉ hoạt động với các thiết bị hỗ trợ Chromecast.",
   "manualPairDesc": "Kết nối bằng PIN hoạt động với bất kỳ màn hình nào bạn muốn.",
   "connectToDevice": "Kết nối với thiết bị",
@@ -1404,6 +1417,54 @@
   "loadingYourPhotos": "Đang tải ảnh của bạn...",
   "processingImport": "Đang xử lý {folderName}...",
   "personName": "Tên người",
+  "addPerson": "Thêm người",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Thêm vào người",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Vui lòng đặt tên trong mục Mọi người trước",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ những tệp đã tải lên mới có thể được thêm vào",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Không phát hiện khuôn mặt nào, hãy chạm để thêm.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Đã thêm 1 tệp vào {personName}} other {Đã thêm {count} tệp vào {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1tệp đã được liên kết với {personName}} other {{count} tệp đã được liên kết với {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Thêm người mới",
   "addNameOrMerge": "Thêm tên hoặc hợp nhất",
   "mergeWithExisting": "Hợp nhất với người đã có",
@@ -1617,6 +1678,7 @@
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy",
   "hideSharedItemsFromHomeGallery": "Ẩn các mục được chia sẻ khỏi thư viện chính",
+  "swipeToSelect": "Quẹt để chọn",
   "gallery": "Thư viện",
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
@@ -1764,9 +1826,9 @@
   "memoriesWidgetDesc": "Chọn những loại kỷ niệm bạn muốn thấy trên màn hình chính của mình.",
   "smartMemories": "Gợi nhớ kỷ niệm",
   "pastYearsMemories": "Kỷ niệm năm ngoái",
-  "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) trong {count} album này <bold>khỏi toàn bộ album khác</bold> cũng đang chứa chúng?",
+  "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) có trong {count} album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
   "addParticipants": "Thêm người tham gia",
-  "selectedAlbums": "{count} đã chọn",
+  "selectedAlbums": "Đã chọn {count} album",
   "actionNotSupportedOnFavouritesAlbum": "Hành động không áp dụng trong album Đã thích",
   "onThisDayMemories": "Kỷ niệm hôm nay",
   "onThisDay": "Vào ngày này",
@@ -1970,14 +2032,14 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Chuyển đến ngày",
-  "cLDesc1": "Xem các ảnh xung quanh cho bất kỳ ảnh nào bằng cách chọn tùy chọn chuyển đến ngày trong ngăn thông tin của tệp.",
-  "cLTitle2": "Chỉnh sửa video nhanh hơn",
-  "cLDesc2": "Trình chỉnh sửa video đã được cải tiến để cải thiện đáng kể tốc độ khi chỉnh sửa video lớn cũng như cải thiện UX.",
-  "cLTitle3": "Kỷ niệm mới",
-  "cLDesc3": "\"Những đứa trẻ vui tươi\", \"Cuộc phiêu lưu mùa đông\", \"Đêm neon\" và hơn thế nữa.",
-  "cLTitle4": "Phòng trưng bày phong cảnh và hơn thế nữa",
-  "cLDesc4": "Hỗ trợ bố cục ngang trong thư viện chính của ứng dụng. Hiển thị những người không có bất kỳ ảnh liên quan nào thay vì lọc chúng ra. Cải thiện khả năng phát hiện khía cạnh video khi được chia sẻ từ các ứng dụng bên ngoài.",
+  "cLTitle1": "Ra mắt Thói quen",
+  "cLDesc1": "Bạn đang lên kế hoạch cho những mục tiêu năm 2026? Với Thói quen, bạn có thể đặt lời nhắc trên Ente Photos và theo dõi tiến độ bằng cách chụp ảnh. Sử dụng ứng dụng này cho việc tập luyện, thói quen ăn uống, những khoảnh khắc hàng ngày với người thân yêu—bất cứ điều gì bạn muốn biến thành thói quen.",
+  "cLTitle2": "Liên kết công khai, giờ dành cho mọi người",
+  "cLDesc2": "Tất cả người dùng Ente sử dụng gói miễn phí giờ đây có thể tạo và chia sẻ liên kết công khai đến ảnh và album. Để ngăn chặn việc lạm dụng, các liên kết sẽ có giới hạn về số người có thể xem.",
+  "cLTitle3": "Gắn thẻ mọi người theo cách thủ công",
+  "cLDesc3": "Giờ đây, bạn có thể gắn thẻ người ngay cả khi AI trên thiết bị của chúng tôi không nhận diện được khuôn mặt. Rất tiện lợi cho thú cưng, khuôn mặt chỉ hiển thị một phần hoặc những trường hợp ai đó không thực sự có mặt trong ảnh nhưng vẫn cần được đưa vào.",
+  "cLTitle4": "Và nhiều hơn thế",
+  "cLDesc4": "Giờ đây bạn có thể ghim các album được chia sẻ. Liên kết album sẽ hiển thị cho người cộng tác và người xem, giúp việc chia sẻ dễ dàng hơn. Chúng tôi đã sửa một số lỗi vuốt trên iOS và cập nhật chế độ xem ảnh, bao gồm biểu tượng yêu thích mới (chuẩn bị cho các tính năng sắp ra mắt).",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2015,11 +2077,11 @@
   "riverCruises": "Cảnh quan trên sông",
   "facesTimelineBannerTitle": "Hồi Ức",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Xem ảnh của {name} qua từng năm",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2077,8 +2139,99 @@
   },
   "facesTimelineUnavailable": "Đang chuẩn bị dòng thời gian...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Trẻ em vui chơi",
-  "coastalCliffs": "Vách đá bên bờ biển"
+  "coastalCliffs": "Vách đá bên bờ biển",
+  "ritualsTitle": "Thói quen",
+  "ritualAddTooltip": "Thêm thói quen",
+  "ritualActivityHeading": "Hoạt động",
+  "ritualDefaultHeatmapTitle": "Chụp một ảnh mỗi ngày",
+  "ritualUntitled": "Thói quen chưa đặt tên",
+  "ritualShareUnavailable": "Không thể chia sẻ. Vui lòng thử lại.",
+  "ritualNotificationMessage": "Chụp ảnh ngay",
+  "ritualCameraNotFound": "Không tìm thấy camera trên thiết bị này.",
+  "ritualCameraStartError": "Không thể khởi động camera. Vui lòng kiểm tra quyền.",
+  "ritualCaptureError": "Không thể chụp ảnh. Vui lòng thử lại.",
+  "ritualPhotoLimit": "Bạn có thể thêm tối đa {maxPhotos, plural, other {# ảnh.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Chụp ít nhất một ảnh trước.",
+  "ritualAlbumMissing": "Album thói quen bị thiếu. Chỉnh sửa thói quen để thiết lập album.",
+  "ritualAddedToAlbum": "Đã thêm vào album",
+  "ritualAddedToAlbumWithName": "Đã thêm vào album {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Không thể thêm ảnh vào album: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Quay lại thói quen",
+  "ritualNoPhotosYet": "Chưa có ảnh nào",
+  "ritualSetAlbumToLaunchCamera": "Thiết lập một album cho thói quen này để khởi động camera.",
+  "ritualDefaultCameraTitle": "Chụp ảnh",
+  "ritualBadgeMessage7": "Đã 7 ngày trôi qua! Bạn kiên trì tốt đấy. Hãy tiếp tục nhé!",
+  "ritualBadgeMessage14": "14 ngày rồi! Bạn đang dần có một thói quen. Thật tuyệt vời!",
+  "ritualBadgeMessage30": "30 ngày liên tiếp! Sự kiên trì đáng kinh ngạc. Ngưỡng mộ ghê!",
+  "ritualBadgeMessageDefault": "Bạn đang trên đà!",
+  "ritualBadgeNewTitle": "Thành tích mới",
+  "ritualBadgePreparing": "Đang chuẩn bị...",
+  "ritualStreaksLabel": "Ngày liên tiếp",
+  "ritualCreateYourOwn": "Tạo thói quen của riêng bạn",
+  "ritualGetDailyReminders": "Nhận nhắc nhở mỗi ngày",
+  "ritualAlbumNotSet": "Album chưa đặt tên",
+  "ritualOpenCameraTooltip": "Mở camera thói quen",
+  "ritualEditorLabel": "Trình chỉnh sửa thói quen",
+  "ritualNew": "Tạo thói quen mới",
+  "ritualCreateNewTitle": "Tạo thói quen mới",
+  "ritualEdit": "Sửa thói quen",
+  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterDescription": "Vui lòng nhập mô tả",
+  "ritualChooseDaysLabel": "Chọn số ngày thói quen",
+  "ritualDayLabel": "Ngày",
+  "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
+  "ritualTimeLabel": "Thời gian",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Lưu thói quen",
+  "ritualCreateAction": "Tạo thói quen",
+  "ritualUpdate": "Cập nhật thói quen",
+  "ritualSelectAlbumTitle": "Chọn album",
+  "ritualChooseAlbumLabel": "Chọn một album",
+  "ritualSendReminderLabel": "Gửi lời nhắc",
+  "ritualSearchOrCreate": "Tìm kiếm hoặc tạo mới",
+  "ritualNoAlbumsYet": "Chưa có album nào",
+  "ritualNoMatchingAlbums": "Không có album trùng khớp",
+  "ritualCreateAlbumWithName": "Tạo \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Tạo mới",
+  "ritualAlbumSelectionPlaceholder": "Chọn album",
+  "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
+  "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
+  "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
+  "ritualEmojiUseAction": "Sử dụng",
+  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
 }

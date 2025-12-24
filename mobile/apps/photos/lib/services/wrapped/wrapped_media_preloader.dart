@@ -1,6 +1,5 @@
 import "dart:async";
 
-import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
@@ -53,11 +52,11 @@ class WrappedMediaPreloader {
   /// Ensures the [EnteFile] for [uploadedID] is cached and returns it.
   Future<EnteFile?> ensureFile(int uploadedID) {
     if (uploadedID <= 0) {
-      return SynchronousFuture<EnteFile?>(null);
+      return Future<EnteFile?>.value(null);
     }
     final EnteFile? cached = _cache[uploadedID];
     if (cached != null) {
-      return SynchronousFuture<EnteFile?>(cached);
+      return Future<EnteFile?>.value(cached);
     }
     final Future<EnteFile?>? inFlight = _inFlight[uploadedID];
     if (inFlight != null) {

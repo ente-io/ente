@@ -14,6 +14,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
@@ -73,12 +74,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                         SizedBox(
                           width: 100,
                           height: 100,
-                          child: ClipPath(
-                            clipper: ShapeBorderClipper(
-                              shape: ContinuousRectangleBorder(
-                                borderRadius: BorderRadius.circular(75),
-                              ),
-                            ),
+                          child: FaceThumbnailSquircleClip(
                             child: files.isNotEmpty
                                 ? PersonFaceWidget(
                                     clusterID: clusterID,
@@ -275,12 +271,7 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: ClipPath(
-                      clipper: ShapeBorderClipper(
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(75),
-                        ),
-                      ),
+                    child: FaceThumbnailSquircleClip(
                       child: widget.files.isNotEmpty
                           ? PersonFaceWidget(
                               clusterID: widget.clusterID,

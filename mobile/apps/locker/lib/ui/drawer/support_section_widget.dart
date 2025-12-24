@@ -1,14 +1,12 @@
-import 'dart:io';
+import "dart:io";
 
-import "package:ente_ui/components/captioned_text_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_utils/email_util.dart";
-import 'package:flutter/material.dart';
+import "package:ente_utils/platform_util.dart";
+import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/core/constants.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/drawer/about_section_widget.dart";
-import "package:locker/ui/drawer/common_settings.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 class SupportSectionWidget extends StatelessWidget {
@@ -19,7 +17,7 @@ class SupportSectionWidget extends StatelessWidget {
     return ExpandableMenuItemWidget(
       title: context.l10n.support,
       selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Icons.help_outline_outlined,
+      leadingIcon: HugeIcons.strokeRoundedHelpCircle,
     );
   }
 
@@ -28,27 +26,27 @@ class SupportSectionWidget extends StatelessWidget {
         Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: context.l10n.contactSupport,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
+        ExpandableChildItem(
+          title: context.l10n.contactSupport,
+          trailingIcon: Icons.chevron_right,
           onTap: () async {
             await sendEmail(context, to: supportEmail);
           },
         ),
-        sectionOptionSpacing,
-        AboutMenuItemWidget(
+        ExpandableChildItem(
           title: context.l10n.help,
-          url: "https://ente.io/help",
+          trailingIcon: Icons.chevron_right,
+          onTap: () async {
+            await PlatformUtil.openWebView(
+              context,
+              context.l10n.help,
+              "https://ente.io/help",
+            );
+          },
         ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: context.l10n.suggestFeatures,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
+        ExpandableChildItem(
+          title: context.l10n.suggestFeatures,
+          trailingIcon: Icons.chevron_right,
           onTap: () async {
             // ignore: unawaited_futures
             launchUrlString(
@@ -57,12 +55,9 @@ class SupportSectionWidget extends StatelessWidget {
             );
           },
         ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: context.l10n.reportABug,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
+        ExpandableChildItem(
+          title: context.l10n.reportABug,
+          trailingIcon: Icons.chevron_right,
           onTap: () async {
             await sendLogs(
               context,
@@ -75,7 +70,6 @@ class SupportSectionWidget extends StatelessWidget {
             await shareLogs(context, bugsEmail, zipFilePath);
           },
         ),
-        sectionOptionSpacing,
       ],
     );
   }

@@ -327,7 +327,6 @@
   "removeFromAlbumTitle": "Fjern fra album?",
   "removeFromAlbum": "Fjern fra album",
   "itemsWillBeRemovedFromAlbum": "Valgte elementer vil bli fjernet fra dette albumet",
-  "removeShareItemsWarning": "Noen av elementene du fjerner ble lagt til av andre personer, og du vil miste tilgang til dem",
   "addingToFavorites": "Legger til i favoritter...",
   "removingFromFavorites": "Fjerner fra favoritter...",
   "sorryCouldNotAddToFavorites": "Beklager, kan ikke legge til i favoritter!",

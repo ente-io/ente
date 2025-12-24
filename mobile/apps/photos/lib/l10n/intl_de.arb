@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Bestätige deinen Wiederherstellungsschlüssel",
   "addViewer": "Album teilen",
   "addCollaborator": "Bearbeiter hinzufügen",
+  "admin": "Administrator",
+  "admins": "Administratoren",
+  "addAdmin": "Administrator hinzufügen",
+  "addMoreAdmins": "Weitere Administratoren hinzufügen",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Administratoren und Bearbeiter können Fotos hinzufügen. Administratoren können auch Fotos und Teilnehmer verwalten.",
   "addANewEmail": "Neue E-Mail-Adresse hinzufügen",
   "orPickAnExistingOne": "Oder eine vorherige auswählen",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bearbeiter können Fotos & Videos zu dem geteilten Album hinzufügen.",
@@ -258,6 +263,7 @@
   "shareWithNonenteUsers": "Mit Nicht-Ente-Benutzern teilen",
   "createPublicLink": "Öffentlichen Link erstellen",
   "sendLink": "Link senden",
+  "qrCode": "QR-Code",
   "sendQrCode": "QR-Code senden",
   "copyLink": "Link kopieren",
   "copyEmbedHtml": "Einzubettendes HTML kopieren",
@@ -350,12 +356,13 @@
   "removeFromAlbumTitle": "Aus Album entfernen?",
   "removeFromAlbum": "Aus Album entfernen",
   "itemsWillBeRemovedFromAlbum": "Ausgewählte Elemente werden aus diesem Album entfernt",
-  "removeShareItemsWarning": "Einige der Elemente, die du entfernst, wurden von anderen Nutzern hinzugefügt und du wirst den Zugriff auf sie verlieren",
+  "removeShareItemsWarning": "Ausgewählte Fotos werden für Betrachter dieses Albums nicht zugänglich sein, außer für die Besitzer der Fotos.",
   "addingToFavorites": "Wird zu Favoriten hinzugefügt...",
   "removingFromFavorites": "Wird aus Favoriten entfernt...",
   "sorryCouldNotAddToFavorites": "Konnte leider nicht zu den Favoriten hinzugefügt werden!",
   "sorryCouldNotRemoveFromFavorites": "Konnte leider nicht aus den Favoriten entfernt werden!",
   "subscribeToEnableSharing": "Du benötigst ein aktives, bezahltes Abonnement, um das Teilen zu aktivieren.",
+  "subscribeToChangeLinkSetting": "Du benötigst ein kostenpflichtiges Abonnement, um diese Link-Einstellung zu ändern.",
   "subscribe": "Abonnieren",
   "canOnlyRemoveFilesOwnedByYou": "Du kannst nur Dateien entfernen, die dir gehören",
   "deleteSharedAlbum": "Geteiltes Album löschen?",
@@ -885,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Klicken Sie auf das Überlaufmenü",
   "click": "• Klick",
   "nothingToSeeHere": "Hier gibt es nichts zu sehen! 👀",
+  "selectFoldersToBackup": "<action>Wähle Ordner</action> zum Anzeigen und\nSichern auf Ente.",
   "unarchiveAlbum": "Album dearchivieren",
   "archiveAlbum": "Album archivieren",
   "calculating": "Wird berechnet...",
@@ -1205,10 +1213,13 @@
   "unpinAlbum": "Album lösen",
   "pinAlbum": "Album anheften",
   "pin": "Anheften",
+  "pinPerson": "Person anheften",
   "pinToTop": "Oben anheften",
   "unpin": "Lösen",
+  "unpinPerson": "Person lösen",
   "visibility": "Sichtbarkeit",
   "hideFromMemories": "Aus Erinnerungen ausblenden",
+  "showInMemories": "In Erinnerungen anzeigen",
   "create": "Erstellen",
   "viewAll": "Alle anzeigen",
   "nothingSharedWithYouYet": "Noch nichts mit Dir geteilt",
@@ -1320,6 +1331,8 @@
   "enterDateOfBirth": "Geburtstag (optional)",
   "birthday": "Geburtstag",
   "removePersonLabel": "Personenetikett entfernen",
+  "removePersonTag": "Personen-Tag entfernen",
+  "areYouSureRemoveThisPersonTag": "Möchtest du dieses Personen-Tag wirklich entfernen?",
   "autoPairDesc": "Automatisches Verbinden funktioniert nur mit Geräten, die Chromecast unterstützen.",
   "manualPairDesc": "\"Mit PIN verbinden\" funktioniert mit jedem Bildschirm, auf dem du dein Album sehen möchtest.",
   "connectToDevice": "Mit Gerät verbinden",
@@ -1404,6 +1417,54 @@
   "loadingYourPhotos": "Lade deine Fotos...",
   "processingImport": "Verarbeite {folderName}...",
   "personName": "Name der Person",
+  "addPerson": "Person hinzufügen",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Zur Person hinzufügen",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Bitte benenne zuerst eine Person in der Personen-Rubrik",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Nur hochgeladene Dateien können zu einer Person hinzugefügt werden",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Keine Gesichter erkannt, tippe zum Hinzufügen.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Eine Datei zu {personName}} other {{count} Dateien zu {personName}}} hinzugefügt",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {Eine Datei ist bereits zu {personName} hinzugefügt} other {{count} Dateien sind bereits zu {personName} hinzugefügt}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Neue Person hinzufügen",
   "addNameOrMerge": "Name hinzufügen oder zusammenführen",
   "mergeWithExisting": "Mit vorhandenem zusammenführen",
@@ -1617,6 +1678,7 @@
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
   "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "swipeToSelect": "Zum Auswählen wischen",
   "gallery": "Galerie",
   "joinAlbum": "Album beitreten",
   "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
@@ -1970,14 +2032,14 @@
   "hoorayyyy": "Hurraaaa!",
   "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
   "deletingDash": "Lösche - ",
-  "cLTitle1": "Zum Datum springen",
-  "cLDesc1": "Zeigt umliegende Fotos für jedes Foto durch Anwählen der Zum-Datum-Springen-Option im Infobereich der Datei.",
-  "cLTitle2": "Schnellerer Video-Editor",
-  "cLDesc2": "Der Video-Editor wurde überarbeitet, um sowohl seine Geschwindigkeit beim Bearbeiten größerer Videos drastisch zu erhöhen als auch die UX zu verbessern.",
-  "cLTitle3": "Neue Erinnerungen",
-  "cLDesc3": "\"Verspielte Kinder\", \"Winterabenteuer\", \"Nächte in Neon\" und mehr.",
-  "cLTitle4": "Galerie im Querformat und mehr",
-  "cLDesc4": "Unterstützung für das Querformat in der Hauptgalerie der App. Personen ohne zugehörige Fotos anzeigen, anstatt sie zu filtern. Verbesserung der Erkennung des Seitenverhältnisses von Videos, die aus externen Apps geteilt wurden.",
+  "cLTitle1": "Einführung von Ritualen",
+  "cLDesc1": "Gute Vorsätze für 2026? Mit Ritualen kannst du eine Erinnerung mit Ente Fotos einstellen und deinen Fortschritt mit der Aufnahme von Bildern verfolgen. Nutze es für das Fitness-Training, Essgewohnheiten, tägliche Momente mit deinen Lieben — alles, was du zu einer Gewohnheit machen möchtest.",
+  "cLTitle2": "Öffentliche Links, jetzt für alle",
+  "cLDesc2": "Alle Benutzer von Ente mit einem kostenlosen Plan können jetzt öffentliche Links zu Fotos und Alben erstellen und teilen. Um Missbrauch vorzubeugen, werden Links ein Limit haben, wie viele Personen sie sehen können.",
+  "cLTitle3": "Personen manuell markieren",
+  "cLDesc3": "Du kannst jetzt Personen in Bildern markieren, auch wenn unsere lokale KI kein Gesicht erkannt hat. Hilfreich für Haustiere, teilweise sichtbare Gesichter oder Momente, in denen jemand nicht auf einem Foto ist, aber dennoch miteinbezogen werden sollte.",
+  "cLTitle4": "Und mehr",
+  "cLDesc4": "Du kannst jetzt geteilte Alben anheften. Links zu Alben sind für Bearbeiter und Betrachter sichtbar, um das Teilen zu vereinfachen. Wir haben einige Swipe-Fehler unter iOS behoben und die Fotoansicht aktualisiert, inklusive eines neuen Favoriten-Icons (schafft Platz für kommende Features).",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2015,11 +2077,11 @@
   "riverCruises": "Flusskreuzfahrt-Ausblicke",
   "facesTimelineBannerTitle": "Erinnerungen",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Sieh dir Fotos von {name} über die Jahre an",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2077,8 +2139,95 @@
   },
   "facesTimelineUnavailable": "Zeitleiste der Gesichter wird vorbereitet...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Verspielte Kinder",
-  "coastalCliffs": "Klippen am Meer"
+  "coastalCliffs": "Klippen am Meer",
+  "ritualsTitle": "Rituale",
+  "ritualAddTooltip": "Ritual hinzufügen",
+  "ritualActivityHeading": "Aktivität",
+  "ritualDefaultHeatmapTitle": "Täglich ein Foto machen",
+  "ritualUntitled": "Unbenanntes Ritual",
+  "ritualShareUnavailable": "Momentan kann nicht geteilt werden. Bitte versuche es erneut.",
+  "ritualNotificationMessage": "Jetzt ein Foto machen",
+  "ritualCameraNotFound": "Keine Kamera auf diesem Gerät gefunden.",
+  "ritualCameraStartError": "Kamera kann nicht gestartet werden. Bitte überprüfe die Berechtigungen.",
+  "ritualCaptureError": "Foto konnte nicht aufgenommen werden. Bitte versuche es erneut.",
+  "ritualPhotoLimit": "Du kannst bis zu {maxPhotos, plural, one {einem Foto} other {# Fotos}} hinzufügen.",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Nimm zuerst mindestens ein Foto auf.",
+  "ritualAlbumMissing": "Das Rituale-Album fehlt. Bearbeite das Ritual, um ein Album festzulegen.",
+  "ritualAddedToAlbum": "Zum Album hinzugefügt",
+  "ritualAddedToAlbumWithName": "Zu {albumName} hinzugefügt",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Konnte keine Fotos zum Album hinzufügen: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Zurück zu den Ritualen",
+  "ritualNoPhotosYet": "Noch keine Fotos",
+  "ritualSetAlbumToLaunchCamera": "Lege ein Album für dieses Ritual fest, um die Kamera zu starten.",
+  "ritualDefaultCameraTitle": "Mach ein Foto",
+  "ritualBadgeMessage7": "7 Tage geschafft! Die Beständigkeit steht dir. Weiter so!",
+  "ritualBadgeMessage14": "14 Tage dabei! Dein Ritual wird zur Gewohnheit. Unglaublich!",
+  "ritualBadgeMessage30": "30 Tage in Folge! Legendäre Beständigkeit! Genieße den Applaus!",
+  "ritualBadgeMessageDefault": "Du hast einen Lauf!",
+  "ritualBadgeNewTitle": "Neuer Erfolg",
+  "ritualBadgePreparing": "Wird vorbereitet...",
+  "ritualStreaksLabel": "Streaks",
+  "ritualCreateYourOwn": "Erstelle dein eigenes Ritual",
+  "ritualGetDailyReminders": "Erhalte tägliche Erinnerungen",
+  "ritualAlbumNotSet": "Album nicht gesetzt",
+  "ritualOpenCameraTooltip": "Ritualkamera öffnen",
+  "ritualEditorLabel": "Ritual-Editor",
+  "ritualNew": "Neues Ritual erstellen",
+  "ritualCreateNewTitle": "Neues Ritual erstellen",
+  "ritualEdit": "Ritual bearbeiten",
+  "ritualEnterPrompt": "Gib dein Ritual ein",
+  "ritualEnterDescription": "Bitte gib eine Beschreibung ein",
+  "ritualChooseDaysLabel": "Tage für Ritual auswählen",
+  "ritualDayLabel": "Tag",
+  "ritualNotificationsOffHint": "Benachrichtigungen sind ausgeschaltet. Tippe auf einen Tag, um sie einzuschalten.",
+  "ritualTimeLabel": "Zeitpunkt",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Ritual speichern",
+  "ritualCreateAction": "Ritual erstellen",
+  "ritualUpdate": "Ritual aktualisieren",
+  "ritualSelectAlbumTitle": "Album auswählen",
+  "ritualChooseAlbumLabel": "Wähle ein Album",
+  "ritualSendReminderLabel": "Erinnerung senden",
+  "ritualSearchOrCreate": "Suchen oder neu erstellen",
+  "ritualNoAlbumsYet": "Bisher keine Alben",
+  "ritualNoMatchingAlbums": "Keine passenden Alben",
+  "ritualCreateAlbumWithName": "\"{albumName} \" erstellen",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Neu erstellen",
+  "ritualAlbumSelectionPlaceholder": "Album auswählen",
+  "ritualPickEmojiTitle": "Emoji auswählen"
 }

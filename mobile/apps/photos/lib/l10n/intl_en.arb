@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Confirm your recovery key",
   "addViewer": "Add viewer",
   "addCollaborator": "Add collaborator",
+  "admin": "Admin",
+  "admins": "Admins",
+  "addAdmin": "Add admin",
+  "addMoreAdmins": "Add more admins",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Admins and collaborators can add photos. Admins can also manage photos & participants.",
   "addANewEmail": "Add a new email",
   "orPickAnExistingOne": "Or pick an existing one",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Collaborators can add photos and videos to the shared album.",
@@ -258,6 +263,7 @@
   "shareWithNonenteUsers": "Share with non-Ente users",
   "createPublicLink": "Create public link",
   "sendLink": "Send link",
+  "qrCode": "QR Code",
   "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
   "copyEmbedHtml": "Copy embed HTML",
@@ -350,12 +356,13 @@
   "removeFromAlbumTitle": "Remove from album?",
   "removeFromAlbum": "Remove from album",
   "itemsWillBeRemovedFromAlbum": "Selected items will be removed from this album",
-  "removeShareItemsWarning": "Some of the items you are removing were added by other people, and you will lose access to them",
+  "removeShareItemsWarning": "Selected photos will not be accessible to any viewer of this album, except the photo owners.",
   "addingToFavorites": "Adding to favorites...",
   "removingFromFavorites": "Removing from favorites...",
   "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
   "sorryCouldNotRemoveFromFavorites": "Sorry, could not remove from favorites!",
   "subscribeToEnableSharing": "You need an active paid subscription to enable sharing.",
+  "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
@@ -885,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Click on the overflow menu",
   "click": "• Click",
   "nothingToSeeHere": "Nothing to see here! 👀",
+  "selectFoldersToBackup": "<action>Select folders</action> to view and\nbackup on ente.",
   "unarchiveAlbum": "Unarchive album",
   "archiveAlbum": "Archive album",
   "calculating": "Calculating...",
@@ -1205,10 +1213,13 @@
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album",
   "pin": "Pin",
+  "pinPerson": "Pin person",
   "pinToTop": "Pin to top",
   "unpin": "Unpin",
+  "unpinPerson": "Unpin person",
   "visibility": "Visibility",
   "hideFromMemories": "Hide from memories",
+  "showInMemories": "Show in memories",
   "create": "Create",
   "viewAll": "View all",
   "nothingSharedWithYouYet": "Nothing shared with you yet",
@@ -1320,6 +1331,8 @@
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
+  "removePersonTag": "Remove person tag",
+  "areYouSureRemoveThisPersonTag": "Are you sure you want to remove this person tag?",
   "autoPairDesc": "Auto pair works only with devices that support Chromecast.",
   "manualPairDesc": "Pair with PIN works with any screen you wish to view your album on.",
   "connectToDevice": "Connect to device",
@@ -1399,11 +1412,60 @@
   "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
   "showPerson": "Show person",
   "sort": "Sort",
+  "recent": "Recent",
   "mostRecent": "Most recent",
   "mostRelevant": "Most relevant",
   "loadingYourPhotos": "Loading your photos...",
   "processingImport": "Processing {folderName}...",
   "personName": "Person name",
+  "addPerson": "Add person",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Add to person",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Please name a person in the People section first",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Only uploaded files can be added to a person",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "No faces detected, tap to add.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Added 1 file to {personName}} other {Added {count} files to {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 file is already linked to {personName}} other {{count} files are already linked to {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Add new person",
   "addNameOrMerge": "Add name or merge",
   "mergeWithExisting": "Merge with existing",
@@ -1971,14 +2033,14 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Jump to date",
-  "cLDesc1": "See surrounding photos for any photo by selecting the jump to date option in the file's info pane.",
-  "cLTitle2": "Faster video editor",
-  "cLDesc2": "Video editor was revamped to both drastically improve its speed when editing larger videos, and also improve the UX.",
-  "cLTitle3": "New memories",
-  "cLDesc3": "\"Playful kids\", \"Winter adventures\", \"Neon nights\", and more.",
-  "cLTitle4": "Landscape gallery and more",
-  "cLDesc4": "Support for landscape layout in the app's main gallery. Show persons without any associated photos instead of filtering them out. Improve video aspect detection when shared from external apps.",
+  "cLTitle1": "Introducing Rituals",
+  "cLDesc1": "Planning resolutions for 2026? With Rituals, you can set a reminder on Ente Photos and track your progress by taking photos. Use it for workouts, eating habits, daily moments with loved ones—anything you want to make a habit.",
+  "cLTitle2": "Public links, now for everyone",
+  "cLDesc2": "All Ente users on the free plan can now create and share public links to photos and albums. To prevent abuse, links will have limits on how many people can view them.",
+  "cLTitle3": "Manually tag people",
+  "cLDesc3": "You can now tag people even when our on-device AI doesn't detect a face. Handy for pets, partially visible faces, or moments where someone isn't actually in the photo but should still be included.",
+  "cLTitle4": "And more",
+  "cLDesc4": "You can now pin shared albums. Album links are visible to collaborators and viewers to make sharing even easier. We've fixed some iOS swiping bugs and updated the photo view, including a new favorite icon (making room for upcoming features).",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2016,11 +2078,11 @@
   "riverCruises": "River cruise views",
   "facesTimelineBannerTitle": "Memory Lane",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "See {name}'s photos across the years",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2078,8 +2140,99 @@
   },
   "facesTimelineUnavailable": "Faces timeline is preparing...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Playful kids",
-  "coastalCliffs": "Cliffs by the sea"
+  "coastalCliffs": "Cliffs by the sea",
+  "ritualsTitle": "Rituals",
+  "ritualAddTooltip": "Add ritual",
+  "ritualActivityHeading": "Activity",
+  "ritualDefaultHeatmapTitle": "Take a photo every day",
+  "ritualUntitled": "Untitled ritual",
+  "ritualShareUnavailable": "Unable to share right now. Please try again.",
+  "ritualNotificationMessage": "Take a photo now",
+  "ritualCameraNotFound": "No camera found on this device.",
+  "ritualCameraStartError": "Unable to start camera. Please check permissions.",
+  "ritualCaptureError": "Unable to capture photo. Please try again.",
+  "ritualPhotoLimit": "You can add up to {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Capture at least one photo first.",
+  "ritualAlbumMissing": "Ritual album missing. Edit the ritual to set an album.",
+  "ritualAddedToAlbum": "Added to album",
+  "ritualAddedToAlbumWithName": "Added to {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Couldn't add photos to the album: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Back to rituals",
+  "ritualNoPhotosYet": "No photos yet",
+  "ritualSetAlbumToLaunchCamera": "Set an album for this ritual to launch the camera.",
+  "ritualDefaultCameraTitle": "Take a photo",
+  "ritualBadgeMessage7": "7 days down! Consistency looks good on you. Keep going!",
+  "ritualBadgeMessage14": "14 days in! Your ritual is becoming a habit. Incredible!",
+  "ritualBadgeMessage30": "30 days in a row! Legendary consistency. Take a bow!",
+  "ritualBadgeMessageDefault": "You're on a roll!",
+  "ritualBadgeNewTitle": "New achievement",
+  "ritualBadgePreparing": "Preparing...",
+  "ritualStreaksLabel": "Streaks",
+  "ritualCreateYourOwn": "Create your own ritual",
+  "ritualGetDailyReminders": "Get daily reminders",
+  "ritualAlbumNotSet": "Album not set",
+  "ritualOpenCameraTooltip": "Open ritual camera",
+  "ritualEditorLabel": "Ritual editor",
+  "ritualNew": "Create new ritual",
+  "ritualCreateNewTitle": "Create new ritual",
+  "ritualEdit": "Edit ritual",
+  "ritualEnterPrompt": "Enter your ritual",
+  "ritualEnterDescription": "Please enter a description",
+  "ritualChooseDaysLabel": "Choose days for ritual",
+  "ritualDayLabel": "Day",
+  "ritualNotificationsOffHint": "Notifications are off. Tap a day to turn them on.",
+  "ritualTimeLabel": "Time",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Save ritual",
+  "ritualCreateAction": "Create ritual",
+  "ritualUpdate": "Update ritual",
+  "ritualSelectAlbumTitle": "Select album",
+  "ritualChooseAlbumLabel": "Choose an album",
+  "ritualSendReminderLabel": "Send reminder",
+  "ritualSearchOrCreate": "Search or create new",
+  "ritualNoAlbumsYet": "No albums yet",
+  "ritualNoMatchingAlbums": "No matching albums",
+  "ritualCreateAlbumWithName": "Create \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Create new",
+  "ritualAlbumSelectionPlaceholder": "Select album",
+  "ritualPickEmojiTitle": "Pick an emoji",
+  "ritualCustomKeyboardLabel": "Custom (keyboard)",
+  "ritualEmojiKeyboardHint": "Press to open emoji keyboard",
+  "ritualEmojiUseAction": "Use",
+  "ritualSearchEmpty": "Build a ritual to keep your photo habit going."
 }

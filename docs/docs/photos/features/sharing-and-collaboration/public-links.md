@@ -51,6 +51,8 @@ Create a shareable link without creating an album first:
 - Quick links can be converted to regular albums if needed
 - Removing a link doesn't delete the photos
 
+Quick link is not supported on web/desktop.
+
 ## Link features
 
 Public links support powerful customization, security, and control features:
@@ -104,6 +106,15 @@ Set an expiration date for your link. After this time, the link automatically st
 ### Device limits
 
 Limit how many devices can access the link. This prevents the link from being widely forwarded.
+
+**How devices are identified:**
+
+A "device" is determined by the combination of IP address and browser/app (User-Agent). This means:
+
+- Same browser on the same network = 1 device
+- Different browsers on the same device = separate devices
+- Same browser from different networks (e.g., home vs mobile data) = separate devices
+- Once a device has accessed the link, it can continue accessing it even if the limit is later reached
 
 **When to use:**
 
@@ -256,18 +267,19 @@ Public links are end-to-end encrypted, but with an important caveat:
 
 ## Availability
 
-Public links (including collect links and quick links) are only available to paid customers. This limitation helps safeguard against platform abuse.
+Public links (including collect links and quick links) are available on all plans, including the free tier. Free plan users can create public links with a [device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5.
 
 **Free users can:**
 
+- Create public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 - View public links shared with them
 - Add photos to collect links shared with them
-- Receive shared albums from other Ente users
+- Create and receive shared albums
 
-**To create public links:**
+**Paid users can:**
 
-- Upgrade to any paid plan
-- All paid tiers have full sharing capabilities
+- Create public links with no device limit
+- Access all other premium features
 
 ## Related topics
 

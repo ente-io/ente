@@ -1,10 +1,12 @@
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
@@ -34,6 +36,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
@@ -44,6 +47,7 @@ import {
     updateCollectionOrder,
     updateCollectionSortOrder,
     updateCollectionVisibility,
+    updateShareeCollectionOrder,
 } from "ente-new/photos/services/collection";
 import {
     PseudoCollectionID,
@@ -54,16 +58,29 @@ import {
     savedCollectionFiles,
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
+import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
+import type { FileListWithViewerProps } from "../FileListWithViewer";
+import { CollectionMapDialog } from "./CollectionMapDialog";
 
-export interface CollectionHeaderProps {
+export interface CollectionHeaderProps
+    extends Pick<
+        FileListWithViewerProps,
+        | "onMarkTempDeleted"
+        | "onAddFileToCollection"
+        | "onRemoteFilesPull"
+        | "onVisualFeedback"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    > {
     collectionSummary: CollectionSummary;
-    // TODO: This can be undefined
-    activeCollection: Collection;
+    activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
     /**
@@ -125,14 +142,25 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onCollectionCast,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+    const { mapEnabled, isShareePinEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
+    const { show: showMapDialog, props: mapDialogVisibilityProps } =
         useModalVisibility();
 
     const { type: collectionSummaryType, fileCount } = collectionSummary;
@@ -162,6 +190,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
     const handleRenameCollection = useCallback(
         async (newName: string) => {
+            if (!activeCollection) return;
             if (activeCollection.name !== newName) {
                 await renameCollection(activeCollection, newName);
                 void onRemotePull({ silent: true });
@@ -227,11 +256,13 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     };
 
     const deleteCollectionAlongWithFiles = wrap(async () => {
+        if (!activeCollection) return;
         await deleteCollection(activeCollection.id);
         setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const deleteCollectionButKeepFiles = wrap(async () => {
+        if (!activeCollection) return;
         await deleteCollection(activeCollection.id, { keepFiles: true });
         setActiveCollectionID(PseudoCollectionID.all);
     });
@@ -272,7 +303,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 true,
                 onAddSaveGroup,
             );
-        } else {
+        } else if (activeCollection) {
             await downloadAndSaveCollectionFiles(
                 activeCollection.name,
                 activeCollection.id,
@@ -288,13 +319,21 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const downloadCollection = () =>
         void _downloadCollection().catch(onGenericError);
 
-    const archiveAlbum = wrap(() =>
-        updateCollectionVisibility(activeCollection, ItemVisibility.archived),
-    );
+    const archiveAlbum = wrap(async () => {
+        if (!activeCollection) return;
+        await updateCollectionVisibility(
+            activeCollection,
+            ItemVisibility.archived,
+        );
+    });
 
-    const unarchiveAlbum = wrap(() =>
-        updateCollectionVisibility(activeCollection, ItemVisibility.visible),
-    );
+    const unarchiveAlbum = wrap(async () => {
+        if (!activeCollection) return;
+        await updateCollectionVisibility(
+            activeCollection,
+            ItemVisibility.visible,
+        );
+    });
 
     const confirmLeaveSharedAlbum = () =>
         showMiniDialog({
@@ -308,19 +347,39 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         });
 
     const leaveSharedAlbum = wrap(async () => {
+        if (!activeCollection) return;
         await leaveSharedCollection(activeCollection.id);
         setActiveCollectionID(PseudoCollectionID.all);
     });
 
-    const pinAlbum = wrap(() =>
-        updateCollectionOrder(activeCollection, CollectionOrder.pinned),
-    );
+    const pinAlbum = wrap(async () => {
+        if (!activeCollection) return;
+        await updateCollectionOrder(activeCollection, CollectionOrder.pinned);
+    });
 
-    const unpinAlbum = wrap(() =>
-        updateCollectionOrder(activeCollection, CollectionOrder.default),
-    );
+    const unpinAlbum = wrap(async () => {
+        if (!activeCollection) return;
+        await updateCollectionOrder(activeCollection, CollectionOrder.default);
+    });
+
+    const pinSharedAlbum = wrap(async () => {
+        if (!activeCollection) return;
+        await updateShareeCollectionOrder(
+            activeCollection,
+            CollectionOrder.pinned,
+        );
+    });
+
+    const unpinSharedAlbum = wrap(async () => {
+        if (!activeCollection) return;
+        await updateShareeCollectionOrder(
+            activeCollection,
+            CollectionOrder.default,
+        );
+    });
 
     const hideAlbum = wrap(async () => {
+        if (!activeCollection) return;
         await updateCollectionVisibility(
             activeCollection,
             ItemVisibility.hidden,
@@ -329,6 +388,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     });
 
     const unhideAlbum = wrap(async () => {
+        if (!activeCollection) return;
         await updateCollectionVisibility(
             activeCollection,
             ItemVisibility.visible,
@@ -336,13 +396,27 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(PseudoCollectionID.hiddenItems);
     });
 
-    const changeSortOrderAsc = wrap(() =>
-        updateCollectionSortOrder(activeCollection, true),
-    );
+    const changeSortOrderAsc = wrap(async () => {
+        if (!activeCollection) return;
+        await updateCollectionSortOrder(activeCollection, true);
+    });
 
-    const changeSortOrderDesc = wrap(() =>
-        updateCollectionSortOrder(activeCollection, false),
-    );
+    const changeSortOrderDesc = wrap(async () => {
+        if (!activeCollection) return;
+        await updateCollectionSortOrder(activeCollection, false);
+    });
+
+    const handleShowMap = useCallback(async () => {
+        if (!mapEnabled) {
+            try {
+                await updateMapEnabled(true);
+            } catch (e) {
+                onGenericError(e);
+                return;
+            }
+        }
+        showMapDialog();
+    }, [mapEnabled, onGenericError, showMapDialog]);
 
     let menuOptions: React.ReactNode[] = [];
     // MUI doesn't let us use fragments to pass multiple menu items, so we need
@@ -410,6 +484,28 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "sharedIncoming":
             menuOptions = [
+                // Pin/Unpin for shared incoming collections (behind feature flag)
+                ...(isShareePinEnabled
+                    ? [
+                          collectionSummary.attributes.has("shareePinned") ? (
+                              <OverflowMenuOption
+                                  key="unpin"
+                                  onClick={unpinSharedAlbum}
+                                  startIcon={<PushPinOutlinedIcon />}
+                              >
+                                  {t("unpin_album")}
+                              </OverflowMenuOption>
+                          ) : (
+                              <OverflowMenuOption
+                                  key="pin"
+                                  onClick={pinSharedAlbum}
+                                  startIcon={<PushPinIcon />}
+                              >
+                                  {t("pin_album")}
+                              </OverflowMenuOption>
+                          ),
+                      ]
+                    : []),
                 collectionSummary.attributes.has("archived") ? (
                     <OverflowMenuOption
                         key="unarchive"
@@ -460,6 +556,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("sort_by")}
                 </OverflowMenuOption>,
+                shouldShowMapOption(collectionSummary) && (
+                    <OverflowMenuOption
+                        key="map"
+                        onClick={handleShowMap}
+                        startIcon={<MapOutlinedIcon />}
+                    >
+                        {t("map")}
+                    </OverflowMenuOption>
+                ),
                 collectionSummary.attributes.has("pinned") ? (
                     <OverflowMenuOption
                         key="unpin"
@@ -477,7 +582,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         {t("pin_album")}
                     </OverflowMenuOption>
                 ),
-                ...(!isHiddenCollection(activeCollection)
+                ...(!activeCollection || !isHiddenCollection(activeCollection)
                     ? [
                           collectionSummary.attributes.has("archived") ? (
                               <OverflowMenuOption
@@ -498,7 +603,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                           ),
                       ]
                     : []),
-                isHiddenCollection(activeCollection) ? (
+                activeCollection && isHiddenCollection(activeCollection) ? (
                     <OverflowMenuOption
                         key="unhide"
                         onClick={unhideAlbum}
@@ -564,15 +669,29 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 overflowMenuIconRef={overflowMenuIconRef}
+                sortAsc={activeCollection?.pubMagicMetadata?.data.asc ?? false}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
+            />
+            <CollectionMapDialog
+                {...mapDialogVisibilityProps}
+                collectionSummary={collectionSummary}
+                activeCollection={activeCollection}
+                onRemotePull={onRemotePull}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={onMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                onVisualFeedback={onVisualFeedback}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}
                 title={t("rename_album")}
                 label={t("album_name")}
-                // TODO: Need to ensure this cannot be undefined when we reach here
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
@@ -643,6 +762,13 @@ const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "hiddenItems" ||
     attributes.has("favorites") ||
     attributes.has("shared");
+
+const shouldShowMapOption = ({ type, fileCount }: CollectionSummary) =>
+    fileCount > 0 &&
+    type !== "all" &&
+    type !== "archiveItems" &&
+    type !== "trash" &&
+    type !== "hiddenItems";
 
 type DownloadQuickOptionProps = OptionProps & {
     collectionSummary: CollectionSummary;
@@ -736,6 +862,7 @@ interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
     overflowMenuIconRef: React.RefObject<SVGSVGElement | null>;
+    sortAsc: boolean;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -744,6 +871,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     open,
     onClose,
     overflowMenuIconRef,
+    sortAsc,
     onAscClick,
     onDescClick,
 }) => {
@@ -772,10 +900,16 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-            <OverflowMenuOption onClick={handleDescClick}>
+            <OverflowMenuOption
+                onClick={handleDescClick}
+                endIcon={!sortAsc ? <CheckIcon /> : undefined}
+            >
                 {t("newest_first")}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={handleAscClick}>
+            <OverflowMenuOption
+                onClick={handleAscClick}
+                endIcon={sortAsc ? <CheckIcon /> : undefined}
+            >
                 {t("oldest_first")}
             </OverflowMenuOption>
         </Menu>

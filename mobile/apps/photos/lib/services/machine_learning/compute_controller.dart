@@ -8,6 +8,7 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
+import "package:photos/events/device_health_changed_event.dart";
 import "package:thermal/thermal.dart";
 
 enum ComputeRunState {
@@ -46,6 +47,12 @@ class ComputeController {
   bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
+
+  void _setDeviceHealth(bool healthy) {
+    if (_isDeviceHealthy == healthy) return;
+    _isDeviceHealthy = healthy;
+    Bus.instance.fire(DeviceHealthChangedEvent(healthy));
+  }
 
   ComputeController() {
     _logger.info('ComputeController constructor');
@@ -232,23 +239,25 @@ class ComputeController {
   void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {
     _androidLastBatteryInfo = batteryInfo;
     _logger.info("Battery info: ${batteryInfo!.toJson()}");
-    _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
+    _setDeviceHealth(_computeIsAndroidDeviceHealthy());
     _fireControlEvent();
   }
 
   void _oniOSBatteryStateUpdate(IosBatteryInfo? batteryInfo) {
     _iosLastBatteryInfo = batteryInfo;
     _logger.info("Battery info: ${batteryInfo!.toJson()}");
-    _isDeviceHealthy = _computeIsiOSDeviceHealthy();
+    _setDeviceHealth(_computeIsiOSDeviceHealthy());
     _fireControlEvent();
   }
 
   void _onThermalStateUpdate(ThermalStatus? thermalStatus) {
     _lastThermalStatus = thermalStatus;
     _logger.info("Thermal status: $thermalStatus");
-    _isDeviceHealthy = Platform.isAndroid
-        ? _computeIsAndroidDeviceHealthy()
-        : _computeIsiOSDeviceHealthy();
+    _setDeviceHealth(
+      Platform.isAndroid
+          ? _computeIsAndroidDeviceHealthy()
+          : _computeIsiOSDeviceHealthy(),
+    );
     _fireControlEvent();
   }
 

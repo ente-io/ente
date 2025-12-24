@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
@@ -25,7 +25,6 @@ class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
 
 class _PersonalNotePageState
     extends BaseInfoPageState<PersonalNoteData, PersonalNotePage> {
-  static const String _defaultTitle = 'Note title';
   static const double _editorMinWidth = 320.0;
   static const double _editorMaxWidth = 720.0;
   static const double _editorWidthFactor = 0.92;
@@ -54,7 +53,6 @@ class _PersonalNotePageState
   @override
   void loadExistingData() {
     _syncControllers(
-      selectAllTitle: true,
       triggerSetState: false,
       updateInitial: true,
     );
@@ -64,7 +62,6 @@ class _PersonalNotePageState
   void refreshUIWithCurrentData() {
     super.refreshUIWithCurrentData();
     _syncControllers(
-      selectAllTitle: false,
       triggerSetState: true,
       updateInitial: true,
     );
@@ -111,7 +108,8 @@ class _PersonalNotePageState
 
   @override
   bool validateForm() {
-    return _contentController.text.trim().isNotEmpty;
+    final content = _contentController.text.trim();
+    return content.isNotEmpty;
   }
 
   @override
@@ -119,10 +117,34 @@ class _PersonalNotePageState
 
   @override
   PersonalNoteData createInfoData() {
+    final content = _contentController.text.trim();
+    var title = _nameController.text.trim();
+
+    if (title.isEmpty && content.isNotEmpty) {
+      title = _generateTitleFromContent(content);
+    }
+
     return PersonalNoteData(
-      title: _nameController.text.trim(),
-      content: _contentController.text.trim(),
+      title: title,
+      content: content,
     );
+  }
+
+  String _generateTitleFromContent(
+    String content, {
+    int maxWords = 5,
+    int maxLength = 40,
+  }) {
+    final firstLine = content.split('\n').first.trim();
+    if (firstLine.isEmpty) return '';
+
+    final words = firstLine.split(RegExp(r'\s+'));
+    final limitedWords = words.take(maxWords).join(' ');
+
+    if (limitedWords.length <= maxLength) {
+      return limitedWords;
+    }
+    return '${limitedWords.substring(0, maxLength).trimRight()}...';
   }
 
   @override
@@ -315,6 +337,8 @@ class _PersonalNotePageState
     }
     _titleFocusNode.canRequestFocus = isEditing;
 
+    final colorScheme = getEnteColorScheme(context);
+
     return TextField(
       controller: _nameController,
       focusNode: _titleFocusNode,
@@ -322,10 +346,12 @@ class _PersonalNotePageState
       showCursor: isEditing,
       enableInteractiveSelection: true,
       style: textTheme.h3Bold,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         border: InputBorder.none,
         isDense: true,
         contentPadding: EdgeInsets.zero,
+        hintText: context.l10n.noteNameHint,
+        hintStyle: textTheme.h3Bold.copyWith(color: colorScheme.textFaint),
       ),
       textCapitalization: TextCapitalization.sentences,
       maxLines: 1,
@@ -333,21 +359,13 @@ class _PersonalNotePageState
   }
 
   void _syncControllers({
-    bool selectAllTitle = false,
     bool triggerSetState = true,
     bool updateInitial = false,
   }) {
     _isControllerSyncInProgress = true;
     try {
       final data = currentData;
-      final trimmedTitle = data?.title.trim() ?? '';
-      final effectiveTitle =
-          trimmedTitle.isEmpty ? _defaultTitle : trimmedTitle;
-      final shouldSelectAll = selectAllTitle && trimmedTitle.isEmpty;
-      _updateTitleController(
-        effectiveTitle,
-        selectAll: shouldSelectAll,
-      );
+      _nameController.text = data?.title ?? '';
       _contentController.text = data?.content ?? '';
       if (updateInitial) {
         _initialContent = _contentController.text;
@@ -393,14 +411,6 @@ class _PersonalNotePageState
     if (_isControllerSyncInProgress) {
       return;
     }
-
-    final titleText = _nameController.text.trim();
-    final contentText = _contentController.text.trim();
-    if (titleText == _defaultTitle && contentText.isNotEmpty) {
-      final generatedTitle = _formatCurrentTimestamp();
-      _updateTitleController(generatedTitle);
-    }
-
     _notifyFormChanged();
   }
 
@@ -414,38 +424,11 @@ class _PersonalNotePageState
     return _contentController.text.trim() != _initialContent.trim();
   }
 
-  void _updateTitleController(String value, {bool selectAll = false}) {
-    _nameController.value = TextEditingValue(
-      text: value,
-      selection: selectAll
-          ? TextSelection(baseOffset: 0, extentOffset: value.length)
-          : TextSelection.collapsed(offset: value.length),
-    );
-  }
-
-  String _formatCurrentTimestamp() {
-    final now = DateTime.now();
-    final monthAbbreviation = DateFormat('MMM').format(now);
-    final day = DateFormat('d').format(now);
-    final year = DateFormat('yyyy').format(now);
-    final time = DateFormat('h:mma').format(now).toLowerCase();
-    return '$monthAbbreviation $day, $year - $time';
-  }
-
   void _onTitleFocusChanged() {
     if (_isControllerSyncInProgress) {
       return;
     }
-
-    if (_titleFocusNode.hasFocus) {
-      if (_nameController.text.trim() == _defaultTitle) {
-        _updateTitleController('');
-      }
-    } else {
-      if (_nameController.text.trim().isEmpty) {
-        _updateTitleController(_defaultTitle);
-      }
-    }
+    _notifyFormChanged();
   }
 
   void _onContentFocusChanged() {
@@ -478,7 +461,6 @@ class _PersonalNotePageState
     }
 
     _syncControllers(
-      selectAllTitle: false,
       triggerSetState: true,
       updateInitial: false,
     );
@@ -486,87 +468,19 @@ class _PersonalNotePageState
   }
 
   Future<bool> _showDiscardChangesDialog() async {
-    final result = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        final colorScheme = getEnteColorScheme(dialogContext);
-        final textTheme = getEnteTextTheme(dialogContext);
-
-        return Dialog(
-          backgroundColor: colorScheme.backgroundElevated2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 24,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colorScheme.backgroundElevated2,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.l10n.unsavedNoteChangesTitle,
-                        style: textTheme.h3Bold,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: () => Navigator.of(dialogContext).pop(false),
-                      child: Container(
-                        height: 36,
-                        width: 36,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colorScheme.backgroundElevated,
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.unsavedNoteChangesDescription,
-                  style: textTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  child: GradientButton(
-                    text: context.l10n.discardChanges,
-                    backgroundColor: colorScheme.warning400,
-                    onTap: () => Navigator.of(dialogContext).pop(true),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    final colorScheme = getEnteColorScheme(context);
+    final result = await showAlertBottomSheet<bool>(
+      context,
+      title: context.l10n.unsavedNoteChangesTitle,
+      message: context.l10n.unsavedNoteChangesDescription,
+      assetPath: 'assets/warning-grey.png',
+      buttons: [
+        GradientButton(
+          text: context.l10n.discardChanges,
+          backgroundColor: colorScheme.warning400,
+          onTap: () => Navigator.of(context).pop(true),
+        ),
+      ],
     );
 
     return result ?? false;

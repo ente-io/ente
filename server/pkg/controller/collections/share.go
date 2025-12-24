@@ -9,6 +9,7 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -216,9 +217,17 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 	if userID != collection.Owner.ID {
 		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
+	valTrue := true
+	if req.EnableJoin == nil {
+		req.EnableJoin = &valTrue
+	}
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		}
+		// Override device limit for free users
+		req.DeviceLimit = public.FreeUserDeviceLimit
 	}
 	response, err := c.CollectionLinkCtrl.CreateLink(ctx, req)
 	if err != nil {
@@ -241,7 +250,15 @@ func (c *CollectionController) UpdateShareURL(
 	}
 	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
+		if errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			// Only throw error if free user tries to change device limit to non-default value
+			if req.DeviceLimit != nil && *req.DeviceLimit != public.FreeUserDeviceLimit {
+				return nil, stacktrace.Propagate(&ente.ErrLinkEditNotAllowed, "")
+			}
+			// Allow other settings changes for free users
+		} else {
+			return nil, stacktrace.Propagate(err, "")
+		}
 	}
 	response, err := c.CollectionLinkCtrl.UpdateSharedUrl(ctx, req)
 	if err != nil {

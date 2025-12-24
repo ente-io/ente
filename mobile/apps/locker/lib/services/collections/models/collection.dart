@@ -156,6 +156,13 @@ class Collection {
     return CollectionParticipantRole.unknown;
   }
 
+  bool canAdd(int userID) {
+    final participantRole = getRole(userID);
+    return (isOwner(userID) ||
+            participantRole == CollectionParticipantRole.collaborator) &&
+        !isDeleted;
+  }
+
   void updateSharees(List<User> newSharees) {
     sharees.clear();
     sharees.addAll(newSharees);

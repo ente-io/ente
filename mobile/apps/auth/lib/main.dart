@@ -44,10 +44,10 @@ final _logger = Logger("main");
 Future<void> initSystemTray() async {
   if (PlatformUtil.isMobile()) return;
   String path = Platform.isWindows
-      ? 'assets/icons/auth-icon.ico'
+      ? 'assets/icons/auth-icon-monochrome.ico'
       : Platform.isMacOS
-          ? 'assets/icons/auth-icon-monochrome.png'
-          : 'assets/icons/auth-icon.png';
+          ? 'assets/icons/auth-icon-monochrome-padded.png'
+          : 'assets/icons/auth-icon-monochrome.png';
   await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [

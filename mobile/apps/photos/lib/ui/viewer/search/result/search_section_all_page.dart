@@ -134,12 +134,13 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                             widget.sectionType,
                           );
                         }
-                        final adjustedIndex = widget.sectionType.isCTAVisible
-                            ? index - 1
-                            : index;
-                        if (sectionResults[adjustedIndex] is AlbumSearchResult) {
+                        final adjustedIndex =
+                            widget.sectionType.isCTAVisible ? index - 1 : index;
+                        if (sectionResults[adjustedIndex]
+                            is AlbumSearchResult) {
                           final albumSectionResult =
-                              sectionResults[adjustedIndex] as AlbumSearchResult;
+                              sectionResults[adjustedIndex]
+                                  as AlbumSearchResult;
                           return SearchableItemWidget(
                             albumSectionResult,
                             resultCount:
@@ -165,7 +166,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
 
                         if (widget.sectionType == SectionType.magic) {
                           final magicSectionResult =
-                              sectionResults[adjustedIndex] as GenericSearchResult;
+                              sectionResults[adjustedIndex]
+                                  as GenericSearchResult;
                           return SearchableItemWidget(
                             magicSectionResult,
                             onResultTap: () {
@@ -192,8 +194,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                           );
                         } else if (sectionResults[adjustedIndex]
                             is GenericSearchResult) {
-                          final result =
-                              sectionResults[adjustedIndex] as GenericSearchResult;
+                          final result = sectionResults[adjustedIndex]
+                              as GenericSearchResult;
                           return SearchableItemWidget(
                             sectionResults[adjustedIndex],
                             onResultTap: result.onResultTap != null

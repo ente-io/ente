@@ -148,10 +148,6 @@ func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose
 			return err
 		}
 	}
-	app := auth.GetApp(ctx)
-	if app == ente.Locker && purpose == ente.SignUpOTTPurpose {
-		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, "signup ott restricted for locker")
-	}
 	isSignUpComplete, err := c.isSignUpComplete(email)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -357,17 +353,12 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
-func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) error {
+func (c *UserController) ensureLockerAccess(userID int64, app ente.App) error {
 	if app != ente.Locker {
 		return nil
 	}
-	const restrictionMsg = "locker is restricted to paid users currently"
-	if err := c.BillingController.HasActiveSelfOrFamilySubscription(userID, true); err != nil {
-		if !errors.Is(err, ente.ErrNoActiveSubscription) && !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
-			log.WithError(err).Error("locker access: failed to verify active subscription status")
-		}
-		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, restrictionMsg)
-	}
+
+	// Check rollout limit
 	if err := c.UserAuthRepo.EnsureLockerRolloutAccess(userID); err != nil {
 		return stacktrace.Propagate(err, "locker access: rollout check failed")
 	}
@@ -375,7 +366,7 @@ func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) erro
 }
 
 func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token string, ip string, userAgent string) error {
-	if err := c.ensureLockerPaidAccess(userID, app); err != nil {
+	if err := c.ensureLockerAccess(userID, app); err != nil {
 		return err
 	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
@@ -437,9 +428,6 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			if app == ente.Locker {
-				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, "locker signup is restricted to paid users")
-			}
 			if viper.GetBool("internal.disable-registration") {
 				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			} else {
@@ -501,7 +489,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
-			if lockerErr := c.ensureLockerPaidAccess(userID, app); lockerErr != nil {
+			if lockerErr := c.ensureLockerAccess(userID, app); lockerErr != nil {
 				return ente.EmailAuthorizationResponse{}, lockerErr
 			}
 			err = c.UserAuthRepo.AddToken(userID, app, token,
@@ -532,12 +520,12 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 
 }
 
-func convertStringToBytes(s string) []byte {
+func convertStringToBytes(s string) ([]byte, error) {
 	b, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		panic(fmt.Sprintf("failed to base64dDecode string %s", s))
+		return nil, ente.NewBadRequestWithMessage("invalid base64 encoding")
 	}
-	return b
+	return b, nil
 }
 
 func convertBytesToString(b []byte) string {

@@ -3,6 +3,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_accounts/models/errors.dart';
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -10,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/gradient_button.dart";
-import 'package:locker/ui/components/new_account_dialog.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -148,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
           await showErrorDialog(
             context,
             context.l10n.oops,
-            context.l10n.unlockLockerPaidPlanBody,
+            context.l10n.unlockLockerNewUserBody,
           );
         } else if (enteErrCode != null &&
             enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
@@ -245,13 +245,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleSignUp() {
-    showCreateNewAccountDialog(
+    showAlertBottomSheet(
       context,
-      title: context.l10n.unlockLockerPaidPlanTitle,
-      body: context.l10n.unlockLockerPaidPlanBody,
-      buttonLabel: context.l10n.okay,
+      title: context.l10n.unlockLockerNewUserTitle,
+      message: context.l10n.unlockLockerNewUserBody,
       assetPath: "assets/file_lock.png",
-      icon: const SizedBox.shrink(),
     );
   }
 
@@ -273,6 +271,7 @@ class _LoginPageState extends State<LoginPage> {
           'assets/locker-logo-blue.png',
           height: 28,
         ),
+        centerTitle: true,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
         leading: IconButton(

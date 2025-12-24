@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/core/errors.dart';
+import 'package:locker/events/user_details_refresh_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -184,10 +186,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _loadCollections() async {
     try {
-      final collections = await CollectionService.instance.getCollections();
-      final filteredCollections = collections
-          .where((c) => c.type != CollectionType.uncategorized)
-          .toList();
+      final filteredCollections =
+          await CollectionService.instance.getCollectionsForUI();
 
       Set<int> initialSelection = _selectedCollectionIds;
 
@@ -333,19 +333,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     await _updateCollectionMembership();
 
     // Update the local data to reflect the changes in the UI
-    // The metadata updater service already updated the file object locally
-    // Now extract the updated info data and refresh the UI
-    final updatedInfo =
-        InfoFileService.instance.extractInfoFromFile(widget.existingFile!);
-    if (updatedInfo != null) {
-      // Update the current data state to show the new values in view mode
-      setState(() {
-        _currentData = updatedInfo.data as T?;
-      });
+    // Use the infoItem data directly since it contains the updated values
+    setState(() {
+      _currentData = infoItem.data as T?;
+    });
 
-      // Refresh UI with updated data
-      refreshUIWithCurrentData();
-    }
+    // Refresh UI with updated data
+    refreshUIWithCurrentData();
 
     // The info file service already performs a sync, so we don't need to sync again
   }
@@ -483,6 +477,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
     // Trigger sync after successful save
     await CollectionService.instance.sync();
+    Bus.instance.fire(UserDetailsRefreshEvent());
 
     // Show success message
     final collectionCount = selectedCollections.length;
