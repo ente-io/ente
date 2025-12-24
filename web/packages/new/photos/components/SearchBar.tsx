@@ -443,7 +443,8 @@ const iconForOption = (option: SearchOption | undefined) => {
             return <ImageIcon />;
         case "date":
             return <CalendarIcon />;
-        case "camera":
+        case "cameraMake":
+        case "cameraModel":
             return <CameraIcon />;
         case "sidebarAction":
             return <SettingsIcon />;
@@ -658,8 +659,11 @@ const labelForOption = (option: SearchOption) => {
         case "fileCaption":
             return t("description");
 
-        case "camera":
-            return t("camera", { defaultValue: "Camera" });
+        case "cameraMake":
+            return t("cameraMake", { defaultValue: "Camera Make" });
+
+        case "cameraModel":
+            return t("cameraModel", { defaultValue: "Camera Model" });
 
         case "date":
             return t("date");

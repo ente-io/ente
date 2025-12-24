@@ -478,7 +478,8 @@ class SearchService {
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
     final Map<String, List<EnteFile>> uploaderToFile = {};
-    final Map<String, List<EnteFile>> cameraToFiles = {};
+    final Map<String, List<EnteFile>> cameraMakeToFiles = {};
+    final Map<String, List<EnteFile>> cameraModelToFiles = {};
     for (EnteFile eachFile in allFiles) {
       if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
         captionMatch.add(eachFile);
@@ -493,9 +494,13 @@ class SearchService {
         }
         uploaderToFile[eachFile.uploaderName!]!.add(eachFile);
       }
-      final cameraLabel = eachFile.cameraLabel;
-      if (cameraLabel != null && pattern.hasMatch(cameraLabel)) {
-        cameraToFiles.putIfAbsent(cameraLabel, () => []).add(eachFile);
+      final cameraMake = eachFile.cameraMake;
+      if (cameraMake != null && pattern.hasMatch(cameraMake)) {
+        cameraMakeToFiles.putIfAbsent(cameraMake, () => []).add(eachFile);
+      }
+      final cameraModel = eachFile.cameraModel;
+      if (cameraModel != null && pattern.hasMatch(cameraModel)) {
+        cameraModelToFiles.putIfAbsent(cameraModel, () => []).add(eachFile);
       }
     }
     if (captionMatch.isNotEmpty) {
@@ -545,15 +550,33 @@ class SearchService {
         );
       }
     }
-    if (cameraToFiles.isNotEmpty) {
-      for (final entry in cameraToFiles.entries) {
+    if (cameraMakeToFiles.isNotEmpty) {
+      for (final entry in cameraMakeToFiles.entries) {
         searchResults.add(
           GenericSearchResult(
-            ResultType.camera,
+            ResultType.cameraMake,
+            entry.key,
+            entry.value,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: entry.key,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.cameraMake,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+              filterIcon: Icons.photo_camera_outlined,
+            ),
+          ),
+        );
+      }
+    }
+    if (cameraModelToFiles.isNotEmpty) {
+      for (final entry in cameraModelToFiles.entries) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.cameraModel,
             entry.key,
             entry.value,
             hierarchicalSearchFilter: CameraFilter(
-              cameraLabel: entry.key,
+              cameraModel: entry.key,
               occurrence: kMostRelevantFilter,
               matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
             ),

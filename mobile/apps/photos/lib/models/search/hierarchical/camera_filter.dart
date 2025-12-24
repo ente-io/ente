@@ -4,11 +4,11 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 
 class CameraFilter extends HierarchicalSearchFilter {
-  final String cameraLabel;
+  final String cameraModel;
   final int occurrence;
 
   CameraFilter({
-    required this.cameraLabel,
+    required this.cameraModel,
     required this.occurrence,
     super.filterTypeName = "cameraFilter",
     super.matchedUploadedIDs,
@@ -16,7 +16,7 @@ class CameraFilter extends HierarchicalSearchFilter {
 
   @override
   String name() {
-    return cameraLabel;
+    return cameraModel;
   }
 
   @override
@@ -26,13 +26,13 @@ class CameraFilter extends HierarchicalSearchFilter {
 
   @override
   bool isMatch(EnteFile file) {
-    return file.cameraLabel == cameraLabel;
+    return file.cameraModel == cameraModel;
   }
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     if (other is CameraFilter) {
-      return other.cameraLabel == cameraLabel;
+      return other.cameraModel == cameraModel;
     }
     return false;
   }

@@ -40,6 +40,7 @@ class MediaUploadData {
   final FileHashData? hashData;
   final int? height;
   final int? width;
+  final String? cameraMake;
   final String? cameraModel;
 
   // For android motion photos, the startIndex is the index of the first frame
@@ -57,6 +58,7 @@ class MediaUploadData {
     this.hashData, {
     this.height,
     this.width,
+    this.cameraMake,
     this.cameraModel,
     this.motionPhotoStartIndex,
     this.isPanorama,
@@ -108,6 +110,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   String? zipHash;
   String fileHash;
   Map<String, IfdTag>? exifData;
+  String? cameraMake;
   String? cameraModel;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
@@ -147,6 +150,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   if (parseExif) {
     exifData = await tryExifFromFile(sourceFile);
     if (exifData != null) {
+      cameraMake = _extractPrintableExifValue(exifData['Image Make']);
       cameraModel = _extractPrintableExifValue(exifData['Image Model']);
     }
   }
@@ -211,6 +215,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     FileHashData(fileHash, zipHash: zipHash),
     height: h,
     width: w,
+    cameraMake: cameraMake,
     cameraModel: cameraModel,
     motionPhotoStartIndex: motionPhotoStartingIndex,
     exifData: exifData,
@@ -382,6 +387,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   File sourceFile;
   Uint8List? thumbnailData;
   Map<String, IfdTag>? exifData;
+  String? cameraMake;
   String? cameraModel;
   const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
@@ -402,6 +408,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       dimensions = await getImageHeightAndWith(imagePath: localPath);
       exifData = await tryExifFromFile(sourceFile);
       if (exifData != null) {
+        cameraMake = _extractPrintableExifValue(exifData['Image Make']);
         cameraModel = _extractPrintableExifValue(exifData['Image Model']);
       }
     } else if (thumbnailData != null) {
@@ -422,6 +429,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       FileHashData(fileHash),
       height: dimensions?['height'],
       width: dimensions?['width'],
+      cameraMake: cameraMake,
       cameraModel: cameraModel,
       exifData: exifData,
     );

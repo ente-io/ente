@@ -49,14 +49,20 @@ extension FilePropsExtn on EnteFile {
 
   String? get uploaderName => pubMagicMetadata?.uploaderName;
 
+  String? get cameraMake => pubMagicMetadata?.cameraMake;
+
   String? get cameraModel => pubMagicMetadata?.cameraModel;
 
   String? get cameraLabel {
+    final make = cameraMake?.trim();
     final model = cameraModel?.trim();
-    if (model == null || model.isEmpty) {
+    if ((make == null || make.isEmpty) && (model == null || model.isEmpty)) {
       return null;
     }
-    return model;
+    if (make != null && make.isNotEmpty && model != null && model.isNotEmpty) {
+      return '$make $model';
+    }
+    return model ?? make;
   }
 
   bool get skipIndex => !isUploaded || fileType == FileType.other;

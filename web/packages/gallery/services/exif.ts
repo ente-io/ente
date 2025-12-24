@@ -47,6 +47,7 @@ export const parseExif = (tags: RawExifTags) => {
     if (creationDate) metadata.creationDate = creationDate;
     if (location) metadata.location = location;
     if (description) metadata.description = description;
+    if (camera?.make) metadata.cameraMake = camera.make;
     if (camera?.model) metadata.cameraModel = camera.model;
     return metadata;
 };

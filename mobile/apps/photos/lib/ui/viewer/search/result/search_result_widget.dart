@@ -166,8 +166,10 @@ class SearchResultWidget extends StatelessWidget {
         return "Person";
       case ResultType.uploader:
         return "Uploaded by";
-      case ResultType.camera:
-        return "Camera";
+      case ResultType.cameraMake:
+        return "Camera Make";
+      case ResultType.cameraModel:
+        return "Camera Model";
     }
   }
 }

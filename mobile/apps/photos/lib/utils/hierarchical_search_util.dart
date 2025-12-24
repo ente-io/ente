@@ -357,21 +357,20 @@ List<CameraFilter> _curateCameraFilters(
   List<EnteFile> files,
 ) {
   final cameraFilters = <CameraFilter>[];
-  final labelToOccurrence = <String, int>{};
+  final modelToOccurrence = <String, int>{};
 
   for (final file in files) {
-    final cameraLabel = file.cameraLabel;
-    if (cameraLabel == null || cameraLabel.isEmpty) {
+    final cameraModel = file.cameraModel;
+    if (cameraModel == null || cameraModel.isEmpty) {
       continue;
     }
-    labelToOccurrence[cameraLabel] =
-        (labelToOccurrence[cameraLabel] ?? 0) + 1;
+    modelToOccurrence[cameraModel] = (modelToOccurrence[cameraModel] ?? 0) + 1;
   }
 
-  for (final entry in labelToOccurrence.entries) {
+  for (final entry in modelToOccurrence.entries) {
     cameraFilters.add(
       CameraFilter(
-        cameraLabel: entry.key,
+        cameraModel: entry.key,
         occurrence: entry.value,
       ),
     );
