@@ -150,23 +150,26 @@ func (c *Controller) SendRecoveryReminder() {
 
 			go c.sendRecoveryNotification(context.Background(), row.UserID, row.EmergencyContactID, ente.RecoveryStatusReady, nil)
 		} else if daysLeft >= 2 && row.Status == ente.RecoveryStatusWaiting {
-			var nextReminder *int64
+			var (
+				nextReminder int64
+				shouldUpdate bool
+			)
 			if daysLeft > 9 {
 				// schedule another reminder after 7 days
-				n := row.NextReminderAt + int64(microsecondsInDay*7)
-				nextReminder = &n
+				nextReminder = row.NextReminderAt + int64(microsecondsInDay*7)
+				shouldUpdate = true
 			} else if daysLeft > 2 {
 				// schedule the final reminder two days before waitTill
-				n := row.WaitTill - int64(microsecondsInDay*2)
-				nextReminder = &n
+				nextReminder = row.WaitTill - int64(microsecondsInDay*2)
+				shouldUpdate = true
 			} else {
 				// final reminder already sent; wait until recovery becomes ready
-				n := row.WaitTill
-				nextReminder = &n
+				nextReminder = row.WaitTill
+				shouldUpdate = true
 			}
 
-			if nextReminder != nil {
-				if err := c.Repo.UpdateNextReminder(context.Background(), row.ID, *nextReminder); err != nil {
+			if shouldUpdate {
+				if err := c.Repo.UpdateNextReminder(context.Background(), row.ID, nextReminder); err != nil {
 					logger.WithError(err).Error("failed to update next reminder")
 					continue
 				}
