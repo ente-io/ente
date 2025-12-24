@@ -1,0 +1,32 @@
+package public
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/ente-io/museum/ente"
+	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
+	"github.com/ente-io/stacktrace"
+)
+
+func ensureAnonUserForCollection(ctx context.Context, repo *socialrepo.AnonUsersRepository, collectionID int64, actor socialcontroller.Actor) error {
+	if repo == nil || !actor.IsAnonymous() {
+		return nil
+	}
+	if actor.AnonUserID == nil || *actor.AnonUserID == "" {
+		return ente.ErrBadRequest
+	}
+	anonUser, err := repo.GetByID(ctx, *actor.AnonUserID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ente.ErrAuthenticationRequired
+		}
+		return stacktrace.Propagate(err, "")
+	}
+	if anonUser.CollectionID != collectionID {
+		return ente.ErrPermissionDenied
+	}
+	return nil
+}
