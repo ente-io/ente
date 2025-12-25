@@ -851,6 +851,43 @@
       }
     }
   },
+  "important": "Important",
+  "unimportant": "Unimportant",
+  "removingFromImportant": "Removing from important...",
+  "markingAsImportant": "Marking as important...",
+  "fileMarkedAsImportant": "Item marked as important",
+  "fileRemovedFromImportant": "Item removed from important",
+  "filesMarkedAsImportant": "{count, plural, =1{1 item marked as important} other{{count} items marked as important}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "allFilesAlreadyMarkedAsImportant": "All items are already marked as important",
+  "failedToMarkFilesAsImportant": "Failed to mark items as important: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "failedToUpdateImportantStatus": "Failed to update important status: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Sorry",
   "subscribe": "Subscribe",
   "sharedWith": "Shared with",
