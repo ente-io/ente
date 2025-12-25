@@ -210,6 +210,11 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Future<void> _onTapSkip() async {
     await backupPreferenceService.setOnboardingPermissionSkipped(true);
+    final state = await permissionService.getPermissionState();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+    }
     SyncService.instance.sync().ignore();
     if (mounted) {
       setState(() {});

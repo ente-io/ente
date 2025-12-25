@@ -2518,6 +2518,66 @@ abstract class AppLocalizations {
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
 
+  /// No description provided for @important.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get important;
+
+  /// No description provided for @unimportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Unimportant'**
+  String get unimportant;
+
+  /// No description provided for @removingFromImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing from important...'**
+  String get removingFromImportant;
+
+  /// No description provided for @markingAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking as important...'**
+  String get markingAsImportant;
+
+  /// No description provided for @fileMarkedAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Item marked as important'**
+  String get fileMarkedAsImportant;
+
+  /// No description provided for @fileRemovedFromImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed from important'**
+  String get fileRemovedFromImportant;
+
+  /// Success message when items are marked as important
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item marked as important} other{{count} items marked as important}}'**
+  String filesMarkedAsImportant(int count);
+
+  /// No description provided for @allFilesAlreadyMarkedAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'All items are already marked as important'**
+  String get allFilesAlreadyMarkedAsImportant;
+
+  /// Error message when marking items as important fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to mark items as important: {error}'**
+  String failedToMarkFilesAsImportant(String error);
+
+  /// Error message when updating important status fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update important status: {error}'**
+  String failedToUpdateImportantStatus(String error);
+
   /// No description provided for @sorry.
   ///
   /// In en, this message translates to:
@@ -2530,11 +2590,77 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get subscribe;
 
+  /// No description provided for @sharedWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with'**
+  String get sharedWith;
+
+  /// No description provided for @shareLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Share later'**
+  String get shareLater;
+
+  /// No description provided for @enterNameOrEmailToShareWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name or email to share with'**
+  String get enterNameOrEmailToShareWith;
+
+  /// No description provided for @chooseFromAnExistingContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from an existing contact'**
+  String get chooseFromAnExistingContact;
+
+  /// No description provided for @scheduleShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule share'**
+  String get scheduleShare;
+
+  /// No description provided for @addEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get addEmail;
+
+  /// No description provided for @addNewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new email'**
+  String get addNewEmail;
+
+  /// No description provided for @noSharedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Not shared with anyone yet. Share this collection by adding someone\'s email below.'**
+  String get noSharedUsers;
+
+  /// No description provided for @removeAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove access'**
+  String get removeAccess;
+
   /// No description provided for @subscriptionRequiredForSharing.
   ///
   /// In en, this message translates to:
   /// **'You need a paid subscription to share links'**
   String get subscriptionRequiredForSharing;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get sessionExpired;
+
+  /// No description provided for @pleaseLoginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login again'**
+  String get pleaseLoginAgain;
 }
 
 class _AppLocalizationsDelegate

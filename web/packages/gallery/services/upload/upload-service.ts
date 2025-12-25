@@ -1274,6 +1274,13 @@ const extractImageOrVideoMetadata = async (
         publicMagicMetadata.caption = caption;
     }
 
+    if (parsedMetadata?.cameraMake) {
+        publicMagicMetadata.cameraMake = parsedMetadata.cameraMake;
+    }
+    if (parsedMetadata?.cameraModel) {
+        publicMagicMetadata.cameraModel = parsedMetadata.cameraModel;
+    }
+
     return { metadata, publicMagicMetadata };
 };
 

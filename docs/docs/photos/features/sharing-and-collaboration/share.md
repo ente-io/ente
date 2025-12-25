@@ -97,8 +97,7 @@ comments and reactions.
 
 ## Limitations
 
-Peer-to-peer sharing between Ente users is available on every plan, including
-the free tier. Creating public links is only available to paid customers.This limitation helps safeguard against potential platform abuse.
+Peer-to-peer sharing between Ente users and creating public links are available on every plan, including the free tier. Free plan users can create public links with a device limit of 5, while paid users can create public links with no device limit.
 
 ## Related topics
 

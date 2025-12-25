@@ -541,10 +541,12 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     const hasAddOnBonus = userDetailsAddOnBonuses(userDetails).length > 0;
 
     let message: React.ReactNode;
+    let showUpgradeText = false;
     if (!hasAddOnBonus) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isSubscriptionFree(userDetails.subscription)) {
                 message = t("subscription_info_free");
+                showUpgradeText = true;
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
                     date: userDetails.subscription.expiryTime,
@@ -573,13 +575,39 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 
     return (
         <Box sx={{ px: 1, pt: 0.5 }}>
-            <Typography
-                variant="small"
-                onClick={handleClick}
-                sx={{ color: "text.muted" }}
+            <Stack
+                direction="row"
+                sx={{ alignItems: "center", justifyContent: "space-between" }}
             >
-                {message}
-            </Typography>
+                <Typography
+                    variant="small"
+                    onClick={handleClick}
+                    sx={{ color: "text.muted" }}
+                >
+                    {message}
+                </Typography>
+                {showUpgradeText && (
+                    <Stack
+                        direction="row"
+                        onClick={onShowPlanSelector}
+                        sx={{
+                            alignItems: "center",
+                            cursor: "pointer",
+                            "&:hover": { opacity: 0.8 },
+                        }}
+                    >
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.base", fontWeight: "medium" }}
+                        >
+                            {t("upgrade")}
+                        </Typography>
+                        <ChevronRightIcon
+                            sx={{ fontSize: "18px", color: "text.muted" }}
+                        />
+                    </Stack>
+                )}
+            </Stack>
         </Box>
     );
 };

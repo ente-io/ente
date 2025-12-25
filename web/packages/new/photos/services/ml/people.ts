@@ -73,6 +73,14 @@ export interface CGroupUserEntityData {
      */
     rejectedFaceIDs: string[];
     /**
+     * An unordered set of file IDs that the user has manually tagged as
+     * belonging to this group.
+     *
+     * For ease of transportation and persistence this is an array, but it
+     * should conceptually be thought of as a set.
+     */
+    manuallyAssigned: number[];
+    /**
      * True if this cluster group should be hidden.
      *
      * The user can hide both named cluster groups and single unnamed clusters.
@@ -304,8 +312,14 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
         const mostRecentFace = faces[0];
         if (!mostRecentFace) return undefined;
 
-        // IDs of the files containing this face.
-        const fileIDs = [...new Set(faces.map((f) => f.file.id))];
+        // IDs of the files containing this face, plus any files manually
+        // associated with this person.
+        const fileIDsSet = new Set(faces.map((f) => f.file.id));
+        for (const fileID of data.manuallyAssigned) {
+            // Only include normal (non-hidden, non-deleted) files.
+            if (fileByID.has(fileID)) fileIDsSet.add(fileID);
+        }
+        const fileIDs = [...fileIDsSet];
 
         // Avatar face ID, or the highest scoring face.
         let avatarFile: EnteFile | undefined;

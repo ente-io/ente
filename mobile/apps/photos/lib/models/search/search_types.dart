@@ -38,6 +38,8 @@ enum ResultType {
   shared,
   faces,
   magic,
+  cameraMake,
+  cameraModel,
 }
 
 enum SectionType {

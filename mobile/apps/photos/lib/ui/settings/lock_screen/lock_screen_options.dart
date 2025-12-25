@@ -214,7 +214,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         title: AppLocalizations.of(context)
                                             .deviceLock,
                                       ),
-                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       isTopBorderRadiusRemoved: false,
                                       isBottomBorderRadiusRemoved: true,
@@ -235,7 +234,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         title: AppLocalizations.of(context)
                                             .pinLock,
                                       ),
-                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       isTopBorderRadiusRemoved: true,
                                       isBottomBorderRadiusRemoved: true,
@@ -254,7 +252,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         title: AppLocalizations.of(context)
                                             .passwordLock,
                                       ),
-                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       isTopBorderRadiusRemoved: true,
                                       isBottomBorderRadiusRemoved: false,
@@ -279,7 +276,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                           ),
                                         ),
                                       ),
-                                      surfaceExecutionStates: false,
                                       trailingIcon:
                                           Icons.chevron_right_outlined,
                                       trailingIconIsMuted: true,

@@ -1216,8 +1216,6 @@
   "related": "Relaterat",
   "hoorayyyy": "Huurraaaa!",
   "deletingDash": "Tar bort - ",
-  "cLTitle1": "Gå till datum",
-  "cLTitle3": "Nya minnen",
   "closeBy": "Stäng",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

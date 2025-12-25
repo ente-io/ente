@@ -6,14 +6,14 @@ import "package:locker/core/errors.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/trash_service.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/ui/components/subscription_required_dialog.dart";
@@ -24,7 +24,7 @@ import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
 import "package:logging/logging.dart";
 
-/// Utility class for common file actions like edit, share, and delete
+/// Utility class for common file actions like edit, share, delete, and favorites
 class FileActions {
   static final _logger = Logger("FileActions");
 
@@ -43,16 +43,20 @@ class FileActions {
       'Opening edit dialog for file ${file.uploadedFileID}',
     );
 
-    final allCollections = await CollectionService.instance.getCollections();
+    final int currentUserID = Configuration.instance.getUserID()!;
+    if (file.ownerID != currentUserID) {
+      showToast(context, "Edit feature coming soon");
+      return;
+    }
+
+    final editableCollections =
+        await CollectionService.instance.getCollectionsForUI();
+
     final currentCollections =
         await CollectionService.instance.getCollectionsForFile(file);
 
     final favoriteCollection =
         await CollectionService.instance.getOrCreateImportantCollection();
-
-    final editableCollections = allCollections
-        .where((c) => c.type != CollectionType.uncategorized)
-        .toList();
 
     final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 
@@ -254,7 +258,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        await showShareLinkDialog(
+        await showShareLinkSheet(
           context,
           shareableLink.fullURL!,
           shareableLink.linkID,
@@ -266,7 +270,7 @@ class FileActions {
 
       if (context.mounted) {
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await showSubscriptionRequiredDialog(context);
+          await showSubscriptionRequiredSheet(context);
         } else {
           showToast(
             context,
@@ -283,7 +287,7 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(1),
@@ -342,7 +346,7 @@ class FileActions {
       return;
     }
 
-    final confirmation = await showDeleteConfirmationDialog(
+    final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
       body: context.l10n.deleteMultipleFilesDialogBody(files.length),
@@ -404,6 +408,124 @@ class FileActions {
         context: context,
         error: e,
       );
+    }
+  }
+
+  /// Checks if a file is marked as important using cache
+  static bool isImportant(EnteFile file) {
+    return FavoritesService.instance.isFavoriteCache(file);
+  }
+
+  /// Toggles important status of a single file
+  static Future<void> toggleImportant(
+    BuildContext context,
+    EnteFile file, {
+    VoidCallback? onSuccess,
+  }) async {
+    final isCurrentlyImportant = isImportant(file);
+    final dialog = createProgressDialog(
+      context,
+      isCurrentlyImportant
+          ? context.l10n.removingFromImportant
+          : context.l10n.markingAsImportant,
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      if (isCurrentlyImportant) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else {
+        await FavoritesService.instance.addToFavorites(context, file);
+      }
+
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          !isCurrentlyImportant
+              ? context.l10n.fileMarkedAsImportant
+              : context.l10n.fileRemovedFromImportant,
+        );
+      }
+
+      onSuccess?.call();
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.failedToUpdateImportantStatus(e.toString()),
+        );
+      }
+    }
+  }
+
+  /// Marks multiple files as important
+  static Future<void> markMultipleAsImportant(
+    BuildContext context,
+    List<EnteFile> files, {
+    VoidCallback? onSuccess,
+  }) async {
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.markingAsImportant,
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      // Use sync cache for better performance
+      final filesToMark = files
+          .where((file) => !FavoritesService.instance.isFavoriteCache(file))
+          .toList();
+
+      if (filesToMark.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          showToast(
+            context,
+            context.l10n.allFilesAlreadyMarkedAsImportant,
+          );
+        }
+        return;
+      }
+
+      await FavoritesService.instance.updateFavorites(
+        context,
+        filesToMark,
+        true,
+      );
+
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.filesMarkedAsImportant(filesToMark.length),
+        );
+      }
+
+      onSuccess?.call();
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Failed to mark multiple files as important: $e",
+        e,
+        stackTrace,
+      );
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.failedToMarkFilesAsImportant(e.toString()),
+        );
+      }
     }
   }
 }

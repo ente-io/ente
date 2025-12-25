@@ -344,6 +344,10 @@ export interface FilePublicMagicMetadataData {
      * (The owner of such files will be the owner of the collection)
      */
     uploaderName?: string;
+    /** Camera make (manufacturer) extracted from metadata. */
+    cameraMake?: string;
+    /** Camera model extracted from metadata. */
+    cameraModel?: string;
     /**
      * Edited latitude of the file
      *
@@ -407,6 +411,8 @@ export const FilePublicMagicMetadataData = z.looseObject({
     h: z.number().nullish().transform(nullToUndefined),
     caption: z.string().nullish().transform(nullToUndefined),
     uploaderName: z.string().nullish().transform(nullToUndefined),
+    cameraMake: z.string().nullish().transform(nullToUndefined),
+    cameraModel: z.string().nullish().transform(nullToUndefined),
     lat: z.number().nullish().transform(nullToUndefined),
     long: z.number().nullish().transform(nullToUndefined),
     sv: z.number().nullish().transform(nullToUndefined),
@@ -504,6 +510,39 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
 };
 
 /**
+ * Return the camera make (manufacturer) for the file.
+ */
+export const fileCameraMake = (file: EnteFile): string | undefined => {
+    const rawMake = file.pubMagicMetadata?.data.cameraMake;
+    if (!rawMake) return undefined;
+    const make = rawMake.trim();
+    if (make.length === 0) return undefined;
+    return make;
+};
+
+/**
+ * Return the camera model for the file.
+ */
+export const fileCameraModel = (file: EnteFile): string | undefined => {
+    const rawModel = file.pubMagicMetadata?.data.cameraModel;
+    if (!rawModel) return undefined;
+    const model = rawModel.trim();
+    if (model.length === 0) return undefined;
+    return model;
+};
+
+/**
+ * Return a user-friendly string describing the camera used for the file.
+ */
+export const fileCameraLabel = (file: EnteFile): string | undefined => {
+    const make = fileCameraMake(file);
+    const model = fileCameraModel(file);
+    if (!make && !model) return undefined;
+    if (make && model) return `${make} ${model}`;
+    return model ?? make;
+};
+
+/**
  * Return the duration of the video as a formatted "HH:mm:ss" string (when
  * present) for the given {@link EnteFile}.
  *
@@ -587,6 +626,10 @@ export interface ParsedMetadata {
      * A caption / description attached by the user to the photo.
      */
     description?: string;
+    /** Camera make (manufacturer) extracted from metadata (e.g. Apple, Canon). */
+    cameraMake?: string;
+    /** Camera model extracted from metadata (e.g. iPhone 15 Pro). */
+    cameraModel?: string;
 }
 
 /**

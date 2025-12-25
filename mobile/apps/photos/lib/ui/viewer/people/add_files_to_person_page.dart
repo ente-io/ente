@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -9,6 +10,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -43,7 +45,7 @@ class AddFilesToPersonPage extends StatefulWidget {
       if (persons.isEmpty) {
         showShortToast(
           context,
-          "Please name a person in the People section first",
+          AppLocalizations.of(context).pleaseNamePersonInPeopleSectionFirst,
         );
         return false;
       }
@@ -83,7 +85,7 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("(i) Add person"),
+        title: Text(AppLocalizations.of(context).addPerson),
         centerTitle: false,
       ),
       body: FutureBuilder<List<GenericSearchResult>>(
@@ -99,8 +101,8 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
             );
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text("No results found."),
+            return Center(
+              child: Text(AppLocalizations.of(context).noResultsFound),
             );
           }
 
@@ -163,14 +165,14 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
     if (uploadIds.isEmpty) {
       showShortToast(
         context,
-        "Only uploaded files can be added to a person",
+        AppLocalizations.of(context).onlyUploadedFilesCanBeAddedToPerson,
       );
       return;
     }
 
     final dialog = createProgressDialog(
       context,
-      "Saving...",
+      AppLocalizations.of(context).saving,
     );
     await dialog.show();
     try {
@@ -208,8 +210,6 @@ class _ManualPersonGridTile extends StatelessWidget {
     required this.onTap,
   });
 
-  double get _borderRadius => 82 * (size / 102);
-
   @override
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context).small;
@@ -221,12 +221,7 @@ class _ManualPersonGridTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ClipPath(
-            clipper: ShapeBorderClipper(
-              shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(_borderRadius),
-              ),
-            ),
+          FaceThumbnailSquircleClip(
             child: Container(
               width: size,
               height: size,

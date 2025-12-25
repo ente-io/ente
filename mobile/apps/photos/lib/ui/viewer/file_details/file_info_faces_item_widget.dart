@@ -22,6 +22,7 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
 import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -38,6 +39,7 @@ class FacesItemWidget extends StatefulWidget {
 }
 
 class _FacesItemWidgetState extends State<FacesItemWidget> {
+  static const double _kHeaderActionHeight = 48;
   bool _isEditMode = false;
   bool _showRemainingFaces = false;
   bool _isLoading = true;
@@ -136,7 +138,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
               _editStateButton(),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           _buildPeopleGrid(thumbnailWidth),
           if (_remainingFaces.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -207,11 +209,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         strokeWidth: strokeWidth,
         dashPattern: const [4, 4],
         padding: EdgeInsets.zero,
-        customPath: (size) {
-          return ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(52),
-          ).getOuterPath(Rect.fromLTWH(0, 0, size.width, size.height));
-        },
+        customPath: faceThumbnailSquircleOuterPath,
         child: SizedBox(
           height: innerSize,
           width: innerSize,
@@ -321,7 +319,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final showManualTagOption = flagService.manualTagFileToPerson &&
         reason == NoFacesReason.noFacesFound;
     final label = showManualTagOption
-        ? "No faces detected, tap to add."
+        ? AppLocalizations.of(context).noFacesDetectedTapToAdd
         : getNoFaceReasonText(context, reason);
     return Expanded(
       child: Padding(
@@ -400,23 +398,29 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   Widget _editStateButton() {
     if (_isEditMode) {
       return Padding(
-        padding: const EdgeInsets.only(right: 12.0, top: 11, bottom: 10),
-        child: GestureDetector(
-          onTap: _toggleEditMode,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: getEnteColorScheme(context).primary500,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              AppLocalizations.of(context).done,
-              style: getEnteTextTheme(context).small.copyWith(
+        padding: const EdgeInsets.only(right: 12.0),
+        child: SizedBox(
+          height: _kHeaderActionHeight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _toggleEditMode,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(
                     color: getEnteColorScheme(context).primary500,
+                    width: 1,
                   ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  AppLocalizations.of(context).done,
+                  style: getEnteTextTheme(context).small.copyWith(
+                        color: getEnteColorScheme(context).primary500,
+                      ),
+                ),
+              ),
             ),
           ),
         ),
@@ -669,29 +673,13 @@ class _ManualPersonTag extends StatelessWidget {
                   Container(
                     height: thumbnailWidth,
                     width: thumbnailWidth,
-                    decoration: const ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.elliptical(16, 12),
-                        ),
-                        side: BorderSide.none,
-                      ),
+                    decoration: ShapeDecoration(
+                      shape: faceThumbnailSquircleBorder(side: thumbnailWidth),
                     ),
-                    child: ClipRRect(
-                      child: SizedBox(
-                        width: thumbnailWidth,
-                        height: thumbnailWidth,
-                        child: ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(52),
-                            ),
-                          ),
-                          child: PersonFaceWidget(
-                            personId: person.remoteID,
-                            keepAlive: true,
-                          ),
-                        ),
+                    child: FaceThumbnailSquircleClip(
+                      child: PersonFaceWidget(
+                        personId: person.remoteID,
+                        keepAlive: true,
                       ),
                     ),
                   ),

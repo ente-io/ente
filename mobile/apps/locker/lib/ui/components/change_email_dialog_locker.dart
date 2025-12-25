@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_accounts/ente_accounts.dart';
+import 'package:ente_ui/components/close_icon_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
@@ -75,21 +76,7 @@ class _ChangeEmailDialogLockerState extends State<ChangeEmailDialogLocker> {
                   context.l10n.changeEmail,
                   style: textTheme.h3Bold,
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.fillFaint,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 20,
-                      color: colorScheme.textMuted,
-                    ),
-                  ),
-                ),
+                const CloseIconButton(),
               ],
             ),
             const SizedBox(height: 24),
