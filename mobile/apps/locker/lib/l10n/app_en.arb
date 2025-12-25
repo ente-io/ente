@@ -853,7 +853,6 @@
   },
   "important": "Important",
   "unimportant": "Unimportant",
-  "addingToImportant": "Marking as important...",
   "removingFromImportant": "Removing from important...",
   "markingAsImportant": "Marking as important...",
   "fileMarkedAsImportant": "Item marked as important",

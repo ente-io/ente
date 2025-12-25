@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
@@ -94,16 +95,14 @@ class FilePopupMenuWidget extends StatelessWidget {
         value: 'toggle_important',
         padding: EdgeInsets.zero,
         height: 0,
-        child: FutureBuilder<bool>(
-          future: FileActions.isImportant(file),
-          initialData: false,
-          builder: (context, snapshot) {
-            final isImportant = snapshot.data ?? false;
+        child: Builder(
+          builder: (context) {
+            final isImportant = FavoritesService.instance.isFavoriteCache(file);
             return PopupMenuItemWidget(
               icon: Icon(
                 isImportant ? Icons.star_rounded : Icons.star_border_rounded,
                 color: colorScheme.textBase,
-                size: 20,
+                size: 22,
               ),
               label: isImportant
                   ? context.l10n.unimportant
@@ -124,7 +123,7 @@ class FilePopupMenuWidget extends StatelessWidget {
             color: colorScheme.textBase,
             size: 20,
           ),
-          label: "Save",
+          label: context.l10n.save,
           isFirst: false,
           isLast: false,
         ),

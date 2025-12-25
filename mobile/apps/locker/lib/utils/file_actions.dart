@@ -407,14 +407,9 @@ class FileActions {
     }
   }
 
-  /// Checks if a file is marked as important
-  static Future<bool> isImportant(EnteFile file) async {
-    try {
-      return await FavoritesService.instance.isFavorite(file);
-    } catch (e) {
-      _logger.severe("Error checking important status: $e");
-      return false;
-    }
+  /// Checks if a file is marked as important using cache
+  static bool isImportant(EnteFile file) {
+    return FavoritesService.instance.isFavoriteCache(file);
   }
 
   /// Toggles important status of a single file
@@ -423,12 +418,12 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
-    final isCurrentlyImportant = await isImportant(file);
+    final isCurrentlyImportant = isImportant(file);
     final dialog = createProgressDialog(
       context,
       isCurrentlyImportant
           ? context.l10n.removingFromImportant
-          : context.l10n.addingToImportant,
+          : context.l10n.markingAsImportant,
       isDismissible: false,
     );
 
@@ -460,7 +455,7 @@ class FileActions {
       if (context.mounted) {
         showToast(
           context,
-          context.l10n.somethingWentWrong,
+          context.l10n.failedToUpdateImportantStatus(e.toString()),
         );
       }
     }
@@ -481,13 +476,10 @@ class FileActions {
     try {
       await dialog.show();
 
-      final List<EnteFile> filesToMark = [];
-      for (final file in files) {
-        final isFileImportant = await isImportant(file);
-        if (!isFileImportant) {
-          filesToMark.add(file);
-        }
-      }
+      // Use sync cache for better performance
+      final filesToMark = files
+          .where((file) => !FavoritesService.instance.isFavoriteCache(file))
+          .toList();
 
       if (filesToMark.isEmpty) {
         await dialog.hide();

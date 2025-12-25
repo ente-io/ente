@@ -2530,12 +2530,6 @@ abstract class AppLocalizations {
   /// **'Unimportant'**
   String get unimportant;
 
-  /// No description provided for @addingToImportant.
-  ///
-  /// In en, this message translates to:
-  /// **'Marking as important...'**
-  String get addingToImportant;
-
   /// No description provided for @removingFromImportant.
   ///
   /// In en, this message translates to:

@@ -1472,9 +1472,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unimportant => 'Unimportant';
 
   @override
-  String get addingToImportant => 'Marking as important...';
-
-  @override
   String get removingFromImportant => 'Removing from important...';
 
   @override

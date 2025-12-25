@@ -601,5 +601,4 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       }
     }
   }
-
 }
