@@ -1,3 +1,4 @@
+import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
@@ -9,7 +10,6 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:locker/ui/components/recovery_key_sheet.dart";
 
@@ -43,14 +43,7 @@ class AccountSectionWidget extends StatelessWidget {
             );
             if (hasAuthenticated) {
               // ignore: unawaited_futures
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const ChangeEmailDialogLocker();
-                },
-                barrierColor: Colors.black.withValues(alpha: 0.85),
-                barrierDismissible: false,
-              );
+              showChangeEmailDialog(context);
             }
           },
         ),
