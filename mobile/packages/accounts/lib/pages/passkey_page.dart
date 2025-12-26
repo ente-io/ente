@@ -5,6 +5,7 @@ import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_strings/ente_strings.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -70,10 +71,11 @@ class _PasskeyPageState extends State<PasskeyPage> {
       showToast(context, context.strings.passKeyPendingVerification);
       return;
     } on PassKeySessionExpiredError {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.strings.loginSessionExpired,
-        context.strings.loginSessionExpiredDetails,
+        title: context.strings.loginSessionExpired,
+        message: context.strings.loginSessionExpiredDetails,
+        assetPath: 'assets/warning-grey.png',
       );
       Navigator.of(context).pop();
       return;
