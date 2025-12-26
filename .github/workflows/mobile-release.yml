@@ -1,21 +1,21 @@
 name: "Release (photos independent)"
 
 on:
-    workflow_dispatch: # Allow manually running the action
-      inputs:
-        tag:
+  workflow_dispatch:
+    inputs:
+      tag:
         description: "Release tag (e.g. photos-v1.2.3)"
         required: true
         type: string
-    push:
-        # Run when a tag matching the pattern "photos-v*"" is pushed
-        # See: [Note: Testing release workflows that are triggered by tags]
-        tags:
-            - "photos-v*"
+  push:
+    tags:
+      - "photos-v*"
+
 
 env:
-    FLUTTER_VERSION: "3.32.8"
-    RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+  FLUTTER_VERSION: "3.32.8"
+  RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
 permissions:
     contents: write
 
