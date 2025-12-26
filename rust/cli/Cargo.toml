@@ -22,10 +22,8 @@ tokio = { version = "1.41", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "stream"] }
 futures = "0.3"
 
-# Cryptography - ONLY libsodium (statically linked)
-libsodium-sys-stable = "1.20"
+# Cryptography - using ente-core pure Rust implementation
 base64 = "0.22"
-hex = "0.4"
 zeroize = { version = "1.8", features = ["derive"] }
 
 # SRP authentication
@@ -51,6 +49,7 @@ uuid = { version = "1.11", features = ["serde", "v4"] }
 rpassword = "7.3"
 indicatif = "0.17"
 dialoguer = "0.11"
+open = "5.0"
 
 # File operations
 walkdir = "2.5"

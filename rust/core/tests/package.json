@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "libsodium-wrappers-sumo": "^0.7.15"
+  }
+}
