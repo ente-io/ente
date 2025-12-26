@@ -108,6 +108,12 @@ Regular albums continue to work perfectly on your custom domain - only the Trip 
 
 Learn more in the [Custom domains guide](/photos/features/sharing-and-collaboration/custom-domains/).
 
+### How can my partner and I automatically share all photos we take with each other? {#auto-share-partners}
+
+You can do this by adding your partner as a viewer or collaborator to your camera folder, and asking them to do the same for you. On Android this is the **Camera** folder, and on iOS this is **Recents** (or equivalent).
+
+Any new photos backed up to these folders will automatically be shared and synced to the other person's device. This results in two separate albums — one for your photos and one for your partner's — where both of you can view and add photos.
+
 ## Collaboration
 
 ### How do I share an album with other Ente users? {#share-with-users}
