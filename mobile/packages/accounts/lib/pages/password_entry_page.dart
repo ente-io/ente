@@ -477,7 +477,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
               const SizedBox(height: 20),
               GradientButton(
                 text: context.strings.doNotSignOut,
-                backgroundColor: colorScheme.primary700,
                 onTap: () {
                   logOutFromOther = false;
                   Navigator.of(bottomSheetContext).pop();

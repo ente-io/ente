@@ -1,12 +1,19 @@
+import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+
+enum GradientButtonType {
+  primary,
+  secondary,
+  critical,
+}
 
 class GradientButton extends StatelessWidget {
   final VoidCallback? onTap;
   final String text;
   final IconData? icon;
   final double paddingValue;
-  final Color? backgroundColor;
+  final GradientButtonType buttonType;
 
   const GradientButton({
     super.key,
@@ -14,7 +21,7 @@ class GradientButton extends StatelessWidget {
     this.text = '',
     this.icon,
     this.paddingValue = 6.0,
-    this.backgroundColor,
+    this.buttonType = GradientButtonType.primary,
   });
 
   static const TextStyle _textStyle = TextStyle(
@@ -28,10 +35,13 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final bool isEnabled = onTap != null;
-    final Color effectiveBackgroundColor = backgroundColor ??
-        (isEnabled ? colorScheme.primary700 : colorScheme.fillFaint);
+
+    final Color effectiveBackgroundColor =
+        _getBackgroundColor(colorScheme, isEnabled);
+    final Color effectiveTextColor = _getTextColor(colorScheme, isEnabled);
+
     final TextStyle effectiveTextStyle = _textStyle.copyWith(
-      color: isEnabled ? Colors.white : colorScheme.textMuted,
+      color: effectiveTextColor,
     );
 
     final Widget textWidget = Text(text, style: effectiveTextStyle);
@@ -44,7 +54,7 @@ class GradientButton extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: isEnabled ? Colors.white : colorScheme.textMuted,
+                color: effectiveTextColor,
               ),
               Padding(padding: EdgeInsets.symmetric(horizontal: paddingValue)),
               if (text.isNotEmpty) textWidget,
@@ -67,5 +77,33 @@ class GradientButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getBackgroundColor(EnteColorScheme colorScheme, bool isEnabled) {
+    if (!isEnabled) {
+      return colorScheme.fillFaint;
+    }
+    switch (buttonType) {
+      case GradientButtonType.primary:
+        return colorScheme.primary700;
+      case GradientButtonType.secondary:
+        return colorScheme.backdropBase;
+      case GradientButtonType.critical:
+        return colorScheme.warning700;
+    }
+  }
+
+  Color _getTextColor(EnteColorScheme colorScheme, bool isEnabled) {
+    if (!isEnabled) {
+      return colorScheme.textMuted;
+    }
+    switch (buttonType) {
+      case GradientButtonType.primary:
+        return Colors.white;
+      case GradientButtonType.secondary:
+        return colorScheme.textBase;
+      case GradientButtonType.critical:
+        return Colors.white;
+    }
   }
 }

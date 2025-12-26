@@ -5,8 +5,8 @@ import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_strings/ente_strings.dart';
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
+import 'package:ente_ui/components/buttons/gradient_button.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/navigation_util.dart';
@@ -140,10 +140,24 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
-        title: Text(
-          context.strings.passkeyAuthTitle,
+        elevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: Image.asset(
+          'assets/locker-logo-blue.png',
+          height: 24,
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.primary700,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
       ),
       body: _getBody(),
@@ -151,29 +165,37 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Widget _getBody() {
-    return Center(
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 12),
             Text(
-              context.strings.waitingForVerification,
-              style: const TextStyle(
-                height: 1.4,
-                fontSize: 16,
+              context.strings.passkeyAuthTitle,
+              style: textTheme.h3Bold.copyWith(
+                color: colorScheme.textBase,
               ),
             ),
-            const SizedBox(height: 16),
-            ButtonWidget(
-              buttonType: ButtonType.primary,
-              labelText: context.strings.tryAgain,
+            Text(
+              context.strings.waitingForVerification,
+              style: textTheme.body.copyWith(
+                color: colorScheme.textMuted,
+              ),
+            ),
+            const SizedBox(height: 24),
+            GradientButton(
+              text: context.strings.tryAgain,
               onTap: () => launchPasskey(),
             ),
             const SizedBox(height: 16),
-            ButtonWidget(
-              buttonType: ButtonType.secondary,
-              labelText: context.strings.checkStatus,
+            GradientButton(
+              text: context.strings.checkStatus,
+              buttonType: GradientButtonType.secondary,
               onTap: () async {
                 try {
                   await checkStatus();
@@ -182,54 +204,51 @@ class _PasskeyPageState extends State<PasskeyPage> {
                   showGenericErrorDialog(context: context, error: e).ignore();
                 }
               },
-              shouldSurfaceExecutionStates: true,
             ),
-            const Padding(padding: EdgeInsets.all(30)),
-            if (widget.totp2FASessionID.isNotEmpty)
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  routeToPage(
-                    context,
-                    TwoFactorAuthenticationPage(
-                      widget.totp2FASessionID,
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Center(
-                    child: Text(
-                      context.strings.loginWithTOTP,
-                      style: const TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                UserService.instance.recoverTwoFactor(
-                  context,
-                  widget.sessionID,
-                  TwoFactorType.passkey,
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                child: Center(
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                widget.totp2FASessionID.isNotEmpty
+                    ? GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          routeToPage(
+                            context,
+                            TwoFactorAuthenticationPage(
+                              widget.totp2FASessionID,
+                            ),
+                          );
+                        },
+                        child: Text(
+                          context.strings.loginWithTOTP,
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.primary700,
+                            decoration: TextDecoration.underline,
+                            decorationColor: colorScheme.primary700,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    UserService.instance.recoverTwoFactor(
+                      context,
+                      widget.sessionID,
+                      TwoFactorType.passkey,
+                    );
+                  },
                   child: Text(
                     context.strings.recoverAccount,
-                    style: const TextStyle(
+                    style: textTheme.body.copyWith(
+                      color: colorScheme.primary700,
                       decoration: TextDecoration.underline,
-                      fontSize: 12,
+                      decorationColor: colorScheme.primary700,
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
