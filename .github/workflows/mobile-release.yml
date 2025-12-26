@@ -2,7 +2,11 @@ name: "Release (photos independent)"
 
 on:
     workflow_dispatch: # Allow manually running the action
-    push:
+    inputs:
+      tag:
+        description: "Release tag (e.g. photos-v1.2.3)"
+        required: true
+	push:
         # Run when a tag matching the pattern "photos-v*"" is pushed
         # See: [Note: Testing release workflows that are triggered by tags]
         tags:
@@ -10,7 +14,7 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
-
+    RELEASE_TAG: ${{ inputs.tag || env.RELEASE_TAG }}
 permissions:
     contents: write
 
@@ -91,7 +95,7 @@ jobs:
             - name: Build independent APK
               run: |
                 flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
-                mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk
+                mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ env.RELEASE_TAG }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
@@ -99,10 +103,11 @@ jobs:
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}
 
             - name: Checksum
-              run: sha256sum build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk > build/app/outputs/flutter-apk/sha256sum
+              run: sha256sum build/app/outputs/flutter-apk/ente-${{ env.RELEASE_TAG }}.apk > build/app/outputs/flutter-apk/sha256sum
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "mobile/apps/photos/build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk,mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum"
+                  tag: ${{ env.RELEASE_TAG }}
+                  artifacts: "mobile/apps/photos/build/app/outputs/flutter-apk/ente-${{ env.RELEASE_TAG }}.apk,mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum"
                   draft: true
