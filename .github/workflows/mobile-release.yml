@@ -112,3 +112,8 @@ jobs:
                   tag: ${{ env.RELEASE_TAG }}
                   artifacts: "mobile/apps/photos/build/app/outputs/flutter-apk/ente-${{ env.RELEASE_TAG }}.apk,mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum"
                   draft: true
+            - name: Upload APK
+              uses: actions/upload-artifact@v4
+              with:
+                  name: release-apk
+                  path: mobile/apps/photos/build/app/outputs/flutter-apk/ente-${{ env.RELEASE_TAG }}.apk
