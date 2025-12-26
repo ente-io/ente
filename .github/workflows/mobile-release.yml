@@ -3,8 +3,8 @@ name: "Release (photos independent)"
 on:
     workflow_dispatch: # Allow manually running the action
       inputs:
-	  tag:
-	  description: "Release tag (e.g. photos-v1.2.3)"
+        tag:
+        description: "Release tag (e.g. photos-v1.2.3)"
         required: true
     push:
         # Run when a tag matching the pattern "photos-v*"" is pushed
