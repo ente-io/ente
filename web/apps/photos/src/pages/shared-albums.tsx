@@ -422,11 +422,13 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
-            await downloadAndSaveFiles(
-                selectedFiles,
-                t("files_count", { count: selectedFiles.length }),
-                onAddSaveGroup,
-            );
+            const filesCountTitle = t("files_count", {
+                count: selectedFiles.length,
+            });
+            const title = publicCollection?.name
+                ? `${publicCollection.name} - ${filesCountTitle}`
+                : filesCountTitle;
+            await downloadAndSaveFiles(selectedFiles, title, onAddSaveGroup);
             clearSelection();
         } catch (e) {
             log.error("failed to download selected files", e);
