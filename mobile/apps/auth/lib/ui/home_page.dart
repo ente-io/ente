@@ -60,6 +60,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:window_manager/window_manager.dart';
 
 class HomePage extends BaseHomePage {
   const HomePage({super.key});
@@ -1018,6 +1019,13 @@ class _HomePageState extends State<HomePage> {
           : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
               _pressedKeys.contains(LogicalKeyboardKey.control) ||
               _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyW) {
+        if (PlatformUtil.isDesktop()) {
+          windowManager.close();
+          return true;
+        }
+      }
 
       if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) ||
           event.logicalKey == LogicalKeyboardKey.slash) {
