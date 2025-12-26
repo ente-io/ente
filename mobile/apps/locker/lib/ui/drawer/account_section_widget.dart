@@ -3,6 +3,8 @@ import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
@@ -99,14 +101,20 @@ class AccountSectionWidget extends StatelessWidget {
   }
 
   void _onLogoutTapped(BuildContext context) {
-    showChoiceActionSheet(
+    showAlertBottomSheet(
       context,
-      title: context.l10n.areYouSureYouWantToLogout,
-      firstButtonLabel: context.l10n.yesLogout,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await UserService.instance.logout(context);
-      },
+      title: context.l10n.warning,
+      message: context.l10n.areYouSureYouWantToLogout,
+      assetPath: "assets/warning-grey.png",
+      buttons: [
+        GradientButton(
+          buttonType: GradientButtonType.critical,
+          text: context.l10n.yesLogout,
+          onTap: () async {
+            await UserService.instance.logout(context);
+          },
+        ),
+      ],
     );
   }
 }
