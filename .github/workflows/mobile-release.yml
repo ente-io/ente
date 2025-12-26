@@ -6,6 +6,7 @@ on:
         tag:
         description: "Release tag (e.g. photos-v1.2.3)"
         required: true
+        type: string
     push:
         # Run when a tag matching the pattern "photos-v*"" is pushed
         # See: [Note: Testing release workflows that are triggered by tags]
@@ -14,7 +15,7 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
-    RELEASE_TAG: ${{ inputs.tag || env.RELEASE_TAG }}
+    RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 permissions:
     contents: write
 
