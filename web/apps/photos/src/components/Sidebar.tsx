@@ -290,6 +290,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onShowExport,
                 onLogout: handleLogout,
                 onRouteToDeduplicate: () => router.push("/duplicates"),
+                onRouteToSimilarImages: () => router.push("/similar-images"),
                 onShowWatchFolder: handleOpenWatchFolder,
                 pseudoIDs: {
                     uncategorized: uncategorizedCollectionSummaryID,
@@ -379,6 +380,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onHelpActionHandled: setPendingHelpAction,
                         onRouteToDeduplicate: () => {
                             void router.push("/duplicates");
+                        },
+                        onRouteToSimilarImages: () => {
+                            void router.push("/similar-images");
                         },
                     }}
                 />
@@ -768,6 +772,7 @@ type UtilitySectionProps = SectionProps &
         pendingHelpAction?: HelpAction;
         onHelpActionHandled: (action?: HelpAction) => void;
         onRouteToDeduplicate: () => void;
+        onRouteToSimilarImages: () => void;
     };
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({
@@ -790,6 +795,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     pendingHelpAction,
     onHelpActionHandled,
     onRouteToDeduplicate,
+    onRouteToSimilarImages,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -816,6 +822,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 variant="secondary"
                 label={t("deduplicate_files")}
                 onClick={onRouteToDeduplicate}
+            />
+            <RowButton
+                variant="secondary"
+                label={t("similar_images")}
+                onClick={onRouteToSimilarImages}
             />
             <RowButton
                 variant="secondary"

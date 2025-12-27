@@ -177,3 +177,5 @@ const cachedOrReadCLIPIndexes = async () =>
     ));
 
 export const clearCachedCLIPIndexes = () => (_cachedCLIPIndexes = undefined);
+
+export const getCLIPIndexes = cachedOrReadCLIPIndexes;
