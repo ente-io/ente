@@ -1,5 +1,6 @@
 import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
+import "package:ente_accounts/pages/password_entry_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
@@ -14,6 +15,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:locker/ui/components/recovery_key_sheet.dart";
+import "package:locker/ui/pages/home_page.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
@@ -74,6 +76,31 @@ class AccountSectionWidget extends StatelessWidget {
               await showRecoveryKeySheet(
                 context,
                 recoveryKey: recoveryKey,
+              );
+            }
+          },
+        ),
+        ExpandableChildItem(
+          title: l10n.changePassword,
+          trailingIcon: Icons.chevron_right,
+          onTap: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              l10n.authToChangeYourPassword,
+            );
+            if (hasAuthenticated) {
+              // ignore: unawaited_futures
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return PasswordEntryPage(
+                      Configuration.instance,
+                      PasswordEntryMode.update,
+                      const HomePage(),
+                    );
+                  },
+                ),
               );
             }
           },
