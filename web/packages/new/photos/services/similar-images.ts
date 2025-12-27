@@ -112,8 +112,25 @@ export const getSimilarImages = async (
         );
     }
 
-    const fileIDs = collectionFiles.map((f) => f.id);
-    console.log(`[Similar Images] Found ${collectionFiles.length} eligible files with embeddings`);
+    // Aggregate collection IDs per file ID (like dedup.ts does)
+    // Each file can belong to multiple collections, but savedCollectionFiles()
+    // returns one entry per (file, collection) pair. We need to aggregate all
+    // collection IDs for each file to preserve all memberships during deletion.
+    const collectionIDsByFileID = new Map<number, Set<number>>();
+    const uniqueFiles = new Map<number, EnteFile>();
+    for (const file of collectionFiles) {
+        let collectionIDs = collectionIDsByFileID.get(file.id);
+        if (!collectionIDs) {
+            collectionIDsByFileID.set(file.id, (collectionIDs = new Set()));
+            // First time seeing this file ID, store the file
+            uniqueFiles.set(file.id, file);
+        }
+        collectionIDs.add(file.collectionID);
+    }
+
+    const files = Array.from(uniqueFiles.values());
+    const fileIDs = Array.from(uniqueFiles.keys());
+    console.log(`[Similar Images] Found ${files.length} eligible files with embeddings`);
 
     // Step 3: Check cache for existing results
     onProgress?.(40);
@@ -150,11 +167,12 @@ export const getSimilarImages = async (
 
     // Step 4: Group files by similarity (cache miss)
     onProgress?.(50);
-    console.log(`[Similar Images] Starting similarity computation for ${collectionFiles.length} files...`);
+    console.log(`[Similar Images] Starting similarity computation for ${files.length} files...`);
 
     // Use HNSW-based grouping for better performance
     const groups = await groupSimilarImagesHNSW(
-        collectionFiles,
+        files,
+        collectionIDsByFileID,
         embeddingsByFileID,
         collectionNameByID,
         distanceThreshold,
@@ -216,6 +234,7 @@ const hashFileIDs = (fileIDs: number[]): string => {
  */
 const groupSimilarImagesHNSW = async (
     files: EnteFile[],
+    collectionIDsByFileID: Map<number, Set<number>>,
     embeddingsByFileID: Map<number, Float32Array>,
     collectionNameByID: Map<number, string>,
     threshold: number,
@@ -347,12 +366,13 @@ const groupSimilarImagesHNSW = async (
         const group: SimilarImageItem[] = [];
         let furthestDistance = 0;
 
-        // Add reference file
+        // Add reference file with all its collection memberships
+        const referenceCollectionIDs = collectionIDsByFileID.get(fileID) || new Set([referenceFile.collectionID]);
         group.push({
             file: referenceFile,
             distance: 0,
             similarityScore: 100,
-            collectionIDs: new Set([referenceFile.collectionID]),
+            collectionIDs: referenceCollectionIDs,
             collectionName:
                 collectionNameByID.get(referenceFile.collectionID) || "Unknown",
         });
@@ -365,12 +385,14 @@ const groupSimilarImagesHNSW = async (
             const neighborFile = fileByID.get(neighborID);
             if (!neighborFile) continue;
 
+            // Get all collection memberships for this file
+            const neighborCollectionIDs = collectionIDsByFileID.get(neighborID) || new Set([neighborFile.collectionID]);
             const similarityScore = Math.round((1 - distance) * 100);
             group.push({
                 file: neighborFile,
                 distance,
                 similarityScore,
-                collectionIDs: new Set([neighborFile.collectionID]),
+                collectionIDs: neighborCollectionIDs,
                 collectionName:
                     collectionNameByID.get(neighborFile.collectionID) ||
                     "Unknown",
