@@ -15,6 +15,9 @@ import {
     clearSimilarImagesCache as clearSimilarImagesCacheInDB,
     loadSimilarImagesCache,
     saveSimilarImagesCache,
+    loadHNSWIndexMetadata,
+    saveHNSWIndexMetadata,
+    generateFileIDHash,
 } from "./ml/db";
 import { dotProduct } from "./ml/math";
 import { getCLIPHNSWIndex, clearCLIPHNSWIndex } from "./ml/hnsw";
@@ -206,6 +209,10 @@ const hashFileIDs = (fileIDs: number[]): string => {
  * algorithm. Much faster than O(n²) for large libraries:
  * - O(n²): ~6.4B comparisons for 80k images
  * - HNSW: ~1.3M comparisons for 80k images (~5000x faster)
+ *
+ * Implements index persistence for massive performance improvement:
+ * - First load: ~7 minutes (build + save)
+ * - Subsequent loads: ~2-5 seconds (load from IDBFS)
  */
 const groupSimilarImagesHNSW = async (
     files: EnteFile[],
@@ -217,10 +224,6 @@ const groupSimilarImagesHNSW = async (
     if (files.length < 2) return [];
 
     onProgress?.(55);
-    console.log(`[Similar Images] Building HNSW index...`);
-
-    // Clear any existing index to avoid "maximum elements exceeded" error
-    clearCLIPHNSWIndex();
 
     // Prepare vectors for indexing
     const fileIDs: number[] = [];
@@ -233,25 +236,83 @@ const groupSimilarImagesHNSW = async (
         }
     }
 
-    console.log(`[Similar Images] Creating HNSW index for ${fileIDs.length} vectors...`);
-    onProgress?.(58);
+    const currentFileIDHash = generateFileIDHash(fileIDs);
+    const indexFilename = "clip_hnsw.bin";
 
-    // Build HNSW index with required capacity
+    // Try to load cached index
+    console.log(`[Similar Images] Checking for cached HNSW index...`);
+    const cachedMetadata = await loadHNSWIndexMetadata("clip-hnsw-index");
+
+    // Clear any existing index in memory
+    clearCLIPHNSWIndex();
+
+    // Build or load HNSW index with required capacity
     const index = await getCLIPHNSWIndex(fileIDs.length);
 
-    console.log(`[Similar Images] Adding ${fileIDs.length} vectors to index...`);
+    let indexLoaded = false;
 
-    try {
-        // Add all vectors at once with progress reporting
-        await index.addVectors(fileIDs, embeddings, (addProgress) => {
-            // Map internal progress (0-100) to overall progress (58-65)
-            const overallProgress = 58 + (addProgress * 7) / 100;
-            onProgress?.(Math.round(overallProgress));
-        });
-        console.log(`[Similar Images] Successfully added ${index.size()} vectors`);
-    } catch (error) {
-        console.error(`[Similar Images] Failed to add vectors to HNSW index:`, error);
-        throw new Error(`Failed to build similarity index: ${error}`);
+    if (cachedMetadata && cachedMetadata.fileIDHash === currentFileIDHash) {
+        // Cache valid - try to load index from IDBFS
+        console.log(`[Similar Images] Found valid cached index (${cachedMetadata.vectorCount} vectors)`);
+        console.log(`[Similar Images] Loading index from IDBFS...`);
+        onProgress?.(56);
+
+        try {
+            await index.loadIndex(indexFilename, {
+                fileIDToLabel: cachedMetadata.fileIDToLabel,
+                labelToFileID: cachedMetadata.labelToFileID,
+            });
+            console.log(`[Similar Images] Successfully loaded cached index`);
+            indexLoaded = true;
+            onProgress?.(65);
+        } catch (error) {
+            console.warn(`[Similar Images] Failed to load cached index, will rebuild:`, error);
+            indexLoaded = false;
+        }
+    } else {
+        console.log(cachedMetadata
+            ? `[Similar Images] Cache invalid (file hash mismatch), rebuilding...`
+            : `[Similar Images] No cached index found, building...`
+        );
+    }
+
+    if (!indexLoaded) {
+        // Build index from scratch
+        console.log(`[Similar Images] Building HNSW index for ${fileIDs.length} vectors...`);
+        onProgress?.(58);
+
+        try {
+            // Add all vectors at once with progress reporting
+            await index.addVectors(fileIDs, embeddings, (addProgress) => {
+                // Map internal progress (0-100) to overall progress (58-90)
+                const overallProgress = 58 + (addProgress * 32) / 100;
+                onProgress?.(Math.round(overallProgress));
+            });
+            console.log(`[Similar Images] Successfully added ${index.size()} vectors`);
+
+            onProgress?.(90);
+
+            // Save index to IDBFS for next time
+            console.log(`[Similar Images] Saving index to IDBFS...`);
+            const mappings = await index.saveIndex(indexFilename);
+
+            // Save metadata to IndexedDB
+            await saveHNSWIndexMetadata({
+                id: "clip-hnsw-index",
+                fileIDHash: currentFileIDHash,
+                fileIDToLabel: mappings.fileIDToLabel,
+                labelToFileID: mappings.labelToFileID,
+                vectorCount: fileIDs.length,
+                createdAt: Date.now(),
+                filename: indexFilename,
+            });
+
+            console.log(`[Similar Images] Index saved successfully`);
+            onProgress?.(95);
+        } catch (error) {
+            console.error(`[Similar Images] Failed to add vectors to HNSW index:`, error);
+            throw new Error(`Failed to build similarity index: ${error}`);
+        }
     }
 
     onProgress?.(65);

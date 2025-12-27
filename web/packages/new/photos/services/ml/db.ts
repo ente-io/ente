@@ -3,7 +3,7 @@ import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
-import type { CachedSimilarImages } from "../similar-images-types";
+import type { CachedSimilarImages, CachedHNSWIndexMetadata } from "../similar-images-types";
 
 /**
  * ML DB schema.
@@ -50,6 +50,7 @@ interface MLDBSchema extends DBSchema {
     /* Unused */
     "cluster-group": { key: string; value: unknown };
     "similar-images-cache": { key: string; value: CachedSimilarImages };
+    "hnsw-index-metadata": { key: string; value: CachedHNSWIndexMetadata };
 }
 
 interface FileStatus {
@@ -90,7 +91,7 @@ interface FileStatus {
 let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
 const openMLDB = async () => {
-    const db = await openDB<MLDBSchema>("ml", 2, {
+    const db = await openDB<MLDBSchema>("ml", 3, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
@@ -104,6 +105,9 @@ const openMLDB = async () => {
             }
             if (oldVersion < 2) {
                 db.createObjectStore("similar-images-cache", { keyPath: "id" });
+            }
+            if (oldVersion < 3) {
+                db.createObjectStore("hnsw-index-metadata", { keyPath: "id" });
             }
         },
         blocking() {
@@ -489,4 +493,61 @@ export const invalidateSimilarImagesCacheForFiles = async (
     // For now, we clear the entire cache when files change.
     // In the future, we could do incremental updates.
     await clearSimilarImagesCache();
+};
+
+// ===========================================================================
+// HNSW Index Metadata Cache
+// ===========================================================================
+
+/**
+ * Save HNSW index metadata to IndexedDB.
+ *
+ * The actual index data is stored in IDBFS, but we store metadata here
+ * for cache validation and quick lookup.
+ *
+ * @param metadata The index metadata to save.
+ */
+export const saveHNSWIndexMetadata = async (
+    metadata: CachedHNSWIndexMetadata,
+): Promise<void> => {
+    const db = await mlDB();
+    await db.put("hnsw-index-metadata", metadata);
+};
+
+/**
+ * Load HNSW index metadata from IndexedDB.
+ *
+ * @param id The ID of the metadata to load (e.g., "clip-hnsw-index").
+ * @returns The cached metadata, or undefined if not found.
+ */
+export const loadHNSWIndexMetadata = async (
+    id: string = "clip-hnsw-index",
+): Promise<CachedHNSWIndexMetadata | undefined> => {
+    const db = await mlDB();
+    return db.get("hnsw-index-metadata", id);
+};
+
+/**
+ * Clear all HNSW index metadata.
+ *
+ * Call this when you want to force a rebuild of all indexes.
+ */
+export const clearHNSWIndexMetadata = async (): Promise<void> => {
+    const db = await mlDB();
+    const tx = db.transaction("hnsw-index-metadata", "readwrite");
+    await tx.store.clear();
+    return tx.done;
+};
+
+/**
+ * Generate a hash from file IDs for cache validation.
+ *
+ * This is used to detect when files have been added or removed.
+ *
+ * @param fileIDs Array of file IDs to hash.
+ * @returns A hash string representing the file IDs.
+ */
+export const generateFileIDHash = (fileIDs: number[]): string => {
+    const sorted = [...fileIDs].sort((a, b) => a - b);
+    return hashString(sorted.join(','));
 };
