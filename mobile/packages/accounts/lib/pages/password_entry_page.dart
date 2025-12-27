@@ -458,12 +458,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Future<bool> logOutFromOtherDevices(BuildContext context) async {
-    bool logOutFromOther = true;
+    bool logOutFromOther = false;
 
     await showBaseBottomSheet(
       context,
       headerSpacing: 20,
       title: context.strings.signOutFromOtherDevices,
+      isDismissible: false,
+      enableDrag: false,
       child: Builder(
         builder: (bottomSheetContext) {
           final colorScheme = getEnteColorScheme(bottomSheetContext);
@@ -478,7 +480,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
               GradientButton(
                 text: context.strings.doNotSignOut,
                 onTap: () {
-                  logOutFromOther = false;
                   Navigator.of(bottomSheetContext).pop();
                 },
               ),
