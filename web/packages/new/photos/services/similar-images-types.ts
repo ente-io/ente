@@ -165,3 +165,43 @@ export interface CachedSimilarImages {
      */
     version: number;
 }
+
+/**
+ * Metadata for a cached HNSW index stored in IndexedDB.
+ *
+ * The actual index data is stored in IDBFS (Emscripten's virtual filesystem),
+ * but we store metadata here for cache validation and reconstruction.
+ */
+export interface CachedHNSWIndexMetadata {
+    /**
+     * A unique identifier for this cache entry.
+     */
+    id: string;
+    /**
+     * Hash of file IDs that were indexed.
+     * Used for cache invalidation - if this changes, rebuild the index.
+     */
+    fileIDHash: string;
+    /**
+     * Mapping of file IDs to HNSW labels.
+     * Needed to reconstruct the index mappings.
+     */
+    fileIDToLabel: [number, number][];
+    /**
+     * Mapping of HNSW labels to file IDs.
+     * Needed to reconstruct the index mappings.
+     */
+    labelToFileID: [number, number][];
+    /**
+     * Number of vectors in the index.
+     */
+    vectorCount: number;
+    /**
+     * Timestamp when this index was built.
+     */
+    createdAt: number;
+    /**
+     * Filename of the index in IDBFS.
+     */
+    filename: string;
+}

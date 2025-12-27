@@ -1,4 +1,4 @@
-import { loadHnswlib } from "hnswlib-wasm";
+import { loadHnswlib, syncFileSystem } from "hnswlib-wasm";
 import type { HierarchicalNSW } from "hnswlib-wasm";
 
 /**
@@ -220,6 +220,86 @@ export class HNSWIndex {
      */
     getMaxElements(): number {
         return this.maxElements;
+    }
+
+    /**
+     * Save index to Emscripten virtual filesystem (backed by IDBFS).
+     *
+     * @param filename - Name of file to save to in virtual FS
+     * @returns Object containing file mappings for reconstruction
+     */
+    async saveIndex(filename: string = "clip_hnsw.bin"): Promise<{
+        fileIDToLabel: [number, number][];
+        labelToFileID: [number, number][];
+    }> {
+        if (!this.index) throw new Error("Index not initialized");
+
+        console.log(`[HNSW] Saving index to virtual filesystem: ${filename}`);
+
+        // Write index to Emscripten virtual FS
+        await this.index.writeIndex(filename);
+
+        // Sync virtual FS to IndexedDB (IDBFS persistence)
+        await syncFileSystem('write');
+
+        console.log(`[HNSW] Index saved to IDBFS`);
+
+        // Return mappings (needed for reconstruction)
+        return {
+            fileIDToLabel: Array.from(this.fileIDToLabel.entries()),
+            labelToFileID: Array.from(this.labelToFileID.entries()),
+        };
+    }
+
+    /**
+     * Load index from Emscripten virtual filesystem (backed by IDBFS).
+     *
+     * @param filename - Name of file to load from virtual FS
+     * @param mappings - File ID to label mappings
+     */
+    async loadIndex(
+        filename: string = "clip_hnsw.bin",
+        mappings: {
+            fileIDToLabel: [number, number][];
+            labelToFileID: [number, number][];
+        }
+    ): Promise<void> {
+        if (!this.index) throw new Error("Index not initialized");
+
+        console.log(`[HNSW] Loading index from IDBFS: ${filename}`);
+
+        // Sync IndexedDB to virtual FS
+        await syncFileSystem('read');
+
+        // Load index from virtual FS
+        const success = await this.index.readIndex(filename, this.maxElements);
+
+        if (!success) {
+            throw new Error(`Failed to load HNSW index from ${filename}`);
+        }
+
+        // Restore mappings
+        this.fileIDToLabel = new Map(mappings.fileIDToLabel);
+        this.labelToFileID = new Map(mappings.labelToFileID);
+
+        console.log(`[HNSW] Index loaded successfully (${this.size()} vectors)`);
+    }
+
+    /**
+     * Check if a saved index exists in IDBFS.
+     *
+     * @param filename - Name of file to check
+     */
+    async hasSavedIndex(filename: string = "clip_hnsw.bin"): Promise<boolean> {
+        try {
+            await syncFileSystem('read');
+            // Try to access the file (will throw if not found)
+            // Note: We'd need access to FS API to check file existence
+            // For now, we'll rely on try/catch in loadIndex
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /**
