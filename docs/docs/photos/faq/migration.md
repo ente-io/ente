@@ -45,3 +45,15 @@ To fix this:
 ### Can I retry failed uploads?
 
 Yes. You can check the progress/info tab that appears during upload to determine the cause of failed uploads. You can also drag and drop the folder or files again. Ente will automatically ignore already backed up files and try to upload just the rest.
+
+### Why does my google takeout upload fail?
+
+This usually occurs due to a network connectivity issue:
+
+- Check your internet connection is active
+- Try switching networks (WiFi to mobile data or vice versa)
+- If using VPN, try disabling it temporarily
+- Check if your firewall is blocking Ente's servers
+- On desktop/web, try disabling "Faster uploads" in Settings > Preferences > Advanced
+
+For more check: [Troubleshooting](https://ente.io/help/photos/faq/troubleshooting#desktop-app-issues)
