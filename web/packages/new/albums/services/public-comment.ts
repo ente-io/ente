@@ -77,53 +77,6 @@ export const addPublicComment = async (
 };
 
 /**
- * Update a comment in a public album (as an anonymous user).
- *
- * @param credentials Public album credentials (access token).
- * @param collectionID The collection ID for looking up stored identity.
- * @param commentID The ID of the comment to update.
- * @param text The new comment text.
- * @param collectionKey The decrypted collection key (base64 encoded).
- * @param anonIdentity Optional anonymous identity. If not provided, will use stored identity.
- */
-export const updatePublicComment = async (
-    credentials: PublicAlbumsCredentials,
-    collectionID: number,
-    commentID: string,
-    text: string,
-    collectionKey: string,
-    anonIdentity?: AnonIdentity,
-): Promise<void> => {
-    const identity = anonIdentity ?? getStoredAnonIdentity(collectionID);
-    if (!identity) {
-        throw new Error("No anonymous identity available");
-    }
-
-    const { encryptedData: cipher, nonce } = await encryptBox(
-        new TextEncoder().encode(text),
-        collectionKey,
-    );
-
-    const res = await fetch(
-        await apiURL(`/public-collection/comments/${commentID}`),
-        {
-            method: "PATCH",
-            headers: {
-                ...authenticatedPublicAlbumsRequestHeaders(credentials),
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                cipher,
-                nonce,
-                anonUserID: identity.anonUserID,
-                anonToken: identity.token,
-            }),
-        },
-    );
-    ensureOk(res);
-};
-
-/**
  * Delete a comment from a public album (as an anonymous user).
  *
  * @param credentials Public album credentials (access token).
