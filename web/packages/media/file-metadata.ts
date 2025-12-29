@@ -505,6 +505,8 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
 
     if (latitude === undefined || longitude === undefined) return undefined;
     if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
+    // (0, 0) is in the Atlantic Ocean and indicates missing/default coordinates.
+    if (latitude === 0 && longitude === 0) return undefined;
 
     return { latitude, longitude };
 };
