@@ -578,7 +578,6 @@ func main() {
 
 	privateAPI.GET("/social/diff", socialHandler.UnifiedDiff)
 	privateAPI.GET("/social/anon-profiles", socialHandler.AnonProfiles)
-	privateAPI.GET("/social/album-feed", socialHandler.AlbumFeed)
 	privateAPI.GET("/comments-reactions/counts", socialHandler.Counts)
 
 	emergencyCtrl := &emergency.Controller{
