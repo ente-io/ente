@@ -761,6 +761,7 @@ function extractLocationPoints(files: EnteFile[]): JourneyPoint[] {
     for (const file of files) {
         const loc = fileLocation(file);
         if (!loc) continue;
+        if (loc.latitude === 0 && loc.longitude === 0) continue; // Ignore invalid default coordinates
 
         points.push({
             lat: loc.latitude,
