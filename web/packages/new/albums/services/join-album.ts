@@ -1,10 +1,8 @@
 import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
-import { ensureLocalUser } from "ente-accounts/services/user";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import type { Collection } from "ente-media/collection";
 
 /**
  * Service for handling the join album flow for public collections.
@@ -115,41 +113,7 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
     }
 
     try {
-        // If collectionID is 0 (placeholder), we need to fetch the actual collection first
-        let collectionID = context.collectionID;
-        let collection: Collection | undefined;
-        if (collectionID === 0) {
-            // Import the pullCollection function dynamically from the correct module
-            const { pullCollection } = await import("./public-collection");
-            const result = await pullCollection(
-                context.accessToken,
-                context.collectionKey,
-            );
-            collection = result.collection;
-            collectionID = collection.id;
-
-            // Update the context with the actual collection ID
-            const updatedContext = { ...context, collectionID };
-            sessionStorage.setItem(
-                JOIN_ALBUM_CONTEXT_KEY,
-                JSON.stringify(updatedContext),
-            );
-        } else {
-            // Fetch the collection to check ownership
-            const { pullCollection } = await import("./public-collection");
-            const result = await pullCollection(
-                context.accessToken,
-                context.collectionKey,
-            );
-            collection = result.collection;
-        }
-
-        // Check if the user is the owner of the album
-        const currentUser = ensureLocalUser();
-        if (collection.owner.id === currentUser.id) {
-            clearJoinAlbumContext();
-            return null;
-        }
+        const collectionID = context.collectionID;
 
         // Get user's key attributes from local storage
         const keyAttributes = savedKeyAttributes();
@@ -166,6 +130,7 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         const encryptedKey = await boxSeal(context.collectionKey, publicKey);
 
         // Join the album (include JWT token if present for password-protected albums)
+        // Server validates ownership and returns error if user is the album owner
         await joinPublicAlbum(
             context.accessToken,
             collectionID,
