@@ -115,7 +115,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       key: ValueKey(groupType.name),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: groupType.name,
+        title: groupType.getLocalizedName(context),
       ),
       trailingIcon: currentGroupType == groupType ? Icons.check : null,
       alignCaptionedTextToLeft: true,
