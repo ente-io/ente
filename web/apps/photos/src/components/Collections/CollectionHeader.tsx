@@ -725,6 +725,7 @@ interface QuickOptionsProps {
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onFeedClick,
     onShareClick,
     collectionSummary,
@@ -750,9 +751,9 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 onClick={onShareClick}
             />
         )}
-        {showFeedQuickOption(collectionSummary) && (
+        {/* {showFeedQuickOption(collectionSummary) && (
             <FeedQuickOption onClick={onFeedClick} />
-        )}
+        )} */}
     </Stack>
 );
 
@@ -834,6 +835,7 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     </Tooltip>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const showFeedQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "sharedIncoming" ||
     ((type == "album" || type == "folder") && attributes.has("shared"));
@@ -865,6 +867,7 @@ const FeedIcon: React.FC = () => (
     </svg>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FeedQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("feed")}>
         <IconButton onClick={onClick}>
