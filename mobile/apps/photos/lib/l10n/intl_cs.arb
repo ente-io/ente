@@ -35,8 +35,8 @@
   "password": "Heslo",
   "confirmPassword": "Potvrďte heslo",
   "activeSessions": "Aktivní relace",
-  "ocrProcessingOverlayMessage": "Zjišťuji text...",
-  "ocrLoadingIndicatorLabel": "Zjišťuji text",
+  "ocrProcessingOverlayMessage": "Detekuji text...",
+  "ocrLoadingIndicatorLabel": "Detekuji text",
   "ocrSelectionHint": "Tažením nebo dvojitým poklepáním vyberete, co potřebujete",
   "ocrNoTextDetected": "Nebyl nalezen žádný text",
   "ocrRetryButtonLabel": "Znovu",
@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Potvrďte svůj obnovovací klíč",
   "addViewer": "Přidat diváka",
   "addCollaborator": "Přidat spolupracovníka",
+  "admin": "Správce",
+  "admins": "Správci",
+  "addAdmin": "Přidat správce",
+  "addMoreAdmins": "Přidat více správců",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Správci a spolupracovníci můžou přidávat fotky. Správci můžou navíc spravovat fotky a spolupracovníky.",
   "addANewEmail": "Přidejte nový email",
   "orPickAnExistingOne": "Nebo vyberte existující",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Spolupracovníci mohou do sdíleného alba přidávat fotografie a videa.",
@@ -887,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Klikněte na rozbalovací nabídku",
   "click": "• Klikněte",
   "nothingToSeeHere": "Tady není nic k vidění! 👀",
+  "selectFoldersToBackup": "<action>Vyberte složky</action> pro zobrazení a zálohování na ente.",
   "unarchiveAlbum": "Odebrat album z archivu",
   "archiveAlbum": "Archivovat album",
   "calculating": "Probíhá výpočet...",
@@ -1406,11 +1412,60 @@
   "localSyncErrorMessage": "Zdá se, že došlo k nějaké chybě, protože synchronizace místních fotografií trvá déle, než se očekávalo. Obraťte se prosím na náš tým podpory",
   "showPerson": "Zobrazit osobu",
   "sort": "Seřadit",
+  "recent": "Nedávné",
   "mostRecent": "Nejnovější",
   "mostRelevant": "Nejrelevantnější",
   "loadingYourPhotos": "Načítání Vašich fotografií...",
   "processingImport": "Zpracovávání {folderName}...",
   "personName": "Jméno osoby",
+  "addPerson": "Přidat osobu",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Přidat k osobě",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Nejprve prosím pojmenujte osobu v sekci Lidé",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "K osobě mohou být přidány pouze nahrané soubory",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Nebyly nalezeny žádné obličeje, klepnutím přidáte.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, one {} few {Přidány {count} soubory k osobě {personName}} many {Přidáno {count} souborů k osobě {personName}}=1 {Přidán 1 soubor k osobě {personName}} other {Přidáno {count} souborů k osobě {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, one {{count} soubor je již propojen s osobou {personName}} few {{count} soubory jsou již propojeny s osobou {personName}} many {{count} souborů je již propojeno s osobou{personName}}=1 {1 soubor je již propojen s osobou {personName}} other {{count} souborů je již propojeno s osobou {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Přidat novou osobu",
   "addNameOrMerge": "Přidat jméno nebo sloučit",
   "mergeWithExisting": "Sloučit s existujícím",
@@ -1978,6 +2033,14 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
+  "cLTitle1": "Představujeme Rituály",
+  "cLDesc1": "Plánujete předsevzetí na rok 2026? S Rituály si můžete nastavit připomenutí na Ente Photos a sledovat svůj pokrok pořizováním fotek. Ať už jde o workouty, stravovací návyky, nebo trávení času s vašimi blízkými – cokoliv, z čeho si chcete udělat návyk.",
+  "cLTitle2": "Veřejné odkazy, nyní pro všechny",
+  "cLDesc2": "Všichni uživatelé na bezplatném plánu mohou nyní vytvářet a sdílet veřejné odkazy na fotky a alba. Aby se zabránilo zneužití, odkazy budou mít limity, kolik lidí je může zobrazit.",
+  "cLTitle3": "Ruční označování osob",
+  "cLDesc3": "Nyní můžete označovat lidi, i v případě, kdy AI na vašem zařízení nenajde obličej. Skvělé pro mazlíčky, částečně zakryté obličeje, nebo pro okamžiky kdy chcete označit člověka, který na samotné fotce není.",
+  "cLTitle4": "A další",
+  "cLDesc4": "Nyní můžete připnout sdílená alba. Odkazy na album jsou viditelné pro spolupracovníky a diváky, aby bylo sdílení ještě snazší. Opravili jsme chyby na iOS a aktualizovali jsme zobrazení fotografií, včetně nové ikony pro oblíbené fotky (bude se hodit pro nadcházející funkce).",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2137,16 +2200,22 @@
   "ritualAlbumNotSet": "Album není nastaveno",
   "ritualOpenCameraTooltip": "Otevřít fotoaparát rituálu",
   "ritualEditorLabel": "Editor rituálů",
+  "ritualNew": "Vytvořit nový rituál",
+  "ritualCreateNewTitle": "Vytvořit nový rituál",
   "ritualEdit": "Upravit rituál",
   "ritualEnterPrompt": "Zadejte svůj rituál",
   "ritualEnterDescription": "Zadejte prosím popis",
+  "ritualChooseDaysLabel": "Zvolte dny rituálu",
   "ritualDayLabel": "Den",
   "ritualNotificationsOffHint": "Upozornění jsou vypnuta. Klepnutím na den je zapněte.",
   "ritualTimeLabel": "Čas",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Uložit rituál",
+  "ritualCreateAction": "Vytvořit rituál",
   "ritualUpdate": "Aktualizovat rituál",
   "ritualSelectAlbumTitle": "Vybrat album",
+  "ritualChooseAlbumLabel": "Vyberte album",
+  "ritualSendReminderLabel": "Poslat upomínku",
   "ritualSearchOrCreate": "Vyhledat nebo vytvořit nový",
   "ritualNoAlbumsYet": "Zatím žádná alba",
   "ritualNoMatchingAlbums": "Žádná odpovídající alba",
