@@ -1466,12 +1466,89 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get important => 'Important';
+
+  @override
+  String get unimportant => 'Unimportant';
+
+  @override
+  String get removingFromImportant => 'Removing from important...';
+
+  @override
+  String get markingAsImportant => 'Marking as important...';
+
+  @override
+  String get fileMarkedAsImportant => 'Item marked as important';
+
+  @override
+  String get fileRemovedFromImportant => 'Item removed from important';
+
+  @override
+  String filesMarkedAsImportant(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items marked as important',
+      one: '1 item marked as important',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allFilesAlreadyMarkedAsImportant =>
+      'All items are already marked as important';
+
+  @override
+  String failedToMarkFilesAsImportant(String error) {
+    return 'Failed to mark items as important: $error';
+  }
+
+  @override
+  String failedToUpdateImportantStatus(String error) {
+    return 'Failed to update important status: $error';
+  }
+
+  @override
   String get sorry => 'Sorry';
 
   @override
   String get subscribe => 'Subscribe';
 
   @override
+  String get sharedWith => 'Shared with';
+
+  @override
+  String get shareLater => 'Share later';
+
+  @override
+  String get enterNameOrEmailToShareWith => 'Enter name or email to share with';
+
+  @override
+  String get chooseFromAnExistingContact => 'Choose from an existing contact';
+
+  @override
+  String get scheduleShare => 'Schedule share';
+
+  @override
+  String get addEmail => 'Add email';
+
+  @override
+  String get addNewEmail => 'Add new email';
+
+  @override
+  String get noSharedUsers =>
+      'Not shared with anyone yet. Share this collection by adding someone\'s email below.';
+
+  @override
+  String get removeAccess => 'Remove access';
+
+  @override
   String get subscriptionRequiredForSharing =>
       'You need a paid subscription to share links';
+
+  @override
+  String get sessionExpired => 'Session expired';
+
+  @override
+  String get pleaseLoginAgain => 'Please login again';
 }

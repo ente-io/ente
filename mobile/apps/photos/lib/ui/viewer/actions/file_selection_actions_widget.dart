@@ -277,18 +277,6 @@ class _FileSelectionActionsWidgetState
         }
       }
 
-      if (flagService.manualTagFileToPerson &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.person_add_alt_1_outlined,
-            labelText: "(i) Add to person",
-            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
-            shouldShow: hasUploadedFileIDs,
-          ),
-        );
-      }
-
       if (widget.type.showAddtoHiddenAlbum()) {
         items.add(
           SelectionActionButton(
@@ -388,6 +376,18 @@ class _FileSelectionActionsWidgetState
           onTap: _onGuestViewClick,
         ),
       );
+
+      if (flagService.manualTagFileToPerson &&
+          widget.type.showAddToPersonOption()) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.person_add_alt_1_outlined,
+            labelText: AppLocalizations.of(context).addToPerson,
+            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
+            shouldShow: hasUploadedFileIDs,
+          ),
+        );
+      }
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
@@ -787,7 +787,7 @@ class _FileSelectionActionsWidgetState
     if (filesWithIds.isEmpty) {
       showShortToast(
         context,
-        "Only uploaded files can be added to a person",
+        AppLocalizations.of(context).onlyUploadedFilesCanBeAddedToPerson,
       );
       return;
     }
@@ -821,10 +821,12 @@ class _FileSelectionActionsWidgetState
           relevantFiles: addedFiles,
         ),
       );
-      final suffix = addedCount == 1 ? "file" : "files";
       showToast(
         context,
-        "Added $addedCount $suffix to ${result.person.data.name}",
+        AppLocalizations.of(context).addedFilesToPerson(
+          count: addedCount,
+          personName: result.person.data.name,
+        ),
       );
       widget.selectedFiles.clearAll();
       if (mounted) {
@@ -834,10 +836,12 @@ class _FileSelectionActionsWidgetState
     }
     final alreadyCount = result.alreadyAssignedFileIds.length;
     if (alreadyCount > 0) {
-      final suffix = alreadyCount == 1 ? "file is" : "files are";
       showShortToast(
         context,
-        "$alreadyCount $suffix already linked to ${result.person.data.name}",
+        AppLocalizations.of(context).filesAlreadyLinkedToPerson(
+          count: alreadyCount,
+          personName: result.person.data.name,
+        ),
       );
     }
   }

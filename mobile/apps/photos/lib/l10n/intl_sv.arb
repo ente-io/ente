@@ -172,6 +172,10 @@
   "confirmYourRecoveryKey": "Bekräfta din återställningsnyckel",
   "addViewer": "Lägg till bildvy",
   "addCollaborator": "Lägg till samarbetspartner",
+  "admin": "Administratör",
+  "admins": "Administratörer",
+  "addAdmin": "Lägg till administratör",
+  "addMoreAdmins": "Lägg till fler administratörer",
   "addANewEmail": "Lägg till en ny e-postadress",
   "orPickAnExistingOne": "Eller välj en befintlig",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Samarbetspartner kan lägga till foton och videor till det delade albumet.",
@@ -1216,8 +1220,6 @@
   "related": "Relaterat",
   "hoorayyyy": "Huurraaaa!",
   "deletingDash": "Tar bort - ",
-  "cLTitle1": "Gå till datum",
-  "cLTitle3": "Nya minnen",
   "closeBy": "Stäng",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

@@ -12,6 +12,7 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -145,6 +146,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                           .updateDeviceFolderSyncStatus(
                         {widget.deviceCollection.id: !shouldBackup.value},
                       );
+                      await backupPreferenceService
+                          .setHasManualFolderSelection(true);
                       if (mounted) {
                         setState(() {
                           shouldBackup.value = !shouldBackup.value;

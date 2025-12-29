@@ -9,11 +9,12 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_base/models/key_attributes.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_network/network.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -56,7 +57,8 @@ class EmergencyContactService {
         assetPath: "assets/warning-blue.png",
       );
       return false;
-    } else if (email.trim() == _config.getEmail()) {
+    }
+    if (email.trim() == _config.getEmail()) {
       await showAlertBottomSheet(
         context,
         title: context.strings.oops,
@@ -65,25 +67,37 @@ class EmergencyContactService {
       );
       return false;
     }
-    final String? publicKey = await _userService.getPublicKey(email);
-    if (publicKey == null) {
-      await showInviteSheet(context, email: email);
-      return false;
+
+    final dialog = createProgressDialog(context, context.strings.pleaseWait);
+    await dialog.show();
+
+    try {
+      final String? publicKey = await _userService.getPublicKey(email);
+      if (publicKey == null) {
+        await dialog.hide();
+        await showInviteSheet(context, email: email);
+        return false;
+      }
+
+      final Uint8List recoveryKey = _config.getRecoveryKey();
+      final encryptedKey = CryptoUtil.sealSync(
+        recoveryKey,
+        CryptoUtil.base642bin(publicKey),
+      );
+      await _enteDio.post(
+        "/emergency-contacts/add",
+        data: {
+          "email": email.trim(),
+          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+          "recoveryNoticeInDays": recoveryNoticeInDays,
+        },
+      );
+      await dialog.hide();
+      return true;
+    } catch (e) {
+      await dialog.hide();
+      rethrow;
     }
-    final Uint8List recoveryKey = _config.getRecoveryKey();
-    final encryptedKey = CryptoUtil.sealSync(
-      recoveryKey,
-      CryptoUtil.base642bin(publicKey),
-    );
-    await _enteDio.post(
-      "/emergency-contacts/add",
-      data: {
-        "email": email.trim(),
-        "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-        "recoveryNoticeInDays": recoveryNoticeInDays,
-      },
-    );
-    return true;
   }
 
   Future<EmergencyInfo> getInfo() async {

@@ -540,6 +540,7 @@ class CollectionApiClient {
     await _updateCollectionInDB(collection);
     _logger.info("Firing CollectionsUpdatedEvent: share_url_created");
     Bus.instance.fire(CollectionsUpdatedEvent("share_url_created"));
+    unawaited(CollectionService.instance.sync());
   }
 
   Future<void> disableShareUrl(Collection collection) async {
@@ -548,6 +549,7 @@ class CollectionApiClient {
     await _updateCollectionInDB(collection);
     _logger.info("Firing CollectionsUpdatedEvent: share_url_disabled");
     Bus.instance.fire(CollectionsUpdatedEvent("share_url_disabled"));
+    unawaited(CollectionService.instance.sync());
   }
 
   Future<void> updateShareUrl(
@@ -566,6 +568,7 @@ class CollectionApiClient {
     await _updateCollectionInDB(collection);
     _logger.info("Firing CollectionsUpdatedEvent: share_url_updated");
     Bus.instance.fire(CollectionsUpdatedEvent("share_url_updated"));
+    unawaited(CollectionService.instance.sync());
   }
 
   Future<List<User>> share(
@@ -593,6 +596,8 @@ class CollectionApiClient {
     final collection = CollectionService.instance.getFromCache(collectionID);
     final updatedCollection = collection!.copyWith(sharees: sharees);
     await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_added"));
+    unawaited(CollectionService.instance.sync());
     return sharees;
   }
 
@@ -602,6 +607,8 @@ class CollectionApiClient {
     final collection = CollectionService.instance.getFromCache(collectionID);
     final updatedCollection = collection!.copyWith(sharees: sharees);
     await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_removed"));
+    unawaited(CollectionService.instance.sync());
     return sharees;
   }
 

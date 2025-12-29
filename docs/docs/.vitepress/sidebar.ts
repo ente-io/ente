@@ -427,6 +427,10 @@ export const sidebar = [
                         text: "Ente on Windows",
                         link: "/self-hosting/guides/windows",
                     },
+                    {
+                        text: "Ente-Photos on Kubernetes (community helm-chart)",
+                        link: "/self-hosting/guides/photos-k8s-helm",
+                    },
                 ],
             },
             {

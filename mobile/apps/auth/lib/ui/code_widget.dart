@@ -13,9 +13,9 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/shortcuts.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
@@ -26,7 +26,6 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
-import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
@@ -272,7 +271,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        focusNode: widget.focusNode,customBorder: RoundedRectangleBorder(
+                        focusNode: widget.focusNode,
+                        customBorder: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         // InkWell handles focus natively.
@@ -934,20 +934,14 @@ class _CodeWidgetState extends State<CodeWidget> {
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return QrCodeDialog(
+        return AuthQrDialog(
           data: qrData,
-          title: widget.code.account,
-          subtitle: widget.code.issuer,
-          accentColor: accentColor,
+          title: widget.code.issuer,
+          subtitle: widget.code.account,
           shareFileName: 'ente_auth_qr_${widget.code.account}.png',
           shareText: 'QR code for ${widget.code.account}',
           dialogTitle: context.l10n.qrCode,
           shareButtonText: context.l10n.share,
-          logoAssetPath: 'assets/qr_logo.png',
-          branding: const QrSvgBranding(
-            assetPath: 'assets/svg/auth-logo.svg',
-            height: 12,
-          ),
         );
       },
     );

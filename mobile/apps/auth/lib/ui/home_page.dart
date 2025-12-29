@@ -19,12 +19,13 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_auth/theme/colors.dart';
+
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/components/auth_qr_dialog.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
@@ -50,7 +51,6 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
-import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -458,20 +458,14 @@ class _HomePageState extends State<HomePage> {
     await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return QrCodeDialog(
+        return AuthQrDialog(
           data: qrData,
-          title: code.account,
-          subtitle: code.issuer,
-          accentColor: accentColor,
+          title: code.issuer,
+          subtitle: code.account,
           shareFileName: 'ente_auth_qr_${code.account}.png',
           shareText: 'QR code for ${code.account}',
           dialogTitle: context.l10n.qrCode,
           shareButtonText: context.l10n.share,
-          logoAssetPath: 'assets/qr_logo.png',
-          branding: const QrSvgBranding(
-            assetPath: 'assets/svg/auth-logo.svg',
-            height: 12,
-          ),
         );
       },
     );
@@ -1025,7 +1019,8 @@ class _HomePageState extends State<HomePage> {
               _pressedKeys.contains(LogicalKeyboardKey.control) ||
               _pressedKeys.contains(LogicalKeyboardKey.controlRight));
 
-      if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) || event.logicalKey == LogicalKeyboardKey.slash) {
+      if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) ||
+          event.logicalKey == LogicalKeyboardKey.slash) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
@@ -1345,7 +1340,8 @@ class _HomePageState extends State<HomePage> {
                 builder: (context) {
                   return Shortcuts(
                     shortcuts: <LogicalKeySet, Intent>{
-                      LogicalKeySet(LogicalKeyboardKey.keyC): const CopyIntent(),
+                      LogicalKeySet(LogicalKeyboardKey.keyC):
+                          const CopyIntent(),
                       LogicalKeySet(LogicalKeyboardKey.keyN):
                           const CopyNextIntent(),
                     },
@@ -1603,8 +1599,7 @@ class _HomePageState extends State<HomePage> {
     final crossAxisCount = _calculateGridColumnCount(context);
     _currentGridColumns = crossAxisCount;
     final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-    final double gridBottomPadding =
-        80 + (_showSearchBox ? keyboardInset : 0);
+    final double gridBottomPadding = 80 + (_showSearchBox ? keyboardInset : 0);
     if (_hasLoaded) {
       final bool noCodesAnywhere = !hasNonTrashedCodes && !hasTrashedCodes;
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {

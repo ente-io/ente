@@ -137,7 +137,7 @@ When someone adds a photo via a collect link:
 
 - **Password protection**: Require a password to access the link
 - **Link expiry**: Set when the link should stop working
-- **Device limits**: Limit how many devices can access the link
+- **Device limits**: Limit how many devices can access the link (a device is identified by IP address + browser/app combination)
 - **Disable downloads**: Prevent people from downloading original quality photos
 - **Disable uploads**: Convert to view-only by turning off "Allow adding photos"
 

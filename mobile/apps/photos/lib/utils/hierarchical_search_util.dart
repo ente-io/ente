@@ -11,6 +11,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
@@ -158,6 +159,7 @@ Future<void> curateFilters(
     );
     final contactsFilters = _curateContactsFilter(files);
     final uploaderFilters = _curateUploaderFilter(files);
+    final cameraFilters = _curateCameraFilters(files);
     final faceFilters = await curateFaceFilters(files);
     final magicFilters = await curateMagicFilters(files, context);
     final onlyThemFilter = getOnlyThemFilter(
@@ -173,6 +175,7 @@ Future<void> curateFilters(
         ...fileTypeFilters,
         ...contactsFilters,
         ...uploaderFilters,
+        ...cameraFilters,
         ...albumFilters,
         ...locationFilters,
       ],
@@ -348,6 +351,32 @@ List<ContactsFilter> _curateContactsFilter(
   }
 
   return contactsFilters;
+}
+
+List<CameraFilter> _curateCameraFilters(
+  List<EnteFile> files,
+) {
+  final cameraFilters = <CameraFilter>[];
+  final modelToOccurrence = <String, int>{};
+
+  for (final file in files) {
+    final cameraModel = file.cameraModel;
+    if (cameraModel == null || cameraModel.isEmpty) {
+      continue;
+    }
+    modelToOccurrence[cameraModel] = (modelToOccurrence[cameraModel] ?? 0) + 1;
+  }
+
+  for (final entry in modelToOccurrence.entries) {
+    cameraFilters.add(
+      CameraFilter(
+        cameraModel: entry.key,
+        occurrence: entry.value,
+      ),
+    );
+  }
+
+  return cameraFilters;
 }
 
 List<UploaderFilter> _curateUploaderFilter(
@@ -538,6 +567,13 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     searchFilterDataProvider.recommendations.whereType<UploaderFilter>(),
   );
 
+  final cameraFilters = searchFilterDataProvider.appliedFilters
+      .whereType<CameraFilter>()
+      .toList();
+  cameraFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<CameraFilter>(),
+  );
+
   final magicFilters =
       searchFilterDataProvider.appliedFilters.whereType<MagicFilter>().toList();
   magicFilters.addAll(
@@ -555,6 +591,7 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     "locationFilters": locationFilters,
     "contactsFilters": contactsFilters,
     "uploaderFilters": uploaderFilters,
+    "cameraFilters": cameraFilters,
     "albumFilters": albumFilters,
     "fileTypeFilters": fileTypeFilters,
     "topLevelGenericFilter": topLevelGenericFilter,
@@ -605,6 +642,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
   final locationReccos = <LocationFilter>[];
   final contactsReccos = <ContactsFilter>[];
   final uploaderReccos = <UploaderFilter>[];
+  final cameraReccos = <CameraFilter>[];
   final albumReccos = <AlbumFilter>[];
   final fileTypeReccos = <FileTypeFilter>[];
   final onlyThemFilter = <OnlyThemFilter>[];
@@ -622,6 +660,8 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
       contactsReccos.add(recommendation);
     } else if (recommendation is UploaderFilter) {
       uploaderReccos.add(recommendation);
+    } else if (recommendation is CameraFilter) {
+      cameraReccos.add(recommendation);
     } else if (recommendation is AlbumFilter) {
       albumReccos.add(recommendation);
     } else if (recommendation is FileTypeFilter) {
@@ -636,6 +676,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
     ...locationReccos,
     ...contactsReccos,
     ...uploaderReccos,
+    ...cameraReccos,
     ...albumReccos,
     ...fileTypeReccos,
   ];

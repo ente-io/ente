@@ -4,6 +4,7 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +71,7 @@ void main() async {
   debugRepaintRainbowEnabled = false;
   await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
+  FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 
@@ -300,9 +302,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    _logger.info("ActivityService init $tlog");
-    await activityService.init();
-    _logger.info("ActivityService init done $tlog");
+    _logger.info("RitualsService init $tlog");
+    await ritualsService.init();
+    _logger.info("RitualsService init done $tlog");
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
