@@ -224,10 +224,6 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
-                    if (checkAndRedirectForTripAlbum(collection)) {
-                        return;
-                    }
-
                     setPublicCollection(collection);
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
