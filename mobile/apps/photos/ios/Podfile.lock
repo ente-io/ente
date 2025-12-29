@@ -16,8 +16,6 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - emoji_picker_flutter (0.0.1):
-    - Flutter
   - ente_photos_rust (0.0.1):
     - Flutter
   - ente_rust (0.0.1):
@@ -247,8 +245,6 @@ PODS:
     - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
-  - vibration (1.7.5):
-    - Flutter
   - video_player_avfoundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -271,7 +267,6 @@ DEPENDENCIES:
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - emoji_picker_flutter (from `.symlinks/plugins/emoji_picker_flutter/ios`)
   - ente_photos_rust (from `.symlinks/plugins/ente_photos_rust/ios`)
   - ente_rust (from `.symlinks/plugins/ente_rust/ios`)
   - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
@@ -323,7 +318,6 @@ DEPENDENCIES:
   - thermal (from `.symlinks/plugins/thermal/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
-  - vibration (from `.symlinks/plugins/vibration/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
   - volume_controller (from `.symlinks/plugins/volume_controller/ios`)
@@ -370,8 +364,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
-  emoji_picker_flutter:
-    :path: ".symlinks/plugins/emoji_picker_flutter/ios"
   ente_photos_rust:
     :path: ".symlinks/plugins/ente_photos_rust/ios"
   ente_rust:
@@ -474,8 +466,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/ua_client_hints/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
-  vibration:
-    :path: ".symlinks/plugins/vibration/ios"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   video_thumbnail:
@@ -496,7 +486,6 @@ SPEC CHECKSUMS:
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
-  emoji_picker_flutter: ed468d9746c21711e66b2788880519a9de5de211
   ente_photos_rust: 79732f3ba67df7b0fb22089627afb80d692c2b2d
   ente_rust: 9c976e3d083f0ce90f31693deb99629b28d8fe4c
   ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
@@ -567,7 +556,6 @@ SPEC CHECKSUMS:
   thermal: d4c48be750d1ddbab36b0e2dcb2471531bc8df41
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  vibration: 8e2f50fc35bb736f9eecb7dd9f7047fbb6a6e888
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12

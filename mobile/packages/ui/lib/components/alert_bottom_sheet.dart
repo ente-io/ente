@@ -1,3 +1,4 @@
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
@@ -12,6 +13,7 @@ Future<T?> showAlertBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     isDismissible: true,
+    backgroundColor: Colors.transparent,
     builder: (context) => AlertBottomSheet<T>(
       title: title,
       message: message,
@@ -49,13 +51,19 @@ class AlertBottomSheet<T> extends StatelessWidget {
         ),
       ),
       child: SafeArea(
+        top: false,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildCloseButton(context, colorScheme),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CloseIconButton(),
+                ],
+              ),
               const SizedBox(height: 12),
               Center(child: Image.asset(assetPath)),
               const SizedBox(height: 20),
@@ -72,13 +80,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (buttons != null && buttons!.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                for (int i = 0; i < buttons!.length; i++) ...[
-                  buttons![i],
-                  if (i < buttons!.length - 1) const SizedBox(height: 12),
-                ],
-              ],
+              ..._buildButtonsSection(),
             ],
           ),
         ),
@@ -86,29 +88,18 @@ class AlertBottomSheet<T> extends StatelessWidget {
     );
   }
 
-  Widget _buildCloseButton(BuildContext context, colorScheme) {
-    return SizedBox(
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.fillFaint,
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Icon(
-                Icons.close,
-                size: 20,
-                color: colorScheme.textBase,
-              ),
-            ),
-          ),
-        ],
+  List<Widget> _buildButtonsSection() {
+    if (buttons == null || buttons!.isEmpty) return [];
+
+    return [
+      const SizedBox(height: 20),
+      ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: buttons!.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, index) => buttons![index],
       ),
-    );
+    ];
   }
 }

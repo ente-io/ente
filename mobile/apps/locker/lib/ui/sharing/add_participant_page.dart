@@ -186,16 +186,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 // showShortToast(context, "yet to implement");
                               },
                               onLongPress: () {
-                                showDialog(
-                                  useRootNavigator: false,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return VerifyIdentityDialog(
-                                      self: false,
-                                      email: currentUser.email,
-                                      config: Configuration.instance,
-                                    );
-                                  },
+                                showVerifyIdentitySheet(
+                                  context,
+                                  self: false,
+                                  email: currentUser.email,
+                                  config: Configuration.instance,
                                 );
                               },
                               isTopBorderRadiusRemoved: index > 0,

@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
@@ -92,6 +93,28 @@ class FilePopupMenuWidget extends StatelessWidget {
         ),
       ),
       PopupMenuItem<String>(
+        value: 'toggle_important',
+        padding: EdgeInsets.zero,
+        height: 0,
+        child: Builder(
+          builder: (context) {
+            final isImportant = FavoritesService.instance.isFavoriteCache(file);
+            return PopupMenuItemWidget(
+              icon: Icon(
+                isImportant ? Icons.star_rounded : Icons.star_border_rounded,
+                color: colorScheme.textBase,
+                size: 22,
+              ),
+              label: isImportant
+                  ? context.l10n.unimportant
+                  : context.l10n.important,
+              isFirst: false,
+              isLast: false,
+            );
+          },
+        ),
+      ),
+      PopupMenuItem<String>(
         value: 'download',
         padding: EdgeInsets.zero,
         height: 0,
@@ -101,7 +124,7 @@ class FilePopupMenuWidget extends StatelessWidget {
             color: colorScheme.textBase,
             size: 20,
           ),
-          label: "Save",
+          label: context.l10n.save,
           isFirst: false,
           isLast: false,
         ),
@@ -154,6 +177,9 @@ class FilePopupMenuWidget extends StatelessWidget {
       case 'edit':
         _editFile(context);
         break;
+      case 'toggle_important':
+        _toggleImportant(context);
+        break;
       case 'download':
         _downloadFile(context);
         break;
@@ -186,5 +212,12 @@ class FilePopupMenuWidget extends StatelessWidget {
 
   Future<void> _editFile(BuildContext context) async {
     await FileActions.editFile(context, file);
+  }
+
+  Future<void> _toggleImportant(BuildContext context) async {
+    await FileActions.toggleImportant(
+      context,
+      file,
+    );
   }
 }

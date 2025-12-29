@@ -4,7 +4,9 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
+import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/pages/developer_settings_page.dart";
 import "package:ente_ui/pages/web_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -14,7 +16,6 @@ import 'package:flutter/rendering.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -198,12 +199,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Center(
                       child: TextButton(
                         onPressed: () async {
-                          final result = await showCreateNewAccountDialog(
+                          final result =
+                              await showAlertBottomSheet<ButtonResult>(
                             context,
                             title: l10n.unlockLockerNewUserTitle,
-                            body: l10n.unlockLockerNewUserBody,
-                            buttonLabel: l10n.checkoutEntePhotos,
+                            message: l10n.unlockLockerNewUserBody,
                             assetPath: "assets/file_lock.png",
+                            buttons: [
+                              GradientButton(
+                                text: l10n.checkoutEntePhotos,
+                                onTap: () => Navigator.of(context).pop(
+                                  ButtonResult(ButtonAction.first),
+                                ),
+                              ),
+                            ],
                           );
 
                           if (result?.action == ButtonAction.first) {

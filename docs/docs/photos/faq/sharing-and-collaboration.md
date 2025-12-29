@@ -108,6 +108,12 @@ Regular albums continue to work perfectly on your custom domain - only the Trip 
 
 Learn more in the [Custom domains guide](/photos/features/sharing-and-collaboration/custom-domains/).
 
+### How can my partner and I automatically share all photos we take with each other? {#auto-share-partners}
+
+You can do this by adding your partner as a viewer or collaborator to your camera folder, and asking them to do the same for you. On Android this is the **Camera** folder, and on iOS this is **Recents** (or equivalent).
+
+Any new photos backed up to these folders will automatically be shared and synced to the other person's device. This results in two separate albums — one for your photos and one for your partner's — where both of you can view and add photos.
+
 ### Does Ente have a shared library feature where all photos are shared with another account (similar to Google Photos Partner Sharing/iCloud Shared Photo Library)? {#shared-library}
 
 Ente has shared albums but does not support sharing your entire library in one click. However, you can share all albums by selecting one album, choosing the "all" option on the bottom right, which selects all albums and then you can share in one go with a partner (they can be [viewer or collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)).
@@ -369,13 +375,13 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a device limit of 5. This limitation helps safeguard against potential platform abuse.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
 
 Free users can:
 
 - Create and receive shared albums
 - Share albums directly with other Ente users
-- Create public links (device limit of 5)
+- Create public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 - View public links shared with them
 - Add photos to collect links that allow uploads
 

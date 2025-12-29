@@ -40,6 +40,8 @@ class MediaUploadData {
   final FileHashData? hashData;
   final int? height;
   final int? width;
+  final String? cameraMake;
+  final String? cameraModel;
 
   // For android motion photos, the startIndex is the index of the first frame
   // For iOS, this value will be always null.
@@ -56,6 +58,8 @@ class MediaUploadData {
     this.hashData, {
     this.height,
     this.width,
+    this.cameraMake,
+    this.cameraModel,
     this.motionPhotoStartIndex,
     this.isPanorama,
     this.exifData,
@@ -71,6 +75,18 @@ class FileHashData {
   String? zipHash;
 
   FileHashData(this.fileHash, {this.zipHash});
+}
+
+String? _extractPrintableExifValue(IfdTag? tag) {
+  final printableValue = tag?.printable;
+  final printable = printableValue?.trim();
+  if (printable == null || printable.isEmpty) {
+    return null;
+  }
+  if (printable.toLowerCase() == 'null') {
+    return null;
+  }
+  return printable;
 }
 
 Future<MediaUploadData> getUploadDataFromEnteFile(
@@ -94,6 +110,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   String? zipHash;
   String fileHash;
   Map<String, IfdTag>? exifData;
+  String? cameraMake;
+  String? cameraModel;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await file.getAsset
@@ -131,6 +149,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   }
   if (parseExif) {
     exifData = await tryExifFromFile(sourceFile);
+    if (exifData != null) {
+      cameraMake = _extractPrintableExifValue(exifData['Image Make']);
+      cameraModel = _extractPrintableExifValue(exifData['Image Model']);
+    }
   }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   await _decorateEnteFileData(file, asset, sourceFile, exifData);
@@ -193,6 +215,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     FileHashData(fileHash, zipHash: zipHash),
     height: h,
     width: w,
+    cameraMake: cameraMake,
+    cameraModel: cameraModel,
     motionPhotoStartIndex: motionPhotoStartingIndex,
     exifData: exifData,
   );
@@ -363,6 +387,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   File sourceFile;
   Uint8List? thumbnailData;
   Map<String, IfdTag>? exifData;
+  String? cameraMake;
+  String? cameraModel;
   const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
   sourceFile = File(localPath);
@@ -381,6 +407,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
     if (file.fileType == FileType.image) {
       dimensions = await getImageHeightAndWith(imagePath: localPath);
       exifData = await tryExifFromFile(sourceFile);
+      if (exifData != null) {
+        cameraMake = _extractPrintableExifValue(exifData['Image Make']);
+        cameraModel = _extractPrintableExifValue(exifData['Image Model']);
+      }
     } else if (thumbnailData != null) {
       // the thumbnail null check is to ensure that we are able to generate thum
       // for video, we need to use the thumbnail data with any max width/height
@@ -399,6 +429,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       FileHashData(fileHash),
       height: dimensions?['height'],
       width: dimensions?['width'],
+      cameraMake: cameraMake,
+      cameraModel: cameraModel,
       exifData: exifData,
     );
   } catch (e, s) {

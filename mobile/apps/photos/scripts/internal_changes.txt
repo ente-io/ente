@@ -1,10 +1,8 @@
+- Neeraj: Jump to date when clicking on album from file info [QOL]
+- Neeraj: Add camera make/model search and filter by model [feature](https://github.com/ente-io/ente/discussions/5588)
+- Neeraj: Fixed order for [pinned albums](https://github.com/ente-io/ente/discussions/5979)
+- Neeraj: Show recent move/add to collections on top (in memory) [QOL]
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out
-- Ashil: Move add to album cta in file viewer from popup menu to bottom bar
-- Fix remove from album [1](https://github.com/ente-io/ente/issues/7705)
-- Neeraj:  Show public link to album participants
-- Laurens: (i) Rituals redesign
-- Laurens: (i) Manual people tagging
-- Ashil: New favorite icon
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Neeraj: (i) Admin Role + Suggest Delete feature
