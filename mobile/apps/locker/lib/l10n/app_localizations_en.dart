@@ -1466,6 +1466,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get important => 'Important';
+
+  @override
+  String get unimportant => 'Unimportant';
+
+  @override
+  String get removingFromImportant => 'Removing from important...';
+
+  @override
+  String get markingAsImportant => 'Marking as important...';
+
+  @override
+  String get fileMarkedAsImportant => 'Item marked as important';
+
+  @override
+  String get fileRemovedFromImportant => 'Item removed from important';
+
+  @override
+  String filesMarkedAsImportant(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items marked as important',
+      one: '1 item marked as important',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allFilesAlreadyMarkedAsImportant =>
+      'All items are already marked as important';
+
+  @override
+  String failedToMarkFilesAsImportant(String error) {
+    return 'Failed to mark items as important: $error';
+  }
+
+  @override
+  String failedToUpdateImportantStatus(String error) {
+    return 'Failed to update important status: $error';
+  }
+
+  @override
   String get sorry => 'Sorry';
 
   @override

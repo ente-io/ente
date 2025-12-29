@@ -7,7 +7,7 @@ import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
-import "package:pro_image_editor/mixins/converted_configs.dart";
+import 'package:pro_image_editor/core/mixins/converted_configs.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorTextBar extends StatefulWidget with SimpleConfigsAccess {

@@ -10,7 +10,6 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/add_to_collection_dialog.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
@@ -36,31 +35,11 @@ class FileSelectionOverlayBar extends StatefulWidget {
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   static final Logger _logger = Logger("FileSelectionOverlayBar");
-  bool _isImportant = false;
 
   @override
   void initState() {
     super.initState();
     widget.selectedFiles.addListener(_onSelectionChanged);
-    _checkIfImportant();
-  }
-
-  Future<void> _checkIfImportant() async {
-    if (widget.selectedFiles.files.length == 1) {
-      final file = widget.selectedFiles.files.first;
-
-      try {
-        final isFav = await FavoritesService.instance.isFavorite(file);
-
-        if (mounted) {
-          setState(() {
-            _isImportant = isFav;
-          });
-        }
-      } catch (e) {
-        _logger.severe("Error checking favorite status: $e");
-      }
-    }
   }
 
   @override
@@ -72,7 +51,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   void _onSelectionChanged() {
     if (mounted) {
       setState(() {});
-      _checkIfImportant();
     }
   }
 
@@ -369,25 +347,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           onTap: () => _editFile(context, file!),
         ),
       );
-      actions.add(
-        SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedStar,
-          ),
-          label: _isImportant ? "Unmark" : "Important",
-          onTap: () => _toggleImportant(context, file!),
-        ),
-      );
-    } else {
-      actions.add(
-        SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedStar,
-          ),
-          label: "Important",
-          onTap: () => _markMultipleAsImportant(context, files),
-        ),
-      );
     }
 
     actions.add(
@@ -641,111 +600,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           context,
           context.l10n.failedToDownloadOrDecrypt,
         );
-      }
-    }
-  }
-
-  Future<void> _toggleImportant(BuildContext context, EnteFile file) async {
-    final dialog = createProgressDialog(
-      context,
-      _isImportant ? "Removing from Important..." : "Adding to Important...",
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      if (_isImportant) {
-        await FavoritesService.instance.removeFromFavorites(context, file);
-      } else {
-        await FavoritesService.instance.addToFavorites(context, file);
-      }
-
-      await dialog.hide();
-      widget.selectedFiles.clearAll();
-
-      setState(() {
-        _isImportant = !_isImportant;
-      });
-
-      if (context.mounted) {
-        final message = _isImportant
-            ? "File marked as important"
-            : "File removed from important";
-        showToast(context, message);
-      }
-    } catch (e, stackTrace) {
-      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
-      await dialog.hide();
-
-      if (context.mounted) {
-        final errorMessage =
-            'Failed to update important status: ${e.toString()}';
-        showToast(context, errorMessage);
-      }
-    }
-  }
-
-  Future<void> _markMultipleAsImportant(
-    BuildContext context,
-    List<EnteFile> files,
-  ) async {
-    final dialog = createProgressDialog(
-      context,
-      "Marking as Important...",
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      final List<EnteFile> filesToMark = [];
-      for (final file in files) {
-        final isFav = await FavoritesService.instance.isFavorite(file);
-        if (!isFav) {
-          filesToMark.add(file);
-        }
-      }
-
-      if (filesToMark.isEmpty) {
-        await dialog.hide();
-        if (context.mounted) {
-          showToast(
-            context,
-            "All files are already marked as important",
-          );
-        }
-        return;
-      }
-
-      await FavoritesService.instance.updateFavorites(
-        context,
-        filesToMark,
-        true,
-      );
-
-      await dialog.hide();
-
-      widget.selectedFiles.clearAll();
-
-      if (context.mounted) {
-        final message = filesToMark.length == 1
-            ? "1 file marked as important"
-            : "${filesToMark.length} files marked as important";
-        showToast(context, message);
-      }
-    } catch (e, stackTrace) {
-      _logger.severe(
-        "Failed to mark multiple files as important: $e",
-        e,
-        stackTrace,
-      );
-      await dialog.hide();
-
-      if (context.mounted) {
-        final errorMessage =
-            'Failed to mark files as important: ${e.toString()}';
-        showToast(context, errorMessage);
       }
     }
   }

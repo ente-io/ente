@@ -97,6 +97,7 @@ class AlbumsItemWidget extends StatelessWidget {
                 context,
                 CollectionPage(
                   CollectionWithThumbnail(c, null),
+                  fileToJumpTo: file,
                 ),
               );
             },
