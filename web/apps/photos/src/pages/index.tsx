@@ -64,12 +64,14 @@ const Page: React.FC = () => {
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 try {
-                    // Format: joinAlbum?=accessToken&jwt=<jwtToken>#collectionKeyHash
+                    // Format: ?joinAlbum=accessToken&collectionId=123&jwt=<jwtToken>#collectionKeyHash
                     const accessToken = joinAlbumParam;
+                    const collectionIdParam =
+                        currentURL.searchParams.get("collectionId");
                     const collectionKeyHash = currentURL.hash.slice(1);
                     const jwtFromURL = currentURL.searchParams.get("jwt");
 
-                    if (accessToken && collectionKeyHash) {
+                    if (accessToken && collectionKeyHash && collectionIdParam) {
                         // Import the necessary functions to convert the collection key
                         const { extractCollectionKeyFromShareURL } =
                             await import("ente-gallery/services/share");
@@ -85,7 +87,7 @@ const Page: React.FC = () => {
                             accessToken,
                             collectionKey,
                             collectionKeyHash,
-                            collectionID: 0,
+                            collectionID: parseInt(collectionIdParam, 10),
                             ...(jwtFromURL && { accessTokenJWT: jwtFromURL }),
                         };
 
