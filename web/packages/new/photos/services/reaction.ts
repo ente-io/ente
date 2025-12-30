@@ -57,6 +57,7 @@ export const addReaction = async (
  * @param commentID The ID of the comment to react to.
  * @param reactionType The type of reaction (e.g., "green_heart").
  * @param collectionKey The decrypted collection key (base64 encoded).
+ * @param fileID Optional file ID, required for file-scoped comments.
  * @returns The ID of the created reaction.
  */
 export const addCommentReaction = async (
@@ -64,6 +65,7 @@ export const addCommentReaction = async (
     commentID: string,
     reactionType: string,
     collectionKey: string,
+    fileID?: number,
 ): Promise<string> => {
     const { encryptedData: cipher, nonce } = await encryptBox(
         new TextEncoder().encode(padReaction(reactionType)),
@@ -76,7 +78,7 @@ export const addCommentReaction = async (
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ collectionID, commentID, cipher, nonce }),
+        body: JSON.stringify({ collectionID, commentID, fileID, cipher, nonce }),
     });
     ensureOk(res);
     const { id } = UpsertReactionResponse.parse(await res.json());

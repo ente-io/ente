@@ -1145,6 +1145,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     "green_heart",
                     collectionKey,
                     identity,
+                    pendingCommentLike.fileID,
                 );
                 const newReaction: UnifiedReaction = {
                     id: reactionID,
@@ -1339,6 +1340,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         "green_heart",
                         collectionKey,
                         storedIdentity,
+                        targetComment.fileID,
                     );
                     const newReaction: UnifiedReaction = {
                         id: reactionID,
@@ -1398,6 +1400,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         targetComment.id,
                         "green_heart",
                         collection.key,
+                        targetComment.fileID,
                     );
                     const newReaction: UnifiedReaction = {
                         id: reactionID,

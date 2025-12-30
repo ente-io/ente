@@ -195,6 +195,7 @@ export const addPublicReaction = async (
  * @param reactionType The type of reaction (e.g., "green_heart").
  * @param collectionKey The decrypted collection key (base64 encoded).
  * @param anonIdentity Optional anonymous identity. If not provided, will use stored identity.
+ * @param fileID Optional file ID, required for file-scoped comments.
  * @returns The ID of the created reaction.
  */
 export const addPublicCommentReaction = async (
@@ -204,6 +205,7 @@ export const addPublicCommentReaction = async (
     reactionType: string,
     collectionKey: string,
     anonIdentity?: AnonIdentity,
+    fileID?: number,
 ): Promise<string> => {
     const identity = anonIdentity ?? getStoredAnonIdentity(collectionID);
     if (!identity) {
@@ -223,6 +225,7 @@ export const addPublicCommentReaction = async (
         },
         body: JSON.stringify({
             commentID,
+            fileID,
             cipher,
             nonce,
             anonUserID: identity.anonUserID,
