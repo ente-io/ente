@@ -2,12 +2,17 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
+import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/utils/navigation_util.dart";
 
 /// Screen that displays the user's activity feed.
 ///
@@ -150,8 +155,56 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  void _onFeedItemTap(FeedItem item) {
-    // TODO: Navigate to the photo or comment
-    // For now, we'll leave this as a placeholder for future implementation
+  Future<void> _onFeedItemTap(FeedItem item) async {
+    var fileID = item.fileID;
+
+    if (fileID == null && item.commentID != null) {
+      final comment =
+          await SocialDataProvider.instance.getCommentById(item.commentID!);
+      fileID = comment?.fileID;
+    }
+
+    if (fileID == null) return;
+
+    // Load the file from DB
+    final file = await FilesDB.instance.getUploadedFile(
+      fileID,
+      item.collectionID,
+    );
+    if (file == null || !mounted) return;
+
+    // Navigate based on feed item type
+    if (item.type == FeedItemType.comment ||
+        item.type == FeedItemType.reply ||
+        item.type == FeedItemType.commentLike ||
+        item.type == FeedItemType.replyLike) {
+      // Open comments screen for comment-related items
+      // For commentLike/replyLike, highlight the specific comment
+      unawaited(
+        routeToPage(
+          context,
+          FileCommentsScreen(
+            collectionID: item.collectionID,
+            fileID: fileID,
+            highlightCommentID: item.commentID,
+          ),
+        ),
+      );
+    } else {
+      // Open photo viewer for photoLike
+      unawaited(
+        routeToPage(
+          context,
+          DetailPage(
+            DetailPageConfiguration(
+              [file],
+              0,
+              "feed_item",
+            ),
+          ),
+          forceCustomPageRoute: true,
+        ),
+      );
+    }
   }
 }

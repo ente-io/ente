@@ -12,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 
 class SocialDB {
   static final Logger _logger = Logger("SocialDB");
-  static const _databaseName = "ente.social.db";
+  static const _databaseName = "ente.social2.db";
   static const _databaseVersion = 1;
 
   static const _commentsTable = 'comments';
@@ -205,6 +205,25 @@ class SocialDB {
     );
     if (rows.isEmpty) return null;
     return _rowToComment(rows.first);
+  }
+
+  Future<Map<String, Comment>> getCommentsByIds(
+    Iterable<String> ids,
+  ) async {
+    final idList = ids.toList();
+    if (idList.isEmpty) return {};
+
+    final placeholders = List.filled(idList.length, '?').join(',');
+    final db = await database;
+    final rows = await db.query(
+      _commentsTable,
+      where: 'id IN ($placeholders) AND is_deleted = 0',
+      whereArgs: idList,
+    );
+
+    return {
+      for (final row in rows) (row['id'] as String): _rowToComment(row),
+    };
   }
 
   Future<List<Comment>> getCommentsForFilePaginated(

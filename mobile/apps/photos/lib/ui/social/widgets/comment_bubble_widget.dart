@@ -33,6 +33,9 @@ class CommentBubbleWidget extends StatefulWidget {
   final User Function(Comment) userResolver;
   final VoidCallback? onCommentDeleted;
 
+  /// Whether this comment should be visually highlighted.
+  final bool isHighlighted;
+
   const CommentBubbleWidget({
     required this.comment,
     required this.user,
@@ -44,6 +47,7 @@ class CommentBubbleWidget extends StatefulWidget {
     required this.onReplyTap,
     required this.userResolver,
     this.onCommentDeleted,
+    this.isHighlighted = false,
     super.key,
   });
 
@@ -149,6 +153,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     await SocialDataProvider.instance.toggleReaction(
       userID: widget.currentUserID,
       collectionID: widget.collectionID,
+      fileID: widget.comment.fileID,
       commentID: widget.comment.id,
     );
 
@@ -191,7 +196,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(
+    final colorScheme = getEnteColorScheme(context);
+
+    Widget content = CompositedTransformTarget(
       link: _layerLink,
       child: OverlayPortal(
         controller: _overlayController,
@@ -208,6 +215,20 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         ),
       ),
     );
+
+    // Add highlight effect if needed
+    if (widget.isHighlighted) {
+      content = AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        decoration: BoxDecoration(
+          color: colorScheme.fillFaint,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: content,
+      );
+    }
+
+    return content;
   }
 
   Widget _buildOverlayContent(BuildContext context) {

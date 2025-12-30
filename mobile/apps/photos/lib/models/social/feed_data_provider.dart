@@ -62,7 +62,7 @@ class FeedDataProvider {
 
     // Aggregate comment likes by comment
     feedItems.addAll(
-      _aggregateReactionsByComment(
+      await _aggregateReactionsByComment(
         commentLikeReactions,
         FeedItemType.commentLike,
       ),
@@ -70,7 +70,10 @@ class FeedDataProvider {
 
     // Aggregate reply likes by reply
     feedItems.addAll(
-      _aggregateReactionsByComment(replyLikeReactions, FeedItemType.replyLike),
+      await _aggregateReactionsByComment(
+        replyLikeReactions,
+        FeedItemType.replyLike,
+      ),
     );
 
     // Filter out items where the associated file doesn't exist
@@ -120,12 +123,24 @@ class FeedDataProvider {
       // Sort by created_at DESC to get most recent first
       reactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+      // Dedupe actors by userID, keeping order (most recent first)
+      final seenUserIDs = <int>{};
+      final uniqueUserIDs = <int>[];
+      final uniqueAnonIDs = <String?>[];
+      for (final r in reactions) {
+        if (!seenUserIDs.contains(r.userID)) {
+          seenUserIDs.add(r.userID);
+          uniqueUserIDs.add(r.userID);
+          uniqueAnonIDs.add(r.anonUserID);
+        }
+      }
+
       return FeedItem(
         type: type,
         collectionID: reactions.first.collectionID,
         fileID: reactions.first.fileID,
-        actorUserIDs: reactions.map((r) => r.userID).toList(),
-        actorAnonIDs: reactions.map((r) => r.anonUserID).toList(),
+        actorUserIDs: uniqueUserIDs,
+        actorAnonIDs: uniqueAnonIDs,
         createdAt: reactions.first.createdAt,
       );
     }).toList();
@@ -146,12 +161,24 @@ class FeedDataProvider {
       // Sort by created_at DESC to get most recent first
       comments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+      // Dedupe actors by userID, keeping order (most recent first)
+      final seenUserIDs = <int>{};
+      final uniqueUserIDs = <int>[];
+      final uniqueAnonIDs = <String?>[];
+      for (final c in comments) {
+        if (!seenUserIDs.contains(c.userID)) {
+          seenUserIDs.add(c.userID);
+          uniqueUserIDs.add(c.userID);
+          uniqueAnonIDs.add(c.anonUserID);
+        }
+      }
+
       return FeedItem(
         type: FeedItemType.comment,
         collectionID: comments.first.collectionID,
         fileID: comments.first.fileID,
-        actorUserIDs: comments.map((c) => c.userID).toList(),
-        actorAnonIDs: comments.map((c) => c.anonUserID).toList(),
+        actorUserIDs: uniqueUserIDs,
+        actorAnonIDs: uniqueAnonIDs,
         createdAt: comments.first.createdAt,
       );
     }).toList();
@@ -172,46 +199,87 @@ class FeedDataProvider {
       // Sort by created_at DESC to get most recent first
       replies.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+      // Dedupe actors by userID, keeping order (most recent first)
+      final seenUserIDs = <int>{};
+      final uniqueUserIDs = <int>[];
+      final uniqueAnonIDs = <String?>[];
+      for (final r in replies) {
+        if (!seenUserIDs.contains(r.userID)) {
+          seenUserIDs.add(r.userID);
+          uniqueUserIDs.add(r.userID);
+          uniqueAnonIDs.add(r.anonUserID);
+        }
+      }
+
       return FeedItem(
         type: FeedItemType.reply,
         collectionID: replies.first.collectionID,
         fileID: replies.first.fileID,
         commentID: replies.first.parentCommentID,
-        actorUserIDs: replies.map((r) => r.userID).toList(),
-        actorAnonIDs: replies.map((r) => r.anonUserID).toList(),
+        actorUserIDs: uniqueUserIDs,
+        actorAnonIDs: uniqueAnonIDs,
         createdAt: replies.first.createdAt,
       );
     }).toList();
   }
 
   /// Aggregates reactions by comment ID.
-  List<FeedItem> _aggregateReactionsByComment(
+  Future<List<FeedItem>> _aggregateReactionsByComment(
     List<Reaction> reactions,
     FeedItemType type,
-  ) {
+  ) async {
+    if (reactions.isEmpty) return [];
+
     final groupedByComment = <String, List<Reaction>>{};
+    final commentIDs = <String>{};
 
     for (final reaction in reactions) {
       if (reaction.commentID == null) continue;
       final key = '${reaction.collectionID}_${reaction.commentID}';
+      commentIDs.add(reaction.commentID!);
       groupedByComment.putIfAbsent(key, () => []).add(reaction);
     }
 
-    return groupedByComment.entries.map((entry) {
-      final reactions = entry.value;
-      // Sort by created_at DESC to get most recent first
-      reactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    if (groupedByComment.isEmpty) return [];
 
-      return FeedItem(
-        type: type,
-        collectionID: reactions.first.collectionID,
-        fileID: reactions.first.fileID,
-        commentID: reactions.first.commentID,
-        actorUserIDs: reactions.map((r) => r.userID).toList(),
-        actorAnonIDs: reactions.map((r) => r.anonUserID).toList(),
-        createdAt: reactions.first.createdAt,
-      );
-    }).toList();
+    final commentsByID = await _db.getCommentsByIds(commentIDs);
+
+    return groupedByComment.entries
+        .map((entry) {
+          final reactions = entry.value;
+          // Sort by created_at DESC to get most recent first
+          reactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+          // Dedupe actors by userID, keeping order (most recent first)
+          final seenUserIDs = <int>{};
+          final uniqueUserIDs = <int>[];
+          final uniqueAnonIDs = <String?>[];
+          for (final r in reactions) {
+            if (!seenUserIDs.contains(r.userID)) {
+              seenUserIDs.add(r.userID);
+              uniqueUserIDs.add(r.userID);
+              uniqueAnonIDs.add(r.anonUserID);
+            }
+          }
+
+          final commentID = reactions.first.commentID;
+          final comment = commentID != null ? commentsByID[commentID] : null;
+          if (comment == null) {
+            return null;
+          }
+
+          return FeedItem(
+            type: type,
+            collectionID: reactions.first.collectionID,
+            fileID: comment.fileID,
+            commentID: commentID,
+            actorUserIDs: uniqueUserIDs,
+            actorAnonIDs: uniqueAnonIDs,
+            createdAt: reactions.first.createdAt,
+          );
+        })
+        .whereType<FeedItem>()
+        .toList();
   }
 
   /// Filters out feed items where the associated file doesn't exist in FilesDB.
