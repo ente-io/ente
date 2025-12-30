@@ -149,7 +149,8 @@ class _FeedScreenState extends State<FeedScreen> {
                         anonDisplayNames:
                             _anonDisplayNamesByCollection[item.collectionID] ??
                                 const {},
-                        onTap: () => _onFeedItemTap(item),
+                        onTap: () => _openComments(item),
+                        onThumbnailTap: () => _openPhoto(item),
                       );
                     },
                   ),
@@ -186,7 +187,32 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Future<void> _onFeedItemTap(FeedItem item) async {
+  /// Opens the comments screen for the feed item.
+  Future<void> _openComments(FeedItem item) async {
+    var fileID = item.fileID;
+
+    if (fileID == null && item.commentID != null) {
+      final comment =
+          await SocialDataProvider.instance.getCommentById(item.commentID!);
+      fileID = comment?.fileID;
+    }
+
+    if (fileID == null || !mounted) return;
+
+    unawaited(
+      routeToPage(
+        context,
+        FileCommentsScreen(
+          collectionID: item.collectionID,
+          fileID: fileID,
+          highlightCommentID: item.commentID,
+        ),
+      ),
+    );
+  }
+
+  /// Opens the photo viewer for the feed item.
+  Future<void> _openPhoto(FeedItem item) async {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
@@ -197,45 +223,24 @@ class _FeedScreenState extends State<FeedScreen> {
 
     if (fileID == null) return;
 
-    // Load the file from DB
     final file = await FilesDB.instance.getUploadedFile(
       fileID,
       item.collectionID,
     );
     if (file == null || !mounted) return;
 
-    // Navigate based on feed item type
-    if (item.type == FeedItemType.comment ||
-        item.type == FeedItemType.reply ||
-        item.type == FeedItemType.commentLike ||
-        item.type == FeedItemType.replyLike) {
-      // Open comments screen for comment-related items
-      // For commentLike/replyLike, highlight the specific comment
-      unawaited(
-        routeToPage(
-          context,
-          FileCommentsScreen(
-            collectionID: item.collectionID,
-            fileID: fileID,
-            highlightCommentID: item.commentID,
+    unawaited(
+      routeToPage(
+        context,
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "feed_item",
           ),
         ),
-      );
-    } else {
-      // Open photo viewer for photoLike
-      unawaited(
-        routeToPage(
-          context,
-          DetailPage(
-            DetailPageConfiguration(
-              [file],
-              0,
-              "feed_item",
-            ),
-          ),
-          forceCustomPageRoute: true,
-        ),
-      );
-    }
+        forceCustomPageRoute: true,
+      ),
+    );
   }
 }

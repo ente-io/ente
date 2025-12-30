@@ -125,6 +125,7 @@ class _FeedPreviewWidgetState extends State<FeedPreviewWidget> {
                       currentUserID: _currentUserID,
                       anonDisplayNames: _anonDisplayNames,
                       onTap: _onTap,
+                      onThumbnailTap: _onTap,
                     ),
                   ),
                   Icon(

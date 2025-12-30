@@ -179,7 +179,7 @@ class SocialDataProvider {
     required int collectionID,
     int? fileID,
     String? commentID,
-    String reactionType = 'green_like',
+    String reactionType = 'green_heart',
   }) async {
     try {
       // Check if user already has a reaction
