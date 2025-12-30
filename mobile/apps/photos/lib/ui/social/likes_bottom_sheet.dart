@@ -57,6 +57,7 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   List<CollectionLikeInfo> _sharedCollections = [];
   late int _selectedCollectionID;
   late final int _currentUserID;
+  Map<String, String> _anonDisplayNames = {};
 
   @override
   void initState() {
@@ -138,15 +139,22 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
         widget.fileID,
       );
 
-      final likes =
-          await SocialDataProvider.instance.getReactionsForFileInCollection(
-        widget.fileID,
-        _selectedCollectionID,
-      );
+      final results = await Future.wait([
+        SocialDataProvider.instance.getReactionsForFileInCollection(
+          widget.fileID,
+          _selectedCollectionID,
+        ),
+        SocialDataProvider.instance
+            .getAnonDisplayNamesForCollection(_selectedCollectionID),
+      ]);
+
+      final likes = results[0] as List<Reaction>;
+      final anonNames = results[1] as Map<String, String>;
 
       if (mounted) {
         setState(() {
           _likes = likes;
+          _anonDisplayNames = anonNames;
           _isLoading = false;
         });
       }
@@ -161,14 +169,25 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   }
 
   Future<void> _onCollectionSelected(int collectionID) async {
-    // Load likes for new collection first to avoid flash/jump
-    final likes = await SocialDataProvider.instance
-        .getReactionsForFileInCollection(widget.fileID, collectionID);
+    // Load likes and anon names for new collection first to avoid flash/jump
+    final results = await Future.wait([
+      SocialDataProvider.instance.getReactionsForFileInCollection(
+        widget.fileID,
+        collectionID,
+      ),
+      SocialDataProvider.instance.getAnonDisplayNamesForCollection(
+        collectionID,
+      ),
+    ]);
+
+    final likes = results[0] as List<Reaction>;
+    final anonNames = results[1] as Map<String, String>;
 
     if (mounted) {
       setState(() {
         _selectedCollectionID = collectionID;
         _likes = likes;
+        _anonDisplayNames = anonNames;
       });
     }
   }
@@ -220,6 +239,7 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
                     likes: _likes,
                     currentUserID: _currentUserID,
                     selectedCollectionID: _selectedCollectionID,
+                    anonDisplayNames: _anonDisplayNames,
                   ),
                 ),
             ],
@@ -317,19 +337,24 @@ class _LikesList extends StatelessWidget {
   final List<Reaction> likes;
   final int currentUserID;
   final int selectedCollectionID;
+  final Map<String, String> anonDisplayNames;
 
   const _LikesList({
     required this.likes,
     required this.currentUserID,
     required this.selectedCollectionID,
+    required this.anonDisplayNames,
   });
 
   User _getUserForReaction(Reaction reaction) {
     if (reaction.isAnonymous) {
+      final anonID = reaction.anonUserID;
+      final displayName =
+          anonID != null ? (anonDisplayNames[anonID] ?? anonID) : "Anonymous";
       return User(
         id: reaction.userID,
-        email: "${reaction.anonUserID ?? "anonymous"}@unknown.com",
-        name: reaction.anonUserID ?? "Anonymous",
+        email: "${anonID ?? "anonymous"}@unknown.com",
+        name: displayName,
       );
     }
 

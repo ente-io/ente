@@ -18,12 +18,22 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
+
+  /// Called when the user taps on non-thumbnail areas (icon, avatar, text).
   final VoidCallback? onTap;
+
+  /// Called when the user taps on the photo thumbnail.
+  final VoidCallback? onThumbnailTap;
+
+  /// Map of anonUserID -> decrypted display name for the collection.
+  final Map<String, String> anonDisplayNames;
 
   const FeedItemWidget({
     required this.feedItem,
     required this.currentUserID,
     this.onTap,
+    this.onThumbnailTap,
+    this.anonDisplayNames = const {},
     super.key,
   });
 
@@ -31,48 +41,61 @@ class FeedItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Feed type icon
-            _FeedTypeIcon(type: feedItem.type),
-            const SizedBox(width: 10),
-            // Stacked avatars
-            _StackedAvatars(
-              feedItem: feedItem,
-              currentUserID: currentUserID,
-            ),
-            const SizedBox(width: 10),
-            // Text content
-            Expanded(
-              child: _FeedTextContent(
-                feedItem: feedItem,
-                currentUserID: currentUserID,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left side - tappable for comments
+          Expanded(
+            child: GestureDetector(
+              onTap: onTap,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Feed type icon
+                  _FeedTypeIcon(type: feedItem.type),
+                  const SizedBox(width: 10),
+                  // Stacked avatars
+                  _StackedAvatars(
+                    feedItem: feedItem,
+                    currentUserID: currentUserID,
+                    anonDisplayNames: anonDisplayNames,
+                  ),
+                  const SizedBox(width: 10),
+                  // Text content
+                  Expanded(
+                    child: _FeedTextContent(
+                      feedItem: feedItem,
+                      currentUserID: currentUserID,
+                      anonDisplayNames: anonDisplayNames,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Photo thumbnail
-            if (feedItem.fileID != null)
-              _FeedThumbnail(
+          ),
+          const SizedBox(width: 12),
+          // Photo thumbnail - separate tap target
+          if (feedItem.fileID != null)
+            GestureDetector(
+              onTap: onThumbnailTap,
+              child: _FeedThumbnail(
                 fileID: feedItem.fileID!,
                 collectionID: feedItem.collectionID,
-              )
-            else
-              Container(
-                width: 66,
-                height: 66,
-                decoration: BoxDecoration(
-                  color: colorScheme.fillFaint,
-                  borderRadius: BorderRadius.circular(7.792),
-                ),
               ),
-          ],
-        ),
+            )
+          else
+            Container(
+              width: 66,
+              height: 66,
+              decoration: BoxDecoration(
+                color: colorScheme.fillFaint,
+                borderRadius: BorderRadius.circular(7.792),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -169,10 +192,12 @@ class _FeedTypeIcon extends StatelessWidget {
 class _StackedAvatars extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
+  final Map<String, String> anonDisplayNames;
 
   const _StackedAvatars({
     required this.feedItem,
     required this.currentUserID,
+    required this.anonDisplayNames,
   });
 
   @override
@@ -252,12 +277,13 @@ class _StackedAvatars extends StatelessWidget {
       final anonID = feedItem.actorAnonIDs[i];
 
       if (userID <= 0 && anonID != null) {
-        // Anonymous user
+        // Anonymous user - use decrypted display name if available
+        final displayName = anonDisplayNames[anonID] ?? anonID;
         users.add(
           User(
             id: userID,
             email: "$anonID@unknown.com",
-            name: anonID,
+            name: displayName,
           ),
         );
       } else {
@@ -276,10 +302,12 @@ class _StackedAvatars extends StatelessWidget {
 class _FeedTextContent extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
+  final Map<String, String> anonDisplayNames;
 
   const _FeedTextContent({
     required this.feedItem,
     required this.currentUserID,
+    required this.anonDisplayNames,
   });
 
   @override
@@ -381,10 +409,12 @@ class _FeedTextContent extends StatelessWidget {
     final anonID = feedItem.primaryActorAnonID;
 
     if (userID <= 0 && anonID != null) {
+      // Anonymous user - use decrypted display name if available
+      final displayName = anonDisplayNames[anonID] ?? anonID;
       return User(
         id: userID,
         email: "$anonID@unknown.com",
-        name: anonID,
+        name: displayName,
       );
     }
 

@@ -179,7 +179,7 @@ class SocialDataProvider {
     required int collectionID,
     int? fileID,
     String? commentID,
-    String reactionType = 'green_like',
+    String reactionType = 'green_heart',
   }) async {
     try {
       // Check if user already has a reaction
@@ -292,5 +292,37 @@ class SocialDataProvider {
       if (r.userID == userID && !r.isDeleted) return r;
     }
     return null;
+  }
+
+  // ============ Anon Profile methods ============
+
+  /// Gets the decrypted display name for an anonymous user.
+  ///
+  /// Returns the display name from the synced AnonProfile if available,
+  /// otherwise returns [fallback] (typically the raw anonUserID).
+  Future<String> getAnonDisplayName(
+    String anonUserID,
+    int collectionID, {
+    String? fallback,
+  }) async {
+    final profile = await _db.getAnonProfile(anonUserID, collectionID);
+    return profile?.displayName ?? fallback ?? anonUserID;
+  }
+
+  /// Gets all anon profiles for a collection as a map of anonUserID -> displayName.
+  ///
+  /// Only includes profiles where displayName could be extracted from the data.
+  Future<Map<String, String>> getAnonDisplayNamesForCollection(
+    int collectionID,
+  ) async {
+    final profiles = await _db.getAnonProfilesForCollection(collectionID);
+    final result = <String, String>{};
+    for (final p in profiles) {
+      final name = p.displayName;
+      if (name != null) {
+        result[p.anonUserID] = name;
+      }
+    }
+    return result;
   }
 }

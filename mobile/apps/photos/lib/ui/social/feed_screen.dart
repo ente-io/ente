@@ -29,6 +29,9 @@ class _FeedScreenState extends State<FeedScreen> {
   bool _isLoading = true;
   late final int _currentUserID;
 
+  /// Map of collectionID -> (anonUserID -> displayName)
+  Map<int, Map<String, String>> _anonDisplayNamesByCollection = {};
+
   @override
   void initState() {
     super.initState();
@@ -42,15 +45,36 @@ class _FeedScreenState extends State<FeedScreen> {
     // Load local data first
     final items = await FeedDataProvider.instance.getFeedItems(limit: 50);
 
+    // Load anon display names for all collections in feed
+    final anonNames = await _loadAnonDisplayNames(items);
+
     if (mounted) {
       setState(() {
         _feedItems = items;
+        _anonDisplayNamesByCollection = anonNames;
         _isLoading = false;
       });
     }
 
     // Sync in background and refresh
     unawaited(_syncAndRefresh());
+  }
+
+  Future<Map<int, Map<String, String>>> _loadAnonDisplayNames(
+    List<FeedItem> items,
+  ) async {
+    final collectionIDs = items.map((e) => e.collectionID).toSet();
+    final results = <int, Map<String, String>>{};
+
+    await Future.wait(
+      collectionIDs.map((collectionID) async {
+        final names = await SocialDataProvider.instance
+            .getAnonDisplayNamesForCollection(collectionID);
+        results[collectionID] = names;
+      }),
+    );
+
+    return results;
   }
 
   Future<void> _syncAndRefresh() async {
@@ -63,9 +87,13 @@ class _FeedScreenState extends State<FeedScreen> {
       final freshItems =
           await FeedDataProvider.instance.getFeedItems(limit: 50);
 
+      // Reload anon display names for new items
+      final freshAnonNames = await _loadAnonDisplayNames(freshItems);
+
       if (mounted) {
         setState(() {
           _feedItems = freshItems;
+          _anonDisplayNamesByCollection = freshAnonNames;
         });
       }
     } catch (_) {
@@ -118,7 +146,11 @@ class _FeedScreenState extends State<FeedScreen> {
                         ),
                         feedItem: item,
                         currentUserID: _currentUserID,
-                        onTap: () => _onFeedItemTap(item),
+                        anonDisplayNames:
+                            _anonDisplayNamesByCollection[item.collectionID] ??
+                                const {},
+                        onTap: () => _openComments(item),
+                        onThumbnailTap: () => _openPhoto(item),
                       );
                     },
                   ),
@@ -155,7 +187,32 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Future<void> _onFeedItemTap(FeedItem item) async {
+  /// Opens the comments screen for the feed item.
+  Future<void> _openComments(FeedItem item) async {
+    var fileID = item.fileID;
+
+    if (fileID == null && item.commentID != null) {
+      final comment =
+          await SocialDataProvider.instance.getCommentById(item.commentID!);
+      fileID = comment?.fileID;
+    }
+
+    if (fileID == null || !mounted) return;
+
+    unawaited(
+      routeToPage(
+        context,
+        FileCommentsScreen(
+          collectionID: item.collectionID,
+          fileID: fileID,
+          highlightCommentID: item.commentID,
+        ),
+      ),
+    );
+  }
+
+  /// Opens the photo viewer for the feed item.
+  Future<void> _openPhoto(FeedItem item) async {
     var fileID = item.fileID;
 
     if (fileID == null && item.commentID != null) {
@@ -166,45 +223,24 @@ class _FeedScreenState extends State<FeedScreen> {
 
     if (fileID == null) return;
 
-    // Load the file from DB
     final file = await FilesDB.instance.getUploadedFile(
       fileID,
       item.collectionID,
     );
     if (file == null || !mounted) return;
 
-    // Navigate based on feed item type
-    if (item.type == FeedItemType.comment ||
-        item.type == FeedItemType.reply ||
-        item.type == FeedItemType.commentLike ||
-        item.type == FeedItemType.replyLike) {
-      // Open comments screen for comment-related items
-      // For commentLike/replyLike, highlight the specific comment
-      unawaited(
-        routeToPage(
-          context,
-          FileCommentsScreen(
-            collectionID: item.collectionID,
-            fileID: fileID,
-            highlightCommentID: item.commentID,
+    unawaited(
+      routeToPage(
+        context,
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "feed_item",
           ),
         ),
-      );
-    } else {
-      // Open photo viewer for photoLike
-      unawaited(
-        routeToPage(
-          context,
-          DetailPage(
-            DetailPageConfiguration(
-              [file],
-              0,
-              "feed_item",
-            ),
-          ),
-          forceCustomPageRoute: true,
-        ),
-      );
-    }
+        forceCustomPageRoute: true,
+      ),
+    );
   }
 }

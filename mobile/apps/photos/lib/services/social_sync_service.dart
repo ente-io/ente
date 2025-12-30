@@ -1,6 +1,8 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/social_db.dart';
+import 'package:photos/events/social_data_updated_event.dart';
 import 'package:photos/models/social/anon_profile.dart';
 import 'package:photos/models/social/api_responses.dart';
 import 'package:photos/models/social/comment.dart';
@@ -171,12 +173,26 @@ class SocialSyncService {
       );
 
       int syncedCount = 0;
+      bool hasNewComments = false;
+      bool hasNewReactions = false;
+
       for (final update in latestUpdates.updates) {
         try {
-          final needsSync = await _needsSync(update);
-          if (needsSync) {
+          final localCommentsSyncTime =
+              await _db.getCommentsSyncTime(update.collectionID);
+          final localReactionsSyncTime =
+              await _db.getReactionsSyncTime(update.collectionID);
+
+          final needsCommentsSync = update.commentsUpdatedAt != null &&
+              update.commentsUpdatedAt! > localCommentsSyncTime;
+          final needsReactionsSync = update.reactionsUpdatedAt != null &&
+              update.reactionsUpdatedAt! > localReactionsSyncTime;
+
+          if (needsCommentsSync || needsReactionsSync) {
             await syncCollection(update.collectionID);
             syncedCount++;
+            hasNewComments = hasNewComments || needsCommentsSync;
+            hasNewReactions = hasNewReactions || needsReactionsSync;
           }
 
           // Sync anon profiles if needed
@@ -196,33 +212,21 @@ class SocialSyncService {
       }
 
       _logger.info('Synced $syncedCount collections with new updates');
+
+      // Fire event if any data was synced
+      if (syncedCount > 0) {
+        Bus.instance.fire(
+          SocialDataUpdatedEvent(
+            hasNewComments: hasNewComments,
+            hasNewReactions: hasNewReactions,
+          ),
+        );
+      }
     } catch (e) {
       _logger.severe('Failed to fetch latest updates', e);
     } finally {
       _isSyncing = false;
     }
-  }
-
-  /// Checks if a collection needs syncing based on server vs local timestamps.
-  Future<bool> _needsSync(CollectionLatestUpdate update) async {
-    final localCommentsSyncTime =
-        await _db.getCommentsSyncTime(update.collectionID);
-    final localReactionsSyncTime =
-        await _db.getReactionsSyncTime(update.collectionID);
-
-    // Check if comments need sync
-    if (update.commentsUpdatedAt != null &&
-        update.commentsUpdatedAt! > localCommentsSyncTime) {
-      return true;
-    }
-
-    // Check if reactions need sync
-    if (update.reactionsUpdatedAt != null &&
-        update.reactionsUpdatedAt! > localReactionsSyncTime) {
-      return true;
-    }
-
-    return false;
   }
 
   /// Syncs anonymous profiles for a collection.
@@ -238,7 +242,7 @@ class SocialSyncService {
       final profiles = <AnonProfile>[];
 
       for (final apiProfile in response.profiles) {
-        final displayName = _api.decryptAnonProfile(
+        final data = _api.decryptAnonProfile(
           apiProfile.cipher,
           apiProfile.nonce,
           collectionID,
@@ -248,7 +252,7 @@ class SocialSyncService {
           AnonProfile(
             anonUserID: apiProfile.anonUserID,
             collectionID: apiProfile.collectionID,
-            displayName: displayName,
+            data: data,
             createdAt: apiProfile.createdAt,
             updatedAt: apiProfile.updatedAt,
           ),

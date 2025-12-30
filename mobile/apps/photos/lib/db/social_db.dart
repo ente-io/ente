@@ -12,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 
 class SocialDB {
   static final Logger _logger = Logger("SocialDB");
-  static const _databaseName = "ente.social2.db";
+  static const _databaseName = "ente.social3.db";
   static const _databaseVersion = 1;
 
   static const _commentsTable = 'comments';
@@ -87,7 +87,7 @@ class SocialDB {
       CREATE TABLE $_anonProfilesTable (
         anon_user_id TEXT NOT NULL,
         collection_id INTEGER NOT NULL,
-        display_name TEXT NOT NULL,
+        data TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         PRIMARY KEY (anon_user_id, collection_id)
@@ -782,7 +782,7 @@ class SocialDB {
     return {
       'anon_user_id': profile.anonUserID,
       'collection_id': profile.collectionID,
-      'display_name': profile.displayName,
+      'data': profile.data,
       'created_at': profile.createdAt,
       'updated_at': profile.updatedAt,
     };
@@ -792,7 +792,7 @@ class SocialDB {
     return AnonProfile(
       anonUserID: row['anon_user_id'] as String,
       collectionID: row['collection_id'] as int,
-      displayName: row['display_name'] as String,
+      data: row['data'] as String,
       createdAt: row['created_at'] as int,
       updatedAt: row['updated_at'] as int,
     );
