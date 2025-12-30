@@ -22,9 +22,13 @@ class FileCommentsScreen extends StatefulWidget {
   final int collectionID;
   final int fileID;
 
+  /// Optional comment ID to scroll to and highlight.
+  final String? highlightCommentID;
+
   const FileCommentsScreen({
     required this.collectionID,
     required this.fileID,
+    this.highlightCommentID,
     super.key,
   });
 
@@ -43,6 +47,8 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
+  String? _highlightedCommentID;
+  bool _hasScrolledToHighlight = false;
 
   List<CollectionCommentInfo> _sharedCollections = [];
   late int _selectedCollectionID;
@@ -62,6 +68,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     _scrollController = ScrollController()..addListener(_onScroll);
     _currentUserID = Configuration.instance.getUserID()!;
     _selectedCollectionID = widget.collectionID;
+    _highlightedCommentID = widget.highlightCommentID;
     _loadSharedCollections();
   }
 
@@ -146,6 +153,9 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       _isLoading = false;
     });
 
+    // Scroll to highlighted comment if specified
+    _scrollToHighlightedComment();
+
     // Sync in background and refresh if there are changes
     unawaited(_syncAndRefresh());
   }
@@ -207,6 +217,38 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreComments();
     }
+  }
+
+  void _scrollToHighlightedComment() {
+    if (_highlightedCommentID == null || _hasScrolledToHighlight) return;
+
+    final index = _comments.indexWhere((c) => c.id == _highlightedCommentID);
+    if (index == -1) return;
+
+    _hasScrolledToHighlight = true;
+
+    // Use post-frame callback to ensure layout is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+
+      // Estimate scroll position (since ListView is reversed, index 0 is at bottom)
+      // Each comment is roughly 100-150px, we'll use 120px as estimate
+      const estimatedItemHeight = 120.0;
+      final scrollPosition = index * estimatedItemHeight;
+
+      _scrollController.animateTo(
+        scrollPosition,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+
+      // Clear highlight after a delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() => _highlightedCommentID = null);
+        }
+      });
+    });
   }
 
   void _onCollectionSelected(int collectionID) {
@@ -382,6 +424,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
                         isOwnComment: comment.userID == _currentUserID,
                         currentUserID: _currentUserID,
                         collectionID: _selectedCollectionID,
+                        isHighlighted: comment.id == _highlightedCommentID,
                         onFetchParent: comment.isReply
                             ? () => _getParentComment(comment.parentCommentID!)
                             : null,
