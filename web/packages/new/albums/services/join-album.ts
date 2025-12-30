@@ -1,8 +1,16 @@
 import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
-import { boxSeal } from "ente-base/crypto";
+import { boxSeal, fromB64 } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+
+/**
+ * The expected length in bytes for a collection key.
+ *
+ * This matches SecretBoxKeyBytes (crypto_secretbox_KEYBYTES) in libsodium,
+ * which is 32 bytes (256 bits).
+ */
+const collectionKeyBytes = 32;
 
 /**
  * Service for handling the join album flow for public collections.
@@ -124,6 +132,16 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         }
 
         const publicKey = keyAttributes.publicKey;
+
+        // Validate the collection key is exactly 32 bytes (256 bits)
+        // This matches SecretBoxKeyBytes on the server and prevents processing
+        // malformed join album URLs
+        const collectionKeyBytes_ = await fromB64(context.collectionKey);
+        if (collectionKeyBytes_.length !== collectionKeyBytes) {
+            log.warn("Invalid collection key length in join album context");
+            clearJoinAlbumContext();
+            return null;
+        }
 
         // Encrypt the collection key with user's public key
         // The collection key is already base64 encoded, and boxSeal expects base64
