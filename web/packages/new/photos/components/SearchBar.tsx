@@ -292,7 +292,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onInputChange={handleInputChange}
                 isClearable
                 escapeClearsValue
-                menuIsOpen={isFocused && inputValue !== ""}
+                menuIsOpen={
+                    isFocused && (inputValue !== "" || shouldShowEmptyState(""))
+                }
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 placeholder={t("search_hint")}
