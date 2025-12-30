@@ -47,6 +47,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
+  Map<String, String> _anonDisplayNames = {};
   String? _highlightedCommentID;
   bool _hasScrolledToHighlight = false;
 
@@ -138,16 +139,23 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     setState(() => _isLoading = true);
 
     // Load local data first for immediate display
-    final comments =
-        await SocialDataProvider.instance.getCommentsForFilePaginated(
-      widget.fileID,
-      collectionID: _selectedCollectionID,
-      limit: _pageSize,
-      offset: 0,
-    );
+    final results = await Future.wait([
+      SocialDataProvider.instance.getCommentsForFilePaginated(
+        widget.fileID,
+        collectionID: _selectedCollectionID,
+        limit: _pageSize,
+        offset: 0,
+      ),
+      SocialDataProvider.instance
+          .getAnonDisplayNamesForCollection(_selectedCollectionID),
+    ]);
+
+    final comments = results[0] as List<Comment>;
+    final anonNames = results[1] as Map<String, String>;
 
     setState(() {
       _comments.addAll(comments);
+      _anonDisplayNames = anonNames;
       _offset = comments.length;
       _hasMoreComments = comments.length == _pageSize;
       _isLoading = false;
@@ -258,6 +266,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       _offset = 0;
       _hasMoreComments = true;
       _userCache.clear();
+      _anonDisplayNames = {};
     });
     _loadInitialComments();
   }
@@ -281,10 +290,13 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     }
 
     if (comment.isAnonymous) {
+      final anonID = comment.anonUserID;
+      final displayName =
+          anonID != null ? (_anonDisplayNames[anonID] ?? anonID) : "Anonymous";
       final user = User(
         id: comment.userID,
-        email: "${comment.anonUserID ?? "anonymous"}@unknown.com",
-        name: comment.anonUserID ?? "Anonymous",
+        email: "${anonID ?? "anonymous"}@unknown.com",
+        name: displayName,
       );
       _userCache[comment.userID] = user;
       return user;

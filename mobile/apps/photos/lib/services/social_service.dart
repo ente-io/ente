@@ -500,9 +500,10 @@ class SocialService {
     return padded.substring(0, nullIndex);
   }
 
-  /// Decrypts anonymous profile name.
+  /// Decrypts anonymous profile data.
   ///
-  /// Returns the decrypted display name, or empty string if decryption fails.
+  /// Returns the decrypted JSON string, or empty string if decryption fails.
+  /// The payload is JSON: {"userName": "..."} (may have more fields in future).
   String decryptAnonProfile(String? cipher, String? nonce, int collectionID) {
     if (cipher == null || nonce == null || cipher.isEmpty || nonce.isEmpty) {
       return '';

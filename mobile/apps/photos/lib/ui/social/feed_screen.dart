@@ -29,6 +29,9 @@ class _FeedScreenState extends State<FeedScreen> {
   bool _isLoading = true;
   late final int _currentUserID;
 
+  /// Map of collectionID -> (anonUserID -> displayName)
+  Map<int, Map<String, String>> _anonDisplayNamesByCollection = {};
+
   @override
   void initState() {
     super.initState();
@@ -42,15 +45,36 @@ class _FeedScreenState extends State<FeedScreen> {
     // Load local data first
     final items = await FeedDataProvider.instance.getFeedItems(limit: 50);
 
+    // Load anon display names for all collections in feed
+    final anonNames = await _loadAnonDisplayNames(items);
+
     if (mounted) {
       setState(() {
         _feedItems = items;
+        _anonDisplayNamesByCollection = anonNames;
         _isLoading = false;
       });
     }
 
     // Sync in background and refresh
     unawaited(_syncAndRefresh());
+  }
+
+  Future<Map<int, Map<String, String>>> _loadAnonDisplayNames(
+    List<FeedItem> items,
+  ) async {
+    final collectionIDs = items.map((e) => e.collectionID).toSet();
+    final results = <int, Map<String, String>>{};
+
+    await Future.wait(
+      collectionIDs.map((collectionID) async {
+        final names = await SocialDataProvider.instance
+            .getAnonDisplayNamesForCollection(collectionID);
+        results[collectionID] = names;
+      }),
+    );
+
+    return results;
   }
 
   Future<void> _syncAndRefresh() async {
@@ -63,9 +87,13 @@ class _FeedScreenState extends State<FeedScreen> {
       final freshItems =
           await FeedDataProvider.instance.getFeedItems(limit: 50);
 
+      // Reload anon display names for new items
+      final freshAnonNames = await _loadAnonDisplayNames(freshItems);
+
       if (mounted) {
         setState(() {
           _feedItems = freshItems;
+          _anonDisplayNamesByCollection = freshAnonNames;
         });
       }
     } catch (_) {
@@ -118,6 +146,9 @@ class _FeedScreenState extends State<FeedScreen> {
                         ),
                         feedItem: item,
                         currentUserID: _currentUserID,
+                        anonDisplayNames:
+                            _anonDisplayNamesByCollection[item.collectionID] ??
+                                const {},
                         onTap: () => _onFeedItemTap(item),
                       );
                     },

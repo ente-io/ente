@@ -20,10 +20,14 @@ class FeedItemWidget extends StatelessWidget {
   final int currentUserID;
   final VoidCallback? onTap;
 
+  /// Map of anonUserID -> decrypted display name for the collection.
+  final Map<String, String> anonDisplayNames;
+
   const FeedItemWidget({
     required this.feedItem,
     required this.currentUserID,
     this.onTap,
+    this.anonDisplayNames = const {},
     super.key,
   });
 
@@ -46,6 +50,7 @@ class FeedItemWidget extends StatelessWidget {
             _StackedAvatars(
               feedItem: feedItem,
               currentUserID: currentUserID,
+              anonDisplayNames: anonDisplayNames,
             ),
             const SizedBox(width: 10),
             // Text content
@@ -53,6 +58,7 @@ class FeedItemWidget extends StatelessWidget {
               child: _FeedTextContent(
                 feedItem: feedItem,
                 currentUserID: currentUserID,
+                anonDisplayNames: anonDisplayNames,
               ),
             ),
             const SizedBox(width: 12),
@@ -169,10 +175,12 @@ class _FeedTypeIcon extends StatelessWidget {
 class _StackedAvatars extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
+  final Map<String, String> anonDisplayNames;
 
   const _StackedAvatars({
     required this.feedItem,
     required this.currentUserID,
+    required this.anonDisplayNames,
   });
 
   @override
@@ -252,12 +260,13 @@ class _StackedAvatars extends StatelessWidget {
       final anonID = feedItem.actorAnonIDs[i];
 
       if (userID <= 0 && anonID != null) {
-        // Anonymous user
+        // Anonymous user - use decrypted display name if available
+        final displayName = anonDisplayNames[anonID] ?? anonID;
         users.add(
           User(
             id: userID,
             email: "$anonID@unknown.com",
-            name: anonID,
+            name: displayName,
           ),
         );
       } else {
@@ -276,10 +285,12 @@ class _StackedAvatars extends StatelessWidget {
 class _FeedTextContent extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
+  final Map<String, String> anonDisplayNames;
 
   const _FeedTextContent({
     required this.feedItem,
     required this.currentUserID,
+    required this.anonDisplayNames,
   });
 
   @override
@@ -381,10 +392,12 @@ class _FeedTextContent extends StatelessWidget {
     final anonID = feedItem.primaryActorAnonID;
 
     if (userID <= 0 && anonID != null) {
+      // Anonymous user - use decrypted display name if available
+      final displayName = anonDisplayNames[anonID] ?? anonID;
       return User(
         id: userID,
         email: "$anonID@unknown.com",
-        name: anonID,
+        name: displayName,
       );
     }
 

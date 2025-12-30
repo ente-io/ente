@@ -292,34 +292,18 @@ class FeedDataProvider {
     if (items.isEmpty) return items;
 
     // Collect unique (fileID, collectionID) pairs
-    final filesToCheck = <String, (int fileID, int collectionID)>{};
+    final filesToCheck = <(int, int)>{};
     for (final item in items) {
       if (item.fileID != null) {
-        final key = '${item.collectionID}_${item.fileID}';
-        filesToCheck[key] = (item.fileID!, item.collectionID);
+        filesToCheck.add((item.fileID!, item.collectionID));
       }
     }
 
     if (filesToCheck.isEmpty) return items;
 
-    // Check which files exist in parallel
-    final existingFiles = <String>{};
-    final checkResults = await Future.wait(
-      filesToCheck.entries.map((entry) async {
-        final (fileID, collectionID) = entry.value;
-        final file = await FilesDB.instance.getUploadedFile(
-          fileID,
-          collectionID,
-        );
-        return (key: entry.key, exists: file != null);
-      }),
-    );
-
-    for (final result in checkResults) {
-      if (result.exists) {
-        existingFiles.add(result.key);
-      }
-    }
+    // Check which files exist using batch query (single DB call)
+    final existingFiles =
+        await FilesDB.instance.getExistingFileKeys(filesToCheck);
 
     // Filter items to only include those with existing files
     return items.where((item) {
