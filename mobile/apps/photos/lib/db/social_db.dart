@@ -5,23 +5,26 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/models/social/anon_profile.dart';
 import 'package:photos/models/social/comment.dart';
 import 'package:photos/models/social/reaction.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
 
 class SocialDB {
   static final Logger _logger = Logger("SocialDB");
   static const _databaseName = "ente.social.db";
   static const _databaseVersion = 1;
 
-  static const commentsTable = 'comments';
-  static const reactionsTable = 'reactions';
+  static const _commentsTable = 'comments';
+  static const _reactionsTable = 'reactions';
+  static const _syncTimeTable = 'sync_time';
+  static const _anonProfilesTable = 'anon_profiles';
 
-  SocialDB._privateConstructor();
-  static final SocialDB instance = SocialDB._privateConstructor();
+  SocialDB._();
+  static final SocialDB instance = SocialDB._();
 
   static Future<Database>? _dbFuture;
+
   Future<Database> get database async {
     _dbFuture ??= _initDatabase();
     return _dbFuture!;
@@ -39,14 +42,15 @@ class SocialDB {
     );
   }
 
-  Future _onCreate(Database db, int version) async {
+  Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE $commentsTable (
+      CREATE TABLE $_commentsTable (
         id TEXT PRIMARY KEY NOT NULL,
         collection_id INTEGER NOT NULL,
         file_id INTEGER,
         data TEXT NOT NULL,
         parent_comment_id TEXT,
+        parent_comment_user_id INTEGER,
         is_deleted INTEGER NOT NULL DEFAULT 0,
         user_id INTEGER NOT NULL,
         anon_user_id TEXT,
@@ -56,7 +60,7 @@ class SocialDB {
     ''');
 
     await db.execute('''
-      CREATE TABLE $reactionsTable (
+      CREATE TABLE $_reactionsTable (
         id TEXT PRIMARY KEY NOT NULL,
         collection_id INTEGER NOT NULL,
         file_id INTEGER,
@@ -69,39 +73,51 @@ class SocialDB {
         updated_at INTEGER NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE $_syncTimeTable (
+        collection_id INTEGER PRIMARY KEY NOT NULL,
+        comments_sync_time INTEGER NOT NULL DEFAULT 0,
+        reactions_sync_time INTEGER NOT NULL DEFAULT 0,
+        anon_profiles_sync_time INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE $_anonProfilesTable (
+        anon_user_id TEXT NOT NULL,
+        collection_id INTEGER NOT NULL,
+        display_name TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        PRIMARY KEY (anon_user_id, collection_id)
+      )
+    ''');
+
+    // Create indexes for common queries
+    await db.execute(
+      'CREATE INDEX idx_comments_file_collection ON $_commentsTable(file_id, collection_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_reactions_file_collection ON $_reactionsTable(file_id, collection_id)',
+    );
   }
 
-  // Comment methods
+  // ============ Comment Methods ============
 
-  Future<Comment?> addComment(Comment comment) async {
-    if (comment.data.trim().isEmpty) {
-      debugPrint('addComment: Cannot add comment with empty data');
-      return null;
-    }
-
-    if (comment.parentCommentID != null) {
-      final parentExists = await _commentExists(comment.parentCommentID!);
-      if (!parentExists) {
-        debugPrint(
-          'addComment: Parent comment ${comment.parentCommentID} does not exist',
-        );
-        return null;
-      }
-    }
-
+  Future<void> addComment(Comment comment) async {
     final db = await database;
     await db.insert(
-      commentsTable,
+      _commentsTable,
       _commentToRow(comment),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    return comment;
   }
 
   Future<Comment?> deleteComment(String id) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -111,16 +127,16 @@ class SocialDB {
       return null;
     }
 
-    final updatedAt = DateTime.now().millisecondsSinceEpoch;
+    final updatedAt = DateTime.now().microsecondsSinceEpoch;
     await db.update(
-      commentsTable,
+      _commentsTable,
       {'is_deleted': 1, 'updated_at': updatedAt},
       where: 'id = ?',
       whereArgs: [id],
     );
 
     final updatedRows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -130,7 +146,7 @@ class SocialDB {
   Future<List<Comment>> getCommentsForFile(int fileID) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'file_id = ? AND is_deleted = 0',
       whereArgs: [fileID],
     );
@@ -138,18 +154,22 @@ class SocialDB {
   }
 
   Future<int> getCommentCountForFile(int fileID) async {
-    final comments = await getCommentsForFile(fileID);
-    return comments.length;
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $_commentsTable '
+      'WHERE file_id = ? AND is_deleted = 0',
+      [fileID],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  /// Get comment count for a specific file within a specific collection
   Future<int> getCommentCountForFileInCollection(
     int fileID,
     int collectionID,
   ) async {
     final db = await database;
     final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM $commentsTable '
+      'SELECT COUNT(*) as count FROM $_commentsTable '
       'WHERE file_id = ? AND collection_id = ? AND is_deleted = 0',
       [fileID, collectionID],
     );
@@ -159,7 +179,7 @@ class SocialDB {
   Future<List<Comment>> getCommentsForCollection(int collectionID) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'collection_id = ? AND file_id IS NULL AND is_deleted = 0',
       whereArgs: [collectionID],
     );
@@ -169,18 +189,17 @@ class SocialDB {
   Future<List<Comment>> getRepliesForComment(String commentID) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'parent_comment_id = ? AND is_deleted = 0',
       whereArgs: [commentID],
     );
     return rows.map(_rowToComment).toList();
   }
 
-  /// Fetch a single comment by ID (for parent lookup)
   Future<Comment?> getCommentById(String id) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'id = ? AND is_deleted = 0',
       whereArgs: [id],
     );
@@ -188,7 +207,6 @@ class SocialDB {
     return _rowToComment(rows.first);
   }
 
-  /// Paginated fetch for file comments within a specific collection
   Future<List<Comment>> getCommentsForFilePaginated(
     int fileID, {
     required int collectionID,
@@ -197,7 +215,7 @@ class SocialDB {
   }) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'file_id = ? AND collection_id = ? AND is_deleted = 0',
       whereArgs: [fileID, collectionID],
       orderBy: 'created_at DESC',
@@ -207,7 +225,6 @@ class SocialDB {
     return rows.map(_rowToComment).toList();
   }
 
-  /// Paginated fetch for collection comments
   Future<List<Comment>> getCommentsForCollectionPaginated(
     int collectionID, {
     int limit = 20,
@@ -215,7 +232,7 @@ class SocialDB {
   }) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
+      _commentsTable,
       where: 'collection_id = ? AND file_id IS NULL AND is_deleted = 0',
       whereArgs: [collectionID],
       orderBy: 'created_at DESC',
@@ -225,114 +242,25 @@ class SocialDB {
     return rows.map(_rowToComment).toList();
   }
 
-  /// Delete all comments from the database
-  Future<int> deleteAllComments() async {
-    final db = await database;
-    final deletedCount = await db.delete(commentsTable);
-    _logger.info('Deleted $deletedCount comments');
-    return deletedCount;
-  }
-
-  /// Delete all reactions from the database
-  Future<int> deleteAllReactions() async {
-    final db = await database;
-    final deletedCount = await db.delete(reactionsTable);
-    _logger.info('Deleted $deletedCount reactions');
-    return deletedCount;
-  }
-
-  /// Seeds the database with example comments and reactions for testing.
-  Future<void> seedExampleData() async {}
-
-  // Reaction methods
-
-  Future<Reaction?> addReaction(Reaction reaction) async {
-    if (reaction.commentID != null) {
-      final commentExists = await _commentExists(reaction.commentID!);
-      if (!commentExists) {
-        debugPrint(
-          'addReaction: Comment ${reaction.commentID} does not exist',
-        );
-        return null;
-      }
-    }
-
-    final db = await database;
-    await db.insert(
-      reactionsTable,
-      _reactionToRow(reaction),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    return reaction;
-  }
-
-  Future<Reaction?> toggleReaction({
-    required int userID,
-    required int collectionID,
-    int? fileID,
-    String? commentID,
-  }) async {
-    final existingReaction = await _findExistingReaction(
-      userID: userID,
-      collectionID: collectionID,
-      fileID: fileID,
-      commentID: commentID,
-    );
-
-    if (existingReaction != null) {
-      // Toggle is_deleted on existing reaction
-      final db = await database;
-      final updatedAt = DateTime.now().millisecondsSinceEpoch;
-      final newIsDeleted = existingReaction.isDeleted ? 0 : 1;
-
-      await db.update(
-        reactionsTable,
-        {'is_deleted': newIsDeleted, 'updated_at': updatedAt},
-        where: 'id = ?',
-        whereArgs: [existingReaction.id],
-      );
-
-      final updatedRows = await db.query(
-        reactionsTable,
-        where: 'id = ?',
-        whereArgs: [existingReaction.id],
-      );
-      return _rowToReaction(updatedRows.first);
-    } else {
-      // Create new reaction
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final reaction = Reaction(
-        id: const Uuid().v4(),
-        collectionID: collectionID,
-        fileID: fileID,
-        commentID: commentID,
-        data: '',
-        userID: userID,
-        createdAt: now,
-        updatedAt: now,
-      );
-      return addReaction(reaction);
-    }
-  }
+  // ============ Reaction Methods ============
 
   Future<List<Reaction>> getReactionsForFile(int fileID) async {
     final db = await database;
     final rows = await db.query(
-      reactionsTable,
+      _reactionsTable,
       where: 'file_id = ? AND comment_id IS NULL AND is_deleted = 0',
       whereArgs: [fileID],
     );
     return rows.map(_rowToReaction).toList();
   }
 
-  /// Get reactions for a file within a specific collection (file-level likes only)
   Future<List<Reaction>> getReactionsForFileInCollection(
     int fileID,
     int collectionID,
   ) async {
     final db = await database;
     final rows = await db.query(
-      reactionsTable,
+      _reactionsTable,
       where:
           'file_id = ? AND collection_id = ? AND comment_id IS NULL AND is_deleted = 0',
       whereArgs: [fileID, collectionID],
@@ -343,7 +271,7 @@ class SocialDB {
   Future<List<Reaction>> getReactionsForComment(String commentID) async {
     final db = await database;
     final rows = await db.query(
-      reactionsTable,
+      _reactionsTable,
       where: 'comment_id = ? AND is_deleted = 0',
       whereArgs: [commentID],
     );
@@ -353,7 +281,7 @@ class SocialDB {
   Future<List<Reaction>> getReactionsForCollection(int collectionID) async {
     final db = await database;
     final rows = await db.query(
-      reactionsTable,
+      _reactionsTable,
       where:
           'collection_id = ? AND file_id IS NULL AND comment_id IS NULL AND is_deleted = 0',
       whereArgs: [collectionID],
@@ -361,110 +289,274 @@ class SocialDB {
     return rows.map(_rowToReaction).toList();
   }
 
-  // Helper methods
+  // ============ Sync Time Methods ============
 
-  Future<bool> _commentExists(String id) async {
+  Future<int> getCommentsSyncTime(int collectionID) async {
     final db = await database;
     final rows = await db.query(
-      commentsTable,
-      where: 'id = ?',
-      whereArgs: [id],
+      _syncTimeTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
     );
-    return rows.isNotEmpty;
+    if (rows.isEmpty) return 0;
+    return rows.first['comments_sync_time'] as int? ?? 0;
   }
 
-  Future<Reaction?> _findExistingReaction({
-    required int userID,
-    required int collectionID,
-    int? fileID,
-    String? commentID,
-  }) async {
+  Future<int> getReactionsSyncTime(int collectionID) async {
     final db = await database;
-    String where;
-    List<Object?> whereArgs;
+    final rows = await db.query(
+      _syncTimeTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    if (rows.isEmpty) return 0;
+    return rows.first['reactions_sync_time'] as int? ?? 0;
+  }
 
-    if (commentID != null) {
-      where = 'user_id = ? AND comment_id = ?';
-      whereArgs = [userID, commentID];
-    } else if (fileID != null) {
-      where =
-          'user_id = ? AND collection_id = ? AND file_id = ? AND comment_id IS NULL';
-      whereArgs = [userID, collectionID, fileID];
+  Future<void> setCommentsSyncTime(int collectionID, int syncTime) async {
+    final db = await database;
+    await db.insert(
+      _syncTimeTable,
+      {'collection_id': collectionID, 'comments_sync_time': syncTime},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> setReactionsSyncTime(int collectionID, int syncTime) async {
+    final db = await database;
+    await db.insert(
+      _syncTimeTable,
+      {'collection_id': collectionID, 'reactions_sync_time': syncTime},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> clearSyncTime(int collectionID) async {
+    final db = await database;
+    await db.delete(
+      _syncTimeTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+  }
+
+  Future<int> getAnonProfilesSyncTime(int collectionID) async {
+    final db = await database;
+    final rows = await db.query(
+      _syncTimeTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    if (rows.isEmpty) return 0;
+    return rows.first['anon_profiles_sync_time'] as int? ?? 0;
+  }
+
+  Future<void> setAnonProfilesSyncTime(int collectionID, int syncTime) async {
+    final db = await database;
+    // First check if the row exists
+    final rows = await db.query(
+      _syncTimeTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    if (rows.isEmpty) {
+      await db.insert(
+        _syncTimeTable,
+        {'collection_id': collectionID, 'anon_profiles_sync_time': syncTime},
+      );
     } else {
-      where =
-          'user_id = ? AND collection_id = ? AND file_id IS NULL AND comment_id IS NULL';
-      whereArgs = [userID, collectionID];
+      await db.update(
+        _syncTimeTable,
+        {'anon_profiles_sync_time': syncTime},
+        where: 'collection_id = ?',
+        whereArgs: [collectionID],
+      );
     }
-
-    final rows = await db.query(
-      reactionsTable,
-      where: where,
-      whereArgs: whereArgs,
-    );
-
-    if (rows.isEmpty) return null;
-    return _rowToReaction(rows.first);
   }
+
+  // ============ Bulk Upsert Methods ============
+
+  Future<void> upsertComments(List<Comment> comments) async {
+    if (comments.isEmpty) return;
+    final db = await database;
+    final batch = db.batch();
+    for (final comment in comments) {
+      batch.insert(
+        _commentsTable,
+        _commentToRow(comment),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> upsertReactions(List<Reaction> reactions) async {
+    if (reactions.isEmpty) return;
+    final db = await database;
+    final batch = db.batch();
+    for (final reaction in reactions) {
+      batch.insert(
+        _reactionsTable,
+        _reactionToRow(reaction),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  // ============ Anon Profile Methods ============
+
+  Future<void> upsertAnonProfiles(List<AnonProfile> profiles) async {
+    if (profiles.isEmpty) return;
+    final db = await database;
+    final batch = db.batch();
+    for (final profile in profiles) {
+      batch.insert(
+        _anonProfilesTable,
+        _anonProfileToRow(profile),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<List<AnonProfile>> getAnonProfilesForCollection(
+    int collectionID,
+  ) async {
+    final db = await database;
+    final rows = await db.query(
+      _anonProfilesTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    return rows.map(_rowToAnonProfile).toList();
+  }
+
+  Future<AnonProfile?> getAnonProfile(
+    String anonUserID,
+    int collectionID,
+  ) async {
+    final db = await database;
+    final rows = await db.query(
+      _anonProfilesTable,
+      where: 'anon_user_id = ? AND collection_id = ?',
+      whereArgs: [anonUserID, collectionID],
+    );
+    if (rows.isEmpty) return null;
+    return _rowToAnonProfile(rows.first);
+  }
+
+  // ============ Cleanup Methods ============
+
+  Future<void> deleteCollectionData(int collectionID) async {
+    final db = await database;
+    await db.delete(
+      _commentsTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    await db.delete(
+      _reactionsTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    await db.delete(
+      _anonProfilesTable,
+      where: 'collection_id = ?',
+      whereArgs: [collectionID],
+    );
+    await clearSyncTime(collectionID);
+  }
+
+  Future<void> clearAllData() async {
+    final db = await database;
+    await db.delete(_commentsTable);
+    await db.delete(_reactionsTable);
+    await db.delete(_anonProfilesTable);
+    await db.delete(_syncTimeTable);
+  }
+
+  // ============ Row Mappers ============
 
   Map<String, dynamic> _commentToRow(Comment comment) {
-    final map = comment.toMap();
     return {
-      'id': map['id'],
-      'collection_id': map['collectionID'],
-      'file_id': map['fileID'],
-      'data': map['data'],
-      'parent_comment_id': map['parentCommentID'],
-      'is_deleted': map['isDeleted'] == true ? 1 : 0,
-      'user_id': map['userID'],
-      'anon_user_id': map['anonUserID'],
-      'created_at': map['createdAt'],
-      'updated_at': map['updatedAt'],
+      'id': comment.id,
+      'collection_id': comment.collectionID,
+      'file_id': comment.fileID,
+      'data': comment.data,
+      'parent_comment_id': comment.parentCommentID,
+      'parent_comment_user_id': comment.parentCommentUserID,
+      'is_deleted': comment.isDeleted ? 1 : 0,
+      'user_id': comment.userID,
+      'anon_user_id': comment.anonUserID,
+      'created_at': comment.createdAt,
+      'updated_at': comment.updatedAt,
     };
   }
 
   Comment _rowToComment(Map<String, dynamic> row) {
-    return Comment.fromMap({
-      'id': row['id'],
-      'collectionID': row['collection_id'],
-      'fileID': row['file_id'],
-      'data': row['data'],
-      'parentCommentID': row['parent_comment_id'],
-      'isDeleted': row['is_deleted'] == 1,
-      'userID': row['user_id'],
-      'anonUserID': row['anon_user_id'],
-      'createdAt': row['created_at'],
-      'updatedAt': row['updated_at'],
-    });
+    return Comment(
+      id: row['id'] as String,
+      collectionID: row['collection_id'] as int,
+      fileID: row['file_id'] as int?,
+      data: row['data'] as String,
+      parentCommentID: row['parent_comment_id'] as String?,
+      parentCommentUserID: row['parent_comment_user_id'] as int?,
+      isDeleted: row['is_deleted'] == 1,
+      userID: row['user_id'] as int,
+      anonUserID: row['anon_user_id'] as String?,
+      createdAt: row['created_at'] as int,
+      updatedAt: row['updated_at'] as int,
+    );
   }
 
   Map<String, dynamic> _reactionToRow(Reaction reaction) {
-    final map = reaction.toMap();
     return {
-      'id': map['id'],
-      'collection_id': map['collectionID'],
-      'file_id': map['fileID'],
-      'comment_id': map['commentID'],
-      'data': map['data'],
-      'is_deleted': map['isDeleted'] == true ? 1 : 0,
-      'user_id': map['userID'],
-      'anon_user_id': map['anonUserID'],
-      'created_at': map['createdAt'],
-      'updated_at': map['updatedAt'],
+      'id': reaction.id,
+      'collection_id': reaction.collectionID,
+      'file_id': reaction.fileID,
+      'comment_id': reaction.commentID,
+      'data': reaction.data,
+      'is_deleted': reaction.isDeleted ? 1 : 0,
+      'user_id': reaction.userID,
+      'anon_user_id': reaction.anonUserID,
+      'created_at': reaction.createdAt,
+      'updated_at': reaction.updatedAt,
     };
   }
 
   Reaction _rowToReaction(Map<String, dynamic> row) {
-    return Reaction.fromMap({
-      'id': row['id'],
-      'collectionID': row['collection_id'],
-      'fileID': row['file_id'],
-      'commentID': row['comment_id'],
-      'data': row['data'],
-      'isDeleted': row['is_deleted'] == 1,
-      'userID': row['user_id'],
-      'anonUserID': row['anon_user_id'],
-      'createdAt': row['created_at'],
-      'updatedAt': row['updated_at'],
-    });
+    return Reaction(
+      id: row['id'] as String,
+      collectionID: row['collection_id'] as int,
+      fileID: row['file_id'] as int?,
+      commentID: row['comment_id'] as String?,
+      data: row['data'] as String,
+      isDeleted: row['is_deleted'] == 1,
+      userID: row['user_id'] as int,
+      anonUserID: row['anon_user_id'] as String?,
+      createdAt: row['created_at'] as int,
+      updatedAt: row['updated_at'] as int,
+    );
+  }
+
+  Map<String, dynamic> _anonProfileToRow(AnonProfile profile) {
+    return {
+      'anon_user_id': profile.anonUserID,
+      'collection_id': profile.collectionID,
+      'display_name': profile.displayName,
+      'created_at': profile.createdAt,
+      'updated_at': profile.updatedAt,
+    };
+  }
+
+  AnonProfile _rowToAnonProfile(Map<String, dynamic> row) {
+    return AnonProfile(
+      anonUserID: row['anon_user_id'] as String,
+      collectionID: row['collection_id'] as int,
+      displayName: row['display_name'] as String,
+      createdAt: row['created_at'] as int,
+      updatedAt: row['updated_at'] as int,
+    );
   }
 }

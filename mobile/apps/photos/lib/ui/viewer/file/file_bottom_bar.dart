@@ -90,7 +90,7 @@ class FileBottomBarState extends State<FileBottomBar> {
     }
   }
 
-  Future<void> _updateSocialState() async {
+  Future<void> _updateSocialState({bool sync = false}) async {
     if (widget.file.uploadedFileID == null) {
       _hasLiked = false;
       _commentCount = 0;
@@ -98,7 +98,17 @@ class FileBottomBarState extends State<FileBottomBar> {
     }
 
     final fileID = widget.file.uploadedFileID!;
+    final collectionID = widget.file.collectionID;
     final provider = SocialDataProvider.instance;
+
+    // Sync from server if requested and we have a collection ID
+    if (sync && collectionID != null) {
+      try {
+        await provider.syncFileReactions(collectionID, fileID);
+      } catch (_) {
+        // Ignore sync errors, continue with local data
+      }
+    }
 
     // Check if user has liked
     final reactions = await provider.getReactionsForFile(fileID);
