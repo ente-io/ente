@@ -407,48 +407,53 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       body: Column(
         children: [
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    controller: _scrollController,
-                    reverse: true,
-                    padding: const EdgeInsets.only(
-                      top: 24,
-                      left: 16,
-                      right: 16,
-                      bottom: 24,
-                    ),
-                    itemCount: _comments.length + (_hasMoreComments ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == _comments.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: CircularProgressIndicator(),
-                          ),
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              behavior: HitTestBehavior.translucent,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      controller: _scrollController,
+                      reverse: true,
+                      padding: const EdgeInsets.only(
+                        top: 24,
+                        left: 16,
+                        right: 16,
+                        bottom: 24,
+                      ),
+                      itemCount: _comments.length + (_hasMoreComments ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _comments.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        final comment = _comments[index];
+                        return CommentBubbleWidget(
+                          key: ValueKey(comment.id),
+                          comment: comment,
+                          user: _getUserForComment(comment),
+                          isOwnComment: comment.userID == _currentUserID,
+                          currentUserID: _currentUserID,
+                          collectionID: _selectedCollectionID,
+                          isHighlighted: comment.id == _highlightedCommentID,
+                          onFetchParent: comment.isReply
+                              ? () =>
+                                  _getParentComment(comment.parentCommentID!)
+                              : null,
+                          onFetchReactions: () =>
+                              _getReactionsForComment(comment.id),
+                          onReplyTap: () => _onReplyTap(comment),
+                          userResolver: _getUserForComment,
+                          onCommentDeleted: () =>
+                              _handleCommentDeleted(comment.id),
                         );
-                      }
-                      final comment = _comments[index];
-                      return CommentBubbleWidget(
-                        key: ValueKey(comment.id),
-                        comment: comment,
-                        user: _getUserForComment(comment),
-                        isOwnComment: comment.userID == _currentUserID,
-                        currentUserID: _currentUserID,
-                        collectionID: _selectedCollectionID,
-                        isHighlighted: comment.id == _highlightedCommentID,
-                        onFetchParent: comment.isReply
-                            ? () => _getParentComment(comment.parentCommentID!)
-                            : null,
-                        onFetchReactions: () =>
-                            _getReactionsForComment(comment.id),
-                        onReplyTap: () => _onReplyTap(comment),
-                        userResolver: _getUserForComment,
-                        onCommentDeleted: () =>
-                            _handleCommentDeleted(comment.id),
-                      );
-                    },
-                  ),
+                      },
+                    ),
+            ),
           ),
           CommentInputWidget(
             replyingTo: _replyingTo,

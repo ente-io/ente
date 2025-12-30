@@ -127,8 +127,10 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
               TextField(
                 controller: widget.controller,
                 focusNode: widget.focusNode,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => widget.onSend(),
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                minLines: 1,
+                maxLines: widget.replyingTo != null ? 4 : 8,
                 textAlignVertical: TextAlignVertical.center,
                 style: textTheme.body.copyWith(
                   height: 15 / 16,
