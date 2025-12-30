@@ -19,6 +19,7 @@ import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/social/widgets/feed_preview_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
@@ -161,6 +162,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
+            const FeedPreviewWidget(),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [

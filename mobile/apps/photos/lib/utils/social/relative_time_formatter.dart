@@ -1,8 +1,11 @@
 import "package:intl/intl.dart";
 
-String formatRelativeTime(int timestampMillis) {
+/// Formats a timestamp (in microseconds) to a relative time string.
+///
+/// Server timestamps are in microseconds since epoch.
+String formatRelativeTime(int timestampMicros) {
   final now = DateTime.now();
-  final dateTime = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+  final dateTime = DateTime.fromMicrosecondsSinceEpoch(timestampMicros);
   final difference = now.difference(dateTime);
 
   if (difference.inMinutes < 1) {

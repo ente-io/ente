@@ -17,7 +17,6 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
-import "package:uuid/uuid.dart";
 
 class FileCommentsScreen extends StatefulWidget {
   final int collectionID;
@@ -131,6 +130,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   Future<void> _loadInitialComments() async {
     setState(() => _isLoading = true);
 
+    // Load local data first for immediate display
     final comments =
         await SocialDataProvider.instance.getCommentsForFilePaginated(
       widget.fileID,
@@ -145,6 +145,40 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       _hasMoreComments = comments.length == _pageSize;
       _isLoading = false;
     });
+
+    // Sync in background and refresh if there are changes
+    unawaited(_syncAndRefresh());
+  }
+
+  Future<void> _syncAndRefresh() async {
+    try {
+      await SocialDataProvider.instance.syncFileSocialData(
+        _selectedCollectionID,
+        widget.fileID,
+      );
+
+      if (!mounted) return;
+
+      // Reload comments after sync
+      final freshComments =
+          await SocialDataProvider.instance.getCommentsForFilePaginated(
+        widget.fileID,
+        collectionID: _selectedCollectionID,
+        limit: _pageSize,
+        offset: 0,
+      );
+
+      if (mounted) {
+        setState(() {
+          _comments.clear();
+          _comments.addAll(freshComments);
+          _offset = freshComments.length;
+          _hasMoreComments = freshComments.length == _pageSize;
+        });
+      }
+    } catch (_) {
+      // Ignore sync errors, local data is already displayed
+    }
   }
 
   Future<void> _loadMoreComments() async {
@@ -228,20 +262,13 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final newComment = Comment(
-      id: const Uuid().v4(),
+    // Call API to create comment
+    final result = await SocialDataProvider.instance.addComment(
       collectionID: _selectedCollectionID,
+      text: text,
       fileID: widget.fileID,
-      data: text,
       parentCommentID: _replyingTo?.id,
-      userID: _currentUserID,
-      createdAt: now,
-      updatedAt: now,
     );
-
-    // Persist first
-    final result = await SocialDataProvider.instance.addComment(newComment);
     if (result == null) {
       _logger.warning('Failed to save comment');
       return;
@@ -250,7 +277,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     // Update UI only after successful persistence
     if (mounted) {
       setState(() {
-        _comments.insert(0, newComment);
+        _comments.insert(0, result);
         _replyingTo = null;
 
         // Update comment count in shared collections list

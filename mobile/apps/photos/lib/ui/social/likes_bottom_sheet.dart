@@ -132,6 +132,12 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
+      // Sync reactions from server before loading locally
+      await SocialDataProvider.instance.syncFileReactions(
+        _selectedCollectionID,
+        widget.fileID,
+      );
+
       final likes =
           await SocialDataProvider.instance.getReactionsForFileInCollection(
         widget.fileID,

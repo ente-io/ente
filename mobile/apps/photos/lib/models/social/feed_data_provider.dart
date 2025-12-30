@@ -1,0 +1,266 @@
+import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/db/social_db.dart";
+import "package:photos/models/social/comment.dart";
+import "package:photos/models/social/feed_item.dart";
+import "package:photos/models/social/reaction.dart";
+import "package:photos/services/social_sync_service.dart";
+
+/// Provider for feed data.
+///
+/// Aggregates social activity (comments, reactions) into feed items
+/// for display in the activity feed.
+class FeedDataProvider {
+  FeedDataProvider._();
+  static final instance = FeedDataProvider._();
+
+  final _logger = Logger('FeedDataProvider');
+  final _db = SocialDB.instance;
+
+  /// Gets feed items aggregated from local database.
+  ///
+  /// Feed items are sorted by most recent activity.
+  /// Each item represents a unique (type, fileID, commentID) combination.
+  /// Items associated with files that no longer exist in the database are filtered out.
+  Future<List<FeedItem>> getFeedItems({
+    int limit = 50,
+  }) async {
+    final userID = Configuration.instance.getUserID();
+    if (userID == null) {
+      _logger.warning('No user ID found, returning empty feed');
+      return [];
+    }
+
+    final feedItems = <FeedItem>[];
+
+    // Fetch all activity types in parallel
+    final results = await Future.wait([
+      _db.getReactionsOnFiles(excludeUserID: userID, limit: limit),
+      _db.getCommentsOnFiles(excludeUserID: userID, limit: limit),
+      _db.getRepliesToUserComments(targetUserID: userID, limit: limit),
+      _db.getReactionsOnUserComments(targetUserID: userID, limit: limit),
+      _db.getReactionsOnUserReplies(targetUserID: userID, limit: limit),
+    ]);
+
+    final photoLikeReactions = results[0] as List<Reaction>;
+    final fileComments = results[1] as List<Comment>;
+    final replies = results[2] as List<Comment>;
+    final commentLikeReactions = results[3] as List<Reaction>;
+    final replyLikeReactions = results[4] as List<Reaction>;
+
+    // Aggregate photo likes by file
+    feedItems.addAll(
+      _aggregateReactionsByFile(photoLikeReactions, FeedItemType.photoLike),
+    );
+
+    // Aggregate comments by file
+    feedItems.addAll(_aggregateCommentsByFile(fileComments));
+
+    // Aggregate replies by parent comment
+    feedItems.addAll(_aggregateRepliesByParent(replies));
+
+    // Aggregate comment likes by comment
+    feedItems.addAll(
+      _aggregateReactionsByComment(
+        commentLikeReactions,
+        FeedItemType.commentLike,
+      ),
+    );
+
+    // Aggregate reply likes by reply
+    feedItems.addAll(
+      _aggregateReactionsByComment(replyLikeReactions, FeedItemType.replyLike),
+    );
+
+    // Filter out items where the associated file doesn't exist
+    final validItems = await _filterItemsWithExistingFiles(feedItems);
+
+    // Sort by most recent activity
+    validItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    // Limit total results
+    if (validItems.length > limit) {
+      return validItems.sublist(0, limit);
+    }
+
+    return validItems;
+  }
+
+  /// Gets a single feed item for preview display.
+  Future<FeedItem?> getLatestFeedItem() async {
+    final items = await getFeedItems(limit: 1);
+    return items.isNotEmpty ? items.first : null;
+  }
+
+  /// Triggers background sync for all shared collections.
+  Future<void> syncAllSharedCollections() async {
+    try {
+      await SocialSyncService.instance.syncAllSharedCollections();
+    } catch (e) {
+      _logger.warning('Failed to sync shared collections', e);
+    }
+  }
+
+  /// Aggregates reactions on files by (collectionID, fileID).
+  List<FeedItem> _aggregateReactionsByFile(
+    List<Reaction> reactions,
+    FeedItemType type,
+  ) {
+    final groupedByFile = <String, List<Reaction>>{};
+
+    for (final reaction in reactions) {
+      if (reaction.fileID == null) continue;
+      final key = '${reaction.collectionID}_${reaction.fileID}';
+      groupedByFile.putIfAbsent(key, () => []).add(reaction);
+    }
+
+    return groupedByFile.entries.map((entry) {
+      final reactions = entry.value;
+      // Sort by created_at DESC to get most recent first
+      reactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return FeedItem(
+        type: type,
+        collectionID: reactions.first.collectionID,
+        fileID: reactions.first.fileID,
+        actorUserIDs: reactions.map((r) => r.userID).toList(),
+        actorAnonIDs: reactions.map((r) => r.anonUserID).toList(),
+        createdAt: reactions.first.createdAt,
+      );
+    }).toList();
+  }
+
+  /// Aggregates comments on files by (collectionID, fileID).
+  List<FeedItem> _aggregateCommentsByFile(List<Comment> comments) {
+    final groupedByFile = <String, List<Comment>>{};
+
+    for (final comment in comments) {
+      if (comment.fileID == null) continue;
+      final key = '${comment.collectionID}_${comment.fileID}';
+      groupedByFile.putIfAbsent(key, () => []).add(comment);
+    }
+
+    return groupedByFile.entries.map((entry) {
+      final comments = entry.value;
+      // Sort by created_at DESC to get most recent first
+      comments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return FeedItem(
+        type: FeedItemType.comment,
+        collectionID: comments.first.collectionID,
+        fileID: comments.first.fileID,
+        actorUserIDs: comments.map((c) => c.userID).toList(),
+        actorAnonIDs: comments.map((c) => c.anonUserID).toList(),
+        createdAt: comments.first.createdAt,
+      );
+    }).toList();
+  }
+
+  /// Aggregates replies by parent comment ID.
+  List<FeedItem> _aggregateRepliesByParent(List<Comment> replies) {
+    final groupedByParent = <String, List<Comment>>{};
+
+    for (final reply in replies) {
+      if (reply.parentCommentID == null) continue;
+      final key = '${reply.collectionID}_${reply.parentCommentID}';
+      groupedByParent.putIfAbsent(key, () => []).add(reply);
+    }
+
+    return groupedByParent.entries.map((entry) {
+      final replies = entry.value;
+      // Sort by created_at DESC to get most recent first
+      replies.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return FeedItem(
+        type: FeedItemType.reply,
+        collectionID: replies.first.collectionID,
+        fileID: replies.first.fileID,
+        commentID: replies.first.parentCommentID,
+        actorUserIDs: replies.map((r) => r.userID).toList(),
+        actorAnonIDs: replies.map((r) => r.anonUserID).toList(),
+        createdAt: replies.first.createdAt,
+      );
+    }).toList();
+  }
+
+  /// Aggregates reactions by comment ID.
+  List<FeedItem> _aggregateReactionsByComment(
+    List<Reaction> reactions,
+    FeedItemType type,
+  ) {
+    final groupedByComment = <String, List<Reaction>>{};
+
+    for (final reaction in reactions) {
+      if (reaction.commentID == null) continue;
+      final key = '${reaction.collectionID}_${reaction.commentID}';
+      groupedByComment.putIfAbsent(key, () => []).add(reaction);
+    }
+
+    return groupedByComment.entries.map((entry) {
+      final reactions = entry.value;
+      // Sort by created_at DESC to get most recent first
+      reactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return FeedItem(
+        type: type,
+        collectionID: reactions.first.collectionID,
+        fileID: reactions.first.fileID,
+        commentID: reactions.first.commentID,
+        actorUserIDs: reactions.map((r) => r.userID).toList(),
+        actorAnonIDs: reactions.map((r) => r.anonUserID).toList(),
+        createdAt: reactions.first.createdAt,
+      );
+    }).toList();
+  }
+
+  /// Filters out feed items where the associated file doesn't exist in FilesDB.
+  ///
+  /// This handles cases where a file has been deleted but its social data
+  /// (comments/reactions) still exists in the database.
+  Future<List<FeedItem>> _filterItemsWithExistingFiles(
+    List<FeedItem> items,
+  ) async {
+    if (items.isEmpty) return items;
+
+    // Collect unique (fileID, collectionID) pairs
+    final filesToCheck = <String, (int fileID, int collectionID)>{};
+    for (final item in items) {
+      if (item.fileID != null) {
+        final key = '${item.collectionID}_${item.fileID}';
+        filesToCheck[key] = (item.fileID!, item.collectionID);
+      }
+    }
+
+    if (filesToCheck.isEmpty) return items;
+
+    // Check which files exist in parallel
+    final existingFiles = <String>{};
+    final checkResults = await Future.wait(
+      filesToCheck.entries.map((entry) async {
+        final (fileID, collectionID) = entry.value;
+        final file = await FilesDB.instance.getUploadedFile(
+          fileID,
+          collectionID,
+        );
+        return (key: entry.key, exists: file != null);
+      }),
+    );
+
+    for (final result in checkResults) {
+      if (result.exists) {
+        existingFiles.add(result.key);
+      }
+    }
+
+    // Filter items to only include those with existing files
+    return items.where((item) {
+      if (item.fileID == null) {
+        // Items without fileID (collection-level activity) are kept
+        return true;
+      }
+      final key = '${item.collectionID}_${item.fileID}';
+      return existingFiles.contains(key);
+    }).toList();
+  }
+}

@@ -4,6 +4,7 @@ class Comment {
   final int? fileID;
   final String data;
   final String? parentCommentID;
+  final int? parentCommentUserID;
   final bool isDeleted;
   final int userID;
   final String? anonUserID;
@@ -16,6 +17,7 @@ class Comment {
     this.fileID,
     required this.data,
     this.parentCommentID,
+    this.parentCommentUserID,
     this.isDeleted = false,
     required this.userID,
     this.anonUserID,
@@ -35,6 +37,7 @@ class Comment {
     int? fileID,
     String? data,
     String? parentCommentID,
+    int? parentCommentUserID,
     bool? isDeleted,
     int? userID,
     String? anonUserID,
@@ -47,6 +50,7 @@ class Comment {
       fileID: fileID ?? this.fileID,
       data: data ?? this.data,
       parentCommentID: parentCommentID ?? this.parentCommentID,
+      parentCommentUserID: parentCommentUserID ?? this.parentCommentUserID,
       isDeleted: isDeleted ?? this.isDeleted,
       userID: userID ?? this.userID,
       anonUserID: anonUserID ?? this.anonUserID,
@@ -62,6 +66,7 @@ class Comment {
       'fileID': fileID,
       'data': data,
       'parentCommentID': parentCommentID,
+      'parentCommentUserID': parentCommentUserID,
       'isDeleted': isDeleted,
       'userID': userID,
       'anonUserID': anonUserID,
@@ -77,6 +82,7 @@ class Comment {
       fileID: map['fileID'] as int?,
       data: map['data'] as String,
       parentCommentID: map['parentCommentID'] as String?,
+      parentCommentUserID: map['parentCommentUserID'] as int?,
       isDeleted: map['isDeleted'] as bool? ?? false,
       userID: map['userID'] as int,
       anonUserID: map['anonUserID'] as String?,
