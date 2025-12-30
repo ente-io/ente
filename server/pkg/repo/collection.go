@@ -372,6 +372,37 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 	return cIDs, nil
 }
 
+// FilterNonDeletedCollectionIDs returns collection IDs that are not deleted and match the provided app.
+func (repo *CollectionRepository) FilterNonDeletedCollectionIDs(collectionIDs []int64, app ente.App) ([]int64, error) {
+	if len(collectionIDs) == 0 {
+		return nil, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collections
+		WHERE collection_id = ANY($1)
+		  AND is_deleted = FALSE
+		  AND app = $2
+	`, pq.Array(collectionIDs), app)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	result := make([]int64, 0, len(collectionIDs))
+	for rows.Next() {
+		var collectionID int64
+		if err := rows.Scan(&collectionID); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result = append(result, collectionID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return result, nil
+}
+
 func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {
 	rows, err := repo.DB.Query(`
 		SELECT collection_id
