@@ -6,7 +6,9 @@ import 'package:dio/dio.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_in_event.dart";
+import "package:ente_events/models/trigger_logout_event.dart";
 import 'package:ente_network/network.dart';
+import "package:locker/core/errors.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/events/user_details_refresh_event.dart";
 import 'package:locker/services/collections/collections_db.dart';
@@ -192,6 +194,14 @@ class TrashService {
         hasMore,
         latestUpdatedAtTime,
       );
+    } on DioException catch (e, s) {
+      _logger.severe(e, s);
+      if (e.response?.statusCode == 401) {
+        _logger.info("Session expired in trash sync, triggering logout");
+        Bus.instance.fire(TriggerLogoutEvent());
+        throw UnauthorizedError();
+      }
+      rethrow;
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
@@ -213,6 +223,14 @@ class TrashService {
       await _trashDB.delete(uniqueFileIds);
 
       await _collectionDB.deleteFilesByUploadedFileIDs(uniqueFileIds);
+    } on DioException catch (e, s) {
+      _logger.severe("failed to delete from trash", e, s);
+      if (e.response?.statusCode == 401) {
+        _logger.info("Session expired in delete from trash, triggering logout");
+        Bus.instance.fire(TriggerLogoutEvent());
+        throw UnauthorizedError();
+      }
+      rethrow;
     } catch (e, s) {
       _logger.severe("failed to delete from trash", e, s);
       rethrow;
@@ -237,6 +255,20 @@ class TrashService {
       await _trashDB.clearTable();
       await _collectionDB.deleteFilesByUploadedFileIDs(fileIDs);
       unawaited(syncTrash());
+      _logger.info("Successfully emptied trash");
+    } on DioException catch (e, s) {
+      _logger.severe(
+        "failed to empty trash - status: ${e.response?.statusCode}, "
+        "data: ${e.response?.data}",
+        e,
+        s,
+      );
+      if (e.response?.statusCode == 401) {
+        _logger.info("Session expired in empty trash, triggering logout");
+        Bus.instance.fire(TriggerLogoutEvent());
+        throw UnauthorizedError();
+      }
+      rethrow;
     } catch (e, s) {
       _logger.severe("failed to empty trash", e, s);
       rethrow;
@@ -274,6 +306,14 @@ class TrashService {
       await CollectionService.instance.sync();
       Bus.instance.fire(CollectionsUpdatedEvent("file_restore"));
       Bus.instance.fire(UserDetailsRefreshEvent());
+    } on DioException catch (e, s) {
+      _logger.severe("failed to restore files", e, s);
+      if (e.response?.statusCode == 401) {
+        _logger.info("Session expired in restore files, triggering logout");
+        Bus.instance.fire(TriggerLogoutEvent());
+        throw UnauthorizedError();
+      }
+      rethrow;
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;
