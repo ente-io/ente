@@ -446,6 +446,116 @@ class SocialDB {
     return _rowToAnonProfile(rows.first);
   }
 
+  // ============ Feed Query Methods ============
+
+  /// Gets all reactions on files (photo likes) excluding the current user's reactions.
+  /// Returns reactions sorted by created_at DESC.
+  Future<List<Reaction>> getReactionsOnFiles({
+    required int excludeUserID,
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      _reactionsTable,
+      where:
+          'file_id IS NOT NULL AND comment_id IS NULL AND is_deleted = 0 AND user_id != ?',
+      whereArgs: [excludeUserID],
+      orderBy: 'created_at DESC',
+      limit: limit,
+      offset: offset,
+    );
+    return rows.map(_rowToReaction).toList();
+  }
+
+  /// Gets all comments on files excluding the current user's comments.
+  /// Returns comments sorted by created_at DESC.
+  Future<List<Comment>> getCommentsOnFiles({
+    required int excludeUserID,
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      _commentsTable,
+      where:
+          'file_id IS NOT NULL AND parent_comment_id IS NULL AND is_deleted = 0 AND user_id != ?',
+      whereArgs: [excludeUserID],
+      orderBy: 'created_at DESC',
+      limit: limit,
+      offset: offset,
+    );
+    return rows.map(_rowToComment).toList();
+  }
+
+  /// Gets all replies to comments, excluding the current user's own replies.
+  /// Returns replies sorted by created_at DESC.
+  Future<List<Comment>> getRepliesToUserComments({
+    required int targetUserID,
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    // Get all replies excluding the current user's own replies
+    final rows = await db.query(
+      _commentsTable,
+      where:
+          'parent_comment_id IS NOT NULL AND is_deleted = 0 AND user_id != ?',
+      whereArgs: [targetUserID],
+      orderBy: 'created_at DESC',
+      limit: limit,
+      offset: offset,
+    );
+    return rows.map(_rowToComment).toList();
+  }
+
+  /// Gets all reactions on top-level comments, excluding the current user's reactions.
+  /// Returns reactions sorted by created_at DESC.
+  Future<List<Reaction>> getReactionsOnUserComments({
+    required int targetUserID,
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    // Get all reactions on comments (not on files) excluding current user's
+    // Join to ensure we only get reactions on top-level comments (not replies)
+    final rows = await db.rawQuery(
+      '''
+      SELECT r.* FROM $_reactionsTable r
+      INNER JOIN $_commentsTable c ON r.comment_id = c.id
+      WHERE r.comment_id IS NOT NULL AND r.is_deleted = 0 AND r.user_id != ?
+        AND c.is_deleted = 0 AND c.parent_comment_id IS NULL
+      ORDER BY r.created_at DESC
+      LIMIT ? OFFSET ?
+      ''',
+      [targetUserID, limit, offset],
+    );
+    return rows.map(_rowToReaction).toList();
+  }
+
+  /// Gets all reactions on replies, excluding the current user's reactions.
+  /// Returns reactions sorted by created_at DESC.
+  Future<List<Reaction>> getReactionsOnUserReplies({
+    required int targetUserID,
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    // Get all reactions on replies excluding current user's
+    final rows = await db.rawQuery(
+      '''
+      SELECT r.* FROM $_reactionsTable r
+      INNER JOIN $_commentsTable c ON r.comment_id = c.id
+      WHERE r.comment_id IS NOT NULL AND r.is_deleted = 0 AND r.user_id != ?
+        AND c.is_deleted = 0 AND c.parent_comment_id IS NOT NULL
+      ORDER BY r.created_at DESC
+      LIMIT ? OFFSET ?
+      ''',
+      [targetUserID, limit, offset],
+    );
+    return rows.map(_rowToReaction).toList();
+  }
+
   // ============ Cleanup Methods ============
 
   Future<void> deleteCollectionData(int collectionID) async {
@@ -474,6 +584,115 @@ class SocialDB {
     await db.delete(_reactionsTable);
     await db.delete(_anonProfilesTable);
     await db.delete(_syncTimeTable);
+  }
+
+  Future<int> deleteAllComments() async {
+    final db = await database;
+    return await db.delete(_commentsTable);
+  }
+
+  Future<int> deleteAllReactions() async {
+    final db = await database;
+    return await db.delete(_reactionsTable);
+  }
+
+  // ============ Debug Methods ============
+
+  Future<void> seedExampleData() async {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    const testCollectionID = 1;
+    const testFileID = 100;
+    const testUserID = 1;
+
+    // Seed example comments
+    final exampleComments = [
+      Comment(
+        id: 'comment_1',
+        collectionID: testCollectionID,
+        fileID: testFileID,
+        data: 'This is a great photo!',
+        parentCommentID: null,
+        parentCommentUserID: null,
+        isDeleted: false,
+        userID: testUserID,
+        anonUserID: null,
+        createdAt: now - 3600000000,
+        updatedAt: now - 3600000000,
+      ),
+      Comment(
+        id: 'comment_2',
+        collectionID: testCollectionID,
+        fileID: testFileID,
+        data: 'I agree, amazing shot!',
+        parentCommentID: 'comment_1',
+        parentCommentUserID: testUserID,
+        isDeleted: false,
+        userID: testUserID + 1,
+        anonUserID: null,
+        createdAt: now - 1800000000,
+        updatedAt: now - 1800000000,
+      ),
+      Comment(
+        id: 'comment_3',
+        collectionID: testCollectionID,
+        fileID: null,
+        data: 'Collection-level comment',
+        parentCommentID: null,
+        parentCommentUserID: null,
+        isDeleted: false,
+        userID: testUserID,
+        anonUserID: null,
+        createdAt: now - 900000000,
+        updatedAt: now - 900000000,
+      ),
+    ];
+
+    // Seed example reactions
+    final exampleReactions = [
+      Reaction(
+        id: 'reaction_1',
+        collectionID: testCollectionID,
+        fileID: testFileID,
+        commentID: null,
+        data: '❤️',
+        isDeleted: false,
+        userID: testUserID,
+        anonUserID: null,
+        createdAt: now - 7200000000,
+        updatedAt: now - 7200000000,
+      ),
+      Reaction(
+        id: 'reaction_2',
+        collectionID: testCollectionID,
+        fileID: testFileID,
+        commentID: null,
+        data: '👍',
+        isDeleted: false,
+        userID: testUserID + 1,
+        anonUserID: null,
+        createdAt: now - 3600000000,
+        updatedAt: now - 3600000000,
+      ),
+      Reaction(
+        id: 'reaction_3',
+        collectionID: testCollectionID,
+        fileID: null,
+        commentID: 'comment_1',
+        data: '😊',
+        isDeleted: false,
+        userID: testUserID + 2,
+        anonUserID: null,
+        createdAt: now - 1800000000,
+        updatedAt: now - 1800000000,
+      ),
+    ];
+
+    await upsertComments(exampleComments);
+    await upsertReactions(exampleReactions);
+
+    _logger.info(
+      'Seeded ${exampleComments.length} comments and ${exampleReactions.length} reactions',
+    );
   }
 
   // ============ Row Mappers ============

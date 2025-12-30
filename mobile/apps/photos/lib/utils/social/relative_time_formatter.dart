@@ -5,8 +5,7 @@ import "package:intl/intl.dart";
 /// Server timestamps are in microseconds since epoch.
 String formatRelativeTime(int timestampMicros) {
   final now = DateTime.now();
-  final dateTime =
-      DateTime.fromMicrosecondsSinceEpoch(timestampMicros);
+  final dateTime = DateTime.fromMicrosecondsSinceEpoch(timestampMicros);
   final difference = now.difference(dateTime);
 
   if (difference.inMinutes < 1) {

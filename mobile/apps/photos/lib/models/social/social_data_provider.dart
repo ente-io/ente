@@ -204,8 +204,7 @@ class SocialDataProvider {
         return deletedReaction;
       } else {
         // User doesn't have a reaction or it's deleted - create/upsert one
-        final encrypted =
-            _api.encryptReaction(reactionType, collectionID);
+        final encrypted = _api.encryptReaction(reactionType, collectionID);
 
         final reactionID = await _api.upsertReaction(
           collectionID: collectionID,
