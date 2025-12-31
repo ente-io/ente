@@ -14,7 +14,12 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 /// Widget that displays a single feed item.
 ///
-/// Shows: [Icon] [Stacked Avatars] [User names + action text] [Photo Thumbnail]
+/// Layout matches Figma design:
+/// ```
+/// [Icon with timeline] [Avatars]              [Thumbnail]
+///         |            Username and X other
+///         |            Action description
+/// ```
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
@@ -28,12 +33,16 @@ class FeedItemWidget extends StatelessWidget {
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
 
+  /// Whether this is the last item in the feed (hides timeline line).
+  final bool isLastItem;
+
   const FeedItemWidget({
     required this.feedItem,
     required this.currentUserID,
     this.onTap,
     this.onThumbnailTap,
     this.anonDisplayNames = const {},
+    this.isLastItem = false,
     super.key,
   });
 
@@ -51,21 +60,32 @@ class FeedItemWidget extends StatelessWidget {
             child: GestureDetector(
               onTap: onTap,
               behavior: HitTestBehavior.opaque,
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Feed type icon
-                  _FeedTypeIcon(type: feedItem.type),
-                  const SizedBox(width: 10),
-                  // Stacked avatars
-                  _StackedAvatars(
-                    feedItem: feedItem,
-                    currentUserID: currentUserID,
-                    anonDisplayNames: anonDisplayNames,
+                  // First row: Icon with timeline + Avatars
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Feed type icon with timeline line
+                      _FeedTypeIconWithTimeline(
+                        type: feedItem.type,
+                        showTimeline: !isLastItem,
+                      ),
+                      const SizedBox(width: 10),
+                      // Stacked avatars
+                      _StackedAvatars(
+                        feedItem: feedItem,
+                        currentUserID: currentUserID,
+                        anonDisplayNames: anonDisplayNames,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  // Text content
-                  Expanded(
+                  const SizedBox(height: 4),
+                  // Second row: Text content with left padding
+                  Padding(
+                    padding: const EdgeInsets.only(left: 42),
                     child: _FeedTextContent(
                       feedItem: feedItem,
                       currentUserID: currentUserID,
@@ -101,25 +121,57 @@ class FeedItemWidget extends StatelessWidget {
   }
 }
 
-/// Displays the feed type icon (heart, comment, reply, etc.)
-class _FeedTypeIcon extends StatelessWidget {
+/// Displays the feed type icon with optional timeline line passing through center.
+///
+/// The timeline line connects feed items vertically, passing through the icon center.
+class _FeedTypeIconWithTimeline extends StatelessWidget {
   final FeedItemType type;
+  final bool showTimeline;
 
-  const _FeedTypeIcon({required this.type});
+  /// Height of the timeline line extending below the icon.
+  /// This should match the total height of the feed item content below the icon.
+  static const double _timelineExtensionHeight = 55;
+
+  const _FeedTypeIconWithTimeline({
+    required this.type,
+    required this.showTimeline,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
-    return Container(
+    return SizedBox(
       width: 32,
       height: 32,
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: _buildIcon(context),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Timeline line (behind the icon) - dashed
+          if (showTimeline)
+            const Positioned(
+              left: 15.5, // Center of 32px width
+              top: 16, // Start from icon center
+              child: CustomPaint(
+                size: Size(1, _timelineExtensionHeight),
+                painter: _DashedLinePainter(
+                  color: Color(0xFF00B33C),
+                ),
+              ),
+            ),
+          // Icon container
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevated,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: _buildIcon(context),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -514,4 +566,34 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
       ),
     );
   }
+}
+
+/// Custom painter for drawing a dashed vertical line.
+class _DashedLinePainter extends CustomPainter {
+  final Color color;
+
+  static const double _dashHeight = 4;
+  static const double _dashGap = 3;
+
+  const _DashedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = size.width;
+
+    double startY = 0;
+    while (startY < size.height) {
+      canvas.drawLine(
+        Offset(size.width / 2, startY),
+        Offset(size.width / 2, (startY + _dashHeight).clamp(0, size.height)),
+        paint,
+      );
+      startY += _dashHeight + _dashGap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

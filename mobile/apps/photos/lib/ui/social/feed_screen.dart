@@ -131,15 +131,12 @@ class _FeedScreenState extends State<FeedScreen> {
               ? _buildEmptyState(context)
               : RefreshIndicator(
                   onRefresh: _onRefresh,
-                  child: ListView.separated(
+                  child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     itemCount: _feedItems.length,
-                    separatorBuilder: (context, index) => Divider(
-                      height: 1,
-                      color: colorScheme.strokeFaint,
-                    ),
                     itemBuilder: (context, index) {
                       final item = _feedItems[index];
+                      final isLastItem = index == _feedItems.length - 1;
                       return FeedItemWidget(
                         key: ValueKey(
                           '${item.type}_${item.fileID}_${item.commentID}_${item.createdAt}',
@@ -149,6 +146,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         anonDisplayNames:
                             _anonDisplayNamesByCollection[item.collectionID] ??
                                 const {},
+                        isLastItem: isLastItem,
                         onTap: () => _openComments(item),
                         onThumbnailTap: () => _openPhoto(item),
                       );
