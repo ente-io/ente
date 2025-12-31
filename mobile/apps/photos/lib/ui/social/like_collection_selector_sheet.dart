@@ -8,6 +8,7 @@ import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
@@ -264,20 +265,16 @@ class _LikeCollectionSelectorSheetState
   }
 
   Widget _buildHeader() {
-    final colorScheme = getEnteColorScheme(context);
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 11, 14, 0),
+      padding: const EdgeInsets.fromLTRB(16, 11, 12, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          GestureDetector(
+          IconButtonWidget(
+            iconButtonType: IconButtonType.rounded,
+            icon: Icons.close_rounded,
+            size: 20,
             onTap: () => Navigator.of(context).pop(),
-            child: Icon(
-              Icons.cancel,
-              size: 40,
-              color: colorScheme.fillMuted,
-            ),
           ),
         ],
       ),
@@ -392,9 +389,9 @@ class _LikeCollectionSelectorSheetState
                 child: ListView.builder(
                   shrinkWrap: _collections.length <= 10,
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  itemCount: _collections.length * 2,
+                  itemCount: _collections.length,
                   itemBuilder: (context, index) {
-                    final state = _collections[index ~/ 2];
+                    final state = _collections[index];
                     return _AlbumListItem(
                       key: ValueKey(state.collection.id),
                       state: state,
@@ -434,12 +431,14 @@ class _AlbumListItem extends StatelessWidget {
     super.key,
   });
 
-  static const _heartContainerBg = Color(0x0F08C225);
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final heartContainerBg = isDarkTheme
+        ? const Color(0x1A08C225) // ~10% opacity for dark
+        : const Color(0x0F08C225); // ~6% opacity for light
 
     return GestureDetector(
       onTap: onTap,
@@ -465,7 +464,7 @@ class _AlbumListItem extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: _heartContainerBg,
+                color: heartContainerBg,
                 borderRadius: BorderRadius.circular(9.6),
               ),
               child: Center(
