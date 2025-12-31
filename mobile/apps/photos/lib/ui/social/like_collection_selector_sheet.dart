@@ -6,7 +6,6 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -219,10 +218,6 @@ class _LikeCollectionSelectorSheetState
 
   bool get _isVideo => _file?.isVideo ?? false;
 
-  String get _subtitle => _isVideo
-      ? "Select the album to like this video"
-      : "Select the album to like this photo";
-
   bool get _allLiked => _collections.every((c) => c.isLiked);
 
   @override
@@ -245,7 +240,21 @@ class _LikeCollectionSelectorSheetState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(),
+            // Header with close button - inlined for simplicity
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 11, 12, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButtonWidget(
+                    iconButtonType: IconButtonType.rounded,
+                    icon: Icons.close_rounded,
+                    size: 20,
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 48),
@@ -254,9 +263,12 @@ class _LikeCollectionSelectorSheetState
             else if (_hasError)
               _buildErrorState()
             else ...[
-              _buildFileThumbnail(colorScheme),
-              _buildTitleSection(),
-              _buildAlbumsContainer(colorScheme),
+              _FileThumbnail(
+                file: _file,
+                placeholderColor: colorScheme.fillMuted,
+              ),
+              _TitleSection(isVideo: _isVideo),
+              _buildAlbumsContainer(),
             ],
           ],
         ),
@@ -264,68 +276,7 @@ class _LikeCollectionSelectorSheetState
     );
   }
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 11, 12, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          IconButtonWidget(
-            iconButtonType: IconButtonType.rounded,
-            icon: Icons.close_rounded,
-            size: 20,
-            onTap: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFileThumbnail(EnteColorScheme colorScheme) {
-    return Center(
-      child: SizedBox(
-        width: 128,
-        height: 128,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: _file != null
-              ? ThumbnailWidget(
-                  _file!,
-                  thumbnailSize: thumbnailLargeSize,
-                  rawThumbnail: true,
-                )
-              : Container(color: colorScheme.fillMuted),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitleSection() {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 27, bottom: 9),
-      child: Column(
-        children: [
-          Text(
-            "Like",
-            style: textTheme.h3Bold,
-          ),
-          const SizedBox(height: 9),
-          Text(
-            _subtitle,
-            style: textTheme.small.copyWith(color: colorScheme.textMuted),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAlbumsContainer(EnteColorScheme colorScheme) {
-    final textTheme = getEnteTextTheme(context);
-
+  Widget _buildAlbumsContainer() {
     return Flexible(
       child: Container(
         margin: const EdgeInsets.fromLTRB(21, 16, 21, 16),
@@ -336,48 +287,10 @@ class _LikeCollectionSelectorSheetState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header row with album count and "Like all" button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(25, 26, 12, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "${_collections.length} ${_collections.length == 1 ? 'Album' : 'Albums'}",
-                    style: textTheme.small,
-                  ),
-                  GestureDetector(
-                    onTap: _likeAll,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.backgroundBase,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Like all",
-                            style: textTheme.small,
-                          ),
-                          const SizedBox(width: 10),
-                          Icon(
-                            _allLiked ? Icons.favorite : Icons.favorite_border,
-                            color: _allLiked
-                                ? _greenHeartColor
-                                : colorScheme.textBase,
-                            size: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            _AlbumsHeader(
+              albumCount: _collections.length,
+              allLiked: _allLiked,
+              onLikeAll: _likeAll,
             ),
             // Album list
             Flexible(
@@ -413,6 +326,120 @@ class _LikeCollectionSelectorSheetState
         "Could not load albums",
         style: textTheme.smallMuted,
         textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class _AlbumsHeader extends StatelessWidget {
+  final int albumCount;
+  final bool allLiked;
+  final VoidCallback onLikeAll;
+
+  const _AlbumsHeader({
+    required this.albumCount,
+    required this.allLiked,
+    required this.onLikeAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(25, 26, 12, 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "$albumCount ${albumCount == 1 ? 'Album' : 'Albums'}",
+            style: textTheme.small,
+          ),
+          GestureDetector(
+            onTap: onLikeAll,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              decoration: BoxDecoration(
+                color: colorScheme.backgroundBase,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Like all", style: textTheme.small),
+                  const SizedBox(width: 10),
+                  Icon(
+                    allLiked ? Icons.favorite : Icons.favorite_border,
+                    color: allLiked ? _greenHeartColor : colorScheme.textBase,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TitleSection extends StatelessWidget {
+  final bool isVideo;
+
+  const _TitleSection({required this.isVideo});
+
+  String get _subtitle => isVideo
+      ? "Select the album to like this video"
+      : "Select the album to like this photo";
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 27, bottom: 9),
+      child: Column(
+        children: [
+          Text("Like", style: textTheme.h3Bold),
+          const SizedBox(height: 9),
+          Text(
+            _subtitle,
+            style: textTheme.small.copyWith(color: colorScheme.textMuted),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FileThumbnail extends StatelessWidget {
+  final EnteFile? file;
+  final Color placeholderColor;
+
+  const _FileThumbnail({
+    required this.file,
+    required this.placeholderColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: 128,
+        height: 128,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: file != null
+              ? ThumbnailWidget(
+                  file!,
+                  thumbnailSize: thumbnailLargeSize,
+                  rawThumbnail: true,
+                )
+              : Container(color: placeholderColor),
+        ),
       ),
     );
   }
