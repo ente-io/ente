@@ -167,6 +167,10 @@ export interface AddNameModalProps extends ModalVisibilityProps {
      * Defaults to 'like'.
      */
     actionType?: "like" | "comment";
+    /**
+     * Called after the modal's exit animation completes.
+     */
+    onExited?: () => void;
 }
 
 /**
@@ -177,6 +181,7 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
     onClose,
     onSubmit,
     actionType = "like",
+    onExited,
 }) => {
     const [name, setName] = useState("");
     const isComment = actionType === "comment";
@@ -194,7 +199,11 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
     };
 
     return (
-        <StyledDialog open={open} onClose={handleClose}>
+        <StyledDialog
+            open={open}
+            onClose={handleClose}
+            TransitionProps={{ onExited }}
+        >
             <DialogWrapper>
                 <CloseButton onClick={handleClose}>
                     <CloseIcon sx={{ fontSize: 20 }} />
@@ -233,9 +242,7 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                         onClick={handleSubmit}
                         hasName={!!name.trim()}
                     >
-                        {isComment
-                            ? "Set name and comment"
-                            : "Set name and like"}
+                        {isComment ? "Set name" : "Set name and like"}
                     </SubmitButton>
                 </ContentContainer>
             </DialogWrapper>

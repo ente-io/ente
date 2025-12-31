@@ -18,7 +18,10 @@ import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
-import { addPublicComment } from "ente-new/albums/services/public-comment";
+import {
+    addPublicComment,
+    deletePublicComment,
+} from "ente-new/albums/services/public-comment";
 import {
     addPublicCommentReaction,
     createAnonIdentity,
@@ -445,6 +448,11 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      * Map of anonymous user ID to decrypted user name.
      */
     anonUserNames?: Map<string, string>;
+    /**
+     * Called when user clicks "Join album to like" in the public like modal.
+     * Should trigger the join album flow (with mobile deep link fallback).
+     */
+    onJoinAlbum?: () => void;
 }
 
 /**
@@ -475,6 +483,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     publicAlbumsCredentials,
     collectionKey,
     anonUserNames,
+    onJoinAlbum,
 }) => {
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
@@ -486,11 +495,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [showPublicCommentModal, setShowPublicCommentModal] = useState(false);
     const [showAddNameModal, setShowAddNameModal] = useState(false);
     const [showPublicLikeModal, setShowPublicLikeModal] = useState(false);
-    const [pendingComment, setPendingComment] = useState("");
     const [pendingCommentLike, setPendingCommentLike] =
         useState<Comment | null>(null);
     /** Tracks whether the AddNameModal was triggered by a comment like action */
     const [addNameForCommentLike, setAddNameForCommentLike] = useState(false);
+    /** Tracks whether the user has set up their anonymous identity for commenting */
+    const [hasAnonIdentity, setHasAnonIdentity] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -720,8 +730,21 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const canDeleteComment = useCallback(
         (comment: Comment): boolean => {
             // Comment author can always delete their own comment
+            // For logged-in users, check userID
             if (comment.userID === currentUserID) {
                 return true;
+            }
+            // For anonymous users, check anonUserID
+            if (selectedCollectionInfo) {
+                const storedIdentity = getStoredAnonIdentity(
+                    selectedCollectionInfo.id,
+                );
+                if (
+                    storedIdentity &&
+                    comment.anonUserID === storedIdentity.anonUserID
+                ) {
+                    return true;
+                }
             }
 
             // Check if user is owner or admin of the selected collection
@@ -859,6 +882,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     }, [hasCollectionContext, selectedCollectionID, commentsByCollection]);
 
+    // Update hasAnonIdentity when collection changes (for public albums)
+    useEffect(() => {
+        if (isPublicAlbum && selectedCollectionInfo) {
+            const storedIdentity = getStoredAnonIdentity(
+                selectedCollectionInfo.id,
+            );
+            setHasAnonIdentity(!!storedIdentity);
+        }
+    }, [isPublicAlbum, selectedCollectionInfo]);
+
     // Fetch thumbnails for each collection's cover file
     useEffect(() => {
         if (!open || collectionsInfo.length === 0) {
@@ -952,8 +985,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 // User already has identity, send directly
                 await sendPublicComment(commentText.trim());
             } else {
-                // Show modal to choose anonymous or sign in
-                setPendingComment(commentText.trim());
+                // Show modal to choose anonymous or join album
                 setShowPublicCommentModal(true);
             }
             return;
@@ -1091,10 +1123,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setShowAddNameModal(true);
     };
 
-    const handleSignInAndComment = () => {
+    const handleJoinAlbumToComment = () => {
         setShowPublicCommentModal(false);
-        // Redirect to web.ente.io for sign in
-        window.open("https://web.ente.io", "_blank");
+        onJoinAlbum?.();
     };
 
     const handleLikeAnonymously = () => {
@@ -1103,11 +1134,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setShowAddNameModal(true);
     };
 
-    const handleSignInAndLike = () => {
+    const handleJoinAlbumToLike = () => {
         setShowPublicLikeModal(false);
         setPendingCommentLike(null);
-        // Redirect to web.ente.io for sign in
-        window.open("https://web.ente.io", "_blank");
+        onJoinAlbum?.();
     };
 
     const handleNameSubmit = async (name: string) => {
@@ -1118,7 +1148,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             !publicAlbumsCredentials ||
             !collectionKey
         ) {
-            setPendingComment("");
             setPendingCommentLike(null);
             setAddNameForCommentLike(false);
             return;
@@ -1170,6 +1199,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     return next;
                 });
                 onCommentReactionAdded?.(newReaction);
+                setHasAnonIdentity(true);
             } catch (e) {
                 log.error("Failed to create identity and like comment", e);
             } finally {
@@ -1179,76 +1209,40 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             return;
         }
 
-        // Handle comment action
-        if (!file) {
-            setPendingComment("");
-            return;
-        }
-
-        setSending(true);
+        // Handle comment action - just create identity, don't send comment
+        // User will type and send the comment afterwards
         try {
-            // Create anonymous identity with the provided name
-            const identity = await createAnonIdentity(
+            await createAnonIdentity(
                 publicAlbumsCredentials,
                 collectionID,
                 name,
                 collectionKey,
             );
-
-            // Now post the comment using the new identity
-            const newCommentID = await addPublicComment(
-                publicAlbumsCredentials,
-                collectionID,
-                file.id,
-                pendingComment,
-                collectionKey,
-                replyingTo?.id,
-                identity,
-            );
-
-            // Add the new comment to local state
-            const newComment: Comment = {
-                id: newCommentID,
-                collectionID,
-                fileID: file.id,
-                text: pendingComment,
-                parentCommentID: replyingTo?.id,
-                isDeleted: false,
-                userID: 0, // Anonymous user
-                anonUserID: identity.anonUserID,
-                createdAt: Date.now() * 1000, // Microseconds to match server format
-                updatedAt: Date.now() * 1000,
-            };
-            setComments((prev) => [...prev, newComment]);
-            setCommentsByCollection((prev) => {
-                const next = new Map(prev);
-                const existing = next.get(collectionID) ?? [];
-                next.set(collectionID, [...existing, newComment]);
-                return next;
-            });
-
-            setCommentText("");
-            setReplyingTo(null);
-
-            // Notify parent to update its comments state
-            onCommentAdded?.(newComment);
-
-            // Scroll to bottom after adding comment
-            setTimeout(() => {
-                if (commentsContainerRef.current) {
-                    commentsContainerRef.current.scrollTop = 0;
-                }
-            }, 0);
+            // Identity created, user can now type and send comments
+            setHasAnonIdentity(true);
         } catch (e) {
-            log.error("Failed to create identity and add comment", e);
-        } finally {
-            setSending(false);
-            setPendingComment("");
+            log.error("Failed to create anonymous identity", e);
         }
     };
 
+    // Check if user needs to set up identity before commenting (public album without identity)
+    const needsIdentityToComment =
+        isPublicAlbum && selectedCollectionInfo && !hasAnonIdentity;
+
     const handleReply = (commentToReply: Comment) => {
         setReplyingTo(commentToReply);
+
+        // For public albums, check if we have an identity
+        if (needsIdentityToComment) {
+            setShowPublicCommentModal(true);
+        }
+    };
+
+    // Handler for clicking the comment input area on public albums
+    const handleInputClick = () => {
+        if (needsIdentityToComment) {
+            setShowPublicCommentModal(true);
+        }
     };
 
     const handleCollectionSelect = (collectionID: number) => {
@@ -1447,7 +1441,27 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 break;
             case "delete":
                 try {
-                    await deleteComment(targetComment.id);
+                    // Use public API for anonymous users in public albums
+                    if (isPublicAlbum && publicAlbumsCredentials) {
+                        const storedIdentity = selectedCollectionInfo
+                            ? getStoredAnonIdentity(selectedCollectionInfo.id)
+                            : undefined;
+                        if (storedIdentity) {
+                            await deletePublicComment(
+                                publicAlbumsCredentials,
+                                targetComment.collectionID,
+                                targetComment.id,
+                                storedIdentity,
+                            );
+                        } else {
+                            log.error(
+                                "No stored identity for public comment delete",
+                            );
+                            return;
+                        }
+                    } else {
+                        await deleteComment(targetComment.id);
+                    }
 
                     // Update local state
                     setComments((prev) =>
@@ -1759,7 +1773,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                             !showOwnTimestamp &&
                                             commentIsOwn &&
                                             !!prevComment &&
-                                            prevComment.userID !== currentUserID
+                                            prevComment.userID !== currentUserID &&
+                                            prevComment.anonUserID !==
+                                                storedIdentity?.anonUserID
                                         }
                                         isLastOwn={isLastInSequence}
                                         isHighlighted={
@@ -1980,12 +1996,36 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             </IconButton>
                         </ReplyingToBar>
                     )}
-                    <InputWrapper>
+                    <InputWrapper
+                        onClick={handleInputClick}
+                        sx={
+                            needsIdentityToComment
+                                ? (theme) => ({
+                                      cursor: "pointer",
+                                      borderRadius: "20px",
+                                      overflow: "hidden",
+                                      transition: "background-color 0.15s ease",
+                                      "&:hover": {
+                                          backgroundColor:
+                                              "rgba(0, 0, 0, 0.04)",
+                                          ...theme.applyStyles("dark", {
+                                              backgroundColor:
+                                                  "rgba(255, 255, 255, 0.08)",
+                                          }),
+                                      },
+                                      "& .MuiInputBase-root, & .MuiInputBase-input":
+                                          {
+                                              cursor: "pointer",
+                                          },
+                                  })
+                                : undefined
+                        }
+                    >
                         <StyledTextField
                             fullWidth
                             multiline
                             minRows={1}
-                            autoFocus
+                            autoFocus={!needsIdentityToComment}
                             placeholder="Say something nice!"
                             variant="standard"
                             value={commentText}
@@ -2011,7 +2051,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 open={showPublicCommentModal}
                 onClose={() => setShowPublicCommentModal(false)}
                 onCommentAnonymously={handleCommentAnonymously}
-                onSignInAndComment={handleSignInAndComment}
+                onJoinAlbumToComment={handleJoinAlbumToComment}
             />
             <PublicLikeModal
                 open={showPublicLikeModal}
@@ -2020,14 +2060,17 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     setPendingCommentLike(null);
                 }}
                 onLikeAnonymously={handleLikeAnonymously}
-                onSignInAndLike={handleSignInAndLike}
+                onJoinAlbumToLike={handleJoinAlbumToLike}
             />
             <AddNameModal
                 open={showAddNameModal}
                 onClose={() => {
                     setShowAddNameModal(false);
-                    setPendingComment("");
                     setPendingCommentLike(null);
+                }}
+                onExited={() => {
+                    // Reset actionType after modal has fully closed to avoid
+                    // visual glitch of icon changing during exit animation
                     setAddNameForCommentLike(false);
                 }}
                 onSubmit={handleNameSubmit}

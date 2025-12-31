@@ -127,6 +127,7 @@ export type FileListWithViewerProps = {
         | "onSelectPerson"
         | "publicAlbumsCredentials"
         | "collectionKey"
+        | "onJoinAlbum"
     >;
 
 /**
@@ -180,6 +181,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onPendingNavigationConsumed,
     publicAlbumsCredentials,
     collectionKey,
+    onJoinAlbum,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -378,6 +380,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     onSelectPerson,
                     publicAlbumsCredentials,
                     collectionKey,
+                    onJoinAlbum,
                 }}
                 onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}

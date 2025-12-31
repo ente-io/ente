@@ -87,9 +87,9 @@ export interface PublicLikeModalProps extends ModalVisibilityProps {
      */
     onLikeAnonymously: () => void;
     /**
-     * Called when user clicks "Sign in and like".
+     * Called when user clicks "Join album to like".
      */
-    onSignInAndLike: () => void;
+    onJoinAlbumToLike: () => void;
 }
 
 /**
@@ -100,7 +100,7 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
     open,
     onClose,
     onLikeAnonymously,
-    onSignInAndLike,
+    onJoinAlbumToLike,
 }) => {
     return (
         <StyledDialog open={open} onClose={onClose}>
@@ -134,9 +134,9 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                         <SignInButton
                             variant="contained"
                             fullWidth
-                            onClick={onSignInAndLike}
+                            onClick={onJoinAlbumToLike}
                         >
-                            Sign in and like
+                            Join album and like
                         </SignInButton>
                     </ButtonsSection>
                 </ContentContainer>

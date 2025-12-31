@@ -369,6 +369,14 @@ export default function PublicCollectionGallery() {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
+    // Join album handler for use in file viewer's public like modal
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken: credentials.current?.accessToken,
+        collectionKey: collectionKey.current,
+        credentials,
+    });
+
     const handleSubmitPassword: SingleInputFormProps["onSubmit"] = async (
         password,
         setFieldError,
@@ -587,6 +595,7 @@ export default function PublicCollectionGallery() {
                         onAddSaveGroup={onAddSaveGroup}
                         publicAlbumsCredentials={credentials.current}
                         collectionKey={collectionKey.current}
+                        onJoinAlbum={handleJoinAlbum}
                     />
                 </>
             )}

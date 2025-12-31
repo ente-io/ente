@@ -6,6 +6,7 @@ import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { useEffect, useRef, useState } from "react";
 
 // Import extracted components
@@ -78,6 +79,14 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         handleCloseFileViewer,
         handleTriggerRemotePull,
     } = useFileViewer({ files, onSetOpenFileViewer, onRemotePull });
+
+    // Join album hook for file viewer's public like modal
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection: collection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
 
     // Download all files functionality
     const downloadAllFiles = () => {
@@ -516,6 +525,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 }}
                 publicAlbumsCredentials={credentials?.current}
                 collectionKey={collectionKey}
+                onJoinAlbum={handleJoinAlbum}
             />
 
             {/* Download progress notifications */}

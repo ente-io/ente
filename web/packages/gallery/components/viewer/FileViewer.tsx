@@ -340,6 +340,11 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Required when viewing a public album (no logged in user).
      */
     collectionKey?: string;
+    /**
+     * Called when user clicks "Join album to like" in the public like modal.
+     * Should trigger the join album flow (with mobile deep link fallback).
+     */
+    onJoinAlbum?: () => void;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -381,6 +386,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     activeCollectionID,
     publicAlbumsCredentials,
     collectionKey,
+    onJoinAlbum,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -1185,9 +1191,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenAddNameModal(true);
     }, []);
 
-    const handleSignInAndLike = useCallback(() => {
-        window.open("https://web.ente.io", "_blank");
-    }, []);
+    const handleJoinAlbumToLike = useCallback(() => {
+        setOpenPublicLikeModal(false);
+        onJoinAlbum?.();
+    }, [onJoinAlbum]);
 
     const handleAddNameModalClose = useCallback(
         () => setOpenAddNameModal(false),
@@ -2291,6 +2298,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 publicAlbumsCredentials={publicAlbumsCredentials}
                 collectionKey={collectionKey}
                 anonUserNames={anonUserNames}
+                onJoinAlbum={onJoinAlbum}
             />
             <LikesSidebar
                 open={openLikes}
@@ -2318,7 +2326,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 open={openPublicLikeModal}
                 onClose={handlePublicLikeModalClose}
                 onLikeAnonymously={handleLikeAnonymously}
-                onSignInAndLike={handleSignInAndLike}
+                onJoinAlbumToLike={handleJoinAlbumToLike}
             />
             <AddNameModal
                 open={openAddNameModal}

@@ -99,9 +99,9 @@ export interface PublicCommentModalProps extends ModalVisibilityProps {
      */
     onCommentAnonymously: () => void;
     /**
-     * Called when user clicks "Sign in and comment".
+     * Called when user clicks "Join album and comment".
      */
-    onSignInAndComment: () => void;
+    onJoinAlbumToComment: () => void;
 }
 
 /**
@@ -112,7 +112,7 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
     open,
     onClose,
     onCommentAnonymously,
-    onSignInAndComment,
+    onJoinAlbumToComment,
 }) => {
     return (
         <StyledDialog open={open} onClose={onClose}>
@@ -146,9 +146,9 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
                         <SignInButton
                             variant="contained"
                             fullWidth
-                            onClick={onSignInAndComment}
+                            onClick={onJoinAlbumToComment}
                         >
-                            Sign in and comment
+                            Join album and comment
                         </SignInButton>
                     </ButtonsSection>
                 </ContentContainer>
