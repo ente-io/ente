@@ -41,31 +41,31 @@ COPY --from=builder /build/web/apps/embed/out /out/embed
 
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
-    listen 3000; root /out/photos;
+    listen 3000; listen [::]:3000; root /out/photos;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3001; root /out/accounts;
+    listen 3001; listen [::]:3001; root /out/accounts;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3002; root /out/photos;
+    listen 3002; listen [::]:3002; root /out/photos;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3003; root /out/auth;
+    listen 3003; listen [::]:3003; root /out/auth;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3004; root /out/cast;
+    listen 3004; listen [::]:3004; root /out/cast;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3005; root /out/share;
+    listen 3005; listen [::]:3005; root /out/share;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 server {
-    listen 3006; root /out/embed;
+    listen 3006; listen [::]:3006; root /out/embed;
     location / { try_files \$uri \$uri.html /index.html; }
 }
 EOF
