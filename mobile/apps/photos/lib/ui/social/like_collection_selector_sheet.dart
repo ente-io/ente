@@ -8,7 +8,6 @@ import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
@@ -265,15 +264,20 @@ class _LikeCollectionSelectorSheetState
   }
 
   Widget _buildHeader() {
+    final colorScheme = getEnteColorScheme(context);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 11, 12, 0),
+      padding: const EdgeInsets.fromLTRB(16, 11, 14, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          IconButtonWidget(
-            iconButtonType: IconButtonType.rounded,
-            icon: Icons.close_rounded,
+          GestureDetector(
             onTap: () => Navigator.of(context).pop(),
+            child: Icon(
+              Icons.cancel,
+              size: 40,
+              color: colorScheme.fillMuted,
+            ),
           ),
         ],
       ),
@@ -282,7 +286,7 @@ class _LikeCollectionSelectorSheetState
 
   Widget _buildFileThumbnail(EnteColorScheme colorScheme) {
     return Padding(
-      padding: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.only(top: 14),
       child: Center(
         child: SizedBox(
           width: 110,
