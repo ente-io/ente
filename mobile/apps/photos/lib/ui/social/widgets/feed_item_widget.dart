@@ -129,8 +129,11 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
   final bool showTimeline;
 
   /// Height of the timeline line extending below the icon.
-  /// This should match the total height of the feed item content below the icon.
-  static const double _timelineExtensionHeight = 55;
+  /// Extends from icon center through text content and padding to next item's icon.
+  static const double _timelineExtensionHeight = 95;
+
+  /// Width of the dashed timeline line.
+  static const double _timelineWidth = 1.5;
 
   const _FeedTypeIconWithTimeline({
     required this.type,
@@ -140,6 +143,10 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    // Timeline color: black with 8% opacity for light, white with 20% for dark
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final timelineColor =
+        isDarkMode ? const Color(0x33FFFFFF) : const Color(0x14000000);
 
     return SizedBox(
       width: 32,
@@ -149,14 +156,12 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
         children: [
           // Timeline line (behind the icon) - dashed
           if (showTimeline)
-            const Positioned(
-              left: 15.5, // Center of 32px width
+            Positioned(
+              left: (32 - _timelineWidth) / 2, // Center the line
               top: 16, // Start from icon center
               child: CustomPaint(
-                size: Size(1, _timelineExtensionHeight),
-                painter: _DashedLinePainter(
-                  color: Color(0xFF00B33C),
-                ),
+                size: const Size(_timelineWidth, _timelineExtensionHeight),
+                painter: _DashedLinePainter(color: timelineColor),
               ),
             ),
           // Icon container
@@ -572,8 +577,11 @@ class _FeedThumbnailState extends State<_FeedThumbnail> {
 class _DashedLinePainter extends CustomPainter {
   final Color color;
 
-  static const double _dashHeight = 4;
-  static const double _dashGap = 3;
+  /// Dash length per Figma spec: 7.5px
+  static const double _dashHeight = 7.5;
+
+  /// Gap between dashes per Figma spec: 4.5px
+  static const double _dashGap = 4.5;
 
   const _DashedLinePainter({required this.color});
 
