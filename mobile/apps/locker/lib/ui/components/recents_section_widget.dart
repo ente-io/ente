@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
+import "package:locker/models/selected_files.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -15,11 +16,15 @@ import 'package:locker/ui/components/item_list_view.dart';
 class RecentsSectionWidget extends StatefulWidget {
   final List<Collection> collections;
   final List<EnteFile> recentFiles;
+  final SelectedFiles? selectedFiles;
+  final ScrollController? scrollController;
 
   const RecentsSectionWidget({
     super.key,
     required this.collections,
     required this.recentFiles,
+    this.selectedFiles,
+    this.scrollController,
   });
 
   @override
@@ -130,6 +135,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
           : ItemListView(
               key: const ValueKey('items_list'),
               files: _displayedFiles,
+              selectedFiles: widget.selectedFiles,
+              scrollController: widget.scrollController,
             ),
     );
   }
