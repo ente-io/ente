@@ -10,6 +10,8 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/collections/models/collection_view_type.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/add_to_collection_dialog.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
@@ -22,9 +24,14 @@ import "package:logging/logging.dart";
 class FileSelectionOverlayBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final List<EnteFile> files;
+  final CollectionViewType? collectionViewType;
+  final ScrollController? scrollController;
+
   const FileSelectionOverlayBar({
     required this.selectedFiles,
     required this.files,
+    this.collectionViewType,
+    this.scrollController,
     super.key,
   });
 
@@ -36,22 +43,73 @@ class FileSelectionOverlayBar extends StatefulWidget {
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   static final Logger _logger = Logger("FileSelectionOverlayBar");
 
+  static const double _scrollThreshold = 10.0;
+
+  bool _isExpanded = true;
+  double _lastScrollPosition = 0;
+  int _previousSelectionCount = 0;
+
+  bool get _hasSelection => widget.selectedFiles.files.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
     widget.selectedFiles.addListener(_onSelectionChanged);
+    widget.scrollController?.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     widget.selectedFiles.removeListener(_onSelectionChanged);
+    widget.scrollController?.removeListener(_onScroll);
     super.dispose();
   }
 
   void _onSelectionChanged() {
-    if (mounted) {
+    if (!mounted) return;
+
+    final currentCount = widget.selectedFiles.files.length;
+    final isFirstSelection = _previousSelectionCount == 0 && currentCount > 0;
+
+    if (isFirstSelection) {
+      setState(() => _isExpanded = true);
+    } else {
       setState(() {});
     }
+
+    _previousSelectionCount = currentCount;
+  }
+
+  void _onScroll() {
+    final controller = widget.scrollController;
+    if (!mounted || controller == null || !_hasSelection) return;
+
+    final position = controller.position;
+    final current = position.pixels;
+
+    if (current < 0 || current > position.maxScrollExtent) return;
+
+    final delta = current - _lastScrollPosition;
+    if (delta.abs() < _scrollThreshold) return;
+
+    _lastScrollPosition = current;
+
+    final shouldCollapse = delta > 0 && _isExpanded;
+    final shouldExpand = delta < 0 && !_isExpanded;
+
+    if (shouldCollapse || shouldExpand) {
+      setState(() => _isExpanded = !_isExpanded);
+    }
+  }
+
+  bool get showFileSelectionOverlayBar {
+    final viewType = widget.collectionViewType;
+    if (viewType == null) return true;
+
+    return viewType != CollectionViewType.sharedCollectionViewer &&
+        viewType != CollectionViewType.sharedCollectionCollaborator &&
+        viewType != CollectionViewType.quickLink &&
+        viewType != CollectionViewType.favorite;
   }
 
   @override
@@ -76,7 +134,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             child: hasSelection
                 ? GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onVerticalDragUpdate: (_) {},
+                    onVerticalDragUpdate: (details) {
+                      if (details.primaryDelta != null) {
+                        if (details.primaryDelta! < -5 && !_isExpanded) {
+                          setState(() => _isExpanded = true);
+                        } else if (details.primaryDelta! > 5 && _isExpanded) {
+                          setState(() => _isExpanded = false);
+                        }
+                      }
+                    },
                     child: Container(
                       decoration: BoxDecoration(
                         color: colorScheme.backdropBase,
@@ -91,7 +157,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                       margin: EdgeInsets.zero,
                       child: Padding(
                         padding:
-                            EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
+                            EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -140,8 +206,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                             const SizedBox(width: 6),
                                             Icon(
                                               iconData,
-                                              color: getEnteColorScheme(context)
-                                                  .textBase,
+                                              color: colorScheme.textBase,
                                               size: 20,
                                             ),
                                           ],
@@ -184,8 +249,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                             const SizedBox(width: 6),
                                             Icon(
                                               Icons.close,
-                                              color: getEnteColorScheme(context)
-                                                  .textBase,
+                                              color: colorScheme.textBase,
                                               size: 20,
                                             ),
                                           ],
@@ -226,8 +290,19 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildPrimaryActionRow(selectedFiles),
-              const SizedBox(height: 12),
-              _buildSecondaryActionRow(selectedFiles),
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 250),
+                crossFadeState: _isExpanded
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                firstChild: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    _buildSecondaryActionRow(selectedFiles),
+                  ],
+                ),
+                secondChild: const SizedBox.shrink(),
+              ),
             ],
           ),
         );
@@ -248,7 +323,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             hugeIcon: const HugeIcon(
               icon: HugeIcons.strokeRoundedDownload01,
             ),
-            label: "Download",
+            label: context.l10n.save,
             onTap: () => isSingleSelection
                 ? _downloadFile(context, file!)
                 : _downloadMultipleFiles(context, files),
@@ -276,7 +351,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             label: context.l10n.delete,
             onTap: () => isSingleSelection
                 ? _deleteFile(context, file!)
-                : _deleteMultipleFile(context, files),
+                : _deleteMultipleFiles(context, files),
             isDestructive: true,
           ),
         ),
@@ -293,29 +368,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-          return Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              ...previousChildren,
-              if (currentChild != null) currentChild,
-            ],
-          );
-        },
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-        child: Row(
-          key: ValueKey('secondary_${selectedFiles.length}'),
-          children: _buildActionRow(actions),
-        ),
+      child: Row(
+        children: _buildActionRow(actions),
       ),
     );
   }
@@ -349,6 +403,18 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
+    final isImportant =
+        isSingleSelection && FavoritesService.instance.isFavoriteCache(file!);
+    actions.add(
+      SelectionActionButton(
+        icon: isImportant ? Icons.star_rounded : Icons.star_border_rounded,
+        label: isImportant ? context.l10n.unimportant : context.l10n.important,
+        onTap: () => isSingleSelection
+            ? _markImportant(context, file!)
+            : _markMultipleImportant(context, files),
+      ),
+    );
+
     actions.add(
       SelectionActionButton(
         hugeIcon: const HugeIcon(
@@ -360,6 +426,23 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     );
 
     return actions;
+  }
+
+  Future<void> _downloadFile(BuildContext context, EnteFile file) async {
+    try {
+      final success = await FileUtil.downloadFile(context, file);
+      if (success) {
+        widget.selectedFiles.clearAll();
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to download file: $e", e, stackTrace);
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.failedToDownloadOrDecrypt,
+        );
+      }
+    }
   }
 
   Future<void> _downloadMultipleFiles(
@@ -395,6 +478,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   Future<void> _editFile(BuildContext context, EnteFile file) async {
     await FileActions.editFile(context, file);
+    widget.selectedFiles.clearAll();
   }
 
   Future<void> _showAddToDialog(
@@ -523,7 +607,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     );
   }
 
-  Future<void> _deleteMultipleFile(
+  Future<void> _deleteMultipleFiles(
     BuildContext context,
     List<EnteFile> files,
   ) async {
@@ -587,20 +671,28 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
   }
 
-  Future<void> _downloadFile(BuildContext context, EnteFile file) async {
-    try {
-      final success = await FileUtil.downloadFile(context, file);
-      if (success) {
+  Future<void> _markImportant(BuildContext context, EnteFile file) async {
+    await FileActions.markImportant(
+      context,
+      file,
+      onSuccess: () {
         widget.selectedFiles.clearAll();
-      }
-    } catch (e, stackTrace) {
-      _logger.severe("Failed to download file: $e", e, stackTrace);
-      if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.failedToDownloadOrDecrypt,
-        );
-      }
-    }
+        Bus.instance.fire(CollectionsUpdatedEvent('file_important_toggled'));
+      },
+    );
+  }
+
+  Future<void> _markMultipleImportant(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    await FileActions.markMultipleImportant(
+      context,
+      files,
+      onSuccess: () {
+        widget.selectedFiles.clearAll();
+        Bus.instance.fire(CollectionsUpdatedEvent('files_marked_important'));
+      },
+    );
   }
 }

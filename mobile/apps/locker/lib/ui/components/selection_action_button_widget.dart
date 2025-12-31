@@ -33,10 +33,7 @@ class SelectionActionButton extends StatelessWidget {
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(24.0),
         ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 18.0,
-          horizontal: 12.0,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 18.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,

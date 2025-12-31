@@ -1,9 +1,10 @@
-import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/ente_utils.dart";
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:locker/extensions/collection_extension.dart";
-import 'package:locker/l10n/l10n.dart';
+import "package:locker/l10n/l10n.dart";
 import 'package:locker/models/file_type.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/models/selected_files.dart';
@@ -37,6 +38,8 @@ class OverflowMenuAction {
 }
 
 class ItemListView extends StatefulWidget {
+  static const double _selectionOverlayPadding = 270.0;
+
   final List<EnteFile> files;
   final List<Collection> collections;
   final Widget? emptyStateWidget;
@@ -45,6 +48,8 @@ class ItemListView extends StatefulWidget {
   final SelectedCollections? selectedCollections;
   final SelectedFiles? selectedFiles;
   final ScrollPhysics? physics;
+  final ScrollController? scrollController;
+  final bool selectionEnabled;
 
   const ItemListView({
     super.key,
@@ -56,6 +61,8 @@ class ItemListView extends StatefulWidget {
     this.selectedCollections,
     this.selectedFiles,
     this.physics = const NeverScrollableScrollPhysics(),
+    this.scrollController,
+    this.selectionEnabled = true,
   });
 
   @override
@@ -102,6 +109,10 @@ class _ItemListViewState extends State<ItemListView> {
   }
 
   void _toggleFileSelection(EnteFile file) {
+    if (!widget.selectionEnabled) {
+      showToast(context, "Multi-select for shared albums coming soon");
+      return;
+    }
     HapticFeedback.lightImpact();
     widget.selectedFiles!.toggleSelection(file);
   }
@@ -116,10 +127,28 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
+    if (widget.selectedFiles != null && widget.selectionEnabled) {
+      return ListenableBuilder(
+        listenable: widget.selectedFiles!,
+        builder: (context, _) {
+          final hasSelection = widget.selectedFiles!.hasSelections;
+          final bottomPadding =
+              hasSelection ? ItemListView._selectionOverlayPadding : 0.0;
+          return _buildListView(bottomPadding: bottomPadding);
+        },
+      );
+    }
+
+    return _buildListView();
+  }
+
+  Widget _buildListView({double bottomPadding = 0}) {
     return ListView.separated(
+      controller: widget.scrollController,
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       shrinkWrap: true,
       physics: widget.physics,
+      padding: EdgeInsets.only(bottom: bottomPadding),
       itemCount: _sortedItems.length,
       itemBuilder: (context, index) => _buildItem(index),
     );
