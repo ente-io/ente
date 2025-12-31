@@ -416,6 +416,10 @@
       ]
     },
     {
+      "title": "Computershare",
+      "slug": "computershare"
+    },
+    {
       "title": "ConfigCat"
     },
     {
@@ -1745,6 +1749,9 @@
       "altNames": [
         "Tokped"
       ]
+    },
+    {
+      "title": "TorBox"
     },
     {
       "title": "TorGuard"

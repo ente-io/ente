@@ -224,9 +224,8 @@ class MemoriesCacheService {
     }
     return _memoriesGetLock.synchronized(() async {
       if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
-        final currentMemories = _cachedMemories!
-            .where((memory) => memory.shouldShowNow())
-            .toList();
+        final currentMemories =
+            _cachedMemories!.where((memory) => memory.shouldShowNow()).toList();
         if (currentMemories.isNotEmpty) {
           _logger.info("Found memories in memory cache");
           return currentMemories;

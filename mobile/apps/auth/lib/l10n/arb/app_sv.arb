@@ -7,8 +7,19 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Säkerhetskopiera dina 2FA-koder",
+  "featureBackupCodes": "Totalsträckskryptering säkerhetskopiering och synkronisering",
+  "featureSearchEtc": "Sök, etiketter, dela,\nNästa kod och mycket mer",
+  "featureOpenSource": "Öppen källkod och\ngranskade av säkerhetsexperter",
+  "signUp": "Registrera dig",
   "onBoardingGetStarted": "Kom igång",
+  "setupFirstAccount": "Konfigurera ditt första\nkonto",
+  "allTabEmptyHint": "Inget här än. Tryck på + för att lägga till en kod eller öppna papperskorgen för att återställa en.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Skanna en QR-kod",
+  "qrCode": "QR-kod",
+  "qr": "QR",
   "importEnterSetupKey": "Ange en konfigurationskod",
   "importAccountPageTitle": "Ange kontodetaljer",
   "secretCanNotBeEmpty": "Secret kan inte vara tomt",
@@ -99,6 +110,7 @@
   "importTypeEnteEncrypted": "Ente krypterad export",
   "passwordForDecryptingExport": "Lösenord för att dekryptera export",
   "passwordEmptyError": "Lösenordet får inte vara tomt",
+  "passwordTooShort": "Lösenordet måste vara minst 8 tecken långt.",
   "importFromApp": "Importera koder från {appName}",
   "importGoogleAuthGuide": "Exportera dina konton från Google Authenticator till en QR-kod med alternativet \"Överföra konton\". Använd sedan en annan enhet och skanna QR-koden.\n\nTips: Du kan använda din bärbara dators webbkamera för att ta en bild av QR-koden.",
   "importSelectJsonFile": "Välj JSON-fil",
@@ -137,6 +149,7 @@
   "existingUser": "Befintlig användare",
   "newUser": "Ny hos Ente",
   "delete": "Radera",
+  "addTag": "Lägg till etikett",
   "enterYourPasswordHint": "Ange ditt lösenord",
   "forgotPassword": "Glömt lösenord",
   "oops": "Hoppsan",
@@ -299,6 +312,7 @@
   "checking": "Kontrollerar...",
   "youAreOnTheLatestVersion": "Du är på den senaste versionen",
   "warning": "Varning",
+  "note": "Anteckning",
   "exportWarningDesc": "Den exporterade filen innehåller känslig information. Förvara den på ett säkert sätt.",
   "iUnderStand": "Jag förstår",
   "@iUnderStand": {
@@ -367,12 +381,14 @@
   "useOffline": "Använd utan säkerhetskopior",
   "signInToBackup": "Logga in för att säkerhetskopiera dina koder",
   "singIn": "Logga in",
+  "sigInBackupReminder": "Ente kommer automatiskt säkerhetskopiera koder efter inloggning.\n\nVi rekommenderar fortfarande att exportera koder som en extra säkerhetskopia.",
   "offlineModeWarning": "Du har valt att fortsätta utan säkerhetskopior. Vänligen ta manuella säkerhetskopior för att se till att dina koder är säkra.",
   "showLargeIcons": "Visa stora ikoner",
   "compactMode": "Kompakt läge",
   "shouldHideCode": "Dölj koder",
   "doubleTapToViewHiddenCode": "Du kan dubbeltrycka på en post för att visa koden",
   "focusOnSearchBar": "Fokusera på sök vid uppstart av app",
+  "minimizeToTrayOnClose": "Minimera vid stängning",
   "confirmUpdatingkey": "Är du säker på att du vill uppdatera den hemliga nyckeln?",
   "minimizeAppOnCopy": "Minimera appen vid kopiering",
   "editCodeAuthMessage": "Autentisera för att redigera kod",
@@ -509,7 +525,7 @@
   "dropReviewAndroid": "Skriv en recension på Play Store",
   "supportEnte": "Stöd <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Ge oss en stjärna på Github",
-  "free10GB": "10 GB gratis på <bold-green>ente</bold-green> Foton",
+  "free10GB": "10GB gratis på <bold-green>ente</bold-green> Foton",
   "loginWithAuthAccount": "Logga in med ditt Auth-konto",
   "freeStorageOffer": "10% rabatt på <bold-green>ente</bold-green> foton",
   "freeStorageOfferDescription": "Använd koden \"AUTH\" för att få 10% rabatt första året",
@@ -524,5 +540,91 @@
   "errorInvalidQRCodeBody": "Den skannade QR-koden är inte ett giltigt 2FA konto.",
   "errorNoQRCode": "Ingen QR-kod hittades",
   "errorGenericTitle": "Ett fel inträffade",
-  "errorGenericBody": "Ett oväntat fel inträffade vid import."
+  "errorGenericBody": "Ett oväntat fel inträffade vid import.",
+  "localBackupSettingsTitle": "Lokal säkerhetskopia",
+  "localBackupSidebarTitle": "Lokal säkerhetskopia",
+  "enableAutomaticBackups": "Automatisk säkerhetskopiering",
+  "backupDescription": "Detta kommer automatiskt säkerhetskopiera dina data till en plats på enheten. Säkerhetskopior uppdateras när poster läggs till, redigeras eller tas bort",
+  "localBackupDailyManualCopy": "Skapar en lokal säkerhetskopiering per dag när du öppnar appen. Använd \"Backup now\" för att köra en manuell säkerhetskopiering. Säkerhetskopior behålls upp till 5 filer.",
+  "currentLocation": "Nuvarande plats för säkerhetskopia:",
+  "securityNotice": "Säkerhetsmeddelande",
+  "backupSecurityNotice": "Denna krypterade säkerhetskopia innehåller dina 2FA-nycklar. Om du förlorar den, kanske du inte kan återställa dina konton. Håll det säkert!",
+  "locationUpdatedAndBackupCreated": "Plats uppdaterad och initial säkerhetskopia skapad!",
+  "initialBackupCreated": "Första säkerhetskopia skapad!",
+  "backupCreated": "Säkerhetskopia skapad!",
+  "noDefaultBackupFolder": "Kunde inte skapa standardmapp för säkerhetskopia.",
+  "backupLocationChoiceDescription": "Vart vill du spara dina säkerhetskopior?",
+  "chooseBackupLocation": "Välj en plats för säkerhetskopior",
+  "loadDefaultLocation": "Laddar standardplats...",
+  "couldNotDetermineLocation": "Kunde inte bestämma platsen...",
+  "saveBackup": "Spara säkerhetskopia",
+  "updateBackupPassword": "Uppdatera lösenord för säkerhetskopiering",
+  "setBackupPassword": "Ange lösenord för säkerhetskopia",
+  "createBackupNow": "Skapa säkerhetskopia nu",
+  "clearBackupFolder": "Rensa säkerhetskopieringsmappen",
+  "clearBackupPassword": "Ta bort lösenordet för säkerhetskopian",
+  "selectBackupFolder": "Välj en mapp för säkerhetskopiering",
+  "setBackupFolder": "Ange mapp för säkerhetskopiering",
+  "backupFolderLabel": "Mapp för säkerhetskopia:",
+  "backupPasswordHint": "Din säkerhetskopia krypteras med detta lösenord.",
+  "authToUpdateBackupPassword": "Autentisera för att uppdatera lösenord för säkerhetskopiering",
+  "authToSetBackupPassword": "Autentisera för att ange lösenord för säkerhetskopia",
+  "backupPasswordCleared": "Säkerhetskopians lösenord rensat",
+  "enableBackupsIosInstruction": "För att aktivera säkerhetskopior på iOS, välj en mapp i Filer (till exempel \"On My iPhone\").",
+  "currentBackupFolder": "Aktuell mapp för säkerhetskopia:",
+  "selectFolder": "Välj mapp",
+  "selectFolderToContinue": "Välj en mapp för att fortsätta",
+  "iosOnMyDeviceNotSupported": "\"På min iPhone\" kan inte användas direkt. Välj eller skapa en mapp inuti den.",
+  "done": "Klar",
+  "addNew": "Lägg till ny",
+  "selected": "vald",
+  "moveMultipleToTrashMessage": "Är du säker på att du vill flytta {count} objekt till papperskorgen?",
+  "nSelected": "{count, plural, one {}=1{1 vald} other{{count} valda}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, one {}=1{Fäst 1 objekt} other{Fäst {count} objekt}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, one {}=1{Fäst 1 objekt} other{Fäst {count} objekt}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "enterPasswordToAegisVault": "Ange lösenord till aegis valvet",
+  "submit": "Skicka",
+  "failedToDecryptAegisVault": "Misslyckades att dekryptera aegis valvet",
+  "pleaseCheckPasswordAndTryAgain": "Var god kontrollera ditt lösenord och försök igen.",
+  "enterPasswordToDecrypt2FASBackup": "Ange lösenord för att dekryptera 2FAS-säkerhetskopia",
+  "failedToDecrypt2FASExport": "Misslyckades med att dekryptera 2Fas export",
+  "chooseIcon": "Välj ikon",
+  "customOrder": "Anpassad ordning",
+  "selectAnOption": "Välj ett alternativ",
+  "todaysLogs": "Dagens loggar",
+  "appIcon": "Appikon",
+  "importAndOTPGuide": "Exportera din säkerhetskopia från andOTP med alternativet \"Backup\" i Inställningar.\n\nOm din säkerhetskopia är krypterad måste du ange lösenordet för att dekryptera den.",
+  "enterPasswordToDecryptAndOTP": "Ange lösenord för att dekryptera andOTP-säkerhetskopia",
+  "failedToDecryptAndOTPBackup": "Misslyckades att dekryptera andOTP-säkerhetskopia",
+  "notSupportedForHOTP": "Stödjer inte HOTP"
 }

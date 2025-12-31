@@ -56,6 +56,11 @@ Ente provides several tools to help you optimize both your device storage and cl
 - Use ML to find visually similar (but not identical) photos
 - Keep only the best shots and delete the rest
 
+**View and delete large files:**
+
+- Identify and delete the largest files taking up storage space
+- Available under Settings > Backup > Free up space > Large files
+
 Learn more in the [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization).
 
 ### Do items in trash count against my storage? {#trash-storage-count}

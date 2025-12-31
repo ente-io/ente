@@ -1010,7 +1010,6 @@ class GalleryIndexUpdatedEvent {
   GalleryIndexUpdatedEvent(this.tag, this.index);
 }
 
-
 /// Custom scroll physics that extends [BouncingScrollPhysics] to provide
 /// exponential bouncing behavior for scrollable widgets.
 ///

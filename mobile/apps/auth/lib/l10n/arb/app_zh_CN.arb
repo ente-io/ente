@@ -13,7 +13,7 @@
   "signUp": "注册",
   "onBoardingGetStarted": "开始",
   "setupFirstAccount": "设置您的\n第一个账户",
-  "allTabEmptyHint": "这里暂时没有内容。点按 + 添加代码，或打开回收站恢复代码。",
+  "allTabEmptyHint": "这里暂时没有任何内容。点按 + 添加代码，或打开回收站恢复代码。",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
   },
@@ -525,7 +525,7 @@
   "dropReviewAndroid": "在 Play 商店上发表评价",
   "supportEnte": "支持 <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "在 Github 上给我们一个星标",
-  "free10GB": "<bold-green>ente</bold-green> Photos 上 10GB 可用空间",
+  "free10GB": "<bold-green>ente</bold-green> Photos 上 10GB 免费空间",
   "loginWithAuthAccount": "使用您的认证账户登录",
   "freeStorageOffer": "购买 <bold-green>ente</bold-green> Photos 可享受 10% 优惠",
   "freeStorageOfferDescription": "使用优惠码“AUTH”可享受首年 10% 折扣",
@@ -555,8 +555,8 @@
   "noDefaultBackupFolder": "无法创建默认备份文件夹。",
   "backupLocationChoiceDescription": "您想将备份保存在何处？",
   "chooseBackupLocation": "选择备份位置",
-  "loadDefaultLocation": "正在加载默认位置…",
-  "couldNotDetermineLocation": "无法确定位置…",
+  "loadDefaultLocation": "正在加载默认位置………",
+  "couldNotDetermineLocation": "无法确定位置……",
   "saveBackup": "保存备份",
   "updateBackupPassword": "更新备份密码",
   "setBackupPassword": "设置备份密码",
@@ -625,5 +625,6 @@
   "appIcon": "应用图标",
   "importAndOTPGuide": "使用设置中的“备份”选项从 andOTP 导出您的备份。\n\n如果您的备份已加密，您需要输入备份密码才能解密。",
   "enterPasswordToDecryptAndOTP": "请输入密码以解密 andOTP 备份",
-  "failedToDecryptAndOTPBackup": "解密 andOTP 备份失败"
+  "failedToDecryptAndOTPBackup": "解密 andOTP 备份失败",
+  "notSupportedForHOTP": "不支持 HOTP"
 }
