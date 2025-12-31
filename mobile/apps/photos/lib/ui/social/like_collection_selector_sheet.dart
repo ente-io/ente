@@ -17,12 +17,10 @@ const _greenHeartColor = Color(0xFF08C225);
 /// Holds collection info with mutable like state for the selector
 class _CollectionLikeState {
   final Collection collection;
-  final EnteFile? thumbnail;
   bool isLiked;
 
   _CollectionLikeState({
     required this.collection,
-    this.thumbnail,
     required this.isLiked,
   });
 }
@@ -110,11 +108,9 @@ class _LikeCollectionSelectorSheetState
         return;
       }
 
-      // Fetch thumbnails and like states in parallel
+      // Fetch like states in parallel
       final collectionStates = await Future.wait(
         sharedCollections.map((collection) async {
-          final thumbnail =
-              await CollectionsService.instance.getCover(collection);
           final reactions = await SocialDataProvider.instance
               .getReactionsForFileInCollection(widget.fileID, collection.id);
           final isLiked = reactions.any(
@@ -122,7 +118,6 @@ class _LikeCollectionSelectorSheetState
           );
           return _CollectionLikeState(
             collection: collection,
-            thumbnail: thumbnail,
             isLiked: isLiked,
           );
         }),
@@ -242,7 +237,7 @@ class _LikeCollectionSelectorSheetState
       decoration: BoxDecoration(
         color: colorScheme.backgroundBase,
         borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24),
+          top: Radius.circular(28),
         ),
       ),
       child: SafeArea(
@@ -250,7 +245,6 @@ class _LikeCollectionSelectorSheetState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildDragHandle(colorScheme),
             _buildHeader(),
             if (_isLoading)
               const Padding(
@@ -262,8 +256,7 @@ class _LikeCollectionSelectorSheetState
             else ...[
               _buildFileThumbnail(colorScheme),
               _buildTitleSection(),
-              _buildAlbumsHeader(),
-              Flexible(child: _buildAlbumsList()),
+              _buildAlbumsContainer(colorScheme),
             ],
           ],
         ),
@@ -271,23 +264,9 @@ class _LikeCollectionSelectorSheetState
     );
   }
 
-  Widget _buildDragHandle(EnteColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Container(
-        width: 36,
-        height: 4,
-        decoration: BoxDecoration(
-          color: colorScheme.strokeMuted,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
-  }
-
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 12, 0),
+      padding: const EdgeInsets.fromLTRB(16, 11, 12, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -303,34 +282,20 @@ class _LikeCollectionSelectorSheetState
 
   Widget _buildFileThumbnail(EnteColorScheme colorScheme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: const EdgeInsets.only(top: 24),
       child: Center(
         child: SizedBox(
-          width: 180,
-          height: 180,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: _file != null
-                    ? ThumbnailWidget(
-                        _file!,
-                        thumbnailSize: thumbnailLargeSize,
-                        rawThumbnail: true,
-                      )
-                    : Container(color: colorScheme.fillMuted),
-              ),
-              const Positioned(
-                bottom: -8,
-                right: -8,
-                child: Icon(
-                  Icons.favorite,
-                  color: _greenHeartColor,
-                  size: 36,
-                ),
-              ),
-            ],
+          width: 110,
+          height: 110,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: _file != null
+                ? ThumbnailWidget(
+                    _file!,
+                    thumbnailSize: thumbnailLargeSize,
+                    rawThumbnail: true,
+                  )
+                : Container(color: colorScheme.fillMuted),
           ),
         ),
       ),
@@ -342,79 +307,102 @@ class _LikeCollectionSelectorSheetState
     final colorScheme = getEnteColorScheme(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.only(top: 27, bottom: 9),
       child: Column(
         children: [
           Text(
             "Like",
             style: textTheme.largeBold,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 9),
           Text(
             _subtitle,
             style: textTheme.small.copyWith(color: colorScheme.textMuted),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAlbumsHeader() {
+  Widget _buildAlbumsContainer(EnteColorScheme colorScheme) {
     final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "${_collections.length} ${_collections.length == 1 ? 'Album' : 'Albums'}",
-            style: textTheme.bodyBold,
-          ),
-          GestureDetector(
-            onTap: _likeAll,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(16),
-              ),
+    return Flexible(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(21, 16, 21, 16),
+        decoration: BoxDecoration(
+          color: const Color(0x1FA2A2A2),
+          borderRadius: BorderRadius.circular(27),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header row with album count and "Like all" button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 26, 12, 16),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Like all",
-                    style: textTheme.smallBold,
+                    "${_collections.length} ${_collections.length == 1 ? 'Album' : 'Albums'}",
+                    style: textTheme.small,
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    _allLiked ? Icons.favorite : Icons.favorite_border,
-                    color: _allLiked ? _greenHeartColor : colorScheme.textBase,
-                    size: 16,
+                  GestureDetector(
+                    onTap: _likeAll,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.backgroundBase,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Like all",
+                            style: textTheme.small,
+                          ),
+                          const SizedBox(width: 10),
+                          Icon(
+                            _allLiked ? Icons.favorite : Icons.favorite_border,
+                            color: _allLiked
+                                ? _greenHeartColor
+                                : colorScheme.textBase,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            // Album list
+            Flexible(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: ListView.builder(
+                  shrinkWrap: _collections.length <= 10,
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  itemCount: _collections.length * 2,
+                  itemBuilder: (context, index) {
+                    final state = _collections[index ~/ 2];
+                    return _AlbumListItem(
+                      key: ValueKey(state.collection.id),
+                      state: state,
+                      onTap: () => _toggleLike(state),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildAlbumsList() {
-    return ListView.builder(
-      shrinkWrap: _collections.length <= 10,
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-      itemCount: _collections.length,
-      itemBuilder: (context, index) {
-        final state = _collections[index];
-        return _AlbumListItem(
-          key: ValueKey(state.collection.id),
-          state: state,
-          onTap: () => _toggleLike(state),
-        );
-      },
     );
   }
 
@@ -442,6 +430,8 @@ class _AlbumListItem extends StatelessWidget {
     super.key,
   });
 
+  static const _heartContainerBg = Color(0x0F08C225);
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -450,33 +440,37 @@ class _AlbumListItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundBase,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Row(
           children: [
-            SizedBox(
-              width: 40,
-              height: 40,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: state.thumbnail != null
-                    ? ThumbnailWidget(state.thumbnail!)
-                    : Container(color: colorScheme.fillMuted),
-              ),
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 state.collection.displayName,
-                style: textTheme.body,
+                style: textTheme.small,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 12),
-            Icon(
-              state.isLiked ? Icons.favorite : Icons.favorite_border,
-              color: state.isLiked ? _greenHeartColor : colorScheme.textMuted,
-              size: 24,
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _heartContainerBg,
+                borderRadius: BorderRadius.circular(9.6),
+              ),
+              child: Center(
+                child: Icon(
+                  state.isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: _greenHeartColor,
+                  size: 19.2,
+                ),
+              ),
             ),
           ],
         ),
