@@ -282,22 +282,19 @@ class _LikeCollectionSelectorSheetState
   }
 
   Widget _buildFileThumbnail(EnteColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Center(
-        child: SizedBox(
-          width: 110,
-          height: 110,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: _file != null
-                ? ThumbnailWidget(
-                    _file!,
-                    thumbnailSize: thumbnailLargeSize,
-                    rawThumbnail: true,
-                  )
-                : Container(color: colorScheme.fillMuted),
-          ),
+    return Center(
+      child: SizedBox(
+        width: 128,
+        height: 128,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: _file != null
+              ? ThumbnailWidget(
+                  _file!,
+                  thumbnailSize: thumbnailLargeSize,
+                  rawThumbnail: true,
+                )
+              : Container(color: colorScheme.fillMuted),
         ),
       ),
     );
@@ -313,7 +310,7 @@ class _LikeCollectionSelectorSheetState
         children: [
           Text(
             "Like",
-            style: textTheme.largeBold,
+            style: textTheme.h3Bold,
           ),
           const SizedBox(height: 9),
           Text(
