@@ -10,7 +10,7 @@ import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/social/feed_screen.dart";
-import "package:photos/ui/social/widgets/feed_item_widget.dart";
+import "package:photos/ui/social/widgets/feed_preview_item_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
@@ -104,36 +104,28 @@ class _FeedPreviewWidgetState extends State<FeedPreviewWidget> {
     final colorScheme = getEnteColorScheme(context);
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated,
-          borderRadius: BorderRadius.circular(8),
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colorScheme.strokeFainter,
+            width: 1,
+          ),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: _onTap,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(20),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FeedItemWidget(
-                      feedItem: _latestItem!,
-                      currentUserID: _currentUserID,
-                      anonDisplayNames: _anonDisplayNames,
-                      onTap: _onTap,
-                      onThumbnailTap: _onTap,
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: colorScheme.strokeMuted,
-                    size: 24,
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: FeedPreviewItemWidget(
+                feedItem: _latestItem!,
+                currentUserID: _currentUserID,
+                anonDisplayNames: _anonDisplayNames,
+                onTap: _onTap,
               ),
             ),
           ),
