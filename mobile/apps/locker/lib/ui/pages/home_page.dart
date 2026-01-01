@@ -188,6 +188,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final _searchFocusNode = FocusNode();
   bool _isLoading = true;
+  bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
@@ -477,6 +478,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
+          _hasCompletedInitialLoad = true;
         });
       }
     } catch (error) {
@@ -484,6 +486,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
+          _hasCompletedInitialLoad = true;
         });
       }
     }
@@ -611,7 +614,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
+    if (_isLoading || !_hasCompletedInitialLoad) {
       return const Center(
         child: CircularProgressIndicator(),
       );
