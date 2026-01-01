@@ -17,6 +17,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/social_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -141,6 +142,7 @@ class CollectionsService {
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
+        await _cleanupSocialData(collection.id);
         await setCollectionSyncTime(collection.id, null);
         if (_collectionIDToCollections.containsKey(collection.id)) {
           shouldFireDeleteEvent = true;
@@ -935,6 +937,7 @@ class CollectionsService {
         final deletedCollection = collection.copyWith(isDeleted: true);
         _collectionIDToCollections[collection.id] = deletedCollection;
         unawaited(_db.insert([deletedCollection]));
+        await _cleanupSocialData(collection.id);
       } else {
         await _handleCollectionDeletion(collection);
       }
@@ -951,6 +954,7 @@ class CollectionsService {
 
   Future<void> _handleCollectionDeletion(Collection collection) async {
     await _filesDB.deleteCollection(collection.id);
+    await _cleanupSocialData(collection.id);
     final deletedCollection = collection.copyWith(isDeleted: true);
     unawaited(_db.insert([deletedCollection]));
     _collectionIDToCollections[collection.id] = deletedCollection;
@@ -965,6 +969,14 @@ class CollectionsService {
     sync().ignore();
     // not required once remote & local world are separate
     LocalSyncService.instance.syncAll().ignore();
+  }
+
+  Future<void> _cleanupSocialData(int collectionID) async {
+    try {
+      await SocialDB.instance.deleteCollectionData(collectionID);
+    } catch (e, s) {
+      _logger.severe('Failed to cleanup social data for $collectionID', e, s);
+    }
   }
 
   Uint8List getCollectionKey(int collectionID) {
