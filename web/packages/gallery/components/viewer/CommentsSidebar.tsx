@@ -757,9 +757,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 return false;
             }
 
-            // User is owner (sharedOutgoing) or admin (sharedIncomingAdmin)
+            // User is owner (not sharedIncoming) or admin (sharedIncomingAdmin)
             return (
-                summary.attributes.has("sharedOutgoing") ||
+                !summary.attributes.has("sharedIncoming") ||
                 summary.attributes.has("sharedIncomingAdmin")
             );
         },
