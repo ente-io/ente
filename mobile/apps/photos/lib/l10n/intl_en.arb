@@ -203,6 +203,7 @@
   },
   "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
+  "enableComment": "Enable comments",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
   "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
