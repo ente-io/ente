@@ -1320,6 +1320,7 @@ class CollectionsService {
           "collectionID": collection.id,
           "enableCollect": enableCollect,
           "enableJoin": true,
+          "enableComment": true,
         },
       );
       collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
