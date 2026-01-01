@@ -19,7 +19,7 @@ class PublicURL {
     this.passwordEnabled = false,
     this.enableCollect = false,
     this.enableJoin = true,
-    this.enableComment = true,
+    this.enableComment = false,
     this.nonce,
     this.opsLimit,
     this.memLimit,
@@ -61,7 +61,7 @@ class PublicURL {
       opsLimit: map['opsLimit'],
       memLimit: map['memLimit'],
       enableJoin: map['enableJoin'] ?? true,
-      enableComment: map['enableComment'] ?? true,
+      enableComment: map['enableComment'] ?? false,
     );
   }
 }
