@@ -124,10 +124,11 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 		}
 
 		publicCtx := ente.PublicAccessContext{
-			ID:           publicCollectionSummary.ID,
-			IP:           clientIP,
-			UserAgent:    userAgent,
-			CollectionID: publicCollectionSummary.CollectionID,
+			ID:            publicCollectionSummary.ID,
+			IP:            clientIP,
+			UserAgent:     userAgent,
+			CollectionID:  publicCollectionSummary.CollectionID,
+			EnableComment: publicCollectionSummary.EnableComment,
 		}
 		c.Set(auth.PublicAccessKey, publicCtx)
 

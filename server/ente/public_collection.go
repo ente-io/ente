@@ -128,10 +128,11 @@ type PublicURL struct {
 }
 
 type PublicAccessContext struct {
-	ID           int64
-	IP           string
-	UserAgent    string
-	CollectionID int64
+	ID            int64
+	IP            string
+	UserAgent     string
+	CollectionID  int64
+	EnableComment bool
 }
 
 func FilterPublicURLsForRole(urls []PublicURL, role CollectionParticipantRole) []PublicURL {
@@ -158,7 +159,8 @@ type PublicCollectionSummary struct {
 	UpdatedAt         int64
 	DeviceAccessCount int
 	// not empty value of passHash indicates that the link is password protected.
-	PassHash *string
+	PassHash      *string
+	EnableComment bool
 }
 
 type AbuseReportRequest struct {

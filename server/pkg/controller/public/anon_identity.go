@@ -33,6 +33,9 @@ type CreateAnonIdentityRequest struct {
 }
 
 func (c *AnonIdentityController) Create(ctx *gin.Context, req CreateAnonIdentityRequest) (AnonIdentityResponse, error) {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return AnonIdentityResponse{}, err
+	}
 	if strings.TrimSpace(req.Cipher) == "" || strings.TrimSpace(req.Nonce) == "" {
 		return AnonIdentityResponse{}, ente.ErrBadRequest
 	}

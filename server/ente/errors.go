@@ -160,6 +160,12 @@ var ErrPublicCollectDisabled = ApiError{
 	HttpStatusCode: http.StatusMethodNotAllowed,
 }
 
+var ErrPublicCommentDisabled = ApiError{
+	Code:           PublicCommentDisabled,
+	Message:        "User has not enabled public comments for this url",
+	HttpStatusCode: http.StatusMethodNotAllowed,
+}
+
 var ErrNotFoundError = ApiError{
 	Code:           NotFoundError,
 	Message:        "",
@@ -242,6 +248,9 @@ const (
 
 	// PublicCollectDisabled error code indicates that the user has not enabled public collect
 	PublicCollectDisabled ErrorCode = "PUBLIC_COLLECT_DISABLED"
+
+	// PublicCommentDisabled error code indicates that the user has not enabled public comments
+	PublicCommentDisabled ErrorCode = "PUBLIC_COMMENT_DISABLED"
 
 	// CollectionNotEmpty is thrown when user attempts to delete a collection but keep files but all files from that
 	// collections have been moved yet.

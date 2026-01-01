@@ -36,6 +36,9 @@ type ReactionDeleteRequest struct {
 }
 
 func (c *ReactionsController) UpsertReaction(ctx *gin.Context, collectionID int64, req ReactionRequest) (string, error) {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return "", err
+	}
 	if len(req.Cipher) != reactionCipherLength || len(req.Nonce) == 0 {
 		return "", ente.ErrBadRequest
 	}
@@ -60,6 +63,9 @@ func (c *ReactionsController) UpsertReaction(ctx *gin.Context, collectionID int6
 }
 
 func (c *ReactionsController) DeleteReaction(ctx *gin.Context, collectionID int64, reactionID string, req ReactionDeleteRequest) error {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return err
+	}
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return err
@@ -76,6 +82,9 @@ func (c *ReactionsController) DeleteReaction(ctx *gin.Context, collectionID int6
 }
 
 func (c *ReactionsController) ListReactions(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64, commentID *string) ([]socialentity.Reaction, bool, error) {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return nil, false, err
+	}
 	diffReq := socialcontroller.ReactionDiffRequest{
 		Actor:         socialcontroller.Actor{},
 		CollectionID:  collectionID,

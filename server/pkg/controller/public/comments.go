@@ -9,6 +9,7 @@ import (
 	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/repo"
 	socialrepo "github.com/ente-io/museum/pkg/repo/social"
+	"github.com/ente-io/museum/pkg/utils/auth"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -56,6 +57,9 @@ type participant struct {
 }
 
 func (c *CommentsController) CreateComment(ctx *gin.Context, collectionID int64, req CommentRequest) (string, error) {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return "", err
+	}
 	if len(req.Cipher) == 0 || len(req.Cipher) > maxCommentPayloadSize {
 		return "", ente.ErrBadRequest
 	}
@@ -83,6 +87,9 @@ func (c *CommentsController) CreateComment(ctx *gin.Context, collectionID int64,
 }
 
 func (c *CommentsController) UpdateComment(ctx *gin.Context, collectionID int64, commentID string, req CommentUpdateRequest) error {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return err
+	}
 	if len(req.Cipher) == 0 || len(req.Cipher) > maxCommentPayloadSize {
 		return ente.ErrBadRequest
 	}
@@ -106,6 +113,9 @@ func (c *CommentsController) UpdateComment(ctx *gin.Context, collectionID int64,
 }
 
 func (c *CommentsController) DeleteComment(ctx *gin.Context, collectionID int64, commentID string, req CommentDeleteRequest) error {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return err
+	}
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return err
@@ -122,6 +132,9 @@ func (c *CommentsController) DeleteComment(ctx *gin.Context, collectionID int64,
 }
 
 func (c *CommentsController) ListComments(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64) ([]socialentity.Comment, bool, error) {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return nil, false, err
+	}
 	diffReq := socialcontroller.CommentDiffRequest{
 		Actor:         socialcontroller.Actor{},
 		CollectionID:  collectionID,
@@ -168,5 +181,18 @@ func (c *CommentsController) Participants(ctx context.Context, collectionID int6
 }
 
 func (c *CommentsController) ListAnonProfiles(ctx *gin.Context, collectionID int64) ([]socialentity.AnonUser, error) {
+	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
+		return nil, err
+	}
 	return c.AnonUsersRepo.ListByCollection(ctx.Request.Context(), collectionID)
+}
+
+func ensureCommentsFeatureEnabled(ctx *gin.Context) error {
+	if ctx == nil {
+		return nil
+	}
+	if auth.MustGetPublicAccessContext(ctx).EnableComment {
+		return nil
+	}
+	return &ente.ErrPublicCommentDisabled
 }

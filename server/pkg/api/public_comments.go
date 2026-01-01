@@ -71,6 +71,9 @@ func (h *PublicCommentsHandler) CreateComment(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxPublicCommentCipherSize || len(payload.Nonce) == 0 {
 		handler.Error(c, ente.ErrBadRequest)
 		return
@@ -97,6 +100,9 @@ func (h *PublicCommentsHandler) UpdateComment(c *gin.Context) {
 	var payload publicCommentEditPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if !ensurePublicCommentsEnabled(c) {
 		return
 	}
 	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxPublicCommentCipherSize || len(payload.Nonce) == 0 {
@@ -128,6 +134,9 @@ func (h *PublicCommentsHandler) DeleteComment(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	commentID := c.Param("commentID")
 	if commentID == "" {
@@ -146,6 +155,9 @@ func (h *PublicCommentsHandler) DeleteComment(c *gin.Context) {
 }
 
 func (h *PublicCommentsHandler) CommentDiff(c *gin.Context) {
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	since, err := parseDiffSinceTime(c.Query("sinceTime"))
 	if err != nil {
@@ -176,6 +188,9 @@ func (h *PublicCommentsHandler) CreateReaction(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxPublicReactionCipherSize || len(payload.Nonce) == 0 {
 		handler.Error(c, ente.ErrBadRequest)
 		return
@@ -199,6 +214,9 @@ func (h *PublicCommentsHandler) CreateReaction(c *gin.Context) {
 }
 
 func (h *PublicCommentsHandler) ReactionDiff(c *gin.Context) {
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	since, err := parseDiffSinceTime(c.Query("sinceTime"))
 	if err != nil {
@@ -234,6 +252,9 @@ func (h *PublicCommentsHandler) DeleteReaction(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	reactionID := c.Param("reactionID")
 	if reactionID == "" {
@@ -252,6 +273,9 @@ func (h *PublicCommentsHandler) DeleteReaction(c *gin.Context) {
 }
 
 func (h *PublicCommentsHandler) Participants(c *gin.Context) {
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	// ignore includeSharees flag for now
 	participants, err := h.CommentsCtrl.Participants(c.Request.Context(), collectionID)
@@ -266,6 +290,9 @@ func (h *PublicCommentsHandler) CreateAnonIdentity(c *gin.Context) {
 	var payload publicAnonIdentityPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if !ensurePublicCommentsEnabled(c) {
 		return
 	}
 	if len(payload.Cipher) == 0 || len(payload.Nonce) == 0 {
@@ -286,6 +313,9 @@ func (h *PublicCommentsHandler) CreateAnonIdentity(c *gin.Context) {
 }
 
 func (h *PublicCommentsHandler) AnonProfiles(c *gin.Context) {
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	profiles, err := h.CommentsCtrl.ListAnonProfiles(c, collectionID)
 	if err != nil {
@@ -297,6 +327,9 @@ func (h *PublicCommentsHandler) AnonProfiles(c *gin.Context) {
 
 // SocialDiff returns both comments and reactions in a single response.
 func (h *PublicCommentsHandler) SocialDiff(c *gin.Context) {
+	if !ensurePublicCommentsEnabled(c) {
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	since, err := parseDiffSinceTime(c.Query("sinceTime"))
 	if err != nil {
@@ -332,4 +365,12 @@ func (h *PublicCommentsHandler) SocialDiff(c *gin.Context) {
 		"hasMoreComments":  hasMoreComments,
 		"hasMoreReactions": hasMoreReactions,
 	})
+}
+
+func ensurePublicCommentsEnabled(c *gin.Context) bool {
+	if auth.MustGetPublicAccessContext(c).EnableComment {
+		return true
+	}
+	handler.Error(c, &ente.ErrPublicCommentDisabled)
+	return false
 }
