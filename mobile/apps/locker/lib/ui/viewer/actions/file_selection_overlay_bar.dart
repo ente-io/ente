@@ -11,6 +11,7 @@ import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/add_to_collection_dialog.dart";
@@ -50,6 +51,22 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   int _previousSelectionCount = 0;
 
   bool get _hasSelection => widget.selectedFiles.files.isNotEmpty;
+
+  List<EnteFile> _getOwnedFiles(List<EnteFile> files) {
+    final currentUserID = Configuration.instance.getUserID();
+    final ownedFiles =
+        files.where((file) => file.ownerID == currentUserID).toList();
+
+    final sharedCount = files.length - ownedFiles.length;
+    if (sharedCount > 0 && mounted) {
+      showToast(
+        context,
+        "Skipped $sharedCount shared file${sharedCount > 1 ? 's' : ''} - actions coming soon",
+      );
+    }
+
+    return ownedFiles;
+  }
 
   @override
   void initState() {
@@ -449,8 +466,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     BuildContext context,
     List<EnteFile> files,
   ) async {
+    final ownedFiles = _getOwnedFiles(files);
+    if (ownedFiles.isEmpty) {
+      return;
+    }
+
     try {
-      final success = await FileUtil.downloadFiles(context, files);
+      final success = await FileUtil.downloadFiles(context, ownedFiles);
       if (success) {
         widget.selectedFiles.clearAll();
       }
@@ -485,12 +507,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     BuildContext context,
     List<EnteFile> files,
   ) async {
-    if (files.isEmpty) {
+    final ownedFiles = _getOwnedFiles(files);
+    if (ownedFiles.isEmpty) {
       return;
     }
 
     _logger.info(
-      'Opening add-to dialog for ${files.length} file(s); fetching collections.',
+      'Opening add-to dialog for ${ownedFiles.length} file(s); fetching collections.',
     );
 
     final allCollections =
@@ -523,7 +546,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       try {
         final addFutures = <Future<void>>[];
 
-        for (final file in files) {
+        for (final file in ownedFiles) {
           _logger.fine(
             'Processing file ${file.uploadedFileID} for add-to operation',
           );
@@ -561,6 +584,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         if (addFutures.isEmpty) {
           await dialog.hide();
+          widget.selectedFiles.clearAll();
           showToast(
             context,
             context.l10n.noChangesWereMade,
@@ -571,7 +595,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         await Future.wait(addFutures);
         await CollectionService.instance.sync();
         _logger.info(
-          'Completed add-to operation for ${files.length} file(s).',
+          'Completed add-to operation for ${ownedFiles.length} file(s).',
         );
 
         await dialog.hide();
@@ -611,15 +635,16 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     BuildContext context,
     List<EnteFile> files,
   ) async {
-    if (files.isEmpty) {
+    final ownedFiles = _getOwnedFiles(files);
+    if (ownedFiles.isEmpty) {
       return;
     }
 
     final confirmation = await showDeleteConfirmationSheet(
       context,
       title: context.l10n.areYouSure,
-      body: context.l10n.deleteMultipleFilesDialogBody(files.length),
-      deleteButtonLabel: context.l10n.yesDeleteFiles(files.length),
+      body: context.l10n.deleteMultipleFilesDialogBody(ownedFiles.length),
+      deleteButtonLabel: context.l10n.yesDeleteFiles(ownedFiles.length),
       assetPath: "assets/file_delete_icon.png",
     );
 
@@ -636,7 +661,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     try {
       await dialog.show();
 
-      for (final file in files) {
+      for (final file in ownedFiles) {
         final collections =
             await CollectionService.instance.getCollectionsForFile(file);
 
@@ -686,9 +711,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     BuildContext context,
     List<EnteFile> files,
   ) async {
+    final ownedFiles = _getOwnedFiles(files);
+    if (ownedFiles.isEmpty) {
+      return;
+    }
+
     await FileActions.markMultipleImportant(
       context,
-      files,
+      ownedFiles,
       onSuccess: () {
         widget.selectedFiles.clearAll();
         Bus.instance.fire(CollectionsUpdatedEvent('files_marked_important'));

@@ -38,7 +38,7 @@ class OverflowMenuAction {
 }
 
 class ItemListView extends StatefulWidget {
-  static const double _selectionOverlayPadding = 270.0;
+  static const double _selectionOverlayPadding = 200.0;
 
   final List<EnteFile> files;
   final List<Collection> collections;
@@ -127,19 +127,12 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
-    if (widget.selectedFiles != null && widget.selectionEnabled) {
-      return ListenableBuilder(
-        listenable: widget.selectedFiles!,
-        builder: (context, _) {
-          final hasSelection = widget.selectedFiles!.hasSelections;
-          final bottomPadding =
-              hasSelection ? ItemListView._selectionOverlayPadding : 0.0;
-          return _buildListView(bottomPadding: bottomPadding);
-        },
-      );
-    }
+    final bottomPadding =
+        (widget.selectedFiles != null && widget.selectionEnabled)
+            ? ItemListView._selectionOverlayPadding
+            : 0.0;
 
-    return _buildListView();
+    return _buildListView(bottomPadding: bottomPadding);
   }
 
   Widget _buildListView({double bottomPadding = 0}) {

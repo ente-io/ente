@@ -730,7 +730,6 @@ class _HomePageState extends UploaderPageState<HomePage>
                       collections: _filterOutUncategorized(_collections),
                       recentFiles: _recentFiles,
                       selectedFiles: _selectedFiles,
-                      scrollController: _scrollController,
                     ),
                   ],
                 ),

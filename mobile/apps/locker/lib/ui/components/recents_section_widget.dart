@@ -17,14 +17,12 @@ class RecentsSectionWidget extends StatefulWidget {
   final List<Collection> collections;
   final List<EnteFile> recentFiles;
   final SelectedFiles? selectedFiles;
-  final ScrollController? scrollController;
 
   const RecentsSectionWidget({
     super.key,
     required this.collections,
     required this.recentFiles,
     this.selectedFiles,
-    this.scrollController,
   });
 
   @override
@@ -136,7 +134,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
               key: const ValueKey('items_list'),
               files: _displayedFiles,
               selectedFiles: widget.selectedFiles,
-              scrollController: widget.scrollController,
             ),
     );
   }
