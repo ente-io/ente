@@ -840,7 +840,7 @@ const showFeedQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "sharedIncoming" ||
     ((type == "album" || type == "folder") && attributes.has("shared"));
 
-const FeedIcon: React.FC = () => (
+export const FeedIcon: React.FC = () => (
     <svg
         width="23"
         height="20"

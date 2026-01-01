@@ -618,3 +618,150 @@ const GetPublicSocialDiffResponse = z.object({
     hasMoreComments: z.boolean(),
     hasMoreReactions: z.boolean(),
 });
+
+// =============================================================================
+// Public Album Feed
+// =============================================================================
+
+/**
+ * A public comment extended with isReply flag for feed processing.
+ */
+export interface PublicFeedComment extends PublicComment {
+    /** True if this comment is a reply to another comment. */
+    isReply: boolean;
+}
+
+/**
+ * A public reaction extended with isCommentReply flag for feed processing.
+ */
+export interface PublicFeedReaction extends PublicReaction {
+    /** True if this reaction is on a reply (comment with parent). */
+    isCommentReply?: boolean;
+}
+
+/**
+ * Result of fetching all social data for a public album feed.
+ */
+export interface PublicAlbumFeed {
+    comments: PublicFeedComment[];
+    reactions: PublicFeedReaction[];
+}
+
+/**
+ * Get all comments and reactions for a public album (for the feed).
+ *
+ * Unlike getPublicSocialDiff which is per-file, this fetches ALL social data
+ * for the entire album without filtering by file.
+ *
+ * @param credentials Public album credentials (access token).
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @returns Object containing all decrypted comments and reactions for the album.
+ */
+export const getPublicAlbumFeed = async (
+    credentials: PublicAlbumsCredentials,
+    collectionKey: string,
+): Promise<PublicAlbumFeed> => {
+    // Fetch all social data without fileID filter
+    const res = await fetch(
+        await apiURL("/public-collection/social/diff", {
+            sinceTime: 0,
+            limit: 1000,
+        }),
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+    );
+    ensureOk(res);
+    const data = GetPublicSocialDiffResponse.parse(await res.json());
+
+    // Build a map of comment IDs to their parent status for determining isCommentReply
+    const commentParentMap = new Map<string, boolean>();
+
+    // Decrypt comments
+    const comments: PublicFeedComment[] = [];
+    for (const comment of data.comments) {
+        const isReply = !!comment.parentCommentID;
+        commentParentMap.set(comment.id, isReply);
+
+        // Include deleted comments with empty text
+        if (comment.isDeleted || !comment.cipher || !comment.nonce) {
+            comments.push({
+                id: comment.id,
+                collectionID: comment.collectionID,
+                fileID: comment.fileID ?? undefined,
+                parentCommentID: comment.parentCommentID ?? undefined,
+                userID: comment.userID,
+                anonUserID: comment.anonUserID ?? undefined,
+                text: "",
+                isDeleted: comment.isDeleted,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+                isReply,
+            });
+            continue;
+        }
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: comment.cipher, nonce: comment.nonce },
+                collectionKey,
+            );
+            const text = new TextDecoder().decode(
+                Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+            );
+            comments.push({
+                id: comment.id,
+                collectionID: comment.collectionID,
+                fileID: comment.fileID ?? undefined,
+                parentCommentID: comment.parentCommentID ?? undefined,
+                userID: comment.userID,
+                anonUserID: comment.anonUserID ?? undefined,
+                text,
+                isDeleted: comment.isDeleted,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+                isReply,
+            });
+        } catch {
+            // Skip comments that fail to decrypt
+        }
+    }
+
+    // Decrypt reactions
+    const reactions: PublicFeedReaction[] = [];
+    for (const reaction of data.reactions) {
+        // Skip deleted reactions (they have null cipher/nonce)
+        if (reaction.isDeleted || !reaction.cipher || !reaction.nonce) continue;
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: reaction.cipher, nonce: reaction.nonce },
+                collectionKey,
+            );
+            const reactionType = unpadReaction(
+                new TextDecoder().decode(
+                    Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+                ),
+            );
+
+            // Determine if this reaction is on a reply by checking the comment's parent status
+            let isCommentReply: boolean | undefined;
+            if (reaction.commentID) {
+                isCommentReply = commentParentMap.get(reaction.commentID);
+            }
+
+            reactions.push({
+                id: reaction.id,
+                fileID: reaction.fileID ?? 0,
+                commentID: reaction.commentID ?? undefined,
+                isCommentReply,
+                reactionType,
+                userID: reaction.userID,
+                anonUserID: reaction.anonUserID ?? undefined,
+                isDeleted: reaction.isDeleted,
+                createdAt: reaction.createdAt,
+                updatedAt: reaction.updatedAt,
+            });
+        } catch {
+            // Skip reactions that fail to decrypt
+        }
+    }
+
+    return { comments, reactions };
+};
