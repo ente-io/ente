@@ -13,6 +13,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
+import "package:photos/ui/collections/album/all_albums_page.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -22,6 +23,7 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class HiddenPage extends StatefulWidget {
   final String tagPrefix;
@@ -131,6 +133,16 @@ class _HiddenPageState extends State<HiddenPage> {
           return _hiddenCollectionsExcludingDefault;
         },
         hasVerifiedLock: true,
+        onViewAllTapped: () async {
+          await routeToPage(
+            context,
+            AllAlbumsPage(
+              collections: _hiddenCollectionsExcludingDefault,
+              title: AppLocalizations.of(context).hidden,
+              hasVerifiedLock: true,
+            ),
+          );
+        },
       ),
     );
     return GalleryBoundariesProvider(
