@@ -243,6 +243,8 @@ When photos are uploaded on the web app, the most common cause of thumbnails not
 
 Ente will automatically skip files that have already been uploaded, so you can drag and drop the original folder again after removing the files without thumbnails.
 
+If the browser settings cannot be changed, we recommend uploading files through the desktop app.
+
 ### Why aren't my watch folders syncing? {#watch-folders-troubleshooting}
 
 If watch folders aren't uploading new files automatically:
