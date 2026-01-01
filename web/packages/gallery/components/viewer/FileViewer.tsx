@@ -33,6 +33,7 @@ import { lowercaseExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { formattedListJoin, ut } from "ente-base/i18n";
 import log from "ente-base/log";
+import { shouldOnlyServeAlbumsApp } from "ente-base/origins";
 import {
     FileInfo,
     type FileInfoExif,
@@ -701,17 +702,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     activeAnnotatedFileRef.current = activeAnnotatedFile;
 
     // Called when the like button (heart) is clicked.
-    // - If public album (has ?t=): toggle like (unlike if already liked, else show modal)
+    // - If public album: toggle like (unlike if already liked, else show modal)
     // - If gallery view: show album selector (like) OR unlike selector/direct delete
     // - If collection view: toggle like in that collection
     const handleLikeClick = useCallback(() => {
-        const searchParams =
-            typeof window !== "undefined"
-                ? new URLSearchParams(window.location.search)
-                : new URLSearchParams();
-        const isPublicAlbum = searchParams.has("t");
-
-        if (isPublicAlbum) {
+        if (shouldOnlyServeAlbumsApp) {
             const file = activeAnnotatedFileRef.current?.file;
             if (!file || !publicAlbumsCredentials) {
                 setOpenPublicLikeModal(true);

@@ -15,6 +15,7 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
+import { shouldOnlyServeAlbumsApp } from "ente-base/origins";
 import { downloadManager } from "ente-gallery/services/download";
 import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
@@ -653,10 +654,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         return fileNormalCollectionIDs?.get(file.id) ?? [];
     }, [file, fileNormalCollectionIDs]);
 
-    // Check if this is a public album (has ?t=... in URL)
-    const isPublicAlbum =
-        typeof window !== "undefined" &&
-        new URLSearchParams(window.location.search).has("t");
+    // Check if this is a public album
+    const isPublicAlbum = shouldOnlyServeAlbumsApp;
 
     // Build collection info list with comment counts and cover files (shared albums only)
     const collectionsInfo = useMemo((): CollectionInfo[] => {
