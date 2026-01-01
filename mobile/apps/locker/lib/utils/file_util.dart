@@ -177,26 +177,34 @@ class FileUtil {
             ? '${savedNames.first} saved'
             : '${savedNames.length} files saved';
         _logger.info('${savedPaths.length} files saved');
-        showToast(context, message);
+        if (context.mounted) {
+          showToast(context, message);
+        }
       }
 
       return true;
     } catch (e, s) {
       _logger.severe('Failed to save files', e, s);
-      if (e is UnsupportedError) {
-        showToast(
-          context,
-          'This file type is not supported for download',
-        );
-      } else {
-        showToast(
-          context,
-          context.l10n.failedToDownloadOrDecrypt,
-        );
+      if (context.mounted) {
+        if (e is UnsupportedError) {
+          showToast(
+            context,
+            'This file type is not supported for download',
+          );
+        } else {
+          showToast(
+            context,
+            context.l10n.failedToDownloadOrDecrypt,
+          );
+        }
       }
       return false;
     } finally {
-      await dialog.hide();
+      try {
+        await dialog.hide();
+      } catch (e) {
+        _logger.warning('Failed to hide progress dialog: $e');
+      }
     }
   }
 
@@ -245,10 +253,19 @@ class FileUtil {
         throw Exception('Failed to save file');
       }
 
-      progressDialog.update(
-        message:
-            '${context.l10n.downloadingProgress(100)} ($currentIndex/$totalCount)',
-      );
+      // After FileSaver returns, the context might be unmounted due to
+      // app lifecycle changes (e.g., LockScreen overlay appearing).
+      // Safely update the progress dialog if possible.
+      if (context.mounted) {
+        try {
+          progressDialog.update(
+            message:
+                '${context.l10n.downloadingProgress(100)} ($currentIndex/$totalCount)',
+          );
+        } catch (e) {
+          _logger.fine('Unable to update progress dialog after save: $e');
+        }
+      }
       return savedPath;
     } finally {
       try {
