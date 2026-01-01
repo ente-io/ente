@@ -233,6 +233,12 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                         variant="standard"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleSubmit();
+                            }
+                        }}
                         autoFocus
                     />
 
