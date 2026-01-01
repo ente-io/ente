@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -129,6 +130,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                 focusNode: widget.focusNode,
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
+                inputFormatters: [LengthLimitingTextInputFormatter(500)],
                 minLines: 1,
                 maxLines: widget.replyingTo != null ? 4 : 8,
                 textAlignVertical: TextAlignVertical.center,
