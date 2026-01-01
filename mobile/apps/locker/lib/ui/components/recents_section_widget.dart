@@ -214,6 +214,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
         _filteredFiles = [];
         _availableCollections = List.from(widget.collections);
       });
+
+      // Update notifier when filters are cleared
+      _updateDisplayedFilesNotifier();
       return;
     }
 
