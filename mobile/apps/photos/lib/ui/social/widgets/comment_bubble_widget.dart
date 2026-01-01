@@ -25,6 +25,7 @@ class CommentBubbleWidget extends StatefulWidget {
   final Comment comment;
   final User user;
   final bool isOwnComment;
+  final bool canModerateAnonComments;
   final int currentUserID;
   final int collectionID;
   final Future<Comment?> Function()? onFetchParent;
@@ -40,6 +41,7 @@ class CommentBubbleWidget extends StatefulWidget {
     required this.comment,
     required this.user,
     required this.isOwnComment,
+    required this.canModerateAnonComments,
     required this.currentUserID,
     required this.collectionID,
     this.onFetchParent,
@@ -284,6 +286,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     double bubbleScale = 1.0,
     double capsuleOpacity = 1.0,
   }) {
+    final canDeleteComment = widget.isOwnComment ||
+        (widget.canModerateAnonComments && widget.comment.isAnonymous);
+
     return Padding(
       padding: EdgeInsets.only(
         right: widget.isOwnComment ? 6 : 0,
@@ -365,8 +370,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                             _hideHighlight();
                             widget.onReplyTap();
                           },
-                          onDeleteTap: _handleDelete,
-                          showDelete: widget.isOwnComment,
+                          onDeleteTap: canDeleteComment ? _handleDelete : null,
+                          showDelete: canDeleteComment,
                         ),
                       ),
                   ],
