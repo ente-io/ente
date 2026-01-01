@@ -253,12 +253,11 @@ export const getAnonProfiles = async (
                 { encryptedData: profile.cipher, nonce: profile.nonce },
                 collectionKey,
             );
-            const decryptedStr = new TextDecoder().decode(
+            const userName = new TextDecoder().decode(
                 Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
             );
-            const data = JSON.parse(decryptedStr) as { userName?: string };
-            if (data.userName) {
-                anonUserNames.set(profile.anonUserID, data.userName);
+            if (userName) {
+                anonUserNames.set(profile.anonUserID, userName);
             }
         } catch {
             // Skip profiles that fail to decrypt

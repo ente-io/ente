@@ -111,7 +111,7 @@ export const createAnonIdentity = async (
 ): Promise<AnonIdentity> => {
     // Encrypt the user name using the collection key
     const { encryptedData: cipher, nonce } = await encryptBox(
-        new TextEncoder().encode(JSON.stringify({ userName })),
+        new TextEncoder().encode(userName),
         collectionKey,
     );
 
@@ -398,12 +398,11 @@ export const getPublicAnonProfiles = async (
                 { encryptedData: profile.cipher, nonce: profile.nonce },
                 collectionKey,
             );
-            const decryptedStr = new TextDecoder().decode(
+            const userName = new TextDecoder().decode(
                 Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
             );
-            const data = JSON.parse(decryptedStr) as { userName?: string };
-            if (data.userName) {
-                anonUserNames.set(profile.anonUserID, data.userName);
+            if (userName) {
+                anonUserNames.set(profile.anonUserID, userName);
             }
         } catch {
             // Skip profiles that fail to decrypt
