@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
@@ -55,7 +56,7 @@ class DeleteSuggestionsPage extends StatelessWidget {
             preferredSize: const Size.fromHeight(50.0),
             child: GalleryAppBarWidget(
               appBarType,
-              "Delete suggestions",
+              AppLocalizations.of(context).deleteSuggestions,
               _selectedFiles,
             ),
           ),
