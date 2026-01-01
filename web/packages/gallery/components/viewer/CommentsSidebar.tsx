@@ -1917,12 +1917,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     {replyingTo && (
                         <ReplyingToBar>
                             <ReplyingToContent>
-                                <Box
-                                    sx={{
-                                        flex: 1,
-                                        minWidth: 0,
-                                    }}
-                                >
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
                                     <Typography
                                         sx={(theme) => ({
                                             fontSize: 12,
@@ -2416,9 +2411,7 @@ const InputContainer = styled(Box)(({ theme }) => ({
     }),
 }));
 
-const ReplyingToBar = styled(Box)(() => ({
-    padding: "12px 12px 0 12px",
-}));
+const ReplyingToBar = styled(Box)(() => ({ padding: "12px 12px 0 12px" }));
 
 const ReplyingToContent = styled(Box)(({ theme }) => ({
     display: "flex",
