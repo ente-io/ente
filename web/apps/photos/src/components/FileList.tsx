@@ -864,12 +864,8 @@ const BackToTopButton = styled(Fab)(({ theme }) => ({
     backgroundColor: theme.vars.palette.fill.faint,
     color: theme.vars.palette.text.base,
     boxShadow: "none",
-    "&:hover": {
-        backgroundColor: theme.vars.palette.fill.faintHover,
-    },
-    [theme.breakpoints.down("sm")]: {
-        display: "none",
-    },
+    "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
+    [theme.breakpoints.down("sm")]: { display: "none" },
 }));
 
 /**
