@@ -655,7 +655,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     }, [file, fileNormalCollectionIDs]);
 
     // Check if this is a public album
-    const isPublicAlbum = shouldOnlyServeAlbumsApp;
+    const isPublicAlbum = shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
 
     // Build collection info list with comment counts and cover files (shared albums only)
     const collectionsInfo = useMemo((): CollectionInfo[] => {
