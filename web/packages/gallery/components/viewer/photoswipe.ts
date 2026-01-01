@@ -1517,6 +1517,9 @@ export class FileViewerPhotoSwipe {
 
                     const updateSocialButtonsVisibility = () => {
                         if (!actionButtonsEl) return;
+                        // Guard: _currentAnnotatedFile can be undefined during
+                        // initialization before the first slide is shown.
+                        if (!_currentAnnotatedFile) return;
                         // Show buttons if: static showSocialButtons is true
                         // (public album) OR delegate says this file should
                         // show buttons (file in shared collection).
