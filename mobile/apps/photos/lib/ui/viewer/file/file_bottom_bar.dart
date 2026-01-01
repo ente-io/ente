@@ -53,14 +53,14 @@ class FileBottomBarState extends State<FileBottomBar> {
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   int? lastFileGenID;
-  Future<bool>? _isFileInSharedCollectionFuture;
+  bool _isInSharedCollection = false;
   bool _hasLiked = false;
   int _commentCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _updateSharedCollectionFuture();
+    _updateSharedCollectionState();
     _updateSocialState();
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -74,19 +74,27 @@ class FileBottomBarState extends State<FileBottomBar> {
   void didUpdateWidget(FileBottomBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.file.uploadedFileID != widget.file.uploadedFileID) {
-      _updateSharedCollectionFuture();
+      _updateSharedCollectionState();
       _updateSocialState();
     }
   }
 
-  void _updateSharedCollectionFuture() {
-    if (widget.file.uploadedFileID != null) {
-      _isFileInSharedCollectionFuture =
-          CollectionsService.instance.isFileInSharedCollection(
-        widget.file.uploadedFileID!,
-      );
-    } else {
-      _isFileInSharedCollectionFuture = null;
+  Future<void> _updateSharedCollectionState() async {
+    final fileID = widget.file.uploadedFileID;
+    if (fileID == null) {
+      _isInSharedCollection = false;
+      safeRefresh();
+      return;
+    }
+
+    final isShared =
+        await CollectionsService.instance.isFileInSharedCollection(fileID);
+
+    // Guard: Only update if still showing the same file
+    // (user may have swiped to a different file while awaiting)
+    if (widget.file.uploadedFileID == fileID) {
+      _isInSharedCollection = isShared;
+      safeRefresh();
     }
   }
 
@@ -202,7 +210,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       );
 
       // Add social icons (heart, comment) if file is in a shared collection
-      if (widget.file.uploadedFileID != null) {
+      if (_isInSharedCollection) {
         children.add(_buildHeartIcon());
         children.add(_buildCommentIcon());
       }
@@ -306,35 +314,20 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _buildHeartIcon() {
-    if (_isFileInSharedCollectionFuture == null) {
-      return const SizedBox.shrink();
-    }
-
-    return FutureBuilder<bool>(
-      future: _isFileInSharedCollectionFuture,
-      builder: (context, snapshot) {
-        if (snapshot.data != true) {
-          return const SizedBox.shrink();
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: GestureDetector(
-            onTap: _toggleReaction,
-            onLongPress: _showLikesBottomSheet,
-            child: Icon(
-              _hasLiked
-                  ? (Platform.isAndroid
-                      ? Icons.favorite
-                      : Icons.favorite_rounded)
-                  : (Platform.isAndroid
-                      ? Icons.favorite_border
-                      : Icons.favorite_border_rounded),
-              color: _hasLiked ? const Color(0xFF08C225) : Colors.white,
-            ),
-          ),
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: GestureDetector(
+        onTap: _toggleReaction,
+        onLongPress: _showLikesBottomSheet,
+        child: Icon(
+          _hasLiked
+              ? (Platform.isAndroid ? Icons.favorite : Icons.favorite_rounded)
+              : (Platform.isAndroid
+                  ? Icons.favorite_border
+                  : Icons.favorite_border_rounded),
+          color: _hasLiked ? const Color(0xFF08C225) : Colors.white,
+        ),
+      ),
     );
   }
 
@@ -464,63 +457,49 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _buildCommentIcon() {
-    if (_isFileInSharedCollectionFuture == null) {
-      return const SizedBox.shrink();
-    }
-
-    return FutureBuilder<bool>(
-      future: _isFileInSharedCollectionFuture,
-      builder: (context, snapshot) {
-        if (snapshot.data != true) {
-          return const SizedBox.shrink();
-        }
-
-        return GestureDetector(
-          onTap: _openCommentsScreen,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const HugeIcon(
-                  icon: HugeIcons.strokeRoundedBubbleChat,
-                  color: Colors.white,
-                ),
-                if (_commentCount > 0)
-                  Positioned(
-                    right: -4,
-                    top: -4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(16)),
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 2,
-                          strokeAlign: BorderSide.strokeAlignOutside,
-                        ),
-                      ),
-                      child: Text(
-                        _commentCount > 99 ? '99+' : _commentCount.toString(),
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+    return GestureDetector(
+      onTap: _openCommentsScreen,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedBubbleChat,
+              color: Colors.white,
+            ),
+            if (_commentCount > 0)
+              Positioned(
+                right: -4,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2,
+                      strokeAlign: BorderSide.strokeAlignOutside,
                     ),
                   ),
-              ],
-            ),
-          ),
-        );
-      },
+                  child: Text(
+                    _commentCount > 99 ? '99+' : _commentCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
