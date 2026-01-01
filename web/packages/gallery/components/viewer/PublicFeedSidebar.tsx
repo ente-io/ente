@@ -818,6 +818,7 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
 
 // Drawer & Layout
 const SidebarDrawer = styled(Drawer)(({ theme }) => ({
+    zIndex: 2100, // Above TripLayout nav buttons (z-index: 2000)
     "& .MuiDrawer-paper": {
         width: "23vw",
         minWidth: "520px",
