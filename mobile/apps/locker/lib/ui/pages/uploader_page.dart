@@ -64,12 +64,8 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
     try {
       final List<Future> futures = [];
 
-      final collections = await CollectionService.instance.getCollections();
-      final regularCollections = collections
-          .where(
-            (c) => c.type != CollectionType.uncategorized,
-          )
-          .toList();
+      final regularCollections =
+          await CollectionService.instance.getCollectionsForUI();
 
       // Navigate to upload screen to get collection selection
       final uploadResult =

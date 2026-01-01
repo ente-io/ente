@@ -186,16 +186,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 // showShortToast(context, "yet to implement");
                               },
                               onLongPress: () {
-                                showDialog(
-                                  useRootNavigator: false,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return VerifyIdentityDialog(
-                                      self: false,
-                                      email: currentUser.email,
-                                      config: Configuration.instance,
-                                    );
-                                  },
+                                showVerifyIdentitySheet(
+                                  context,
+                                  self: false,
+                                  email: currentUser.email,
+                                  config: Configuration.instance,
                                 );
                               },
                               isTopBorderRadiusRemoved: index > 0,
@@ -352,7 +347,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             controller: _textController,
             focusNode: textFieldFocusNode,
             style: getEnteTextTheme(context).body,
-            autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
                 borderRadius: const BorderRadius.all(Radius.circular(4.0)),

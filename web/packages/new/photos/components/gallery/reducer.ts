@@ -442,6 +442,15 @@ export interface GalleryState {
      */
     isInSearchMode: boolean;
     /**
+     * Sort order for search results.
+     *
+     * - `undefined`: No explicit sort selected, keep original order (preserves
+     *   CLIP relevance sorting for ML searches)
+     * - `true`: Ascending order (oldest first)
+     * - `false`: Descending order (newest first)
+     */
+    searchSortAsc: boolean | undefined;
+    /**
      * The files to show, uniqued and sorted appropriately.
      */
     filteredFiles: EnteFile[];
@@ -486,7 +495,8 @@ export type GalleryAction =
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "exitSearch"; shouldExitSearchMode?: boolean };
+    | { type: "exitSearch"; shouldExitSearchMode?: boolean }
+    | { type: "setSearchSortOrder"; asc: boolean | undefined };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -526,6 +536,7 @@ const initialGalleryState: GalleryState = {
     view: undefined,
     filteredFiles: [],
     isInSearchMode: false,
+    searchSortAsc: undefined,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -1154,6 +1165,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     : state.isInSearchMode,
             });
         }
+
+        case "setSearchSortOrder":
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                searchSortAsc: action.asc,
+            });
     }
 };
 
@@ -1833,7 +1850,13 @@ const stateForUpdatedCollectionFiles = (
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
-        const filteredFiles = state.searchResults ?? state.filteredFiles;
+        const searchFiles = state.searchResults ?? state.filteredFiles;
+        // Only apply time-based sorting if user explicitly selected a sort order.
+        // When undefined, keep original order (preserves CLIP relevance sorting).
+        const filteredFiles =
+            state.searchSortAsc !== undefined
+                ? sortFiles([...searchFiles], state.searchSortAsc)
+                : searchFiles;
         return { ...state, filteredFiles };
     } else if (
         state.view?.type == "albums" ||

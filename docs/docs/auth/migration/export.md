@@ -75,6 +75,35 @@ You can change the export directory using following command
 ente account update --app auth --email <email> --dir <path>
 ```
 
+## Local backups
+
+Ente Auth supports continuous on-device local backups to protect your codes even
+when offline. This feature creates encrypted backups on your device
+automatically.
+
+**How it works:**
+
+- **Automatic daily backups:** When enabled, Ente Auth creates one local backup
+  per day when you open the app.
+- **Password-protected:** All local backups are encrypted with a password you
+  set. This password is stored securely on your device.
+- **Custom backup location:** Choose where to store your backups on your device.
+- **Backup retention:** The app keeps up to 5 most recent backups and
+  automatically removes older ones.
+
+**Setting up local backups:**
+
+1. Go to **Settings → Data → Local backup**.
+2. Enable **Automatic backups**.
+3. Set a backup password (minimum 8 characters).
+4. Select a folder where backups will be stored.
+
+**Manual backups:**
+
+You can trigger a manual backup at any time using the **Create backup now**
+button. Manual backups are useful before making significant changes to your
+codes.
+
 ## How to use the exported data
 
 - **Ente Authenticator app**: You can directly import the codes in the Ente

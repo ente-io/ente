@@ -160,9 +160,10 @@
       "title": "Belo"
     },
     {
-      "title": "bestbuy",
+      "title": "Best Buy",
+      "slug": "bestbuy",
       "altNames": [
-        "Best Buy",
+        "BestBuy",
         "bestbuy.com"
       ]
     },
@@ -413,6 +414,10 @@
         "Colorado PEAK",
         "myColorado"
       ]
+    },
+    {
+      "title": "Computershare",
+      "slug": "computershare"
     },
     {
       "title": "ConfigCat"
@@ -1746,6 +1751,9 @@
       ]
     },
     {
+      "title": "TorBox"
+    },
+    {
       "title": "TorGuard"
     },
     {
@@ -1837,6 +1845,10 @@
     },
     {
       "title": "Upstox"
+    },
+    {
+      "title": "US Army",
+      "slug": "us_army"
     },
     {
       "title": "US Mobile",

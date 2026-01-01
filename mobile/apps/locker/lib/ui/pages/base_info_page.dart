@@ -186,10 +186,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _loadCollections() async {
     try {
-      final collections = await CollectionService.instance.getCollections();
-      final filteredCollections = collections
-          .where((c) => c.type != CollectionType.uncategorized)
-          .toList();
+      final filteredCollections =
+          await CollectionService.instance.getCollectionsForUI();
 
       Set<int> initialSelection = _selectedCollectionIds;
 

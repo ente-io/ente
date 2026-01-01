@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:io";
 
 import "package:collection/collection.dart";
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -161,6 +162,12 @@ class FileBottomBarState extends State<FileBottomBar> {
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    final bool isFileHidden = widget.file.isOwner &&
+        widget.file.isUploaded &&
+        (CollectionsService.instance
+                .getCollectionByID(widget.file.collectionID!)
+                ?.isHidden() ??
+            false);
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
@@ -208,6 +215,34 @@ class FileBottomBarState extends State<FileBottomBar> {
           ),
         ),
       );
+
+      // Add to album button for uploaded, non-hidden files
+      if (widget.file.isUploaded && !isFileHidden) {
+        children.add(
+          Tooltip(
+            message: AppLocalizations.of(context).addToAlbum,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: IconButton(
+                icon: const Icon(
+                  EnteIcons.addToAlbum,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () {
+                  final selectedFiles = SelectedFiles();
+                  selectedFiles.files.add(widget.file);
+                  showCollectionActionSheet(
+                    context,
+                    selectedFiles: selectedFiles,
+                    actionType: CollectionActionType.addFiles,
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
 
       // Add social icons (heart, comment) if file is in a shared collection
       if (_isInSharedCollection) {

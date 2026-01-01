@@ -375,7 +375,9 @@ class _CollectionSelectionOverlayBarState
     );
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
-          collectionViewType != CollectionViewType.sharedCollection &&
+          collectionViewType != CollectionViewType.sharedCollectionViewer &&
+          collectionViewType !=
+              CollectionViewType.sharedCollectionCollaborator &&
           collectionViewType != CollectionViewType.hiddenOwnedCollection &&
           collectionViewType != CollectionViewType.favorite)) {
         throw Exception(
@@ -383,14 +385,7 @@ class _CollectionSelectionOverlayBarState
         );
       }
 
-      await showModalBottomSheet(
-        context: context,
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
-        isScrollControlled: true,
-        builder: (context) => ShareCollectionBottomSheet(
-          collection: collection,
-        ),
-      );
+      await showShareCollectionSheet(context, collection: collection);
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);

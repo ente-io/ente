@@ -1,17 +1,16 @@
 import "dart:async";
 
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/components/invite_reject_bottom_sheet.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
-import "package:ente_legacy/pages/select_contact_page.dart"
-    show showAddContactBottomSheet;
+import "package:ente_legacy/pages/select_contact_page.dart";
 import "package:ente_legacy/services/emergency_service.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/loading_widget.dart";
@@ -266,7 +265,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             GradientButton(
                               text: context.strings.addTrustedContact,
                               onTap: () async {
-                                final result = await showAddContactBottomSheet(
+                                final result = await showAddContactSheet(
                                   context,
                                   emergencyInfo: info!,
                                   config: widget.config,
@@ -285,7 +284,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           GradientButton(
                             text: context.strings.addTrustedContact,
                             onTap: () async {
-                              final result = await showAddContactBottomSheet(
+                              final result = await showAddContactSheet(
                                 context,
                                 emergencyInfo: info!,
                                 config: widget.config,
@@ -410,7 +409,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     BuildContext context,
     EmergencyContact contact,
   ) async {
-    final result = await showTrustedContactBottomSheet(
+    final result = await showTrustedContactSheet(
       context,
       contact: contact,
     );
@@ -491,7 +490,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    final result = await showEmailBottomSheet<String>(
+    final result = await showEmailSheet<String>(
       context,
       email: contact.user.email,
       message: context.strings.legacyInvite(contact.user.email),
@@ -542,7 +541,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final String emergencyContactEmail = session.emergencyContact.email;
     final colorScheme = getEnteColorScheme(context);
 
-    final confirmed = await showEmailBottomSheet<bool>(
+    final confirmed = await showEmailSheet<bool>(
       context,
       email: emergencyContactEmail,
       message: context.strings.recoveryWarningBody(emergencyContactEmail),

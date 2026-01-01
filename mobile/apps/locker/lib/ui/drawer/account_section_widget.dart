@@ -11,7 +11,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/components/recovery_key_dialog_locker.dart";
+import "package:locker/ui/components/recovery_key_sheet.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
@@ -76,10 +76,9 @@ class AccountSectionWidget extends StatelessWidget {
                 );
                 return;
               }
-              await showRecoveryKeyDialogLocker(
+              await showRecoveryKeySheet(
                 context,
                 recoveryKey: recoveryKey,
-                onDone: () {},
               );
             }
           },

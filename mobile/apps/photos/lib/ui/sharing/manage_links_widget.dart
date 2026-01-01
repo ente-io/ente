@@ -106,7 +106,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
-                    surfaceExecutionStates: false,
                     onTap: () async {
                       // ignore: unawaited_futures
                       routeToPage(
@@ -170,7 +169,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
-                    surfaceExecutionStates: false,
                     onTap: () async {
                       // ignore: unawaited_futures
                       routeToPage(
@@ -216,7 +214,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         setState(() {});
                       });
                     },
-                    surfaceExecutionStates: false,
                   ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
@@ -332,7 +329,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.error_outline,
                       leadingIconColor: getEnteColorScheme(context).warning500,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      isBottomBorderRadiusRemoved: true,
+                      singleBorderRadius: 8,
                     ),
                   if (!url.isExpired)
                     MenuItemWidget(
@@ -366,7 +363,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.code,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       showOnlyLoadingState: false,
-                      surfaceExecutionStates: false,
                       onTap: () async {
                         final embedHtml = CollectionsService.instance
                             .getEmbedHtml(widget.collection!);
@@ -457,7 +453,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     leadingIcon: Icons.remove_circle_outline,
                     leadingIconColor: warning500,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    surfaceExecutionStates: false,
                     onTap: () async {
                       final bool result = await sharingActions.disableUrl(
                         context,

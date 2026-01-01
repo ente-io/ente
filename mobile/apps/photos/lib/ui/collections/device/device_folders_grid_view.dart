@@ -10,10 +10,14 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
+import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/device/device_folder_item.dart";
+import "package:photos/ui/common/backup_flow_helper.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/standalone/debouncer.dart";
+import "package:styled_text/styled_text.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
   const DeviceFoldersGridView({
@@ -71,6 +75,16 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
             albumsCountInCrossAxis;
 
     debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
+
+    // Check permission status
+    final hasSkippedPermission =
+        backupPreferenceService.hasSkippedOnboardingPermission;
+
+    // If permission was skipped, show add folders prompt
+    if (hasSkippedPermission) {
+      return _buildAddFoldersState(context);
+    }
+
     return SizedBox(
       height: sideOfThumbnail + 46,
       child: Align(
@@ -115,6 +129,47 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
               return const EnteLoadingWidget();
             }
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddFoldersState(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    const selectFoldersGreen = Color(0xFF08C225);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              "assets/ducky_folders.png",
+              width: 138,
+              height: 120,
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: StyledText(
+                text: AppLocalizations.of(context).selectFoldersToBackup,
+                style: textTheme.smallMuted,
+                textAlign: TextAlign.center,
+                tags: {
+                  'action': StyledTextActionTag(
+                    (String? text, Map<String?, String?> attrs) async {
+                      await handleFolderSelectionBackupFlow(context);
+                      if (mounted) setState(() {});
+                    },
+                    style: textTheme.small.copyWith(
+                      color: selectFoldersGreen,
+                    ),
+                  ),
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

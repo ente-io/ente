@@ -1,10 +1,16 @@
 import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
-import { ensureLocalUser } from "ente-accounts/services/user";
-import { boxSeal } from "ente-base/crypto";
+import { boxSeal, fromB64 } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import type { Collection } from "ente-media/collection";
+
+/**
+ * The expected length in bytes for a collection key.
+ *
+ * This matches SecretBoxKeyBytes (crypto_secretbox_KEYBYTES) in libsodium,
+ * which is 32 bytes (256 bits).
+ */
+const collectionKeyBytes = 32;
 
 /**
  * Service for handling the join album flow for public collections.
@@ -115,41 +121,7 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
     }
 
     try {
-        // If collectionID is 0 (placeholder), we need to fetch the actual collection first
-        let collectionID = context.collectionID;
-        let collection: Collection | undefined;
-        if (collectionID === 0) {
-            // Import the pullCollection function dynamically from the correct module
-            const { pullCollection } = await import("./public-collection");
-            const result = await pullCollection(
-                context.accessToken,
-                context.collectionKey,
-            );
-            collection = result.collection;
-            collectionID = collection.id;
-
-            // Update the context with the actual collection ID
-            const updatedContext = { ...context, collectionID };
-            sessionStorage.setItem(
-                JOIN_ALBUM_CONTEXT_KEY,
-                JSON.stringify(updatedContext),
-            );
-        } else {
-            // Fetch the collection to check ownership
-            const { pullCollection } = await import("./public-collection");
-            const result = await pullCollection(
-                context.accessToken,
-                context.collectionKey,
-            );
-            collection = result.collection;
-        }
-
-        // Check if the user is the owner of the album
-        const currentUser = ensureLocalUser();
-        if (collection.owner.id === currentUser.id) {
-            clearJoinAlbumContext();
-            return null;
-        }
+        const collectionID = context.collectionID;
 
         // Get user's key attributes from local storage
         const keyAttributes = savedKeyAttributes();
@@ -161,11 +133,22 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
 
         const publicKey = keyAttributes.publicKey;
 
+        // Validate the collection key is exactly 32 bytes (256 bits)
+        // This matches SecretBoxKeyBytes on the server and prevents processing
+        // malformed join album URLs
+        const collectionKeyBytes_ = await fromB64(context.collectionKey);
+        if (collectionKeyBytes_.length !== collectionKeyBytes) {
+            log.warn("Invalid collection key length in join album context");
+            clearJoinAlbumContext();
+            return null;
+        }
+
         // Encrypt the collection key with user's public key
         // The collection key is already base64 encoded, and boxSeal expects base64
         const encryptedKey = await boxSeal(context.collectionKey, publicKey);
 
         // Join the album (include JWT token if present for password-protected albums)
+        // Server validates ownership and returns error if user is the album owner
         await joinPublicAlbum(
             context.accessToken,
             collectionID,

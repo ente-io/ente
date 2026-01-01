@@ -222,6 +222,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     }, [enableImageEditing]);
 
     const shouldShowMapButton =
+        modePlus !== "search" &&
         activeCollectionSummary?.type === "all" &&
         activeCollectionSummary.fileCount > 0;
 

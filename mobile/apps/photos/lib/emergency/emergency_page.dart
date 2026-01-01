@@ -172,7 +172,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               makeTextBold: contact.isPendingInvite(),
                             ),
                             leadingIconSize: 24.0,
-                            surfaceExecutionStates: false,
                             alwaysShowSuccessState: false,
                             leadingIconWidget: UserAvatarWidget(
                               contact.emergencyContact,
@@ -247,7 +246,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           makeTextBold: true,
                         ),
                         leadingIcon: Icons.add_outlined,
-                        surfaceExecutionStates: false,
                         menuItemColor: getEnteColorScheme(context).fillFaint,
                         onTap: () async {
                           await routeToPage(
@@ -344,7 +342,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             isTopBorderRadiusRemoved: listIndex > 0,
                             isBottomBorderRadiusRemoved: !isLastItem,
                             singleBorderRadius: 8,
-                            surfaceExecutionStates: false,
                           ),
                           isLastItem
                               ? const SizedBox.shrink()

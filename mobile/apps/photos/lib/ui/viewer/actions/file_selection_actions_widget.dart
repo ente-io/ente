@@ -26,7 +26,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -171,7 +170,22 @@ class _FileSelectionActionsWidgetState
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-    if (widget.type == GalleryType.deleteSuggestions) {
+    if (widget.type == GalleryType.trash) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.restore_outlined,
+          labelText: AppLocalizations.of(context).restore,
+          onTap: _restore,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_forever_outlined,
+          labelText: AppLocalizations.of(context).permanentlyDelete,
+          onTap: _permanentlyDelete,
+        ),
+      );
+    } else if (widget.type == GalleryType.deleteSuggestions) {
       items.add(
         SelectionActionButton(
           icon: Icons.delete_outline,
@@ -182,7 +196,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.clear,
-          labelText: "Reject suggestions",
+          labelText: AppLocalizations.of(context).rejectSuggestions,
           onTap: widget.selectedFiles.files.isNotEmpty
               ? _rejectDeleteSuggestions
               : null,
@@ -260,18 +274,6 @@ class _FileSelectionActionsWidgetState
             ),
           );
         }
-      }
-
-      if (flagService.manualTagFileToPerson &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.person_add_alt_1_outlined,
-            labelText: "(i) Add to person",
-            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
-            shouldShow: hasUploadedFileIDs,
-          ),
-        );
       }
 
       if (widget.type.showAddtoHiddenAlbum()) {
@@ -373,6 +375,18 @@ class _FileSelectionActionsWidgetState
           onTap: _onGuestViewClick,
         ),
       );
+
+      if (flagService.manualTagFileToPerson &&
+          widget.type.showAddToPersonOption()) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.person_add_alt_1_outlined,
+            labelText: AppLocalizations.of(context).addToPerson,
+            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
+            shouldShow: hasUploadedFileIDs,
+          ),
+        );
+      }
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
@@ -380,16 +394,6 @@ class _FileSelectionActionsWidgetState
             labelText: AppLocalizations.of(context).createCollage,
             onTap: _onCreateCollageClicked,
             shouldShow: showCollageOption,
-          ),
-        );
-      }
-      if (flagService.internalUser &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.movie_creation_sharp,
-            labelText: "(i) Video Memory",
-            onTap: _onCreateVideoMemoryClicked,
           ),
         );
       }
@@ -772,7 +776,7 @@ class _FileSelectionActionsWidgetState
     if (filesWithIds.isEmpty) {
       showShortToast(
         context,
-        "Only uploaded files can be added to a person",
+        AppLocalizations.of(context).onlyUploadedFilesCanBeAddedToPerson,
       );
       return;
     }
@@ -806,10 +810,12 @@ class _FileSelectionActionsWidgetState
           relevantFiles: addedFiles,
         ),
       );
-      final suffix = addedCount == 1 ? "file" : "files";
       showToast(
         context,
-        "Added $addedCount $suffix to ${result.person.data.name}",
+        AppLocalizations.of(context).addedFilesToPerson(
+          count: addedCount,
+          personName: result.person.data.name,
+        ),
       );
       widget.selectedFiles.clearAll();
       if (mounted) {
@@ -819,10 +825,12 @@ class _FileSelectionActionsWidgetState
     }
     final alreadyCount = result.alreadyAssignedFileIds.length;
     if (alreadyCount > 0) {
-      final suffix = alreadyCount == 1 ? "file is" : "files are";
       showShortToast(
         context,
-        "$alreadyCount $suffix already linked to ${result.person.data.name}",
+        AppLocalizations.of(context).filesAlreadyLinkedToPerson(
+          count: alreadyCount,
+          personName: result.person.data.name,
+        ),
       );
     }
   }
@@ -900,12 +908,6 @@ class _FileSelectionActionsWidgetState
     if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
-  }
-
-  Future<void> _onCreateVideoMemoryClicked() async {
-    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
-    await createSlideshow(context, selectedFiles);
-    widget.selectedFiles.clearAll();
   }
 
   Future<void> _onSendLinkTapped() async {
