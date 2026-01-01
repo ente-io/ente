@@ -166,6 +166,18 @@ var ErrPublicCommentDisabled = ApiError{
 	HttpStatusCode: http.StatusMethodNotAllowed,
 }
 
+var ErrPublicCommentTooLong = ApiError{
+	Code:           PublicCommentTooLong,
+	Message:        "Comments are limited to 280 characters",
+	HttpStatusCode: http.StatusBadRequest,
+}
+
+var ErrAnonNameTooLong = ApiError{
+	Code:           AnonNameTooLong,
+	Message:        "Anonymous names are limited to 50 characters",
+	HttpStatusCode: http.StatusBadRequest,
+}
+
 var ErrNotFoundError = ApiError{
 	Code:           NotFoundError,
 	Message:        "",
@@ -251,6 +263,12 @@ const (
 
 	// PublicCommentDisabled error code indicates that the user has not enabled public comments
 	PublicCommentDisabled ErrorCode = "PUBLIC_COMMENT_DISABLED"
+
+	// PublicCommentTooLong indicates that comment text exceeded allowed limit
+	PublicCommentTooLong ErrorCode = "PUBLIC_COMMENT_TOO_LONG"
+
+	// AnonNameTooLong indicates that anonymous display name exceeded allowed limit
+	AnonNameTooLong ErrorCode = "ANON_NAME_TOO_LONG"
 
 	// CollectionNotEmpty is thrown when user attempts to delete a collection but keep files but all files from that
 	// collections have been moved yet.

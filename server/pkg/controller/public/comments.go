@@ -63,6 +63,9 @@ func (c *CommentsController) CreateComment(ctx *gin.Context, collectionID int64,
 	if len(req.Cipher) == 0 || len(req.Cipher) > maxCommentPayloadSize {
 		return "", ente.ErrBadRequest
 	}
+	if err := validateEncryptedPayloadLength(req.Cipher, maxCommentBytes, &ente.ErrPublicCommentTooLong); err != nil {
+		return "", err
+	}
 	if len(req.Nonce) == 0 {
 		return "", ente.ErrBadRequest
 	}
@@ -92,6 +95,9 @@ func (c *CommentsController) UpdateComment(ctx *gin.Context, collectionID int64,
 	}
 	if len(req.Cipher) == 0 || len(req.Cipher) > maxCommentPayloadSize {
 		return ente.ErrBadRequest
+	}
+	if err := validateEncryptedPayloadLength(req.Cipher, maxCommentBytes, &ente.ErrPublicCommentTooLong); err != nil {
+		return err
 	}
 	if len(req.Nonce) == 0 {
 		return ente.ErrBadRequest

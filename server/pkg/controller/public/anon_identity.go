@@ -39,6 +39,9 @@ func (c *AnonIdentityController) Create(ctx *gin.Context, req CreateAnonIdentity
 	if strings.TrimSpace(req.Cipher) == "" || strings.TrimSpace(req.Nonce) == "" {
 		return AnonIdentityResponse{}, ente.ErrBadRequest
 	}
+	if err := validateEncryptedPayloadLength(req.Cipher, maxAnonNameBytes, &ente.ErrAnonNameTooLong); err != nil {
+		return AnonIdentityResponse{}, err
+	}
 	rawID, err := gonanoid.New()
 	if err != nil {
 		return AnonIdentityResponse{}, stacktrace.Propagate(err, "")
