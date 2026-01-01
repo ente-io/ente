@@ -1442,9 +1442,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 try {
                     // Use public API for anonymous users in public albums
                     if (isPublicAlbum && publicAlbumsCredentials) {
-                        const storedIdentity = selectedCollectionInfo
-                            ? getStoredAnonIdentity(selectedCollectionInfo.id)
-                            : undefined;
+                        const storedIdentity = getStoredAnonIdentity(
+                            selectedCollectionInfo.id,
+                        );
                         if (storedIdentity) {
                             await deletePublicComment(
                                 publicAlbumsCredentials,
@@ -1773,7 +1773,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                             !showOwnTimestamp &&
                                             commentIsOwn &&
                                             !!prevComment &&
-                                            prevComment.userID !== currentUserID &&
+                                            prevComment.userID !==
+                                                currentUserID &&
                                             prevComment.anonUserID !==
                                                 storedIdentity?.anonUserID
                                         }
@@ -1868,15 +1869,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             <HeartIcon small />
                             <span>
                                 {contextMenuIsLikedRef.current
-                                    ? "Unlike"
-                                    : "Like"}
+                                    ? t("unlike")
+                                    : t("like")}
                             </span>
                         </StyledMenuItem>
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("reply")}
                         >
                             <ReplyIcon />
-                            <span>Reply</span>
+                            <span>{t("reply")}</span>
                         </StyledMenuItem>
                         {contextMenu &&
                             canDeleteComment(contextMenu.comment) && (
@@ -2014,9 +2015,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                           }),
                                       },
                                       "& .MuiInputBase-root, & .MuiInputBase-input":
-                                          {
-                                              cursor: "pointer",
-                                          },
+                                          { cursor: "pointer" },
                                   })
                                 : undefined
                         }

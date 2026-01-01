@@ -78,7 +78,13 @@ export const addCommentReaction = async (
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ collectionID, commentID, fileID, cipher, nonce }),
+        body: JSON.stringify({
+            collectionID,
+            commentID,
+            fileID,
+            cipher,
+            nonce,
+        }),
     });
     ensureOk(res);
     const { id } = UpsertReactionResponse.parse(await res.json());

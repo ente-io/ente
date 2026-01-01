@@ -158,4 +158,3 @@ const SignUpButton = styled(Button)({
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
     "&:hover": { backgroundColor: "rgba(255, 255, 255, 1)" },
 });
-

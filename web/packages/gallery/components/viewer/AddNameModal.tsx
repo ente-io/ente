@@ -202,7 +202,7 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
         <StyledDialog
             open={open}
             onClose={handleClose}
-            TransitionProps={{ onExited }}
+            slotProps={{ transition: { onExited } }}
         >
             <DialogWrapper>
                 <CloseButton onClick={handleClose}>

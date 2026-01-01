@@ -88,7 +88,6 @@ export interface CollectionHeaderProps
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
-    onCollectionFeed: () => void;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -145,7 +144,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onRemotePull,
     onCollectionShare,
     onCollectionCast,
-    onCollectionFeed,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
     onMarkTempDeleted,
@@ -660,7 +658,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
-                onFeedClick={onCollectionFeed}
                 onShareClick={onCollectionShare}
             />
             {validMenuOptions.length > 0 && (
@@ -718,15 +715,12 @@ interface QuickOptionsProps {
     isDownloadInProgress: () => boolean;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
-    onFeedClick: () => void;
     onShareClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onFeedClick,
     onShareClick,
     collectionSummary,
     isDownloadInProgress,
@@ -751,9 +745,6 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 onClick={onShareClick}
             />
         )}
-        {/* {showFeedQuickOption(collectionSummary) && (
-            <FeedQuickOption onClick={onFeedClick} />
-        )} */}
     </Stack>
 );
 
@@ -835,11 +826,6 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     </Tooltip>
 );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const showFeedQuickOption = ({ type, attributes }: CollectionSummary) =>
-    type == "sharedIncoming" ||
-    ((type == "album" || type == "folder") && attributes.has("shared"));
-
 export const FeedIcon: React.FC = () => (
     <svg
         width="23"
@@ -865,25 +851,6 @@ export const FeedIcon: React.FC = () => (
             fill="currentColor"
         />
     </svg>
-);
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const FeedQuickOption: React.FC<OptionProps> = ({ onClick }) => (
-    <Tooltip title={t("feed")}>
-        <IconButton onClick={onClick}>
-            <Box
-                sx={{
-                    width: 24,
-                    height: 24,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
-                <FeedIcon />
-            </Box>
-        </IconButton>
-    </Tooltip>
 );
 
 const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>

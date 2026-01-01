@@ -15,6 +15,7 @@ import {
     Tooltip,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -67,16 +68,16 @@ import {
     useSaveGroups,
     type AddSaveGroup,
 } from "ente-gallery/components/utils/save-groups";
+import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
+import {
+    PublicFeedSidebar,
+    type PublicFeedItemClickInfo,
+} from "ente-gallery/components/viewer/PublicFeedSidebar";
 import { downloadManager } from "ente-gallery/services/download";
 import {
     downloadAndSaveCollectionFiles,
     downloadAndSaveFiles,
 } from "ente-gallery/services/save";
-import {
-    PublicFeedSidebar,
-    type PublicFeedItemClickInfo,
-} from "ente-gallery/components/viewer/PublicFeedSidebar";
-import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
@@ -102,7 +103,6 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { FeedIcon } from "components/Collections/CollectionHeader";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -865,7 +865,11 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     name={publicCollection.name}
                     fileCount={publicFiles.length}
                 />
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: "center" }}
+                >
                     {onShowFeed && (
                         <IconButton onClick={onShowFeed}>
                             <Box
@@ -952,4 +956,3 @@ const FileListFooter: React.FC<FileListFooterProps> = ({ onAddPhotos }) => (
         </Link>
     </Stack>
 );
-

@@ -421,7 +421,10 @@ const RemoteAnonProfile = z.object({
 });
 
 const GetAnonProfilesResponse = z.object({
-    profiles: z.array(RemoteAnonProfile),
+    profiles: z
+        .array(RemoteAnonProfile)
+        .nullish()
+        .transform((v) => v ?? []),
 });
 
 /**

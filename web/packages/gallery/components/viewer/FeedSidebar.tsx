@@ -22,6 +22,7 @@ import {
     getAnonProfiles,
     type UnifiedReaction,
 } from "ente-new/photos/services/social";
+import { t } from "i18next";
 import React, { useEffect, useMemo, useState } from "react";
 
 // =============================================================================
@@ -716,11 +717,11 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
     // Fetch social data when sidebar opens
     useEffect(() => {
         const fetchSocialData = async () => {
-            if (!open || !collection) return;
+            if (!open) return;
 
             setIsLoading(true);
             try {
-                const hasPublicLink = (collection.publicURLs?.length ?? 0) > 0;
+                const hasPublicLink = collection.publicURLs.length > 0;
                 const [feedData, anonProfiles] = await Promise.all([
                     getAlbumFeed(collection.id, collection.key),
                     // Only fetch anon profiles if collection has public links
@@ -790,7 +791,7 @@ export const FeedSidebar: React.FC<FeedSidebarProps> = ({
                             <CircularProgress size={24} />
                         </LoadingContainer>
                     ) : feedItems.length === 0 ? (
-                        <EmptyStateText>No activity yet</EmptyStateText>
+                        <EmptyStateText>{t("no_activity_yet")}</EmptyStateText>
                     ) : (
                         feedItems.map((item) => (
                             <FeedItemRow

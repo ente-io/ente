@@ -196,7 +196,6 @@ export const GalleryBarAndListHeader: React.FC<
                         collectionSummary={collectionSummary!}
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
-                        onCollectionFeed={showCollectionFeed}
                     />
                 ) : mode != "people" && collectionSummary ? (
                     <GalleryItemsHeaderAdapter>

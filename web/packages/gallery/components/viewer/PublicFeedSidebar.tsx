@@ -24,6 +24,7 @@ import {
     type PublicFeedComment,
     type PublicFeedReaction,
 } from "ente-new/albums/services/public-reaction";
+import { t } from "i18next";
 import React, { useEffect, useMemo, useState } from "react";
 
 // =============================================================================
@@ -589,7 +590,7 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item, onClick }) => {
                                 {user.isMaskedEmail ? (
                                     <PersonIcon />
                                 ) : (
-                                    displayName[0]?.toUpperCase() ?? "A"
+                                    (displayName[0]?.toUpperCase() ?? "A")
                                 )}
                             </StyledAvatar>
                         );
@@ -612,7 +613,9 @@ const FeedItemRow: React.FC<FeedItemRowProps> = ({ item, onClick }) => {
 /**
  * Extracts navigation info from a feed item for click handling.
  */
-const getFeedItemClickInfo = (item: PublicFeedItem): PublicFeedItemClickInfo => {
+const getFeedItemClickInfo = (
+    item: PublicFeedItem,
+): PublicFeedItemClickInfo => {
     switch (item.type) {
         case "liked_photo":
         case "liked_video":
@@ -788,7 +791,7 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
                             <CircularProgress size={24} />
                         </LoadingContainer>
                     ) : feedItems.length === 0 ? (
-                        <EmptyStateText>No activity yet</EmptyStateText>
+                        <EmptyStateText>{t("no_activity_yet")}</EmptyStateText>
                     ) : (
                         feedItems.map((item) => (
                             <FeedItemRow

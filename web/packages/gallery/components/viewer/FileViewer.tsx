@@ -509,7 +509,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             hasOpenedInitialSidebarRef.current = true;
             if (initialSidebar === "comments") {
                 setOpenComments(true);
-            } else if (initialSidebar === "likes") {
+            } else {
                 setOpenLikes(true);
             }
         }
@@ -614,7 +614,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         setFileComments((prev) => {
             const next = new Map(prev);
-            const fileCommentsMap = new Map(prev.get(fileID) ?? new Map());
+            const fileCommentsMap = new Map<number, Comment[]>(
+                prev.get(fileID) ?? new Map(),
+            );
             const collectionComments =
                 fileCommentsMap.get(comment.collectionID) ?? [];
             fileCommentsMap.set(comment.collectionID, [
@@ -661,7 +663,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             setAllReactions((prev) => {
                 const next = new Map(prev);
-                const fileReactionsMap = new Map(prev.get(fileID) ?? new Map());
+                const fileReactionsMap = new Map<number, UnifiedReaction[]>(
+                    prev.get(fileID) ?? new Map(),
+                );
                 const collectionReactions =
                     fileReactionsMap.get(reaction.collectionID) ?? [];
                 fileReactionsMap.set(reaction.collectionID, [
@@ -750,22 +754,17 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             collectionId,
                             existingReaction.id,
                         );
-                        log.info(
-                            `Deleted public reaction: ${existingReaction.id}`,
-                        );
 
                         // Update local state
                         setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const fileReactionsMap = new Map(
-                                prev.get(fileId) ?? new Map(),
-                            );
+                            const fileReactionsMap = new Map<
+                                number,
+                                UnifiedReaction[]
+                            >(prev.get(fileId) ?? new Map());
                             const updatedReactions = (
                                 fileReactionsMap.get(collectionId) ?? []
-                            ).filter(
-                                (r: UnifiedReaction) =>
-                                    r.id !== existingReaction.id,
-                            );
+                            ).filter((r) => r.id !== existingReaction.id);
                             fileReactionsMap.set(
                                 collectionId,
                                 updatedReactions,
@@ -798,9 +797,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         // Update local state
                         setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const fileReactionsMap = new Map(
-                                prev.get(fileId) ?? new Map(),
-                            );
+                            const fileReactionsMap = new Map<
+                                number,
+                                UnifiedReaction[]
+                            >(prev.get(fileId) ?? new Map());
                             const collectionReactions =
                                 fileReactionsMap.get(collectionId) ?? [];
                             fileReactionsMap.set(collectionId, [
@@ -863,12 +863,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                                 "green_heart",
                                 collection.key,
                             );
-                            log.info(`Added reaction: ${reactionId}`);
                             setAllReactions((prev) => {
                                 const next = new Map(prev);
-                                const fileReactionsMap = new Map(
-                                    prev.get(fileId) ?? new Map(),
-                                );
+                                const fileReactionsMap = new Map<
+                                    number,
+                                    UnifiedReaction[]
+                                >(prev.get(fileId) ?? new Map());
                                 const collectionReactions =
                                     fileReactionsMap.get(collectionId) ?? [];
                                 fileReactionsMap.set(collectionId, [
@@ -903,9 +903,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         for (const reaction of reactions) {
                             await deleteReaction(reaction.reactionId);
                             deletedReactionIds.add(reaction.reactionId);
-                            log.info(
-                                `Deleted reaction: ${reaction.reactionId}`,
-                            );
                         }
                         setAllReactions((prev) => {
                             const next = new Map(prev);
@@ -944,9 +941,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 void (async () => {
                     try {
                         await deleteReaction(existingReaction.reactionId);
-                        log.info(
-                            `Deleted reaction: ${existingReaction.reactionId}`,
-                        );
                         setAllReactions((prev) => {
                             const next = new Map(prev);
                             const fileReactionsMap = prev.get(fileId);
@@ -982,12 +976,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             "green_heart",
                             collection.key,
                         );
-                        log.info(`Added reaction: ${reactionId}`);
                         setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const fileReactionsMap = new Map(
-                                prev.get(fileId) ?? new Map(),
-                            );
+                            const fileReactionsMap = new Map<
+                                number,
+                                UnifiedReaction[]
+                            >(prev.get(fileId) ?? new Map());
                             const collectionReactions =
                                 fileReactionsMap.get(activeCollectionID) ?? [];
                             fileReactionsMap.set(activeCollectionID, [
@@ -1043,9 +1037,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     void (async () => {
                         try {
                             await deleteReaction(reactionToDelete.reactionId);
-                            log.info(
-                                `Deleted reaction: ${reactionToDelete.reactionId}`,
-                            );
                             setAllReactions((prev) => {
                                 const next = new Map(prev);
                                 const fileReactionsMap = prev.get(fileId);
@@ -1083,12 +1074,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             "green_heart",
                             collection.key,
                         );
-                        log.info(`Added reaction: ${reactionId}`);
                         setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const fileReactionsMap = new Map(
-                                prev.get(fileId) ?? new Map(),
-                            );
+                            const fileReactionsMap = new Map<
+                                number,
+                                UnifiedReaction[]
+                            >(prev.get(fileId) ?? new Map());
                             const collectionReactions =
                                 fileReactionsMap.get(albumId) ?? [];
                             fileReactionsMap.set(albumId, [
@@ -1149,12 +1140,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         "green_heart",
                         collection.key,
                     );
-                    log.info(`Added reaction: ${reactionId}`);
                     newReactions.push({ collectionId, reactionId });
                 }
                 setAllReactions((prev) => {
                     const next = new Map(prev);
-                    const fileReactionsMap = new Map(
+                    const fileReactionsMap = new Map<number, UnifiedReaction[]>(
                         prev.get(fileId) ?? new Map(),
                     );
                     for (const { collectionId, reactionId } of newReactions) {
@@ -1238,9 +1228,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             name,
                             collectionKey,
                         );
-                        log.info(
-                            `Created anonymous identity: ${identity.anonUserID}`,
-                        );
                     }
 
                     // Add the public reaction
@@ -1256,9 +1243,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // Update local state
                     setAllReactions((prev) => {
                         const next = new Map(prev);
-                        const fileReactionsMap = new Map(
-                            prev.get(fileId) ?? new Map(),
-                        );
+                        const fileReactionsMap = new Map<
+                            number,
+                            UnifiedReaction[]
+                        >(prev.get(fileId) ?? new Map());
                         const collectionReactions =
                             fileReactionsMap.get(collectionId) ?? [];
                         fileReactionsMap.set(collectionId, [
@@ -2069,6 +2057,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     useEffect(() => {
         if (
             !open ||
+            !enableComment ||
             !activeFileID ||
             !publicAlbumsCredentials ||
             !collectionKey
@@ -2172,7 +2161,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 log.error("Failed to fetch public social data", e);
             }
         })();
-    }, [open, activeFileID, publicAlbumsCredentials, collectionKey, files]);
+    }, [
+        open,
+        enableComment,
+        activeFileID,
+        publicAlbumsCredentials,
+        collectionKey,
+        files,
+    ]);
 
     // Refresh comment count when fileComments changes.
     useEffect(() => {
@@ -2215,16 +2211,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         } else {
             return undefined;
         }
-    }, [
         // Be careful with adding new dependencies here, or changing the source
         // of existing ones. If any of these dependencies change unnecessarily,
         // then the file viewer will start getting reloaded even when it is
         // already open.
         //
-        // Note: showSocialButtons is intentionally NOT included here even though
-        // it's passed to the constructor. The delegate's shouldShowSocialButtons
-        // handles dynamic visibility, and showSocialButtons only changes based on
-        // collectionSummaries which we don't want to trigger a full recreation.
+        // Note: showSocialButtons and enableComment are intentionally NOT included
+        // here even though they're passed to the constructor. The delegate's
+        // shouldShowSocialButtons handles dynamic visibility, and these values only
+        // change based on collectionSummaries which we don't want to trigger a full
+        // recreation.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
         open,
         onClose,
         user,

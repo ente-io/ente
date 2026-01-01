@@ -3,12 +3,14 @@ import { DownloadStatusNotifications } from "components/DownloadStatusNotificati
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
-import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
+import {
+    FileViewer,
+    type FileViewerInitialSidebar,
+} from "ente-gallery/components/viewer/FileViewer";
 import {
     PublicFeedSidebar,
     type PublicFeedItemClickInfo,
 } from "ente-gallery/components/viewer/PublicFeedSidebar";
-import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";

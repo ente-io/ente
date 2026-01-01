@@ -1190,8 +1190,6 @@ export class FileViewerPhotoSwipe {
             }
 
             const af = currentAnnotatedFile();
-            // Guard: af may be undefined during initial setup.
-            if (!af) return;
             const isLiked = delegate.isLiked(af);
 
             // Show fill (green) if liked, show outline (white) if not liked
@@ -1211,8 +1209,6 @@ export class FileViewerPhotoSwipe {
             }
 
             const af = currentAnnotatedFile();
-            // Guard: af may be undefined during initial setup.
-            if (!af) return;
             const count = delegate.getCommentCount(af);
             commentCountElement.textContent = String(count);
         };
@@ -1527,13 +1523,12 @@ export class FileViewerPhotoSwipe {
                         // For public albums (no logged-in user), also check
                         // if comments are enabled on the public link.
                         const af = currentAnnotatedFile();
-                        // Guard: af may be undefined during initial setup.
-                        if (!af) return;
                         const baseShow =
                             showSocialButtons ||
                             delegate.shouldShowSocialButtons(af);
                         // For public albums (!haveUser), also require enableComment
-                        const shouldShow = baseShow && (haveUser || enableComment);
+                        const shouldShow =
+                            baseShow && (haveUser || enableComment);
                         actionButtonsEl.style.display = shouldShow
                             ? "flex"
                             : "none";

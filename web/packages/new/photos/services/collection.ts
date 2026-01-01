@@ -1435,7 +1435,11 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  */
 export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
-    "enableCollect" | "enableJoin" | "enableComment" | "validTill" | "deviceLimit"
+    | "enableCollect"
+    | "enableJoin"
+    | "enableComment"
+    | "validTill"
+    | "deviceLimit"
 >;
 
 /**

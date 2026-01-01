@@ -17,6 +17,7 @@ import type { EnteFile } from "ente-media/file";
 import { getStoredAnonIdentity } from "ente-new/albums/services/public-reaction";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
+import { t } from "i18next";
 import React, {
     useCallback,
     useEffect,
@@ -460,8 +461,8 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                             })}
                         >
                             {loading
-                                ? "Loading..."
-                                : `${likers.length} ${likers.length === 1 ? "like" : "likes"}`}
+                                ? t("loading")
+                                : t("like_count", { count: likers.length })}
                         </Typography>
                     ) : collectionsInfo.length > 1 ? (
                         <Box
@@ -568,8 +569,8 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                             })}
                         >
                             {loading
-                                ? "Loading..."
-                                : `${likers.length} ${likers.length === 1 ? "like" : "likes"}`}
+                                ? t("loading")
+                                : t("like_count", { count: likers.length })}
                         </Typography>
                     )}
                     <CloseButton onClick={onClose}>

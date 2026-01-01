@@ -98,8 +98,7 @@ export const getAlbumFeed = async (
  */
 const decryptSocialDiff = async (
     collectionKey: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    responseJson: any,
+    responseJson: unknown,
 ): Promise<UnifiedSocialDiff> => {
     const data = UnifiedDiffResponse.parse(responseJson);
 
