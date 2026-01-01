@@ -706,7 +706,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // - If gallery view: show album selector (like) OR unlike selector/direct delete
     // - If collection view: toggle like in that collection
     const handleLikeClick = useCallback(() => {
-        if (shouldOnlyServeAlbumsApp) {
+        // Detect public album: albums-only build OR we have public album credentials
+        const isPublicAlbum =
+            shouldOnlyServeAlbumsApp || !!publicAlbumsCredentials;
+
+        if (isPublicAlbum) {
             const file = activeAnnotatedFileRef.current?.file;
             if (!file || !publicAlbumsCredentials) {
                 setOpenPublicLikeModal(true);
