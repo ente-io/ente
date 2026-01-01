@@ -226,7 +226,7 @@ The app will detect and skip already uploaded items, so you can safely drag and 
 
 ### Why are my photo thumbnails missing or incorrect? {#thumbnails}
 
-If thumbnails aren't generating properly, the most common cause is browser security settings blocking canvas access.
+When photos are uploaded on the web app, the most common cause of thumbnails not generating properly is browser security settings blocking canvas access.
 
 **Firefox users:** If you have "block canvas fingerprinting" enabled (`privacy.resistFingerprinting` set to true in `about:config`), Firefox will prevent the app from generating thumbnails.
 
