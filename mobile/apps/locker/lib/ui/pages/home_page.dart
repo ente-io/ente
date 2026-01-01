@@ -198,6 +198,8 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
+  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier =
+      ValueNotifier([]);
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -299,6 +301,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   void dispose() {
     _searchFocusNode.dispose();
     _scrollController.dispose();
+    _displayedFilesNotifier.dispose();
     _deepLinkSubscription?.cancel();
     _triggerLogoutSubscription?.cancel();
     disposeSharing();
@@ -608,10 +611,17 @@ class _HomePageState extends UploaderPageState<HomePage>
                 body: Stack(
                   children: [
                     _buildBody(),
-                    FileSelectionOverlayBar(
-                      selectedFiles: _selectedFiles,
-                      files: _recentFiles,
-                      scrollController: _scrollController,
+                    ValueListenableBuilder<List<EnteFile>>(
+                      valueListenable: _displayedFilesNotifier,
+                      builder: (context, displayedFiles, _) {
+                        return FileSelectionOverlayBar(
+                          selectedFiles: _selectedFiles,
+                          files: displayedFiles.isNotEmpty
+                              ? displayedFiles
+                              : _recentFiles,
+                          scrollController: _scrollController,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -730,6 +740,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                       collections: _filterOutUncategorized(_collections),
                       recentFiles: _recentFiles,
                       selectedFiles: _selectedFiles,
+                      displayedFilesNotifier: _displayedFilesNotifier,
                     ),
                   ],
                 ),

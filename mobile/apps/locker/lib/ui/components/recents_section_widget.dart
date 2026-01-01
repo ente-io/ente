@@ -17,12 +17,14 @@ class RecentsSectionWidget extends StatefulWidget {
   final List<Collection> collections;
   final List<EnteFile> recentFiles;
   final SelectedFiles? selectedFiles;
+  final ValueNotifier<List<EnteFile>>? displayedFilesNotifier;
 
   const RecentsSectionWidget({
     super.key,
     required this.collections,
     required this.recentFiles,
     this.selectedFiles,
+    this.displayedFilesNotifier,
   });
 
   @override
@@ -44,6 +46,15 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     super.initState();
     _originalCollectionOrder = List.from(widget.collections);
     _availableCollections = List.from(widget.collections);
+    // Update notifier with initial displayed files after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateDisplayedFilesNotifier();
+    });
+  }
+
+  void _updateDisplayedFilesNotifier() {
+    if (!mounted) return;
+    widget.displayedFilesNotifier?.value = _displayedFiles;
   }
 
   @override
@@ -61,6 +72,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
         }
       });
       _updateFilteredFiles();
+      // Update notifier when source files change and no filters are active
+      if (!_hasActiveFilters) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _updateDisplayedFilesNotifier();
+        });
+      }
     }
   }
 
@@ -249,6 +266,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       _filteredFiles = filteredFiles;
       _availableCollections = availableCollections;
     });
+
+    // Update notifier with the new displayed files
+    _updateDisplayedFilesNotifier();
   }
 
   Future<Map<int, List<Collection>>> _ensureCollectionsForFiles(
@@ -571,7 +591,7 @@ class _FilterClearButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = colorScheme.warning500;
-    final backgroundColor = accentColor.withOpacity(0.12);
+    final backgroundColor = accentColor.withValues(alpha: 0.12);
 
     return GestureDetector(
       onTap: onTap,

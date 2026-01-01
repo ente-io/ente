@@ -183,9 +183,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                 ListenableBuilder(
                                   listenable: widget.selectedFiles,
                                   builder: (context, child) {
-                                    final isAllSelected =
-                                        widget.selectedFiles.count ==
-                                            widget.files.length;
+                                    // Check if all displayed files are selected,
+                                    // not just if counts match
+                                    final selectedSet = widget.selectedFiles.files;
+                                    final isAllSelected = widget.files.isNotEmpty &&
+                                        widget.files.every(
+                                          (file) => selectedSet.contains(file),
+                                        );
                                     final buttonText = isAllSelected
                                         ? context.l10n.deselectAll
                                         : context.l10n.selectAll;
