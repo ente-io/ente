@@ -1244,6 +1244,14 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     };
 
+    // Handler for keydown: Enter to send, Shift+Enter for new line
+    const handleCommentKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            void handleSend();
+        }
+    };
+
     const handleCollectionSelect = (collectionID: number) => {
         setSelectedCollectionID(collectionID);
         setCollectionDropdownOpen(false);
@@ -2029,6 +2037,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             variant="standard"
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
+                            onKeyDown={handleCommentKeyDown}
                             inputRef={inputRef}
                             slotProps={{ htmlInput: { maxLength: 280 } }}
                         />
