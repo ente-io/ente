@@ -1717,14 +1717,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             } => {
                                 // If anonymous user, check anonUserNames map
                                 if (comment.anonUserID) {
+                                    const anonName =
+                                        anonUserNames?.get(
+                                            comment.anonUserID,
+                                        ) ??
+                                        `Anonymous ${comment.anonUserID.slice(-4)}`;
                                     return {
-                                        name:
-                                            anonUserNames?.get(
-                                                comment.anonUserID,
-                                            ) ??
-                                            `Anonymous ${comment.anonUserID.slice(-4)}`,
-                                        // Use anonUserID for consistent avatar color with LikesSidebar
-                                        avatarColorKey: comment.anonUserID,
+                                        name: anonName,
+                                        // Use name for avatar color (varying length like mobile emails)
+                                        avatarColorKey: anonName,
                                         isMaskedEmail: false,
                                     };
                                 }

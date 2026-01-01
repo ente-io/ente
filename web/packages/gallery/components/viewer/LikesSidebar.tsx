@@ -267,7 +267,6 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                 let actualName: string;
 
                 if (isAnonymous) {
-                    email = r.anonUserID ?? "anonymous";
                     // Use decrypted name from anonUserNames if available
                     const decryptedName = r.anonUserID
                         ? anonUserNames?.get(r.anonUserID)
@@ -275,6 +274,8 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                     actualName =
                         decryptedName ??
                         `Anonymous ${r.anonUserID?.slice(-4) ?? ""}`;
+                    // Use actualName for avatar color (varying length like mobile emails)
+                    email = actualName;
                     userName = isCurrentAnonUser ? "You" : actualName;
                 } else {
                     const emailFromMap = prefetchedUserIDToEmail?.get(r.userID);
