@@ -8,6 +8,7 @@ import {
     Typography,
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { t } from "i18next";
 import React from "react";
 
 // =============================================================================
@@ -127,12 +128,8 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>Say something nice</Title>
-                        <Subtitle>
-                            Share who said it, or keep it as a private
-                            <br />
-                            memory.
-                        </Subtitle>
+                        <Title>{t("say_something_nice")}</Title>
+                        <Subtitle>{t("share_who_said_it")}</Subtitle>
                     </TitleSection>
 
                     <ButtonsSection>
@@ -141,14 +138,14 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
                             fullWidth
                             onClick={onCommentAnonymously}
                         >
-                            Comment anonymously
+                            {t("comment_anonymously")}
                         </AnonymousButton>
                         <SignInButton
                             variant="contained"
                             fullWidth
                             onClick={onJoinAlbumToComment}
                         >
-                            Join album and comment
+                            {t("join_album_and_comment")}
                         </SignInButton>
                     </ButtonsSection>
                 </ContentContainer>

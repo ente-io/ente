@@ -11,10 +11,6 @@ import {
     isSaveComplete,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
-import {
-    FeedSidebar,
-    type FeedItemClickInfo,
-} from "ente-gallery/components/viewer/FeedSidebar";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
@@ -60,11 +56,6 @@ type GalleryBarAndListHeaderProps = Omit<
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
-    files: EnteFile[];
-    /**
-     * Called when a feed item is clicked to navigate to the file.
-     */
-    onFeedItemClick?: (info: FeedItemClickInfo) => void;
 } & Pick<
         CollectionHeaderProps,
         | "onRemotePull"
@@ -129,16 +120,12 @@ export const GalleryBarAndListHeader: React.FC<
     onSelectCollection,
     onSelectPerson,
     setFileListHeader,
-    files,
-    onFeedItemClick,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionShare, props: collectionShareVisibilityProps } =
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
-        useModalVisibility();
-    const { show: showCollectionFeed, props: collectionFeedVisibilityProps } =
         useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
@@ -235,7 +222,6 @@ export const GalleryBarAndListHeader: React.FC<
         collectionNameByID,
         onSelectCollection,
         onSelectPerson,
-        showCollectionFeed,
         // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
@@ -295,21 +281,6 @@ export const GalleryBarAndListHeader: React.FC<
                     <AlbumCastDialog
                         {...collectionCastVisibilityProps}
                         collection={activeCollection}
-                    />
-                    <FeedSidebar
-                        {...collectionFeedVisibilityProps}
-                        collection={activeCollection}
-                        files={files}
-                        currentUserID={user.id}
-                        emailByUserID={emailByUserID}
-                        onItemClick={
-                            onFeedItemClick
-                                ? (info) => {
-                                      collectionFeedVisibilityProps.onClose();
-                                      onFeedItemClick(info);
-                                  }
-                                : undefined
-                        }
                     />
                 </>
             )}

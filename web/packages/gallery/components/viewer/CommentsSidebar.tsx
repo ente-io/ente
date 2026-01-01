@@ -278,26 +278,26 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     const getAuthorName = (): string => {
         // Check if this is the current user (logged in or anonymous)
         if (parentComment.userID === currentUserID) {
-            return "You";
+            return t("you");
         }
         if (
             parentComment.anonUserID &&
             parentComment.anonUserID === currentAnonUserID
         ) {
-            return "You";
+            return t("you");
         }
 
         // For anonymous users, look up in anonUserNames
         if (parentComment.anonUserID) {
             return (
                 anonUserNames?.get(parentComment.anonUserID) ??
-                `Anonymous ${parentComment.anonUserID.slice(-4)}`
+                `${t("anonymous")} ${parentComment.anonUserID.slice(-4)}`
             );
         }
 
         // For registered users, look up email
         const email = userIDToEmail?.get(parentComment.userID);
-        return email ?? "User";
+        return email ?? t("user");
     };
 
     return (
@@ -1649,7 +1649,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             <CircularProgress size={32} />
                         </LoadingContainer>
                     ) : sortedComments.length === 0 ? (
-                        <EmptyMessage>No comments yet</EmptyMessage>
+                        <EmptyMessage>{t("no_comments_yet")}</EmptyMessage>
                     ) : (
                         sortedComments.map((comment, index) => {
                             // Check if this is the current user's comment
@@ -1721,7 +1721,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         anonUserNames?.get(
                                             comment.anonUserID,
                                         ) ??
-                                        `Anonymous ${comment.anonUserID.slice(-4)}`;
+                                        `${t("anonymous")} ${comment.anonUserID.slice(-4)}`;
                                     return {
                                         name: anonName,
                                         // Use name for avatar color (varying length like mobile emails)
@@ -1730,17 +1730,17 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     };
                                 }
                                 // For registered users, use email
-                                const email =
+                                const emailFromMap =
                                     prefetchedUserIDToEmail?.get(
                                         comment.userID,
-                                    ) ?? "User";
+                                    );
+                                const email = emailFromMap ?? t("user");
                                 return {
                                     name: email,
                                     // Use email or userID for avatar color
-                                    avatarColorKey:
-                                        email !== "User"
-                                            ? email
-                                            : String(comment.userID),
+                                    avatarColorKey: emailFromMap
+                                        ? emailFromMap
+                                        : String(comment.userID),
                                     isMaskedEmail: email.startsWith("*"),
                                 };
                             };
@@ -1899,7 +1899,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     })}
                                 >
                                     <DeleteIcon />
-                                    <span>Delete</span>
+                                    <span>{t("delete")}</span>
                                 </StyledMenuItem>
                             )}
                     </StyledMenu>
@@ -1943,21 +1943,21 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                 replyingTo.anonUserID ===
                                                     storedIdentity.anonUserID
                                             ) {
-                                                return "yourself";
+                                                return t("yourself");
                                             }
                                             return (
                                                 anonUserNames?.get(
                                                     replyingTo.anonUserID,
-                                                ) ?? "User"
+                                                ) ?? t("user")
                                             );
                                         }
                                         // Regular user
                                         return replyingTo.userID ===
                                             currentUserID
-                                            ? "yourself"
+                                            ? t("yourself")
                                             : (prefetchedUserIDToEmail?.get(
                                                   replyingTo.userID,
-                                              ) ?? "User");
+                                              ) ?? t("user"));
                                     })()}
                                     ...
                                 </Typography>
@@ -2025,7 +2025,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             multiline
                             minRows={1}
                             autoFocus={!needsIdentityToComment}
-                            placeholder="Say something nice!"
+                            placeholder={t("say_something_nice_placeholder")}
                             variant="standard"
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
@@ -2441,12 +2441,12 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     "& .MuiInputBase-input": {
         padding: 0,
         color: "#000",
-        "&::placeholder": { color: "#666", opacity: 1 },
+        "&::placeholder": { color: "#999", opacity: 1 },
     },
     ...theme.applyStyles("dark", {
         "& .MuiInputBase-input": {
             color: "#fff",
-            "&::placeholder": { color: "rgba(255, 255, 255, 0.7)" },
+            "&::placeholder": { color: "rgba(255, 255, 255, 0.5)" },
         },
     }),
 }));

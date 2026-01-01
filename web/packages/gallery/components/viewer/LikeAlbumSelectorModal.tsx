@@ -1,6 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Dialog, IconButton, styled, Typography } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { t } from "i18next";
 import React from "react";
 
 // =============================================================================
@@ -175,13 +176,15 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>Like photo</Title>
-                        <Subtitle>Select the album to like the photo</Subtitle>
+                        <Title>{t("like_photo")}</Title>
+                        <Subtitle>{t("select_album_to_like")}</Subtitle>
                     </TitleSection>
 
                     <AlbumsSection>
                         <AlbumsHeader>
-                            <AlbumsCount>{albums.length} Albums</AlbumsCount>
+                            <AlbumsCount>
+                                {t("albums_count", { count: albums.length })}
+                            </AlbumsCount>
                             <LikeAllButton
                                 onClick={!allLiked ? onLikeAll : undefined}
                                 sx={{
@@ -200,7 +203,7 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
                                         }),
                                     })}
                                 >
-                                    Like all
+                                    {t("like_all")}
                                 </Typography>
                                 {allLiked ? (
                                     <HeartFilledIcon

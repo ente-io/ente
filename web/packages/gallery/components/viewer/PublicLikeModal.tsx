@@ -8,6 +8,7 @@ import {
     Typography,
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { t } from "i18next";
 import React from "react";
 
 // =============================================================================
@@ -115,11 +116,11 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>Give it a like</Title>
+                        <Title>{t("give_it_a_like")}</Title>
                         <Subtitle>
-                            Let them know who liked it
+                            {t("let_them_know_who_liked")}
                             <br />
-                            Or keep it just between you and the memory.
+                            {t("keep_it_private")}
                         </Subtitle>
                     </TitleSection>
 
@@ -129,14 +130,14 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                             fullWidth
                             onClick={onLikeAnonymously}
                         >
-                            Like anonymously
+                            {t("like_anonymously")}
                         </AnonymousButton>
                         <SignInButton
                             variant="contained"
                             fullWidth
                             onClick={onJoinAlbumToLike}
                         >
-                            Join album and like
+                            {t("join_album_and_like")}
                         </SignInButton>
                     </ButtonsSection>
                 </ContentContainer>

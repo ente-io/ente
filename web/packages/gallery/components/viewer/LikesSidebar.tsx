@@ -274,18 +274,18 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                         : undefined;
                     actualName =
                         decryptedName ??
-                        `Anonymous ${r.anonUserID?.slice(-4) ?? ""}`;
+                        `${t("anonymous")} ${r.anonUserID?.slice(-4) ?? ""}`;
                     // Use actualName for avatar color (varying length like mobile emails)
                     email = actualName;
-                    userName = isCurrentAnonUser ? "You" : actualName;
+                    userName = isCurrentAnonUser ? t("you") : actualName;
                 } else {
                     const emailFromMap = prefetchedUserIDToEmail?.get(r.userID);
                     // Use userID as string for unique avatar color
                     email = emailFromMap ?? String(r.userID);
                     // In public albums (no currentUserID), non-anonymous
                     // users are album owner or collaborators
-                    actualName = emailFromMap ?? "Anonymous";
-                    userName = isCurrentUser ? "You" : actualName;
+                    actualName = emailFromMap ?? t("anonymous");
+                    userName = isCurrentUser ? t("you") : actualName;
                 }
 
                 // Check if email is masked (starts with *)
@@ -584,7 +584,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                             <CircularProgress size={32} />
                         </LoadingContainer>
                     ) : likers.length === 0 ? (
-                        <EmptyMessage>No likes yet</EmptyMessage>
+                        <EmptyMessage>{t("no_likes_yet")}</EmptyMessage>
                     ) : (
                         likers.map((liker) => (
                             <LikerRow key={liker.id}>

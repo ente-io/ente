@@ -9,6 +9,7 @@ import {
     Typography,
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { t } from "i18next";
 import React, { useState } from "react";
 
 // =============================================================================
@@ -219,17 +220,15 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>Add your name</Title>
+                        <Title>{t("add_your_name")}</Title>
                         <Subtitle>
-                            Add your name so your friends
-                            <br />
-                            know who {isComment ? "said it" : "liked it"}.
+                            {t("add_your_name_subtitle")}
                         </Subtitle>
                     </TitleSection>
 
                     <StyledTextField
                         fullWidth
-                        placeholder="Name...."
+                        placeholder={t("name_placeholder")}
                         variant="standard"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -249,7 +248,7 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                         onClick={handleSubmit}
                         hasName={!!name.trim()}
                     >
-                        {isComment ? "Set name" : "Set name and like"}
+                        {isComment ? t("set_name") : t("set_name_and_like")}
                     </SubmitButton>
                 </ContentContainer>
             </DialogWrapper>

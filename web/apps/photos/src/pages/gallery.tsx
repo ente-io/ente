@@ -45,7 +45,6 @@ import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
-import { type FeedItemClickInfo } from "ente-gallery/components/viewer/FeedSidebar";
 import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
@@ -638,36 +637,6 @@ const Page: React.FC = () => {
         showLoadingBar();
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
-
-    /**
-     * Handle click on a feed item to navigate to the file viewer.
-     */
-    const handleFeedItemClick = useCallback(
-        (info: FeedItemClickInfo) => {
-            // Find the file index in filteredFiles by fileID
-            const fileIndex = filteredFiles.findIndex(
-                (f) => f.id === info.fileID,
-            );
-            if (fileIndex === -1) {
-                // File not found in current view - might need to switch to the collection
-                log.warn(
-                    `Feed navigation: file ${info.fileID} not found in current view`,
-                );
-                return;
-            }
-
-            // Determine which sidebar to open
-            const sidebar: FileViewerInitialSidebar =
-                info.type === "liked_photo" ? "likes" : "comments";
-
-            setPendingFileNavigation({
-                fileIndex,
-                sidebar,
-                commentID: info.commentID,
-            });
-        },
-        [filteredFiles],
-    );
 
     const handlePendingNavigationConsumed = useCallback(() => {
         setPendingFileNavigation(undefined);
@@ -1380,8 +1349,6 @@ const Page: React.FC = () => {
                 setActiveCollectionID={handleShowCollectionSummaryWithID}
                 onRemotePull={remotePull}
                 onSelectPerson={handleSelectPerson}
-                files={filteredFiles}
-                onFeedItemClick={handleFeedItemClick}
             />
 
             <Upload

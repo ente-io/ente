@@ -263,7 +263,7 @@ const getUserDisplayName = (
     anonUserID?: string,
 ): string => {
     if (userID === -1 || userID === 0 || anonUserID) {
-        return userName || "Anonymous";
+        return userName || t("anonymous");
     }
     return userName;
 };
@@ -300,10 +300,10 @@ const processFeedItems = (
         if (anonUserID) {
             return (
                 anonUserNames.get(anonUserID) ??
-                `Anonymous ${anonUserID.slice(-4)}`
+                `${t("anonymous")} ${anonUserID.slice(-4)}`
             );
         }
-        return maskedEmails.get(userID) ?? "Unknown";
+        return maskedEmails.get(userID) ?? t("unknown_user");
     };
 
     // Helper to get avatar color key
@@ -478,17 +478,17 @@ const processFeedItems = (
 const getActionText = (item: PublicFeedItem): string => {
     switch (item.type) {
         case "liked_photo":
-            return "Liked a photo";
+            return t("liked_a_photo");
         case "liked_video":
-            return "Liked a video";
+            return t("liked_a_video");
         case "commented_photo":
-            return "Commented on a photo";
+            return t("commented_on_a_photo");
         case "commented_video":
-            return "Commented on a video";
+            return t("commented_on_a_video");
         case "replied_comment":
-            return "Replied to a comment";
+            return t("replied_to_a_comment");
         case "liked_comment":
-            return "Liked a comment";
+            return t("liked_a_comment");
     }
 };
 
