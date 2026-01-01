@@ -1,7 +1,7 @@
 import "dart:async";
 import "dart:math";
 
-import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -14,10 +14,12 @@ import "package:photos/ui/common/loading_widget.dart";
 class AlbumHorizontalList extends StatefulWidget {
   final Future<List<Collection>> Function() collectionsFuture;
   final bool? hasVerifiedLock;
+  final VoidCallback? onViewAllTapped;
 
   const AlbumHorizontalList(
     this.collectionsFuture, {
     this.hasVerifiedLock,
+    this.onViewAllTapped,
     super.key,
   });
 
@@ -69,18 +71,46 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
           if (snapshot.data!.isEmpty) {
             return const SizedBox.shrink();
           }
-          final collections = snapshot.data as List<Collection>;
+          final allCollections = snapshot.data as List<Collection>;
+          final hasMore = allCollections.length > 3;
+          final displayCollections =
+              hasMore ? allCollections.sublist(0, 3) : allCollections;
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 24, top: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Text(
-                    AppLocalizations.of(context).albums,
-                    style: getEnteTextTheme(context).large,
+                GestureDetector(
+                  onTap: hasMore && widget.onViewAllTapped != null
+                      ? widget.onViewAllTapped
+                      : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context).albums,
+                          style: getEnteTextTheme(context).large,
+                        ),
+                        if (hasMore && widget.onViewAllTapped != null)
+                          Container(
+                            color: Colors.transparent,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 0, 0, 0),
+                              child: Icon(
+                                Icons.chevron_right_outlined,
+                                color: getEnteColorScheme(context)
+                                    .blurStrokePressed,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
                 Align(
@@ -89,12 +119,12 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                     height: sideOfThumbnail + 46,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: collections.length,
+                      itemCount: displayCollections.length,
                       padding: const EdgeInsets.symmetric(
                         horizontal: horizontalPadding / 2,
                       ),
                       itemBuilder: (context, index) {
-                        final item = collections[index];
+                        final item = displayCollections[index];
                         return Padding(
                           key: ValueKey('horizontal_list_${item.id}'),
                           padding: const EdgeInsets.only(

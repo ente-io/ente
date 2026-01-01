@@ -926,10 +926,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
       final int? userID = Configuration.instance.getUserID();
       final bool isOwner = userID == collection.owner.id;
-      final bool enableAdminRole = flagService.enableAdminRole;
       final CollectionParticipantRole role = collection.getRole(userID ?? -1);
-      final bool isAdmin =
-          enableAdminRole && role == CollectionParticipantRole.admin;
+      final bool isAdmin = role == CollectionParticipantRole.admin;
       final bool canManageParticipants = isOwner || isAdmin;
       if (canManageParticipants) {
         final bool shouldOpenManageLink =

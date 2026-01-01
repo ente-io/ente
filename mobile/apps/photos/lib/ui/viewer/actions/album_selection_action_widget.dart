@@ -193,10 +193,8 @@ class _AlbumSelectionActionWidgetState
     final actions = <ActionTypesToShow>[
       ActionTypesToShow.addViewer,
       ActionTypesToShow.addCollaborator,
+      ActionTypesToShow.addAdmin,
     ];
-    if (flagService.enableAdminRole) {
-      actions.add(ActionTypesToShow.addAdmin);
-    }
     await routeToPage(
       context,
       AddParticipantPage(widget.selectedAlbums.albums.toList(), actions),

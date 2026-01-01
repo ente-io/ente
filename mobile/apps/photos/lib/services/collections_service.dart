@@ -440,9 +440,6 @@ class CollectionsService {
     if (collection.isOwner(userID)) {
       return true;
     }
-    if (!flagService.enableAdminRole) {
-      return false;
-    }
     return collection.isAdmin(userID);
   }
 
