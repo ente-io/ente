@@ -1916,93 +1916,93 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 <InputContainer>
                     {replyingTo && (
                         <ReplyingToBar>
-                            <Box
-                                sx={(theme) => ({
-                                    borderLeft: "3px solid #ccc",
-                                    paddingLeft: "10px",
-                                    paddingRight: "24px",
-                                    ...theme.applyStyles("dark", {
-                                        borderLeft:
-                                            "3px solid rgba(255, 255, 255, 0.3)",
-                                    }),
-                                })}
-                            >
-                                <Typography
+                            <ReplyingToContent>
+                                <Box
+                                    sx={{
+                                        flex: 1,
+                                        minWidth: 0,
+                                    }}
+                                >
+                                    <Typography
+                                        sx={(theme) => ({
+                                            fontSize: 12,
+                                            color: "#666",
+                                            ...theme.applyStyles("dark", {
+                                                color: "rgba(255, 255, 255, 0.7)",
+                                            }),
+                                        })}
+                                    >
+                                        Replying to{" "}
+                                        {(() => {
+                                            // Check for anonymous user
+                                            if (replyingTo.anonUserID) {
+                                                const storedIdentity =
+                                                    selectedCollectionInfo
+                                                        ? getStoredAnonIdentity(
+                                                              selectedCollectionInfo.id,
+                                                          )
+                                                        : undefined;
+                                                if (
+                                                    storedIdentity &&
+                                                    replyingTo.anonUserID ===
+                                                        storedIdentity.anonUserID
+                                                ) {
+                                                    return t("yourself");
+                                                }
+                                                return (
+                                                    anonUserNames?.get(
+                                                        replyingTo.anonUserID,
+                                                    ) ?? t("user")
+                                                );
+                                            }
+                                            // Regular user
+                                            return replyingTo.userID ===
+                                                currentUserID
+                                                ? t("yourself")
+                                                : (prefetchedUserIDToEmail?.get(
+                                                      replyingTo.userID,
+                                                  ) ?? t("user"));
+                                        })()}
+                                        ...
+                                    </Typography>
+                                    <Typography
+                                        sx={(theme) => ({
+                                            fontSize: 14,
+                                            color: "#000",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                            ...theme.applyStyles("dark", {
+                                                color: "#fff",
+                                            }),
+                                        })}
+                                    >
+                                        {truncateCommentText(replyingTo.text)}
+                                    </Typography>
+                                </Box>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                        setReplyingTo(null);
+                                        inputRef.current?.focus();
+                                    }}
                                     sx={(theme) => ({
-                                        fontSize: 12,
                                         color: "#666",
+                                        p: 0,
+                                        mt: -0.25,
+                                        mr: -0.25,
+                                        flexShrink: 0,
+                                        "&:hover": {
+                                            backgroundColor: "transparent",
+                                        },
                                         ...theme.applyStyles("dark", {
                                             color: "rgba(255, 255, 255, 0.7)",
                                         }),
                                     })}
                                 >
-                                    Replying to{" "}
-                                    {(() => {
-                                        // Check for anonymous user
-                                        if (replyingTo.anonUserID) {
-                                            const storedIdentity =
-                                                selectedCollectionInfo
-                                                    ? getStoredAnonIdentity(
-                                                          selectedCollectionInfo.id,
-                                                      )
-                                                    : undefined;
-                                            if (
-                                                storedIdentity &&
-                                                replyingTo.anonUserID ===
-                                                    storedIdentity.anonUserID
-                                            ) {
-                                                return t("yourself");
-                                            }
-                                            return (
-                                                anonUserNames?.get(
-                                                    replyingTo.anonUserID,
-                                                ) ?? t("user")
-                                            );
-                                        }
-                                        // Regular user
-                                        return replyingTo.userID ===
-                                            currentUserID
-                                            ? t("yourself")
-                                            : (prefetchedUserIDToEmail?.get(
-                                                  replyingTo.userID,
-                                              ) ?? t("user"));
-                                    })()}
-                                    ...
-                                </Typography>
-                                <Typography
-                                    sx={(theme) => ({
-                                        fontSize: 14,
-                                        color: "#000",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        whiteSpace: "nowrap",
-                                        ...theme.applyStyles("dark", {
-                                            color: "#fff",
-                                        }),
-                                    })}
-                                >
-                                    {truncateCommentText(replyingTo.text)}
-                                </Typography>
-                            </Box>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    setReplyingTo(null);
-                                    inputRef.current?.focus();
-                                }}
-                                sx={(theme) => ({
-                                    position: "absolute",
-                                    top: 8,
-                                    right: 8,
-                                    color: "#666",
-                                    p: 0.5,
-                                    ...theme.applyStyles("dark", {
-                                        color: "rgba(255, 255, 255, 0.7)",
-                                    }),
-                                })}
-                            >
-                                <CloseIcon sx={{ fontSize: 16 }} />
-                            </IconButton>
+                                    <CloseIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                            </ReplyingToContent>
                         </ReplyingToBar>
                     )}
                     <InputWrapper
@@ -2417,8 +2417,21 @@ const InputContainer = styled(Box)(({ theme }) => ({
 }));
 
 const ReplyingToBar = styled(Box)(() => ({
-    position: "relative",
-    padding: "20px 16px 0 16px",
+    padding: "12px 12px 0 12px",
+}));
+
+const ReplyingToContent = styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.06)",
+    borderRadius: 12,
+    padding: "10px 10px 10px 12px",
+    borderLeft: "4px solid #ccc",
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        borderLeft: "4px solid rgba(255, 255, 255, 0.3)",
+    }),
 }));
 
 const InputWrapper = styled(Box)(({ theme }) => ({
