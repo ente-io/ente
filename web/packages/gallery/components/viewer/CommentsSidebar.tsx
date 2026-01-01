@@ -2031,6 +2031,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
                             inputRef={inputRef}
+                            slotProps={{ htmlInput: { maxLength: 280 } }}
                         />
                     </InputWrapper>
                     <SendButton onClick={handleSend} disabled={sending}>

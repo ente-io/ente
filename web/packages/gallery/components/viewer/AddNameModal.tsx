@@ -240,6 +240,7 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                             }
                         }}
                         autoFocus
+                        slotProps={{ htmlInput: { maxLength: 50 } }}
                     />
 
                     <SubmitButton
