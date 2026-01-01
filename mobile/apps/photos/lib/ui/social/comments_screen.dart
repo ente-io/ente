@@ -371,10 +371,26 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     });
   }
 
+  Collection? get _currentCollection {
+    if (_sharedCollections.isEmpty) {
+      return null;
+    }
+    return _sharedCollections
+        .firstWhere(
+          (c) => c.collection.id == _selectedCollectionID,
+          orElse: () => _sharedCollections.first,
+        )
+        .collection;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final selectedCollection = _currentCollection;
+    final canModerateAnonComments = selectedCollection != null &&
+        (selectedCollection.isOwner(_currentUserID) ||
+            selectedCollection.isAdmin(_currentUserID));
 
     return Scaffold(
       appBar: AppBar(
@@ -437,6 +453,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
                           comment: comment,
                           user: _getUserForComment(comment),
                           isOwnComment: comment.userID == _currentUserID,
+                          canModerateAnonComments: canModerateAnonComments,
                           currentUserID: _currentUserID,
                           collectionID: _selectedCollectionID,
                           isHighlighted: comment.id == _highlightedCommentID,
