@@ -51,6 +51,11 @@ interface TripLayoutProps {
     accessToken?: string;
     collectionKey?: string;
     credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+    /**
+     * `true` if comments/reactions are enabled on the public link.
+     * When `false`, the feed button will be hidden.
+     */
+    enableComment?: boolean;
 }
 
 export const TripLayout: React.FC<TripLayoutProps> = ({
@@ -65,6 +70,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     accessToken,
     collectionKey,
     credentials,
+    enableComment = true,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
@@ -337,7 +343,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
-                        onShowFeed={showPublicFeed}
+                        onShowFeed={enableComment ? showPublicFeed : undefined}
                         collectionTitle={collectionTitle}
                         publicCollection={collection}
                         accessToken={accessToken}
@@ -349,7 +355,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
-                        onShowFeed={showPublicFeed}
+                        onShowFeed={enableComment ? showPublicFeed : undefined}
                         publicCollection={collection}
                         accessToken={accessToken}
                         collectionKey={collectionKey}

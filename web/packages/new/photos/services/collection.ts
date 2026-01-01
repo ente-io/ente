@@ -1435,7 +1435,7 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  */
 export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
-    "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
+    "enableCollect" | "enableJoin" | "enableComment" | "validTill" | "deviceLimit"
 >;
 
 /**
@@ -1455,7 +1455,11 @@ export const createPublicURL = async (
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({ collectionID, ...attributes }),
+        body: JSON.stringify({
+            collectionID,
+            enableComment: true,
+            ...attributes,
+        }),
     });
     ensureOk(res);
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;

@@ -490,6 +490,9 @@ export default function PublicCollectionGallery() {
         setUploadTypeSelectorView(false);
     };
 
+    const commentsEnabled =
+        publicCollection?.publicURLs[0]?.enableComment ?? false;
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -501,7 +504,9 @@ export default function PublicCollectionGallery() {
                                   publicFiles,
                                   downloadEnabled,
                                   onAddSaveGroup,
-                                  onShowFeed: showPublicFeed,
+                                  onShowFeed: commentsEnabled
+                                      ? showPublicFeed
+                                      : undefined,
                               }}
                           />
                       ),
@@ -514,6 +519,7 @@ export default function PublicCollectionGallery() {
             publicFiles,
             downloadEnabled,
             showPublicFeed,
+            commentsEnabled,
         ],
     );
 
@@ -581,6 +587,7 @@ export default function PublicCollectionGallery() {
                     accessToken={credentials.current.accessToken}
                     collectionKey={collectionKey.current}
                     credentials={credentials}
+                    enableComment={commentsEnabled}
                 />
             ) : (
                 <>
@@ -646,6 +653,7 @@ export default function PublicCollectionGallery() {
                         publicAlbumsCredentials={credentials.current}
                         collectionKey={collectionKey.current}
                         onJoinAlbum={handleJoinAlbum}
+                        enableComment={commentsEnabled}
                         pendingFileIndex={pendingFileNavigation?.fileIndex}
                         pendingFileSidebar={pendingFileNavigation?.sidebar}
                         pendingHighlightCommentID={

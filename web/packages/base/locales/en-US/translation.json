@@ -444,6 +444,7 @@
     "allow_downloads": "Allow downloads",
     "allow_adding_photos": "Allow adding photos",
     "allow_adding_photos_hint": "Allow people with the link to also add photos to the shared album.",
+    "enable_comments": "Comments and reactions",
     "device_limit": "Device limit",
     "none": "None",
     "link_expiry": "Link expiry",

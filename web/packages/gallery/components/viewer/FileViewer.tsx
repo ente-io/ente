@@ -346,6 +346,13 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Should trigger the join album flow (with mobile deep link fallback).
      */
     onJoinAlbum?: () => void;
+    /**
+     * `true` if comments are enabled on the public link.
+     *
+     * When `false`, the comment button and comments sidebar will be hidden.
+     * Defaults to `true`.
+     */
+    enableComment?: boolean;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -388,6 +395,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     publicAlbumsCredentials,
     collectionKey,
     onJoinAlbum,
+    enableComment = true,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -2182,6 +2190,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 initialIndex,
                 haveUser,
                 showSocialButtons,
+                enableComment,
                 showFullscreenButton,
                 delegate: delegateRef.current!,
                 onClose: () => {

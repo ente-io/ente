@@ -144,6 +144,13 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     showSocialButtons: boolean;
     /**
+     * `true` if comments are enabled on the public link.
+     *
+     * When `false`, the comment button will be hidden even if
+     * {@link showSocialButtons} is `true`.
+     */
+    enableComment: boolean;
+    /**
      * Dynamic callbacks.
      *
      * The extra level of indirection allows these to be updated without
@@ -241,6 +248,7 @@ export class FileViewerPhotoSwipe {
         initialIndex,
         haveUser,
         showSocialButtons,
+        enableComment,
         showFullscreenButton,
         delegate,
         onClose,
@@ -1516,12 +1524,16 @@ export class FileViewerPhotoSwipe {
                         // Show buttons if: static showSocialButtons is true
                         // (public album) OR delegate says this file should
                         // show buttons (file in shared collection).
+                        // For public albums (no logged-in user), also check
+                        // if comments are enabled on the public link.
                         const af = currentAnnotatedFile();
                         // Guard: af may be undefined during initial setup.
                         if (!af) return;
-                        const shouldShow =
+                        const baseShow =
                             showSocialButtons ||
                             delegate.shouldShowSocialButtons(af);
+                        // For public albums (!haveUser), also require enableComment
+                        const shouldShow = baseShow && (haveUser || enableComment);
                         actionButtonsEl.style.display = shouldShow
                             ? "flex"
                             : "none";
