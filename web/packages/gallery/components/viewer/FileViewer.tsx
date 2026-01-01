@@ -721,13 +721,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const collectionId = file.collectionID;
             const storedAnonIdentity = getStoredAnonIdentity(collectionId);
 
-            // Check if already liked by current anon user
+            // Check if already liked by current anon user (file-level only, not comment likes)
             const fileReactionsMap = allReactionsRef.current.get(fileId);
             const collectionReactions =
                 fileReactionsMap?.get(collectionId) ?? [];
             const existingReaction = collectionReactions.find(
                 (r) =>
                     r.reactionType === "green_heart" &&
+                    !r.commentID &&
                     storedAnonIdentity &&
                     r.anonUserID === storedAnonIdentity.anonUserID,
             );
