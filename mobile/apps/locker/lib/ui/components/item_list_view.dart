@@ -102,15 +102,13 @@ class _ItemListViewState extends State<ItemListView> {
   }
 
   void _toggleCollectionSelection(Collection collection) {
-    // TODO(aman): Re-enable collection multi-select when bulk actions return.
-    return;
-    // HapticFeedback.lightImpact();
-    // widget.selectedCollections!.toggleSelection(collection);
+    HapticFeedback.lightImpact();
+    widget.selectedCollections!.toggleSelection(collection);
   }
 
   void _toggleFileSelection(EnteFile file) {
     if (!widget.selectionEnabled) {
-      showToast(context, "Multi-select for shared albums coming soon");
+      showToast(context, "Multi-select for shared files coming soon");
       return;
     }
     HapticFeedback.lightImpact();
@@ -127,10 +125,12 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
-    final bottomPadding =
-        (widget.selectedFiles != null && widget.selectionEnabled)
-            ? ItemListView._selectionOverlayPadding
-            : 0.0;
+    final hasFileSelection =
+        widget.selectedFiles != null && widget.selectionEnabled;
+    final hasCollectionSelection = widget.selectedCollections != null;
+    final bottomPadding = (hasFileSelection || hasCollectionSelection)
+        ? ItemListView._selectionOverlayPadding
+        : 0.0;
 
     return _buildListView(bottomPadding: bottomPadding);
   }
