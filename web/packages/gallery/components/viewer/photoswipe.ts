@@ -1190,6 +1190,8 @@ export class FileViewerPhotoSwipe {
             }
 
             const af = currentAnnotatedFile();
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (!af) return; // Guard against undefined during initialization
             const isLiked = delegate.isLiked(af);
 
             // Show fill (green) if liked, show outline (white) if not liked
@@ -1209,6 +1211,8 @@ export class FileViewerPhotoSwipe {
             }
 
             const af = currentAnnotatedFile();
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (!af) return; // Guard against undefined during initialization
             const count = delegate.getCommentCount(af);
             commentCountElement.textContent = String(count);
         };

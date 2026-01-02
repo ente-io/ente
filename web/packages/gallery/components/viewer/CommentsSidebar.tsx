@@ -504,6 +504,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [hasAnonIdentity, setHasAnonIdentity] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
+    const hasLoadedRef = useRef(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const commentsContainerRef = useRef<HTMLDivElement>(null);
     // Ref to preserve isLiked state during context menu close animation
@@ -544,10 +545,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     }, [replyingTo]);
 
-    // Reset highlight tracking when sidebar closes
+    // Reset tracking refs when sidebar closes
     useEffect(() => {
         if (!open) {
             hasScrolledToHighlightRef.current = false;
+            hasLoadedRef.current = false;
         }
     }, [open]);
 
@@ -770,7 +772,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const loadComments = useCallback(() => {
         if (!file || !open || !prefetchedComments) return;
 
-        setLoading(true);
+        // Only show loading spinner on initial load, not during polling refresh
+        const isInitialLoad = !hasLoadedRef.current;
+        if (isInitialLoad) {
+            setLoading(true);
+        }
 
         try {
             // Use prefetched data
@@ -820,7 +826,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         } catch (e) {
             log.error("Failed to load comments", e);
         } finally {
-            setLoading(false);
+            if (isInitialLoad) {
+                hasLoadedRef.current = true;
+                setLoading(false);
+            }
         }
     }, [
         file,

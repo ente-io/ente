@@ -10,6 +10,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
+import { useInterval } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
@@ -25,7 +26,7 @@ import {
     type PublicFeedReaction,
 } from "ente-new/albums/services/public-reaction";
 import { t } from "i18next";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // =============================================================================
 // Icons
@@ -716,36 +717,40 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
         }
     }, [open, comments, reactions, files]);
 
-    // Fetch social data when sidebar opens
+    // Polling interval for refreshing feed data (5 seconds)
+    const FEED_REFRESH_INTERVAL_MS = 5_000;
+
+    // Fetch social data (used for both initial load and periodic refresh)
+    const fetchSocialData = useCallback(async () => {
+        try {
+            const [feedData, anonProfiles, participantEmails] =
+                await Promise.all([
+                    getPublicAlbumFeed(credentials, collectionKey),
+                    getPublicAnonProfiles(credentials, collectionKey),
+                    getPublicParticipantsMaskedEmails(credentials),
+                ]);
+            setComments(feedData.comments);
+            setReactions(feedData.reactions);
+            setAnonUserNames(anonProfiles);
+            setMaskedEmails(participantEmails);
+        } catch (e) {
+            log.error("Failed to fetch public album feed", e);
+        }
+    }, [credentials, collectionKey]);
+
+    // Initial fetch when sidebar opens
     useEffect(() => {
-        const fetchSocialData = async () => {
-            if (!open) return;
+        if (!open) return;
 
-            setIsLoading(true);
-            try {
-                const [feedData, anonProfiles, participantEmails] =
-                    await Promise.all([
-                        getPublicAlbumFeed(credentials, collectionKey),
-                        getPublicAnonProfiles(credentials, collectionKey),
-                        getPublicParticipantsMaskedEmails(credentials),
-                    ]);
-                setComments(feedData.comments);
-                setReactions(feedData.reactions);
-                setAnonUserNames(anonProfiles);
-                setMaskedEmails(participantEmails);
-            } catch (e) {
-                log.error("Failed to fetch public album feed", e);
-                setComments([]);
-                setReactions([]);
-                setAnonUserNames(new Map());
-                setMaskedEmails(new Map());
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        setIsLoading(true);
+        void fetchSocialData().finally(() => setIsLoading(false));
+    }, [open, fetchSocialData]);
 
-        void fetchSocialData();
-    }, [open, credentials, collectionKey]);
+    // Periodic refresh while sidebar is open
+    useInterval(
+        fetchSocialData,
+        open && !isLoading ? FEED_REFRESH_INTERVAL_MS : null,
+    );
 
     const feedItems = useMemo(
         () =>

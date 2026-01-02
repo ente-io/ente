@@ -26,7 +26,7 @@ import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useInterval, useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
@@ -508,6 +508,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     useEffect(() => {
         fileNormalCollectionIDsRef.current = fileNormalCollectionIDs;
     }, [fileNormalCollectionIDs]);
+
+    // Cache for collection keys to avoid refetching during polling
+    const collectionCacheRef = useRef<
+        Map<
+            number,
+            {
+                key: string;
+                ownerID: number;
+                ownerEmail?: string;
+                sharees: { id: number; email?: string }[];
+                hasPublicURLs: boolean;
+            }
+        >
+    >(new Map());
 
     // Track whether we've already opened the initial sidebar for this open
     const hasOpenedInitialSidebarRef = useRef(false);
@@ -1981,6 +1995,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         const collection =
                             await getCollectionByID(collectionId);
 
+                        // Cache collection data for polling refresh
+                        collectionCacheRef.current.set(collectionId, {
+                            key: collection.key,
+                            ownerID: collection.owner.id,
+                            ownerEmail: collection.owner.email,
+                            sharees: collection.sharees.map((s) => ({
+                                id: s.id,
+                                email: s.email,
+                            })),
+                            hasPublicURLs: collection.publicURLs.length > 0,
+                        });
+
                         // Build user ID to email map from collection owner and sharees
                         if (collection.owner.email) {
                             newUserIDToEmail.set(
@@ -2199,6 +2225,213 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             psRef.current?.refreshCurrentSlideCommentCountIfNeeded();
         }
     }, [fileComments, files, open]);
+
+    // Polling interval for refreshing social data (5 seconds)
+    const SOCIAL_REFRESH_INTERVAL_MS = 5_000;
+
+    // Refresh social data for logged-in users (uses cached collection keys)
+    const refreshSocialData = useCallback(async () => {
+        if (!activeFileID) return;
+
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+        const shouldFetch =
+            showSocialButtons ||
+            (isGalleryView && isFileInSharedCollection(activeFileID));
+        if (!shouldFetch) return;
+
+        try {
+            const commentsMap = new Map<number, Comment[]>();
+            const reactionsMap = new Map<number, UnifiedReaction[]>();
+            const newAnonUserNames = new Map<string, string>();
+
+            const collectionIDs = isGalleryView
+                ? (fileNormalCollectionIDs?.get(activeFileID) ?? [])
+                : [activeCollectionID];
+
+            for (const collectionId of collectionIDs) {
+                // Use cached collection data (populated during initial fetch)
+                const cached = collectionCacheRef.current.get(collectionId);
+                if (!cached) continue; // Skip if not in cache
+
+                try {
+                    const { comments, reactions } = await getUnifiedSocialDiff(
+                        collectionId,
+                        activeFileID,
+                        cached.key,
+                    );
+
+                    commentsMap.set(collectionId, comments);
+                    reactionsMap.set(collectionId, reactions);
+
+                    if (cached.hasPublicURLs) {
+                        try {
+                            const anonProfiles = await getAnonProfiles(
+                                collectionId,
+                                cached.key,
+                            );
+                            for (const [anonUserID, userName] of anonProfiles) {
+                                newAnonUserNames.set(anonUserID, userName);
+                            }
+                        } catch {
+                            // Ignore
+                        }
+                    }
+                } catch {
+                    // Skip failed collections
+                }
+            }
+
+            setFileComments((prev) => {
+                const next = new Map(prev);
+                next.set(activeFileID, commentsMap);
+                return next;
+            });
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                next.set(activeFileID, reactionsMap);
+                return next;
+            });
+
+            setAnonUserNames((prev) => {
+                const next = new Map(prev);
+                for (const [id, name] of newAnonUserNames) {
+                    next.set(id, name);
+                }
+                return next;
+            });
+        } catch (e) {
+            log.error("Failed to refresh social data", e);
+        }
+    }, [
+        activeFileID,
+        activeCollectionID,
+        fileNormalCollectionIDs,
+        showSocialButtons,
+        isFileInSharedCollection,
+    ]);
+
+    // Refresh social data for public albums
+    const refreshPublicSocialData = useCallback(async () => {
+        if (
+            !activeFileID ||
+            !publicAlbumsCredentials ||
+            !collectionKey ||
+            !enableComment
+        )
+            return;
+
+        const file = files.find((f) => f.id === activeFileID);
+        if (!file) return;
+
+        try {
+            const { comments, reactions } = await getPublicSocialDiff(
+                publicAlbumsCredentials,
+                activeFileID,
+                collectionKey,
+            );
+
+            const commentsForFile: Comment[] = comments.map((c) => ({
+                id: c.id,
+                collectionID: c.collectionID,
+                fileID: c.fileID,
+                parentCommentID: c.parentCommentID,
+                userID: c.userID,
+                anonUserID: c.anonUserID,
+                text: c.text,
+                isDeleted: c.isDeleted,
+                createdAt: c.createdAt,
+                updatedAt: c.updatedAt,
+            }));
+
+            const commentsMap = new Map<number, Comment[]>();
+            commentsMap.set(file.collectionID, commentsForFile);
+
+            setFileComments((prev) => {
+                const next = new Map(prev);
+                next.set(activeFileID, commentsMap);
+                return next;
+            });
+
+            const unifiedReactions: UnifiedReaction[] = reactions.map((r) => ({
+                id: r.id,
+                collectionID: file.collectionID,
+                fileID: r.fileID,
+                commentID: r.commentID,
+                reactionType: r.reactionType,
+                userID: r.userID,
+                anonUserID: r.anonUserID,
+                isDeleted: r.isDeleted,
+                createdAt: r.createdAt,
+                updatedAt: r.updatedAt,
+            }));
+
+            const reactionsMap = new Map<number, UnifiedReaction[]>();
+            reactionsMap.set(file.collectionID, unifiedReactions);
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                next.set(activeFileID, reactionsMap);
+                return next;
+            });
+
+            try {
+                const anonProfiles = await getPublicAnonProfiles(
+                    publicAlbumsCredentials,
+                    collectionKey,
+                );
+                setAnonUserNames((prev) => {
+                    const next = new Map(prev);
+                    for (const [id, name] of anonProfiles) {
+                        next.set(id, name);
+                    }
+                    return next;
+                });
+            } catch {
+                // Ignore
+            }
+
+            try {
+                const participantEmails =
+                    await getPublicParticipantsMaskedEmails(
+                        publicAlbumsCredentials,
+                    );
+                setUserIDToEmail((prev) => {
+                    const next = new Map(prev);
+                    for (const [id, email] of participantEmails) {
+                        next.set(id, email);
+                    }
+                    return next;
+                });
+            } catch {
+                // Ignore
+            }
+        } catch (e) {
+            log.error("Failed to refresh public social data", e);
+        }
+    }, [
+        activeFileID,
+        publicAlbumsCredentials,
+        collectionKey,
+        enableComment,
+        files,
+    ]);
+
+    // Poll for social data when comments or likes sidebar is open (logged-in users)
+    useInterval(
+        refreshSocialData,
+        (openComments || openLikes) && !publicAlbumsCredentials
+            ? SOCIAL_REFRESH_INTERVAL_MS
+            : null,
+    );
+
+    // Poll for social data when comments or likes sidebar is open (public albums)
+    useInterval(
+        refreshPublicSocialData,
+        (openComments || openLikes) && publicAlbumsCredentials
+            ? SOCIAL_REFRESH_INTERVAL_MS
+            : null,
+    );
 
     useEffect(() => {
         if (open) {
