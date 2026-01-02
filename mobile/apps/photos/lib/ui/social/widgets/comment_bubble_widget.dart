@@ -59,11 +59,16 @@ class CommentBubbleWidget extends StatefulWidget {
 
 class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     with SingleTickerProviderStateMixin {
+  static const double _replyThreshold = 60.0;
+  static const double _maxDragOffset = 80.0;
+
   Comment? _parentComment;
   List<Reaction> _reactions = [];
   bool _isLiked = false;
   bool _isLoadingParent = false;
   bool _isLoadingReactions = false;
+  double _dragOffset = 0.0;
+  bool _hasTriggeredReply = false;
 
   final OverlayPortalController _overlayController = OverlayPortalController();
   final LayerLink _layerLink = LayerLink();
@@ -166,6 +171,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   void _showHighlight() {
     HapticFeedback.mediumImpact();
+    setState(() => _dragOffset = 0.0);
     _overlayController.show();
     _overlayAnimationController.forward();
   }
@@ -173,6 +179,30 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   Future<void> _hideHighlight() async {
     await _overlayAnimationController.reverse();
     if (mounted) _overlayController.hide();
+  }
+
+  void _onHorizontalDragStart(DragStartDetails details) {
+    if (!_isOverlayDismissed) return;
+    _hasTriggeredReply = false;
+  }
+
+  void _onHorizontalDragUpdate(DragUpdateDetails details) {
+    if (!_isOverlayDismissed) return;
+    final delta = details.primaryDelta ?? 0;
+    setState(() {
+      _dragOffset = (_dragOffset + delta).clamp(0.0, _maxDragOffset);
+    });
+    if (!_hasTriggeredReply && _dragOffset >= _replyThreshold) {
+      HapticFeedback.selectionClick();
+      _hasTriggeredReply = true;
+    }
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    if (_dragOffset >= _replyThreshold) {
+      widget.onReplyTap();
+    }
+    setState(() => _dragOffset = 0.0);
   }
 
   Future<void> _handleDelete() async {
@@ -207,11 +237,48 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         overlayChildBuilder: _buildOverlayContent,
         child: GestureDetector(
           onLongPress: _showHighlight,
-          child: KeyedSubtree(
-            key: _contentKey,
-            child: _buildCommentContent(
-              showActionsCapsule: true,
-              capsuleOpacity: _isOverlayDismissed ? 1.0 : 0.0,
+          onDoubleTap: () {
+            HapticFeedback.mediumImpact();
+            _toggleLike();
+          },
+          onHorizontalDragStart: _onHorizontalDragStart,
+          onHorizontalDragUpdate: _onHorizontalDragUpdate,
+          onHorizontalDragEnd: _onHorizontalDragEnd,
+          child: Align(
+            alignment: widget.isOwnComment
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                if (_dragOffset > 0)
+                  Positioned(
+                    left: 8,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Opacity(
+                        opacity:
+                            (_dragOffset / _replyThreshold).clamp(0.0, 1.0),
+                        child: Icon(
+                          Icons.reply,
+                          color: colorScheme.textMuted,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                Transform.translate(
+                  offset: Offset(_dragOffset, 0),
+                  child: KeyedSubtree(
+                    key: _contentKey,
+                    child: _buildCommentContent(
+                      showActionsCapsule: true,
+                      capsuleOpacity: _isOverlayDismissed ? 1.0 : 0.0,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
