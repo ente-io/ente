@@ -933,7 +933,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
     // Build liked comments map from reactions when selected collection changes
     useEffect(() => {
-        if (!open || !selectedCollectionInfo) {
+        // Don't reset state on close - preserves UI during exit animation
+        if (!open) return;
+        if (!selectedCollectionInfo) {
             setLikedComments(new Map());
             return;
         }
