@@ -96,6 +96,9 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 			response.PassKeyEnabled = value == "true"
 		case ente.IsInternalUser:
 			response.InternalUser = value == "true"
+			if response.InternalUser {
+				response.ServerApiFlag |= ente.Comments
+			}
 		case ente.IsBetaUser:
 			response.BetaUser = value == "true"
 		case ente.CustomDomain:
