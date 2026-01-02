@@ -1949,6 +1949,8 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     publicURL,
     onUpdate,
 }) => {
+    const { isCommentsEnabled } = useSettingsSnapshot();
+
     const handleCollectSetting = () => {
         void onUpdate({ enableCollect: !publicURL.enableCollect });
     };
@@ -1965,12 +1967,16 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                     checked={publicURL.enableCollect}
                     onClick={handleCollectSetting}
                 />
-                <RowButtonDivider />
-                <RowSwitch
-                    label={t("enable_comments")}
-                    checked={publicURL.enableComment}
-                    onClick={handleCommentSetting}
-                />
+                {isCommentsEnabled && (
+                    <>
+                        <RowButtonDivider />
+                        <RowSwitch
+                            label={t("enable_comments")}
+                            checked={publicURL.enableComment}
+                            onClick={handleCommentSetting}
+                        />
+                    </>
+                )}
             </RowButtonGroup>
         </Stack>
     );

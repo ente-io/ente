@@ -196,7 +196,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const { show: showMapDialog, props: mapDialogVisibilityProps } =
         useModalVisibility();
     const { onGenericError } = useBaseContext();
-    const { mapEnabled } = useSettingsSnapshot();
+    const { mapEnabled, isCommentsEnabled } = useSettingsSnapshot();
     const { mode: colorSchemeMode, systemMode } = useColorScheme();
     const theme = useTheme();
     const resolvedMode =
@@ -385,6 +385,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     onJoinAlbum,
                     enableComment,
                 }}
+                isCommentsFeatureEnabled={isCommentsEnabled}
                 onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}

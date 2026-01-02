@@ -353,6 +353,14 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Defaults to `true`.
      */
     enableComment?: boolean;
+    /**
+     * `true` if the comments and reactions feature is enabled for the user.
+     *
+     * This is controlled by a server-side feature flag. When `false`, the
+     * like and comment buttons will be hidden for logged-in users.
+     * Defaults to `false`.
+     */
+    isCommentsFeatureEnabled?: boolean;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -396,6 +404,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     collectionKey,
     onJoinAlbum,
     enableComment = true,
+    isCommentsFeatureEnabled = false,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -1502,6 +1511,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const showSocialButtons = useMemo(() => {
         // Show for public albums (no logged-in user).
         if (!haveUser) return true;
+        // For logged-in users, check if the comments feature is enabled.
+        if (!isCommentsFeatureEnabled) return false;
         // In collection view: check if that specific collection is shared.
         if (
             activeCollectionID &&
@@ -1513,7 +1524,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             if (collectionSummary?.attributes.has("shared")) return true;
         }
         return false;
-    }, [haveUser, activeCollectionID, collectionSummaries]);
+    }, [haveUser, isCommentsFeatureEnabled, activeCollectionID, collectionSummaries]);
 
     // Check if a file belongs to any shared collection (for gallery view).
     const isFileInSharedCollection = useCallback(
@@ -1535,6 +1546,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             // collection view), this won't be called. This callback is only
             // for gallery view where we need to check per-file.
             //
+            // For logged-in users, require the comments feature to be enabled.
+            if (!isCommentsFeatureEnabled) return false;
+            //
             // If we're in a specific collection context (not gallery view),
             // return false - the collection's shared status is what matters,
             // not whether the file happens to be in some other shared album.
@@ -1544,7 +1558,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             return isFileInSharedCollection(file.id);
         },
-        [isFileInSharedCollection, activeCollectionID],
+        [isCommentsFeatureEnabled, isFileInSharedCollection, activeCollectionID],
     );
 
     // Compute shared albums the file belongs to and which are liked for the modal

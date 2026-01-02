@@ -1,4 +1,5 @@
 import { ensureLocalUser } from "ente-accounts/services/user";
+import { settingsSnapshot } from "./settings";
 import { blobCache } from "ente-base/blob-cache";
 import {
     boxSeal,
@@ -1456,12 +1457,14 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
+    // Only enable comments by default if the feature flag is enabled.
+    const enableComment = settingsSnapshot().isCommentsEnabled;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
             collectionID,
-            enableComment: true,
+            enableComment,
             ...attributes,
         }),
     });
