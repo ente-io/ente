@@ -23,7 +23,7 @@ type CollectionLinkRepo struct {
 // NewCollectionLinkRepository ..
 func NewCollectionLinkRepository(db *sql.DB, albumHost string) *CollectionLinkRepo {
 	if albumHost == "" {
-		albumHost = "https://albums.ente.io"
+		albumHost = "http://192.168.0.21:3002"
 	}
 	lockerHost := viper.GetString("apps.public-locker")
 	if lockerHost == "" {
@@ -60,7 +60,7 @@ func (pcr *CollectionLinkRepo) Insert(ctx context.Context,
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `INSERT INTO public_collection_tokens 
+	_, err = tx.ExecContext(ctx, `INSERT INTO public_collection_tokens
     (collection_id, access_token, valid_till, device_limit, enable_collect, enable_comment, enable_join) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		cID, token, validTill, deviceLimit, enableCollect, enableComment, join)
 	if err != nil && err.Error() == "pq: duplicate key value violates unique constraint \"public_active_collection_unique_idx\"" {
@@ -77,7 +77,7 @@ func (pcr *CollectionLinkRepo) Insert(ctx context.Context,
 }
 
 func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) error {
-	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET is_disabled = true where 
+	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET is_disabled = true where
                                                              collection_id = $1 and is_disabled = false`, cID)
 	return stacktrace.Propagate(err, "failed to disable sharing")
 }
@@ -85,7 +85,7 @@ func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) er
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
 func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64, app ente.App) (map[int64][]ente.PublicURL, error) {
-	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_comment, enable_join, min_role, pw_nonce, mem_limit, ops_limit FROM 
+	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_comment, enable_join, min_role, pw_nonce, mem_limit, ops_limit FROM
                                                    public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
 		pq.Array(collectionIDs))
 	if err != nil {
@@ -126,8 +126,8 @@ func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Con
 // GetActiveCollectionLinkRow will return ente.CollectionLinkRow for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *CollectionLinkRepo) GetActiveCollectionLinkRow(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
-	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit, 
-       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_comment, enable_join, min_role FROM 
+	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit,
+       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_comment, enable_join, min_role FROM
                                                    public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
 		collectionID)
 
@@ -153,8 +153,8 @@ func (pcr *CollectionLinkRepo) UpdatePublicCollectionToken(ctx context.Context, 
 	if pct.MinRole != nil {
 		minRole = string(*pct.MinRole)
 	}
-	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET valid_till = $1, device_limit = $2, 
-                                    pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_comment = $9, enable_join = $10, min_role = $11 
+	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET valid_till = $1, device_limit = $2,
+                                    pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_comment = $9, enable_join = $10, min_role = $11
                                 where id = $12`,
 		pct.ValidTill, pct.DeviceLimit, pct.PassHash, pct.Nonce, pct.MemLimit, pct.OpsLimit, pct.EnableDownload, pct.EnableCollect, pct.EnableComment, pct.EnableJoin, minRole, pct.ID)
 	return stacktrace.Propagate(err, "failed to update public collection token")
@@ -173,8 +173,8 @@ func (pcr *CollectionLinkRepo) GetUniqueAccessCount(ctx context.Context, shareId
 }
 
 func (pcr *CollectionLinkRepo) RecordAccessHistory(ctx context.Context, shareID int64, ip string, ua string) error {
-	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_collection_access_history 
-    (share_id, ip, user_agent) VALUES ($1, $2, $3) 
+	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_collection_access_history
+    (share_id, ip, user_agent) VALUES ($1, $2, $3)
     ON CONFLICT ON CONSTRAINT unique_access_sid_ip_ua DO NOTHING;`,
 		shareID, ip, ua)
 	return stacktrace.Propagate(err, "failed to record access history")
@@ -195,7 +195,7 @@ func (pcr *CollectionLinkRepo) AccessedInPast(ctx context.Context, shareID int64
 func (pcr *CollectionLinkRepo) GetCollectionSummaryByToken(ctx context.Context, accessToken string) (ente.PublicCollectionSummary, error) {
 	row := pcr.DB.QueryRowContext(ctx,
 		`SELECT sct.id, sct.collection_id, sct.is_disabled, sct.valid_till, sct.device_limit, sct.pw_hash, sct.enable_comment,
-       sct.created_at, sct.updated_at, count(ah.share_id) 
+       sct.created_at, sct.updated_at, count(ah.share_id)
 		from public_collection_tokens sct
 		LEFT JOIN public_collection_access_history ah ON sct.id = ah.share_id
 		where access_token = $1

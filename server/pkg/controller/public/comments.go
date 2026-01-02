@@ -2,6 +2,8 @@ package public
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"sort"
 
 	"github.com/ente-io/museum/ente"
@@ -122,6 +124,11 @@ func (c *CommentsController) DeleteComment(ctx *gin.Context, collectionID int64,
 	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
 		return err
 	}
+	if moderator, err := c.resolveModeratorActor(ctx); err != nil {
+		return err
+	} else if moderator != nil {
+		return c.deleteCommentWithActor(ctx, commentID, *moderator, true)
+	}
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return err
@@ -129,12 +136,7 @@ func (c *CommentsController) DeleteComment(ctx *gin.Context, collectionID int64,
 	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
 		return err
 	}
-	deleteReq := socialcontroller.DeleteCommentRequest{
-		Actor:         actor,
-		CommentID:     commentID,
-		RequireAccess: false,
-	}
-	return c.CommentCtrl.Delete(ctx, deleteReq)
+	return c.deleteCommentWithActor(ctx, commentID, actor, false)
 }
 
 func (c *CommentsController) ListComments(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64) ([]socialentity.Comment, bool, error) {
@@ -201,4 +203,35 @@ func ensureCommentsFeatureEnabled(ctx *gin.Context) error {
 		return nil
 	}
 	return &ente.ErrPublicCommentDisabled
+}
+
+func (c *CommentsController) resolveModeratorActor(ctx *gin.Context) (*socialcontroller.Actor, error) {
+	if c.UserAuthRepo == nil {
+		return nil, nil
+	}
+	token := auth.GetToken(ctx)
+	if token == "" {
+		return nil, nil
+	}
+	app := auth.GetApp(ctx)
+	userID, expired, err := c.UserAuthRepo.GetUserIDWithToken(token, app)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ente.ErrAuthenticationRequired
+		}
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if expired {
+		return nil, ente.ErrAuthenticationRequired
+	}
+	return &socialcontroller.Actor{UserID: &userID}, nil
+}
+
+func (c *CommentsController) deleteCommentWithActor(ctx *gin.Context, commentID string, actor socialcontroller.Actor, requireAccess bool) error {
+	deleteReq := socialcontroller.DeleteCommentRequest{
+		Actor:         actor,
+		CommentID:     commentID,
+		RequireAccess: requireAccess,
+	}
+	return c.CommentCtrl.Delete(ctx, deleteReq)
 }

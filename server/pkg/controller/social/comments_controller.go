@@ -184,9 +184,11 @@ func (c *CommentsController) Delete(ctx *gin.Context, req DeleteCommentRequest) 
 		if !hasUserID {
 			return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 		}
-		if comment.UserID == userID {
-			// author is allowed
-		} else if req.RequireAccess {
+		if comment.UserID != userID {
+			requiresAdminRole := req.RequireAccess || comment.AnonUserID != nil
+			if !requiresAdminRole {
+				return stacktrace.Propagate(ente.ErrPermissionDenied, "")
+			}
 			resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 				CollectionID: comment.CollectionID,
 				ActorUserID:  userID,
@@ -201,8 +203,6 @@ func (c *CommentsController) Delete(ctx *gin.Context, req DeleteCommentRequest) 
 			if !resp.Role.Satisfies(&minRole) {
 				return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			}
-		} else {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 		}
 	}
 	return c.Repo.SoftDelete(ctx.Request.Context(), req.CommentID)
