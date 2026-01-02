@@ -15,10 +15,12 @@ import { fsIsDir } from "./fs";
  * pertinent file system events.
  */
 export const createWatcher = (mainWindow: BrowserWindow) => {
-    const send = (eventName: string) => (path: string) =>
-        mainWindow.webContents.send(eventName, ...eventData(path));
+    const send = (eventName: string) => (path: string) => {
+        const data = eventData(path);
+        if (data) mainWindow.webContents.send(eventName, ...data);
+    };
 
-    const folderPaths = folderWatches().map((watch) => watch.folderPath);
+    const folderPaths = storedFolderWatches().map((watch) => watch.folderPath);
 
     const watcher = chokidar.watch(folderPaths, {
         // Don't emit "add" events for matching paths when instantiating the
@@ -46,43 +48,53 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
     return watcher;
 };
 
-const eventData = (platformPath: string): [string, FolderWatch] => {
+const eventData = (platformPath: string): [string, FolderWatch] | undefined => {
     const path = posixPath(platformPath);
 
-    const watch = folderWatches().find((watch) =>
+    const watch = storedFolderWatches().find((watch) =>
         path.startsWith(watch.folderPath + "/"),
     );
 
-    if (!watch) throw new Error(`No folder watch was found for path ${path}`);
+    // This can happen if the watch was removed while chokidar was still
+    // emitting events for it, or if the path is from an unavailable drive.
+    if (!watch) {
+        log.info(`Ignoring event for path with no matching watch: ${path}`);
+        return undefined;
+    }
 
-    return [path, watch];
+    return [path, { ...watch, isAvailable: true }];
 };
 
 export const watchGet = async (watcher: FSWatcher): Promise<FolderWatch[]> => {
-    const valid: FolderWatch[] = [];
-    const deletedPaths: string[] = [];
-    for (const watch of folderWatches()) {
-        if (await fsIsDir(watch.folderPath)) valid.push(watch);
-        else deletedPaths.push(watch.folderPath);
+    const watches: FolderWatch[] = [];
+    for (const watch of storedFolderWatches()) {
+        const isAvailable = await fsIsDir(watch.folderPath);
+        watches.push({ ...watch, isAvailable });
+        // Update chokidar: watch available paths, unwatch unavailable ones.
+        if (isAvailable) {
+            watcher.add(watch.folderPath);
+        } else {
+            watcher.unwatch(watch.folderPath);
+        }
     }
-    if (deletedPaths.length) {
-        await Promise.all(deletedPaths.map((p) => watchRemove(watcher, p)));
-        setFolderWatches(valid);
-    }
-    return valid;
+    return watches;
 };
 
-const folderWatches = (): FolderWatch[] => watchStore.get("mappings") ?? [];
+/** Stored watches don't have the runtime-computed isAvailable field. */
+type StoredFolderWatch = Omit<FolderWatch, "isAvailable">;
 
-const setFolderWatches = (watches: FolderWatch[]) =>
+const storedFolderWatches = (): StoredFolderWatch[] =>
+    watchStore.get("mappings") ?? [];
+
+const setFolderWatches = (watches: StoredFolderWatch[]) =>
     watchStore.set("mappings", watches);
 
 export const watchAdd = async (
     watcher: FSWatcher,
     folderPath: string,
     collectionMapping: CollectionMapping,
-) => {
-    const watches = folderWatches();
+): Promise<FolderWatch[]> => {
+    const watches = storedFolderWatches();
 
     if (!(await fsIsDir(folderPath)))
         throw new Error(
@@ -105,11 +117,15 @@ export const watchAdd = async (
 
     watcher.add(folderPath);
 
-    return watches;
+    // Return with isAvailable set (newly added watch is always available).
+    return watches.map((w) => ({ ...w, isAvailable: true }));
 };
 
-export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
-    const watches = folderWatches();
+export const watchRemove = (
+    watcher: FSWatcher,
+    folderPath: string,
+): FolderWatch[] => {
+    const watches = storedFolderWatches();
     const filtered = watches.filter((watch) => watch.folderPath != folderPath);
     if (watches.length == filtered.length)
         throw new Error(
@@ -117,7 +133,9 @@ export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
         );
     setFolderWatches(filtered);
     watcher.unwatch(folderPath);
-    return filtered;
+    // Return with isAvailable set. We don't know the actual state, but since
+    // the user just removed one, assume remaining ones are available.
+    return filtered.map((w) => ({ ...w, isAvailable: true }));
 };
 
 export const watchUpdateSyncedFiles = (
@@ -125,12 +143,9 @@ export const watchUpdateSyncedFiles = (
     folderPath: string,
 ) => {
     setFolderWatches(
-        folderWatches().map((watch) => {
-            if (watch.folderPath == folderPath) {
-                watch.syncedFiles = syncedFiles;
-            }
-            return watch;
-        }),
+        storedFolderWatches().map((watch) =>
+            watch.folderPath == folderPath ? { ...watch, syncedFiles } : watch,
+        ),
     );
 };
 
@@ -139,12 +154,9 @@ export const watchUpdateIgnoredFiles = (
     folderPath: string,
 ) => {
     setFolderWatches(
-        folderWatches().map((watch) => {
-            if (watch.folderPath == folderPath) {
-                watch.ignoredFiles = ignoredFiles;
-            }
-            return watch;
-        }),
+        storedFolderWatches().map((watch) =>
+            watch.folderPath == folderPath ? { ...watch, ignoredFiles } : watch,
+        ),
     );
 };
 
@@ -158,5 +170,5 @@ export const watchUpdateIgnoredFiles = (
  * The persisted state itself gets cleared via {@link clearStores}.
  */
 export const watchReset = (watcher: FSWatcher) => {
-    watcher.unwatch(folderWatches().map((watch) => watch.folderPath));
+    watcher.unwatch(storedFolderWatches().map((watch) => watch.folderPath));
 };

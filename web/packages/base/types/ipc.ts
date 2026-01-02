@@ -430,12 +430,12 @@ export interface Electron {
      */
     watch: {
         /**
-         * Return the list of folder watches, pruning non-existing directories.
+         * Return the list of folder watches.
          *
          * The list of folder paths (and auxiliary details) is persisted in the
-         * Node.js layer. The implementation of this function goes through the
-         * list, permanently removes any watches whose on-disk directory is no
-         * longer present, and returns this pruned list of watches.
+         * Node.js layer. Each watch includes an {@link FolderWatch.isAvailable}
+         * property indicating whether the folder is currently accessible on
+         * disk (e.g., external drives may be temporarily disconnected).
          */
         get: () => Promise<FolderWatch[]>;
 
@@ -727,6 +727,14 @@ export interface FolderWatch {
      * Files (paths) that should be ignored when uploading.
      */
     ignoredFiles: string[];
+    /**
+     * `true` if the folder path is currently accessible on disk.
+     *
+     * This will be `false` for folders on external drives that are currently
+     * disconnected. The watch is preserved, and syncing will resume
+     * automatically when the folder becomes accessible again.
+     */
+    isAvailable: boolean;
 }
 
 /**

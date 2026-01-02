@@ -17,6 +17,14 @@ export interface FolderWatch {
     folderPath: string;
     syncedFiles: FolderWatchSyncedFile[];
     ignoredFiles: string[];
+    /**
+     * `true` if the folder path is currently accessible on disk.
+     *
+     * This will be `false` for folders on external drives that are currently
+     * disconnected. The watch is preserved, and syncing will resume
+     * automatically when the folder becomes accessible again.
+     */
+    isAvailable: boolean;
 }
 
 export type CollectionMapping = "root" | "parent";
