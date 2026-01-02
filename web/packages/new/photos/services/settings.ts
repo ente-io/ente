@@ -232,7 +232,8 @@ const syncSettingsSnapshotWithLocalStorage = () => {
         (flags?.internalUser ?? false) || isDevBuild;
     settings.isShareePinEnabled = (flags?.internalUser ?? false) || isDevBuild;
     settings.isCommentsEnabled =
-        ((flags?.serverApiFlag ?? 0) & ServerApiFlag.Comments) !== 0;
+        ((flags?.serverApiFlag ?? 0) & ServerApiFlag.Comments) !== 0 ||
+        !!process.env.NEXT_PUBLIC_ENTE_COMMENTS_ENABLED;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
