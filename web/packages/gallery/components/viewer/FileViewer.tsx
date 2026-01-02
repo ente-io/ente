@@ -2375,6 +2375,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 return next;
             });
 
+            // Fetch anon profiles (new anonymous users may have commented)
             try {
                 const anonProfiles = await getPublicAnonProfiles(
                     publicAlbumsCredentials,
@@ -2390,22 +2391,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             } catch {
                 // Ignore
             }
-
-            try {
-                const participantEmails =
-                    await getPublicParticipantsMaskedEmails(
-                        publicAlbumsCredentials,
-                    );
-                setUserIDToEmail((prev) => {
-                    const next = new Map(prev);
-                    for (const [id, email] of participantEmails) {
-                        next.set(id, email);
-                    }
-                    return next;
-                });
-            } catch {
-                // Ignore
-            }
+            // Note: Masked emails for registered participants are fetched only
+            // on initial load since they rarely change during a session.
         } catch (e) {
             log.error("Failed to refresh public social data", e);
         }

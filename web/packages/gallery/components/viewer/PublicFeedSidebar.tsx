@@ -720,35 +720,51 @@ export const PublicFeedSidebar: React.FC<PublicFeedSidebarProps> = ({
     // Polling interval for refreshing feed data (5 seconds)
     const FEED_REFRESH_INTERVAL_MS = 5_000;
 
-    // Fetch social data (used for both initial load and periodic refresh)
-    const fetchSocialData = useCallback(async () => {
+    // Refresh social data (used for periodic refresh - excludes masked emails)
+    const refreshSocialData = useCallback(async () => {
         try {
-            const [feedData, anonProfiles, participantEmails] =
-                await Promise.all([
-                    getPublicAlbumFeed(credentials, collectionKey),
-                    getPublicAnonProfiles(credentials, collectionKey),
-                    getPublicParticipantsMaskedEmails(credentials),
-                ]);
+            const [feedData, anonProfiles] = await Promise.all([
+                getPublicAlbumFeed(credentials, collectionKey),
+                getPublicAnonProfiles(credentials, collectionKey),
+            ]);
             setComments(feedData.comments);
             setReactions(feedData.reactions);
             setAnonUserNames(anonProfiles);
-            setMaskedEmails(participantEmails);
+            // Note: Masked emails for registered participants are fetched only
+            // on initial load since they rarely change during a session.
         } catch (e) {
-            log.error("Failed to fetch public album feed", e);
+            log.error("Failed to refresh public album feed", e);
         }
     }, [credentials, collectionKey]);
 
-    // Initial fetch when sidebar opens
+    // Initial fetch when sidebar opens (includes masked emails)
     useEffect(() => {
         if (!open) return;
 
+        const fetchInitialData = async () => {
+            try {
+                const [feedData, anonProfiles, participantEmails] =
+                    await Promise.all([
+                        getPublicAlbumFeed(credentials, collectionKey),
+                        getPublicAnonProfiles(credentials, collectionKey),
+                        getPublicParticipantsMaskedEmails(credentials),
+                    ]);
+                setComments(feedData.comments);
+                setReactions(feedData.reactions);
+                setAnonUserNames(anonProfiles);
+                setMaskedEmails(participantEmails);
+            } catch (e) {
+                log.error("Failed to fetch public album feed", e);
+            }
+        };
+
         setIsLoading(true);
-        void fetchSocialData().finally(() => setIsLoading(false));
-    }, [open, fetchSocialData]);
+        void fetchInitialData().finally(() => setIsLoading(false));
+    }, [open, credentials, collectionKey]);
 
     // Periodic refresh while sidebar is open
     useInterval(
-        fetchSocialData,
+        refreshSocialData,
         open && !isLoading ? FEED_REFRESH_INTERVAL_MS : null,
     );
 
