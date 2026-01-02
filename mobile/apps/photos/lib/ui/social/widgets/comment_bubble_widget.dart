@@ -61,6 +61,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     with SingleTickerProviderStateMixin {
   static const double _replyThreshold = 60.0;
   static const double _maxDragOffset = 80.0;
+  static const double _minPopupWidth = 150.0;
 
   Comment? _parentComment;
   List<Reaction> _reactions = [];
@@ -73,6 +74,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   final OverlayPortalController _overlayController = OverlayPortalController();
   final LayerLink _layerLink = LayerLink();
   final GlobalKey _contentKey = GlobalKey();
+  Size? _contentSize;
 
   late final AnimationController _overlayAnimationController;
   late final Animation<double> _overlayAnimation;
@@ -101,6 +103,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       }
     });
     _loadData();
+    _measureContent();
   }
 
   @override
@@ -110,7 +113,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       _parentComment = null;
       _reactions = [];
       _isLiked = false;
+      _contentSize = null;
       _loadData();
+      _measureContent();
     }
   }
 
@@ -151,6 +156,19 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     setState(() => _isLoadingParent = true);
     _parentComment = await widget.onFetchParent!();
     if (mounted) setState(() => _isLoadingParent = false);
+  }
+
+  void _measureContent() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderBox =
+          _contentKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null && renderBox.hasSize && mounted) {
+        final newSize = renderBox.size;
+        if (_contentSize != newSize) {
+          setState(() => _contentSize = newSize);
+        }
+      }
+    });
   }
 
   Future<void> _toggleLike() async {
@@ -230,55 +248,59 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
-    Widget content = CompositedTransformTarget(
-      link: _layerLink,
-      child: OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlayContent,
-        child: GestureDetector(
-          onLongPress: _showHighlight,
-          onDoubleTap: () {
-            HapticFeedback.mediumImpact();
-            _toggleLike();
-          },
-          onHorizontalDragStart: _onHorizontalDragStart,
-          onHorizontalDragUpdate: _onHorizontalDragUpdate,
-          onHorizontalDragEnd: _onHorizontalDragEnd,
+    Widget content = OverlayPortal(
+      controller: _overlayController,
+      overlayChildBuilder: _buildOverlayContent,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onLongPress: _showHighlight,
+        onDoubleTap: () {
+          HapticFeedback.mediumImpact();
+          _toggleLike();
+        },
+        onHorizontalDragStart: _onHorizontalDragStart,
+        onHorizontalDragUpdate: _onHorizontalDragUpdate,
+        onHorizontalDragEnd: _onHorizontalDragEnd,
+        child: SizedBox(
+          width: double.infinity,
           child: Align(
             alignment: widget.isOwnComment
                 ? Alignment.centerRight
                 : Alignment.centerLeft,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                if (_dragOffset > 0)
-                  Positioned(
-                    left: 8,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: Opacity(
-                        opacity:
-                            (_dragOffset / _replyThreshold).clamp(0.0, 1.0),
-                        child: Icon(
-                          Icons.reply,
-                          color: colorScheme.textMuted,
-                          size: 24,
+            child: CompositedTransformTarget(
+              link: _layerLink,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  if (_dragOffset > 0)
+                    Positioned(
+                      left: 8,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: Opacity(
+                          opacity:
+                              (_dragOffset / _replyThreshold).clamp(0.0, 1.0),
+                          child: Icon(
+                            Icons.reply,
+                            color: colorScheme.textMuted,
+                            size: 24,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                Transform.translate(
-                  offset: Offset(_dragOffset, 0),
-                  child: KeyedSubtree(
-                    key: _contentKey,
-                    child: _buildCommentContent(
-                      showActionsCapsule: true,
-                      capsuleOpacity: _isOverlayDismissed ? 1.0 : 0.0,
+                  Transform.translate(
+                    offset: Offset(_dragOffset, 0),
+                    child: KeyedSubtree(
+                      key: _contentKey,
+                      child: _buildCommentContent(
+                        showActionsCapsule: true,
+                        capsuleOpacity: _isOverlayDismissed ? 1.0 : 0.0,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -301,11 +323,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   }
 
   Widget _buildOverlayContent(BuildContext context) {
-    // Get original widget size for perfect alignment
-    final renderBox =
-        _contentKey.currentContext?.findRenderObject() as RenderBox?;
-    final size = renderBox?.size;
-
     return AnimatedBuilder(
       animation: _overlayAnimation,
       builder: (context, _) {
@@ -325,19 +342,35 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
             CompositedTransformFollower(
               link: _layerLink,
               showWhenUnlinked: false,
-              child: SizedBox(
-                width: size?.width,
-                child: Opacity(
-                  opacity: isReversing ? 1.0 : value,
-                  child: _buildCommentContent(
-                    showActionsCapsule: isReversing,
-                    showActionsPopup: !isReversing,
-                    showHeader: false,
-                    bubbleScale: 1 + (0.025 * value),
-                    capsuleOpacity: 1 - value,
-                  ),
-                ),
-              ),
+              targetAnchor:
+                  widget.isOwnComment ? Alignment.topRight : Alignment.topLeft,
+              followerAnchor:
+                  widget.isOwnComment ? Alignment.topRight : Alignment.topLeft,
+              child:
+                  _contentSize != null && _contentSize!.width >= _minPopupWidth
+                      ? SizedBox(
+                          width: _contentSize!.width,
+                          child: Opacity(
+                            opacity: isReversing ? 1.0 : value,
+                            child: _buildCommentContent(
+                              showActionsCapsule: isReversing,
+                              showActionsPopup: !isReversing,
+                              showHeader: false,
+                              bubbleScale: 1 + (0.025 * value),
+                              capsuleOpacity: 1 - value,
+                            ),
+                          ),
+                        )
+                      : Opacity(
+                          opacity: isReversing ? 1.0 : value,
+                          child: _buildCommentContent(
+                            showActionsCapsule: isReversing,
+                            showActionsPopup: !isReversing,
+                            showHeader: false,
+                            bubbleScale: 1 + (0.025 * value),
+                            capsuleOpacity: 1 - value,
+                          ),
+                        ),
             ),
           ],
         );
