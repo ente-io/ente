@@ -589,7 +589,7 @@
     }
   },
   "familyPlans": "Gói gia đình",
-  "referrals": "Giới thiệu",
+  "referrals": "Giới thiệu bạn bè",
   "notifications": "Thông báo",
   "sharedPhotoNotifications": "Ảnh chia sẻ mới",
   "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
@@ -1412,6 +1412,7 @@
   "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
   "showPerson": "Hiện người",
   "sort": "Sắp xếp",
+  "recent": "Gần đây",
   "mostRecent": "Mới nhất",
   "mostRelevant": "Liên quan nhất",
   "loadingYourPhotos": "Đang tải ảnh của bạn...",
@@ -2202,9 +2203,9 @@
   "ritualNew": "Tạo thói quen mới",
   "ritualCreateNewTitle": "Tạo thói quen mới",
   "ritualEdit": "Sửa thói quen",
-  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterPrompt": "Tên thói quen",
   "ritualEnterDescription": "Vui lòng nhập mô tả",
-  "ritualChooseDaysLabel": "Chọn số ngày thói quen",
+  "ritualChooseDaysLabel": "Chọn ngày cho thói quen",
   "ritualDayLabel": "Ngày",
   "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
   "ritualTimeLabel": "Thời gian",
@@ -2232,6 +2233,6 @@
   "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
   "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
   "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
-  "ritualEmojiUseAction": "Sử dụng",
+  "ritualEmojiUseAction": "Dùng",
   "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
 }

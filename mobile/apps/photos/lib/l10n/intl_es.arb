@@ -1412,6 +1412,7 @@
   "localSyncErrorMessage": "Parece que algo salió mal ya que la sincronización de fotos locales está tomando más tiempo del esperado. Por favor contacta con nuestro equipo de soporte",
   "showPerson": "Mostrar persona",
   "sort": "Ordenar",
+  "recent": "Reciente",
   "mostRecent": "Más reciente",
   "mostRelevant": "Más relevante",
   "loadingYourPhotos": "Cargando tus fotos...",

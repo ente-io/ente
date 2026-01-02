@@ -26,7 +26,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -197,7 +196,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.clear,
-          labelText: "Reject suggestions",
+          labelText: AppLocalizations.of(context).rejectSuggestions,
           onTap: widget.selectedFiles.files.isNotEmpty
               ? _rejectDeleteSuggestions
               : null,
@@ -395,16 +394,6 @@ class _FileSelectionActionsWidgetState
             labelText: AppLocalizations.of(context).createCollage,
             onTap: _onCreateCollageClicked,
             shouldShow: showCollageOption,
-          ),
-        );
-      }
-      if (flagService.internalUser &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.movie_creation_sharp,
-            labelText: "(i) Video Memory",
-            onTap: _onCreateVideoMemoryClicked,
           ),
         );
       }
@@ -919,12 +908,6 @@ class _FileSelectionActionsWidgetState
     if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
-  }
-
-  Future<void> _onCreateVideoMemoryClicked() async {
-    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
-    await createSlideshow(context, selectedFiles);
-    widget.selectedFiles.clearAll();
   }
 
   Future<void> _onSendLinkTapped() async {

@@ -943,6 +943,7 @@ class SearchService {
         final files = personIdToFiles[personID]!;
         final PersonEntity p = personIdToPerson[personID]!;
         if (p.data.isIgnored) continue;
+        if (files.isEmpty) continue;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,

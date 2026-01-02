@@ -1,7 +1,8 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -284,8 +285,11 @@ export const FileList: React.FC<FileListProps> = ({
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set<string>());
+    // Show back-to-top button when scrolled past threshold
+    const [showBackToTop, setShowBackToTop] = useState(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
+    const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
         () => computeThumbnailGridLayoutParams(width),
@@ -722,6 +726,9 @@ export const FileList: React.FC<FileListProps> = ({
         ({ scrollOffset }: { scrollOffset: number }) => {
             onScroll?.(scrollOffset);
 
+            // Show back-to-top button when scrolled past threshold
+            setShowBackToTop(scrollOffset > 500);
+
             // Calculate which date is visible at the current scroll position
             if (onVisibleDateChange && items.length > 0) {
                 let cumulativeHeight = 0;
@@ -748,6 +755,10 @@ export const FileList: React.FC<FileListProps> = ({
         [onScroll, onVisibleDateChange, items],
     );
 
+    const handleScrollToTop = useCallback(() => {
+        outerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
     if (!items.length) {
         return <></>;
     }
@@ -769,22 +780,34 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <VariableSizeList
-            key={key}
-            ref={listRef}
-            {...{ width, height, itemData, itemSize, itemKey }}
-            itemCount={items.length}
-            overscanCount={3}
-            useIsScrolling
-            onScroll={handleScroll}
-            style={
-                listBorderRadius
-                    ? { borderRadius: listBorderRadius }
-                    : undefined
-            }
-        >
-            {FileListRow}
-        </VariableSizeList>
+        <Box sx={{ position: "relative", width, height }}>
+            <VariableSizeList
+                key={key}
+                ref={listRef}
+                outerRef={outerRef}
+                {...{ width, height, itemData, itemSize, itemKey }}
+                itemCount={items.length}
+                overscanCount={3}
+                useIsScrolling
+                onScroll={handleScroll}
+                style={
+                    listBorderRadius
+                        ? { borderRadius: listBorderRadius }
+                        : undefined
+                }
+            >
+                {FileListRow}
+            </VariableSizeList>
+            {showBackToTop && (
+                <BackToTopButton
+                    size="small"
+                    aria-label="scroll to top"
+                    onClick={handleScrollToTop}
+                >
+                    <KeyboardArrowUpIcon />
+                </BackToTopButton>
+            )}
+        </Box>
     );
 };
 
@@ -830,6 +853,20 @@ const NoFilesListItem = styled(FullSpanListItem)`
     min-height: 100%;
     justify-content: center;
 `;
+
+/**
+ * Floating button to scroll back to the top of the file list.
+ */
+const BackToTopButton = styled(Fab)(({ theme }) => ({
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    backgroundColor: theme.vars.palette.fill.faint,
+    color: theme.vars.palette.text.base,
+    boxShadow: "none",
+    "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
+    [theme.breakpoints.down("sm")]: { display: "none" },
+}));
 
 /**
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}

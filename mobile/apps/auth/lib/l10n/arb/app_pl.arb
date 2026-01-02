@@ -625,5 +625,6 @@
   "appIcon": "Ikona aplikacji",
   "importAndOTPGuide": "Eksportuj kopię zapasową z andOTP za pomocą opcji „Kopia zapasowa” w Ustawieniach.\n\nJeśli kopia zapasowa jest zaszyfrowana, musisz wprowadzić hasło kopii zapasowej, aby ją odszyfrować.",
   "enterPasswordToDecryptAndOTP": "Wpisz hasło, aby odszyfrować kopię zapasową andOTP",
-  "failedToDecryptAndOTPBackup": "Nie udało się odszyfrować kopii zapasowej andOTP"
+  "failedToDecryptAndOTPBackup": "Nie udało się odszyfrować kopii zapasowej andOTP",
+  "notSupportedForHOTP": "Nieobsługiwane dla HOTP"
 }

@@ -226,7 +226,7 @@ The app will detect and skip already uploaded items, so you can safely drag and 
 
 ### Why are my photo thumbnails missing or incorrect? {#thumbnails}
 
-If thumbnails aren't generating properly, the most common cause is browser security settings blocking canvas access.
+When photos are uploaded on the web app, the most common cause of thumbnails not generating properly is browser security settings blocking canvas access.
 
 **Firefox users:** If you have "block canvas fingerprinting" enabled (`privacy.resistFingerprinting` set to true in `about:config`), Firefox will prevent the app from generating thumbnails.
 
@@ -242,6 +242,8 @@ If thumbnails aren't generating properly, the most common cause is browser secur
 3. Re-upload the files
 
 Ente will automatically skip files that have already been uploaded, so you can drag and drop the original folder again after removing the files without thumbnails.
+
+If the browser settings cannot be changed, we recommend uploading files through the desktop app.
 
 ### Why aren't my watch folders syncing? {#watch-folders-troubleshooting}
 

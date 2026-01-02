@@ -23,12 +23,13 @@ export interface UseJoinAlbumReturn {
  */
 const buildWebRedirectURL = (
     accessToken: string,
+    collectionId: number,
     currentHash: string,
     jwtToken?: string,
 ): string => {
     const webAppURL = photosAppOrigin();
     const jwtParam = jwtToken ? `&jwt=${encodeURIComponent(jwtToken)}` : "";
-    return `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+    return `${webAppURL}/?joinAlbum=${accessToken}&collectionId=${collectionId}${jwtParam}#${currentHash}`;
 };
 
 /**
@@ -37,13 +38,19 @@ const buildWebRedirectURL = (
  */
 const handleWebFallback = (
     accessToken: string,
+    collectionId: number,
     currentHash: string,
     jwtToken?: string,
 ): void => {
     // Redirect to web app with joinAlbum parameter
-    // The URL contains all necessary context (token, JWT, hash) which will be
+    // The URL contains all necessary context (token, collectionId, JWT, hash) which will be
     // stored on web.ente.io after the domain transition
-    const redirectURL = buildWebRedirectURL(accessToken, currentHash, jwtToken);
+    const redirectURL = buildWebRedirectURL(
+        accessToken,
+        collectionId,
+        currentHash,
+        jwtToken,
+    );
     window.location.href = redirectURL;
 };
 
@@ -113,10 +120,11 @@ export const useJoinAlbum = ({
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
         const jwtToken = credentials?.current?.accessTokenJWT;
+        const collectionId = publicCollection.id;
 
         // Create fallback function for mobile deep linking
         const fallbackToWeb = () => {
-            handleWebFallback(accessToken, currentHash, jwtToken);
+            handleWebFallback(accessToken, collectionId, currentHash, jwtToken);
         };
 
         // Check if on Android and try deep link with custom scheme with action=join parameter.
@@ -130,7 +138,7 @@ export const useJoinAlbum = ({
             tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
         } else {
             // Desktop and iOS: use the standard web flow directly
-            handleWebFallback(accessToken, currentHash, jwtToken);
+            handleWebFallback(accessToken, collectionId, currentHash, jwtToken);
         }
     };
 

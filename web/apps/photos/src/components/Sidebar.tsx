@@ -1148,39 +1148,7 @@ const Preferences: React.FC<PreferencesProps> = ({
                 )}
                 <RowButton
                     label={t("custom_domains")}
-                    endIcon={
-                        <Stack
-                            direction="row"
-                            sx={{ alignSelf: "stretch", alignItems: "center" }}
-                        >
-                            <Box
-                                sx={{
-                                    width: "8px",
-                                    bgcolor: "stroke.faint",
-                                    alignSelf: "stretch",
-                                    mr: 0.5,
-                                }}
-                            />
-                            <Box
-                                sx={{
-                                    width: "8px",
-                                    bgcolor: "stroke.muted",
-                                    alignSelf: "stretch",
-                                    mr: 0.5,
-                                }}
-                            />
-                            <Box
-                                sx={{
-                                    width: "8px",
-                                    bgcolor: "stroke.base",
-                                    alignSelf: "stretch",
-                                    opacity: 0.3,
-                                    mr: 1.5,
-                                }}
-                            />
-                            <ChevronRightIcon />
-                        </Stack>
-                    }
+                    endIcon={<ChevronRightIcon />}
                     onClick={showDomainSettings}
                 />
                 <RowButton

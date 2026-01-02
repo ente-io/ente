@@ -228,7 +228,6 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 	}
 	if domain == nil || *domain == "" {
 		logger.Warn("domainNotConfigured")
-		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainNotConfigured")
 		return ente.NewPermissionDeniedError("no custom domain configured")
 	}
 	parse, err := url.Parse(origin)

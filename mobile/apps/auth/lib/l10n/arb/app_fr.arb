@@ -361,12 +361,12 @@
   "thisDevice": "Cet appareil",
   "toResetVerifyEmail": "Pour réinitialiser votre mot de passe, veuillez d'abord vérifier votre e-mail.",
   "thisEmailIsAlreadyInUse": "Cette adresse mail est déjà utilisée",
-  "verificationFailedPleaseTryAgain": "La vérification a échouée, veuillez réessayer",
+  "verificationFailedPleaseTryAgain": "La vérification a échoué, veuillez réessayer",
   "yourVerificationCodeHasExpired": "Votre code de vérification a expiré",
   "incorrectCode": "Code non valide",
   "sorryTheCodeYouveEnteredIsIncorrect": "Le code que vous avez saisi est incorrect",
   "emailChangedTo": "L'e-mail a été changé en {newEmail}",
-  "authenticationFailedPleaseTryAgain": "L'authentification a échouée, veuillez réessayer",
+  "authenticationFailedPleaseTryAgain": "L'authentification a échoué, veuillez réessayer",
   "authenticationSuccessful": "Authentification réussie !",
   "twofactorAuthenticationSuccessfullyReset": "L'authentification à deux facteurs a été réinitialisée avec succès ",
   "incorrectRecoveryKey": "Clé de récupération non valide",
@@ -625,5 +625,6 @@
   "appIcon": "Icône de l'application",
   "importAndOTPGuide": "Exportez votre sauvegarde depuis andOTP en utilisant les options de \"sauvegarde\" dans les paramètres.",
   "enterPasswordToDecryptAndOTP": "Entrez le mot de passe pour déchiffrer la sauvegarde andOTP",
-  "failedToDecryptAndOTPBackup": "Impossible de déchiffrer la sauvegarde andOTP"
+  "failedToDecryptAndOTPBackup": "Impossible de déchiffrer la sauvegarde andOTP",
+  "notSupportedForHOTP": "Non pris en charge pour HOTP"
 }
