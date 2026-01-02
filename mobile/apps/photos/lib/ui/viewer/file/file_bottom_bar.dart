@@ -18,6 +18,7 @@ import "package:photos/models/file/trash_file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -54,14 +55,12 @@ class FileBottomBarState extends State<FileBottomBar> {
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   int? lastFileGenID;
-  bool _isInSharedCollection = false;
   bool _hasLiked = false;
   int _commentCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _updateSharedCollectionState();
     _updateSocialState();
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -75,27 +74,7 @@ class FileBottomBarState extends State<FileBottomBar> {
   void didUpdateWidget(FileBottomBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.file.uploadedFileID != widget.file.uploadedFileID) {
-      _updateSharedCollectionState();
       _updateSocialState();
-    }
-  }
-
-  Future<void> _updateSharedCollectionState() async {
-    final fileID = widget.file.uploadedFileID;
-    if (fileID == null) {
-      _isInSharedCollection = false;
-      safeRefresh();
-      return;
-    }
-
-    final isShared =
-        await CollectionsService.instance.isFileInSharedCollection(fileID);
-
-    // Guard: Only update if still showing the same file
-    // (user may have swiped to a different file while awaiting)
-    if (widget.file.uploadedFileID == fileID) {
-      _isInSharedCollection = isShared;
-      safeRefresh();
     }
   }
 
@@ -146,7 +125,17 @@ class FileBottomBarState extends State<FileBottomBar> {
       }
     }
 
-    return _getBottomBar();
+    final sharedCollectionNotifier =
+        InheritedDetailPageState.maybeOf(context)?.isInSharedCollectionNotifier;
+
+    if (sharedCollectionNotifier == null) {
+      return _getBottomBar();
+    }
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: sharedCollectionNotifier,
+      builder: (context, _, __) => _getBottomBar(),
+    );
   }
 
   void safeRefresh() {
@@ -158,6 +147,11 @@ class FileBottomBarState extends State<FileBottomBar> {
   Widget _getBottomBar() {
     Logger("FileBottomBar")
         .fine("building bottom bar ${widget.file.generatedID}");
+
+    final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
+            ?.isInSharedCollectionNotifier
+            .value ??
+        false;
 
     final List<Widget> children = [];
     final bool isOwnedByUser =
@@ -217,7 +211,8 @@ class FileBottomBarState extends State<FileBottomBar> {
       );
 
       // Add to album button for uploaded, non-hidden files
-      if (widget.file.isUploaded && !isFileHidden) {
+      // Hide when in shared collection (moved to app bar popup menu)
+      if (widget.file.isUploaded && !isFileHidden && !isInSharedCollection) {
         children.add(
           Tooltip(
             message: AppLocalizations.of(context).addToAlbum,
@@ -245,7 +240,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       }
 
       // Add social icons (heart, comment) if file is in a shared collection
-      if (_isInSharedCollection) {
+      if (isInSharedCollection) {
         children.add(_buildHeartIcon());
         children.add(_buildCommentIcon());
       }
