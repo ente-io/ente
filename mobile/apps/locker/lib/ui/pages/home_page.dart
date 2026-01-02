@@ -251,10 +251,6 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     _loadCollections();
 
-    if (CollectionService.instance.hasCompletedFirstSync()) {
-      _loadCollections();
-    }
-
     // Initialize sharing functionality to handle shared files
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -472,13 +468,18 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
+      // Only mark initial load complete when first sync has finished
+      // This prevents empty state while sync is in progress
+      final hasCompletedFirstSync =
+          CollectionService.instance.hasCompletedFirstSync();
+
       if (mounted) {
         setState(() {
           _collections = sortedCollections;
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
-          _hasCompletedInitialLoad = true;
+          _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
     } catch (error) {
@@ -486,7 +487,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
-          _hasCompletedInitialLoad = true;
+          _hasCompletedInitialLoad =
+              CollectionService.instance.hasCompletedFirstSync();
         });
       }
     }
