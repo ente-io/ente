@@ -1524,7 +1524,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             if (collectionSummary?.attributes.has("shared")) return true;
         }
         return false;
-    }, [haveUser, isCommentsFeatureEnabled, activeCollectionID, collectionSummaries]);
+    }, [
+        haveUser,
+        isCommentsFeatureEnabled,
+        activeCollectionID,
+        collectionSummaries,
+    ]);
 
     // Check if a file belongs to any shared collection (for gallery view).
     const isFileInSharedCollection = useCallback(
@@ -1558,7 +1563,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             return isFileInSharedCollection(file.id);
         },
-        [isCommentsFeatureEnabled, isFileInSharedCollection, activeCollectionID],
+        [
+            isCommentsFeatureEnabled,
+            isFileInSharedCollection,
+            activeCollectionID,
+        ],
     );
 
     // Compute shared albums the file belongs to and which are liked for the modal

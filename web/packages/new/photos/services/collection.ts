@@ -1,5 +1,4 @@
 import { ensureLocalUser } from "ente-accounts/services/user";
-import { settingsSnapshot } from "./settings";
 import { blobCache } from "ente-base/blob-cache";
 import {
     boxSeal,
@@ -50,6 +49,7 @@ import {
     savedCollections,
     savedCollectionsUpdationTime,
 } from "./photos-fdb";
+import { settingsSnapshot } from "./settings";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -1462,11 +1462,7 @@ export const createPublicURL = async (
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            collectionID,
-            enableComment,
-            ...attributes,
-        }),
+        body: JSON.stringify({ collectionID, enableComment, ...attributes }),
     });
     ensureOk(res);
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
