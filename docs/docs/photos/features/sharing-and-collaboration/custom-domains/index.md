@@ -23,7 +23,7 @@ You don't need to run any servers or manage any services, Ente will still host a
 
 ## Availability
 
-The custom domains feature requires the ability to publicly share albums which for abuse prevention reasons can only be done by people with an active Ente subscription.
+The custom domains feature is available to all Ente users, including those on the free tier.
 
 ## Setup
 
