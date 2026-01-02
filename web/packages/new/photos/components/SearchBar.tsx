@@ -162,6 +162,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
+    // Subscribe to people state so that we re-render when people data arrives.
+    // This is needed because shouldShowEmptyState reads peopleStateSnapshot().
+    usePeopleStateSnapshot();
     // The currently selected option.
     //
     // We need to use `null` instead of `undefined` to indicate missing values,
