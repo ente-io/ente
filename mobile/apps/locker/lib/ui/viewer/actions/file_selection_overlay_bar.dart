@@ -173,8 +173,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                       ),
                       margin: EdgeInsets.zero,
                       child: Padding(
-                        padding:
-                            EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -183,8 +182,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                 ListenableBuilder(
                                   listenable: widget.selectedFiles,
                                   builder: (context, child) {
-                                    // Check if all displayed files are selected,
-                                    // not just if counts match
                                     final selectedSet =
                                         widget.selectedFiles.files;
                                     final isAllSelected =
@@ -217,15 +214,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                               BorderRadius.circular(50),
                                         ),
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0,
-                                          vertical: 14.0,
+                                          horizontal: 12.0,
+                                          vertical: 10.0,
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
                                               buttonText,
-                                              style: textTheme.body,
+                                              style: textTheme.small,
                                             ),
                                             const SizedBox(width: 6),
                                             Icon(
@@ -260,15 +257,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                               BorderRadius.circular(50),
                                         ),
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0,
-                                          vertical: 14.0,
+                                          horizontal: 12.0,
+                                          vertical: 10.0,
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
                                               countText,
-                                              style: textTheme.body,
+                                              style: textTheme.small,
                                             ),
                                             const SizedBox(width: 6),
                                             Icon(
@@ -284,7 +281,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 12),
                             _buildActionButtons(),
                           ],
                         ),

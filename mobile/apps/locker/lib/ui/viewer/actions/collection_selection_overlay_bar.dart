@@ -96,8 +96,7 @@ class _CollectionSelectionOverlayBarState
                       ),
                     ),
                     child: Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -132,15 +131,15 @@ class _CollectionSelectionOverlayBarState
                                         borderRadius: BorderRadius.circular(50),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                        vertical: 14.0,
+                                        horizontal: 12.0,
+                                        vertical: 10.0,
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             buttonText,
-                                            style: textTheme.body,
+                                            style: textTheme.small,
                                           ),
                                           const SizedBox(width: 6),
                                           Icon(
@@ -174,15 +173,15 @@ class _CollectionSelectionOverlayBarState
                                         borderRadius: BorderRadius.circular(50),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                        vertical: 14.0,
+                                        horizontal: 12.0,
+                                        vertical: 10.0,
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             countText,
-                                            style: textTheme.body,
+                                            style: textTheme.small,
                                           ),
                                           const SizedBox(width: 6),
                                           Icon(
@@ -198,7 +197,7 @@ class _CollectionSelectionOverlayBarState
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
                           _buildPrimaryActionButtons(),
                         ],
                       ),
