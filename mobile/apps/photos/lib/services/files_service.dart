@@ -34,24 +34,7 @@ class FilesService {
   }
 
   static final FilesService instance = FilesService._privateConstructor();
-// mobile/lib/services/file_service.dart (Logical addition)
 
-Future<void> pinFileForOffline(File file) async {
-  // 1. Mark as pinned in DB
-  file.isPinnedOffline = true;
-  objectbox.fileBox.put(file);
-
-  // 2. Fetch the encrypted blob from Ente's servers
-  final encryptedBytes = await apiService.downloadEncryptedFile(file);
-
-  // 3. Save to internal permanent storage (not the temp cache)
-  final directory = await getApplicationDocumentsDirectory();
-  final offlinePath = '${directory.path}/offline_media/${file.id}.ente';
-  
-  final localFile = io.File(offlinePath);
-  await localFile.create(recursive: true);
-  await localFile.writeAsBytes(encryptedBytes);
-}
   Future<int> getFileSize(int uploadedFileID) async {
     try {
       final response = await _enteDio.post(
