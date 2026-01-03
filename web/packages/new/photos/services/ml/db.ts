@@ -3,6 +3,7 @@ import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
+import type { CachedSimilarImages, CachedHNSWIndexMetadata } from "../similar-images-types";
 
 /**
  * ML DB schema.
@@ -48,6 +49,8 @@ interface MLDBSchema extends DBSchema {
     "face-cluster": { key: string; value: FaceCluster };
     /* Unused */
     "cluster-group": { key: string; value: unknown };
+    "similar-images-cache": { key: string; value: CachedSimilarImages };
+    "hnsw-index-metadata": { key: string; value: CachedHNSWIndexMetadata };
 }
 
 interface FileStatus {
@@ -88,7 +91,7 @@ interface FileStatus {
 let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
 const openMLDB = async () => {
-    const db = await openDB<MLDBSchema>("ml", 1, {
+    const db = await openDB<MLDBSchema>("ml", 3, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
@@ -99,6 +102,12 @@ const openMLDB = async () => {
                 db.createObjectStore("clip-index", { keyPath: "fileID" });
                 db.createObjectStore("face-cluster", { keyPath: "id" });
                 db.createObjectStore("cluster-group", { keyPath: "id" });
+            }
+            if (oldVersion < 2) {
+                db.createObjectStore("similar-images-cache", { keyPath: "id" });
+            }
+            if (oldVersion < 3) {
+                db.createObjectStore("hnsw-index-metadata", { keyPath: "id" });
             }
         },
         blocking() {
@@ -403,4 +412,142 @@ export const saveFaceClusters = async (clusters: FaceCluster[]) => {
     await tx.store.clear();
     await Promise.all(clusters.map((cluster) => tx.store.put(cluster)));
     return tx.done;
+};
+
+// ===========================================================================
+// Similar Images Cache
+// ===========================================================================
+
+/**
+ * Generate a cache key for similar images based on threshold and file IDs.
+ */
+const getSimilarImagesCacheKey = (
+    distanceThreshold: number,
+    fileIDs: number[],
+): string => {
+    const sortedIDs = [...fileIDs].sort((a, b) => a - b).join(",");
+    return `si_${distanceThreshold.toFixed(3)}_${hashString(sortedIDs)}`;
+};
+
+/**
+ * Simple string hash function for cache keys.
+ */
+const hashString = (str: string): string => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+};
+
+/**
+ * Save similar images cache to IndexedDB.
+ *
+ * @param cache The cached similar images result to save.
+ */
+export const saveSimilarImagesCache = async (
+    cache: CachedSimilarImages,
+): Promise<void> => {
+    const db = await mlDB();
+    await db.put("similar-images-cache", cache);
+};
+
+/**
+ * Load similar images cache from IndexedDB.
+ *
+ * @param distanceThreshold The threshold used for the cache.
+ * @param fileIDs The file IDs that were included in the analysis.
+ * @returns The cached result, or undefined if not found.
+ */
+export const loadSimilarImagesCache = async (
+    distanceThreshold: number,
+    fileIDs: number[],
+): Promise<CachedSimilarImages | undefined> => {
+    const key = getSimilarImagesCacheKey(distanceThreshold, fileIDs);
+    const db = await mlDB();
+    return db.get("similar-images-cache", key);
+};
+
+/**
+ * Clear the similar images cache.
+ *
+ * Call this when files are added or removed to ensure fresh computation.
+ */
+export const clearSimilarImagesCache = async (): Promise<void> => {
+    const db = await mlDB();
+    const tx = db.transaction("similar-images-cache", "readwrite");
+    await tx.store.clear();
+    return tx.done;
+};
+
+/**
+ * Invalidate similar images cache when files are modified.
+ *
+ * @param fileIDs File IDs that were added or removed.
+ */
+export const invalidateSimilarImagesCacheForFiles = async (
+    _fileIDs: number[],
+): Promise<void> => {
+    // For now, we clear the entire cache when files change.
+    // In the future, we could do incremental updates.
+    await clearSimilarImagesCache();
+};
+
+// ===========================================================================
+// HNSW Index Metadata Cache
+// ===========================================================================
+
+/**
+ * Save HNSW index metadata to IndexedDB.
+ *
+ * The actual index data is stored in IDBFS, but we store metadata here
+ * for cache validation and quick lookup.
+ *
+ * @param metadata The index metadata to save.
+ */
+export const saveHNSWIndexMetadata = async (
+    metadata: CachedHNSWIndexMetadata,
+): Promise<void> => {
+    const db = await mlDB();
+    await db.put("hnsw-index-metadata", metadata);
+};
+
+/**
+ * Load HNSW index metadata from IndexedDB.
+ *
+ * @param id The ID of the metadata to load (e.g., "clip-hnsw-index").
+ * @returns The cached metadata, or undefined if not found.
+ */
+export const loadHNSWIndexMetadata = async (
+    id: string = "clip-hnsw-index",
+): Promise<CachedHNSWIndexMetadata | undefined> => {
+    const db = await mlDB();
+    return db.get("hnsw-index-metadata", id);
+};
+
+/**
+ * Clear all HNSW index metadata.
+ *
+ * Call this when you want to force a rebuild of all indexes.
+ */
+export const clearHNSWIndexMetadata = async (): Promise<void> => {
+    const db = await mlDB();
+    const tx = db.transaction("hnsw-index-metadata", "readwrite");
+    await tx.store.clear();
+    return tx.done;
+};
+
+/**
+ * Generate a hash from file IDs for cache validation.
+ *
+ * This is used to detect when files have been added or removed.
+ *
+ * @param fileIDs Array of file IDs to hash.
+ * @returns A hash string representing the file IDs.
+ */
+export const generateFileIDHash = (fileIDs: number[]): string => {
+    const sorted = [...fileIDs].sort((a, b) => a - b);
+    return hashString(sorted.join(','));
 };
