@@ -17,6 +17,8 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/events/account_configured_event.dart';
+import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/main.dart" show isProcessBg;
 import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -48,6 +50,7 @@ class RemoteSyncService {
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
   int _ignoredUploads = 0;
+  Set<String>? _selectedDevicePathIdsCache;
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
@@ -93,6 +96,16 @@ class RemoteSyncService {
         }
       }
     });
+
+    if (flagService.queueSourceEnabled) {
+      Bus.instance.on<UserLoggedOutEvent>().listen((event) {
+        _clearSelectedPathIdsCache();
+      });
+
+      Bus.instance.on<AccountConfiguredEvent>().listen((event) {
+        _clearSelectedPathIdsCache();
+      });
+    }
   }
 
   Future<void> sync({bool silently = false}) async {
@@ -357,6 +370,10 @@ class RemoteSyncService {
     _logger.info("Syncing device collections to be uploaded");
     final int ownerID = _config.getUserID()!;
 
+    if (flagService.queueSourceEnabled) {
+      await _ensureSelectedPathIdsCache();
+    }
+
     final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
     // Sort by count to ensure that photos in iOS are first inserted in
@@ -413,6 +430,8 @@ class RemoteSyncService {
       await _db.setCollectionIDForUnMappedLocalFiles(
         collectionID,
         localIDsToSync,
+        queueSource:
+            flagService.queueSourceEnabled ? deviceCollection.id : null,
       );
 
       // mark IDs as already synced if corresponding entry is present in
@@ -449,6 +468,9 @@ class RemoteSyncService {
             existingFile.collectionID = collectionID;
             existingFile.uploadedFileID = null;
             existingFile.ownerID = null;
+            if (flagService.queueSourceEnabled) {
+              existingFile.queueSource = deviceCollection.id;
+            }
             newFilesToInsert.add(existingFile);
             fileFoundForLocalIDs.add(localID);
           }
@@ -476,6 +498,9 @@ class RemoteSyncService {
     final Set<int> oldCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     await _db.updateDevicePathSyncStatus(syncStatusUpdate);
+    if (flagService.queueSourceEnabled) {
+      await _refreshSelectedPathIdsCacheIfChanged(syncStatusUpdate);
+    }
     final Set<int> newCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
@@ -489,6 +514,45 @@ class RemoteSyncService {
       LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),
     );
     Bus.instance.fire(BackupFoldersUpdatedEvent());
+  }
+
+  Future<void> ensureSelectedPathIdsCache() async {
+    await _ensureSelectedPathIdsCache();
+  }
+
+  Future<void> _ensureSelectedPathIdsCache() async {
+    if (_selectedDevicePathIdsCache != null) {
+      return;
+    }
+    _selectedDevicePathIdsCache = await _db.getSelectedDevicePathIds();
+  }
+
+  void _clearSelectedPathIdsCache() {
+    _selectedDevicePathIdsCache = null;
+  }
+
+  Future<void> _refreshSelectedPathIdsCacheIfChanged(
+    Map<String, bool> syncStatusUpdate,
+  ) async {
+    if (syncStatusUpdate.isEmpty) {
+      return;
+    }
+    await _ensureSelectedPathIdsCache();
+    final cache = _selectedDevicePathIdsCache!;
+    final hasChange = syncStatusUpdate.entries.any(
+      (entry) => cache.contains(entry.key) != entry.value,
+    );
+    if (!hasChange) {
+      return;
+    }
+    _selectedDevicePathIdsCache = await _db.getSelectedDevicePathIds();
+  }
+
+  bool isDevicePathSelected(String pathId) {
+    if (!flagService.queueSourceEnabled) {
+      return true;
+    }
+    return _selectedDevicePathIdsCache?.contains(pathId) ?? true;
   }
 
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
@@ -755,6 +819,9 @@ class RemoteSyncService {
     if (error is InvalidFileError) {
       _ignoredUploads++;
       _logger.warning("Invalid file error", error);
+    } else if (error is SkippedQueuedFileError) {
+      _ignoredUploads++;
+      _logger.info("Skipped queued file due to queue source");
     } else {
       throw error;
     }

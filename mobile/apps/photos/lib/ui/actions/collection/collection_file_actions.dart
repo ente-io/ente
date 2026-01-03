@@ -10,6 +10,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/hidden_service.dart";
@@ -144,8 +145,12 @@ extension CollectionFileActions on CollectionActions {
               files.add(uploadedFile);
             }
           } else {
+            final bool queueSourceEnabled = flagService.queueSourceEnabled;
             for (final file in filesPendingUpload) {
               file.collectionID = collection.id;
+              if (queueSourceEnabled) {
+                file.queueSource = 'manual';
+              }
             }
             // filesPendingUpload might be getting ignored during auto-upload
             // because the user deleted these files from ente in the past.
@@ -267,8 +272,12 @@ extension CollectionFileActions on CollectionActions {
             files.add(uploadedFile);
           }
         } else {
+          final bool queueSourceEnabled = flagService.queueSourceEnabled;
           for (final file in filesPendingUpload) {
             file.collectionID = collectionID;
+            if (queueSourceEnabled) {
+              file.queueSource = 'manual';
+            }
           }
           // filesPendingUpload might be getting ignored during auto-upload
           // because the user deleted these files from ente in the past.
