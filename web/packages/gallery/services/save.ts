@@ -10,15 +10,19 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import {
-    safeDirectoryName,
-    safeFileName,
-} from "ente-new/photos/utils/native-fs";
+import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
 import type {
     AddSaveGroup,
     UpdateSaveGroup,
 } from "../components/utils/save-groups";
+import type { WritableStreamHandle } from "./zip";
+import {
+    createNativeZipWritable,
+    getWritableStreamForZip,
+    streamFilesToZip,
+    zipFileName,
+} from "./zip";
 
 /**
  * Save the given {@link files} to the user's device.
@@ -72,7 +76,6 @@ export const downloadAndSaveCollectionFiles = async (
         files,
         collectionSummaryName,
         onAddSaveGroup,
-        collectionSummaryName,
         collectionSummaryID,
         isHiddenCollectionSummary,
     );
@@ -84,7 +87,6 @@ const downloadAndSave = async (
     files: EnteFile[],
     title: string,
     onAddSaveGroup: AddSaveGroup,
-    collectionSummaryName?: string,
     collectionSummaryID?: number,
     isHiddenCollectionSummary?: boolean,
 ) => {
@@ -104,12 +106,25 @@ const downloadAndSave = async (
             // The user cancelled on the directory selection dialog.
             return;
         }
-        if (collectionSummaryName) {
-            downloadDirPath = await mkdirCollectionDownloadFolder(
-                electron,
-                downloadDirPath,
-                collectionSummaryName,
+    }
+
+    // For web streaming ZIP, get the writable handle first (shows file picker)
+    // so we only show the notification after user confirms the location.
+    let preObtainedWritable: WritableStreamHandle | undefined;
+    if (!electron && files.length > 1) {
+        const zipName = zipFileName(title);
+        const handle = await getWritableStreamForZip(zipName);
+        if (handle === null) {
+            // User cancelled the file picker
+            return;
+        }
+        if (handle === undefined) {
+            // Streaming unavailable, will fall back to individual downloads
+            log.info(
+                "Streaming ZIP unavailable, will use individual downloads",
             );
+        } else {
+            preObtainedWritable = handle;
         }
     }
 
@@ -117,6 +132,16 @@ const downloadAndSave = async (
     const failedFiles: EnteFile[] = [];
     let isDownloading = false;
     let updateSaveGroup: UpdateSaveGroup = () => undefined;
+    let retryAttempt = 0;
+
+    const saveSingleFile = async (file: EnteFile) => {
+        if (electron && downloadDirPath) {
+            await saveFileDesktop(electron, file, downloadDirPath);
+        } else {
+            await saveAsFile(file);
+        }
+        updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
+    };
 
     const downloadFiles = async (
         filesToDownload: EnteFile[],
@@ -127,19 +152,100 @@ const downloadAndSave = async (
         isDownloading = true;
         if (resetFailedCount) {
             updateSaveGroup((g) => ({ ...g, failed: 0 }));
+            retryAttempt += 1;
         }
         failedFiles.length = 0;
 
         try {
+            const zipTitle =
+                retryAttempt > 0 ? `${title}-retry-${retryAttempt}` : title;
+
+            if (filesToDownload.length > 1) {
+                let writableOverride: WritableStreamHandle | undefined =
+                    preObtainedWritable;
+
+                if (electron && downloadDirPath) {
+                    const zipExportName = await safeFileName(
+                        downloadDirPath,
+                        zipFileName(zipTitle),
+                        electron.fs.exists,
+                    );
+                    const zipPath = joinPath(downloadDirPath, zipExportName);
+                    writableOverride = createNativeZipWritable(
+                        electron,
+                        zipPath,
+                    );
+                }
+
+                // For retries on web, we need to get a new writable handle
+                if (!electron && retryAttempt > 0) {
+                    const retryZipName = zipFileName(zipTitle);
+                    const handle = await getWritableStreamForZip(retryZipName);
+                    if (handle === null) {
+                        // User cancelled retry file picker
+                        canceller.abort();
+                        return;
+                    }
+                    if (handle) {
+                        writableOverride = handle;
+                    }
+                }
+
+                if (writableOverride) {
+                    const streamingResult = await streamFilesToZip({
+                        files: filesToDownload,
+                        title: zipTitle,
+                        signal: canceller.signal,
+                        writable: writableOverride,
+                        onFileSuccess: (_file, entryCount) => {
+                            updateSaveGroup((g) => ({
+                                ...g,
+                                success: g.success + entryCount,
+                            }));
+                        },
+                        onFileFailure: (file) => {
+                            if (!failedFiles.includes(file)) {
+                                failedFiles.push(file);
+                                updateSaveGroup((g) => ({
+                                    ...g,
+                                    failed: g.failed + 1,
+                                }));
+                            }
+                        },
+                    });
+
+                    if (streamingResult === "success") {
+                        if (!failedFiles.length) {
+                            updateSaveGroup((g) => ({
+                                ...g,
+                                retry: undefined,
+                            }));
+                        }
+                        return;
+                    }
+
+                    if (streamingResult === "cancelled") {
+                        canceller.abort();
+                        return;
+                    }
+
+                    if (streamingResult !== "unavailable") {
+                        // Streaming started but failed; avoid double-downloading
+                        return;
+                    }
+                }
+
+                // Fall back to individual downloads if streaming unavailable
+                log.info(
+                    "Streaming ZIP unavailable, falling back to individual",
+                );
+            }
+
+            // Individual file downloads (used for single-file or when ZIP is unavailable)
             for (const file of filesToDownload) {
                 if (canceller.signal.aborted) break;
                 try {
-                    if (electron && downloadDirPath) {
-                        await saveFileDesktop(electron, file, downloadDirPath);
-                    } else {
-                        await saveAsFile(file);
-                    }
-                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
+                    await saveSingleFile(file);
                 } catch (e) {
                     log.error("File download failed", e);
                     failedFiles.push(file);
@@ -161,6 +267,7 @@ const downloadAndSave = async (
         void downloadFiles([...failedFiles], true);
     };
 
+    // Only add save group notification after user has confirmed the download location
     updateSaveGroup = onAddSaveGroup({
         title,
         collectionSummaryID,
@@ -198,41 +305,31 @@ const saveAsFile = async (file: EnteFile) => {
 /**
  * Save the given {@link blob} as a file in the user's download folder.
  */
-const saveBlobPartAsFile = async (blobPart: BlobPart, fileName: string) =>
-    createTypedObjectURL(blobPart, fileName).then((url) =>
+const saveBlobPartAsFile = async (
+    blobPart: BlobPart,
+    fileName: string,
+    mimeType?: string,
+) =>
+    createTypedObjectURL(blobPart, fileName, mimeType).then((url) =>
         saveAsFileAndRevokeObjectURL(url, fileName),
     );
 
-const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
-    const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
-    const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
-    return URL.createObjectURL(new Blob([blob], { type: mimeType }));
-};
-
-/**
- * Create a new directory on the user's file system with the same name as the
- * provided {@link collectionName} under the provided {@link downloadDirPath},
- * and return the full path to the created directory.
- *
- * This function can be used only when running in the context of our desktop
- * app, and so such requires an {@link Electron} instance as the witness.
- */
-const mkdirCollectionDownloadFolder = async (
-    { fs }: Electron,
-    downloadDirPath: string,
-    collectionName: string,
+const createTypedObjectURL = async (
+    blobPart: BlobPart,
+    fileName: string,
+    mimeType?: string,
 ) => {
-    const collectionDownloadName = await safeDirectoryName(
-        downloadDirPath,
-        collectionName,
-        fs.exists,
-    );
-    const collectionDownloadPath = joinPath(
-        downloadDirPath,
-        collectionDownloadName,
-    );
-    await fs.mkdirIfNeeded(collectionDownloadPath);
-    return collectionDownloadPath;
+    const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
+    if (!mimeType) {
+        try {
+            ({ mimeType } = await detectFileTypeInfo(
+                new File([blob], fileName),
+            ));
+        } catch (e) {
+            log.error("Failed to detect mime type", e);
+        }
+    }
+    return URL.createObjectURL(new Blob([blob], { type: mimeType }));
 };
 
 /**
@@ -287,3 +384,5 @@ const saveFileDesktop = async (
         await writeStreamToFile(await createExportName(fileName), stream);
     }
 };
+
+// Streaming ZIP logic moved to zip.ts
