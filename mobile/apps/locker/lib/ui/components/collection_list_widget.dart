@@ -166,9 +166,17 @@ class CollectionListWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 collectionRowWidget,
-                isFavourite
-                    ? const SizedBox.shrink()
-                    : AnimatedSwitcher(
+                if (isFavourite)
+                  const SizedBox.shrink()
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showSharingIndicator && hasSharees)
+                        _buildShareesAvatars(
+                          collection.sharees.whereType<User>().toList(),
+                        ),
+                      AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
@@ -179,45 +187,21 @@ class CollectionListWidget extends StatelessWidget {
                                 iconButtonType: IconButtonType.secondary,
                                 iconColor: colorScheme.primary700,
                               )
-                            : showSharingIndicator
-                                ? Row(
-                                    key: const ValueKey("shared"),
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (hasSharees)
-                                        _buildShareesAvatars(
-                                          collection.sharees
-                                              .whereType<User>()
-                                              .toList(),
-                                        ),
-                                      CollectionPopupMenuWidget(
-                                        collection: collection,
-                                        overflowActions: overflowActions,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: HugeIcon(
-                                            icon: HugeIcons
-                                                .strokeRoundedMoreVertical,
-                                            color: colorScheme.textBase,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : CollectionPopupMenuWidget(
-                                    key: const ValueKey("menu"),
-                                    collection: collection,
-                                    overflowActions: overflowActions,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: HugeIcon(
-                                        icon:
-                                            HugeIcons.strokeRoundedMoreVertical,
-                                        color: colorScheme.textBase,
-                                      ),
-                                    ),
+                            : CollectionPopupMenuWidget(
+                                key: const ValueKey("menu"),
+                                collection: collection,
+                                overflowActions: overflowActions,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedMoreVertical,
+                                    color: colorScheme.textBase,
                                   ),
+                                ),
+                              ),
                       ),
+                    ],
+                  ),
               ],
             ),
           );

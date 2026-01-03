@@ -292,6 +292,18 @@ abstract class AppLocalizations {
   /// **'This collection cannot be deleted'**
   String get collectionCannotBeDeleted;
 
+  /// No description provided for @collectionCannotBeEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection cannot be edited'**
+  String get collectionCannotBeEdited;
+
+  /// No description provided for @collectionCannotBeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection cannot be shared'**
+  String get collectionCannotBeShared;
+
   /// No description provided for @deleteCollection.
   ///
   /// In en, this message translates to:

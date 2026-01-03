@@ -178,7 +178,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         _editFile(context);
         break;
       case 'toggle_important':
-        _toggleImportant(context);
+        _markImportant(context);
         break;
       case 'download':
         _downloadFile(context);
@@ -214,8 +214,8 @@ class FilePopupMenuWidget extends StatelessWidget {
     await FileActions.editFile(context, file);
   }
 
-  Future<void> _toggleImportant(BuildContext context) async {
-    await FileActions.toggleImportant(
+  Future<void> _markImportant(BuildContext context) async {
+    await FileActions.markImportant(
       context,
       file,
     );

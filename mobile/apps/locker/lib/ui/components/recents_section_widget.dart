@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
+import "package:locker/models/selected_files.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -15,11 +16,15 @@ import 'package:locker/ui/components/item_list_view.dart';
 class RecentsSectionWidget extends StatefulWidget {
   final List<Collection> collections;
   final List<EnteFile> recentFiles;
+  final SelectedFiles? selectedFiles;
+  final ValueNotifier<List<EnteFile>>? displayedFilesNotifier;
 
   const RecentsSectionWidget({
     super.key,
     required this.collections,
     required this.recentFiles,
+    this.selectedFiles,
+    this.displayedFilesNotifier,
   });
 
   @override
@@ -41,6 +46,15 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     super.initState();
     _originalCollectionOrder = List.from(widget.collections);
     _availableCollections = List.from(widget.collections);
+    // Update notifier with initial displayed files after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateDisplayedFilesNotifier();
+    });
+  }
+
+  void _updateDisplayedFilesNotifier() {
+    if (!mounted) return;
+    widget.displayedFilesNotifier?.value = _displayedFiles;
   }
 
   @override
@@ -58,6 +72,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
         }
       });
       _updateFilteredFiles();
+      // Update notifier when source files change and no filters are active
+      if (!_hasActiveFilters) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _updateDisplayedFilesNotifier();
+        });
+      }
     }
   }
 
@@ -130,6 +150,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
           : ItemListView(
               key: const ValueKey('items_list'),
               files: _displayedFiles,
+              selectedFiles: widget.selectedFiles,
             ),
     );
   }
@@ -193,6 +214,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
         _filteredFiles = [];
         _availableCollections = List.from(widget.collections);
       });
+
+      // Update notifier when filters are cleared
+      _updateDisplayedFilesNotifier();
       return;
     }
 
@@ -245,6 +269,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       _filteredFiles = filteredFiles;
       _availableCollections = availableCollections;
     });
+
+    // Update notifier with the new displayed files
+    _updateDisplayedFilesNotifier();
   }
 
   Future<Map<int, List<Collection>>> _ensureCollectionsForFiles(
@@ -567,7 +594,7 @@ class _FilterClearButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = colorScheme.warning500;
-    final backgroundColor = accentColor.withOpacity(0.12);
+    final backgroundColor = accentColor.withValues(alpha: 0.12);
 
     return GestureDetector(
       onTap: onTap,

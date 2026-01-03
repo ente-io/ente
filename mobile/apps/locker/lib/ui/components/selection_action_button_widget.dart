@@ -33,24 +33,16 @@ class SelectionActionButton extends StatelessWidget {
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(24.0),
         ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 18.0,
-          horizontal: 12.0,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            hugeIcon ??
-                Icon(
-                  icon!,
-                  color: color,
-                  size: 24,
-                ),
+            hugeIcon ?? Icon(icon!, color: color, size: 24),
             const SizedBox(height: 8),
             Text(
               label,
-              style: textTheme.body.copyWith(
+              style: textTheme.small.copyWith(
                 color: color,
               ),
               textAlign: TextAlign.center,

@@ -95,6 +95,8 @@
     }
   },
   "collectionCannotBeDeleted": "This collection cannot be deleted",
+  "collectionCannotBeEdited": "This collection cannot be edited",
+  "collectionCannotBeShared": "This collection cannot be shared",
   "deleteCollection": "Delete collection",
   "deleteCollectionConfirmation": "Are you sure you want to delete \"{collectionName}\"?",
   "@deleteCollectionConfirmation": {

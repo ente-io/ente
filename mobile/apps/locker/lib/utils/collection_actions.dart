@@ -77,6 +77,11 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
+    if (!collection.type.canEdit) {
+      showToast(context, context.l10n.collectionCannotBeEdited);
+      return;
+    }
+
     await showInputDialogSheet(
       context,
       title: context.l10n.renameCollection,

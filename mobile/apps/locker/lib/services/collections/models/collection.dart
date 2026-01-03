@@ -297,6 +297,12 @@ String typeToString(CollectionType type) {
 extension CollectionTypeExtn on CollectionType {
   bool get canDelete =>
       this != CollectionType.favorites && this != CollectionType.uncategorized;
+
+  bool get canEdit =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
+
+  bool get canShare =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
 }
 
 enum CollectionParticipantRole {
