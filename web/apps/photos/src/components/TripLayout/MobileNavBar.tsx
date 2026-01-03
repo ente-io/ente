@@ -3,6 +3,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
+import { FeedIcon } from "components/Collections/CollectionHeader";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
@@ -17,6 +18,7 @@ interface MobileNavBarProps {
     onAddPhotos?: () => void;
     downloadAllFiles: () => void;
     enableDownload?: boolean;
+    onShowFeed?: () => void;
     collectionTitle?: string;
     publicCollection?: Collection;
     accessToken?: string;
@@ -28,6 +30,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     onAddPhotos,
     downloadAllFiles,
     enableDownload,
+    onShowFeed,
     collectionTitle,
     publicCollection,
     accessToken,
@@ -93,6 +96,12 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
                     <MobileNavButton onClick={handleShare}>
                         <ShareIcon sx={{ fontSize: "15px" }} />
                     </MobileNavButton>
+
+                    {onShowFeed && (
+                        <MobileNavButton onClick={onShowFeed}>
+                            <FeedIcon />
+                        </MobileNavButton>
+                    )}
 
                     {onAddPhotos && (
                         <MobileNavButton onClick={onAddPhotos}>

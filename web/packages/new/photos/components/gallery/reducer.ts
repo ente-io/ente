@@ -1491,11 +1491,15 @@ const createCollectionSummaries = (
             type = "sharedIncoming";
             attributes.add("shared");
             attributes.add("sharedIncoming");
+            const userRole = collection.sharees.find(
+                (s) => s.id == user.id,
+            )?.role;
             attributes.add(
-                collection.sharees.find((s) => s.id == user.id)?.role ==
-                    "COLLABORATOR"
-                    ? "sharedIncomingCollaborator"
-                    : "sharedIncomingViewer",
+                userRole == "ADMIN"
+                    ? "sharedIncomingAdmin"
+                    : userRole == "COLLABORATOR"
+                      ? "sharedIncomingCollaborator"
+                      : "sharedIncomingViewer",
             );
         } else if (collectionType == "uncategorized") {
             type = "uncategorized";

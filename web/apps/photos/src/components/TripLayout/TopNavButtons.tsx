@@ -3,6 +3,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
+import { FeedIcon } from "components/Collections/CollectionHeader";
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
@@ -16,6 +17,7 @@ interface TopNavButtonsProps {
     onAddPhotos?: () => void;
     downloadAllFiles: () => void;
     enableDownload?: boolean;
+    onShowFeed?: () => void;
     publicCollection?: Collection;
     accessToken?: string;
     collectionKey?: string;
@@ -26,6 +28,7 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
     onAddPhotos,
     downloadAllFiles,
     enableDownload,
+    onShowFeed,
     publicCollection,
     accessToken,
     collectionKey,
@@ -72,6 +75,12 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                 <NavButton onClick={handleShare}>
                     <ShareIcon sx={{ fontSize: "20px" }} />
                 </NavButton>
+
+                {onShowFeed && (
+                    <NavButton onClick={onShowFeed}>
+                        <FeedIcon />
+                    </NavButton>
+                )}
 
                 {onAddPhotos && (
                     <NavButton onClick={onAddPhotos}>

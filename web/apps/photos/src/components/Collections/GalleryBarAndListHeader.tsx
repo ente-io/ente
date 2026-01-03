@@ -18,6 +18,10 @@ import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
@@ -48,7 +52,7 @@ type GalleryBarAndListHeaderProps = Omit<
      */
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
-    activeCollection: Collection;
+    activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
@@ -154,9 +158,12 @@ export const GalleryBarAndListHeader: React.FC<
     useEffect(() => {
         if (shouldHide) return;
 
+        const collectionSummary = toShowCollectionSummaries.get(
+            activeCollectionID!,
+        );
         setFileListHeader({
             component:
-                mode != "people" ? (
+                mode != "people" && activeCollection ? (
                     <CollectionHeader
                         {...{
                             activeCollection,
@@ -173,12 +180,17 @@ export const GalleryBarAndListHeader: React.FC<
                             onSelectCollection,
                             onSelectPerson,
                         }}
-                        collectionSummary={
-                            toShowCollectionSummaries.get(activeCollectionID!)!
-                        }
+                        collectionSummary={collectionSummary!}
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
                     />
+                ) : mode != "people" && collectionSummary ? (
+                    <GalleryItemsHeaderAdapter>
+                        <GalleryItemsSummary
+                            name={collectionSummary.name}
+                            fileCount={collectionSummary.fileCount}
+                        />
+                    </GalleryItemsHeaderAdapter>
                 ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
@@ -194,6 +206,7 @@ export const GalleryBarAndListHeader: React.FC<
         shouldHide,
         mode,
         toShowCollectionSummaries,
+        activeCollection,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
@@ -249,24 +262,28 @@ export const GalleryBarAndListHeader: React.FC<
                 isInHiddenSection={mode == "hidden-albums"}
                 onRemotePull={onRemotePull}
             />
-            <CollectionShare
-                {...collectionShareVisibilityProps}
-                collectionSummary={
-                    toShowCollectionSummaries.get(activeCollectionID!)!
-                }
-                collection={activeCollection}
-                {...{
-                    user,
-                    emailByUserID,
-                    shareSuggestionEmails,
-                    setBlockingLoad,
-                    onRemotePull,
-                }}
-            />
-            <AlbumCastDialog
-                {...collectionCastVisibilityProps}
-                collection={activeCollection}
-            />
+            {activeCollection && (
+                <>
+                    <CollectionShare
+                        {...collectionShareVisibilityProps}
+                        collectionSummary={
+                            toShowCollectionSummaries.get(activeCollectionID!)!
+                        }
+                        collection={activeCollection}
+                        {...{
+                            user,
+                            emailByUserID,
+                            shareSuggestionEmails,
+                            setBlockingLoad,
+                            onRemotePull,
+                        }}
+                    />
+                    <AlbumCastDialog
+                        {...collectionCastVisibilityProps}
+                        collection={activeCollection}
+                    />
+                </>
+            )}
         </>
     );
 };

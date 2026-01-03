@@ -322,6 +322,10 @@ export interface PublicURL {
      */
     enableCollect: boolean;
     /**
+     * `true` if comments are enabled on this public link.
+     */
+    enableComment: boolean;
+    /**
      * `true` if the link is password protected.
      *
      * When this is `true`, {@link nonce}, {@link memLimit} and {@link opsLimit}
@@ -360,6 +364,7 @@ export const RemotePublicURL = z.looseObject({
     enableDownload: z.boolean().nullish().transform(nullishToFalse),
     enableJoin: z.boolean().nullish().transform(nullishToFalse),
     enableCollect: z.boolean().nullish().transform(nullishToFalse),
+    enableComment: z.boolean().nullish().transform(nullishToFalse),
     passwordEnabled: z.boolean().nullish().transform(nullishToFalse),
     nonce: z.string().nullish().transform(nullToUndefined),
     memLimit: z.number().nullish().transform(nullToUndefined),
