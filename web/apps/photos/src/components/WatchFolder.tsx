@@ -3,6 +3,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
     CircularProgress,
     Dialog,
@@ -223,7 +224,11 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     return (
         <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>
             <Stack direction="row" sx={{ overflow: "hidden", gap: 1.5 }}>
-                {watch.collectionMapping == "root" ? (
+                {!watch.isAvailable ? (
+                    <Tooltip title={t("folder_not_accessible")}>
+                        <WarningAmberIcon color="warning" />
+                    </Tooltip>
+                ) : watch.collectionMapping == "root" ? (
                     <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon color="secondary" />
                     </Tooltip>

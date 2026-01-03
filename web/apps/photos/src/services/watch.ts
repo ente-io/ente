@@ -129,6 +129,41 @@ class FolderWatcher {
         this.triggerSyncWithDisk();
     }
 
+    /**
+     * Recheck availability of previously unavailable watches.
+     *
+     * This is called on window focus to detect reconnected external drives.
+     * If any watches that were previously unavailable are now accessible,
+     * trigger a sync to process files that may have been added while the
+     * drive was disconnected.
+     */
+    async recheckUnavailableWatches() {
+        // Check if any previously unavailable watches are now available.
+        // getWatches() also updates chokidar for newly available paths.
+        const previouslyUnavailable = this.unavailablePaths;
+        const watches = await this.getWatches();
+
+        // Update our record of unavailable paths for next time.
+        this.unavailablePaths = new Set(
+            watches.filter((w) => !w.isAvailable).map((w) => w.folderPath),
+        );
+
+        // Find watches that were unavailable but are now available.
+        const newlyAvailable = watches.filter(
+            (w) => w.isAvailable && previouslyUnavailable.has(w.folderPath),
+        );
+
+        if (newlyAvailable.length > 0) {
+            log.info(
+                `Detected ${newlyAvailable.length} reconnected watch folder(s)`,
+            );
+            this.triggerSyncWithDisk();
+        }
+    }
+
+    /** Paths of watches that were unavailable on the last check. */
+    private unavailablePaths = new Set<string>();
+
     /** Return the list of folders we are watching for changes. */
     async getWatches(): Promise<FolderWatch[]> {
         return await ensureElectron().watch.get();
@@ -172,6 +207,11 @@ class FolderWatcher {
     private async syncWithDisk() {
         try {
             const watches = await this.getWatches();
+
+            // Track unavailable paths for recheckUnavailableWatches().
+            this.unavailablePaths = new Set(
+                watches.filter((w) => !w.isAvailable).map((w) => w.folderPath),
+            );
 
             this.eventQueue = [];
             const events = await deduceEvents(watches);
@@ -247,6 +287,11 @@ class FolderWatcher {
         if (!watch) {
             // Possibly stale
             skip(`no folder watch for found for ${event.folderPath}`);
+            return;
+        }
+        if (!watch.isAvailable) {
+            // Folder is temporarily unavailable (e.g., external drive disconnected).
+            skip(`folder is not currently available: ${event.folderPath}`);
             return;
         }
 
@@ -553,6 +598,9 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     const events: WatchEvent[] = [];
 
     for (const watch of watches) {
+        // Skip unavailable watches (e.g., disconnected external drives).
+        if (!watch.isAvailable) continue;
+
         const folderPath = watch.folderPath;
 
         const filePaths = await electron.fs.findFiles(folderPath);
