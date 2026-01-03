@@ -8,17 +8,21 @@ Future<T?> showAlertBottomSheet<T>(
   required String message,
   required String assetPath,
   List<Widget>? buttons,
+  bool isDismissible = true,
+  bool showCloseButton = true,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
-    isDismissible: true,
+    isDismissible: isDismissible,
+    enableDrag: isDismissible,
     backgroundColor: Colors.transparent,
     builder: (context) => AlertBottomSheet<T>(
       title: title,
       message: message,
       assetPath: assetPath,
       buttons: buttons,
+      showCloseButton: showCloseButton,
     ),
   );
 }
@@ -28,12 +32,14 @@ class AlertBottomSheet<T> extends StatelessWidget {
   final String message;
   final String assetPath;
   final List<Widget>? buttons;
+  final bool showCloseButton;
 
   const AlertBottomSheet({
     required this.title,
     required this.message,
     required this.assetPath,
     this.buttons,
+    this.showCloseButton = true,
     super.key,
   });
 
@@ -58,13 +64,14 @@ class AlertBottomSheet<T> extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CloseIconButton(),
-                ],
-              ),
-              const SizedBox(height: 12),
+              if (showCloseButton)
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CloseIconButton(),
+                  ],
+                ),
+              SizedBox(height: showCloseButton ? 12 : 24),
               Center(child: Image.asset(assetPath)),
               const SizedBox(height: 20),
               Text(

@@ -137,6 +137,7 @@
   "@email": {
     "description": "Email field label"
   },
+  "emailHint": "Enter your email id",
   "verify": "Verify",
   "@verify": {
     "description": "Verify button label"
@@ -269,6 +270,10 @@
   "@password": {
     "description": "Password field label"
   },
+  "enterThePasswordFor": "Enter the password for",
+  "@enterThePasswordFor": {
+    "description": "Text shown before email on login password verification page"
+  },
   "confirmPassword": "Confirm password",
   "@confirmPassword": {
     "description": "Confirm password field label"
@@ -316,6 +321,10 @@
   "@logInLabel": {
     "description": "Log in button label"
   },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Text asking if user already has an account"
+  },
   "welcomeBack": "Welcome back!",
   "@welcomeBack": {
     "description": "Welcome back message"
@@ -360,17 +369,6 @@
   "@verifyEmail": {
     "description": "Verify email title"
   },
-  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
-  "@weHaveSendEmailTo": {
-    "description": "Text to indicate that we have sent a mail to the user",
-    "placeholders": {
-      "email": {
-        "description": "The email address of the user",
-        "type": "String",
-        "example": "example@ente.io"
-      }
-    }
-  },
   "toResetVerifyEmail": "To reset your password, please verify your email first.",
   "@toResetVerifyEmail": {
     "description": "Message asking user to verify email before password reset"
@@ -379,6 +377,15 @@
   "@checkInboxAndSpamFolder": {
     "description": "Message asking user to check inbox and spam folder"
   },
+  "weHaveSentCode": "We have sent a code to {email}",
+  "@weHaveSentCode": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "resendCode": "Resend Code",
   "tapToEnterCode": "Tap to enter code",
   "@tapToEnterCode": {
     "description": "Hint for entering verification code"
@@ -527,6 +534,10 @@
   "noRecoveryKeyTitle": "No recovery key?",
   "@noRecoveryKeyTitle": {
     "description": "No recovery key title"
+  },
+  "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+  "@noRecoveryKeyNoDecryption": {
+    "description": "Explanation that data cannot be decrypted without password or recovery key"
   },
   "twoFactorAuthTitle": "Two-factor authentication",
   "@twoFactorAuthTitle": {
@@ -1014,5 +1025,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "sorry": "Sorry"
 }

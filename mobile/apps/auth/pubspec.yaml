@@ -21,34 +21,64 @@ dependencies:
   device_info_plus: ^9.1.1
   dio: ^5.8.0+1
   dir_utils:
-    path: ../../packages/dir_utils
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/dir_utils
   dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
   ente_accounts:
-    path: ../../packages/accounts
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/accounts
   ente_base:
-    path: ../../packages/base
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/base
   ente_configuration:
-    path: ../../packages/configuration
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/configuration
   ente_crypto_dart:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_events:
-    path: ../../packages/events
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/events
   ente_lock_screen:
-    path: ../../packages/lock_screen
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/lock_screen
   ente_logging:
-    path: ../../packages/logging
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/logging
   ente_network:
-    path: ../../packages/network
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/network
   ente_qr:
     path: plugins/qr
   ente_strings:
-    path: ../../packages/strings
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/strings
   ente_ui:
-    path: ../../packages/ui
+    git:
+      url: https://github.com/ente-io/ente.git
+      ref: 7371617af788ded7ecd66686db0272937c76c624
+      path: mobile/packages/ui
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
