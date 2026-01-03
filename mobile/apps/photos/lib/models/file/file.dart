@@ -14,7 +14,16 @@ import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
+@Entity()
+class File {
+  // Existing fields...
+  int id = 0;
+  
+  // Add this field
+  bool isPinnedOffline = false; 
 
+  // ... rest of the class
+}
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
   int? generatedID;
