@@ -313,16 +313,21 @@ func (c *ReplicationController3) tryReplicate() error {
 	defer os.Remove(filePath)
 	defer file.Close()
 
-	size, err := c.downloadFromB2ViaWorker(objectKey, file, logger)
+	downloadedSize, err := c.downloadFromB2ViaWorker(objectKey, file, logger)
 	if err != nil {
 		return done(stacktrace.Propagate(err, "Failed to download object from B2"))
 	}
-	logger.Infof("Downloaded %d bytes to %s", size, filePath)
+	logger.Infof("Downloaded %d bytes to %s", downloadedSize, filePath)
+
+	if downloadedSize != ob.Size {
+		c.notifyDiscord(fmt.Sprintf("⚠️ Replication download size mismatch for %s: got %d bytes, expected %d", objectKey, downloadedSize, ob.Size))
+		return done(stacktrace.NewError("downloaded size (%d) does not match expected size (%d)", downloadedSize, ob.Size))
+	}
 
 	in := &UploadInput{
 		File:         file,
 		ObjectKey:    objectKey,
-		ExpectedSize: size,
+		ExpectedSize: ob.Size,
 		Logger:       logger,
 	}
 
