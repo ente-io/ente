@@ -86,7 +86,6 @@ https://pics.example.org/?t=...
 
 **Requirements:**
 
-- Active Ente subscription (required for public sharing)
 - Your own domain or subdomain
 - Ability to add a CNAME DNS record
 

@@ -55,6 +55,10 @@
       "title": "Amazon"
     },
     {
+      "title": "Amica",
+      "slug": "amica"
+    },
+    {
       "title": "Amtrak",
       "slug": "amtrak"
     },
@@ -1825,6 +1829,10 @@
     {
       "title": "Ubuntu One",
       "slug": "ubuntu_one"
+    },
+    {
+      "title": "UCF",
+      "slug": "ucf"
     },
     {
       "title": "unitedhealthgroup",

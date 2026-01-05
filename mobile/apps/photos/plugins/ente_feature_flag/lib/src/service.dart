@@ -48,9 +48,6 @@ class FlagService {
     return (flags.internalUser || kDebugMode) && !isDisabled;
   }
 
-  bool get enableAdminRole => internalUser;
-  bool get enableDeleteSuggestion => internalUser;
-
   bool get betaUser => flags.betaUser;
 
   bool get internalOrBetaUser => internalUser || betaUser;

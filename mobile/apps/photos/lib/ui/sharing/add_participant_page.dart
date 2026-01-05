@@ -148,9 +148,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 widget.actionTypesToShow.contains(
                                   ActionTypesToShow.addAdmin,
                                 )
-                                    ? const MenuSectionDescriptionWidget(
-                                        content:
-                                            '(i) Admins can manage photos & participants.',
+                                    ? MenuSectionDescriptionWidget(
+                                        content: AppLocalizations.of(context)
+                                            .adminsCanManagePhotosAndParticipants,
                                       )
                                     : const SizedBox.shrink(),
                               ],
@@ -345,7 +345,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               ? ButtonType.primary
               : ButtonType.neutral,
           buttonSize: ButtonSize.large,
-          labelText: _adminActionLabel(_selectedEmails.length),
+          labelText: AppLocalizations.of(context)
+              .addAdmins(count: _selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             final results = <bool>[];
@@ -365,7 +366,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             }
 
             final successful = results.where((e) => e).length;
-            showToast(context, _adminSuccessMessage(successful));
+            showToast(
+              context,
+              AppLocalizations.of(context)
+                  .adminsSuccessfullyAdded(count: successful),
+            );
 
             if (!results.any((e) => e == false) && mounted) {
               Navigator.of(context).pop(true);
@@ -527,22 +532,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       case ActionTypesToShow.addCollaborator:
         return AppLocalizations.of(context).addCollaborator;
       case ActionTypesToShow.addAdmin:
-        return _adminTitle();
+        return AppLocalizations.of(context).addAdmin;
     }
   }
-
-  String _adminActionLabel(int count) =>
-      count == 1 ? "(i) Add admin" : "(i) Add admins";
-
-  String _adminSuccessMessage(int count) {
-    if (count == 0) {
-      return "(i) No admins were added";
-    }
-    if (count == 1) {
-      return "(i) 1 admin successfully added";
-    }
-    return "(i) $count admins successfully added";
-  }
-
-  String _adminTitle() => "(i) Add admin";
 }
