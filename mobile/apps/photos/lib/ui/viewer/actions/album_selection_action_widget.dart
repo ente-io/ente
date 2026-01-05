@@ -110,13 +110,47 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).archive,
-        icon: Icons.archive_outlined,
-        onTap: _archiveClick,
-      ),
-    );
+    if (widget.sectionType == UISectionType.archivedCollections) {
+      // For archived albums: show unarchive and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unarchive,
+          icon: Icons.unarchive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else if (widget.sectionType == UISectionType.hiddenCollections) {
+      // For hidden albums: show unhide and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unhide,
+          icon: Icons.visibility_outlined,
+          onTap: _onHideClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else {
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).archive,
+          icon: Icons.archive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+    }
 
     if (widget.sectionType == UISectionType.incomingCollections) {
       // Pin/Unpin options for incoming collections (uses sharee metadata)

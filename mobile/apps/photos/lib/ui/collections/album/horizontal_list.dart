@@ -72,9 +72,6 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
             return const SizedBox.shrink();
           }
           final allCollections = snapshot.data as List<Collection>;
-          final hasMore = allCollections.length > 3;
-          final displayCollections =
-              hasMore ? allCollections.sublist(0, 3) : allCollections;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 24, top: 8),
@@ -82,9 +79,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: hasMore && widget.onViewAllTapped != null
-                      ? widget.onViewAllTapped
-                      : null,
+                  onTap: widget.onViewAllTapped,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -97,7 +92,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                           AppLocalizations.of(context).albums,
                           style: getEnteTextTheme(context).large,
                         ),
-                        if (hasMore && widget.onViewAllTapped != null)
+                        if (widget.onViewAllTapped != null)
                           Container(
                             color: Colors.transparent,
                             child: Padding(
@@ -119,12 +114,12 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                     height: sideOfThumbnail + 46,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: displayCollections.length,
+                      itemCount: allCollections.length,
                       padding: const EdgeInsets.symmetric(
                         horizontal: horizontalPadding / 2,
                       ),
                       itemBuilder: (context, index) {
-                        final item = displayCollections[index];
+                        final item = allCollections[index];
                         return Padding(
                           key: ValueKey('horizontal_list_${item.id}'),
                           padding: const EdgeInsets.only(
