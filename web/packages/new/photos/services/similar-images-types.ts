@@ -197,6 +197,12 @@ export interface CachedHNSWIndexMetadata {
      */
     vectorCount: number;
     /**
+     * Maximum capacity of the index.
+     * Must use this exact value when loading the index.
+     * Optional for backward compatibility with old cache entries.
+     */
+    maxElements?: number;
+    /**
      * Timestamp when this index was built.
      */
     createdAt: number;
