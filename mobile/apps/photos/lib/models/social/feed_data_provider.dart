@@ -5,6 +5,7 @@ import "package:photos/db/social_db.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/reaction.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/social_sync_service.dart";
 
 /// Provider for feed data.
@@ -22,7 +23,7 @@ class FeedDataProvider {
   ///
   /// Feed items are sorted by most recent activity.
   /// Each item represents a unique (type, fileID, commentID) combination.
-  /// Items associated with files that no longer exist in the database are filtered out.
+  /// Items from hidden collections or associated with deleted files are filtered out.
   Future<List<FeedItem>> getFeedItems({
     int limit = 50,
   }) async {
@@ -76,8 +77,8 @@ class FeedDataProvider {
       ),
     );
 
-    // Filter out items where the associated file doesn't exist
-    final validItems = await _filterItemsWithExistingFiles(feedItems);
+    // Filter out items where the associated file doesn't exist or collection is hidden
+    final validItems = await _filterFeedItems(feedItems);
 
     // Sort by most recent activity
     validItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -282,14 +283,19 @@ class FeedDataProvider {
         .toList();
   }
 
-  /// Filters out feed items where the associated file doesn't exist in FilesDB.
+  /// Filters out feed items that should not be displayed.
   ///
-  /// This handles cases where a file has been deleted but its social data
-  /// (comments/reactions) still exists in the database.
-  Future<List<FeedItem>> _filterItemsWithExistingFiles(
+  /// Removes items where:
+  /// - The associated file no longer exists in FilesDB
+  /// - The collection is hidden
+  Future<List<FeedItem>> _filterFeedItems(
     List<FeedItem> items,
   ) async {
     if (items.isEmpty) return items;
+
+    // Get hidden collection IDs to filter out
+    final hiddenCollectionIds =
+        CollectionsService.instance.getHiddenCollectionIds();
 
     // Collect unique (fileID, collectionID) pairs
     final filesToCheck = <(int, int)>{};
@@ -299,18 +305,28 @@ class FeedDataProvider {
       }
     }
 
-    if (filesToCheck.isEmpty) return items;
+    if (filesToCheck.isEmpty) {
+      // Still filter hidden collections even if no files to check
+      return items
+          .where((item) => !hiddenCollectionIds.contains(item.collectionID))
+          .toList();
+    }
 
     // Check which files exist using batch query (single DB call)
     final existingFiles =
         await FilesDB.instance.getExistingFileKeys(filesToCheck);
 
-    // Filter items to only include those with existing files
+    // Filter out invalid items
     return items.where((item) {
+      // Exclude hidden collections
+      if (hiddenCollectionIds.contains(item.collectionID)) {
+        return false;
+      }
+      // Items without fileID (collection-level activity) are kept
       if (item.fileID == null) {
-        // Items without fileID (collection-level activity) are kept
         return true;
       }
+      // Exclude items where file no longer exists
       final key = '${item.collectionID}_${item.fileID}';
       return existingFiles.contains(key);
     }).toList();
