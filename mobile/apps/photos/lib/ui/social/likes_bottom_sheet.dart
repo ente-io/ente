@@ -75,13 +75,24 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
       );
 
       // Filter to shared collections only
-      final sharedCollectionsList = collectionIDs
+      var sharedCollectionsList = collectionIDs
           .map((id) => CollectionsService.instance.getCollectionByID(id))
           .whereType<Collection>()
           .where(
             (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
           )
           .toList();
+
+      // Filter out hidden collections unless viewing from a hidden collection
+      final hiddenCollectionIds =
+          CollectionsService.instance.getHiddenCollectionIds();
+      final isInitialCollectionHidden =
+          hiddenCollectionIds.contains(widget.initialCollectionID);
+      if (!isInitialCollectionHidden) {
+        sharedCollectionsList = sharedCollectionsList
+            .where((c) => !hiddenCollectionIds.contains(c.id))
+            .toList();
+      }
 
       // Fetch like counts and thumbnails in parallel
       final sharedCollections = await Future.wait(

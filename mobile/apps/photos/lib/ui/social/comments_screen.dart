@@ -87,13 +87,24 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     );
 
     // Filter to shared collections first (sync operation)
-    final sharedCollectionsList = collectionIDs
+    var sharedCollectionsList = collectionIDs
         .map((id) => CollectionsService.instance.getCollectionByID(id))
         .whereType<Collection>()
         .where(
           (c) => c.hasSharees || c.hasLink || !c.isOwner(_currentUserID),
         )
         .toList();
+
+    // Filter out hidden collections unless viewing from a hidden collection
+    final hiddenCollectionIds =
+        CollectionsService.instance.getHiddenCollectionIds();
+    final isInitialCollectionHidden =
+        hiddenCollectionIds.contains(widget.collectionID);
+    if (!isInitialCollectionHidden) {
+      sharedCollectionsList = sharedCollectionsList
+          .where((c) => !hiddenCollectionIds.contains(c.id))
+          .toList();
+    }
 
     // Fetch data in parallel
     final sharedCollections = await Future.wait(
