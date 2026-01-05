@@ -17,6 +17,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/trash_file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -240,7 +241,8 @@ class FileBottomBarState extends State<FileBottomBar> {
       }
 
       // Add social icons (heart, comment) if file is in a shared collection
-      if (isInSharedCollection) {
+      // and social features are enabled
+      if (isInSharedCollection && flagService.isSocialEnabled) {
         children.add(_buildHeartIcon());
         children.add(_buildCommentIcon());
       }

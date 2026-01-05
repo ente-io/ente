@@ -12,6 +12,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -162,7 +163,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            const FeedPreviewWidget(),
+            if (flagService.isSocialEnabled) const FeedPreviewWidget(),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [

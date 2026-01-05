@@ -96,6 +96,7 @@ class FlagService {
 
   bool get enableShareePin => true;
 
+  bool get isSocialEnabled => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {
