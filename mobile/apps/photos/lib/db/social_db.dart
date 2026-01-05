@@ -12,7 +12,7 @@ import 'package:sqflite/sqflite.dart';
 
 class SocialDB {
   static final Logger _logger = Logger("SocialDB");
-  static const _databaseName = "ente.social3.db";
+  static const _databaseName = "ente.social.db";
   static const _databaseVersion = 1;
 
   static const _commentsTable = 'comments';
