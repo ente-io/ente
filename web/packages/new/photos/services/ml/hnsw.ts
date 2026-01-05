@@ -365,7 +365,7 @@ export class HNSWIndex {
             const success = await this.index.readIndex(filename, this.maxElements);
             console.log(`[HNSW] readIndex returned: ${success} (type: ${typeof success})`);
 
-            if (success !== true) {
+            if (success !== true && success !== undefined) {
                 throw new Error(`readIndex returned ${success} (expected true) - possible capacity mismatch or index already initialized`);
             }
         } catch (error) {
