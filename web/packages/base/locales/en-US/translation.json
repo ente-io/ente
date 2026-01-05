@@ -746,5 +746,7 @@
     "more": "more",
     "remove": "Remove",
     "keep": "Keep",
-    "deleting": "Deleting..."
+    "deleting": "Deleting...",
+    "select_all_in_groups": "Select all",
+    "deselect_all_groups": "Deselect all"
 }
