@@ -618,95 +618,275 @@ class SocialDB {
   // ============ Debug Methods ============
 
   Future<void> seedExampleData() async {
-    final now = DateTime.now().microsecondsSinceEpoch;
-    const testCollectionID = 1;
-    const testFileID = 100;
-    const testUserID = 1;
+    const collectionID1 = 1580559965370209;
 
-    // Seed example comments
+    const collectionID2 = 1580559965494203;
+
+    const fileID = 344651204;
+
+    const userID1 = 1580559962687385;
+
+    const userID2 = 1580559962405667;
+
+// Seed example comments - Collection 1
+
     final exampleComments = [
       Comment(
-        id: 'comment_1',
-        collectionID: testCollectionID,
-        fileID: testFileID,
-        data: 'This is a great photo!',
+        id: 'comment-1',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'A photo from Varkala!',
         parentCommentID: null,
         parentCommentUserID: null,
         isDeleted: false,
-        userID: testUserID,
+        userID: userID1,
         anonUserID: null,
-        createdAt: now - 3600000000,
-        updatedAt: now - 3600000000,
+        createdAt: 1764927602000000,
+        updatedAt: 1764927602000000,
       ),
+
       Comment(
-        id: 'comment_2',
-        collectionID: testCollectionID,
-        fileID: testFileID,
-        data: 'I agree, amazing shot!',
-        parentCommentID: 'comment_1',
-        parentCommentUserID: testUserID,
+        id: 'comment-2',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'Damn that looks nice 👌',
+        parentCommentID: 'comment-1',
+        parentCommentUserID: userID1,
         isDeleted: false,
-        userID: testUserID + 1,
+        userID: userID2,
         anonUserID: null,
-        createdAt: now - 1800000000,
-        updatedAt: now - 1800000000,
+        createdAt: 1764928916000000,
+        updatedAt: 1764928916000000,
       ),
+
       Comment(
-        id: 'comment_3',
-        collectionID: testCollectionID,
-        fileID: null,
-        data: 'Collection-level comment',
+        id: 'comment-3',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'You should definitely visit Varkala 🌊',
+        parentCommentID: 'comment-2',
+        parentCommentUserID: userID2,
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764929999000000,
+        updatedAt: 1764929999000000,
+      ),
+
+      Comment(
+        id: 'comment-4',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'The sunset colors are incredible here!',
         parentCommentID: null,
         parentCommentUserID: null,
         isDeleted: false,
-        userID: testUserID,
+        userID: userID1,
         anonUserID: null,
-        createdAt: now - 900000000,
-        updatedAt: now - 900000000,
+        createdAt: 1764931000000000,
+        updatedAt: 1764931000000000,
+      ),
+
+      Comment(
+        id: 'comment-5',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'What time of day was this taken?',
+        parentCommentID: 'comment-4',
+        parentCommentUserID: userID1,
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764932000000000,
+        updatedAt: 1764932000000000,
+      ),
+
+      Comment(
+        id: 'comment-6',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'Around 6pm, golden hour ✨',
+        parentCommentID: 'comment-5',
+        parentCommentUserID: userID2,
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764933000000000,
+        updatedAt: 1764933000000000,
+      ),
+
+      Comment(
+        id: 'comment-7',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'Is this near the cliff?',
+        parentCommentID: null,
+        parentCommentUserID: null,
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764934000000000,
+        updatedAt: 1764934000000000,
+      ),
+
+      Comment(
+        id: 'comment-8',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'Yes! Right by the famous Varkala cliff 🏖️',
+        parentCommentID: 'comment-7',
+        parentCommentUserID: userID2,
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764935000000000,
+        updatedAt: 1764935000000000,
+      ),
+
+      Comment(
+        id: 'comment-9',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'Adding this to my travel list',
+        parentCommentID: 'comment-7',
+        parentCommentUserID: userID2,
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764936000000000,
+        updatedAt: 1764936000000000,
+      ),
+
+      Comment(
+        id: 'comment-10',
+        collectionID: collectionID1,
+        fileID: fileID,
+        data: 'Great composition 📸',
+        parentCommentID: null,
+        parentCommentUserID: null,
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764937000000000,
+        updatedAt: 1764937000000000,
+      ),
+
+// Collection 2 comments (same file, different conversation)
+
+      Comment(
+        id: 'comment-c2-1',
+        collectionID: collectionID2,
+        fileID: fileID,
+        data: 'Perfect shot for the travel album!',
+        parentCommentID: null,
+        parentCommentUserID: null,
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764940000000000,
+        updatedAt: 1764940000000000,
+      ),
+
+      Comment(
+        id: 'comment-c2-2',
+        collectionID: collectionID2,
+        fileID: fileID,
+        data: 'When was this trip?',
+        parentCommentID: 'comment-c2-1',
+        parentCommentUserID: userID1,
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764941000000000,
+        updatedAt: 1764941000000000,
+      ),
+
+      Comment(
+        id: 'comment-c2-3',
+        collectionID: collectionID2,
+        fileID: fileID,
+        data: 'Last December, the weather was perfect',
+        parentCommentID: 'comment-c2-2',
+        parentCommentUserID: userID2,
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764942000000000,
+        updatedAt: 1764942000000000,
+      ),
+
+      Comment(
+        id: 'comment-c2-4',
+        collectionID: collectionID2,
+        fileID: fileID,
+        data: 'We should plan a group trip there!',
+        parentCommentID: null,
+        parentCommentUserID: null,
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764943000000000,
+        updatedAt: 1764943000000000,
+      ),
+
+      Comment(
+        id: 'comment-c2-5',
+        collectionID: collectionID2,
+        fileID: fileID,
+        data: 'Count me in! 🙋',
+        parentCommentID: 'comment-c2-4',
+        parentCommentUserID: userID2,
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764944000000000,
+        updatedAt: 1764944000000000,
       ),
     ];
 
-    // Seed example reactions
+// Seed example reactions
+
     final exampleReactions = [
       Reaction(
-        id: 'reaction_1',
-        collectionID: testCollectionID,
-        fileID: testFileID,
-        commentID: null,
-        data: '❤️',
-        isDeleted: false,
-        userID: testUserID,
-        anonUserID: null,
-        createdAt: now - 7200000000,
-        updatedAt: now - 7200000000,
-      ),
-      Reaction(
-        id: 'reaction_2',
-        collectionID: testCollectionID,
-        fileID: testFileID,
-        commentID: null,
-        data: '👍',
-        isDeleted: false,
-        userID: testUserID + 1,
-        anonUserID: null,
-        createdAt: now - 3600000000,
-        updatedAt: now - 3600000000,
-      ),
-      Reaction(
-        id: 'reaction_3',
-        collectionID: testCollectionID,
+        id: 'reaction-1',
+        collectionID: collectionID1,
         fileID: null,
-        commentID: 'comment_1',
-        data: '😊',
+        commentID: 'comment-1',
+        data: '',
         isDeleted: false,
-        userID: testUserID + 2,
+        userID: userID2,
         anonUserID: null,
-        createdAt: now - 1800000000,
-        updatedAt: now - 1800000000,
+        createdAt: 1764929858000000,
+        updatedAt: 1764929858000000,
+      ),
+      Reaction(
+        id: 'reaction-2',
+        collectionID: collectionID1,
+        fileID: fileID,
+        commentID: null,
+        data: '',
+        isDeleted: false,
+        userID: userID1,
+        anonUserID: null,
+        createdAt: 1764929858000000,
+        updatedAt: 1764929858000000,
+      ),
+      Reaction(
+        id: 'reaction-3',
+        collectionID: collectionID1,
+        fileID: fileID,
+        commentID: null,
+        data: '',
+        isDeleted: false,
+        userID: userID2,
+        anonUserID: null,
+        createdAt: 1764929858000000,
+        updatedAt: 1764929858000000,
       ),
     ];
 
     await upsertComments(exampleComments);
+
     await upsertReactions(exampleReactions);
 
     _logger.info(

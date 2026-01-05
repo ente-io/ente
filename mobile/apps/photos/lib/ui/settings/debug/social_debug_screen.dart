@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/social_db.dart';
+import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/social_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -41,6 +43,41 @@ class SocialDebugScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      MenuItemWidget(
+                        captionedTextWidget: const CaptionedTextWidget(
+                          title: "Trigger social sync",
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        trailingWidget: Icon(
+                          Icons.chevron_right_outlined,
+                          color: colorScheme.strokeBase,
+                        ),
+                        singleBorderRadius: 8,
+                        alignCaptionedTextToLeft: true,
+                        onTap: () async {
+                          await SocialSyncService.instance
+                              .syncAllSharedCollections();
+                          showShortToast(context, "Social sync completed");
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      MenuItemWidget(
+                        captionedTextWidget: const CaptionedTextWidget(
+                          title: "Trigger collection sync",
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        trailingWidget: Icon(
+                          Icons.chevron_right_outlined,
+                          color: colorScheme.strokeBase,
+                        ),
+                        singleBorderRadius: 8,
+                        alignCaptionedTextToLeft: true,
+                        onTap: () async {
+                          await CollectionsService.instance.sync();
+                          showShortToast(context, "Collection sync completed");
+                        },
+                      ),
+                      const SizedBox(height: 24),
                       MenuItemWidget(
                         captionedTextWidget: const CaptionedTextWidget(
                           title: "Seed example data",
