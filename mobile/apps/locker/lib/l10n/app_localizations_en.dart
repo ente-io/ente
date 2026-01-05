@@ -1551,4 +1551,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseLoginAgain => 'Please login again';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get selectLanguage => 'Select language';
+
+  @override
+  String get general => 'General';
 }
