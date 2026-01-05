@@ -13,13 +13,6 @@ import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 /// Widget that displays a single feed item.
-///
-/// Layout matches Figma design:
-/// ```
-/// [Icon with timeline] [Avatars]              [Thumbnail]
-///         |            Username and X other
-///         |            Action description
-/// ```
 class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
