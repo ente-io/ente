@@ -23,7 +23,7 @@ type CollectionLinkRepo struct {
 // NewCollectionLinkRepository ..
 func NewCollectionLinkRepository(db *sql.DB, albumHost string) *CollectionLinkRepo {
 	if albumHost == "" {
-		albumHost = "http://192.168.0.21:3002"
+		albumHost = "https://albums.ente.io"
 	}
 	lockerHost := viper.GetString("apps.public-locker")
 	if lockerHost == "" {

@@ -304,7 +304,7 @@ func (repo *CommentsRepository) GetActiveUserIDs(ctx context.Context, collection
 // 2. Replies to user's comments
 func (repo *CommentsRepository) GetAlbumFeedComments(ctx context.Context, collectionID int64, userID int64, since int64, limit int) ([]socialentity.Comment, bool, error) {
 	query := `
-        SELECT c.id, c.collection_id, c.file_id, c.parent_comment_id, p.user_id AS parent_comment_user_id,
+        SELECT c.id, c.collection_id, c.file_id, c.parent_comment_id,
                c.user_id, c.anon_user_id, c.cipher, c.nonce, c.is_deleted, c.created_at, c.updated_at
         FROM comments c
         LEFT JOIN comments p ON c.parent_comment_id = p.id
@@ -336,20 +336,18 @@ func (repo *CommentsRepository) GetAlbumFeedComments(ctx context.Context, collec
 	comments := make([]socialentity.Comment, 0, limit+1)
 	for rows.Next() {
 		var (
-			file         sql.NullInt64
-			parent       sql.NullString
-			parentUserID sql.NullInt64
-			anon         sql.NullString
-			cipher       sql.NullString
-			nonce        sql.NullString
-			comment      socialentity.Comment
+			file    sql.NullInt64
+			parent  sql.NullString
+			anon    sql.NullString
+			cipher  sql.NullString
+			nonce   sql.NullString
+			comment socialentity.Comment
 		)
 		if err := rows.Scan(
 			&comment.ID,
 			&comment.CollectionID,
 			&file,
 			&parent,
-			&parentUserID,
 			&comment.UserID,
 			&anon,
 			&cipher,
@@ -365,9 +363,6 @@ func (repo *CommentsRepository) GetAlbumFeedComments(ctx context.Context, collec
 		}
 		if parent.Valid {
 			comment.ParentCommentID = &parent.String
-		}
-		if parentUserID.Valid {
-			comment.ParentCommentUserID = &parentUserID.Int64
 		}
 		if anon.Valid {
 			comment.AnonUserID = &anon.String
