@@ -801,12 +801,19 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     }
 
                     // Initial selection: find collection with most comments
+                    // Only consider shared collections (non-shared ones won't appear in the UI)
                     let maxCount = -1;
                     let bestCollectionID: number | undefined;
                     for (const [
                         collectionID,
                         collectionComments,
                     ] of prefetchedComments) {
+                        // Skip non-shared collections
+                        const isShared = collectionSummaries
+                            ?.get(collectionID)
+                            ?.attributes.has("shared");
+                        if (!isShared) continue;
+
                         const count = collectionComments.filter(
                             (c) => !c.isDeleted,
                         ).length;
@@ -838,6 +845,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         prefetchedReactions,
         hasCollectionContext,
         activeCollectionID,
+        collectionSummaries,
     ]);
 
     // Load comments when the sidebar opens
@@ -856,12 +864,19 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             commentsByCollection.size > 0
         ) {
             // Find the collection with the most comments
+            // Only consider shared collections (non-shared ones won't appear in the UI)
             let maxCount = -1;
             let bestCollectionID: number | undefined;
             for (const [
                 collectionID,
                 collectionComments,
             ] of commentsByCollection) {
+                // Skip non-shared collections
+                const isShared = collectionSummaries
+                    ?.get(collectionID)
+                    ?.attributes.has("shared");
+                if (!isShared) continue;
+
                 const count = collectionComments.filter(
                     (c) => !c.isDeleted,
                 ).length;
@@ -879,6 +894,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         hasCollectionContext,
         selectedCollectionID,
         commentsByCollection,
+        collectionSummaries,
     ]);
 
     // Update displayed comments when selected collection changes (gallery view)
