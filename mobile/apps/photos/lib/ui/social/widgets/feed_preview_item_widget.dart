@@ -9,9 +9,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 
-/// Compact feed preview widget matching Figma design.
-///
-/// Shows: [Overlapping Avatars with Icon Badge] [Text] [Chevron]
 class FeedPreviewItemWidget extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
