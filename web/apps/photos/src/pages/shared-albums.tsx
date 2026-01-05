@@ -15,6 +15,7 @@ import {
     Tooltip,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -49,6 +50,7 @@ import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
     isHTTP401Error,
@@ -66,6 +68,11 @@ import {
     useSaveGroups,
     type AddSaveGroup,
 } from "ente-gallery/components/utils/save-groups";
+import { type FileViewerInitialSidebar } from "ente-gallery/components/viewer/FileViewer";
+import {
+    PublicFeedSidebar,
+    type PublicFeedItemClickInfo,
+} from "ente-gallery/components/viewer/PublicFeedSidebar";
 import { downloadManager } from "ente-gallery/services/download";
 import {
     downloadAndSaveCollectionFiles,
@@ -139,6 +146,42 @@ export default function PublicCollectionGallery() {
     const isRedirectingToAlbumsAppRef = useRef<boolean>(false);
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
+    const { show: showPublicFeed, props: publicFeedVisibilityProps } =
+        useModalVisibility();
+
+    // Pending navigation from feed item click
+    const [pendingFileNavigation, setPendingFileNavigation] = useState<{
+        fileIndex: number;
+        sidebar?: FileViewerInitialSidebar;
+        commentID?: string;
+    }>();
+
+    /**
+     * Handle clicks on feed items to navigate to the file and open sidebar.
+     */
+    const handleFeedItemClick = (info: PublicFeedItemClickInfo) => {
+        if (!publicFiles) return;
+
+        // Find the file index in publicFiles
+        const fileIndex = publicFiles.findIndex((f) => f.id === info.fileID);
+        if (fileIndex === -1) return;
+
+        // Close the feed sidebar
+        publicFeedVisibilityProps.onClose();
+
+        // Determine which sidebar to open
+        const sidebar: FileViewerInitialSidebar =
+            info.type === "liked_photo" || info.type === "liked_video"
+                ? "likes"
+                : "comments";
+
+        // Set navigation state
+        setPendingFileNavigation({
+            fileIndex,
+            sidebar,
+            commentID: info.commentID,
+        });
+    };
 
     const router = useRouter();
 
@@ -369,6 +412,14 @@ export default function PublicCollectionGallery() {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
+    // Join album handler for use in file viewer's public like modal
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken: credentials.current?.accessToken,
+        collectionKey: collectionKey.current,
+        credentials,
+    });
+
     const handleSubmitPassword: SingleInputFormProps["onSubmit"] = async (
         password,
         setFieldError,
@@ -439,6 +490,9 @@ export default function PublicCollectionGallery() {
         setUploadTypeSelectorView(false);
     };
 
+    const commentsEnabled =
+        publicCollection?.publicURLs[0]?.enableComment ?? false;
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -450,13 +504,23 @@ export default function PublicCollectionGallery() {
                                   publicFiles,
                                   downloadEnabled,
                                   onAddSaveGroup,
+                                  onShowFeed: commentsEnabled
+                                      ? showPublicFeed
+                                      : undefined,
                               }}
                           />
                       ),
                       height: fileListHeaderHeight,
                   }
                 : undefined,
-        [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
+        [
+            onAddSaveGroup,
+            publicCollection,
+            publicFiles,
+            downloadEnabled,
+            showPublicFeed,
+            commentsEnabled,
+        ],
     );
 
     const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
@@ -523,6 +587,7 @@ export default function PublicCollectionGallery() {
                     accessToken={credentials.current.accessToken}
                     collectionKey={collectionKey.current}
                     credentials={credentials}
+                    enableComment={commentsEnabled}
                 />
             ) : (
                 <>
@@ -585,6 +650,18 @@ export default function PublicCollectionGallery() {
                         onRemotePull={publicAlbumsRemotePull}
                         onVisualFeedback={handleVisualFeedback}
                         onAddSaveGroup={onAddSaveGroup}
+                        publicAlbumsCredentials={credentials.current}
+                        collectionKey={collectionKey.current}
+                        onJoinAlbum={handleJoinAlbum}
+                        enableComment={commentsEnabled}
+                        pendingFileIndex={pendingFileNavigation?.fileIndex}
+                        pendingFileSidebar={pendingFileNavigation?.sidebar}
+                        pendingHighlightCommentID={
+                            pendingFileNavigation?.commentID
+                        }
+                        onPendingNavigationConsumed={() =>
+                            setPendingFileNavigation(undefined)
+                        }
                     />
                 </>
             )}
@@ -605,6 +682,16 @@ export default function PublicCollectionGallery() {
             <DownloadStatusNotifications
                 {...{ saveGroups, onRemoveSaveGroup }}
             />
+            {publicCollection && collectionKey.current && (
+                <PublicFeedSidebar
+                    {...publicFeedVisibilityProps}
+                    albumName={publicCollection.name}
+                    files={publicFiles}
+                    credentials={credentials.current}
+                    collectionKey={collectionKey.current}
+                    onItemClick={handleFeedItemClick}
+                />
+            )}
         </FullScreenDropZone>
     );
 }
@@ -741,6 +828,7 @@ interface FileListHeaderProps {
     publicFiles: EnteFile[];
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
+    onShowFeed?: () => void;
 }
 
 /**
@@ -759,6 +847,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicFiles,
     downloadEnabled,
     onAddSaveGroup,
+    onShowFeed,
 }) => {
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
@@ -776,16 +865,37 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                     name={publicCollection.name}
                     fileCount={publicFiles.length}
                 />
-                {downloadEnabled && (
-                    <OverflowMenu ariaID="collection-options">
-                        <OverflowMenuOption
-                            startIcon={<FileDownloadOutlinedIcon />}
-                            onClick={downloadAllFiles}
-                        >
-                            {t("download_album")}
-                        </OverflowMenuOption>
-                    </OverflowMenu>
-                )}
+                <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: "center" }}
+                >
+                    {onShowFeed && (
+                        <IconButton onClick={onShowFeed}>
+                            <Box
+                                sx={{
+                                    width: 24,
+                                    height: 24,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <FeedIcon />
+                            </Box>
+                        </IconButton>
+                    )}
+                    {downloadEnabled && (
+                        <OverflowMenu ariaID="collection-options">
+                            <OverflowMenuOption
+                                startIcon={<FileDownloadOutlinedIcon />}
+                                onClick={downloadAllFiles}
+                            >
+                                {t("download_album")}
+                            </OverflowMenuOption>
+                        </OverflowMenu>
+                    )}
+                </Stack>
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );

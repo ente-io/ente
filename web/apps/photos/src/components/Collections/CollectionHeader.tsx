@@ -2,13 +2,10 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
@@ -36,6 +33,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     defaultHiddenCollectionUserFacingName,
@@ -109,8 +107,14 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     const EndIcon = () => {
         if (attributes.has("archived")) return <ArchiveOutlinedIcon />;
         if (attributes.has("sharedOnlyViaLink")) return <LinkIcon />;
-        if (attributes.has("shared")) return <PeopleIcon />;
-        if (attributes.has("userFavorites")) return <FavoriteRoundedIcon />;
+        if (attributes.has("shared"))
+            return (
+                <Box sx={{ mt: "-1px" }}>
+                    <SmallShareIcon />
+                </Box>
+            );
+        if (attributes.has("userFavorites"))
+            return <StarIcon fontSize="small" />;
         return <></>;
     };
 
@@ -445,7 +449,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 <OverflowMenuOption
                     key="share"
                     onClick={onCollectionShare}
-                    startIcon={<PeopleIcon />}
+                    startIcon={<ShareIcon />}
                 >
                     {t("share_favorites")}
                 </OverflowMenuOption>,
@@ -630,7 +634,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 <OverflowMenuOption
                     key="share"
                     onClick={onCollectionShare}
-                    startIcon={<PeopleIcon />}
+                    startIcon={<ShareIcon />}
                 >
                     {t("share_album")}
                 </OverflowMenuOption>,
@@ -774,6 +778,23 @@ type DownloadQuickOptionProps = OptionProps & {
     collectionSummary: CollectionSummary;
 };
 
+const DownloadIcon: React.FC = () => (
+    <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M2.99969 17.0002C2.99969 17.9302 2.99969 18.3952 3.10192 18.7767C3.37932 19.8119 4.18796 20.6206 5.22324 20.898C5.60474 21.0002 6.06972 21.0002 6.99969 21.0002L16.9997 21.0002C17.9297 21.0002 18.3947 21.0002 18.7762 20.898C19.8114 20.6206 20.6201 19.8119 20.8975 18.7767C20.9997 18.3952 20.9997 17.9302 20.9997 17.0002" />
+        <path d="M16.4998 11.5002C16.4998 11.5002 13.1856 16.0002 11.9997 16.0002C10.8139 16.0002 7.49976 11.5002 7.49976 11.5002M11.9997 15.0002V3.00016" />
+    </svg>
+);
+
 const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     collectionSummary: { type },
     onClick,
@@ -790,9 +811,46 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
         }
     >
         <IconButton onClick={onClick}>
-            <FileDownloadOutlinedIcon />
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <DownloadIcon />
+            </Box>
         </IconButton>
     </Tooltip>
+);
+
+export const FeedIcon: React.FC = () => (
+    <svg
+        width="23"
+        height="20"
+        viewBox="0 0 23 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M9.7998 0.5C10.2416 0.5 10.5996 0.857977 10.5996 1.2998C10.5996 1.74163 10.2416 2.09961 9.7998 2.09961H4.7998C3.03249 2.09961 1.59961 3.53249 1.59961 5.2998V14.2998C1.59961 16.0671 3.0325 17.5 4.7998 17.5H13.7998C15.5671 17.5 17 16.0671 17 14.2998V11.7998C17 11.358 17.358 11 17.7998 11C18.2416 11 18.5996 11.358 18.5996 11.7998V14.2998C18.5996 16.9507 16.4507 19.0996 13.7998 19.0996H4.7998C2.14883 19.0996 0 16.9507 0 14.2998V5.2998C0 2.64884 2.14884 0.5 4.7998 0.5H9.7998Z"
+            fill="currentColor"
+        />
+        <path
+            d="M13.2998 13.5C13.7416 13.5 14.0996 13.858 14.0996 14.2998C14.0996 14.7416 13.7416 15.0996 13.2998 15.0996H4.2998C3.85798 15.0996 3.5 14.7416 3.5 14.2998C3.5 13.858 3.85798 13.5 4.2998 13.5H13.2998Z"
+            fill="currentColor"
+        />
+        <path
+            d="M10.2998 10.5C10.7416 10.5 11.0996 10.858 11.0996 11.2998C11.0996 11.7416 10.7416 12.0996 10.2998 12.0996H4.2998C3.85798 12.0996 3.5 11.7416 3.5 11.2998C3.5 10.858 3.85798 10.5 4.2998 10.5H10.2998Z"
+            fill="currentColor"
+        />
+        <path
+            d="M20.6523 6.12012C21.3761 5.2635 22.0996 4.13144 22.0996 2.93848C22.0995 1.38141 20.9626 0 19.2998 0C18.621 0 17.9847 0.205224 17.2998 0.749023C16.6149 0.205224 15.9787 0 15.2998 0C13.637 0 12.5001 1.38141 12.5 2.93848C12.5 4.13144 13.2236 5.2635 13.9473 6.12012C14.698 7.00866 15.5878 7.76218 16.1758 8.21484C16.8431 8.72865 17.7565 8.72865 18.4238 8.21484C19.0119 7.76218 19.9016 7.00866 20.6523 6.12012Z"
+            fill="currentColor"
+        />
+    </svg>
 );
 
 const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
@@ -805,6 +863,38 @@ interface ShareQuickOptionProps {
     collectionSummary: CollectionSummary;
     onClick: () => void;
 }
+
+const ShareIcon: React.FC = () => (
+    <svg
+        width="21"
+        height="19"
+        viewBox="0 0 22 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M13.875 8C13.3918 8 13 8.39175 13 8.875C13 9.35825 13.3918 9.75 13.875 9.75V8.875V8ZM13.875 0C13.3918 0 13 0.391751 13 0.875C13 1.35825 13.3918 1.75 13.875 1.75V0.875V0ZM15.875 11C15.3918 11 15 11.3918 15 11.875C15 12.3582 15.3918 12.75 15.875 12.75V11.875V11ZM17.375 18C16.8918 18 16.5 18.3918 16.5 18.875C16.5 19.3582 16.8918 19.75 17.375 19.75V18.875V18ZM11.875 4.875H11C11 6.60089 9.60086 8 7.875 8V8.875V9.75C10.5673 9.75 12.75 7.56739 12.75 4.875H11.875ZM7.875 8.875V8C6.14911 8 4.75 6.60089 4.75 4.875H3.875H3C3 7.56739 5.18261 9.75 7.875 9.75V8.875ZM3.875 4.875H4.75C4.75 3.14911 6.14911 1.75 7.875 1.75V0.875V0C5.18261 0 3 2.18261 3 4.875H3.875ZM7.875 0.875V1.75C9.60086 1.75 11 3.14911 11 4.875H11.875H12.75C12.75 2.18261 10.5673 0 7.875 0V0.875ZM13.875 8.875V9.75C16.5673 9.75 18.75 7.56739 18.75 4.875H17.875H17C17 6.60089 15.6009 8 13.875 8V8.875ZM17.875 4.875H18.75C18.75 2.18261 16.5673 0 13.875 0V0.875V1.75C15.6009 1.75 17 3.14911 17 4.875H17.875ZM9.875 11.875V11H5.875V11.875V12.75H9.875V11.875ZM5.875 11.875V11C2.63033 11 0 13.6304 0 16.875H0.875H1.75C1.75 14.5968 3.59683 12.75 5.875 12.75V11.875ZM0.875 16.875H0C0 18.4629 1.28719 19.75 2.875 19.75V18.875V18C2.25367 18 1.75 17.4963 1.75 16.875H0.875ZM2.875 18.875V19.75H12.875V18.875V18H2.875V18.875ZM12.875 18.875V19.75C14.4628 19.75 15.75 18.4628 15.75 16.875H14.875H14C14 17.4964 13.4964 18 12.875 18V18.875ZM14.875 16.875H15.75C15.75 13.6304 13.1196 11 9.875 11V11.875V12.75C12.1532 12.75 14 14.5968 14 16.875H14.875ZM15.875 11.875V12.75C18.1532 12.75 20 14.5968 20 16.875H20.875H21.75C21.75 13.6304 19.1196 11 15.875 11V11.875ZM20.875 16.875H20C20 17.4964 19.4964 18 18.875 18V18.875V19.75C20.4628 19.75 21.75 18.4628 21.75 16.875H20.875ZM18.875 18.875V18H17.375V18.875V19.75H18.875V18.875Z"
+            fill="currentColor"
+        />
+    </svg>
+);
+
+/** A smaller version of ShareIcon for use in the collection header summary. */
+const SmallShareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg
+        width="15"
+        height="14"
+        viewBox="0 0 22 20"
+        {...props}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M13.875 8C13.3918 8 13 8.39175 13 8.875C13 9.35825 13.3918 9.75 13.875 9.75V8.875V8ZM13.875 0C13.3918 0 13 0.391751 13 0.875C13 1.35825 13.3918 1.75 13.875 1.75V0.875V0ZM15.875 11C15.3918 11 15 11.3918 15 11.875C15 12.3582 15.3918 12.75 15.875 12.75V11.875V11ZM17.375 18C16.8918 18 16.5 18.3918 16.5 18.875C16.5 19.3582 16.8918 19.75 17.375 19.75V18.875V18ZM11.875 4.875H11C11 6.60089 9.60086 8 7.875 8V8.875V9.75C10.5673 9.75 12.75 7.56739 12.75 4.875H11.875ZM7.875 8.875V8C6.14911 8 4.75 6.60089 4.75 4.875H3.875H3C3 7.56739 5.18261 9.75 7.875 9.75V8.875ZM3.875 4.875H4.75C4.75 3.14911 6.14911 1.75 7.875 1.75V0.875V0C5.18261 0 3 2.18261 3 4.875H3.875ZM7.875 0.875V1.75C9.60086 1.75 11 3.14911 11 4.875H11.875H12.75C12.75 2.18261 10.5673 0 7.875 0V0.875ZM13.875 8.875V9.75C16.5673 9.75 18.75 7.56739 18.75 4.875H17.875H17C17 6.60089 15.6009 8 13.875 8V8.875ZM17.875 4.875H18.75C18.75 2.18261 16.5673 0 13.875 0V0.875V1.75C15.6009 1.75 17 3.14911 17 4.875H17.875ZM9.875 11.875V11H5.875V11.875V12.75H9.875V11.875ZM5.875 11.875V11C2.63033 11 0 13.6304 0 16.875H0.875H1.75C1.75 14.5968 3.59683 12.75 5.875 12.75V11.875ZM0.875 16.875H0C0 18.4629 1.28719 19.75 2.875 19.75V18.875V18C2.25367 18 1.75 17.4963 1.75 16.875H0.875ZM2.875 18.875V19.75H12.875V18.875V18H2.875V18.875ZM12.875 18.875V19.75C14.4628 19.75 15.75 18.4628 15.75 16.875H14.875H14C14 17.4964 13.4964 18 12.875 18V18.875ZM14.875 16.875H15.75C15.75 13.6304 13.1196 11 9.875 11V11.875V12.75C12.1532 12.75 14 14.5968 14 16.875H14.875ZM15.875 11.875V12.75C18.1532 12.75 20 14.5968 20 16.875H20.875H21.75C21.75 13.6304 19.1196 11 15.875 11V11.875ZM20.875 16.875H20C20 17.4964 19.4964 18 18.875 18V18.875V19.75C20.4628 19.75 21.75 18.4628 21.75 16.875H20.875ZM18.875 18.875V18H17.375V18.875V19.75H18.875V18.875Z"
+            fill="currentColor"
+        />
+    </svg>
+);
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
     collectionSummary: { attributes },
@@ -822,7 +912,17 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
         }
     >
         <IconButton onClick={onClick}>
-            <PeopleIcon />
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <ShareIcon />
+            </Box>
         </IconButton>
     </Tooltip>
 );
@@ -849,7 +949,7 @@ const DownloadOption: React.FC<
             isDownloadInProgress?.() ? (
                 <ActivityIndicator size="20px" sx={{ cursor: "not-allowed" }} />
             ) : (
-                <FileDownloadOutlinedIcon />
+                <DownloadIcon />
             )
         }
         onClick={onClick}
