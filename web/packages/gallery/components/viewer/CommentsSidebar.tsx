@@ -641,9 +641,14 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         };
     }, [open, highlightCommentID, loading, comments]);
 
-    // Reset selected collection when the file changes (gallery view only)
+    // Reset state when the file changes to avoid showing stale data
     useEffect(() => {
         setSelectedCollectionID(undefined);
+        setComments([]);
+        setCommentsByCollection(new Map());
+        setReactionsByCollection(new Map());
+        setLikedComments(new Map());
+        hasLoadedRef.current = false;
     }, [file?.id]);
 
     // Check if opened from a collection context
@@ -802,17 +807,20 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
                     // Initial selection: find collection with most comments
                     // Only consider shared collections (non-shared ones won't appear in the UI)
+                    // For public albums, skip the shared check since there's no collectionSummaries
                     let maxCount = -1;
                     let bestCollectionID: number | undefined;
                     for (const [
                         collectionID,
                         collectionComments,
                     ] of prefetchedComments) {
-                        // Skip non-shared collections
-                        const isShared = collectionSummaries
-                            ?.get(collectionID)
-                            ?.attributes.has("shared");
-                        if (!isShared) continue;
+                        // Skip non-shared collections (except for public albums)
+                        if (!isPublicAlbum) {
+                            const isShared = collectionSummaries
+                                ?.get(collectionID)
+                                ?.attributes.has("shared");
+                            if (!isShared) continue;
+                        }
 
                         const count = collectionComments.filter(
                             (c) => !c.isDeleted,
@@ -846,6 +854,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         hasCollectionContext,
         activeCollectionID,
         collectionSummaries,
+        isPublicAlbum,
     ]);
 
     // Load comments when the sidebar opens
@@ -865,17 +874,20 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         ) {
             // Find the collection with the most comments
             // Only consider shared collections (non-shared ones won't appear in the UI)
+            // For public albums, skip the shared check since there's no collectionSummaries
             let maxCount = -1;
             let bestCollectionID: number | undefined;
             for (const [
                 collectionID,
                 collectionComments,
             ] of commentsByCollection) {
-                // Skip non-shared collections
-                const isShared = collectionSummaries
-                    ?.get(collectionID)
-                    ?.attributes.has("shared");
-                if (!isShared) continue;
+                // Skip non-shared collections (except for public albums)
+                if (!isPublicAlbum) {
+                    const isShared = collectionSummaries
+                        ?.get(collectionID)
+                        ?.attributes.has("shared");
+                    if (!isShared) continue;
+                }
 
                 const count = collectionComments.filter(
                     (c) => !c.isDeleted,
@@ -895,6 +907,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         selectedCollectionID,
         commentsByCollection,
         collectionSummaries,
+        isPublicAlbum,
     ]);
 
     // Update displayed comments when selected collection changes (gallery view)
