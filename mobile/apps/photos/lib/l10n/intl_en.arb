@@ -1518,6 +1518,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {No admins were added} =1 {1 admin successfully added} other {{count} admins successfully added}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Add admin} =1 {Add admin} other {Add admins}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Admins can manage photos & participants.",
+  "suggestDeletion": "Suggest deletion",
+  "suggestDeletionDescription": "Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos.",
+  "deleteSuggestionSent": "Delete suggestion sent",
   "accountIsAlreadyConfigured": "Account is already configured.",
   "sessionIdMismatch": "Session ID mismatch",
   "@sessionIdMismatch": {
