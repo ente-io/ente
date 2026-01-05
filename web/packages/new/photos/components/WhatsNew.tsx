@@ -79,11 +79,11 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut("Better search, people pinning, and more")}
+                {ut("Map view, manual people tagging, and more")}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "Press Ctrl/Cmd + K to quickly open search. Find settings directly in search results. Terminate sessions on other devices from settings. Pin your favorite people for quick access. Add photos to albums directly from the photo viewer menu.",
+                    "Explore your photos on a map. Manually tag people in photos. Album admins can now remove photos added by collaborators. Viewers and collaborators can see and copy public links. Free users can now create public links with a device limit of 5.",
                 )}
             </Typography>
         </Stack>

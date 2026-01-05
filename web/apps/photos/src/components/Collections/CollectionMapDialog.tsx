@@ -2019,6 +2019,7 @@ const EmptyStateContainer = styled(Box)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "center",
     textAlign: "center",
     paddingTop: 0,
     paddingBottom: theme.spacing(4),
