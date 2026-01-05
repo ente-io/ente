@@ -17,10 +17,11 @@ import {
     saveSimilarImagesCache,
     loadHNSWIndexMetadata,
     saveHNSWIndexMetadata,
+    clearHNSWIndexMetadata,
     generateFileIDHash,
 } from "./ml/db";
 import { dotProduct } from "./ml/math";
-import { getCLIPHNSWIndex, clearCLIPHNSWIndex } from "./ml/hnsw";
+import { getCLIPHNSWIndex, clearCLIPHNSWIndex, type HNSWIndex } from "./ml/hnsw";
 import type {
     CachedSimilarImages,
     SimilarImageGroup,
@@ -265,39 +266,166 @@ const groupSimilarImagesHNSW = async (
     // Clear any existing index in memory
     clearCLIPHNSWIndex();
 
-    // Build or load HNSW index with required capacity
-    const index = await getCLIPHNSWIndex(fileIDs.length);
-
     let indexLoaded = false;
+    let index: HNSWIndex;
 
-    if (cachedMetadata && cachedMetadata.fileIDHash === currentFileIDHash) {
-        // Cache valid - try to load index from IDBFS
-        console.log(`[Similar Images] Found valid cached index (${cachedMetadata.vectorCount} vectors)`);
-        console.log(`[Similar Images] Loading index from IDBFS...`);
-        onProgress?.(56);
+    if (cachedMetadata) {
+        // We have a cached index - try to load it
+        console.log(`[Similar Images] Found cached index (${cachedMetadata.vectorCount} vectors)`);
+        console.log(`[Similar Images] Cached metadata:`, {
+            vectorCount: cachedMetadata.vectorCount,
+            maxElements: cachedMetadata.maxElements,
+            fileIDHash: cachedMetadata.fileIDHash?.substring(0, 16) + '...',
+            mappingsCount: cachedMetadata.fileIDToLabel.length,
+        });
 
-        try {
-            await index.loadIndex(indexFilename, {
-                fileIDToLabel: cachedMetadata.fileIDToLabel,
-                labelToFileID: cachedMetadata.labelToFileID,
-            });
-            console.log(`[Similar Images] Successfully loaded cached index`);
-            indexLoaded = true;
-            onProgress?.(65);
-        } catch (error) {
-            console.warn(`[Similar Images] Failed to load cached index, will rebuild:`, error);
-            indexLoaded = false;
+        // Backward compatibility: If old cache doesn't have maxElements, estimate it
+        if (!cachedMetadata.maxElements) {
+            console.log(`[Similar Images] Old cache format detected (missing maxElements)`);
+            // Estimate the original capacity (would have been rounded up to nearest 10k)
+            const estimatedCapacity = Math.ceil(cachedMetadata.vectorCount / 10000) * 10000;
+            console.log(`[Similar Images] Estimating original capacity: ${estimatedCapacity} (from ${cachedMetadata.vectorCount} vectors)`);
+
+            // Try to load with estimated capacity
+            cachedMetadata.maxElements = estimatedCapacity;
         }
-    } else {
-        console.log(cachedMetadata
-            ? `[Similar Images] Cache invalid (file hash mismatch), rebuilding...`
-            : `[Similar Images] No cached index found, building...`
+
+        // Check if we need incremental updates
+        const cachedFileIDs = new Set(
+            cachedMetadata.fileIDToLabel.map(([fileID]) => fileID)
         );
+        const currentFileIDs = new Set(fileIDs);
+        const addedFileIDs = fileIDs.filter(id => !cachedFileIDs.has(id));
+        const removedFileIDs = Array.from(cachedFileIDs).filter(id => !currentFileIDs.has(id));
+
+        // Check if capacity is sufficient for incremental updates
+        const netChange = addedFileIDs.length - removedFileIDs.length;
+        const requiredSize = cachedMetadata.vectorCount + netChange;
+
+        // Check if the cached index has enough capacity
+        const cachedMaxElements = cachedMetadata.maxElements;
+
+        // If adding more vectors than the cached index can hold, rebuild from scratch
+        if (requiredSize > cachedMaxElements) {
+                console.log(`[Similar Images] Capacity insufficient (need ${requiredSize}, cached max ${cachedMaxElements}), will rebuild`);
+                console.log(`[Similar Images] Cache details: ${cachedMetadata.vectorCount} cached, +${addedFileIDs.length} added, -${removedFileIDs.length} removed = ${requiredSize} required`);
+
+                // Create fresh index with correct capacity
+                index = await getCLIPHNSWIndex(fileIDs.length);
+                console.log(`[Similar Images] Created fresh index with capacity: ${index.getMaxElements()}`);
+
+                indexLoaded = false;
+            } else if (cachedMetadata.fileIDHash === currentFileIDHash) {
+                // No changes, just load the cached index
+                console.log(`[Similar Images] Loading index from IDBFS...`);
+                // CRITICAL: Use the exact maxElements from when the index was saved
+                // CRITICAL: Pass skipInit=true since we'll call loadIndex()
+                index = await getCLIPHNSWIndex(cachedMetadata.maxElements, true);
+                onProgress?.(56);
+
+                try {
+                    await index.loadIndex(indexFilename, {
+                        fileIDToLabel: cachedMetadata.fileIDToLabel,
+                        labelToFileID: cachedMetadata.labelToFileID,
+                    });
+                    console.log(`[Similar Images] Index is up-to-date, no changes needed`);
+                    indexLoaded = true;
+                    onProgress?.(65);
+                } catch (error) {
+                    console.error(`[Similar Images] Failed to load cached index, clearing corrupted cache and rebuilding:`, error);
+                    // Clear the corrupted index and create a fresh one for rebuild
+                    clearCLIPHNSWIndex();
+
+                    // Delete corrupted metadata so we don't keep trying to load it
+                    try {
+                        await clearHNSWIndexMetadata();
+                        console.log(`[Similar Images] Cleared corrupted cache metadata`);
+                    } catch (deleteError) {
+                        console.warn(`[Similar Images] Failed to clear cache metadata (non-fatal):`, deleteError);
+                    }
+
+                    index = await getCLIPHNSWIndex(fileIDs.length);
+                    indexLoaded = false;
+                }
+            } else {
+                // Changes detected, load and apply incremental updates
+                console.log(`[Similar Images] Loading index from IDBFS for incremental update...`);
+                console.log(`[Similar Images] Changes: +${addedFileIDs.length} files, -${removedFileIDs.length} files`);
+                // CRITICAL: Use the exact maxElements from when the index was saved
+                // CRITICAL: Pass skipInit=true since we'll call loadIndex()
+                index = await getCLIPHNSWIndex(cachedMetadata.maxElements, true);
+                onProgress?.(56);
+
+                try {
+                    await index.loadIndex(indexFilename, {
+                        fileIDToLabel: cachedMetadata.fileIDToLabel,
+                        labelToFileID: cachedMetadata.labelToFileID,
+                    });
+                    console.log(`[Similar Images] Successfully loaded cached index`);
+
+                    // Apply incremental updates
+                    if (removedFileIDs.length > 0 || addedFileIDs.length > 0) {
+                        // Remove deleted files
+                        for (const fileID of removedFileIDs) {
+                            index.removeVector(fileID);
+                        }
+
+                        // Add new files
+                        for (const fileID of addedFileIDs) {
+                            const embedding = embeddingsByFileID.get(fileID);
+                            if (embedding) {
+                                index.addVector(fileID, embedding);
+                            }
+                        }
+
+                        console.log(`[Similar Images] Incremental update completed`);
+
+                        // Save updated index
+                        console.log(`[Similar Images] Saving updated index...`);
+                        const mappings = await index.saveIndex(indexFilename);
+
+                        // Update metadata
+                        await saveHNSWIndexMetadata({
+                            id: "clip-hnsw-index",
+                            fileIDHash: currentFileIDHash,
+                            fileIDToLabel: mappings.fileIDToLabel,
+                            labelToFileID: mappings.labelToFileID,
+                            vectorCount: fileIDs.length,
+                            maxElements: index.getMaxElements(),
+                            createdAt: Date.now(),
+                            filename: indexFilename,
+                        });
+                        console.log(`[Similar Images] Updated index saved`);
+                    }
+
+                    indexLoaded = true;
+                    onProgress?.(65);
+                } catch (error) {
+                    console.error(`[Similar Images] Failed to load/update cached index, clearing corrupted cache and rebuilding:`, error);
+                    // Clear the corrupted index and create a fresh one for rebuild
+                    clearCLIPHNSWIndex();
+
+                    // Delete corrupted metadata so we don't keep trying to load it
+                    try {
+                        await clearHNSWIndexMetadata();
+                        console.log(`[Similar Images] Cleared corrupted cache metadata`);
+                    } catch (deleteError) {
+                        console.warn(`[Similar Images] Failed to clear cache metadata (non-fatal):`, deleteError);
+                    }
+
+                    index = await getCLIPHNSWIndex(fileIDs.length);
+                    indexLoaded = false;
+                }
+            }
+    } else {
+        console.log(`[Similar Images] No cached index found, building from scratch...`);
+        index = await getCLIPHNSWIndex(fileIDs.length);
     }
 
     if (!indexLoaded) {
         // Build index from scratch
         console.log(`[Similar Images] Building HNSW index for ${fileIDs.length} vectors...`);
+        console.log(`[Similar Images] Index capacity: ${index.getMaxElements()}, current size: ${index.size()}`);
         onProgress?.(58);
 
         try {
@@ -322,6 +450,7 @@ const groupSimilarImagesHNSW = async (
                 fileIDToLabel: mappings.fileIDToLabel,
                 labelToFileID: mappings.labelToFileID,
                 vectorCount: fileIDs.length,
+                maxElements: index.getMaxElements(),
                 createdAt: Date.now(),
                 filename: indexFilename,
             });
