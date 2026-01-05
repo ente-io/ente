@@ -51,6 +51,9 @@ const getStorageKey = (collectionID: number): string =>
 /**
  * Get the stored anonymous identity for a specific collection from local storage.
  *
+ * Returns undefined if no identity is stored or if the stored identity has expired.
+ * Expired identities are automatically cleared from storage.
+ *
  * @param collectionID The collection ID to get the identity for.
  */
 export const getStoredAnonIdentity = (
@@ -60,7 +63,16 @@ export const getStoredAnonIdentity = (
     const stored = localStorage.getItem(getStorageKey(collectionID));
     if (!stored) return undefined;
     try {
-        return JSON.parse(stored) as AnonIdentity;
+        const identity = JSON.parse(stored) as AnonIdentity;
+        // Check if the identity has expired.
+        // Server returns expiresAt in microseconds, Date.now() returns milliseconds.
+        const nowMicroseconds = Date.now() * 1000;
+        if (identity.expiresAt && nowMicroseconds > identity.expiresAt) {
+            // Clear expired identity so user can create a fresh one
+            clearAnonIdentity(collectionID);
+            return undefined;
+        }
+        return identity;
     } catch {
         return undefined;
     }

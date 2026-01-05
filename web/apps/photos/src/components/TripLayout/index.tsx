@@ -594,6 +594,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 publicAlbumsCredentials={credentials?.current}
                 collectionKey={collectionKey}
                 onJoinAlbum={handleJoinAlbum}
+                enableComment={enableComment}
             />
 
             {/* Download progress notifications */}
