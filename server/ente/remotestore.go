@@ -93,7 +93,7 @@ func (k FlagKey) UserEditable() bool {
 }
 
 func (k FlagKey) NeedSubscription() bool {
-	return k == CustomDomain
+	return false
 }
 
 func (k FlagKey) CanRemove() bool {

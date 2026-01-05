@@ -139,6 +139,7 @@ const Page: React.FC = () => {
                             deletableSize={state.deletableSize}
                             removeProgress={state.removeProgress}
                             onRemoveSimilarImages={handleRemoveSimilarImages}
+                            onToggleSelectAll={() => dispatch({ type: "toggleSelectAll" })}
                         />
                     );
                 }
@@ -190,23 +191,24 @@ type SimilarImagesAction =
     | { type: "setAnalysisProgress"; progress: number }
     | { type: "analysisFailed" }
     | {
-          type: "analysisCompleted";
-          groups: SimilarImageGroup[];
-          computationTimeMs: number;
-      }
+        type: "analysisCompleted";
+        groups: SimilarImageGroup[];
+        computationTimeMs: number;
+    }
     | { type: "changeSortOrder"; sortOrder: SortOrder }
     | { type: "changeCategoryFilter"; categoryFilter: CategoryFilter }
     | { type: "toggleSelection"; index: number }
     | { type: "toggleItemSelection"; groupIndex: number; itemIndex: number }
+    | { type: "toggleSelectAll" }
     | { type: "deselectAll" }
     | { type: "remove" }
     | { type: "setRemoveProgress"; progress: number }
     | { type: "removeFailed" }
     | {
-          type: "removeCompleted";
-          deletedFileIDs: Set<number>;
-          fullyRemovedGroupIDs: Set<string>;
-      };
+        type: "removeCompleted";
+        deletedFileIDs: Set<number>;
+        fullyRemovedGroupIDs: Set<string>;
+    };
 
 const initialSimilarImagesState: SimilarImagesState = {
     analysisStatus: undefined,
@@ -256,7 +258,19 @@ const similarImagesReducer: React.Reducer<
             const allSimilarImageGroups = sortedCopyOfSimilarImageGroups(
                 action.groups,
                 state.sortOrder,
-            );
+            ).map(group => {
+                const items = group.items.map((item, index) => ({
+                    ...item,
+                    // Select all except the first one by default
+                    isSelected: index > 0
+                }));
+                return {
+                    ...group,
+                    items,
+                    // Group is selected if all deletable items (index > 0) are selected
+                    isSelected: items.length > 1 && items.slice(1).every(i => i.isSelected)
+                };
+            });
             const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
@@ -292,7 +306,19 @@ const similarImagesReducer: React.Reducer<
             const allSimilarImageGroups = [...state.allSimilarImageGroups];
             const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
             const group = filteredGroups[action.index]!;
-            group.isSelected = !group.isSelected;
+
+            // Toggle group state
+            const newIsSelected = !group.isSelected;
+            group.isSelected = newIsSelected;
+
+            // Update items: if selecting group, select all items EXCEPT first
+            // if deselecting group, deselect all items
+            // (Unless we want "select all" to include first? Standard dedup behavior is keep 1)
+            group.items = group.items.map((item, idx) => ({
+                ...item,
+                isSelected: idx === 0 ? false : newIsSelected
+            }));
+
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
             return {
@@ -309,10 +335,48 @@ const similarImagesReducer: React.Reducer<
             const group = filteredGroups[action.groupIndex]!;
             const items = [...group.items];
             const item = items[action.itemIndex]!;
+
+            // Toggle item
             item.isSelected = !item.isSelected;
             group.items = items;
+
+            // Update group selection state (checked if all deletable items are selected)
+            // We ignore the first item for "group selected" definition typically
+            const deletableItems = items.slice(1);
+            group.isSelected = deletableItems.length > 0 && deletableItems.every(i => i.isSelected);
+
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
+            return {
+                ...state,
+                allSimilarImageGroups,
+                deletableCount,
+                deletableSize,
+            };
+        }
+
+        case "toggleSelectAll": {
+            const allSimilarImageGroups = [...state.allSimilarImageGroups];
+            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+
+            // Check if all filtered groups are currently selected
+            const areAllSelected = filteredGroups.length > 0 && filteredGroups.every(g => g.isSelected);
+
+            // Toggle state
+            const targetState = !areAllSelected;
+
+            filteredGroups.forEach(group => {
+                group.isSelected = targetState;
+                group.items = group.items.map((item, idx) => ({
+                    ...item,
+                    // If selecting: select all except first. If deselecting: deselect all.
+                    isSelected: targetState ? (idx > 0) : false
+                }));
+            });
+
+            const { deletableCount, deletableSize } =
+                calculateDeletableStats(filteredGroups);
+
             return {
                 ...state,
                 allSimilarImageGroups,
@@ -401,18 +465,10 @@ const calculateDeletableStats = (groups: SimilarImageGroup[]) => {
     let deletableSize = 0;
 
     for (const group of groups) {
-        if (group.isSelected) {
-            // Group is selected - delete all except first item
-            deletableCount += Math.max(0, group.items.length - 1);
-            const firstItemSize = group.items[0]?.file.info?.fileSize || 0;
-            deletableSize += group.totalSize - firstItemSize;
-        } else {
-            // Check for individual item selections
-            for (const item of group.items) {
-                if (item.isSelected) {
-                    deletableCount += 1;
-                    deletableSize += item.file.info?.fileSize || 0;
-                }
+        for (const item of group.items) {
+            if (item.isSelected) {
+                deletableCount += 1;
+                deletableSize += item.file.info?.fileSize || 0;
             }
         }
     }
@@ -543,6 +599,7 @@ interface SimilarImagesProps {
     deletableSize: number;
     removeProgress: number | undefined;
     onRemoveSimilarImages: () => void;
+    onToggleSelectAll: () => void;
 }
 
 const SimilarImages: React.FC<SimilarImagesProps> = ({
@@ -555,38 +612,67 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
     deletableSize,
     removeProgress,
     onRemoveSimilarImages,
-}) => (
-    <Stack sx={{ flex: 1 }}>
-        <CategoryTabs
-            categoryFilter={categoryFilter}
-            onCategoryFilterChange={onCategoryFilterChange}
-        />
-        <Box sx={{ flex: 1, overflow: "hidden", paddingBlockEnd: 1 }}>
-            <Autosizer>
-                {({ width, height }) => (
-                    <SimilarImagesList
-                        {...{
-                            width,
-                            height,
-                            similarImageGroups,
-                            onToggleSelection,
-                            onToggleItemSelection,
-                        }}
-                    />
-                )}
-            </Autosizer>
-        </Box>
-        <Stack sx={{ margin: 1 }}>
-            <RemoveButton
-                disabled={deletableCount === 0 || removeProgress !== undefined}
-                deletableCount={deletableCount}
-                deletableSize={deletableSize}
-                progress={removeProgress}
-                onRemove={onRemoveSimilarImages}
+    onToggleSelectAll,
+}) => {
+
+    const areAllSelected = similarImageGroups.length > 0 && similarImageGroups.every(g => g.isSelected);
+
+    return (
+        <Stack sx={{ flex: 1 }}>
+            <CategoryTabs
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={onCategoryFilterChange}
             />
-        </Stack>
-    </Stack>
-);
+            <Box sx={{ flex: 1, overflow: "hidden", paddingBlockEnd: 1 }}>
+                <Autosizer>
+                    {({ width, height }) => (
+                        <SimilarImagesList
+                            {...{
+                                width,
+                                height,
+                                similarImageGroups,
+                                onToggleSelection,
+                                onToggleItemSelection,
+                                categoryFilter,
+                            }}
+                        />
+                    )}
+                </Autosizer>
+            </Box>
+            <Stack direction="row" spacing={2} sx={{ margin: 2, alignItems: "stretch" }}>
+                <FocusVisibleButton
+                    variant="outlined"
+                    onClick={onToggleSelectAll}
+                    sx={{
+                        flex: 1,
+                        borderColor: "divider",
+                        color: "text.primary",
+                        justifyContent: "flex-start",
+                        paddingLeft: 2,
+                        height: "100%",
+                    }}
+                >
+                    <Checkbox
+                        checked={areAllSelected}
+                        tabIndex={-1}
+                        disableRipple
+                        sx={{ marginRight: 1 }}
+                    />
+                    {areAllSelected ? t("deselect_all_groups") : t("select_all_in_groups")}
+                </FocusVisibleButton>
+                <Box sx={{ flex: 1 }}>
+                    <RemoveButton
+                        disabled={deletableCount === 0 || removeProgress !== undefined}
+                        deletableCount={deletableCount}
+                        deletableSize={deletableSize}
+                        progress={removeProgress}
+                        onRemove={onRemoveSimilarImages}
+                    />
+                </Box>
+            </Stack>
+        </Stack >
+    );
+};
 
 interface CategoryTabsProps {
     categoryFilter: CategoryFilter;
@@ -616,6 +702,7 @@ interface SimilarImagesListProps {
     similarImageGroups: SimilarImageGroup[];
     onToggleSelection: (index: number) => void;
     onToggleItemSelection: (groupIndex: number, itemIndex: number) => void;
+    categoryFilter: CategoryFilter;
 }
 
 const SimilarImagesList: React.FC<SimilarImagesListProps> = ({
@@ -624,6 +711,7 @@ const SimilarImagesList: React.FC<SimilarImagesListProps> = ({
     similarImageGroups,
     onToggleSelection,
     onToggleItemSelection,
+    categoryFilter,
 }) => {
     const layoutParams = useMemo(
         () => computeThumbnailGridLayoutParams(width),
@@ -657,8 +745,14 @@ const SimilarImagesList: React.FC<SimilarImagesListProps> = ({
 
         const fixedHeight = 24 + 42 + 4 + 1 + 20 + 16; // Header + divider + padding
         const isExpanded = expandedGroups.has(group.id);
-        const itemsToShow = isExpanded ? group.items.length : Math.min(6, group.items.length);
-        const rows = Math.ceil(itemsToShow / layoutParams.columns);
+
+        let cellCount = group.items.length;
+        if (!isExpanded && cellCount > 6) {
+            // 6 items + 1 "more" button
+            cellCount = 7;
+        }
+
+        const rows = Math.ceil(cellCount / layoutParams.columns);
         const gridHeight = rows * layoutParams.itemHeight + (rows - 1) * layoutParams.gap;
 
         return fixedHeight + gridHeight + 8;
@@ -666,10 +760,15 @@ const SimilarImagesList: React.FC<SimilarImagesListProps> = ({
 
     const listRef = React.useRef<VariableSizeList>(null);
 
-    // Reset cache when expanded groups change
+    // Reset cache when expanded groups or data changes
     React.useEffect(() => {
         listRef.current?.resetAfterIndex(0);
-    }, [expandedGroups]);
+    }, [expandedGroups, similarImageGroups]);
+
+    // Scroll to top when category filter changes
+    React.useEffect(() => {
+        listRef.current?.scrollTo(0);
+    }, [categoryFilter]);
 
     return (
         <VariableSizeList
@@ -806,39 +905,47 @@ const GroupContent: React.FC<GroupContentProps> = ({
                 <Box
                     key={item.file.id}
                     sx={{ position: "relative", cursor: "pointer" }}
-                    onClick={() => !isGroupSelected && onToggleItemSelection(groupIndex, itemIndex)}
+                    onClick={() => onToggleItemSelection(groupIndex, itemIndex)}
                 >
                     <ItemCard
                         TileComponent={DuplicateItemTile}
                         coverFile={item.file}
+                        sx={{
+                            // Visual feedback for selected items: darken the image
+                            filter: item.isSelected ? "brightness(0.5)" : "none",
+                            transition: "filter 0.2s ease-in-out",
+                            "&:hover": {
+                                filter: item.isSelected ? "brightness(0.4)" : "brightness(0.9)",
+                            },
+                        }}
                     >
-                        {!isGroupSelected && (
-                            <Box
-                                sx={{
-                                    position: "absolute",
-                                    top: 8,
-                                    right: 8,
-                                    zIndex: 1,
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                zIndex: 1,
+                            }}
+                        >
+                            <Checkbox
+                                checked={item.isSelected || false}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleItemSelection(groupIndex, itemIndex);
                                 }}
-                            >
-                                <Checkbox
-                                    checked={item.isSelected || false}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onToggleItemSelection(groupIndex, itemIndex);
-                                    }}
-                                    sx={{
-                                        color: "white",
-                                        backgroundColor: "rgba(0, 0, 0, 0.5)",
-                                        borderRadius: "4px",
-                                        padding: "4px",
-                                        "&.Mui-checked": {
-                                            color: "primary.main",
-                                        },
-                                    }}
-                                />
-                            </Box>
-                        )}
+                                sx={{
+                                    color: "white",
+                                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                    borderRadius: "4px",
+                                    padding: "4px",
+                                    "&.Mui-checked": {
+                                        color: "primary.main",
+                                    },
+                                    // Make checkbox always visible or visible on hover/selected
+                                    // Based on mobile standard, usually always visible provides better affordance
+                                }}
+                            />
+                        </Box>
                         <TileBottomTextOverlay>
                             <Ellipsized2LineTypography variant="body">
                                 {item.collectionName}
@@ -896,8 +1003,10 @@ const RemoveButton: React.FC<RemoveButtonProps> = ({
         onClick={onRemove}
         sx={{
             width: "100%",
+            height: "100%",
             justifyContent: "space-between",
             paddingX: 3,
+            minHeight: "48px",
             bgcolor: "error.main",
             "&:hover": {
                 bgcolor: "error.dark",

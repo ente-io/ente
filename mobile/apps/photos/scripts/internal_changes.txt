@@ -1,3 +1,5 @@
+- Neeraj: Admin Role + Suggest Delete feature
+- Neeraj: Large files section: add type filter, lower threshold to 10MB [QOL]
 - Neeraj: Jump to date when clicking on album from file info [QOL]
 - Neeraj: Add camera make/model search and filter by model [feature](https://github.com/ente-io/ente/discussions/5588)
 - Neeraj: Fixed order for [pinned albums](https://github.com/ente-io/ente/discussions/5979)
@@ -5,4 +7,3 @@
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
-- Neeraj: (i) Admin Role + Suggest Delete feature

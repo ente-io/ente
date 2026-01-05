@@ -128,6 +128,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   String _getLanguageName(Locale locale) {
     switch (locale.languageCode) {
+      case 'cs':
+        return 'Čeština';
       case 'en':
         return 'English';
       case 'es':
