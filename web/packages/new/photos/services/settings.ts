@@ -227,9 +227,8 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
-    settings.isAdminRoleEnabled = (flags?.internalUser ?? false) || isDevBuild;
-    settings.isSurfacePublicLinkEnabled =
-        (flags?.internalUser ?? false) || isDevBuild;
+    settings.isAdminRoleEnabled = true;
+    settings.isSurfacePublicLinkEnabled = true;
     settings.isShareePinEnabled = (flags?.internalUser ?? false) || isDevBuild;
     settings.isCommentsEnabled =
         ((flags?.serverApiFlag ?? 0) & ServerApiFlag.Comments) !== 0 ||
