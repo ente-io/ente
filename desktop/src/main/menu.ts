@@ -113,12 +113,6 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
             label: "Help",
             submenu: [
                 { label: "Ente Help", click: handleHelp },
-                { type: "separator" },
-                {
-                    label: "Similar Images",
-                    click: () =>
-                        mainWindow?.webContents.send("navigate", "/similar-images"),
-                },
             ],
         },
     ]);
