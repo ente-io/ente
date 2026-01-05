@@ -1,3 +1,4 @@
+- Neeraj: Large files section: add type filter, lower threshold to 10MB [QOL]
 - Neeraj: Jump to date when clicking on album from file info [QOL]
 - Neeraj: Add camera make/model search and filter by model [feature](https://github.com/ente-io/ente/discussions/5588)
 - Neeraj: Fixed order for [pinned albums](https://github.com/ente-io/ente/discussions/5979)
