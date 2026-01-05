@@ -1976,7 +1976,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const isGalleryView = !activeCollectionID || activeCollectionID === 0;
         const shouldFetch =
             showSocialButtons ||
-            (isGalleryView && isFileInSharedCollection(activeFileID));
+            (isCommentsFeatureEnabled &&
+                isGalleryView &&
+                isFileInSharedCollection(activeFileID));
         if (!shouldFetch) return;
 
         void (async () => {
@@ -2100,6 +2102,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         fileNormalCollectionIDs,
         showSocialButtons,
         isFileInSharedCollection,
+        isCommentsFeatureEnabled,
     ]);
 
     // Fetch social data (comments + reactions) for public albums (when viewing as anonymous user).
@@ -2236,7 +2239,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const isGalleryView = !activeCollectionID || activeCollectionID === 0;
         const shouldFetch =
             showSocialButtons ||
-            (isGalleryView && isFileInSharedCollection(activeFileID));
+            (isCommentsFeatureEnabled &&
+                isGalleryView &&
+                isFileInSharedCollection(activeFileID));
         if (!shouldFetch) return;
 
         try {
@@ -2309,6 +2314,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         fileNormalCollectionIDs,
         showSocialButtons,
         isFileInSharedCollection,
+        isCommentsFeatureEnabled,
     ]);
 
     // Refresh social data for public albums
