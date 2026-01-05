@@ -137,7 +137,7 @@ class SocialSyncService {
         await _db.upsertReactions(reactions);
       }
     } catch (e) {
-      _logger.warning('Failed to sync reactions for file $fileID', e);
+      _logger.warning('Failed to sync social data for file $fileID', e);
       // Don't rethrow - this is a non-critical operation
     }
   }
