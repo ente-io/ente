@@ -52,6 +52,7 @@ class CollectionsService {
   static const _collectionsSyncTimeKey = "collections_sync_time_x";
 
   static const int kMaximumWriteAttempts = 5;
+  static const int _maxSocialCleanupRetries = 3;
 
   final _logger = Logger("CollectionsService");
 
@@ -998,11 +999,26 @@ class CollectionsService {
     LocalSyncService.instance.syncAll().ignore();
   }
 
-  Future<void> _cleanupSocialData(int collectionID) async {
+  Future<void> _cleanupSocialData(int collectionID, {int attempt = 0}) async {
     try {
       await SocialDB.instance.deleteCollectionData(collectionID);
     } catch (e, s) {
-      _logger.severe('Failed to cleanup social data for $collectionID', e, s);
+      if (attempt < _maxSocialCleanupRetries) {
+        final backoff = Duration(
+          milliseconds: 100 * pow(2, attempt + 1).toInt(),
+        );
+        _logger.info(
+          'Failed to cleanup social data for $collectionID (${e.runtimeType}), '
+          'retrying (attempt ${attempt + 1}/$_maxSocialCleanupRetries) in ${backoff.inMilliseconds}ms',
+        );
+        await Future.delayed(backoff);
+        return _cleanupSocialData(collectionID, attempt: attempt + 1);
+      }
+      _logger.severe(
+        'Failed to cleanup social data for $collectionID after $_maxSocialCleanupRetries retries',
+        e,
+        s,
+      );
     }
   }
 
