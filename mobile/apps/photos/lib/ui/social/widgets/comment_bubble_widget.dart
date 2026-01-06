@@ -518,7 +518,8 @@ class _InlineParentQuote extends StatelessWidget {
       );
     }
 
-    final parentText = parentComment?.data ?? "Original comment unavailable";
+    final isParentDeleted = parentComment == null;
+    final parentText = isParentDeleted ? "(deleted)" : parentComment!.data;
     final parentUser =
         parentComment != null ? userResolver(parentComment!) : null;
     final parentAuthor = parentComment != null
@@ -581,6 +582,8 @@ class _InlineParentQuote extends StatelessWidget {
                       height: 17 / 10,
                       letterSpacing: -0.3,
                       color: parentTextColor,
+                      fontStyle:
+                          isParentDeleted ? FontStyle.italic : FontStyle.normal,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
