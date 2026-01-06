@@ -2284,5 +2284,7 @@
       }
     }
   },
-  "noActivityYet": "No activity yet"
+  "noActivityYet": "No activity yet",
+  "like": "Like",
+  "comments": "Comments"
 }
