@@ -135,10 +135,12 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
 
                     <TitleSection>
                         <Title>{t("say_something_nice")}</Title>
-                        <Subtitle>{t("share_who_said_it")}</Subtitle>
+                        {enableJoin && (
+                            <Subtitle>{t("public_reaction_subtitle")}</Subtitle>
+                        )}
                     </TitleSection>
 
-                    <ButtonsSection>
+                    <ButtonsSection sx={!enableJoin ? { mt: 4 } : undefined}>
                         <AnonymousButton
                             variant="outlined"
                             fullWidth
@@ -242,7 +244,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     fontSize: 14,
     lineHeight: "20px",
     color: "#666666",
-    maxWidth: 295,
+    maxWidth: 240,
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 

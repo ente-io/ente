@@ -123,14 +123,12 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
 
                     <TitleSection>
                         <Title>{t("give_it_a_like")}</Title>
-                        <Subtitle>
-                            {t("let_them_know_who_liked")}
-                            <br />
-                            {t("keep_it_private")}
-                        </Subtitle>
+                        {enableJoin && (
+                            <Subtitle>{t("public_reaction_subtitle")}</Subtitle>
+                        )}
                     </TitleSection>
 
-                    <ButtonsSection>
+                    <ButtonsSection sx={!enableJoin ? { mt: 4 } : undefined}>
                         <AnonymousButton
                             variant="outlined"
                             fullWidth
@@ -234,7 +232,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     fontSize: 14,
     lineHeight: "20px",
     color: "#666666",
-    maxWidth: 295,
+    maxWidth: 240,
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
