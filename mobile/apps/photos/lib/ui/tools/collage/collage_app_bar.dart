@@ -21,20 +21,31 @@ class CollageAppBar extends StatelessWidget implements PreferredSizeWidget {
     final textTheme = getEnteTextTheme(context);
     return AppBar(
       elevation: 0,
-      title: Text(AppLocalizations.of(context).createCollage),
-      actions: [
-        TextButton(
-          onPressed: isSaveEnabled ? onSave : null,
-          child: Text(
-            AppLocalizations.of(context).save,
-            style: textTheme.body.copyWith(
-              color: isSaveEnabled
-                  ? colorScheme.primary500
-                  : colorScheme.textMuted,
+      automaticallyImplyLeading: false,
+      titleSpacing: 0,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              AppLocalizations.of(context).cancel,
+              style: textTheme.body,
             ),
           ),
-        ),
-      ],
+          TextButton(
+            onPressed: isSaveEnabled ? onSave : null,
+            child: Text(
+              AppLocalizations.of(context).save,
+              style: textTheme.body.copyWith(
+                color: isSaveEnabled
+                    ? colorScheme.primary500
+                    : colorScheme.textMuted,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
