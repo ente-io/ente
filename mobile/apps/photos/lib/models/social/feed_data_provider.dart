@@ -216,7 +216,7 @@ class FeedDataProvider {
         type: FeedItemType.reply,
         collectionID: replies.first.collectionID,
         fileID: replies.first.fileID,
-        commentID: replies.first.parentCommentID,
+        commentID: replies.first.id,
         actorUserIDs: uniqueUserIDs,
         actorAnonIDs: uniqueAnonIDs,
         createdAt: replies.first.createdAt,
