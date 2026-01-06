@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_in_event.dart";
 import 'package:ente_network/network.dart';

@@ -6,7 +6,7 @@ import 'package:dir_utils/dir_utils.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_out_event.dart';
 import 'package:intl/intl.dart';
