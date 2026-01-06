@@ -90,7 +90,16 @@ export const DownloadStatusNotifications: React.FC<
     return saveGroups.map((group, index) => {
         const hasErrors = isSaveCompleteWithErrors(group);
         const canRetry = hasErrors && !!group.retry;
-        const failedTitle = `${t("download_failed")} (${group.failed}/${group.total})`;
+
+        // Show specific error message based on failure reason
+        let failedTitle: string;
+        if (group.failureReason === "network_offline") {
+            failedTitle = `${t("download_failed_network_offline")} (${group.failed}/${group.total})`;
+        } else if (group.failureReason === "file_error") {
+            failedTitle = `${t("download_failed_file_error")} (${group.failed}/${group.total})`;
+        } else {
+            failedTitle = `${t("download_failed")} (${group.failed}/${group.total})`;
+        }
 
         return (
             <Notification

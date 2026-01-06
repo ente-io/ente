@@ -1,24 +1,130 @@
 import { assertionFailed } from "ente-base/assert";
-import { joinPath } from "ente-base/file-name";
+import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
-import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import JSZip from "jszip";
 import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
-import { wait } from "ente-utils/promise";
 import type {
     AddSaveGroup,
     UpdateSaveGroup,
 } from "../components/utils/save-groups";
+
+/**
+ * Download limits optimized for different devices and browsers.
+ */
+interface DownloadLimits {
+    /** Number of concurrent file downloads. */
+    concurrency: number;
+    /** Maximum size of a ZIP batch in bytes. */
+    maxZipSize: number;
+}
+
+let cachedLimits: DownloadLimits | undefined;
+
+/**
+ * Get download limits optimized for the current device and browser.
+ *
+ * The limits are determined based on:
+ * - **Device type**: iOS devices have stricter memory limits, Android varies
+ * - **Browser**: Safari/WebKit has stricter blob size handling
+ * - **Available memory**: Uses `navigator.deviceMemory` when available
+ *
+ * Limits by platform:
+ * - iOS (all browsers use WebKit): 3 concurrent, 50MB max
+ * - Android (low memory): 3 concurrent, 50MB max
+ * - Android (normal): 4 concurrent, 100MB max
+ * - Desktop Safari: 5 concurrent, 100MB max
+ * - Other mobile: 4 concurrent, 75MB max
+ * - Desktop (low memory): 5 concurrent, 100MB max
+ * - Desktop (normal): 6 concurrent, 150MB max
+ */
+const getDownloadLimits = (): DownloadLimits => {
+    if (cachedLimits) return cachedLimits;
+
+    const ua = navigator.userAgent.toLowerCase();
+
+    // Detect iOS - all browsers on iOS use WebKit with strict memory limits.
+    // iPadOS 13+ reports as "Macintosh" in UA so we check maxTouchPoints.
+    const isIOS =
+        ua.includes("iphone") ||
+        ua.includes("ipad") ||
+        ua.includes("ipod") ||
+        (ua.includes("macintosh") && navigator.maxTouchPoints > 1);
+
+    // Detect Android
+    const isAndroid = ua.includes("android");
+
+    // Detect mobile (fallback for other mobile browsers)
+    const isMobile =
+        isIOS || isAndroid || ua.includes("mobile") || ua.includes("tablet");
+
+    // Detect Safari - Chrome/Firefox on macOS include "safari" in UA but also
+    // include their own name, so we exclude those.
+    const isSafari =
+        ua.includes("safari") &&
+        !ua.includes("chrome") &&
+        !ua.includes("chromium") &&
+        !ua.includes("firefox") &&
+        !ua.includes("edg");
+
+    // deviceMemory is available in Chrome-based browsers (in GB).
+    // Low memory devices (< 4GB) need more conservative limits.
+    const deviceMemory = (navigator as { deviceMemory?: number }).deviceMemory;
+    const isLowMemoryDevice = deviceMemory !== undefined && deviceMemory < 4;
+
+    // iOS - most restrictive due to WebKit's aggressive memory management.
+    // All browsers on iOS (Chrome, Firefox, etc.) use WebKit under the hood.
+    if (isIOS) {
+        cachedLimits = {
+            concurrency: 3,
+            maxZipSize: 50 * 1024 * 1024, // 50MB
+        };
+        return cachedLimits;
+    }
+
+    // Android - moderate restrictions, varies by device memory
+    if (isAndroid) {
+        cachedLimits = isLowMemoryDevice
+            ? { concurrency: 3, maxZipSize: 50 * 1024 * 1024 } // 50MB
+            : { concurrency: 4, maxZipSize: 100 * 1024 * 1024 }; // 100MB
+        return cachedLimits;
+    }
+
+    // Desktop Safari - WebKit has stricter blob handling than Chromium/Gecko
+    if (isSafari) {
+        cachedLimits = {
+            concurrency: 5,
+            maxZipSize: 100 * 1024 * 1024, // 100MB
+        };
+        return cachedLimits;
+    }
+
+    // Other mobile browsers (rare: Windows Phone, KaiOS, etc.)
+    if (isMobile) {
+        cachedLimits = {
+            concurrency: 4,
+            maxZipSize: 75 * 1024 * 1024, // 75MB
+        };
+        return cachedLimits;
+    }
+
+    // Desktop browsers (Chrome, Firefox, Edge) - most capable
+    cachedLimits = isLowMemoryDevice
+        ? { concurrency: 5, maxZipSize: 100 * 1024 * 1024 } // 100MB
+        : { concurrency: 6, maxZipSize: 150 * 1024 * 1024 }; // 150MB
+
+    return cachedLimits;
+};
 
 /**
  * Save the given {@link files} to the user's device.
@@ -118,11 +224,12 @@ const downloadAndSave = async (
     let isDownloading = false;
     let updateSaveGroup: UpdateSaveGroup = () => undefined;
 
-    const downloadFiles = async (
+    const downloadFilesDesktop = async (
         filesToDownload: EnteFile[],
         resetFailedCount = false,
     ) => {
         if (!filesToDownload.length || isDownloading) return;
+        if (!electron || !downloadDirPath) return;
 
         isDownloading = true;
         if (resetFailedCount) {
@@ -134,11 +241,7 @@ const downloadAndSave = async (
             for (const file of filesToDownload) {
                 if (canceller.signal.aborted) break;
                 try {
-                    if (electron && downloadDirPath) {
-                        await saveFileDesktop(electron, file, downloadDirPath);
-                    } else {
-                        await saveAsFile(file);
-                    }
+                    await saveFileDesktop(electron, file, downloadDirPath);
                     updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
                 } catch (e) {
                     log.error("File download failed", e);
@@ -154,6 +257,48 @@ const downloadAndSave = async (
             isDownloading = false;
         }
     };
+
+    const downloadFilesWeb = async (
+        filesToDownload: EnteFile[],
+        resetFailedCount = false,
+    ) => {
+        if (!filesToDownload.length || isDownloading) return;
+
+        // Don't start download if already offline - wait for network
+        if (!navigator.onLine) {
+            log.info("Skipping download attempt - network is offline");
+            return;
+        }
+
+        isDownloading = true;
+        if (resetFailedCount) {
+            updateSaveGroup((g) => ({ ...g, failed: 0, failureReason: undefined }));
+        }
+        failedFiles.length = 0;
+
+        try {
+            await saveAsZip(
+                filesToDownload,
+                title,
+                () =>
+                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 })),
+                (file) => {
+                    failedFiles.push(file);
+                    updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
+                },
+                canceller,
+                updateSaveGroup,
+            );
+
+            if (!failedFiles.length) {
+                updateSaveGroup((g) => ({ ...g, retry: undefined }));
+            }
+        } finally {
+            isDownloading = false;
+        }
+    };
+
+    const downloadFiles = electron ? downloadFilesDesktop : downloadFilesWeb;
 
     const retry = () => {
         if (!failedFiles.length || isDownloading || canceller.signal.aborted)
@@ -175,38 +320,295 @@ const downloadAndSave = async (
 };
 
 /**
- * Save the given {@link EnteFile} as a file in the user's download folder.
+ * A helper class to accumulate files into ZIP batches and download them when
+ * the batch size limit is reached.
  */
-const saveAsFile = async (file: EnteFile) => {
+class ZipBatcher {
+    private zip = new JSZip();
+    private currentBatchSize = 0;
+    private currentFileCount = 0;
+    private batchIndex = 1;
+    private usedNames = new Set<string>();
+    private baseName: string;
+    private maxZipSize: number;
+
+    constructor(baseName: string, maxZipSize: number) {
+        this.baseName = baseName;
+        this.maxZipSize = maxZipSize;
+    }
+
+    /**
+     * Add file data to the current ZIP batch. If adding this file would exceed
+     * the batch size limit, the current batch is downloaded first.
+     */
+    async addFile(data: Uint8Array | Blob, fileName: string): Promise<void> {
+        const size = data instanceof Blob ? data.size : data.byteLength;
+
+        // If adding this file would exceed the limit and we have files in the
+        // batch, download the current batch first.
+        if (
+            this.currentBatchSize > 0 &&
+            this.currentBatchSize + size > this.maxZipSize
+        ) {
+            await this.downloadCurrentBatch();
+        }
+
+        // Ensure unique file names within the ZIP
+        const uniqueName = this.getUniqueName(fileName);
+        this.usedNames.add(uniqueName);
+        this.zip.file(uniqueName, data);
+        this.currentBatchSize += size;
+        this.currentFileCount++;
+    }
+
+    /**
+     * Download any remaining files in the current batch.
+     */
+    async flush(): Promise<void> {
+        if (this.currentBatchSize > 0) {
+            await this.downloadCurrentBatch();
+        }
+    }
+
+    private async downloadCurrentBatch(): Promise<void> {
+        const zipBlob = await this.zip.generateAsync({ type: "blob" });
+        const fileLabel =
+            this.currentFileCount === 1
+                ? "1 file"
+                : `${this.currentFileCount} files`;
+        const zipName =
+            this.batchIndex === 1
+                ? `${this.baseName} (${fileLabel}).zip`
+                : `${this.baseName} (${fileLabel})-${this.batchIndex}.zip`;
+
+        const url = URL.createObjectURL(zipBlob);
+        saveAsFileAndRevokeObjectURL(url, zipName);
+
+        // Reset for next batch
+        this.zip = new JSZip();
+        this.currentBatchSize = 0;
+        this.currentFileCount = 0;
+        this.usedNames.clear();
+        this.batchIndex++;
+    }
+
+    /**
+     * Generate a unique file name within the ZIP by appending a suffix if the
+     * name already exists.
+     */
+    private getUniqueName(fileName: string): string {
+        if (!this.usedNames.has(fileName)) {
+            return fileName;
+        }
+
+        const [name, ext] = nameAndExtension(fileName);
+        let counter = 1;
+        let uniqueName: string;
+        do {
+            uniqueName = ext ? `${name}(${counter}).${ext}` : `${name}(${counter})`;
+            counter++;
+        } while (this.usedNames.has(uniqueName));
+
+        return uniqueName;
+    }
+}
+
+/** Result of downloading and processing a single file for ZIP inclusion. */
+type DownloadedFileData =
+    | { type: "regular"; fileName: string; data: Uint8Array }
+    | {
+          type: "livePhoto";
+          imageFileName: string;
+          imageData: Uint8Array;
+          videoFileName: string;
+          videoData: Uint8Array;
+      };
+
+/**
+ * Download and process a single file, returning the data ready for ZIP.
+ */
+const downloadFileForZip = async (
+    file: EnteFile,
+): Promise<DownloadedFileData> => {
     const fileBlob = await downloadManager.fileBlob(file);
     const fileName = fileFileName(file);
+
     if (file.metadata.fileType == FileType.livePhoto) {
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(fileName, fileBlob);
-
-        await saveBlobPartAsFile(imageData, imageFileName);
-
-        // Downloading multiple works everywhere except, you guessed it,
-        // Safari. Make up for their incompetence by adding a setTimeout.
-        await wait(300) /* arbitrary constant, 300ms */;
-        await saveBlobPartAsFile(videoData, videoFileName);
+        return { type: "livePhoto", imageFileName, imageData, videoFileName, videoData };
     } else {
-        await saveBlobPartAsFile(fileBlob, fileName);
+        const data = new Uint8Array(await fileBlob.arrayBuffer());
+        return { type: "regular", fileName, data };
     }
 };
 
 /**
- * Save the given {@link blob} as a file in the user's download folder.
+ * Save multiple files as ZIP archives to the user's download folder.
+ *
+ * Files are batched into ZIPs of up to 100MB each. If the total exceeds 100MB,
+ * multiple ZIP files will be downloaded. Downloads are performed concurrently
+ * (up to {@link CONCURRENT_DOWNLOADS} at a time) for better performance.
+ *
+ * @param files The files to download and add to the ZIP.
+ * @param baseName The base name for the ZIP file(s).
+ * @param onSuccess Callback invoked after each file is successfully added.
+ * @param onError Callback invoked when a file fails to download.
+ * @param canceller An AbortController to check for cancellation.
  */
-const saveBlobPartAsFile = async (blobPart: BlobPart, fileName: string) =>
-    createTypedObjectURL(blobPart, fileName).then((url) =>
-        saveAsFileAndRevokeObjectURL(url, fileName),
-    );
+const saveAsZip = async (
+    files: EnteFile[],
+    baseName: string,
+    onSuccess: () => void,
+    onError: (file: EnteFile, error: unknown) => void,
+    canceller: AbortController,
+    updateSaveGroup: UpdateSaveGroup,
+): Promise<void> => {
+    const { concurrency, maxZipSize } = getDownloadLimits();
+    const batcher = new ZipBatcher(baseName, maxZipSize);
 
-const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
-    const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
-    const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
-    return URL.createObjectURL(new Blob([blob], { type: mimeType }));
+    // Queue of files to process
+    let fileIndex = 0;
+
+    // Track if we've gone offline to stop processing immediately.
+    // Using an object so the value can be mutated by event handlers and
+    // checked synchronously by the async workers.
+    const networkState = { isOffline: !navigator.onLine };
+    const handleOffline = () => {
+        networkState.isOffline = true;
+    };
+    const handleOnline = () => {
+        networkState.isOffline = false;
+    };
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+
+    // Mutex for serializing ZIP additions (download is concurrent, but adding
+    // to the ZIP must be serialized to avoid race conditions with batching)
+    let zipMutex: Promise<void> = Promise.resolve();
+    const withZipLock = async <T>(fn: () => Promise<T>): Promise<T> => {
+        const prev = zipMutex;
+        let resolve: () => void;
+        zipMutex = new Promise((r) => (resolve = r));
+        await prev;
+        try {
+            return await fn();
+        } finally {
+            resolve!();
+        }
+    };
+
+    // Process a single file: download, then add to ZIP
+    const processFile = async (): Promise<boolean> => {
+        // Stop immediately if offline or cancelled
+        if (networkState.isOffline || canceller.signal.aborted) {
+            return false;
+        }
+
+        // Get next file to process
+        const currentIndex = fileIndex++;
+        if (currentIndex >= files.length) {
+            return false;
+        }
+
+        const file = files[currentIndex]!;
+        try {
+            // Check again before starting download (value can change via event handler)
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (networkState.isOffline) {
+                // Put this file back for retry
+                onError(file, new Error("Network offline"));
+                return false;
+            }
+
+            // Download happens concurrently
+            const downloadedData = await downloadFileForZip(file);
+
+            // Adding to ZIP is serialized via mutex
+            await withZipLock(async () => {
+                if (downloadedData.type === "livePhoto") {
+                    await batcher.addFile(
+                        downloadedData.imageData,
+                        downloadedData.imageFileName,
+                    );
+                    await batcher.addFile(
+                        downloadedData.videoData,
+                        downloadedData.videoFileName,
+                    );
+                } else {
+                    await batcher.addFile(
+                        downloadedData.data,
+                        downloadedData.fileName,
+                    );
+                }
+            });
+            onSuccess();
+        } catch (e) {
+            // Individual file failed - mark it for retry but continue with others
+            // Only log non-network errors to avoid log spam when offline
+            if (!networkState.isOffline) {
+                log.error(`Failed to download file ${file.id}, skipping`, e);
+            }
+            onError(file, e);
+
+            // Only stop all processing if we went offline (not for individual failures)
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (networkState.isOffline) {
+                updateSaveGroup((g) => ({
+                    ...g,
+                    failureReason: "network_offline",
+                }));
+                return false;
+            }
+            // Mark as file error for individual failures
+            updateSaveGroup((g) => ({
+                ...g,
+                failureReason: g.failureReason ?? "file_error",
+            }));
+            // Continue processing remaining files even if this one failed
+        }
+
+        return true;
+    };
+
+    // Worker that continuously processes files until done
+    const worker = async (): Promise<void> => {
+        while (await processFile()) {
+            // Continue processing
+        }
+    };
+
+    try {
+        // Start concurrent workers
+        const workers = Array.from(
+            { length: Math.min(concurrency, files.length) },
+            () => worker(),
+        );
+        await Promise.all(workers);
+
+        // If we went offline, mark remaining files as failed
+        if (networkState.isOffline) {
+            updateSaveGroup((g) => ({
+                ...g,
+                failureReason: "network_offline",
+            }));
+            while (fileIndex < files.length) {
+                const file = files[fileIndex++];
+                if (file) {
+                    onError(file, new Error("Network offline"));
+                }
+            }
+        }
+
+        // Flush whatever we have (even partial) unless cancelled
+        if (!canceller.signal.aborted) {
+            await batcher.flush();
+        }
+    } finally {
+        // Clean up event listeners
+        window.removeEventListener("offline", handleOffline);
+        window.removeEventListener("online", handleOnline);
+    }
 };
 
 /**

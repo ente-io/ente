@@ -73,6 +73,15 @@ export interface SaveGroup {
      * An {@link AbortController} that can be used to cancel the save.
      */
     canceller: AbortController;
+    /**
+     * The reason for the failure, if any.
+     *
+     * This is used to show a more specific error message to the user.
+     * - "network_offline": The network went offline during download
+     * - "file_error": One or more individual files failed to download
+     * - undefined: No specific reason (generic error)
+     */
+    failureReason?: "network_offline" | "file_error";
 }
 
 /**
