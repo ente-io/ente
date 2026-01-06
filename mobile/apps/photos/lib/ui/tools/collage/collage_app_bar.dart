@@ -36,7 +36,7 @@ class CollageAppBar extends StatelessWidget implements PreferredSizeWidget {
           TextButton(
             onPressed: isSaveEnabled ? onSave : null,
             child: Text(
-              AppLocalizations.of(context).save,
+              AppLocalizations.of(context).saveCollage,
               style: textTheme.body.copyWith(
                 color: isSaveEnabled
                     ? colorScheme.primary500
