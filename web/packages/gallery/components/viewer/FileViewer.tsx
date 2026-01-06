@@ -361,6 +361,14 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Defaults to `false`.
      */
     isCommentsFeatureEnabled?: boolean;
+    /**
+     * `true` if the "Join album" option is enabled for this public link.
+     *
+     * When `false`, the "Join album and like/comment" button will be hidden
+     * in the public like/comment modals.
+     * Defaults to `true`.
+     */
+    enableJoin?: boolean;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -405,6 +413,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onJoinAlbum,
     enableComment = true,
     isCommentsFeatureEnabled = false,
+    enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -2555,6 +2564,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 collectionKey={collectionKey}
                 anonUserNames={anonUserNames}
                 onJoinAlbum={onJoinAlbum}
+                enableJoin={enableJoin}
             />
             <LikesSidebar
                 open={openLikes}
@@ -2583,6 +2593,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handlePublicLikeModalClose}
                 onLikeAnonymously={handleLikeAnonymously}
                 onJoinAlbumToLike={handleJoinAlbumToLike}
+                enableJoin={enableJoin}
             />
             <AddNameModal
                 open={openAddNameModal}

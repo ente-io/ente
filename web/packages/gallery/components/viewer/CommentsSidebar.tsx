@@ -471,6 +471,11 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      * Should trigger the join album flow (with mobile deep link fallback).
      */
     onJoinAlbum?: () => void;
+    /**
+     * Whether the "Join album" option is enabled for this public link.
+     * When false, the "Join album and like/comment" buttons will be hidden.
+     */
+    enableJoin?: boolean;
 }
 
 /**
@@ -502,6 +507,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     collectionKey,
     anonUserNames,
     onJoinAlbum,
+    enableJoin = true,
 }) => {
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
@@ -2113,6 +2119,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 onClose={() => setShowPublicCommentModal(false)}
                 onCommentAnonymously={handleCommentAnonymously}
                 onJoinAlbumToComment={handleJoinAlbumToComment}
+                enableJoin={enableJoin}
             />
             <PublicLikeModal
                 open={showPublicLikeModal}
@@ -2122,6 +2129,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 }}
                 onLikeAnonymously={handleLikeAnonymously}
                 onJoinAlbumToLike={handleJoinAlbumToLike}
+                enableJoin={enableJoin}
             />
             <AddNameModal
                 open={showAddNameModal}
