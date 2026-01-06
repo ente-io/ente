@@ -8,3 +8,4 @@
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
+- Prateek: Collage creator: move save to app bar, add scrollbar, responsive layout
