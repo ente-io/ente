@@ -157,5 +157,13 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 	} else if reqPath == "/files/preview" {
 		return r.limit200ReqPerSec
 	}
+	if reqPath == "/public-collection/anon-identity" {
+		return r.limit10ReqPerMin
+	}
+	if (strings.HasPrefix(reqPath, "/public-collection/comments") ||
+		strings.HasPrefix(reqPath, "/public-collection/reactions")) &&
+		(reqMethod == http.MethodPost || reqMethod == http.MethodPut || reqMethod == http.MethodDelete) {
+		return r.limit200ReqPerMin
+	}
 	return nil
 }

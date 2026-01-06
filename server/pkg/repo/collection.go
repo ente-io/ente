@@ -157,7 +157,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
-pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join, pct.min_role 
+pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_comment, pct.enable_join, pct.min_role 
     FROM collections c
     LEFT JOIN collection_shares cs
     ON (cs.collection_id = c.collection_id AND cs.is_deleted = false)
@@ -184,14 +184,14 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var c ente.Collection
 		var name, encryptedName, nameDecryptionNonce sql.NullString
 		var pctDeviceLimit sql.NullInt32
-		var pctEnableDownload, pctEnableCollect, pctEnableJoin sql.NullBool
+		var pctEnableDownload, pctEnableCollect, pctEnableComment, pctEnableJoin sql.NullBool
 		var shareUserID, pctValidTill, pctCreatedAt, pctUpdatedAt, pctMemLimit, pctOpsLimit sql.NullInt64
 		var encryptedEmail, nonce []byte
 		var shareeRoleType, pctToken, pctPwHash, pctPwNonce, pctMinRole sql.NullString
 
 		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
-			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin, &pctMinRole); err != nil {
+			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableComment, &pctEnableJoin, &pctMinRole); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 
@@ -230,6 +230,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 					ValidTill:       pctValidTill.Int64,
 					EnableDownload:  pctEnableDownload.Bool,
 					EnableCollect:   pctEnableCollect.Bool,
+					EnableComment:   pctEnableComment.Bool,
 					PasswordEnabled: pctPwNonce.Valid,
 					EnableJoin:      pctEnableJoin.Bool,
 				}
@@ -370,6 +371,37 @@ func (repo *CollectionRepository) GetCollectionIDsSharedWithUser(userID int64) (
 		cIDs = append(cIDs, cID)
 	}
 	return cIDs, nil
+}
+
+// FilterNonDeletedCollectionIDs returns collection IDs that are not deleted and match the provided app.
+func (repo *CollectionRepository) FilterNonDeletedCollectionIDs(collectionIDs []int64, app ente.App) ([]int64, error) {
+	if len(collectionIDs) == 0 {
+		return nil, nil
+	}
+	rows, err := repo.DB.Query(`
+		SELECT collection_id
+		FROM collections
+		WHERE collection_id = ANY($1)
+		  AND is_deleted = FALSE
+		  AND app = $2
+	`, pq.Array(collectionIDs), app)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	result := make([]int64, 0, len(collectionIDs))
+	for rows.Next() {
+		var collectionID int64
+		if err := rows.Scan(&collectionID); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result = append(result, collectionID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return result, nil
 }
 
 func (repo *CollectionRepository) GetCollectionsSharedWithOrByUser(userID int64) ([]int64, error) {

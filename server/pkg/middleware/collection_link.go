@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"errors"
 	"fmt"
 	"golang.org/x/net/idna"
@@ -17,6 +18,7 @@ import (
 
 	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -39,10 +41,12 @@ type CollectionLinkMiddleware struct {
 	CollectionLinkRepo   *public.CollectionLinkRepo
 	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
+	AnonUsersRepo        *socialrepo.AnonUsersRepository
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
 	DiscordController    *discord.DiscordController
 	RemoteStoreRepo      *remotestore.Repository
+	AnonIdentitySecret   []byte
 }
 
 // Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
@@ -119,15 +123,33 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 			m.Cache.Set(cacheKey, publicCollectionSummary, cache.DefaultExpiration)
 		}
 
-		c.Set(auth.PublicAccessKey, ente.PublicAccessContext{
-			ID:           publicCollectionSummary.ID,
-			IP:           clientIP,
-			UserAgent:    userAgent,
-			CollectionID: publicCollectionSummary.CollectionID,
-		})
+		publicCtx := ente.PublicAccessContext{
+			ID:            publicCollectionSummary.ID,
+			IP:            clientIP,
+			UserAgent:     userAgent,
+			CollectionID:  publicCollectionSummary.CollectionID,
+			EnableComment: publicCollectionSummary.EnableComment,
+		}
+		c.Set(auth.PublicAccessKey, publicCtx)
+
+		if err := m.attachAnonIdentity(c, publicCtx.CollectionID); err != nil {
+			status := http.StatusInternalServerError
+			switch {
+			case errors.Is(err, ente.ErrAuthenticationRequired):
+				status = http.StatusUnauthorized
+			case errors.Is(err, ente.ErrPermissionDenied):
+				status = http.StatusForbidden
+			case errors.Is(err, ente.ErrBadRequest):
+				status = http.StatusBadRequest
+			}
+			c.AbortWithStatusJSON(status, gin.H{"error": err.Error()})
+			return
+		}
+
 		c.Next()
 	}
 }
+
 // validateOwnersSubscription checks if the owner has an active subscription.
 // Returns (isFreeUser, error) where isFreeUser is true if user is on free plan but has active subscription.
 func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) (bool, error) {
@@ -256,6 +278,38 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		// custom domains.
 		// return ente.NewPermissionDeniedError("unknown custom domain")
 	}
+	return nil
+}
+
+func (m *CollectionLinkMiddleware) attachAnonIdentity(c *gin.Context, collectionID int64) error {
+	if len(m.AnonIdentitySecret) == 0 {
+		return nil
+	}
+	token := strings.TrimSpace(c.GetHeader("X-Anon-User-Token"))
+	if token == "" {
+		return nil
+	}
+	claim, err := ente.ParseAnonymousIdentityToken(m.AnonIdentitySecret, token)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	anonID := claim.Subject
+	if anonID == "" {
+		return ente.ErrAuthenticationRequired
+	}
+	if m.AnonUsersRepo != nil {
+		anonUser, err := m.AnonUsersRepo.GetByID(c.Request.Context(), anonID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return ente.ErrAuthenticationRequired
+			}
+			return stacktrace.Propagate(err, "")
+		}
+		if anonUser.CollectionID != collectionID {
+			return ente.ErrPermissionDenied
+		}
+	}
+	auth.SetPublicAnonUserID(c, anonID)
 	return nil
 }
 
