@@ -107,7 +107,7 @@ class SocialDataProvider {
 
   /// Adds a comment via API, then stores locally.
   ///
-  /// Returns the created Comment on success, null on failure.
+  /// Returns the created Comment on success, throws on failure.
   Future<Comment?> addComment({
     required int collectionID,
     required String text,
@@ -146,13 +146,13 @@ class SocialDataProvider {
       return comment;
     } catch (e) {
       _logger.severe('Failed to add comment', e);
-      return null;
+      rethrow;
     }
   }
 
   /// Deletes a comment via API, then marks as deleted locally.
   ///
-  /// Returns the deleted Comment on success, null on failure.
+  /// Returns the deleted Comment on success, throws on failure.
   Future<Comment?> deleteComment(String id) async {
     try {
       // Call API
@@ -162,7 +162,7 @@ class SocialDataProvider {
       return _db.deleteComment(id);
     } catch (e) {
       _logger.severe('Failed to delete comment $id', e);
-      return null;
+      rethrow;
     }
   }
 
@@ -234,7 +234,7 @@ class SocialDataProvider {
       }
     } catch (e) {
       _logger.severe('Failed to toggle reaction', e);
-      return null;
+      rethrow;
     }
   }
 

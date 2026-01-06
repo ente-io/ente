@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/collection/collection.dart";
@@ -10,6 +11,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+
+final _logger = Logger("LikeCollectionSelectorSheet");
 
 const _greenHeartColor = Color(0xFF08C225);
 
@@ -129,7 +132,7 @@ class _LikeCollectionSelectorSheetState
         _isLoading = false;
       });
     } catch (e, s) {
-      debugPrint("Error loading like selector data: $e\n$s");
+      _logger.severe("Error loading like selector data", e, s);
       if (mounted) {
         setState(() {
           _hasError = true;
@@ -151,11 +154,11 @@ class _LikeCollectionSelectorSheetState
         fileID: widget.fileID,
       );
     } catch (e) {
-      // Revert on error
+      _logger.severe("Failed to toggle like", e);
       if (mounted) {
         setState(() => state.isLiked = previousState);
+        showShortToast(context, "Failed to update like");
       }
-      debugPrint("Failed to toggle like: $e");
     }
   }
 
@@ -190,7 +193,7 @@ class _LikeCollectionSelectorSheetState
           );
         } catch (e) {
           failed.add(c);
-          debugPrint("Failed to like ${c.collection.displayName}: $e");
+          _logger.severe("Failed to like ${c.collection.displayName}", e);
         }
       }),
     );

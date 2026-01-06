@@ -14,6 +14,7 @@ import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
@@ -327,38 +328,47 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
-    // Call API to create comment
-    final result = await SocialDataProvider.instance.addComment(
-      collectionID: _selectedCollectionID,
-      text: text,
-      fileID: widget.fileID,
-      parentCommentID: _replyingTo?.id,
-    );
-    if (result == null) {
-      _logger.warning('Failed to save comment');
-      return;
-    }
-
-    // Update UI only after successful persistence
-    if (mounted) {
-      setState(() {
-        _comments.insert(0, result);
-        _replyingTo = null;
-
-        // Update comment count in shared collections list
-        final index = _sharedCollections.indexWhere(
-          (c) => c.collection.id == _selectedCollectionID,
-        );
-        if (index != -1) {
-          final old = _sharedCollections[index];
-          _sharedCollections[index] = CollectionCommentInfo(
-            collection: old.collection,
-            commentCount: old.commentCount + 1,
-            thumbnail: old.thumbnail,
-          );
+    try {
+      final result = await SocialDataProvider.instance.addComment(
+        collectionID: _selectedCollectionID,
+        text: text,
+        fileID: widget.fileID,
+        parentCommentID: _replyingTo?.id,
+      );
+      if (result == null) {
+        _logger.warning('Failed to save comment');
+        if (mounted) {
+          showShortToast(context, "Failed to send comment");
         }
-      });
-      _textController.clear();
+        return;
+      }
+
+      // Update UI only after successful persistence
+      if (mounted) {
+        setState(() {
+          _comments.insert(0, result);
+          _replyingTo = null;
+
+          // Update comment count in shared collections list
+          final index = _sharedCollections.indexWhere(
+            (c) => c.collection.id == _selectedCollectionID,
+          );
+          if (index != -1) {
+            final old = _sharedCollections[index];
+            _sharedCollections[index] = CollectionCommentInfo(
+              collection: old.collection,
+              commentCount: old.commentCount + 1,
+              thumbnail: old.thumbnail,
+            );
+          }
+        });
+        _textController.clear();
+      }
+    } catch (e) {
+      _logger.severe('Failed to send comment', e);
+      if (mounted) {
+        showShortToast(context, "Failed to send comment");
+      }
     }
   }
 

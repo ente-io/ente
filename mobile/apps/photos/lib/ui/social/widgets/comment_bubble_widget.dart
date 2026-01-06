@@ -172,17 +172,26 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   }
 
   Future<void> _toggleLike() async {
-    // Optimistic update
+    final previousState = _isLiked;
     setState(() => _isLiked = !_isLiked);
 
-    await SocialDataProvider.instance.toggleReaction(
-      userID: widget.currentUserID,
-      collectionID: widget.collectionID,
-      fileID: widget.comment.fileID,
-      commentID: widget.comment.id,
-    );
+    try {
+      await SocialDataProvider.instance.toggleReaction(
+        userID: widget.currentUserID,
+        collectionID: widget.collectionID,
+        fileID: widget.comment.fileID,
+        commentID: widget.comment.id,
+      );
+    } catch (e) {
+      _logger.severe('Failed to toggle comment like', e);
+      if (mounted) {
+        setState(() => _isLiked = previousState);
+        showShortToast(context, "Failed to like comment");
+      }
+      return;
+    }
 
-    // Refresh reactions
+    // Refresh reactions after successful toggle (best-effort, no rollback if fails)
     _reactions = await widget.onFetchReactions();
     if (mounted) setState(() {});
   }

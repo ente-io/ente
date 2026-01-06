@@ -31,6 +31,8 @@ import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import "package:photos/utils/share_util.dart";
 
+final _logger = Logger("FileBottomBar");
+
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
   final Function(EnteFile) onFileRemoved;
@@ -382,14 +384,25 @@ class FileBottomBarState extends State<FileBottomBar> {
         .getSharedCollectionCountForFile(file.uploadedFileID!);
 
     if (sharedCount <= 1) {
-      // Single shared collection: like directly (existing behavior)
-      await SocialDataProvider.instance.toggleReaction(
-        userID: widget.userID!,
-        collectionID: file.collectionID!,
-        fileID: file.uploadedFileID,
-      );
+      // Single shared collection: like directly
+      final previousState = _hasLiked;
       _hasLiked = true;
       safeRefresh();
+
+      try {
+        await SocialDataProvider.instance.toggleReaction(
+          userID: widget.userID!,
+          collectionID: file.collectionID!,
+          fileID: file.uploadedFileID,
+        );
+      } catch (e) {
+        _logger.severe("Failed to like photo", e);
+        if (mounted) {
+          _hasLiked = previousState;
+          safeRefresh();
+          showShortToast(context, "Failed to like photo");
+        }
+      }
     } else {
       // Multiple shared collections: show selector bottom sheet
       await showLikeCollectionSelectorSheet(
@@ -461,10 +474,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       if (failedCount > 0 && mounted) {
         _hasLiked = previousState;
         safeRefresh();
-        final msg = failedCount == 1
-            ? "Failed to remove like from 1 album"
-            : "Failed to remove like from $failedCount albums";
-        showShortToast(context, msg);
+        showShortToast(context, "Failed to unlike photo");
       }
     } catch (e) {
       // Rollback on error (e.g., fetching collections failed)
