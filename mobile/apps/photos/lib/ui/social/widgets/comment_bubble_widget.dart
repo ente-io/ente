@@ -12,6 +12,7 @@ import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/social/widgets/comment_actions_capsule.dart";
@@ -552,11 +553,7 @@ class _InlineParentQuote extends StatelessWidget {
         height: 16,
         width: 16,
         alignment: Alignment.centerLeft,
-        child: const SizedBox(
-          width: 14,
-          height: 14,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+        child: const EnteLoadingWidget(padding: 0),
       );
     }
 
