@@ -41,7 +41,7 @@ import {
     deleteReaction,
 } from "ente-new/photos/services/reaction";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
-import { t } from "i18next";
+import i18n, { t } from "i18next";
 import React, {
     useCallback,
     useEffect,
@@ -180,14 +180,31 @@ interface CollectionInfo {
 const formatTimeAgo = (timestampMicros: number): string => {
     // Server timestamps are in microseconds, convert to milliseconds
     const timestampMs = Math.floor(timestampMicros / 1000);
-    const diff = Date.now() - timestampMs;
+    const now = Date.now();
+    const diff = now - timestampMs;
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "now";
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 1) return t("just_now");
+    if (minutes < 60) return t("minutes_ago", { count: minutes });
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) return t("hours_ago", { count: hours });
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    if (days < 7) return t("days_ago", { count: days });
+
+    // For 7+ days, show actual date using locale-aware formatting
+    const date = new Date(timestampMs);
+    const currentYear = new Date(now).getFullYear();
+    const locale = i18n.language;
+    if (date.getFullYear() === currentYear) {
+        return date.toLocaleDateString(locale, {
+            month: "short",
+            day: "numeric",
+        });
+    }
+    return date.toLocaleDateString(locale, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
 };
 
 const getParentComment = (
