@@ -126,33 +126,6 @@ Widget improvements are released regularly. Keep the Ente app updated for the be
 
 The Albums widget defaults to your Favorites album. Add photos to Favorites by tapping the heart icon on any photo. This ensures your most cherished photos appear on your home screen.
 
-## Troubleshooting
-
-### Widget Shows Blank or Loading
-
-- Open the Ente app and wait for it to sync
-- Ensure you have photos in the configured albums
-- Check that your device has enough storage for widget cache
-- Try removing and re-adding the widget
-
-### People Widget Shows No Options
-
-- Enable face recognition in `Settings > General > Advanced > Machine learning`
-- Wait for face indexing to complete
-- Check that faces have been detected in your photos
-
-### Widget Not Updating
-
-- Widgets refresh every ~15 minutes automatically
-- Opening the Ente app triggers a widget sync
-- Check that background app refresh is enabled for Ente in your device settings
-
-### Photos Not Appearing After Configuration
-
-- Allow a few minutes for the widget to sync new photos
-- Try opening and closing the Ente app
-- Remove and re-add the widget to force a refresh
-
 ## Platform Availability
 
 | Platform    | Home Widgets     |
