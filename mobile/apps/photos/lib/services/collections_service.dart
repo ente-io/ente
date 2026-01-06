@@ -17,6 +17,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/social_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -51,6 +52,7 @@ class CollectionsService {
   static const _collectionsSyncTimeKey = "collections_sync_time_x";
 
   static const int kMaximumWriteAttempts = 5;
+  static const int _maxSocialCleanupRetries = 3;
 
   final _logger = Logger("CollectionsService");
 
@@ -146,6 +148,7 @@ class CollectionsService {
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
+        await _cleanupSocialData(collection.id);
         await setCollectionSyncTime(collection.id, null);
         if (_collectionIDToCollections.containsKey(collection.id)) {
           shouldFireDeleteEvent = true;
@@ -237,6 +240,83 @@ class CollectionsService {
       return false;
     }
     return true;
+  }
+
+  /// Returns true if the file exists in any shared collection.
+  ///
+  /// A collection is considered "shared" if it has sharees, has a public link,
+  /// or is owned by someone else (incoming share).
+  Future<bool> isFileInSharedCollection(int uploadedFileID) async {
+    final Set<int> collectionIDs =
+        await _filesDB.getAllCollectionIDsOfFile(uploadedFileID);
+
+    if (collectionIDs.isEmpty) {
+      return false;
+    }
+
+    final int? currentUserID = _config.getUserID();
+    if (currentUserID == null) {
+      return false;
+    }
+
+    for (final int collectionID in collectionIDs) {
+      final Collection? collection = _collectionIDToCollections[collectionID];
+
+      if (collection == null || collection.isDeleted) {
+        continue;
+      }
+
+      if (collection.hasSharees ||
+          collection.hasLink ||
+          !collection.isOwner(currentUserID)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Returns the count of shared collections containing this file.
+  /// Uses early exit optimization - stops counting at 2.
+  ///
+  /// Returns:
+  /// - 0: File not in any shared collection
+  /// - 1: File in exactly one shared collection
+  /// - 2: File in multiple shared collections (early exit)
+  Future<int> getSharedCollectionCountForFile(int uploadedFileID) async {
+    final Set<int> collectionIDs =
+        await _filesDB.getAllCollectionIDsOfFile(uploadedFileID);
+
+    if (collectionIDs.isEmpty) {
+      return 0;
+    }
+
+    final int? currentUserID = _config.getUserID();
+    if (currentUserID == null) {
+      return 0;
+    }
+
+    int sharedCount = 0;
+    for (final int collectionID in collectionIDs) {
+      final Collection? collection = _collectionIDToCollections[collectionID];
+
+      if (collection == null || collection.isDeleted) {
+        continue;
+      }
+
+      // Same logic as isFileInSharedCollection
+      if (collection.hasSharees ||
+          collection.hasLink ||
+          !collection.isOwner(currentUserID)) {
+        sharedCount++;
+        // Early exit: we only need to distinguish between 0, 1, and >1
+        if (sharedCount > 1) {
+          return 2;
+        }
+      }
+    }
+
+    return sharedCount;
   }
 
   Future<List<Collection>> getArchivedCollection() async {
@@ -885,6 +965,7 @@ class CollectionsService {
         final deletedCollection = collection.copyWith(isDeleted: true);
         _collectionIDToCollections[collection.id] = deletedCollection;
         unawaited(_db.insert([deletedCollection]));
+        await _cleanupSocialData(collection.id);
       } else {
         await _handleCollectionDeletion(collection);
       }
@@ -901,6 +982,7 @@ class CollectionsService {
 
   Future<void> _handleCollectionDeletion(Collection collection) async {
     await _filesDB.deleteCollection(collection.id);
+    await _cleanupSocialData(collection.id);
     final deletedCollection = collection.copyWith(isDeleted: true);
     unawaited(_db.insert([deletedCollection]));
     _collectionIDToCollections[collection.id] = deletedCollection;
@@ -915,6 +997,29 @@ class CollectionsService {
     sync().ignore();
     // not required once remote & local world are separate
     LocalSyncService.instance.syncAll().ignore();
+  }
+
+  Future<void> _cleanupSocialData(int collectionID, {int attempt = 0}) async {
+    try {
+      await SocialDB.instance.deleteCollectionData(collectionID);
+    } catch (e, s) {
+      if (attempt < _maxSocialCleanupRetries) {
+        final backoff = Duration(
+          milliseconds: 100 * pow(2, attempt + 1).toInt(),
+        );
+        _logger.info(
+          'Failed to cleanup social data for $collectionID (${e.runtimeType}), '
+          'retrying (attempt ${attempt + 1}/$_maxSocialCleanupRetries) in ${backoff.inMilliseconds}ms',
+        );
+        await Future.delayed(backoff);
+        return _cleanupSocialData(collectionID, attempt: attempt + 1);
+      }
+      _logger.severe(
+        'Failed to cleanup social data for $collectionID after $_maxSocialCleanupRetries retries',
+        e,
+        s,
+      );
+    }
   }
 
   Uint8List getCollectionKey(int collectionID) {
@@ -1278,6 +1383,7 @@ class CollectionsService {
           "collectionID": collection.id,
           "enableCollect": enableCollect,
           "enableJoin": true,
+          "enableComment": true,
         },
       );
       collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));

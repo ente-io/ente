@@ -6,6 +6,7 @@ class PublicURL {
   bool enableCollect;
   bool passwordEnabled;
   bool enableJoin;
+  bool enableComment;
   String? nonce;
   int? opsLimit;
   int? memLimit;
@@ -18,6 +19,7 @@ class PublicURL {
     this.passwordEnabled = false,
     this.enableCollect = false,
     this.enableJoin = true,
+    this.enableComment = false,
     this.nonce,
     this.opsLimit,
     this.memLimit,
@@ -35,6 +37,7 @@ class PublicURL {
       'memLimit': memLimit,
       'opsLimit': opsLimit,
       'enableJoin': enableJoin,
+      'enableComment': enableComment,
     };
   }
 
@@ -58,6 +61,7 @@ class PublicURL {
       opsLimit: map['opsLimit'],
       memLimit: map['memLimit'],
       enableJoin: map['enableJoin'] ?? true,
+      enableComment: map['enableComment'] ?? false,
     );
   }
 }

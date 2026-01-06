@@ -15,6 +15,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
@@ -79,10 +80,12 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
+  final _isInSharedCollectionNotifier = ValueNotifier(false);
 
   @override
   void dispose() {
     _enableFullScreenNotifier.dispose();
+    _isInSharedCollectionNotifier.dispose();
     super.dispose();
   }
 
@@ -93,6 +96,7 @@ class _DetailPageState extends State<DetailPage> {
     // when the body is rebuilt, which can reset state stored in it.
     return InheritedDetailPageState(
       enableFullScreenNotifier: _enableFullScreenNotifier,
+      isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
       child: _Body(widget.config),
     );
   }
@@ -131,6 +135,11 @@ class _BodyState extends State<_Body> {
         isGuestView = event.isGuestView;
         swipeLocked = event.swipeLocked;
       });
+    });
+
+    // Update shared collection state after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
     });
   }
 
@@ -354,6 +363,7 @@ class _BodyState extends State<_Body> {
           _selectedIndexNotifier.value = index;
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
+        _updateSharedCollectionState(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -479,5 +489,27 @@ class _BodyState extends State<_Body> {
       context,
       "Please authenticate to view more photos and videos.",
     );
+  }
+
+  Future<void> _updateSharedCollectionState(EnteFile file) async {
+    final fileID = file.uploadedFileID;
+    final notifier =
+        InheritedDetailPageState.maybeOf(context)?.isInSharedCollectionNotifier;
+
+    if (notifier == null) return;
+
+    if (fileID == null) {
+      notifier.value = false;
+      return;
+    }
+
+    final isShared =
+        await CollectionsService.instance.isFileInSharedCollection(fileID);
+
+    // Guard: Only update if still showing the same file
+    // (user may have swiped to a different file while awaiting)
+    if (_files![_selectedIndexNotifier.value].uploadedFileID == fileID) {
+      notifier.value = isShared;
+    }
   }
 }

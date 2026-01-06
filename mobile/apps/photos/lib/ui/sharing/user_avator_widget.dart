@@ -14,20 +14,22 @@ import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
-enum AvatarType { small, mini, tiny, extra }
+enum AvatarType { xl, lg, md, sm, xs }
 
 class UserAvatarWidget extends StatefulWidget {
   final User user;
   final AvatarType type;
   final int currentUserID;
   final bool thumbnailView;
+  final bool addStroke;
 
   const UserAvatarWidget(
     this.user, {
     super.key,
     this.currentUserID = -1,
-    this.type = AvatarType.mini,
+    this.type = AvatarType.md,
     this.thumbnailView = false,
+    this.addStroke = true,
   });
 
   @override
@@ -90,17 +92,20 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
     final double size = getAvatarSize(widget.type);
     return _personID != null
         ? Container(
-            padding: const EdgeInsets.all(0.5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: widget.thumbnailView
-                    ? strokeMutedDark
-                    : getEnteColorScheme(context).strokeMuted,
-                width: UserAvatarWidget.strokeWidth,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-            ),
+            padding:
+                widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+            decoration: widget.addStroke
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.thumbnailView
+                          ? strokeMutedDark
+                          : getEnteColorScheme(context).strokeMuted,
+                      width: UserAvatarWidget.strokeWidth,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
+                  )
+                : null,
             child: SizedBox(
               height: size,
               width: size,
@@ -128,6 +133,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                               currentUserID: widget.currentUserID,
                               thumbnailView: widget.thumbnailView,
                               type: widget.type,
+                              addStroke: widget.addStroke,
                             ),
                     );
                   } else if (snapshot.hasError) {
@@ -137,6 +143,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
+                      addStroke: widget.addStroke,
                     );
                   } else if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data == null) {
@@ -145,6 +152,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                       currentUserID: widget.currentUserID,
                       thumbnailView: widget.thumbnailView,
                       type: widget.type,
+                      addStroke: widget.addStroke,
                     );
                   }
                   return const SizedBox.shrink();
@@ -157,6 +165,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             currentUserID: widget.currentUserID,
             thumbnailView: widget.thumbnailView,
             type: widget.type,
+            addStroke: widget.addStroke,
           );
   }
 }
@@ -166,11 +175,13 @@ class _FirstLetterCircularAvatar extends StatefulWidget {
   final int currentUserID;
   final bool thumbnailView;
   final AvatarType type;
+  final bool addStroke;
   const _FirstLetterCircularAvatar({
     required this.user,
     required this.currentUserID,
     required this.thumbnailView,
     required this.type,
+    required this.addStroke,
   });
 
   @override
@@ -202,17 +213,19 @@ class _FirstLetterCircularAvatarState
     final double size = avatarStyle.item1;
     final TextStyle textStyle = avatarStyle.item2;
     return Container(
-      padding: const EdgeInsets.all(0.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
-          width: UserAvatarWidget.strokeWidth,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-      ),
+      padding: widget.addStroke ? const EdgeInsets.all(0.5) : EdgeInsets.zero,
+      decoration: widget.addStroke
+          ? BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: widget.thumbnailView
+                    ? strokeMutedDark
+                    : getEnteColorScheme(context).strokeMuted,
+                width: UserAvatarWidget.strokeWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            )
+          : null,
       child: SizedBox(
         height: size,
         width: size,
@@ -234,13 +247,15 @@ class _FirstLetterCircularAvatarState
   ) {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
-      case AvatarType.small:
+      case AvatarType.xl:
         return Tuple2(32.0, enteTextTheme.small);
-      case AvatarType.mini:
+      case AvatarType.lg:
+        return Tuple2(28.0, enteTextTheme.mini);
+      case AvatarType.md:
         return Tuple2(24.0, enteTextTheme.mini);
-      case AvatarType.tiny:
+      case AvatarType.sm:
         return Tuple2(18.0, enteTextTheme.tiny);
-      case AvatarType.extra:
+      case AvatarType.xs:
         return Tuple2(18.0, enteTextTheme.tiny);
     }
   }
@@ -250,13 +265,15 @@ double getAvatarSize(
   AvatarType type,
 ) {
   switch (type) {
-    case AvatarType.small:
+    case AvatarType.xl:
       return 32.0;
-    case AvatarType.mini:
+    case AvatarType.lg:
+      return 28.0;
+    case AvatarType.md:
       return 24.0;
-    case AvatarType.tiny:
+    case AvatarType.sm:
       return 18.0;
-    case AvatarType.extra:
+    case AvatarType.xs:
       return 18.0;
   }
 }

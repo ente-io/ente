@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
+  "enableComment": "Enable comments",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
   "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
@@ -2267,5 +2268,21 @@
   "ritualCustomKeyboardLabel": "Custom (keyboard)",
   "ritualEmojiKeyboardHint": "Press to open emoji keyboard",
   "ritualEmojiUseAction": "Use",
-  "ritualSearchEmpty": "Build a ritual to keep your photo habit going."
+  "ritualSearchEmpty": "Build a ritual to keep your photo habit going.",
+  "feed": "Feed",
+  "likedYourPhoto": "Liked a photo",
+  "commentedOnYourPhoto": "Commented on a photo",
+  "repliedToYourComment": "Replied to a comment",
+  "likedYourComment": "Liked a comment",
+  "likedYourReply": "Liked a reply",
+  "and1Other": "and 1 other",
+  "andXOthers": "and {count} others",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "No activity yet"
 }

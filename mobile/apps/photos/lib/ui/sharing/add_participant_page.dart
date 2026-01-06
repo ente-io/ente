@@ -171,7 +171,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               leadingIconSize: 24.0,
                               leadingIconWidget: UserAvatarWidget(
                                 currentUser,
-                                type: AvatarType.mini,
+                                type: AvatarType.md,
                               ),
                               menuItemColor:
                                   getEnteColorScheme(context).fillFaint,
