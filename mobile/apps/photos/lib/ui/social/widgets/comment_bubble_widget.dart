@@ -37,6 +37,9 @@ class CommentBubbleWidget extends StatefulWidget {
   /// Whether this comment should be visually highlighted.
   final bool isHighlighted;
 
+  /// Callback invoked when auto-highlight animation completes (dismissed).
+  final VoidCallback? onAutoHighlightDismissed;
+
   const CommentBubbleWidget({
     required this.comment,
     required this.user,
@@ -50,6 +53,7 @@ class CommentBubbleWidget extends StatefulWidget {
     required this.userResolver,
     this.onCommentDeleted,
     this.isHighlighted = false,
+    this.onAutoHighlightDismissed,
     super.key,
   });
 
@@ -75,6 +79,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   final LayerLink _layerLink = LayerLink();
   final GlobalKey _contentKey = GlobalKey();
   Size? _contentSize;
+  bool _isAutoHighlight = false;
 
   late final AnimationController _overlayAnimationController;
   late final Animation<double> _overlayAnimation;
@@ -104,6 +109,15 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     });
     _loadData();
     _measureContent();
+
+    // Trigger auto-highlight if widget is created with isHighlighted = true
+    if (widget.isHighlighted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _triggerAutoHighlight();
+        }
+      });
+    }
   }
 
   @override
@@ -116,6 +130,11 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       _contentSize = null;
       _loadData();
       _measureContent();
+    }
+
+    // Trigger auto-highlight when isHighlighted becomes true
+    if (widget.isHighlighted && !oldWidget.isHighlighted) {
+      _triggerAutoHighlight();
     }
   }
 
@@ -197,6 +216,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   }
 
   void _showHighlight() {
+    if (_isAutoHighlight) {
+      return; // Don't allow long-press during auto-highlight
+    }
     HapticFeedback.mediumImpact();
     setState(() => _dragOffset = 0.0);
     _overlayController.show();
@@ -206,6 +228,29 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   Future<void> _hideHighlight() async {
     await _overlayAnimationController.reverse();
     if (mounted) _overlayController.hide();
+  }
+
+  void _triggerAutoHighlight() {
+    _isAutoHighlight = true;
+    setState(() => _dragOffset = 0.0);
+    _overlayController.show();
+    _overlayAnimationController.forward();
+
+    // Auto-dismiss after 750ms
+    Future.delayed(const Duration(milliseconds: 750), () {
+      if (mounted && _isAutoHighlight) {
+        _hideAutoHighlight();
+      }
+    });
+  }
+
+  Future<void> _hideAutoHighlight() async {
+    await _overlayAnimationController.reverse();
+    if (mounted) {
+      _overlayController.hide();
+      _isAutoHighlight = false;
+      widget.onAutoHighlightDismissed?.call();
+    }
   }
 
   void _onHorizontalDragStart(DragStartDetails details) {
@@ -257,7 +302,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
-    Widget content = OverlayPortal(
+    final content = OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: _buildOverlayContent,
       child: GestureDetector(
@@ -316,18 +361,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       ),
     );
 
-    // Add highlight effect if needed
-    if (widget.isHighlighted) {
-      content = AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(
-          color: colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: content,
-      );
-    }
-
     return content;
   }
 
@@ -340,11 +373,11 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
             _overlayAnimationController.status == AnimationStatus.reverse;
         return Stack(
           children: [
-            // Full-screen barrier with black opacity 0.7
+            // Full-screen barrier with black opacity 0.3
             GestureDetector(
-              onTap: _hideHighlight,
+              onTap: _isAutoHighlight ? _hideAutoHighlight : _hideHighlight,
               child: Container(
-                color: Colors.black.withValues(alpha: 0.7 * value),
+                color: Colors.black.withValues(alpha: 0.3 * value),
               ),
             ),
             // Highlighted comment + popup menu
@@ -355,31 +388,31 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                   widget.isOwnComment ? Alignment.topRight : Alignment.topLeft,
               followerAnchor:
                   widget.isOwnComment ? Alignment.topRight : Alignment.topLeft,
-              child:
-                  _contentSize != null && _contentSize!.width >= _minPopupWidth
-                      ? SizedBox(
-                          width: _contentSize!.width,
-                          child: Opacity(
-                            opacity: isReversing ? 1.0 : value,
-                            child: _buildCommentContent(
-                              showActionsCapsule: isReversing,
-                              showActionsPopup: !isReversing,
-                              showHeader: false,
-                              bubbleScale: 1 + (0.025 * value),
-                              capsuleOpacity: 1 - value,
-                            ),
-                          ),
-                        )
-                      : Opacity(
-                          opacity: isReversing ? 1.0 : value,
-                          child: _buildCommentContent(
-                            showActionsCapsule: isReversing,
-                            showActionsPopup: !isReversing,
-                            showHeader: false,
-                            bubbleScale: 1 + (0.025 * value),
-                            capsuleOpacity: 1 - value,
-                          ),
+              child: _contentSize != null &&
+                      _contentSize!.width >= _minPopupWidth
+                  ? SizedBox(
+                      width: _contentSize!.width,
+                      child: Opacity(
+                        opacity: isReversing ? 1.0 : value,
+                        child: _buildCommentContent(
+                          showActionsCapsule: isReversing,
+                          showActionsPopup: !isReversing && !_isAutoHighlight,
+                          showHeader: false,
+                          bubbleScale: 1 + (0.025 * value),
+                          capsuleOpacity: 1 - value,
                         ),
+                      ),
+                    )
+                  : Opacity(
+                      opacity: isReversing ? 1.0 : value,
+                      child: _buildCommentContent(
+                        showActionsCapsule: isReversing,
+                        showActionsPopup: !isReversing && !_isAutoHighlight,
+                        showHeader: false,
+                        bubbleScale: 1 + (0.025 * value),
+                        capsuleOpacity: 1 - value,
+                      ),
+                    ),
             ),
           ],
         );

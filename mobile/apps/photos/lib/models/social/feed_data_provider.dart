@@ -178,6 +178,7 @@ class FeedDataProvider {
         type: FeedItemType.comment,
         collectionID: comments.first.collectionID,
         fileID: comments.first.fileID,
+        commentID: comments.first.id,
         actorUserIDs: uniqueUserIDs,
         actorAnonIDs: uniqueAnonIDs,
         createdAt: comments.first.createdAt,

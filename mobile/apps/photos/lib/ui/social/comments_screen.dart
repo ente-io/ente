@@ -254,20 +254,14 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       // Estimate scroll position (since ListView is reversed, index 0 is at bottom)
       // Each comment is roughly 100-150px, we'll use 120px as estimate
       const estimatedItemHeight = 120.0;
-      final scrollPosition = index * estimatedItemHeight;
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final scrollPosition = (index * estimatedItemHeight).clamp(0.0, maxScroll);
 
       _scrollController.animateTo(
         scrollPosition,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutExpo,
       );
-
-      // Clear highlight after a delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _highlightedCommentID = null);
-        }
-      });
     });
   }
 
@@ -488,6 +482,11 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
                           userResolver: _getUserForComment,
                           onCommentDeleted: () =>
                               _handleCommentDeleted(comment.id),
+                          onAutoHighlightDismissed: () {
+                            if (mounted) {
+                              setState(() => _highlightedCommentID = null);
+                            }
+                          },
                         );
                       },
                     ),
