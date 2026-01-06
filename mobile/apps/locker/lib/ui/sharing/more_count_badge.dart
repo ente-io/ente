@@ -1,4 +1,3 @@
-import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
@@ -21,23 +20,18 @@ class MoreCountWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final displayChar = "+$count";
-    final Color decorationColor = thumbnailView
-        ? backgroundElevated2Light
-        : colorScheme.backgroundElevated2;
+
+    final Color decorationColor = colorScheme.avatarColors[1];
 
     final avatarStyle = getAvatarStyle(context, type);
     final double size = avatarStyle.item1;
-    final TextStyle textStyle = thumbnailView
-        ? avatarStyle.item2.copyWith(color: textFaintLight)
-        : avatarStyle.item2.copyWith(color: Colors.white);
+    final TextStyle textStyle = avatarStyle.item2.copyWith(color: Colors.white);
+
     return Container(
-      padding: const EdgeInsets.all(0.5),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
+          color: getEnteColorScheme(context).backdropBase,
           width: 1.0,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -51,7 +45,6 @@ class MoreCountWidget extends StatelessWidget {
             scale: 0.85,
             child: Text(
               displayChar.toUpperCase(),
-              // fixed color
               style: textStyle,
             ),
           ),

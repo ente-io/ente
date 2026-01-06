@@ -20,6 +20,7 @@ import { setSearchPeople } from "../search";
 import {
     addUserEntity,
     pullUserEntities,
+    savedCGroups,
     updateOrCreateUserEntities,
     type CGroup,
 } from "../user-entity";
@@ -32,6 +33,7 @@ import {
     savedFaceIndex,
     savedIndexCounts,
 } from "./db";
+import { fileIDFromFaceID } from "./face";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
@@ -864,6 +866,88 @@ export const pinCGroup = async (cgroup: CGroup) =>
 
 export const unpinCGroup = async (cgroup: CGroup) =>
     setCGroupPinned(cgroup, false);
+
+export interface ManualPersonAssignmentResult {
+    /**
+     * File IDs that were added to the person's manual assignment list.
+     */
+    addedFileIDs: number[];
+    /**
+     * File IDs that were already associated with the person (either via a
+     * detected face or via an existing manual assignment).
+     */
+    alreadyAssignedFileIDs: number[];
+}
+
+/**
+ * Manually associate the given {@link fileIDs} with a remote cgroup ("person").
+ *
+ * The manual assignment is stored in the cgroup user entity data as an
+ * unordered set of file IDs ({@link CGroupUserEntityData.manuallyAssigned}).
+ */
+export const addManualFileAssignmentsToPerson = async (
+    personID: string,
+    fileIDs: Iterable<number>,
+): Promise<ManualPersonAssignmentResult> => {
+    if (!isMLEnabled()) return { addedFileIDs: [], alreadyAssignedFileIDs: [] };
+
+    const uniqueFileIDs = [...new Set(fileIDs)].filter(
+        (id) => typeof id == "number" && !isNaN(id),
+    );
+    if (!uniqueFileIDs.length)
+        return { addedFileIDs: [], alreadyAssignedFileIDs: [] };
+
+    const cgroup = (await savedCGroups()).find((c) => c.id == personID);
+    if (!cgroup)
+        throw new Error(
+            `addManualFileAssignmentsToPerson: missing cgroup ${personID}`,
+        );
+
+    // File IDs already associated with the person via detected faces.
+    const existingClusterFileIDs = new Set<number>();
+    for (const cluster of cgroup.data.assigned) {
+        for (const faceID of cluster.faces) {
+            const fileID = fileIDFromFaceID(faceID);
+            if (fileID) existingClusterFileIDs.add(fileID);
+        }
+    }
+
+    const manualFileIDs = new Set(cgroup.data.manuallyAssigned);
+
+    const addedFileIDs: number[] = [];
+    const alreadyAssignedFileIDs: number[] = [];
+    for (const id of uniqueFileIDs) {
+        if (existingClusterFileIDs.has(id) || manualFileIDs.has(id)) {
+            alreadyAssignedFileIDs.push(id);
+        } else {
+            addedFileIDs.push(id);
+        }
+    }
+
+    if (!addedFileIDs.length) return { addedFileIDs, alreadyAssignedFileIDs };
+
+    const masterKey = await ensureMasterKeyFromSession();
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [
+            {
+                ...cgroup,
+                data: {
+                    ...cgroup.data,
+                    manuallyAssigned: [...manualFileIDs, ...addedFileIDs],
+                },
+            },
+        ],
+        masterKey,
+    );
+
+    // Pull the updated entity to keep local updatedAt state in sync, and
+    // reconstruct people state to reflect the new manual associations.
+    await pullUserEntities("cgroup", masterKey);
+    await updatePeopleState();
+
+    return { addedFileIDs, alreadyAssignedFileIDs };
+};
 
 /**
  * Return suggestions for the given {@link person}.

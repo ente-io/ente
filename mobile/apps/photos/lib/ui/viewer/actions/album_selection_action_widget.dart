@@ -78,7 +78,7 @@ class _AlbumSelectionActionWidgetState
       );
       items.add(
         SelectionActionButton(
-          labelText: "Pin",
+          labelText: AppLocalizations.of(context).pinAlbum,
           icon: Icons.push_pin_rounded,
           onTap: _onPinClick,
           shouldShow: hasUnpinnedAlbum,
@@ -87,7 +87,7 @@ class _AlbumSelectionActionWidgetState
 
       items.add(
         SelectionActionButton(
-          labelText: "Unpin",
+          labelText: AppLocalizations.of(context).unpinAlbum,
           icon: CupertinoIcons.pin_slash,
           onTap: _onUnpinClick,
           shouldShow: hasPinnedAlbum,
@@ -110,15 +110,78 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).archive,
-        icon: Icons.archive_outlined,
-        onTap: _archiveClick,
-      ),
-    );
+    if (widget.sectionType == UISectionType.archivedCollections) {
+      // For archived albums: show unarchive and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unarchive,
+          icon: Icons.unarchive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else if (widget.sectionType == UISectionType.hiddenCollections) {
+      // For hidden albums: show unhide and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unhide,
+          icon: Icons.visibility_outlined,
+          onTap: _onHideClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else {
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).archive,
+          icon: Icons.archive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+    }
 
     if (widget.sectionType == UISectionType.incomingCollections) {
+      // Pin/Unpin options for incoming collections (uses sharee metadata)
+      // Behind feature flag
+      if (flagService.enableShareePin) {
+        final hasShareePinnedAlbum = widget.selectedAlbums.albums.any(
+          (album) => album.hasShareePinned(),
+        );
+        final hasShareeUnpinnedAlbum = widget.selectedAlbums.albums.any(
+          (album) => !album.hasShareePinned(),
+        );
+
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).pinAlbum,
+            icon: Icons.push_pin_rounded,
+            onTap: _onPinClickForSharee,
+            shouldShow: hasShareeUnpinnedAlbum,
+          ),
+        );
+
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).unpinAlbum,
+            icon: CupertinoIcons.pin_slash,
+            onTap: _onUnpinClickForSharee,
+            shouldShow: hasShareePinnedAlbum,
+          ),
+        );
+      }
+
       items.add(
         SelectionActionButton(
           labelText: AppLocalizations.of(context).leaveAlbum,
@@ -164,10 +227,8 @@ class _AlbumSelectionActionWidgetState
     final actions = <ActionTypesToShow>[
       ActionTypesToShow.addViewer,
       ActionTypesToShow.addCollaborator,
+      ActionTypesToShow.addAdmin,
     ];
-    if (flagService.enableAdminRole) {
-      actions.add(ActionTypesToShow.addAdmin);
-    }
     await routeToPage(
       context,
       AddParticipantPage(widget.selectedAlbums.albums.toList(), actions),
@@ -243,6 +304,28 @@ class _AlbumSelectionActionWidgetState
     }
     if (hasFavorites) {
       _showFavToast();
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onPinClickForSharee() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (collection.hasShareePinned()) {
+        continue;
+      }
+
+      await updateShareeOrder(context, collection, 1);
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onUnpinClickForSharee() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (!collection.hasShareePinned()) {
+        continue;
+      }
+
+      await updateShareeOrder(context, collection, 0);
     }
     widget.selectedAlbums.clearAll();
   }

@@ -48,19 +48,26 @@ Future<void> handleLimitedOrFolderBackupFlow(
   if (permissionService.hasGrantedLimitedPermissions()) {
     unawaited(PhotoManager.presentLimited());
   } else {
-    unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
+    unawaited(
+      _navigateToFolderSelection(context, isFirstBackup: isFirstBackup),
+    );
   }
 }
 
 Future<bool?> handleFolderSelectionBackupFlow(
   BuildContext context, {
   bool isFirstBackup = false,
+  bool fromOnlyNewPhotosToggle = false,
 }) async {
   if (_shouldRunFirstImportFlow()) {
     return _handleFirstImportFlow(context);
   }
 
-  return _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
+  return _navigateToFolderSelection(
+    context,
+    isFirstBackup: isFirstBackup,
+    fromOnlyNewPhotosToggle: fromOnlyNewPhotosToggle,
+  );
 }
 
 bool _shouldRunFirstImportFlow() =>
@@ -75,6 +82,15 @@ Future<bool?> _handleFirstImportFlow(BuildContext context) async {
     await _showPermissionDeniedDialog(context);
     return null;
   }
+
+  // Trigger local sync before showing the loading widget.
+  // The skip flag was cleared above, so sync will now proceed with first import.
+  // We use LocalSyncService.sync() directly because:
+  // 1. It has its own _existingSync guard - returns existing future if already running
+  // 2. It's all we need for first import (fires completedFirstGalleryImport event)
+  // 3. Avoids race conditions with SyncService._doSync() calling syncAll()
+  _logger.info("Triggering local sync for first import from backup flow");
+  unawaited(LocalSyncService.instance.sync());
 
   return routeToPage<bool>(
     context,
@@ -99,10 +115,14 @@ bool _hasMinimalPermission(PermissionState state) =>
 Future<bool?> _navigateToFolderSelection(
   BuildContext context, {
   required bool isFirstBackup,
+  bool fromOnlyNewPhotosToggle = false,
 }) =>
     routeToPage<bool>(
       context,
-      BackupFolderSelectionPage(isFirstBackup: isFirstBackup),
+      BackupFolderSelectionPage(
+        isFirstBackup: isFirstBackup,
+        fromOnlyNewPhotosToggle: fromOnlyNewPhotosToggle,
+      ),
     );
 
 Future<void> _showPermissionDeniedDialog(BuildContext context) =>

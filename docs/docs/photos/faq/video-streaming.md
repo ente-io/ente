@@ -11,7 +11,7 @@ The content from **Video Streaming FAQ** has been reorganized. You can find it i
 ## Video Streaming
 
 - [Video streaming feature guide](/photos/features/utilities/video-streaming) - Complete guide to streaming videos in-app
-- [Video streaming FAQ](/photos/faq/advanced-features) - How it works, enabling/disabling, compatibility
+- [Video streaming FAQ](/photos/faq/advanced-features#video-streaming) - How it works, enabling/disabling, compatibility
 
 ## Troubleshooting
 

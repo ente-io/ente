@@ -1,7 +1,7 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -13,6 +13,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -161,6 +162,10 @@ export interface FileListProps {
     /** The width we should occupy.*/
     width: number;
     /**
+     * Optional border radius to apply to the scrollable list container.
+     */
+    listBorderRadius?: string;
+    /**
      * The files to show, annotated with cached precomputed properties that are
      * frequently needed by the {@link FileList}.
      */
@@ -232,6 +237,14 @@ export interface FileListProps {
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
+    /**
+     * Called when the list scrolls, providing the current scroll offset.
+     */
+    onScroll?: (scrollOffset: number) => void;
+    /**
+     * Called when the visible date at the top of the viewport changes.
+     */
+    onVisibleDateChange?: (date: string | undefined) => void;
 }
 
 /**
@@ -240,6 +253,7 @@ export interface FileListProps {
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
+    listBorderRadius,
     mode,
     modePlus,
     header,
@@ -255,6 +269,8 @@ export const FileList: React.FC<FileListProps> = ({
     favoriteFileIDs,
     emailByUserID,
     onItemClick,
+    onScroll,
+    onVisibleDateChange,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -269,8 +285,11 @@ export const FileList: React.FC<FileListProps> = ({
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set<string>());
+    // Show back-to-top button when scrolled past threshold
+    const [showBackToTop, setShowBackToTop] = useState(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
+    const outerRef = useRef<HTMLDivElement | null>(null);
 
     const layoutParams = useMemo(
         () => computeThumbnailGridLayoutParams(width),
@@ -700,6 +719,46 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, []);
 
+    // Track the last reported date to avoid unnecessary callbacks
+    const lastVisibleDateRef = useRef<string | undefined>(undefined);
+
+    const handleScroll = useCallback(
+        ({ scrollOffset }: { scrollOffset: number }) => {
+            onScroll?.(scrollOffset);
+
+            // Show back-to-top button when scrolled past threshold
+            setShowBackToTop(scrollOffset > 500);
+
+            // Calculate which date is visible at the current scroll position
+            if (onVisibleDateChange && items.length > 0) {
+                let cumulativeHeight = 0;
+                let currentDate: string | undefined;
+
+                for (const item of items) {
+                    if (item.type === "date") {
+                        currentDate = item.groups[0]?.date;
+                    }
+                    cumulativeHeight += item.height;
+                    // Found the item that contains the scroll position
+                    if (cumulativeHeight > scrollOffset) {
+                        break;
+                    }
+                }
+
+                // Only call callback if date changed
+                if (currentDate !== lastVisibleDateRef.current) {
+                    lastVisibleDateRef.current = currentDate;
+                    onVisibleDateChange(currentDate);
+                }
+            }
+        },
+        [onScroll, onVisibleDateChange, items],
+    );
+
+    const handleScrollToTop = useCallback(() => {
+        outerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
     if (!items.length) {
         return <></>;
     }
@@ -721,16 +780,34 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <VariableSizeList
-            key={key}
-            ref={listRef}
-            {...{ width, height, itemData, itemSize, itemKey }}
-            itemCount={items.length}
-            overscanCount={3}
-            useIsScrolling
-        >
-            {FileListRow}
-        </VariableSizeList>
+        <Box sx={{ position: "relative", width, height }}>
+            <VariableSizeList
+                key={key}
+                ref={listRef}
+                outerRef={outerRef}
+                {...{ width, height, itemData, itemSize, itemKey }}
+                itemCount={items.length}
+                overscanCount={3}
+                useIsScrolling
+                onScroll={handleScroll}
+                style={
+                    listBorderRadius
+                        ? { borderRadius: listBorderRadius }
+                        : undefined
+                }
+            >
+                {FileListRow}
+            </VariableSizeList>
+            {showBackToTop && (
+                <BackToTopButton
+                    size="small"
+                    aria-label="scroll to top"
+                    onClick={handleScrollToTop}
+                >
+                    <KeyboardArrowUpIcon />
+                </BackToTopButton>
+            )}
+        </Box>
     );
 };
 
@@ -776,6 +853,20 @@ const NoFilesListItem = styled(FullSpanListItem)`
     min-height: 100%;
     justify-content: center;
 `;
+
+/**
+ * Floating button to scroll back to the top of the file list.
+ */
+const BackToTopButton = styled(Fab)(({ theme }) => ({
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    backgroundColor: theme.vars.palette.fill.faint,
+    color: theme.vars.palette.text.base,
+    boxShadow: "none",
+    "&:hover": { backgroundColor: theme.vars.palette.fill.faintHover },
+    [theme.breakpoints.down("sm")]: { display: "none" },
+}));
 
 /**
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
@@ -1010,7 +1101,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             )}
             {isFav && (
                 <FavoriteOverlay>
-                    <FavoriteRoundedIcon />
+                    <StarIcon fontSize="small" />
                 </FavoriteOverlay>
             )}
 

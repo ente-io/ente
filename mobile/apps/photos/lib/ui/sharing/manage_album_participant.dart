@@ -3,7 +3,6 @@ import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -41,7 +40,6 @@ class _ManageIndividualParticipantState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final adminRoleEnabled = flagService.enableAdminRole;
     final isAdmin = widget.user.isAdmin;
     final isCollaborator = widget.user.isCollaborator;
     final isViewer = widget.user.isViewer;
@@ -74,36 +72,35 @@ class _ManageIndividualParticipantState
             ),
             const SizedBox(height: 12),
             MenuSectionTitle(title: AppLocalizations.of(context).addedAs),
-            if (adminRoleEnabled)
-              MenuItemWidget(
-                captionedTextWidget:
-                    const CaptionedTextWidget(title: '(i) Admin'),
-                leadingIcon: Icons.admin_panel_settings_outlined,
-                menuItemColor: colorScheme.fillFaint,
-                trailingIcon: isAdmin ? Icons.check : null,
-                onTap: isAdmin
-                    ? null
-                    : () async {
-                        final result =
-                            await collectionActions.addEmailToCollection(
-                          context,
-                          widget.collection,
-                          widget.user.email,
-                          CollectionParticipantRole.admin,
-                        );
-                        if (result && mounted) {
-                          widget.user.role =
-                              CollectionParticipantRole.admin.toStringVal();
-                          setState(() => {});
-                        }
-                      },
-                isBottomBorderRadiusRemoved: true,
+            MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: AppLocalizations.of(context).admin,
               ),
-            if (adminRoleEnabled)
-              DividerWidget(
-                dividerType: DividerType.menu,
-                bgColor: colorScheme.fillFaint,
-              ),
+              leadingIcon: Icons.admin_panel_settings_outlined,
+              menuItemColor: colorScheme.fillFaint,
+              trailingIcon: isAdmin ? Icons.check : null,
+              onTap: isAdmin
+                  ? null
+                  : () async {
+                      final result =
+                          await collectionActions.addEmailToCollection(
+                        context,
+                        widget.collection,
+                        widget.user.email,
+                        CollectionParticipantRole.admin,
+                      );
+                      if (result && mounted) {
+                        widget.user.role =
+                            CollectionParticipantRole.admin.toStringVal();
+                        setState(() => {});
+                      }
+                    },
+              isBottomBorderRadiusRemoved: true,
+            ),
+            DividerWidget(
+              dividerType: DividerType.menu,
+              bgColor: colorScheme.fillFaint,
+            ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: AppLocalizations.of(context).collaborator,
@@ -128,7 +125,7 @@ class _ManageIndividualParticipantState
                         setState(() => {});
                       }
                     },
-              isTopBorderRadiusRemoved: adminRoleEnabled,
+              isTopBorderRadiusRemoved: true,
               isBottomBorderRadiusRemoved: true,
             ),
             DividerWidget(
@@ -188,11 +185,8 @@ class _ManageIndividualParticipantState
               isTopBorderRadiusRemoved: true,
             ),
             MenuSectionDescriptionWidget(
-              content: adminRoleEnabled
-                  ? '(i) Admins and collaborators can add photos. (i) Admins can also manage photos & participants.'
-                  : AppLocalizations.of(
-                      context,
-                    ).collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
+              content: AppLocalizations.of(context)
+                  .adminsAndCollaboratorsCanAddPhotosDescription,
             ),
             const SizedBox(height: 24),
             MenuSectionTitle(
@@ -207,7 +201,6 @@ class _ManageIndividualParticipantState
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
               menuItemColor: colorScheme.fillFaint,
-              surfaceExecutionStates: false,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,

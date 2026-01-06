@@ -11,8 +11,10 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_network/network.dart";
+import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/user_dialogs.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/email_util.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -42,40 +44,60 @@ class EmergencyContactService {
     _config = config;
   }
 
-  Future<bool> addContact(BuildContext context, String email) async {
+  Future<bool> addContact(
+    BuildContext context,
+    String email,
+    int recoveryNoticeInDays,
+  ) async {
     if (!isValidEmail(email)) {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.strings.invalidEmailAddress,
-        context.strings.enterValidEmail,
-      );
-      return false;
-    } else if (email.trim() == _config.getEmail()) {
-      await showErrorDialog(
-        context,
-        context.strings.oops,
-        context.strings.youCannotShareWithYourself,
+        title: context.strings.letsTryThatAgain,
+        message: context.strings.enterValidEmail,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     }
-    final String? publicKey = await _userService.getPublicKey(email);
-    if (publicKey == null) {
-      await showInviteDialog(context, email);
+    if (email.trim() == _config.getEmail()) {
+      await showAlertBottomSheet(
+        context,
+        title: context.strings.oops,
+        message: context.strings.youCannotShareWithYourself,
+        assetPath: "assets/warning-blue.png",
+      );
       return false;
     }
-    final Uint8List recoveryKey = _config.getRecoveryKey();
-    final encryptedKey = CryptoUtil.sealSync(
-      recoveryKey,
-      CryptoUtil.base642bin(publicKey),
-    );
-    await _enteDio.post(
-      "/emergency-contacts/add",
-      data: {
-        "email": email.trim(),
-        "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-      },
-    );
-    return true;
+
+    final dialog = createProgressDialog(context, context.strings.pleaseWait);
+    await dialog.show();
+
+    try {
+      final String? publicKey = await _userService.getPublicKey(email);
+      if (publicKey == null) {
+        await dialog.hide();
+        await showInviteSheet(context, email: email);
+        return false;
+      }
+
+      final Uint8List recoveryKey = _config.getRecoveryKey();
+      final encryptedKey = CryptoUtil.sealSync(
+        recoveryKey,
+        CryptoUtil.base642bin(publicKey),
+      );
+      await _enteDio.post(
+        "/emergency-contacts/add",
+        data: {
+          "email": email.trim(),
+          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+          "recoveryNoticeInDays": recoveryNoticeInDays,
+        },
+      );
+      await dialog.hide();
+      return true;
+    } catch (e) {
+      await dialog.hide();
+      rethrow;
+    }
   }
 
   Future<EmergencyInfo> getInfo() async {
@@ -102,7 +124,35 @@ class EmergencyContactService {
         },
       );
     } catch (e, s) {
-      Logger("EmergencyContact").severe('failed to update contact', e, s);
+      _logger.severe('failed to update contact', e, s);
+      rethrow;
+    }
+  }
+
+  Future<bool> updateRecoveryNotice(
+    EmergencyContact contact,
+    int recoveryNoticeInDays,
+  ) async {
+    try {
+      await _enteDio.post(
+        "/emergency-contacts/update-recovery-notice",
+        data: {
+          "emergencyContactID": contact.emergencyContact.id,
+          "recoveryNoticeInDays": recoveryNoticeInDays,
+        },
+      );
+      return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        final message = e.response?.data?['message'] as String?;
+        if (message != null && message.contains('active recovery session')) {
+          return false;
+        }
+      }
+      _logger.severe('failed to update recovery notice', e);
+      rethrow;
+    } catch (e, s) {
+      _logger.severe('failed to update recovery notice', e, s);
       rethrow;
     }
   }
@@ -273,26 +323,5 @@ class EmergencyContactService {
     final secureRandom = FortunaRandom();
     secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
     return secureRandom;
-  }
-
-  // Helper methods for dialogs
-  Future<void> showErrorDialog(
-    BuildContext context,
-    String title,
-    String message,
-  ) async {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

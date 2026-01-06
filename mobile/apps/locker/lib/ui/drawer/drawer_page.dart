@@ -1,5 +1,7 @@
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_events/event_bus.dart";
+import "package:ente_sharing/verify_identity_dialog.dart";
+import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
@@ -47,22 +49,36 @@ class DrawerPage extends StatelessWidget {
 
     if (hasLoggedIn) {
       contents.add(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: AnimatedBuilder(
-              // [AnimatedBuilder] accepts any [Listenable] subtype.
-              animation: emailNotifier,
-              builder: (BuildContext context, Widget? child) {
-                return Text(
-                  emailNotifier.value!,
-                  style: enteTextTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              },
+        GestureDetector(
+          onDoubleTap: () => showVerifyIdentitySheet(
+            context,
+            self: true,
+            config: Configuration.instance,
+            title: context.strings.verifyIDLabel,
+          ),
+          onLongPress: () => showVerifyIdentitySheet(
+            context,
+            self: true,
+            config: Configuration.instance,
+            title: context.strings.verifyIDLabel,
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: AnimatedBuilder(
+                // [AnimatedBuilder] accepts any [Listenable] subtype.
+                animation: emailNotifier,
+                builder: (BuildContext context, Widget? child) {
+                  return Text(
+                    emailNotifier.value!,
+                    style: enteTextTheme.body.copyWith(
+                      color: colorScheme.textMuted,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),

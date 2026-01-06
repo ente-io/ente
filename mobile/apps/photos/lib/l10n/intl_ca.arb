@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Confirma la teva clau de recuperació",
   "addViewer": "Afegeix visualitzador",
   "addCollaborator": "Afegeix col·laborador",
+  "admin": "Administrador",
+  "admins": "Administradors",
+  "addAdmin": "Afegeix administrador",
+  "addMoreAdmins": "Afegeix més administradors",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Els administradors i els col·laboradors poden afegir fotos. Els administradors també poden gestionar fotos i participants.",
   "addANewEmail": "Afegeix un nou correu",
   "orPickAnExistingOne": "O tria'n un d'existent",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Els col·laboradors poden afegir fotos i vídeos a l'àlbum compartit.",
@@ -357,6 +362,7 @@
   "sorryCouldNotAddToFavorites": "Ho sentim, no s'ha pogut afegir a favorits!",
   "sorryCouldNotRemoveFromFavorites": "Ho sentim, no s'ha pogut eliminar de favorits!",
   "subscribeToEnableSharing": "Necessites una subscripció de pagament activa per activar la compartició.",
+  "subscribeToChangeLinkSetting": "Necessiteu una subscripció de pagament per canviar aquesta configuració d'enllaç.",
   "subscribe": "Subscriu-te",
   "canOnlyRemoveFilesOwnedByYou": "Només pots eliminar fitxers que siguin teus",
   "deleteSharedAlbum": "Esborrar àlbum compartit?",
@@ -886,6 +892,7 @@
   "clickOnTheOverflowMenu": "• Fes clic al menú desbordant",
   "click": "• Fes clic",
   "nothingToSeeHere": "Res a veure aquí! 👀",
+  "selectFoldersToBackup": "<action>Seleccioneu les carpetes</action> per\nvisualitzar-les i fer una còpia de seguretat a ente.",
   "unarchiveAlbum": "Desarxiva àlbum",
   "archiveAlbum": "Arxiva àlbum",
   "calculating": "Calculant...",
@@ -1206,10 +1213,13 @@
   "unpinAlbum": "Desfixa àlbum",
   "pinAlbum": "Fixa àlbum",
   "pin": "Fixa",
+  "pinPerson": "Fixa la persona",
   "pinToTop": "Fixa a dalt",
   "unpin": "Desfixa",
+  "unpinPerson": "Desfixa la persona",
   "visibility": "Visibilitat",
   "hideFromMemories": "Amaga dels records",
+  "showInMemories": "Mostra als records",
   "create": "Crea",
   "viewAll": "Veure tot",
   "nothingSharedWithYouYet": "Encara no s'ha compartit res amb tu",
@@ -1321,6 +1331,8 @@
   "enterDateOfBirth": "Aniversari (opcional)",
   "birthday": "Aniversari",
   "removePersonLabel": "Elimina etiqueta de persona",
+  "removePersonTag": "Elimina l'etiqueta de persona",
+  "areYouSureRemoveThisPersonTag": "Esteu segur que voleu eliminar aquesta etiqueta de persona?",
   "autoPairDesc": "L'aparellament automàtic només funciona amb dispositius que suporten Chromecast.",
   "manualPairDesc": "L'aparellament amb PIN funciona amb qualsevol pantalla on vulguis veure el teu àlbum.",
   "connectToDevice": "Connecta al dispositiu",
@@ -1400,11 +1412,60 @@
   "localSyncErrorMessage": "Sembla que alguna cosa ha anat malament ja que la sincronització de fotos locals està trigant més del previst. Si us plau, contacta amb el nostre equip de suport",
   "showPerson": "Mostra persona",
   "sort": "Ordena",
+  "recent": "Recent",
   "mostRecent": "Més recent",
   "mostRelevant": "Més rellevant",
   "loadingYourPhotos": "Carregant les teves fotos...",
   "processingImport": "Processant {folderName}...",
   "personName": "Nom de la persona",
+  "addPerson": "Afegeix persona",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Afegeix a la persona",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Si us plau, primer nomeneu una persona a la secció Persones",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Només els fitxers carregats es poden afegir a una persona",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "No s'ha detectat cap cara, toca per afegir.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {S'ha afegit 1 fitxer a {personName}} other {S'han afegit {count} fitxers a {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 fitxer ja està enllaçat a {personName}} other {{count} fitxers ja estan enllaçats a {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Afegeix nova persona",
   "addNameOrMerge": "Afegeix nom o fusiona",
   "mergeWithExisting": "Fusiona amb existent",
@@ -1972,14 +2033,14 @@
   "hoorayyyy": "Viscaaaa!",
   "nothingToTidyUpHere": "Res a endreçar aquí",
   "deletingDash": "Esborrant - ",
-  "cLTitle1": "Salta a la data",
-  "cLDesc1": "Veure fotos circumdants per a qualsevol foto seleccionant l'opció salta a la data al panell d'informació del fitxer.",
-  "cLTitle2": "Editor de vídeo més ràpid",
-  "cLDesc2": "L'editor de vídeo s'ha renovat per millorar dràsticament la seva velocitat en editar vídeos més grans, i també millorar l'experiència d'usuari.",
-  "cLTitle3": "Nous records",
-  "cLDesc3": "\"Nens juganers\", \"Aventures d'hivern\", \"Nits de neó\", i més.",
-  "cLTitle4": "Galeria apaïsada i més",
-  "cLDesc4": "Suport per a la disposició apaïsada a la galeria principal de l'aplicació. Mostra persones sense cap foto associada en lloc de filtrar-les. Millora la detecció d'aspecte de vídeo quan es comparteix des d'aplicacions externes.",
+  "cLTitle1": "Presentant els Rituals",
+  "cLDesc1": "Planejant propòsits per al 2026? Amb Rituals, pots configurar un recordatori a Ente Photos i fer un seguiment del teu progrés fent fotos. Fes-lo servir per a entrenaments, hàbits alimentaris, moments diaris amb els éssers estimats... qualsevol cosa que vulguis convertir en un hàbit.",
+  "cLTitle2": "Enllaços públics, ara per a tothom",
+  "cLDesc2": "Tots els usuaris d'Ente amb el pla gratuït ara poden crear i compartir enllaços públics a fotos i àlbums. Per evitar abusos, els enllaços tindran límits pel que fa al nombre de persones que els podran veure.",
+  "cLTitle3": "Etiquetar manualment les persones",
+  "cLDesc3": "Ara pots etiquetar persones fins i tot quan la nostra IA del dispositiu no detecta cap cara. Pràctic per a mascotes, cares parcialment visibles o moments en què algú no surt a la foto però que hauria d'estar-hi inclòs.",
+  "cLTitle4": "I més",
+  "cLDesc4": "Ara pots fixar àlbums compartits. Els enllaços dels àlbums són visibles per als col·laboradors i els espectadors per facilitar encara més la compartició. Hem corregit alguns errors de lliscar amb el dit a iOS i hem actualitzat la vista de fotos, incloent-hi una nova icona de preferits (que fa espai per a les funcions futures).",
   "closeBy": "A prop",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2017,11 +2078,11 @@
   "riverCruises": "Vistes de creuer fluvial",
   "facesTimelineBannerTitle": "Camí dels records",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Veure les fotos de {name} a través dels anys",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,7 +2140,7 @@
   },
   "facesTimelineUnavailable": "El camí dels records s'està preparant...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Nens juganers",
   "coastalCliffs": "Penya-segats vora el mar",
@@ -2139,17 +2200,22 @@
   "ritualAlbumNotSet": "Àlbum no establert",
   "ritualOpenCameraTooltip": "Obre càmera de ritual",
   "ritualEditorLabel": "Editor de rituals",
-  "ritualNew": "Nou ritual",
+  "ritualNew": "Crea un nou ritual",
+  "ritualCreateNewTitle": "Crea un nou ritual",
   "ritualEdit": "Edita ritual",
   "ritualEnterPrompt": "Introdueix el teu ritual",
   "ritualEnterDescription": "Si us plau, introdueix una descripció",
+  "ritualChooseDaysLabel": "Trieu els dies per al ritual",
   "ritualDayLabel": "Dia",
   "ritualNotificationsOffHint": "Les notificacions estan desactivades. Toca un dia per activar-les.",
   "ritualTimeLabel": "Hora",
   "ritualAlbumLabel": "Àlbum",
   "ritualSave": "Guarda ritual",
+  "ritualCreateAction": "Crea un ritual",
   "ritualUpdate": "Actualitza ritual",
   "ritualSelectAlbumTitle": "Selecciona àlbum",
+  "ritualChooseAlbumLabel": "Tria un àlbum",
+  "ritualSendReminderLabel": "Envia un recordatori",
   "ritualSearchOrCreate": "Cerca o crea nou",
   "ritualNoAlbumsYet": "Encara no hi ha àlbums",
   "ritualNoMatchingAlbums": "No hi ha àlbums coincidents",

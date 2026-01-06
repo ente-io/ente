@@ -76,6 +76,11 @@ class CollectionsService {
   final _cachedPublicCollectionID = <int>[];
   final _cachedPublicAlbumKey = <int, String>{};
 
+  // In-memory list of recently used collection IDs for add/move actions
+  // Most recently used is at the front
+  static const int _maxRecentlyUsedCollections = 3;
+  final _recentlyUsedCollectionIDs = <int>[];
+
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
     _filesDB = FilesDB.instance;
@@ -402,6 +407,31 @@ class CollectionsService {
         .toList();
   }
 
+  /// Records a collection as recently used for add/move actions.
+  /// Most recently used collection is moved to front.
+  void recordCollectionUsage(int collectionID) {
+    _recentlyUsedCollectionIDs.remove(collectionID);
+    _recentlyUsedCollectionIDs.insert(0, collectionID);
+    if (_recentlyUsedCollectionIDs.length > _maxRecentlyUsedCollections) {
+      _recentlyUsedCollectionIDs.removeLast();
+    }
+  }
+
+  /// Returns a list of recently used collections for add/move actions.
+  /// Filters out collections that no longer exist or are hidden.
+  List<Collection> getRecentlyUsedCollections() {
+    final List<Collection> result = [];
+    for (final id in _recentlyUsedCollectionIDs) {
+      final collection = _collectionIDToCollections[id];
+      if (collection != null &&
+          !collection.isDeleted &&
+          !collection.isHidden()) {
+        result.add(collection);
+      }
+    }
+    return result;
+  }
+
   bool canRemoveFilesFromAllParticipants(Collection collection) {
     final int? userID = _config.getUserID();
     if (userID == null) {
@@ -409,9 +439,6 @@ class CollectionsService {
     }
     if (collection.isOwner(userID)) {
       return true;
-    }
-    if (!flagService.enableAdminRole) {
-      return false;
     }
     return collection.isAdmin(userID);
   }
@@ -453,8 +480,15 @@ class CollectionsService {
           await CollectionsService.instance.getCollectionIDToNewestFileTime();
     }
 
+    // Sort incoming collections, then separate pinned from rest
     incoming.sort(
       (first, second) {
+        // Sharee-pinned collections should come first
+        final firstPinned = first.hasShareePinned();
+        final secondPinned = second.hasShareePinned();
+        if (firstPinned && !secondPinned) return -1;
+        if (!firstPinned && secondPinned) return 1;
+
         int comparison;
         if (sortKey == AlbumSortKey.albumName) {
           comparison = compareAsciiLowerCaseNatural(
@@ -1028,6 +1062,14 @@ class CollectionsService {
         },
       );
       collection.setName(newName);
+      _collectionIDToCollections[collection.id] = collection;
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collection.id,
+          <EnteFile>[],
+          "rename_collection",
+        ),
+      );
       sync().ignore();
     } catch (e, s) {
       _logger.warning("failed to rename collection", e, s);
@@ -1393,7 +1435,7 @@ class CollectionsService {
     }
     try {
       await _enteDio.post(
-        "/collection-actions/reject-delete-suggestions/",
+        "/collection-actions/reject-delete-suggestions",
         data: {"fileIDs": fileIDs},
       );
     } catch (e, s) {

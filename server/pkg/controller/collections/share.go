@@ -232,14 +232,6 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
-		// Free user - check @ente.io domain restriction
-		user, userErr := c.UserRepo.Get(userID)
-		if userErr != nil {
-			return ente.PublicURL{}, stacktrace.Propagate(userErr, "")
-		}
-		if !strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
-			return ente.PublicURL{}, stacktrace.Propagate(err, "")
-		}
 		// Override device limit for free users
 		req.DeviceLimit = public.FreeUserDeviceLimit
 	}
@@ -332,6 +324,14 @@ func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) 
 		}
 		diff[idx].Action = nil
 		diff[idx].ActionUserID = nil
+		if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
+			// This indicates that the file is deleted, but we still have a stale entry in the collection
+			reqContextLogger.WithFields(log.Fields{
+				"file_id":    diff[idx].ID,
+				"updated_at": diff[idx].UpdationTime,
+			}).Warning("stale collection_file found")
+			diff[idx].IsDeleted = true
+		}
 	}
 	return diff, hasMore, nil
 }

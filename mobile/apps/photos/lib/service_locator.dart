@@ -6,7 +6,6 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
-import "package:photos/services/activity/activity_service.dart";
 import "package:photos/services/backup_preference_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/entity_service.dart";
@@ -17,6 +16,7 @@ import "package:photos/services/machine_learning/face_ml/face_recognition_servic
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
+import "package:photos/services/rituals/rituals_service.dart";
 import "package:photos/services/smart_albums_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
@@ -205,10 +205,10 @@ SmartAlbumsService get smartAlbumsService {
   return _smartAlbumsService!;
 }
 
-ActivityService? _activityService;
-ActivityService get activityService {
-  _activityService ??= ActivityService.instance;
-  return _activityService!;
+RitualsService? _ritualsService;
+RitualsService get ritualsService {
+  _ritualsService ??= RitualsService.instance;
+  return _ritualsService!;
 }
 
 CollectionsService? _collectionsService;

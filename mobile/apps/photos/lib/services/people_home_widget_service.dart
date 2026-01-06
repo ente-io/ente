@@ -179,11 +179,10 @@ class PeopleHomeWidgetService {
       forceCustomPageRoute: true,
     ).ignore();
 
-    final clusterFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
+    final files = await SearchService.instance.getFilesForPersonID(
       personId,
+      sortOnTime: false,
     );
-    final files = clusterFiles.entries.expand((e) => e.value).toList();
 
     routeToPage(
       context,
@@ -276,9 +275,10 @@ class PeopleHomeWidgetService {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
     final persons = await PersonService.instance.getCertainPersons(personIds);
     for (final person in persons) {
-      final clusterFiles = await SearchService.instance
-          .getClusterFilesForPersonID(person.remoteID);
-      final files = clusterFiles.entries.expand((e) => e.value).toList();
+      final files = await SearchService.instance.getFilesForPersonID(
+        person.remoteID,
+        sortOnTime: false,
+      );
       if (files.isEmpty) {
         _logger.warning("No files found for person: ${person.data.name}");
         continue;

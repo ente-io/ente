@@ -217,6 +217,7 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
+        await _preferences.setString(keyUserDetails, userDetails.toJson());
         if (userDetails.profileData != null) {
           await _preferences.setBool(
             kIsEmailMFAEnabled,
@@ -392,7 +393,7 @@ class UserService {
         await dialog.hide();
         return;
       }
-      final navigator = Navigator.of(context, rootNavigator: true);
+      final navigator = Navigator.of(context);
       if (userPassword == null) {
         await dialog.hide();
         if (!context.mounted) {
@@ -408,7 +409,7 @@ class UserService {
               );
             },
           ),
-          (route) => route.isFirst,
+          (route) => false,
         );
         return;
       } else {
@@ -435,7 +436,7 @@ class UserService {
               return page;
             },
           ),
-          (route) => route.isFirst,
+          (route) => false,
         );
         return;
       }

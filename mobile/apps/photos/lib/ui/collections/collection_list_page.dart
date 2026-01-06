@@ -22,6 +22,8 @@ enum UISectionType {
   incomingCollections,
   outgoingCollections,
   homeCollections,
+  archivedCollections,
+  hiddenCollections,
 }
 
 class CollectionListPage extends StatefulWidget {
@@ -87,7 +89,9 @@ class _CollectionListPageState extends State<CollectionListPage> {
     final bool enableSelectionMode =
         widget.sectionType == UISectionType.homeCollections ||
             widget.sectionType == UISectionType.outgoingCollections ||
-            widget.sectionType == UISectionType.incomingCollections;
+            widget.sectionType == UISectionType.incomingCollections ||
+            widget.sectionType == UISectionType.archivedCollections ||
+            widget.sectionType == UISectionType.hiddenCollections;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -127,6 +131,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     enableSelectionMode: enableSelectionMode,
                     albumViewType: albumViewType ?? AlbumViewType.grid,
                     selectedAlbums: _selectedAlbum,
+                    sectionType: widget.sectionType,
                   ),
                 ],
               ),
@@ -262,27 +267,23 @@ class _CollectionListPageState extends State<CollectionListPage> {
       } else {
         collections = sharedCollections.outgoing;
       }
-      if (_searchQuery.isNotEmpty) {
-        collections = widget.collections
-            ?.where(
-              (c) => c.displayName
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()),
-            )
-            .toList();
-      }
     } else if (widget.sectionType == UISectionType.homeCollections) {
       collections =
           await CollectionsService.instance.getCollectionForOnEnteSection();
-      if (_searchQuery.isNotEmpty) {
-        collections = widget.collections
-            ?.where(
-              (c) => c.displayName
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()),
-            )
-            .toList();
-      }
+    } else if (widget.sectionType == UISectionType.archivedCollections) {
+      collections = await CollectionsService.instance.getArchivedCollection();
+    } else if (widget.sectionType == UISectionType.hiddenCollections) {
+      collections = CollectionsService.instance
+          .getHiddenCollections(includeDefaultHidden: false);
+    }
+    if (_searchQuery.isNotEmpty) {
+      collections = collections
+          ?.where(
+            (c) => c.displayName
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()),
+          )
+          .toList();
     }
     if (mounted) {
       setState(() {});

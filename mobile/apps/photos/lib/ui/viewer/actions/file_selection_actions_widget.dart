@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_icons/ente_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
@@ -25,7 +26,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -40,6 +40,7 @@ import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
+import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -78,11 +79,6 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-  static const String _suggestDeleteLabel = "(i) Suggest deletion";
-  static const String _suggestDeleteDialogTitle = "(i) Suggest deletion";
-  static const String _suggestDeleteDialogBody =
-      "(i) Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos";
-  static const String _suggestDeleteSentMessage = "(i) Delete suggestion sent.";
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -146,6 +142,8 @@ class _FileSelectionActionsWidgetState
         ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
+    final bool hasUploadedFileIDs =
+        widget.selectedFiles.files.any((file) => file.uploadedFileID != null);
     final showCollageOption = CollageCreatorPage.isValidCount(
           widget.selectedFiles.files.length,
         ) &&
@@ -157,17 +155,32 @@ class _FileSelectionActionsWidgetState
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
-    final bool canSuggestDeleteAction = flagService.enableDeleteSuggestion &&
+    final bool canSuggestDeleteAction =
         (widget.type == GalleryType.sharedCollection ||
-            widget.type == GalleryType.ownedCollection) &&
-        isCollectionOwnerOrAdmin &&
-        split.ownedByOtherUsers.isNotEmpty;
+                widget.type == GalleryType.ownedCollection) &&
+            isCollectionOwnerOrAdmin &&
+            split.ownedByOtherUsers.isNotEmpty;
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-    if (widget.type == GalleryType.deleteSuggestions) {
+    if (widget.type == GalleryType.trash) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.restore_outlined,
+          labelText: AppLocalizations.of(context).restore,
+          onTap: _restore,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_forever_outlined,
+          labelText: AppLocalizations.of(context).permanentlyDelete,
+          onTap: _permanentlyDelete,
+        ),
+      );
+    } else if (widget.type == GalleryType.deleteSuggestions) {
       items.add(
         SelectionActionButton(
           icon: Icons.delete_outline,
@@ -178,7 +191,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.clear,
-          labelText: "Reject suggestions",
+          labelText: AppLocalizations.of(context).rejectSuggestions,
           onTap: widget.selectedFiles.files.isNotEmpty
               ? _rejectDeleteSuggestions
               : null,
@@ -315,7 +328,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.flag_outlined,
-            labelText: _suggestDeleteLabel,
+            labelText: AppLocalizations.of(context).suggestDeletion,
             onTap: _onSuggestDelete,
           ),
         );
@@ -334,7 +347,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.favorite_border_rounded,
+            icon: EnteIcons.favoriteStroke,
             labelText: AppLocalizations.of(context).favorite,
             onTap: anyUploadedFiles ? _onFavoriteClick : null,
             shouldShow: ownedFilesCount > 0,
@@ -343,7 +356,7 @@ class _FileSelectionActionsWidgetState
       } else if (widget.type.showUnFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.favorite,
+            icon: EnteIcons.favoriteFilled,
             labelText: AppLocalizations.of(context).removeFromFavorite,
             onTap: _onUnFavoriteClick,
             shouldShow: ownedFilesCount > 0,
@@ -357,6 +370,18 @@ class _FileSelectionActionsWidgetState
           onTap: _onGuestViewClick,
         ),
       );
+
+      if (flagService.manualTagFileToPerson &&
+          widget.type.showAddToPersonOption()) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.person_add_alt_1_outlined,
+            labelText: AppLocalizations.of(context).addToPerson,
+            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
+            shouldShow: hasUploadedFileIDs,
+          ),
+        );
+      }
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
@@ -364,16 +389,6 @@ class _FileSelectionActionsWidgetState
             labelText: AppLocalizations.of(context).createCollage,
             onTap: _onCreateCollageClicked,
             shouldShow: showCollageOption,
-          ),
-        );
-      }
-      if (flagService.internalUser &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.movie_creation_sharp,
-            labelText: "(i) Video Memory",
-            onTap: _onCreateVideoMemoryClicked,
           ),
         );
       }
@@ -650,14 +665,15 @@ class _FileSelectionActionsWidgetState
     if (filesToSuggest.isEmpty) {
       return;
     }
+    final l10n = AppLocalizations.of(context);
     final actionResult = await showActionSheet(
       context: context,
-      title: _suggestDeleteDialogTitle,
-      body: _suggestDeleteDialogBody,
+      title: l10n.suggestDeletion,
+      body: l10n.suggestDeletionDescription,
       actionSheetType: ActionSheetType.defaultActionSheet,
       buttons: [
         ButtonWidget(
-          labelText: _suggestDeleteLabel,
+          labelText: l10n.suggestDeletion,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -670,12 +686,12 @@ class _FileSelectionActionsWidgetState
             );
             showShortToast(
               context,
-              _suggestDeleteSentMessage,
+              l10n.deleteSuggestionSent,
             );
           },
         ),
         ButtonWidget(
-          labelText: AppLocalizations.of(context).cancel,
+          labelText: l10n.cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -746,6 +762,72 @@ class _FileSelectionActionsWidgetState
     );
     if (result) {
       widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _onAddFilesToPerson() async {
+    final filesWithIds = widget.selectedFiles.files
+        .where((file) => file.uploadedFileID != null)
+        .toList();
+    if (filesWithIds.isEmpty) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).onlyUploadedFilesCanBeAddedToPerson,
+      );
+      return;
+    }
+    final hasPersons =
+        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
+    if (!mounted || !hasPersons) {
+      return;
+    }
+    final result = await routeToPage(
+      context,
+      AddFilesToPersonPage(files: filesWithIds),
+      forceCustomPageRoute: true,
+    );
+    if (result is! ManualPersonAssignmentResult) {
+      return;
+    }
+    final addedCount = result.addedFileIds.length;
+    if (addedCount > 0) {
+      final addedFiles = filesWithIds
+          .where(
+            (file) =>
+                file.uploadedFileID != null &&
+                result.addedFileIds.contains(file.uploadedFileID),
+          )
+          .toList();
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "manual-add-files-to-person",
+          person: result.person,
+          relevantFiles: addedFiles,
+        ),
+      );
+      showToast(
+        context,
+        AppLocalizations.of(context).addedFilesToPerson(
+          count: addedCount,
+          personName: result.person.data.name,
+        ),
+      );
+      widget.selectedFiles.clearAll();
+      if (mounted) {
+        setState(() => {});
+      }
+      return;
+    }
+    final alreadyCount = result.alreadyAssignedFileIds.length;
+    if (alreadyCount > 0) {
+      showShortToast(
+        context,
+        AppLocalizations.of(context).filesAlreadyLinkedToPerson(
+          count: alreadyCount,
+          personName: result.person.data.name,
+        ),
+      );
     }
   }
 
@@ -822,12 +904,6 @@ class _FileSelectionActionsWidgetState
     if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
-  }
-
-  Future<void> _onCreateVideoMemoryClicked() async {
-    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
-    await createSlideshow(context, selectedFiles);
-    widget.selectedFiles.clearAll();
   }
 
   Future<void> _onSendLinkTapped() async {

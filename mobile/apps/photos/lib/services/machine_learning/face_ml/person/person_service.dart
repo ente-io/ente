@@ -16,8 +16,15 @@ import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:shared_preferences/shared_preferences.dart";
+
+typedef ManualPersonAssignmentResult = ({
+  PersonEntity person,
+  List<int> addedFileIds,
+  List<int> alreadyAssignedFileIds,
+});
 
 class PersonService {
   final EntityService entityService;
@@ -173,8 +180,44 @@ class PersonService {
       }
       final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
-      if (_shouldUpdateRemotePerson(person.data, dbPersonCluster)) {
-        final personData = person.data;
+      final personData = person.data;
+      final bool shouldUpdateAssigned =
+          _shouldUpdateRemotePerson(personData, dbPersonCluster);
+
+      bool shouldUpdateManualAssignments = false;
+      List<int>? updatedManualAssignments;
+      if (personData.manuallyAssigned.isNotEmpty) {
+        final manualFileIDs = personData.manuallyAssigned;
+        final manualFileIDSet = manualFileIDs.toSet();
+        final coveredManualFileIDs = <int>{};
+
+        outerLoop:
+        for (final faceIDs in dbPersonCluster.values) {
+          for (final faceID in faceIDs) {
+            final fileID = tryGetFileIdFromFaceId(faceID);
+            if (fileID == null || !manualFileIDSet.contains(fileID)) {
+              continue;
+            }
+            coveredManualFileIDs.add(fileID);
+            if (coveredManualFileIDs.length == manualFileIDSet.length) {
+              break outerLoop;
+            }
+          }
+        }
+
+        shouldUpdateManualAssignments = coveredManualFileIDs.isNotEmpty;
+        if (shouldUpdateManualAssignments) {
+          updatedManualAssignments = manualFileIDs
+              .where((fileID) => !coveredManualFileIDs.contains(fileID))
+              .toList();
+        }
+      }
+
+      if (!shouldUpdateAssigned && !shouldUpdateManualAssignments) {
+        continue;
+      }
+
+      if (shouldUpdateAssigned) {
         personData.assigned = dbPersonCluster.entries
             .map(
               (e) => ClusterInfo(
@@ -183,10 +226,15 @@ class PersonService {
               ),
             )
             .toList();
-        _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
-            .ignore();
-        personData.logStats();
       }
+
+      if (shouldUpdateManualAssignments) {
+        personData.manuallyAssigned = updatedManualAssignments ?? <int>[];
+      }
+
+      _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
+          .ignore();
+      personData.logStats();
     }
     if (orphanMappingsRemoved > 0) {
       logger.warning(
@@ -566,6 +614,55 @@ class PersonService {
       }
     }
     return updatedPerson;
+  }
+
+  Future<ManualPersonAssignmentResult> addManualFileAssignments({
+    required String personID,
+    required Set<int> fileIDs,
+  }) async {
+    final person = await getPerson(personID);
+    if (person == null) {
+      throw Exception("Person $personID not found");
+    }
+    if (fileIDs.isEmpty) {
+      return (
+        person: person,
+        addedFileIds: const <int>[],
+        alreadyAssignedFileIds: const <int>[],
+      );
+    }
+    final existingClusterFileIds =
+        await faceMLDataDB.getFileIdToClusterIDSet(personID);
+    final manualFileIDs = person.data.manuallyAssigned.toSet();
+    final addedFileIDs = <int>[];
+    final alreadyAssigned = <int>[];
+    for (final id in fileIDs) {
+      if (existingClusterFileIds.containsKey(id) ||
+          manualFileIDs.contains(id)) {
+        alreadyAssigned.add(id);
+        continue;
+      }
+      addedFileIDs.add(id);
+    }
+    if (addedFileIDs.isEmpty) {
+      return (
+        person: person,
+        addedFileIds: const <int>[],
+        alreadyAssignedFileIds: alreadyAssigned,
+      );
+    }
+    final updatedPerson = person.copyWith(
+      data: person.data.copyWith(
+        manuallyAssigned: [...manualFileIDs, ...addedFileIDs],
+      ),
+    );
+    await updatePerson(updatedPerson);
+    await refreshPersonCache();
+    return (
+      person: updatedPerson,
+      addedFileIds: addedFileIDs,
+      alreadyAssignedFileIds: alreadyAssigned,
+    );
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {

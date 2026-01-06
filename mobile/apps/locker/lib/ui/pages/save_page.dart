@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import "package:ente_ui/components/title_bar_title_widget.dart";
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
@@ -92,8 +92,9 @@ class SaveBottomSheet extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TitleBarTitleWidget(
-                            title: context.l10n.saveToLocker,
+                          Text(
+                            context.l10n.saveToLocker,
+                            style: textTheme.largeBold,
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -104,23 +105,7 @@ class SaveBottomSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: colorScheme.backgroundElevated,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.close,
-                        size: 24,
-                        color: colorScheme.textBase,
-                      ),
-                    ),
-                  ),
+                  const CloseIconButton(),
                 ],
               ),
               const SizedBox(height: 24),

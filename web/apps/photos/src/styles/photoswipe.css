@@ -11,6 +11,33 @@
     top: calc(env(titlebar-area-height, 0px) * 0.4);
 }
 
+@media (width >= 450px) {
+    .pswp-ente .pswp__top-bar {
+        padding-top: 24px;
+    }
+}
+
+/* Black gradient overlay at the top */
+.pswp-ente .pswp__top-bar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 125px;
+    background: linear-gradient(
+        to top,
+        transparent 0%,
+        rgb(0 0 0 / 0.05) 20%,
+        rgb(0 0 0 / 0.15) 40%,
+        rgb(0 0 0 / 0.3) 60%,
+        rgb(0 0 0 / 0.45) 80%,
+        rgb(0 0 0 / 0.6) 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
 /* The PhotoSwipe CSS already disables and re-enables pointer-events for hidden
    UI elements, but for a reason that I didn't investigate more, that isn't
    working, and the hidden buttons still remain clickable.
@@ -81,9 +108,27 @@
     line-height: 20px;
 }
 
+@media (width >= 450px) {
+    .pswp-ente .pswp__counter {
+        margin-top: 22px;
+        margin-inline-start: 44px;
+    }
+}
+
 .pswp-ente .pswp__button--zoom .pswp__icn {
     top: 16px;
     transform: scale(0.85);
+}
+
+/* When counter is hidden (single photo), give zoom button the left margin */
+.pswp-ente.pswp--one-slide .pswp__top-bar .pswp__button--zoom {
+    margin-left: 4px;
+}
+
+@media (width >= 450px) {
+    .pswp-ente.pswp--one-slide .pswp__top-bar .pswp__button--zoom {
+        margin-left: 28px;
+    }
 }
 
 .pswp-ente .pswp__preloader {
@@ -100,6 +145,21 @@
 
 .pswp-ente .pswp__button--close {
     margin-right: 2px;
+}
+
+/* Remove black strokes from top bar icons */
+.pswp-ente .pswp__top-bar .pswp__icn-shadow {
+    stroke-width: 0;
+}
+
+@media (width >= 450px) {
+    .pswp-ente .pswp__top-bar .pswp__button {
+        margin-left: 8px;
+    }
+
+    .pswp-ente .pswp__button--close {
+        margin-right: 20px;
+    }
 }
 
 .pswp-ente .pswp__button--arrow--prev .pswp__icn {
@@ -148,18 +208,12 @@
     }
 }
 
-/* 4 line caption */
+/* Caption styling */
 
 .pswp-ente .pswp__caption {
-    position: absolute;
-    bottom: 0px;
-    right: 0;
-    margin: 20px 24px;
     border-radius: 3px;
     /* Same opacity as the other controls. */
     color: rgb(255 255 255 / 0.85);
-    background-color: rgb(0 0 0 / 0.2);
-    backdrop-filter: blur(10px);
     max-width: 375px;
     max-height: 200px;
     p {
@@ -175,21 +229,18 @@
     }
 }
 
-.pswp-ente .pswp__caption.ente-video {
-    /* Add extra offset for video captions so that they do not overlap with the
-       video controls. The constant was picked such that it lay above the media
-       controls. */
-    bottom: 48px;
-    /* Adding a caption with a blur backdrop filter above the video element
-       contained in a media-controller causes a subtle tint to be overlaid on
-       the entire video. This is visible on both Chrome and Firefox as of
-       writing.
+/* Desktop caption: max 40% width */
+@media (width >= 450px) {
+    .pswp-ente .pswp__caption {
+        max-width: 40%;
+    }
+}
 
-       We'll hide the caption anyways when hovering on the controls or when the
-       video is playing, so remove the backdrop filter and rely on the
-       translucent background. Note that usually the video might not even extent
-       to this part of the screen on desktop sized screens. */
-    backdrop-filter: none;
+.pswp-ente .pswp__caption.ente-video {
+    /* Add blur box background for videos since we hide the gradient overlay */
+    background-color: rgb(0 0 0 / 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
     /* Since there is too much going on in this part of the screen now, also
       reduce the maximum number of lines for the caption. */
     p {
@@ -351,14 +402,13 @@ media-settings-menu {
     z-index: 1;
 }
 
-/* Hide the caption when hovering over the video controls (and when the settings
-   menu is open) since they occupy similar real estate as the caption. */
+/* Hide the bottom right controls when hovering over the video controls or
+   when the settings menu is open. */
 body:has(
     media-time-range[mediapreviewtime],
-    media-controller:not([mediapaused]),
     media-settings-menu:not([hidden])
 ) {
-    & .pswp-ente .pswp__caption {
+    & .pswp-ente .pswp__bottom-right-controls {
         display: none;
     }
 }
@@ -395,7 +445,161 @@ body:has(
     opacity: 1;
 }
 
-/* Also hide the caption in video fullscreen mode */
-.pswp-ente.pswp--video-fullscreen .pswp__caption {
+/* Also hide the bottom right controls in video fullscreen mode */
+.pswp-ente.pswp--video-fullscreen .pswp__bottom-right-controls {
+    display: none;
+}
+
+/* Bottom controls container (caption on left, action buttons on right on desktop) */
+.pswp-ente .pswp__bottom-right-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 24px;
+    display: flex;
+    /* column-reverse to show buttons on top, caption below (matching original HTML order) */
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+/* Black gradient overlay at the bottom */
+.pswp-ente .pswp__bottom-right-controls::before {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: -24px;
+    right: -24px;
+    height: 225px;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgb(0 0 0 / 0.05) 20%,
+        rgb(0 0 0 / 0.15) 40%,
+        rgb(0 0 0 / 0.3) 60%,
+        rgb(0 0 0 / 0.45) 80%,
+        rgb(0 0 0 / 0.6) 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Row layout on desktop: caption on left, buttons on right */
+@media (width >= 450px) {
+    .pswp-ente .pswp__bottom-right-controls {
+        bottom: 40px;
+        left: 28px;
+        right: 44px;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 24px;
+    }
+
+    .pswp-ente .pswp__bottom-right-controls::before {
+        bottom: -40px;
+        left: -28px;
+        right: -44px;
+    }
+}
+
+/* Extra offset for video to clear video controls */
+.pswp-ente .pswp__bottom-right-controls:has(.pswp__caption.ente-video) {
+    bottom: 100px;
+}
+
+/* Hide gradient overlay for videos since they have their own controls gradient */
+.pswp-ente .pswp__bottom-right-controls:has(.pswp__caption.ente-video)::before {
+    display: none;
+}
+
+/* Hide gradient overlay when description is not present */
+.pswp-ente
+    .pswp__bottom-right-controls:has(
+        .pswp__caption[style*="display: none"]
+    )::before {
+    display: none;
+}
+
+/* Action buttons row - margin-left: auto keeps them on the right when no caption */
+.pswp-ente .pswp__action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-left: auto;
+}
+
+.pswp-ente .pswp__action-button {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: rgb(0 0 0 / 0.6);
+    border: 1px solid rgb(255 255 255 / 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.pswp-ente .pswp__action-button:hover {
+    background-color: rgb(0 0 0 / 0.8);
+}
+
+.pswp-ente .pswp__action-button svg {
+    width: 28px;
+    height: 28px;
+    fill: white;
+}
+
+/* Comment button with count indicator */
+.pswp-ente .pswp__action-button--comment {
+    position: relative;
+}
+
+.pswp-ente .pswp__comment-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #fff;
+    color: #000;
+    font-family: "Inter Variable", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+    display: none;
+}
+
+.pswp-ente .pswp__comment-count:not(:empty) {
+    display: block;
+}
+
+/* Reduce padding on mobile */
+@media (width < 450px) {
+    .pswp-ente .pswp__bottom-right-controls {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+    }
+
+    .pswp-ente .pswp__bottom-right-controls::before {
+        bottom: -12px;
+        left: -12px;
+        right: -12px;
+    }
+}
+
+/* Heart (like) button icons - uses pswp__hidden class toggled by showIf() */
+#pswp__icn-heart-fill {
+    display: none;
+}
+
+#pswp__icn-heart-fill:not(.pswp__hidden) {
+    display: inline;
+}
+
+#pswp__icn-heart.pswp__hidden {
     display: none;
 }

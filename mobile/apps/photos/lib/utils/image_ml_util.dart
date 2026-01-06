@@ -55,11 +55,17 @@ Future<DecodedImage> decodeImageFromPath(
   required bool includeDartUiImage,
 }) async {
   final imageData = await File(imagePath).readAsBytes();
-
-  final Map<String, IfdTag> exifData = await readExifFromBytes(imageData);
+  final format = imagePath.split('.').last.toLowerCase();
+  final bool skipExifRead = Platform.isIOS &&
+      format == 'jxl'; // JXL on iOS has issues with EXIF reading
+  Map<String, IfdTag> exifData = <String, IfdTag>{};
+  if (skipExifRead) {
+    _logger.info('Skipping EXIF read for JXL on iOS');
+  } else {
+    exifData = await readExifFromBytes(imageData);
+  }
   final int orientation =
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
-  final format = imagePath.split('.').last.toLowerCase();
   if (orientation > 1 && includeRgbaBytes) {
     if (format == 'heic' || format == 'heif') {
       _logger

@@ -26,37 +26,16 @@ jobs:
               with:
                   submodules: recursive
 
-            - name: Free up disk space
-              run: |
-                  echo "Initial disk usage:"
-                  df -h /
-                  # Get available space in KB
-                  INITIAL=$(df / | awk 'NR==2 {print $4}')
-                  
-                  echo -e "\n=== Removing .NET SDK (~20-25GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}')
-                  START=$(date +%s)
-                  sudo rm -rf /usr/share/dotnet
-                  END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}')
-                  FREED=$(( (AFTER - BEFORE) / 1048576 ))  # Convert KB to GB
-                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
-                  
-                  echo -e "\n=== Removing cached tools (~5-10GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}')
-                  START=$(date +%s)
-                  sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-                  END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}')
-                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
-                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
-                  
-                  echo -e "\n=== Final Summary ==="
-                  FINAL=$(df / | awk 'NR==2 {print $4}')
-                  TOTAL_FREED=$(( (FINAL - INITIAL) / 1048576 ))
-                  echo "Total space freed: ${TOTAL_FREED}GB"
-                  echo "Final disk usage:"
-                  df -h /
+            - name: Free Disk Space (Ubuntu)
+              uses: jlumbroso/free-disk-space@main
+              with:
+                  android: false
+                  dotnet: true
+                  haskell: true
+                  large-packages: true
+                  docker-images: true
+                  swap-storage: true
+                  tool-cache: true
 
             - name: Setup JDK 17
               uses: actions/setup-java@v1
@@ -146,6 +125,20 @@ jobs:
               with:
                   fileName: "keystore/ente_photos_key.jks"
                   encodedString: ${{ secrets.SIGNING_KEY_PHOTOS }}
+
+            - name: Disk report (before build)
+              run: |
+                  echo "=== Disk space (df -h) ==="
+                  df -h
+                  echo ""
+                  echo "=== Inodes (df -i) ==="
+                  df -i
+                  echo ""
+                  echo "=== Largest cache directories (top 50) ==="
+                  du -xh -d 2 "$HOME/.gradle" "$HOME/.pub-cache" "$HOME/.cargo" 2>/dev/null | sort -h | tail -n 50 || true
+                  echo ""
+                  echo "=== Largest workspace directories (android/build) (top 50) ==="
+                  du -xh -d 3 "$GITHUB_WORKSPACE/mobile/apps/photos/android" "$GITHUB_WORKSPACE/mobile/apps/photos/build" 2>/dev/null | sort -h | tail -n 50 || true
 
             - name: Build PlayStore AAB
               run: |

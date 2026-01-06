@@ -260,6 +260,10 @@ export const sidebar = [
                         link: "/photos/faq/metadata-and-editing",
                     },
                     {
+                        text: "Migration",
+                        link: "/photos/faq/migration",
+                    },
+                    {
                         text: "Search and Discovery",
                         link: "/photos/faq/search-and-discovery",
                     },
@@ -422,6 +426,10 @@ export const sidebar = [
                     {
                         text: "Ente on Windows",
                         link: "/self-hosting/guides/windows",
+                    },
+                    {
+                        text: "Ente-Photos on Kubernetes (community helm-chart)",
+                        link: "/self-hosting/guides/photos-k8s-helm",
                     },
                 ],
             },

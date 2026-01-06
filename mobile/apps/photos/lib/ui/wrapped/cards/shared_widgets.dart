@@ -102,7 +102,8 @@ class _DetailChips extends StatelessWidget {
         children: chips
             .map(
               (String chip) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: colorScheme.fillFaint,
                   borderRadius: BorderRadius.circular(14),

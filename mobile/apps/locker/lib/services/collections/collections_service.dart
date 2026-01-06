@@ -10,7 +10,9 @@ import "package:ente_ui/utils/toast_util.dart";
 import "package:fast_base58/fast_base58.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import 'package:locker/core/errors.dart';
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
@@ -156,6 +158,26 @@ class CollectionService {
       return collections;
     }
     return collections.where((collection) => !collection.isDeleted).toList();
+  }
+
+  Future<List<Collection>> getCollectionsForUI({
+    bool includeViewerCollections = false,
+    bool includeUncategorized = false,
+  }) async {
+    final collections = await getCollections();
+    final int userID = Configuration.instance.getUserID()!;
+
+    return collections.where((c) {
+      if (!includeUncategorized && c.type == CollectionType.uncategorized) {
+        return false;
+      }
+
+      if (includeViewerCollections) {
+        return true;
+      }
+
+      return c.canAdd(userID);
+    }).toList();
   }
 
   Future<Collection?> getCollectionByID(int collectionID) async {
@@ -348,7 +370,12 @@ class CollectionService {
         );
       }
     }).catchError((error) {
-      _logger.severe("Failed to initialize collections: $error");
+      if (error is UnauthorizedError) {
+        _logger.info("Session expired, triggering logout");
+        Bus.instance.fire(TriggerLogoutEvent());
+      } else {
+        _logger.severe("Failed to initialize collections: $error");
+      }
     });
     final collections = await _db.getCollections();
     for (final collection in collections) {

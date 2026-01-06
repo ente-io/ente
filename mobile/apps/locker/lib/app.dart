@@ -14,6 +14,7 @@ import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/onboarding_page.dart';
@@ -82,6 +83,15 @@ class _AppState extends State<App>
 
     _signedOutEvent.cancel();
     _signedInEvent.cancel();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (Configuration.instance.hasConfiguredAccount()) {
+        CollectionService.instance.sync();
+      }
+    }
   }
 
   @override
