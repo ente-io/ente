@@ -51,6 +51,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   Map<String, String> _anonDisplayNames = {};
   String? _highlightedCommentID;
   bool _hasScrolledToHighlight = false;
+  GlobalKey? _highlightedCommentKey;
 
   List<CollectionCommentInfo> _sharedCollections = [];
   late int _selectedCollectionID;
@@ -247,21 +248,29 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
     _hasScrolledToHighlight = true;
 
-    // Use post-frame callback to ensure layout is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
 
-      // Estimate scroll position (since ListView is reversed, index 0 is at bottom)
-      // Each comment is roughly 100-150px, we'll use 120px as estimate
+      // Phase 1: Jump to approximate position to bring item into view
       const estimatedItemHeight = 120.0;
       final maxScroll = _scrollController.position.maxScrollExtent;
-      final scrollPosition = (index * estimatedItemHeight).clamp(0.0, maxScroll);
+      final scrollPosition =
+          (index * estimatedItemHeight).clamp(0.0, maxScroll);
 
-      _scrollController.animateTo(
-        scrollPosition,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutExpo,
-      );
+      _scrollController.jumpTo(scrollPosition);
+
+      // Phase 2: After item is built, use ensureVisible for precise positioning
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final context = _highlightedCommentKey?.currentContext;
+        if (context == null) return;
+
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutExpo,
+        );
+      });
     });
   }
 
@@ -463,15 +472,21 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
                           );
                         }
                         final comment = _comments[index];
+                        final isHighlighted =
+                            comment.id == _highlightedCommentID;
+                        // Use widget.highlightCommentID (not state) to keep key stable after dismiss
+                        final key = (comment.id == widget.highlightCommentID)
+                            ? (_highlightedCommentKey ??= GlobalKey())
+                            : ValueKey(comment.id);
                         return CommentBubbleWidget(
-                          key: ValueKey(comment.id),
+                          key: key,
                           comment: comment,
                           user: _getUserForComment(comment),
                           isOwnComment: comment.userID == _currentUserID,
                           canModerateAnonComments: canModerateAnonComments,
                           currentUserID: _currentUserID,
                           collectionID: _selectedCollectionID,
-                          isHighlighted: comment.id == _highlightedCommentID,
+                          isHighlighted: isHighlighted,
                           onFetchParent: comment.isReply
                               ? () =>
                                   _getParentComment(comment.parentCommentID!)
@@ -485,6 +500,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
                           onAutoHighlightDismissed: () {
                             if (mounted) {
                               setState(() => _highlightedCommentID = null);
+                              // Don't clear _highlightedCommentKey - prevents avatar flicker
                             }
                           },
                         );
