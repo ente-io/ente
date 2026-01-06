@@ -147,7 +147,9 @@ class _FeedScreenState extends State<FeedScreen> {
                             _anonDisplayNamesByCollection[item.collectionID] ??
                                 const {},
                         isLastItem: isLastItem,
-                        onTap: () => _openComments(item),
+                        onTap: () => item.type == FeedItemType.photoLike
+                            ? _openPhoto(item)
+                            : _openComments(item),
                         onThumbnailTap: () => _openPhoto(item),
                       );
                     },
