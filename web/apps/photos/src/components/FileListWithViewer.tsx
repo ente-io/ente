@@ -129,6 +129,7 @@ export type FileListWithViewerProps = {
         | "collectionKey"
         | "onJoinAlbum"
         | "enableComment"
+        | "enableJoin"
     >;
 
 /**
@@ -184,6 +185,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     collectionKey,
     onJoinAlbum,
     enableComment,
+    enableJoin,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -384,6 +386,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionKey,
                     onJoinAlbum,
                     enableComment,
+                    enableJoin,
                 }}
                 isCommentsFeatureEnabled={isCommentsEnabled}
                 onTriggerRemotePull={handleTriggerRemotePull}

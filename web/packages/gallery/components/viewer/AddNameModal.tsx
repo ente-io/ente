@@ -220,8 +220,8 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>{t("add_your_name")}</Title>
-                        <Subtitle>{t("add_your_name_subtitle")}</Subtitle>
+                        <Title>{t("set_your_name")}</Title>
+                        <Subtitle>{t("set_your_name_subtitle")}</Subtitle>
                     </TitleSection>
 
                     <StyledTextField

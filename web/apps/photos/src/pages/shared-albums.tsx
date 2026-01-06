@@ -588,6 +588,7 @@ export default function PublicCollectionGallery() {
                     collectionKey={collectionKey.current}
                     credentials={credentials}
                     enableComment={commentsEnabled}
+                    enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
                 />
             ) : (
                 <>
@@ -654,6 +655,7 @@ export default function PublicCollectionGallery() {
                         collectionKey={collectionKey.current}
                         onJoinAlbum={handleJoinAlbum}
                         enableComment={commentsEnabled}
+                        enableJoin={publicCollection?.publicURLs[0]?.enableJoin}
                         pendingFileIndex={pendingFileNavigation?.fileIndex}
                         pendingFileSidebar={pendingFileNavigation?.sidebar}
                         pendingHighlightCommentID={

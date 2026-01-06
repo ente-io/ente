@@ -103,6 +103,11 @@ export interface PublicCommentModalProps extends ModalVisibilityProps {
      * Called when user clicks "Join album and comment".
      */
     onJoinAlbumToComment: () => void;
+    /**
+     * Whether the "Join album" option is enabled for this public link.
+     * When false, the "Join album and comment" button will be hidden.
+     */
+    enableJoin?: boolean;
 }
 
 /**
@@ -114,6 +119,7 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
     onClose,
     onCommentAnonymously,
     onJoinAlbumToComment,
+    enableJoin = true,
 }) => {
     return (
         <StyledDialog open={open} onClose={onClose}>
@@ -129,10 +135,12 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
 
                     <TitleSection>
                         <Title>{t("say_something_nice")}</Title>
-                        <Subtitle>{t("share_who_said_it")}</Subtitle>
+                        {enableJoin && (
+                            <Subtitle>{t("public_reaction_subtitle")}</Subtitle>
+                        )}
                     </TitleSection>
 
-                    <ButtonsSection>
+                    <ButtonsSection sx={!enableJoin ? { mt: 4 } : undefined}>
                         <AnonymousButton
                             variant="outlined"
                             fullWidth
@@ -140,13 +148,15 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
                         >
                             {t("comment_anonymously")}
                         </AnonymousButton>
-                        <SignInButton
-                            variant="contained"
-                            fullWidth
-                            onClick={onJoinAlbumToComment}
-                        >
-                            {t("join_album_and_comment")}
-                        </SignInButton>
+                        {enableJoin && (
+                            <SignInButton
+                                variant="contained"
+                                fullWidth
+                                onClick={onJoinAlbumToComment}
+                            >
+                                {t("join_album_and_comment")}
+                            </SignInButton>
+                        )}
                     </ButtonsSection>
                 </ContentContainer>
             </DialogWrapper>
@@ -234,7 +244,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     fontSize: 14,
     lineHeight: "20px",
     color: "#666666",
-    maxWidth: 295,
+    maxWidth: 240,
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 

@@ -91,6 +91,11 @@ export interface PublicLikeModalProps extends ModalVisibilityProps {
      * Called when user clicks "Join album to like".
      */
     onJoinAlbumToLike: () => void;
+    /**
+     * Whether the "Join album" option is enabled for this public link.
+     * When false, the "Join album and like" button will be hidden.
+     */
+    enableJoin?: boolean;
 }
 
 /**
@@ -102,6 +107,7 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
     onClose,
     onLikeAnonymously,
     onJoinAlbumToLike,
+    enableJoin = true,
 }) => {
     return (
         <StyledDialog open={open} onClose={onClose}>
@@ -117,14 +123,12 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
 
                     <TitleSection>
                         <Title>{t("give_it_a_like")}</Title>
-                        <Subtitle>
-                            {t("let_them_know_who_liked")}
-                            <br />
-                            {t("keep_it_private")}
-                        </Subtitle>
+                        {enableJoin && (
+                            <Subtitle>{t("public_reaction_subtitle")}</Subtitle>
+                        )}
                     </TitleSection>
 
-                    <ButtonsSection>
+                    <ButtonsSection sx={!enableJoin ? { mt: 4 } : undefined}>
                         <AnonymousButton
                             variant="outlined"
                             fullWidth
@@ -132,13 +136,15 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                         >
                             {t("like_anonymously")}
                         </AnonymousButton>
-                        <SignInButton
-                            variant="contained"
-                            fullWidth
-                            onClick={onJoinAlbumToLike}
-                        >
-                            {t("join_album_and_like")}
-                        </SignInButton>
+                        {enableJoin && (
+                            <SignInButton
+                                variant="contained"
+                                fullWidth
+                                onClick={onJoinAlbumToLike}
+                            >
+                                {t("join_album_and_like")}
+                            </SignInButton>
+                        )}
                     </ButtonsSection>
                 </ContentContainer>
             </DialogWrapper>
@@ -226,7 +232,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     fontSize: 14,
     lineHeight: "20px",
     color: "#666666",
-    maxWidth: 295,
+    maxWidth: 240,
     ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 

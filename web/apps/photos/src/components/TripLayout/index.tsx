@@ -58,6 +58,11 @@ interface TripLayoutProps {
      * When `false`, the feed button will be hidden.
      */
     enableComment?: boolean;
+    /**
+     * `true` if the "Join album" option is enabled for this public link.
+     * When `false`, the "Join album and like/comment" buttons will be hidden.
+     */
+    enableJoin?: boolean;
 }
 
 export const TripLayout: React.FC<TripLayoutProps> = ({
@@ -73,6 +78,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     collectionKey,
     credentials,
     enableComment = true,
+    enableJoin = true,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
@@ -595,6 +601,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 collectionKey={collectionKey}
                 onJoinAlbum={handleJoinAlbum}
                 enableComment={enableComment}
+                enableJoin={enableJoin}
             />
 
             {/* Download progress notifications */}
