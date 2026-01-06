@@ -8,6 +8,7 @@ import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
@@ -126,7 +127,7 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: EnteLoadingWidget(size: 24))
           : _feedItems.isEmpty
               ? _buildEmptyState(context)
               : RefreshIndicator(
