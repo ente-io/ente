@@ -180,14 +180,25 @@ interface CollectionInfo {
 const formatTimeAgo = (timestampMicros: number): string => {
     // Server timestamps are in microseconds, convert to milliseconds
     const timestampMs = Math.floor(timestampMicros / 1000);
-    const diff = Date.now() - timestampMs;
+    const now = Date.now();
+    const diff = now - timestampMs;
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "now";
+    if (minutes < 1) return "just now";
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    if (days < 7) return `${days}d ago`;
+
+    // For 7+ days, show actual date
+    const date = new Date(timestampMs);
+    const currentYear = new Date(now).getFullYear();
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    if (date.getFullYear() === currentYear) {
+        return `${month} ${day}`;
+    }
+    return `${month} ${day}, ${date.getFullYear()}`;
 };
 
 const getParentComment = (
