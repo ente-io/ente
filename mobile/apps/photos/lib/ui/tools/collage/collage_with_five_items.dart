@@ -43,30 +43,36 @@ class _CollageWithFiveItemsState extends State<CollageWithFiveItems> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                WidgetsToImage(
-                  controller: _widgetsToImageController,
-                  child: _getCollage(),
-                ),
-                Column(
+    return SafeArea(
+      top: false,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const CollageLayoutHeading(),
-                    _getLayouts(),
-                    const Padding(padding: EdgeInsets.all(4)),
+                    WidgetsToImage(
+                      controller: _widgetsToImageController,
+                      child: _getCollage(),
+                    ),
+                    Column(
+                      children: [
+                        const CollageLayoutHeading(),
+                        _getLayouts(),
+                        const Padding(padding: EdgeInsets.all(4)),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
