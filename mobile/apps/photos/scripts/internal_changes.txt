@@ -1,3 +1,4 @@
+- Ashil: (i) Like & Comment
 - Neeraj: Admin Role + Suggest Delete feature
 - Neeraj: Large files section: add type filter, lower threshold to 10MB [QOL]
 - Neeraj: Jump to date when clicking on album from file info [QOL]
