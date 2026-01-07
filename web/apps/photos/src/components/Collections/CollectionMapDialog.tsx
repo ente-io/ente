@@ -184,6 +184,14 @@ function useMapData(
         error: null,
     });
 
+    // Track which collection we've loaded to avoid unnecessary reloads
+    // Include fileCount to detect when collection content changes
+    const loadedCollectionRef = useRef<{
+        summaryId: number;
+        collectionId: number | undefined;
+        fileCount: number;
+    } | null>(null);
+
     const loadAllThumbs = useCallback(
         async (points: JourneyPoint[], files: EnteFile[]) => {
             // Build a Map for O(1) file lookup instead of O(n) find
@@ -217,8 +225,29 @@ function useMapData(
         [],
     );
 
+    // Clear loaded ref when dialog closes so we reload fresh data next time
+    useEffect(() => {
+        if (!open) {
+            loadedCollectionRef.current = null;
+        }
+    }, [open]);
+
     useEffect(() => {
         if (!open) return;
+
+        // Skip reload if we already have data for this collection with same file count
+        const currentSummaryId = collectionSummary.id;
+        const currentCollectionId = activeCollection?.id;
+        const currentFileCount = collectionSummary.fileCount;
+        const loaded = loadedCollectionRef.current;
+        if (
+            loaded &&
+            loaded.summaryId === currentSummaryId &&
+            loaded.collectionId === currentCollectionId &&
+            loaded.fileCount === currentFileCount
+        ) {
+            return;
+        }
 
         const loadMapData = async () => {
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -253,6 +282,13 @@ function useMapData(
                         error: null,
                     });
 
+                    // Mark this collection as loaded
+                    loadedCollectionRef.current = {
+                        summaryId: currentSummaryId,
+                        collectionId: currentCollectionId,
+                        fileCount: currentFileCount,
+                    };
+
                     void loadAllThumbs(pointsWithThumbs, files);
                     return;
                 }
@@ -266,6 +302,13 @@ function useMapData(
                     isLoading: false,
                     error: null,
                 });
+
+                // Mark this collection as loaded (even with no photos)
+                loadedCollectionRef.current = {
+                    summaryId: currentSummaryId,
+                    collectionId: currentCollectionId,
+                    fileCount: currentFileCount,
+                };
 
                 return;
             } catch (e) {
