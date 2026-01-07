@@ -27,7 +27,6 @@ import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/like_collection_selector_sheet.dart";
 import "package:photos/ui/social/likes_bottom_sheet.dart";
 import "package:photos/utils/delete_file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -559,14 +558,12 @@ class FileBottomBarState extends State<FileBottomBar> {
     final file = widget.file;
     if (file.collectionID == null) return;
 
-    routeToPage(
+    showFileCommentsBottomSheet(
       context,
-      FileCommentsScreen(
-        collectionID: file.collectionID!,
-        fileID: file.uploadedFileID!,
-      ),
+      collectionID: file.collectionID!,
+      fileID: file.uploadedFileID!,
     ).then((_) {
-      // Refresh comment count when returning from comments screen
+      // Refresh comment count when returning from comments bottom sheet
       _updateSocialState();
     });
   }

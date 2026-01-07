@@ -201,13 +201,11 @@ class _FeedScreenState extends State<FeedScreen> {
     if (fileID == null || !mounted) return;
 
     unawaited(
-      routeToPage(
+      showFileCommentsBottomSheet(
         context,
-        FileCommentsScreen(
-          collectionID: item.collectionID,
-          fileID: fileID,
-          highlightCommentID: item.commentID,
-        ),
+        collectionID: item.collectionID,
+        fileID: fileID,
+        highlightCommentID: item.commentID,
       ),
     );
   }
