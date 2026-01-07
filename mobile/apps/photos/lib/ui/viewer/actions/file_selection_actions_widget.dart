@@ -37,6 +37,7 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/actions/suggest_delete_sheet.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
@@ -48,7 +49,6 @@ import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
 import "package:photos/utils/standalone/simple_task_queue.dart";
-import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 
 class FileSelectionActionsWidget extends StatefulWidget {
   final GalleryType type;

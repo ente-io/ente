@@ -26,10 +26,10 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/like_collection_selector_sheet.dart";
 import "package:photos/ui/social/likes_bottom_sheet.dart";
+import "package:photos/ui/viewer/actions/suggest_delete_sheet.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import "package:photos/utils/share_util.dart";
-import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 
 final _logger = Logger("FileBottomBar");
 
@@ -202,8 +202,8 @@ class FileBottomBarState extends State<FileBottomBar> {
           ) &&
           collection != null;
 
-      if (canShowSuggestDelete) {
-        children.add(_buildSuggestDeleteButton(collection!));
+      if (canShowSuggestDelete && collection != null) {
+        children.add(_buildSuggestDeleteButton(collection));
       }
 
       children.add(
