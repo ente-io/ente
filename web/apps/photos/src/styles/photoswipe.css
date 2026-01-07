@@ -21,10 +21,12 @@
 .pswp-ente .pswp__top-bar::before {
     content: "";
     position: absolute;
-    top: 0;
+    /* Offset to start at the actual viewport top despite top-bar being shifted
+       down for the desktop title bar. See line 10-12. */
+    top: calc(env(titlebar-area-height, 0px) * -0.4);
     left: 0;
     right: 0;
-    height: 125px;
+    height: calc(125px + env(titlebar-area-height, 0px) * 0.4);
     background: linear-gradient(
         to top,
         transparent 0%,
