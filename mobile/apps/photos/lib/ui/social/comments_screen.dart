@@ -13,6 +13,7 @@ import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
@@ -45,6 +46,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   Comment? _replyingTo;
   bool _isLoading = true;
   bool _isLoadingMore = false;
+  bool _isSending = false;
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
@@ -329,7 +331,9 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
   Future<void> _sendComment() async {
     final text = _textController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
+
+    setState(() => _isSending = true);
 
     try {
       final result = await SocialDataProvider.instance.addComment(
@@ -371,6 +375,10 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       _logger.severe('Failed to send comment', e);
       if (mounted) {
         showShortToast(context, "Failed to send comment");
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
       }
     }
   }
@@ -451,7 +459,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
               onTap: () => FocusScope.of(context).unfocus(),
               behavior: HitTestBehavior.translucent,
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const EnteLoadingWidget()
                   : ListView.builder(
                       controller: _scrollController,
                       reverse: true,
@@ -517,6 +525,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
             controller: _textController,
             focusNode: _inputFocusNode,
             onSend: _sendComment,
+            isSending: _isSending,
           ),
         ],
       ),

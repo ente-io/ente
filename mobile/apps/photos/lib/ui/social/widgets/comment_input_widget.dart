@@ -3,6 +3,7 @@ import "package:flutter/services.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/social/widgets/reply_preview_widget.dart";
 
 class CommentInputWidget extends StatefulWidget {
@@ -13,6 +14,7 @@ class CommentInputWidget extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onSend;
+  final bool isSending;
 
   const CommentInputWidget({
     this.replyingTo,
@@ -22,6 +24,7 @@ class CommentInputWidget extends StatefulWidget {
     required this.controller,
     required this.focusNode,
     required this.onSend,
+    this.isSending = false,
     super.key,
   });
 
@@ -151,13 +154,30 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                     horizontal: 18,
                     vertical: 14,
                   ),
-                  suffixIcon: IconButton(
-                    onPressed: widget.onSend,
-                    icon: Icon(
-                      Icons.send_rounded,
-                      color: colorScheme.textBase.withValues(alpha: 0.8),
-                      size: 24,
-                    ),
+                  suffixIcon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeOut,
+                    child: widget.isSending
+                        ? const Padding(
+                            key: ValueKey('loading'),
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: EnteLoadingWidget(size: 20, padding: 0),
+                            ),
+                          )
+                        : IconButton(
+                            key: const ValueKey('send'),
+                            onPressed: widget.onSend,
+                            icon: Icon(
+                              Icons.send_rounded,
+                              color:
+                                  colorScheme.textBase.withValues(alpha: 0.8),
+                              size: 24,
+                            ),
+                          ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
