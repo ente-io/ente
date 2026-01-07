@@ -1193,7 +1193,7 @@ function MapLayout({
                 setSelected={setSelected}
                 onSetOpenFileViewer={onSetOpenFileViewer}
             />
-            <Box sx={{ width: "100%", height: "100%", background: "#f2efe9" }}>
+            <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
                     mapComponents={mapComponents}
                     mapCenter={mapCenter}
@@ -1495,7 +1495,7 @@ const MapCanvas = React.memo(function MapCanvas({
             zoom={optimalZoom}
             scrollWheelZoom
             zoomControl={false}
-            style={{ width: "100%", height: "100%", background: "#f2efe9" }}
+            style={{ width: "100%", height: "100%" }}
         >
             <TileLayer
                 attribution=""
@@ -1609,13 +1609,6 @@ const MapControls = React.memo(function MapControls({
             >
                 <LocationOnIcon />
             </FloatingIconButton>
-
-            {/* Hide default Leaflet attribution watermark and prevent flashing */}
-            <style>{`
-                .leaflet-control-attribution { display: none !important; }
-                .leaflet-container { backface-visibility: hidden; }
-                .leaflet-tile-container { backface-visibility: hidden; }
-            `}</style>
 
             {/* Desktop: Show attribution in bottom right corner */}
             <DesktopAttribution>
