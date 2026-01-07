@@ -9,11 +9,11 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import JSZip from "jszip";
 import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
+import JSZip from "jszip";
 import type {
     AddSaveGroup,
     UpdateSaveGroup,
@@ -273,15 +273,27 @@ const downloadAndSave = async (
     ) => {
         if (!filesToDownload.length || isDownloading) return;
 
-        // Don't start download if already offline - wait for network
+        // If already offline, mark all files as failed so retry is available
         if (!navigator.onLine) {
-            log.info("Skipping download attempt - network is offline");
+            log.info("Download skipped - network is offline");
+            for (const file of filesToDownload) {
+                failedFiles.push(file);
+            }
+            updateSaveGroup((g) => ({
+                ...g,
+                failed: g.failed + filesToDownload.length,
+                failureReason: "network_offline",
+            }));
             return;
         }
 
         isDownloading = true;
         if (resetFailedCount) {
-            updateSaveGroup((g) => ({ ...g, failed: 0, failureReason: undefined }));
+            updateSaveGroup((g) => ({
+                ...g,
+                failed: 0,
+                failureReason: undefined,
+            }));
         }
         failedFiles.length = 0;
 
@@ -414,7 +426,9 @@ class ZipBatcher {
         let counter = 1;
         let uniqueName: string;
         do {
-            uniqueName = ext ? `${name}(${counter}).${ext}` : `${name}(${counter})`;
+            uniqueName = ext
+                ? `${name}(${counter}).${ext}`
+                : `${name}(${counter})`;
             counter++;
         } while (this.usedNames.has(uniqueName));
 
@@ -445,7 +459,13 @@ const downloadFileForZip = async (
     if (file.metadata.fileType == FileType.livePhoto) {
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(fileName, fileBlob);
-        return { type: "livePhoto", imageFileName, imageData, videoFileName, videoData };
+        return {
+            type: "livePhoto",
+            imageFileName,
+            imageData,
+            videoFileName,
+            videoData,
+        };
     } else {
         const data = new Uint8Array(await fileBlob.arrayBuffer());
         return { type: "regular", fileName, data };
