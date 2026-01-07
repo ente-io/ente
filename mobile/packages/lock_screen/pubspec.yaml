@@ -26,6 +26,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_animate: ^4.1.0
+  flutter_svg: ^2.0.10+1
   flutter_local_authentication:
     git:
       url: https://github.com/eaceto/flutter_local_authentication
@@ -49,5 +50,3 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
-  assets:
-    - assets/
