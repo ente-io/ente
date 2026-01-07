@@ -39,14 +39,20 @@ let cachedLimits: DownloadLimits | undefined;
  * - **Browser**: Safari/WebKit has stricter blob size handling
  * - **Available memory**: Uses `navigator.deviceMemory` when available
  *
+ * JSZip requires ~2-3x the final ZIP size in peak memory during generation.
+ * Limits are set to stay well within browser blob/memory limits:
+ * - Chrome desktop: 2GB in-memory blob limit
+ * - Android Chrome: RAM/100 blob limit (40-80MB on typical devices)
+ * - iOS Safari: ~2GB per-tab limit on modern devices
+ *
  * Limits by platform:
- * - iOS (all browsers use WebKit): 3 concurrent, 50MB max
- * - Android (low memory): 3 concurrent, 50MB max
- * - Android (normal): 4 concurrent, 100MB max
- * - Desktop Safari: 5 concurrent, 100MB max
- * - Other mobile: 4 concurrent, 75MB max
- * - Desktop (low memory): 5 concurrent, 100MB max
- * - Desktop (normal): 6 concurrent, 150MB max
+ * - iOS (all browsers use WebKit): 4 concurrent, 150MB max
+ * - Android (low memory): 3 concurrent, 75MB max
+ * - Android (normal): 5 concurrent, 150MB max
+ * - Desktop Safari: 6 concurrent, 250MB max
+ * - Other mobile: 4 concurrent, 100MB max
+ * - Desktop (low memory): 6 concurrent, 200MB max
+ * - Desktop (normal): 8 concurrent, 400MB max
  */
 const getDownloadLimits = (): DownloadLimits => {
     if (cachedLimits) return cachedLimits;
@@ -82,29 +88,31 @@ const getDownloadLimits = (): DownloadLimits => {
     const deviceMemory = (navigator as { deviceMemory?: number }).deviceMemory;
     const isLowMemoryDevice = deviceMemory !== undefined && deviceMemory < 4;
 
-    // iOS - most restrictive due to WebKit's aggressive memory management.
-    // All browsers on iOS (Chrome, Firefox, etc.) use WebKit under the hood.
+    // iOS - WebKit's aggressive memory management, but modern devices have
+    // ~2GB per-tab limit. 150MB * 3 (peak memory multiplier) = 450MB, safe margin.
     if (isIOS) {
         cachedLimits = {
-            concurrency: 3,
-            maxZipSize: 50 * 1024 * 1024, // 50MB
+            concurrency: 4,
+            maxZipSize: 150 * 1024 * 1024, // 150MB
         };
         return cachedLimits;
     }
 
-    // Android - moderate restrictions, varies by device memory
+    // Android - Chrome's blob limit is RAM/100, so keep conservative.
+    // Low memory: 75MB, Normal (6GB+ devices common): 150MB.
     if (isAndroid) {
         cachedLimits = isLowMemoryDevice
-            ? { concurrency: 3, maxZipSize: 50 * 1024 * 1024 } // 50MB
-            : { concurrency: 4, maxZipSize: 100 * 1024 * 1024 }; // 100MB
+            ? { concurrency: 3, maxZipSize: 75 * 1024 * 1024 } // 75MB
+            : { concurrency: 5, maxZipSize: 150 * 1024 * 1024 }; // 150MB
         return cachedLimits;
     }
 
-    // Desktop Safari - WebKit has stricter blob handling than Chromium/Gecko
+    // Desktop Safari - WebKit has "very high" limits per Apple's documentation.
+    // 250MB * 3 = 750MB peak, well within safe range.
     if (isSafari) {
         cachedLimits = {
-            concurrency: 5,
-            maxZipSize: 100 * 1024 * 1024, // 100MB
+            concurrency: 6,
+            maxZipSize: 250 * 1024 * 1024, // 250MB
         };
         return cachedLimits;
     }
@@ -113,15 +121,16 @@ const getDownloadLimits = (): DownloadLimits => {
     if (isMobile) {
         cachedLimits = {
             concurrency: 4,
-            maxZipSize: 75 * 1024 * 1024, // 75MB
+            maxZipSize: 100 * 1024 * 1024, // 100MB
         };
         return cachedLimits;
     }
 
-    // Desktop browsers (Chrome, Firefox, Edge) - most capable
+    // Desktop browsers (Chrome, Firefox, Edge) - most capable.
+    // Chrome has 2GB in-memory blob limit. 400MB * 3 = 1.2GB peak, safe margin.
     cachedLimits = isLowMemoryDevice
-        ? { concurrency: 5, maxZipSize: 100 * 1024 * 1024 } // 100MB
-        : { concurrency: 6, maxZipSize: 150 * 1024 * 1024 }; // 150MB
+        ? { concurrency: 6, maxZipSize: 200 * 1024 * 1024 } // 200MB
+        : { concurrency: 8, maxZipSize: 400 * 1024 * 1024 }; // 400MB
 
     return cachedLimits;
 };
@@ -546,6 +555,7 @@ const saveAsZip = async (
         } catch (e) {
             // Individual file failed - mark it for retry but continue with others
             // Only log non-network errors to avoid log spam when offline
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (!networkState.isOffline) {
                 log.error(`Failed to download file ${file.id}, skipping`, e);
             }
