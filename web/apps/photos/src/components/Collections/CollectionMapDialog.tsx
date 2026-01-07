@@ -1510,6 +1510,7 @@ const MapCanvas = React.memo(function MapCanvas({
                 onVisiblePhotosChange={onVisiblePhotosChange}
             />
             <MarkerClusterGroup
+                key={thumbByFileID.size}
                 chunkedLoading
                 iconCreateFunction={createClusterCustomIcon}
                 maxClusterRadius={80}
