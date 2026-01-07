@@ -184,6 +184,12 @@ function useMapData(
         error: null,
     });
 
+    // Track which collection we've loaded to avoid unnecessary reloads
+    const loadedCollectionRef = useRef<{
+        summaryId: number;
+        collectionId: number | undefined;
+    } | null>(null);
+
     const loadAllThumbs = useCallback(
         async (points: JourneyPoint[], files: EnteFile[]) => {
             // Build a Map for O(1) file lookup instead of O(n) find
@@ -217,8 +223,27 @@ function useMapData(
         [],
     );
 
+    // Clear loaded ref when dialog closes so we reload fresh data next time
+    useEffect(() => {
+        if (!open) {
+            loadedCollectionRef.current = null;
+        }
+    }, [open]);
+
     useEffect(() => {
         if (!open) return;
+
+        // Skip reload if we already have data for this collection
+        const currentSummaryId = collectionSummary.id;
+        const currentCollectionId = activeCollection?.id;
+        const loaded = loadedCollectionRef.current;
+        if (
+            loaded &&
+            loaded.summaryId === currentSummaryId &&
+            loaded.collectionId === currentCollectionId
+        ) {
+            return;
+        }
 
         const loadMapData = async () => {
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -253,6 +278,12 @@ function useMapData(
                         error: null,
                     });
 
+                    // Mark this collection as loaded
+                    loadedCollectionRef.current = {
+                        summaryId: currentSummaryId,
+                        collectionId: currentCollectionId,
+                    };
+
                     void loadAllThumbs(pointsWithThumbs, files);
                     return;
                 }
@@ -266,6 +297,12 @@ function useMapData(
                     isLoading: false,
                     error: null,
                 });
+
+                // Mark this collection as loaded (even with no photos)
+                loadedCollectionRef.current = {
+                    summaryId: currentSummaryId,
+                    collectionId: currentCollectionId,
+                };
 
                 return;
             } catch (e) {
@@ -1150,7 +1187,7 @@ function MapLayout({
                 setSelected={setSelected}
                 onSetOpenFileViewer={onSetOpenFileViewer}
             />
-            <Box sx={{ width: "100%", height: "100%" }}>
+            <Box sx={{ width: "100%", height: "100%", background: "#f2efe9" }}>
                 <MapCanvas
                     mapComponents={mapComponents}
                     mapCenter={mapCenter}
@@ -1452,7 +1489,7 @@ const MapCanvas = React.memo(function MapCanvas({
             zoom={optimalZoom}
             scrollWheelZoom
             zoomControl={false}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%", background: "#f2efe9" }}
         >
             <TileLayer
                 attribution=""
@@ -1473,8 +1510,8 @@ const MapCanvas = React.memo(function MapCanvas({
                 spiderfyOnMaxZoom
                 showCoverageOnHover={false}
                 zoomToBoundsOnClick
-                animate
-                animateAddingMarkers
+                animate={false}
+                animateAddingMarkers={false}
                 spiderfyDistanceMultiplier={1.5}
             >
                 {mapPhotos.map((photo) => (
@@ -1518,13 +1555,7 @@ const MapControls = React.memo(function MapControls({
 
     return (
         <>
-            <FloatingIconButton
-                onClick={handleOpenInMaps}
-                sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
-            >
-                <LocationOnIcon />
-            </FloatingIconButton>
-
+            {/* Zoom controls: top left on mobile, bottom right on desktop */}
             <Stack
                 spacing={1}
                 sx={(theme) => ({
@@ -1533,7 +1564,10 @@ const MapControls = React.memo(function MapControls({
                     top: 24,
                     zIndex: 1000,
                     [theme.breakpoints.up("md")]: {
-                        left: "calc(24px + clamp(450px, 30vw, 600px) + 12px)",
+                        left: "auto",
+                        top: "auto",
+                        right: 24,
+                        bottom: 48,
                     },
                 })}
             >
@@ -1543,10 +1577,38 @@ const MapControls = React.memo(function MapControls({
                 <FloatingIconButton onClick={handleZoomOut}>
                     <RemoveIcon />
                 </FloatingIconButton>
+                {/* Location button: hidden on mobile, shown in stack on desktop */}
+                <FloatingIconButton
+                    onClick={handleOpenInMaps}
+                    sx={(theme) => ({
+                        display: "none",
+                        [theme.breakpoints.up("md")]: { display: "flex" },
+                    })}
+                >
+                    <LocationOnIcon />
+                </FloatingIconButton>
             </Stack>
 
-            {/* Hide default Leaflet attribution watermark */}
-            <style>{`.leaflet-control-attribution { display: none !important; }`}</style>
+            {/* Location button: top right on mobile only */}
+            <FloatingIconButton
+                onClick={handleOpenInMaps}
+                sx={(theme) => ({
+                    position: "absolute",
+                    right: 24,
+                    top: 24,
+                    zIndex: 1000,
+                    [theme.breakpoints.up("md")]: { display: "none" },
+                })}
+            >
+                <LocationOnIcon />
+            </FloatingIconButton>
+
+            {/* Hide default Leaflet attribution watermark and prevent flashing */}
+            <style>{`
+                .leaflet-control-attribution { display: none !important; }
+                .leaflet-container { backface-visibility: hidden; }
+                .leaflet-tile-container { backface-visibility: hidden; }
+            `}</style>
 
             {/* Desktop: Show attribution in bottom right corner */}
             <DesktopAttribution>
