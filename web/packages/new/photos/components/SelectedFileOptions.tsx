@@ -5,7 +5,6 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -21,6 +20,7 @@ import type { Collection } from "ente-media/collection";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     PseudoCollectionID,
@@ -455,7 +455,7 @@ const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("favorite")}>
         <IconButton {...{ onClick }}>
-            <FavoriteBorderIcon />
+            <StarBorderIcon fontSize="small" />
         </IconButton>
     </Tooltip>
 );

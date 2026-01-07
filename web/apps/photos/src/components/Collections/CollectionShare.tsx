@@ -1847,7 +1847,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={t("share_album")}
+            title={t("manage_link")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
                 <ManageLayout
@@ -1949,8 +1949,14 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     publicURL,
     onUpdate,
 }) => {
-    const handleFileDownloadSetting = () => {
+    const { isCommentsEnabled } = useSettingsSnapshot();
+
+    const handleCollectSetting = () => {
         void onUpdate({ enableCollect: !publicURL.enableCollect });
+    };
+
+    const handleCommentSetting = () => {
+        void onUpdate({ enableComment: !publicURL.enableComment });
     };
 
     return (
@@ -1959,8 +1965,18 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                 <RowSwitch
                     label={t("allow_adding_photos")}
                     checked={publicURL.enableCollect}
-                    onClick={handleFileDownloadSetting}
+                    onClick={handleCollectSetting}
                 />
+                {isCommentsEnabled && (
+                    <>
+                        <RowButtonDivider />
+                        <RowSwitch
+                            label={t("enable_comments")}
+                            checked={publicURL.enableComment}
+                            onClick={handleCommentSetting}
+                        />
+                    </>
+                )}
             </RowButtonGroup>
         </Stack>
     );

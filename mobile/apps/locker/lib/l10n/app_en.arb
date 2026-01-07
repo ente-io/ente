@@ -901,5 +901,8 @@
   "removeAccess": "Remove access",
   "subscriptionRequiredForSharing": "You need a paid subscription to share links",
   "sessionExpired": "Session expired",
-  "pleaseLoginAgain": "Please login again"
+  "pleaseLoginAgain": "Please login again",
+  "language": "Language",
+  "selectLanguage": "Select language",
+  "general": "General"
 }

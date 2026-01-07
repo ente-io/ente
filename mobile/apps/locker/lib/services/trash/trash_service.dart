@@ -39,13 +39,13 @@ class TrashService {
     _trashDB = TrashDB.instance;
     _collectionDB = CollectionDB.instance;
 
+    Bus.instance.on<SignedInEvent>().listen((event) {
+      _logger.info("User signed in, starting initial trash sync.");
+      unawaited(syncTrash());
+    });
+
     if (Configuration.instance.hasConfiguredAccount()) {
       unawaited(syncTrash());
-    } else {
-      Bus.instance.on<SignedInEvent>().listen((event) {
-        _logger.info("User signed in, starting initial trash sync.");
-        unawaited(syncTrash());
-      });
     }
   }
 

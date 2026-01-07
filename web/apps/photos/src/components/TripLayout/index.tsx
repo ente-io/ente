@@ -1,11 +1,20 @@
 import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
-import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
+import {
+    FileViewer,
+    type FileViewerInitialSidebar,
+} from "ente-gallery/components/viewer/FileViewer";
+import {
+    PublicFeedSidebar,
+    type PublicFeedItemClickInfo,
+} from "ente-gallery/components/viewer/PublicFeedSidebar";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { useEffect, useRef, useState } from "react";
 
 // Import extracted components
@@ -44,6 +53,16 @@ interface TripLayoutProps {
     accessToken?: string;
     collectionKey?: string;
     credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+    /**
+     * `true` if comments/reactions are enabled on the public link.
+     * When `false`, the feed button will be hidden.
+     */
+    enableComment?: boolean;
+    /**
+     * `true` if the "Join album" option is enabled for this public link.
+     * When `false`, the "Join album and like/comment" buttons will be hidden.
+     */
+    enableJoin?: boolean;
 }
 
 export const TripLayout: React.FC<TripLayoutProps> = ({
@@ -58,6 +77,8 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     accessToken,
     collectionKey,
     credentials,
+    enableComment = true,
+    enableJoin = true,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
@@ -68,6 +89,16 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
+    const { show: showPublicFeed, props: publicFeedVisibilityProps } =
+        useModalVisibility();
+
+    // Navigation state for feed item clicks
+    const [initialSidebar, setInitialSidebar] = useState<
+        FileViewerInitialSidebar | undefined
+    >(undefined);
+    const [highlightCommentID, setHighlightCommentID] = useState<
+        string | undefined
+    >(undefined);
 
     // File viewer hook
     const {
@@ -78,6 +109,54 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         handleCloseFileViewer,
         handleTriggerRemotePull,
     } = useFileViewer({ files, onSetOpenFileViewer, onRemotePull });
+
+    // Join album hook for file viewer's public like modal
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection: collection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
+
+    /**
+     * Handle clicks on feed items to navigate to the file and open sidebar.
+     */
+    const handleFeedItemClick = (info: PublicFeedItemClickInfo) => {
+        // Find the file in the journey data to get its cluster
+        const journeyPoint = journeyData.find(
+            (point) => point.fileId === info.fileID,
+        );
+        if (!journeyPoint) return;
+
+        // Find the cluster that contains this file
+        const cluster = photoClusters.find((c) =>
+            c.some((p) => p.fileId === info.fileID),
+        );
+        if (!cluster) return;
+
+        // Close the feed sidebar
+        publicFeedVisibilityProps.onClose();
+
+        // Determine which sidebar to open
+        const sidebar: FileViewerInitialSidebar =
+            info.type === "liked_photo" || info.type === "liked_video"
+                ? "likes"
+                : "comments";
+
+        // Set navigation state and open file viewer
+        setInitialSidebar(sidebar);
+        setHighlightCommentID(info.commentID);
+        handleOpenFileViewer(cluster, info.fileID);
+    };
+
+    /**
+     * Handle file viewer close to clear navigation state.
+     */
+    const handleCloseFileViewerWithCleanup = () => {
+        setInitialSidebar(undefined);
+        setHighlightCommentID(undefined);
+        handleCloseFileViewer();
+    };
 
     // Download all files functionality
     const downloadAllFiles = () => {
@@ -272,6 +351,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
+                        onShowFeed={enableComment ? showPublicFeed : undefined}
                         collectionTitle={collectionTitle}
                         publicCollection={collection}
                         accessToken={accessToken}
@@ -283,6 +363,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
+                        onShowFeed={enableComment ? showPublicFeed : undefined}
                         publicCollection={collection}
                         accessToken={accessToken}
                         collectionKey={collectionKey}
@@ -504,8 +585,10 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             {/* FileViewer for photo gallery */}
             <FileViewer
                 open={openFileViewer}
-                onClose={handleCloseFileViewer}
+                onClose={handleCloseFileViewerWithCleanup}
                 initialIndex={currentFileIndex}
+                initialSidebar={initialSidebar}
+                highlightCommentID={highlightCommentID}
                 files={viewerFiles}
                 user={user}
                 disableDownload={!enableDownload}
@@ -514,6 +597,11 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 onVisualFeedback={() => {
                     // No-op: Trip viewer is read-only and doesn't need visual feedback
                 }}
+                publicAlbumsCredentials={credentials?.current}
+                collectionKey={collectionKey}
+                onJoinAlbum={handleJoinAlbum}
+                enableComment={enableComment}
+                enableJoin={enableJoin}
             />
 
             {/* Download progress notifications */}
@@ -521,6 +609,18 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 saveGroups={saveGroups}
                 onRemoveSaveGroup={onRemoveSaveGroup}
             />
+
+            {/* Public feed sidebar */}
+            {collection && credentials?.current && collectionKey && (
+                <PublicFeedSidebar
+                    {...publicFeedVisibilityProps}
+                    albumName={collectionTitle}
+                    files={files}
+                    credentials={credentials.current}
+                    collectionKey={collectionKey}
+                    onItemClick={handleFeedItemClick}
+                />
+            )}
         </TripLayoutContainer>
     );
 };

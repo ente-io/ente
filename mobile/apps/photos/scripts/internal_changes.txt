@@ -1,3 +1,4 @@
+- Ashil: (i) Like & Comment
 - Neeraj: Admin Role + Suggest Delete feature
 - Neeraj: Large files section: add type filter, lower threshold to 10MB [QOL]
 - Neeraj: Jump to date when clicking on album from file info [QOL]
@@ -7,3 +8,4 @@
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
+- Prateek: Collage creator: move save to app bar, add scrollbar, responsive layout
