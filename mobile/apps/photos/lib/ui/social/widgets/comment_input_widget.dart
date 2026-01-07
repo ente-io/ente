@@ -151,15 +151,12 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                     horizontal: 18,
                     vertical: 14,
                   ),
-                  suffixIcon: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: GestureDetector(
-                      onTap: widget.onSend,
-                      child: Icon(
-                        Icons.send_rounded,
-                        color: colorScheme.textBase.withValues(alpha: 0.8),
-                        size: 24,
-                      ),
+                  suffixIcon: IconButton(
+                    onPressed: widget.onSend,
+                    icon: Icon(
+                      Icons.send_rounded,
+                      color: colorScheme.textBase.withValues(alpha: 0.8),
+                      size: 24,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
