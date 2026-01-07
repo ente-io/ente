@@ -56,14 +56,14 @@ class VideoPreviewService {
   bool get _hasQueuedFile => fileQueue.isNotEmpty;
 
   VideoPreviewService._privateConstructor()
-    : serviceLocator = ServiceLocator.instance,
-      filesDB = FilesDB.instance,
-      uploadLocksDB = UploadLocksDB.instance,
-      ffmpegService = IsolatedFfmpegService.instance,
-      fileMagicService = FileMagicService.instance,
-      cacheManager = DefaultCacheManager(),
-      videoCacheManager = VideoCacheManager.instance,
-      config = Configuration.instance {
+      : serviceLocator = ServiceLocator.instance,
+        filesDB = FilesDB.instance,
+        uploadLocksDB = UploadLocksDB.instance,
+        ffmpegService = IsolatedFfmpegService.instance,
+        fileMagicService = FileMagicService.instance,
+        cacheManager = DefaultCacheManager(),
+        videoCacheManager = VideoCacheManager.instance,
+        config = Configuration.instance {
     if (flagService.stopStreamProcess) {
       _registerStopSafelyListeners();
     }
@@ -121,28 +121,14 @@ class VideoPreviewService {
 
   /// Run one-time migration for internal users to enable streaming.
   /// This migration:
+  /// - Only runs once (tracked by migration flag)
   /// - Only runs for internal users (when enableStreamByDefault flag is true)
-  /// - Sets streaming to true once (user can disable it later)
-  /// - Does NOT run if user has already made an explicit choice (enabled or disabled)
-  /// - Does NOT run if migration has already been completed
+  /// - Force sets streaming to true (user can disable it later)
   Future<void> runInternalUserStreamingMigration() async {
-    // Check if user has already made an explicit choice about streaming
-    final existingPreference = serviceLocator.prefs.getBool(
-      _videoStreamingEnabled,
-    );
-    if (existingPreference != null) {
-      // User has explicitly set a preference (either true or false)
-      // Respect their choice, don't run migration, don't set migration flag
-      _logger.info(
-        "[migration] User has explicit preference ($existingPreference), skipping migration",
-      );
-      return;
-    }
-
     // Check if migration has already run
     final migrationDone =
         serviceLocator.prefs.getBool(_internalUserStreamingMigrationDone) ??
-        false;
+            false;
     if (migrationDone) {
       _logger.info("[migration] Migration already completed, skipping");
       return;
@@ -154,7 +140,7 @@ class VideoPreviewService {
       return;
     }
 
-    // Run migration: enable streaming for internal user
+    // Run migration: force enable streaming for internal user
     _logger.info(
       "[migration] Running one-time streaming migration for internal user",
     );
@@ -231,9 +217,8 @@ class VideoPreviewService {
       );
     }
 
-    final progressStr = progress != null
-        ? "${(progress * 100).toStringAsFixed(1)}%"
-        : "N/A";
+    final progressStr =
+        progress != null ? "${(progress * 100).toStringAsFixed(1)}%" : "N/A";
 
     // Don't interrupt upload or compression >= 75%, but clear queue
     if (status == PreviewItemStatus.uploading ||
@@ -383,9 +368,8 @@ class VideoPreviewService {
     // If total is empty then mark all as processed else compute the ratio
     // of processed files and total remote video files
     // netProcessedItems = processed / total
-    final double netProcessedItems = total.isEmpty
-        ? 1
-        : (processed.length / total.length).clamp(0, 1);
+    final double netProcessedItems =
+        total.isEmpty ? 1 : (processed.length / total.length).clamp(0, 1);
 
     // Store the data and return it
     final status = netProcessedItems;
@@ -414,7 +398,6 @@ class VideoPreviewService {
   Future<void> chunkAndUploadVideo(
     BuildContext? ctx,
     EnteFile enteFile, {
-
     /// Indicates this function is an continuation of a chunking thread
     bool continuation = false,
     // not used currently
@@ -507,9 +490,8 @@ class VideoPreviewService {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.compressing,
         file: enteFile,
-        retryCount: forceUpload
-            ? 0
-            : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
+        retryCount:
+            forceUpload ? 0 : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
       _fireVideoPreviewStateChange(
@@ -540,11 +522,9 @@ class VideoPreviewService {
           ? (fileSize * 8) / props!.duration!.inSeconds
           : null;
 
-      final colorTransfer = videoData["color_transfer"]
-          ?.toString()
-          .toLowerCase();
-      final isHDR =
-          colorTransfer != null &&
+      final colorTransfer =
+          videoData["color_transfer"]?.toString().toLowerCase();
+      final isHDR = colorTransfer != null &&
           (colorTransfer == "smpte2084" || colorTransfer == "arib-std-b67");
 
       // create temp file & directory for preview generation
@@ -664,16 +644,16 @@ class VideoPreviewService {
           // Fetch resolution of generated stream by decrypting a single frame
           final playlistFrameResult = await ffmpegService
               .runFfmpeg(
-                '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
-              )
+            '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+          )
               .onError((error, stackTrace) {
-                _logger.warning(
-                  "FFmpeg command failed for frame",
-                  error,
-                  stackTrace,
-                );
-                return {};
-              });
+            _logger.warning(
+              "FFmpeg command failed for frame",
+              error,
+              stackTrace,
+            );
+            return {};
+          });
           final playlistFrameReturnCode =
               playlistFrameResult["returnCode"] as int?;
           int? width, height;
@@ -1002,7 +982,8 @@ class VideoPreviewService {
       }
       final videoFile = (await videoCacheManager.getFileFromCache(
         _getVideoPreviewKey(objectID),
-      ))?.file;
+      ))
+          ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
         if (size != null && size < _maxPreviewSizeLimitForCache) {
@@ -1103,9 +1084,8 @@ class VideoPreviewService {
           "${config.getHttpEndpoint()}/public-collection/files/data/preview",
           queryParameters: {
             "fileID": file.uploadedFileID,
-            "type": file.fileType == FileType.video
-                ? "vid_preview"
-                : "img_preview",
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
           },
           options: Options(
             headers: collectionsService.publicCollectionHeaders(
@@ -1119,9 +1099,8 @@ class VideoPreviewService {
           "/files/data/preview",
           queryParameters: {
             "fileID": file.uploadedFileID,
-            "type": file.fileType == FileType.video
-                ? "vid_preview"
-                : "img_preview",
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
           },
         );
         url = (response.data["url"] as String);
@@ -1260,9 +1239,8 @@ class VideoPreviewService {
       );
 
       // If not found in 60-day list, fetch it individually
-      queueFile ??= await filesDB
-          .getAnyUploadedFile(queueFileId)
-          .catchError((e) => null);
+      queueFile ??=
+          await filesDB.getAnyUploadedFile(queueFileId).catchError((e) => null);
 
       if (queueFile == null) {
         await uploadLocksDB
