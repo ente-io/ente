@@ -194,15 +194,15 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       }
 
-      final bool canShowSuggestDelete = flagService.internalUser &&
+      final bool canShowSuggestDelete = collection != null &&
+          flagService.internalUser &&
           isInSharedCollection &&
           canSuggestDeleteForFile(
             file: widget.file,
             collection: collection,
-          ) &&
-          collection != null;
+          );
 
-      if (canShowSuggestDelete && collection != null) {
+      if (canShowSuggestDelete) {
         children.add(_buildSuggestDeleteButton(collection));
       }
 
