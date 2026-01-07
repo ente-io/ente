@@ -178,7 +178,7 @@ func (c *CommentsController) Participants(ctx context.Context, collectionID int6
 		}
 		participants = append(participants, participant{
 			UserID:      id,
-			EmailMasked: emailUtil.GetMaskedEmail(user.Email),
+			EmailMasked: emailUtil.GetMaskedEmailForPublic(user.Email),
 		})
 	}
 	// Sort by userID for consistent ordering
