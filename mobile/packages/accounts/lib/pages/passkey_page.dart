@@ -12,6 +12,7 @@ import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/navigation_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -148,11 +149,16 @@ class _PasskeyPageState extends State<PasskeyPage> {
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
-        title: Image.asset(
-          'assets/locker-logo-blue.png',
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
           height: 24,
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

@@ -7,6 +7,7 @@ import 'package:ente_ui/components/buttons/dynamic_fab.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import "package:styled_text/tags/styled_text_tag_action.dart";
 import "package:styled_text/widgets/styled_text.dart";
@@ -85,11 +86,16 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
-        title: Image.asset(
-          'assets/locker-logo-blue.png',
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
           height: 24,
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
