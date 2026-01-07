@@ -111,18 +111,61 @@ class VideoPreviewService {
   final CacheManager videoCacheManager;
 
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
-
-  /// Returns true if streaming is forced on for the user (e.g., internal users).
-  /// When forced, the user cannot disable streaming.
-  bool get isStreamingForced => flagService.streamEnabledByDefault;
+  static const String _internalUserStreamingMigrationDone =
+      "internalUserStreamingMigrationDone";
 
   bool get isVideoStreamingEnabled {
-    // If streaming is forced for this user (e.g., internal users), always return true
-    if (isStreamingForced) {
-      return true;
-    }
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
         flagService.streamEnabledByDefault;
+  }
+
+  /// Run one-time migration for internal users to enable streaming.
+  /// This migration:
+  /// - Only runs for internal users (when enableStreamByDefault flag is true)
+  /// - Sets streaming to true once (user can disable it later)
+  /// - Does NOT run if user has already made an explicit choice (enabled or disabled)
+  /// - Does NOT run if migration has already been completed
+  Future<void> runInternalUserStreamingMigration() async {
+    // Check if user has already made an explicit choice about streaming
+    final existingPreference = serviceLocator.prefs.getBool(
+      _videoStreamingEnabled,
+    );
+    if (existingPreference != null) {
+      // User has explicitly set a preference (either true or false)
+      // Respect their choice, don't run migration, don't set migration flag
+      _logger.info(
+        "[migration] User has explicit preference ($existingPreference), skipping migration",
+      );
+      return;
+    }
+
+    // Check if migration has already run
+    final migrationDone =
+        serviceLocator.prefs.getBool(_internalUserStreamingMigrationDone) ??
+        false;
+    if (migrationDone) {
+      _logger.info("[migration] Migration already completed, skipping");
+      return;
+    }
+
+    // Only run migration for internal users
+    if (!flagService.streamEnabledByDefault) {
+      _logger.info("[migration] Not an internal user, skipping migration");
+      return;
+    }
+
+    // Run migration: enable streaming for internal user
+    _logger.info(
+      "[migration] Running one-time streaming migration for internal user",
+    );
+    await serviceLocator.prefs.setBool(_videoStreamingEnabled, true);
+    await serviceLocator.prefs.setBool(
+      _internalUserStreamingMigrationDone,
+      true,
+    );
+    _logger.info(
+      "[migration] Streaming enabled for internal user via migration",
+    );
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {

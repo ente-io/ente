@@ -210,7 +210,6 @@ class _VideoStreamingSettingsPageState
 
   Widget _getStreamingSettings(BuildContext context) {
     final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
-    final isForced = VideoPreviewService.instance.isStreamingForced;
     final colorScheme = getEnteColorScheme(context);
 
     return Column(
@@ -218,17 +217,12 @@ class _VideoStreamingSettingsPageState
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).enabled,
-            subTitle: isForced
-                ? AppLocalizations.of(context).streamingForcedForInternalUsers
-                : null,
           ),
           trailingWidget: ToggleSwitchWidget(
             value: () => hasEnabled,
-            onChanged: isForced
-                ? null
-                : () async {
-                    await toggleVideoStreaming();
-                  },
+            onChanged: () async {
+              await toggleVideoStreaming();
+            },
           ),
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
