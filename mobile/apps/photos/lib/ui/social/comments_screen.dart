@@ -46,7 +46,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   Comment? _replyingTo;
   bool _isLoading = true;
   bool _isLoadingMore = false;
-  bool _isSending = false;
+  SendButtonState _sendState = SendButtonState.idle;
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
@@ -331,9 +331,9 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
   Future<void> _sendComment() async {
     final text = _textController.text.trim();
-    if (text.isEmpty || _isSending) return;
+    if (text.isEmpty || _sendState != SendButtonState.idle) return;
 
-    setState(() => _isSending = true);
+    setState(() => _sendState = SendButtonState.sending);
 
     try {
       final result = await SocialDataProvider.instance.addComment(
@@ -344,15 +344,14 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       );
       if (result == null) {
         _logger.warning('Failed to save comment');
-        if (mounted) {
-          showShortToast(context, "Failed to send comment");
-        }
+        _showSendError();
         return;
       }
 
       // Update UI only after successful persistence
       if (mounted) {
         setState(() {
+          _sendState = SendButtonState.idle;
           _comments.insert(0, result);
           _replyingTo = null;
 
@@ -373,14 +372,20 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
       }
     } catch (e) {
       _logger.severe('Failed to send comment', e);
-      if (mounted) {
-        showShortToast(context, "Failed to send comment");
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSending = false);
-      }
+      _showSendError();
     }
+  }
+
+  void _showSendError() {
+    if (!mounted) return;
+    setState(() => _sendState = SendButtonState.error);
+    showShortToast(context, "Failed to send comment");
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted && _sendState == SendButtonState.error) {
+        setState(() => _sendState = SendButtonState.idle);
+      }
+    });
   }
 
   void _handleCommentDeleted(String commentId) {
@@ -525,7 +530,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
             controller: _textController,
             focusNode: _inputFocusNode,
             onSend: _sendComment,
-            isSending: _isSending,
+            sendState: _sendState,
           ),
         ],
       ),
