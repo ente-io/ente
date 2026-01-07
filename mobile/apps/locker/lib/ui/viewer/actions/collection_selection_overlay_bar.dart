@@ -31,10 +31,11 @@ class _CollectionSelectionOverlayBarState
     extends State<CollectionSelectionOverlayBar> {
   static final _logger = Logger('CollectionSelectionOverlayBar');
 
+  int get _currentUserID => Configuration.instance.getUserID()!;
+
   List<Collection> _getOwnedCollections(List<Collection> collections) {
-    final currentUserID = Configuration.instance.getUserID()!;
     final ownedCollections =
-        collections.where((c) => c.isOwner(currentUserID)).toList();
+        collections.where((c) => c.isOwner(_currentUserID)).toList();
 
     final sharedCount = collections.length - ownedCollections.length;
     if (sharedCount > 0 && mounted) {
@@ -45,6 +46,10 @@ class _CollectionSelectionOverlayBarState
     }
 
     return ownedCollections;
+  }
+
+  List<Collection> _getSharedIncomingCollections(List<Collection> collections) {
+    return collections.where((c) => !c.isOwner(_currentUserID)).toList();
   }
 
   @override
@@ -220,8 +225,17 @@ class _CollectionSelectionOverlayBarState
     final isSingleSelection = selectedCollections.length == 1;
     final collection = isSingleSelection ? selectedCollections.first : null;
 
+    final ownedCollections =
+        selectedCollections.where((c) => c.isOwner(_currentUserID)).toList();
+    final sharedIncomingCollections = _getSharedIncomingCollections(
+      selectedCollections.toList(),
+    );
+
+    final hasOwnedCollections = ownedCollections.isNotEmpty;
+    final hasSharedIncoming = sharedIncomingCollections.isNotEmpty;
+
     final primaryActions = <Widget>[
-      if (isSingleSelection)
+      if (isSingleSelection && hasOwnedCollections)
         SelectionActionButton(
           hugeIcon: const HugeIcon(
             icon: HugeIcons.strokeRoundedNavigation06,
@@ -229,7 +243,7 @@ class _CollectionSelectionOverlayBarState
           label: context.l10n.share,
           onTap: () => _shareCollection(collection!),
         ),
-      if (isSingleSelection)
+      if (isSingleSelection && hasOwnedCollections)
         SelectionActionButton(
           hugeIcon: const HugeIcon(
             icon: HugeIcons.strokeRoundedPencilEdit02,
@@ -237,25 +251,42 @@ class _CollectionSelectionOverlayBarState
           label: context.l10n.edit,
           onTap: () => _editCollection(collection!),
         ),
-      SelectionActionButton(
-        hugeIcon: HugeIcon(
-          icon: HugeIcons.strokeRoundedDelete02,
-          color: colorScheme.warning500,
+      if (hasSharedIncoming)
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedLogout02,
+            color: colorScheme.warning500,
+          ),
+          label: context.l10n.leaveCollection,
+          onTap: () => _leaveCollections(sharedIncomingCollections),
+          isDestructive: true,
         ),
-        label: context.l10n.delete,
-        onTap: () {
-          if (isSingleSelection) {
-            _deleteCollection(collection!);
-          } else {
-            _deleteMultipleCollections(selectedCollections);
-          }
-        },
-        isDestructive: true,
-      ),
+      if (hasOwnedCollections)
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete02,
+            color: colorScheme.warning500,
+          ),
+          label: context.l10n.delete,
+          onTap: () {
+            if (isSingleSelection) {
+              _deleteCollection(collection!);
+            } else {
+              _deleteMultipleCollections(selectedCollections);
+            }
+          },
+          isDestructive: true,
+        ),
     ];
 
-    return Row(
-      children: _buildActionRow(primaryActions),
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: _buildActionRow(primaryActions),
+      ),
     );
   }
 
@@ -336,6 +367,31 @@ class _CollectionSelectionOverlayBarState
 
     try {
       await showShareCollectionSheet(context, collection: collection);
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+    widget.selectedCollections.clearAll();
+  }
+
+  Future<void> _leaveCollections(List<Collection> collections) async {
+    if (collections.isEmpty) {
+      widget.selectedCollections.clearAll();
+      return;
+    }
+
+    try {
+      if (collections.length == 1) {
+        await CollectionActions.leaveCollection(
+          context,
+          collections.first,
+        );
+      } else {
+        await CollectionActions.leaveMultipleCollection(
+          context,
+          collections,
+        );
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
