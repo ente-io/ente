@@ -508,7 +508,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                   Stack(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(right: 16, bottom: 12),
+                        padding: EdgeInsets.only(
+                          right: 16,
+                          bottom: showActionsPopup ? 0 : 12,
+                        ),
                         child: _CommentBubble(
                           comment: widget.comment,
                           isOwnComment: widget.isOwnComment,
@@ -521,17 +524,21 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                       Positioned(
                         right: 0,
                         bottom: 0,
-                        child: AnimatedScale(
-                          scale: showCapsule ? 1.0 : 0.8,
-                          duration: const Duration(milliseconds: 100),
-                          child: AnimatedOpacity(
-                            opacity: showCapsule ? 1.0 : 0.0,
+                        child: AnimatedSize(
+                          duration: const Duration(milliseconds: 175),
+                          curve: Curves.easeInOut,
+                          child: AnimatedScale(
+                            scale: showCapsule ? 1.0 : 0.8,
                             duration: const Duration(milliseconds: 100),
-                            child: IgnorePointer(
-                              ignoring: !showCapsule,
-                              child: CommentLikeCountCapsule(
-                                likeCount: displayCount,
-                                onTap: _showCommentLikesSheet,
+                            child: AnimatedOpacity(
+                              opacity: showCapsule ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 100),
+                              child: IgnorePointer(
+                                ignoring: !showCapsule,
+                                child: CommentLikeCountCapsule(
+                                  likeCount: displayCount,
+                                  onTap: _showCommentLikesSheet,
+                                ),
                               ),
                             ),
                           ),
