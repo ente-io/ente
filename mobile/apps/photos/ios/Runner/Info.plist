@@ -23,7 +23,7 @@
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>MinimumOSVersion</key>
-		<string>12.1</string>
+		<string>14.0</string>
 		<key>FlutterDeepLinkingEnabled</key>
 		<false/>
 		<key>LSApplicationQueriesSchemes</key>
@@ -38,8 +38,18 @@
 			<string>superhuman</string>
 			<string>protonmail</string>
 		</array>
+		<key>AppGroupId</key>
+		<string>$(CUSTOM_GROUP_ID)</string>
 		<key>CFBundleURLTypes</key>
 		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				</array>
+			</dict>
 			<dict>
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>

@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
+  "enableComment": "Comments and reactions",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
   "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
@@ -555,6 +556,11 @@
   "removeDuplicatesDesc": "Review and remove files that are exact duplicates.",
   "viewLargeFiles": "Large files",
   "viewLargeFilesDesc": "View files that are consuming the most amount of storage.",
+  "deleteSuggestions": "Delete suggestions",
+  "deleteSuggestionsDesc": "Review files that have been suggested for deletion.",
+  "rejectSuggestions": "Reject suggestions",
+  "noDeleteSuggestion": "No delete suggestions",
+  "youHaveNoFileSuggestedForDeletion": "You've no files that have been suggested for deletion",
   "noDuplicates": "✨ No duplicates",
   "youveNoDuplicateFilesThatCanBeCleared": "You don't have any duplicate files that can be cleared",
   "success": "Success",
@@ -1513,6 +1519,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {No admins were added} =1 {1 admin successfully added} other {{count} admins successfully added}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Add admin} =1 {Add admin} other {Add admins}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Admins can manage photos & participants.",
+  "suggestDeletion": "Suggest deletion",
+  "suggestDeletionDescription": "Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos.",
+  "deleteSuggestionSent": "Delete suggestion sent",
   "accountIsAlreadyConfigured": "Account is already configured.",
   "sessionIdMismatch": "Session ID mismatch",
   "@sessionIdMismatch": {
@@ -1872,6 +1902,10 @@
   "thisMonth": "This month",
   "thisYear": "This year",
   "groupBy": "Group by",
+  "groupByDay": "Day",
+  "groupByWeek": "Week",
+  "groupByMonth": "Month",
+  "groupByYear": "Year",
   "faceThumbnailGenerationFailed": "Unable to generate face thumbnails",
   "fileAnalysisFailed": "Unable to analyze file",
   "editAutoAddPeople": "Edit auto-add people",
@@ -2234,5 +2268,23 @@
   "ritualCustomKeyboardLabel": "Custom (keyboard)",
   "ritualEmojiKeyboardHint": "Press to open emoji keyboard",
   "ritualEmojiUseAction": "Use",
-  "ritualSearchEmpty": "Build a ritual to keep your photo habit going."
+  "ritualSearchEmpty": "Build a ritual to keep your photo habit going.",
+  "feed": "Feed",
+  "likedYourPhoto": "Liked a photo",
+  "commentedOnYourPhoto": "Commented on a photo",
+  "repliedToYourComment": "Replied to a comment",
+  "likedYourComment": "Liked a comment",
+  "likedYourReply": "Liked a reply",
+  "and1Other": "and 1 other",
+  "andXOthers": "and {count} others",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "No activity yet",
+  "like": "Like",
+  "comments": "Comments"
 }

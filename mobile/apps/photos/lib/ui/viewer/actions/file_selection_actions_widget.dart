@@ -26,7 +26,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -80,11 +79,6 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-  static const String _suggestDeleteLabel = "(i) Suggest deletion";
-  static const String _suggestDeleteDialogTitle = "(i) Suggest deletion";
-  static const String _suggestDeleteDialogBody =
-      "(i) Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos";
-  static const String _suggestDeleteSentMessage = "(i) Delete suggestion sent.";
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -161,11 +155,11 @@ class _FileSelectionActionsWidgetState
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
-    final bool canSuggestDeleteAction = flagService.enableDeleteSuggestion &&
+    final bool canSuggestDeleteAction =
         (widget.type == GalleryType.sharedCollection ||
-            widget.type == GalleryType.ownedCollection) &&
-        isCollectionOwnerOrAdmin &&
-        split.ownedByOtherUsers.isNotEmpty;
+                widget.type == GalleryType.ownedCollection) &&
+            isCollectionOwnerOrAdmin &&
+            split.ownedByOtherUsers.isNotEmpty;
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
@@ -197,7 +191,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.clear,
-          labelText: "Reject suggestions",
+          labelText: AppLocalizations.of(context).rejectSuggestions,
           onTap: widget.selectedFiles.files.isNotEmpty
               ? _rejectDeleteSuggestions
               : null,
@@ -334,7 +328,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.flag_outlined,
-            labelText: _suggestDeleteLabel,
+            labelText: AppLocalizations.of(context).suggestDeletion,
             onTap: _onSuggestDelete,
           ),
         );
@@ -395,16 +389,6 @@ class _FileSelectionActionsWidgetState
             labelText: AppLocalizations.of(context).createCollage,
             onTap: _onCreateCollageClicked,
             shouldShow: showCollageOption,
-          ),
-        );
-      }
-      if (flagService.internalUser &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.movie_creation_sharp,
-            labelText: "(i) Video Memory",
-            onTap: _onCreateVideoMemoryClicked,
           ),
         );
       }
@@ -681,14 +665,15 @@ class _FileSelectionActionsWidgetState
     if (filesToSuggest.isEmpty) {
       return;
     }
+    final l10n = AppLocalizations.of(context);
     final actionResult = await showActionSheet(
       context: context,
-      title: _suggestDeleteDialogTitle,
-      body: _suggestDeleteDialogBody,
+      title: l10n.suggestDeletion,
+      body: l10n.suggestDeletionDescription,
       actionSheetType: ActionSheetType.defaultActionSheet,
       buttons: [
         ButtonWidget(
-          labelText: _suggestDeleteLabel,
+          labelText: l10n.suggestDeletion,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -701,12 +686,12 @@ class _FileSelectionActionsWidgetState
             );
             showShortToast(
               context,
-              _suggestDeleteSentMessage,
+              l10n.deleteSuggestionSent,
             );
           },
         ),
         ButtonWidget(
-          labelText: AppLocalizations.of(context).cancel,
+          labelText: l10n.cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -919,12 +904,6 @@ class _FileSelectionActionsWidgetState
     if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
-  }
-
-  Future<void> _onCreateVideoMemoryClicked() async {
-    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
-    await createSlideshow(context, selectedFiles);
-    widget.selectedFiles.clearAll();
   }
 
   Future<void> _onSendLinkTapped() async {

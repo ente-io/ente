@@ -354,6 +354,43 @@ func GetMaskedEmail(email string) string {
 	}
 }
 
+// GetMaskedEmailForPublic masks an email for public display.
+// Format: first 2 chars of username + masked remainder + @ + first char of domain + masked middle + last char of domain
+func GetMaskedEmailForPublic(email string) string {
+	email = strings.TrimSpace(email)
+	at := strings.LastIndex(email, "@")
+	if at <= 0 || at == len(email)-1 {
+		return "[invalid_email]"
+	}
+	username := email[:at]
+	domain := email[at+1:]
+
+	maskedUsername := maskForPublicUsername(username)
+	maskedDomain := maskForPublicDomain(domain)
+
+	return maskedUsername + "@" + maskedDomain
+}
+
+// maskForPublicUsername masks a username keeping the first 2 runes visible.
+// Remaining runes are replaced with asterisks.
+func maskForPublicUsername(s string) string {
+	runes := []rune(s)
+	if len(runes) <= 2 {
+		return s
+	}
+	return string(runes[:2]) + strings.Repeat("*", len(runes)-2)
+}
+
+// maskForPublicDomain masks a domain showing first and last rune.
+// Middle runes are replaced with asterisks.
+func maskForPublicDomain(domain string) string {
+	runes := []rune(domain)
+	if len(runes) <= 2 {
+		return domain
+	}
+	return string(runes[0]) + strings.Repeat("*", len(runes)-2) + string(runes[len(runes)-1])
+}
+
 // GetMaskedEmailWithHint masks both the username and non-TLD domain segments while keeping helpful hints.
 func GetMaskedEmailWithHint(email string) string {
 	email = strings.TrimSpace(email)

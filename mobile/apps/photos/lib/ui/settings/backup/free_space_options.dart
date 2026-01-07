@@ -7,6 +7,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup_status.dart";
 import "package:photos/models/duplicate_files.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/deduplication_service.dart";
 import "package:photos/services/files_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -262,39 +263,61 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 const SizedBox(
                                   height: 24,
                                 ),
-                                if (flagService.internalUser)
-                                  MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "(i) Delete Suggestions",
-                                    ),
-                                    menuItemColor: colorScheme.fillFaint,
-                                    trailingWidget: Icon(
-                                      Icons.chevron_right_outlined,
-                                      color: colorScheme.strokeBase,
-                                    ),
-                                    singleBorderRadius: 8,
-                                    alignCaptionedTextToLeft: true,
-                                    showOnlyLoadingState: true,
-                                    onTap: () async {
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: AppLocalizations.of(context)
+                                        .deleteSuggestions,
+                                  ),
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingWidget: Icon(
+                                    Icons.chevron_right_outlined,
+                                    color: colorScheme.strokeBase,
+                                  ),
+                                  singleBorderRadius: 8,
+                                  alignCaptionedTextToLeft: true,
+                                  showOnlyLoadingState: true,
+                                  onTap: () async {
+                                    List<int> suggestionFileIDs;
+                                    try {
+                                      suggestionFileIDs =
+                                          await CollectionsService.instance
+                                              .fetchDeleteSuggestionFileIDs();
+                                    } catch (e) {
+                                      await showGenericErrorDialog(
+                                        context: context,
+                                        error: e,
+                                      );
+                                      return;
+                                    }
+
+                                    if (suggestionFileIDs.isEmpty) {
+                                      unawaited(
+                                        showErrorDialog(
+                                          context,
+                                          AppLocalizations.of(context)
+                                              .noDeleteSuggestion,
+                                          AppLocalizations.of(context)
+                                              .youHaveNoFileSuggestedForDeletion,
+                                        ),
+                                      );
+                                    } else {
                                       await routeToPage(
                                         context,
                                         DeleteSuggestionsPage(),
                                       );
-                                    },
+                                    }
+                                  },
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: MenuSectionDescriptionWidget(
+                                    content: AppLocalizations.of(context)
+                                        .deleteSuggestionsDesc,
                                   ),
-                                if (flagService.internalUser)
-                                  const Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: MenuSectionDescriptionWidget(
-                                      content:
-                                          "Review files that have been suggested for deletion.",
-                                    ),
-                                  ),
-                                if (flagService.internalUser)
-                                  const SizedBox(
-                                    height: 24,
-                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 24,
+                                ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
                                     title: AppLocalizations.of(context)

@@ -128,6 +128,7 @@ export const EmbedFileListWithViewer: React.FC<
                     files={files}
                     disableDownload={true}
                     showFullscreenButton={true}
+                    enableComment={false}
                     onTriggerRemotePull={handleTriggerRemotePull}
                     onVisualFeedback={() => {
                         // Visual feedback requested

@@ -64,7 +64,7 @@ class GalleryGroups {
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
   final Map<String,
-          ({GroupType groupType, int startCreationTime, int endCreationTime})>
+          ({GroupType groupType, int maxCreationTime, int minCreationTime})>
       _groupIdToGroupDataMap = {};
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
   final Map<String, double> _groupIdToScrollOffsetMap = {};
@@ -76,7 +76,7 @@ class GalleryGroups {
   List<String> get groupIDs => _groupIds;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
   Map<String,
-          ({GroupType groupType, int startCreationTime, int endCreationTime})>
+          ({GroupType groupType, int maxCreationTime, int minCreationTime})>
       get groupIdToGroupDataMap => _groupIdToGroupDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;
@@ -134,16 +134,24 @@ class GalleryGroups {
         return null;
       }
 
-      final startTime = groupData.startCreationTime;
-      final endTime = groupData.endCreationTime;
+      final maxTime = groupData.maxCreationTime;
+      final minTime = groupData.minCreationTime;
 
-      if (creationTime <= startTime && creationTime >= endTime) {
+      if (creationTime <= maxTime && creationTime >= minTime) {
         // Found the group containing this creation time
         return groupId;
-      } else if (creationTime > startTime) {
-        right = mid - 1;
+      } else if (sortOrderAsc) {
+        if (creationTime < minTime) {
+          right = mid - 1;
+        } else if (creationTime > maxTime) {
+          left = mid + 1;
+        }
       } else {
-        left = mid + 1;
+        if (creationTime > maxTime) {
+          right = mid - 1;
+        } else if (creationTime < minTime) {
+          left = mid + 1;
+        }
       }
     }
 
@@ -384,10 +392,19 @@ class GalleryGroups {
 
     _groupIds.add(uuid);
     _groupIdToFilesMap[uuid] = groupFiles;
+    final firstCreationTime = groupFiles.first.creationTime!;
+    final lastCreationTime = lastFile.creationTime!;
+    final maxCreationTime = firstCreationTime > lastCreationTime
+        ? firstCreationTime
+        : lastCreationTime;
+    final minCreationTime = firstCreationTime < lastCreationTime
+        ? firstCreationTime
+        : lastCreationTime;
+
     _groupIdToGroupDataMap[uuid] = (
       groupType: groupType,
-      startCreationTime: groupFiles.first.creationTime!,
-      endCreationTime: lastFile.creationTime!
+      maxCreationTime: maxCreationTime,
+      minCreationTime: minCreationTime
     );
 
     if (localSettings.isSwipeToSelectEnabled && !limitSelectionToOne) {

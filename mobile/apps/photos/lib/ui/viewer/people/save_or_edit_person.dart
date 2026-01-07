@@ -701,8 +701,8 @@ class _EmailSectionState extends State<_EmailSection> {
   @override
   Widget build(BuildContext context) {
     const limitCountTo = 5;
-    final avatarSize = getAvatarSize(AvatarType.small);
-    final overlapPadding = getOverlapPadding(AvatarType.small);
+    final avatarSize = getAvatarSize(AvatarType.xl);
+    final overlapPadding = getOverlapPadding(AvatarType.xl);
     if (_email == null || _email!.isEmpty) {
       return AnimatedSize(
         duration: const Duration(milliseconds: 200),
@@ -730,7 +730,7 @@ class _EmailSectionState extends State<_EmailSection> {
                       child: AlbumSharesIcons(
                         sharees: _contacts,
                         limitCountTo: limitCountTo,
-                        type: AvatarType.small,
+                        type: AvatarType.xl,
                         padding: EdgeInsets.zero,
                         stackAlignment: Alignment.center,
                       ),

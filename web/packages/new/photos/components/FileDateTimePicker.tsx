@@ -73,6 +73,7 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
                 disableFuture={true}
+                timeSteps={{ minutes: 1 }}
                 /* The dialog grows too big on the default portrait mode with
                    our theme customizations. So we instead use the landscape
                    layout if the screen is large enough. */

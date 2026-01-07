@@ -6,6 +6,7 @@ import "package:shared_preferences/shared_preferences.dart";
 // Add more language to the list only when at least 90% of the strings are
 // translated in the corresponding language.
 const List<Locale> appSupportedLocales = <Locale>[
+  Locale('cs'),
   Locale('en'),
   Locale('es'),
   Locale('de'),

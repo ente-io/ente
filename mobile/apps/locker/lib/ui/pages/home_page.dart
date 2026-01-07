@@ -35,6 +35,7 @@ class CustomLockerAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
   final bool isSearchActive;
+  final bool isSyncing;
   final TextEditingController searchController;
   final FocusNode searchFocusNode;
   final VoidCallback onSearchFocused;
@@ -45,6 +46,7 @@ class CustomLockerAppBar extends StatelessWidget
     super.key,
     required this.scaffoldKey,
     required this.isSearchActive,
+    this.isSyncing = false,
     required this.searchController,
     required this.searchFocusNode,
     required this.onSearchFocused,
@@ -93,10 +95,35 @@ class CustomLockerAppBar extends StatelessWidget
                       ),
                     ),
                   ),
-                  Image.asset(
-                    'assets/locker-logo.png',
-                    height: 28,
-                  ),
+                  isSyncing
+                      ? const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              "Syncing...",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Image.asset(
+                          'assets/locker-logo.png',
+                          height: 28,
+                        ),
                 ],
               ),
             ),
@@ -192,6 +219,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   final _selectedFiles = SelectedFiles();
   final _scrollController = ScrollController();
   bool _isLoading = true;
+  bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
@@ -255,10 +283,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     super.initState();
 
     _loadCollections();
-
-    if (CollectionService.instance.hasCompletedFirstSync()) {
-      _loadCollections();
-    }
 
     // Initialize sharing functionality to handle shared files
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -479,12 +503,18 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
+      // Only mark initial load complete when first sync has finished
+      // This prevents empty state while sync is in progress
+      final hasCompletedFirstSync =
+          CollectionService.instance.hasCompletedFirstSync();
+
       if (mounted) {
         setState(() {
           _collections = sortedCollections;
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
+          _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
     } catch (error) {
@@ -492,6 +522,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
+          _hasCompletedInitialLoad =
+              CollectionService.instance.hasCompletedFirstSync();
         });
       }
     }
@@ -654,12 +686,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
     if (_error != null) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
