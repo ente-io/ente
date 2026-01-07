@@ -188,7 +188,7 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  /// Opens the comments screen for the feed item.
+  /// Opens the photo viewer for the feed item, then shows the comments sheet.
   Future<void> _openComments(FeedItem item) async {
     var fileID = item.fileID;
 
@@ -198,14 +198,36 @@ class _FeedScreenState extends State<FeedScreen> {
       fileID = comment?.fileID;
     }
 
-    if (fileID == null || !mounted) return;
+    if (fileID == null) return;
 
+    final file = await FilesDB.instance.getUploadedFile(
+      fileID,
+      item.collectionID,
+    );
+    if (file == null || !mounted) return;
+
+    final capturedFileID = fileID;
+
+    // Navigate to the photo first, then show comments sheet after first frame
     unawaited(
-      showFileCommentsBottomSheet(
+      routeToPage(
         context,
-        collectionID: item.collectionID,
-        fileID: fileID,
-        highlightCommentID: item.commentID,
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "feed_comment",
+            onPageReady: (detailContext) {
+              showFileCommentsBottomSheet(
+                detailContext,
+                collectionID: item.collectionID,
+                fileID: capturedFileID,
+                highlightCommentID: item.commentID,
+              );
+            },
+          ),
+        ),
+        forceCustomPageRoute: true,
       ),
     );
   }

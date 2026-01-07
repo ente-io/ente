@@ -45,12 +45,17 @@ class DetailPageConfiguration {
   final DetailPageMode mode;
   final bool isLocalOnlyContext;
 
+  /// Callback invoked with the page context after the page is ready.
+  /// Useful for showing bottom sheets or dialogs after navigation completes.
+  final void Function(BuildContext context)? onPageReady;
+
   DetailPageConfiguration(
     this.files,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
     this.isLocalOnlyContext = false,
+    this.onPageReady,
   });
 
   DetailPageConfiguration copyWith({
@@ -139,7 +144,9 @@ class _BodyState extends State<_Body> {
 
     // Update shared collection state after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
+      widget.config.onPageReady?.call(context);
     });
   }
 
