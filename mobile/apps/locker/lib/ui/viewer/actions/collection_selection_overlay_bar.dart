@@ -91,7 +91,7 @@ class _CollectionSelectionOverlayBarState
             child: hasSelection
                 ? Container(
                     decoration: BoxDecoration(
-                      color: colorScheme.backdropBase,
+                      color: colorScheme.backdropBase.withValues(alpha: 1.0),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),
