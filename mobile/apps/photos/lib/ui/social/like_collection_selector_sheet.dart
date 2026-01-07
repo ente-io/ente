@@ -8,6 +8,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -261,7 +262,7 @@ class _LikeCollectionSelectorSheetState
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 48),
-                child: CircularProgressIndicator(),
+                child: EnteLoadingWidget(size: 24),
               )
             else if (_hasError)
               _buildErrorState()

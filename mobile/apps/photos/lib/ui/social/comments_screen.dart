@@ -13,44 +13,80 @@ import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
 
-class FileCommentsScreen extends StatefulWidget {
+/// Shows the file comments bottom sheet
+Future<void> showFileCommentsBottomSheet(
+  BuildContext context, {
+  required int collectionID,
+  required int fileID,
+  String? highlightCommentID,
+}) {
+  return showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      snap: true,
+      snapSizes: const [0.6],
+      expand: false,
+      builder: (context, scrollController) => FileCommentsBottomSheet(
+        collectionID: collectionID,
+        fileID: fileID,
+        highlightCommentID: highlightCommentID,
+        dragController: scrollController,
+      ),
+    ),
+  );
+}
+
+class FileCommentsBottomSheet extends StatefulWidget {
   final int collectionID;
   final int fileID;
 
   /// Optional comment ID to scroll to and highlight.
   final String? highlightCommentID;
 
-  const FileCommentsScreen({
+  /// Scroll controller for the drag handle (from DraggableScrollableSheet).
+  final ScrollController dragController;
+
+  const FileCommentsBottomSheet({
     required this.collectionID,
     required this.fileID,
+    required this.dragController,
     this.highlightCommentID,
     super.key,
   });
 
   @override
-  State<FileCommentsScreen> createState() => _FileCommentsScreenState();
+  State<FileCommentsBottomSheet> createState() =>
+      _FileCommentsBottomSheetState();
 }
 
-class _FileCommentsScreenState extends State<FileCommentsScreen> {
-  static final _logger = Logger('FileCommentsScreen');
+class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
+  static final _logger = Logger('FileCommentsBottomSheet');
 
   final List<Comment> _comments = [];
 
   Comment? _replyingTo;
   bool _isLoading = true;
   bool _isLoadingMore = false;
+  SendButtonState _sendState = SendButtonState.idle;
+  Timer? _sendLoadingTimer;
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
   Map<String, String> _anonDisplayNames = {};
   String? _highlightedCommentID;
   bool _hasScrolledToHighlight = false;
+  GlobalKey? _highlightedCommentKey;
 
   List<CollectionCommentInfo> _sharedCollections = [];
   late int _selectedCollectionID;
@@ -76,6 +112,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
   @override
   void dispose() {
+    _sendLoadingTimer?.cancel();
     _textController.dispose();
     _inputFocusNode.dispose();
     _scrollController.dispose();
@@ -247,26 +284,28 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
     _hasScrolledToHighlight = true;
 
-    // Use post-frame callback to ensure layout is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
 
-      // Estimate scroll position (since ListView is reversed, index 0 is at bottom)
-      // Each comment is roughly 100-150px, we'll use 120px as estimate
+      // Phase 1: Jump to approximate position to bring item into view
       const estimatedItemHeight = 120.0;
-      final scrollPosition = index * estimatedItemHeight;
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final scrollPosition =
+          (index * estimatedItemHeight).clamp(0.0, maxScroll);
 
-      _scrollController.animateTo(
-        scrollPosition,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      _scrollController.jumpTo(scrollPosition);
 
-      // Clear highlight after a delay
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _highlightedCommentID = null);
-        }
+      // Phase 2: After item is built, use ensureVisible for precise positioning
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final context = _highlightedCommentKey?.currentContext;
+        if (context == null) return;
+
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutExpo,
+        );
       });
     });
   }
@@ -326,7 +365,17 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
   Future<void> _sendComment() async {
     final text = _textController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _sendState != SendButtonState.idle) return;
+
+    // Mark as sending internally (blocks duplicate sends) but don't show UI yet
+    _sendState = SendButtonState.sending;
+
+    // Only show loading indicator after 400ms delay
+    _sendLoadingTimer = Timer(const Duration(milliseconds: 400), () {
+      if (mounted && _sendState == SendButtonState.sending) {
+        setState(() {});
+      }
+    });
 
     try {
       final result = await SocialDataProvider.instance.addComment(
@@ -335,17 +384,18 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         fileID: widget.fileID,
         parentCommentID: _replyingTo?.id,
       );
+      _sendLoadingTimer?.cancel();
+
       if (result == null) {
         _logger.warning('Failed to save comment');
-        if (mounted) {
-          showShortToast(context, "Failed to send comment");
-        }
+        _showSendError();
         return;
       }
 
       // Update UI only after successful persistence
       if (mounted) {
         setState(() {
+          _sendState = SendButtonState.idle;
           _comments.insert(0, result);
           _replyingTo = null;
 
@@ -365,11 +415,21 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         _textController.clear();
       }
     } catch (e) {
+      _sendLoadingTimer?.cancel();
       _logger.severe('Failed to send comment', e);
-      if (mounted) {
-        showShortToast(context, "Failed to send comment");
-      }
+      _showSendError();
     }
+  }
+
+  void _showSendError() {
+    if (!mounted) return;
+    setState(() => _sendState = SendButtonState.error);
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted && _sendState == SendButtonState.error) {
+        setState(() => _sendState = SendButtonState.idle);
+      }
+    });
   }
 
   void _handleCommentDeleted(String commentId) {
@@ -404,106 +464,135 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         .collection;
   }
 
+  Widget _buildHeader(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    return SingleChildScrollView(
+      controller: widget.dragController,
+      physics: const ClampingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: _sharedCollections.length > 1
+                  ? CollectionSelectorWidget(
+                      sharedCollections: _sharedCollections,
+                      selectedCollectionID: _selectedCollectionID,
+                      onCollectionSelected: _onCollectionSelected,
+                    )
+                  : Text(
+                      "${_comments.length} comments",
+                      style: textTheme.bodyBold,
+                    ),
+            ),
+            IconButtonWidget(
+              iconButtonType: IconButtonType.rounded,
+              icon: Icons.close_rounded,
+              onTap: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final selectedCollection = _currentCollection;
     final canModerateAnonComments = selectedCollection != null &&
         (selectedCollection.isOwner(_currentUserID) ||
             selectedCollection.isAdmin(_currentUserID));
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        titleSpacing: _sharedCollections.length > 1 ? 16 : 28,
-        backgroundColor: colorScheme.backgroundBase,
-        elevation: 0,
-        title: _sharedCollections.length > 1
-            ? CollectionSelectorWidget(
-                sharedCollections: _sharedCollections,
-                selectedCollectionID: _selectedCollectionID,
-                onCollectionSelected: _onCollectionSelected,
-              )
-            : Text(
-                "${_comments.length} comments",
-                style: textTheme.bodyBold,
-              ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: IconButtonWidget(
-              iconButtonType: IconButtonType.rounded,
-              icon: Icons.close_rounded,
-              onTap: () => Navigator.of(context).pop(),
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundBase,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(24),
+        ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              behavior: HitTestBehavior.translucent,
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      controller: _scrollController,
-                      reverse: true,
-                      padding: const EdgeInsets.only(
-                        top: 24,
-                        left: 16,
-                        right: 16,
-                        bottom: 24,
-                      ),
-                      itemCount: _comments.length + (_hasMoreComments ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == _comments.length) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: CircularProgressIndicator(),
-                            ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                behavior: HitTestBehavior.translucent,
+                child: _isLoading
+                    ? const EnteLoadingWidget()
+                    : ListView.builder(
+                        controller: _scrollController,
+                        reverse: true,
+                        padding: const EdgeInsets.only(
+                          top: 24,
+                          left: 16,
+                          right: 16,
+                          bottom: 24,
+                        ),
+                        itemCount:
+                            _comments.length + (_hasMoreComments ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == _comments.length) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          final comment = _comments[index];
+                          final isHighlighted =
+                              comment.id == _highlightedCommentID;
+                          // Use widget.highlightCommentID (not state) to keep key stable after dismiss
+                          final key = (comment.id == widget.highlightCommentID)
+                              ? (_highlightedCommentKey ??= GlobalKey())
+                              : ValueKey(comment.id);
+                          return CommentBubbleWidget(
+                            key: key,
+                            comment: comment,
+                            user: _getUserForComment(comment),
+                            isOwnComment: comment.userID == _currentUserID,
+                            canModerateAnonComments: canModerateAnonComments,
+                            currentUserID: _currentUserID,
+                            collectionID: _selectedCollectionID,
+                            isHighlighted: isHighlighted,
+                            onFetchParent: comment.isReply
+                                ? () =>
+                                    _getParentComment(comment.parentCommentID!)
+                                : null,
+                            onFetchReactions: () =>
+                                _getReactionsForComment(comment.id),
+                            onReplyTap: () => _onReplyTap(comment),
+                            userResolver: _getUserForComment,
+                            onCommentDeleted: () =>
+                                _handleCommentDeleted(comment.id),
+                            onAutoHighlightDismissed: () {
+                              if (mounted) {
+                                setState(() => _highlightedCommentID = null);
+                                // Don't clear _highlightedCommentKey - prevents avatar flicker
+                              }
+                            },
                           );
-                        }
-                        final comment = _comments[index];
-                        return CommentBubbleWidget(
-                          key: ValueKey(comment.id),
-                          comment: comment,
-                          user: _getUserForComment(comment),
-                          isOwnComment: comment.userID == _currentUserID,
-                          canModerateAnonComments: canModerateAnonComments,
-                          currentUserID: _currentUserID,
-                          collectionID: _selectedCollectionID,
-                          isHighlighted: comment.id == _highlightedCommentID,
-                          onFetchParent: comment.isReply
-                              ? () =>
-                                  _getParentComment(comment.parentCommentID!)
-                              : null,
-                          onFetchReactions: () =>
-                              _getReactionsForComment(comment.id),
-                          onReplyTap: () => _onReplyTap(comment),
-                          userResolver: _getUserForComment,
-                          onCommentDeleted: () =>
-                              _handleCommentDeleted(comment.id),
-                        );
-                      },
-                    ),
+                        },
+                      ),
+              ),
             ),
-          ),
-          CommentInputWidget(
-            replyingTo: _replyingTo,
-            replyingToUser:
-                _replyingTo != null ? _getUserForComment(_replyingTo!) : null,
-            currentUserID: _currentUserID,
-            onDismissReply: _dismissReply,
-            controller: _textController,
-            focusNode: _inputFocusNode,
-            onSend: _sendComment,
-          ),
-        ],
+            CommentInputWidget(
+              replyingTo: _replyingTo,
+              replyingToUser:
+                  _replyingTo != null ? _getUserForComment(_replyingTo!) : null,
+              currentUserID: _currentUserID,
+              onDismissReply: _dismissReply,
+              controller: _textController,
+              focusNode: _inputFocusNode,
+              onSend: _sendComment,
+              sendState: _sendState,
+            ),
+          ],
+        ),
       ),
     );
   }

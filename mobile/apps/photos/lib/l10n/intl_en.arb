@@ -208,7 +208,7 @@
   },
   "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
-  "enableComment": "Enable comments",
+  "enableComment": "Comments and reactions",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
   "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
@@ -2284,5 +2284,7 @@
       }
     }
   },
-  "noActivityYet": "No activity yet"
+  "noActivityYet": "No activity yet",
+  "like": "Like",
+  "comments": "Comments"
 }

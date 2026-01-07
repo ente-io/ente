@@ -8,6 +8,7 @@ import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
@@ -126,13 +127,17 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: EnteLoadingWidget(size: 24))
           : _feedItems.isEmpty
               ? _buildEmptyState(context)
               : RefreshIndicator(
                   onRefresh: _onRefresh,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    padding: EdgeInsets.only(
+                      left: 15,
+                      right: 15,
+                      bottom: MediaQuery.paddingOf(context).bottom,
+                    ),
                     itemCount: _feedItems.length,
                     itemBuilder: (context, index) {
                       final item = _feedItems[index];
@@ -147,8 +152,9 @@ class _FeedScreenState extends State<FeedScreen> {
                             _anonDisplayNamesByCollection[item.collectionID] ??
                                 const {},
                         isLastItem: isLastItem,
-                        onTap: () => _openComments(item),
-                        onThumbnailTap: () => _openPhoto(item),
+                        onTap: () => item.type == FeedItemType.photoLike
+                            ? _openPhoto(item)
+                            : _openComments(item),
                       );
                     },
                   ),
@@ -185,7 +191,7 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  /// Opens the comments screen for the feed item.
+  /// Opens the photo viewer for the feed item, then shows the comments sheet.
   Future<void> _openComments(FeedItem item) async {
     var fileID = item.fileID;
 
@@ -195,16 +201,36 @@ class _FeedScreenState extends State<FeedScreen> {
       fileID = comment?.fileID;
     }
 
-    if (fileID == null || !mounted) return;
+    if (fileID == null) return;
 
+    final file = await FilesDB.instance.getUploadedFile(
+      fileID,
+      item.collectionID,
+    );
+    if (file == null || !mounted) return;
+
+    final capturedFileID = fileID;
+
+    // Navigate to the photo first, then show comments sheet after first frame
     unawaited(
       routeToPage(
         context,
-        FileCommentsScreen(
-          collectionID: item.collectionID,
-          fileID: fileID,
-          highlightCommentID: item.commentID,
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "feed_comment",
+            onPageReady: (detailContext) {
+              showFileCommentsBottomSheet(
+                detailContext,
+                collectionID: item.collectionID,
+                fileID: capturedFileID,
+                highlightCommentID: item.commentID,
+              );
+            },
+          ),
         ),
+        forceCustomPageRoute: true,
       ),
     );
   }

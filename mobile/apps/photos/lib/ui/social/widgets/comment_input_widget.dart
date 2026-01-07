@@ -3,7 +3,10 @@ import "package:flutter/services.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/social/widgets/reply_preview_widget.dart";
+
+enum SendButtonState { idle, sending, error }
 
 class CommentInputWidget extends StatefulWidget {
   final Comment? replyingTo;
@@ -13,6 +16,7 @@ class CommentInputWidget extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onSend;
+  final SendButtonState sendState;
 
   const CommentInputWidget({
     this.replyingTo,
@@ -22,6 +26,7 @@ class CommentInputWidget extends StatefulWidget {
     required this.controller,
     required this.focusNode,
     required this.onSend,
+    this.sendState = SendButtonState.idle,
     super.key,
   });
 
@@ -151,16 +156,51 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                     horizontal: 18,
                     vertical: 14,
                   ),
-                  suffixIcon: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: GestureDetector(
-                      onTap: widget.onSend,
-                      child: Icon(
-                        Icons.send_rounded,
-                        color: colorScheme.textBase.withValues(alpha: 0.8),
-                        size: 24,
-                      ),
-                    ),
+                  suffixIcon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeOut,
+                    transitionBuilder: (child, animation) {
+                      final curvedAnimation = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOutExpo,
+                      );
+                      final scale = Tween<double>(begin: 0.5, end: 1.0)
+                          .animate(curvedAnimation);
+                      return FadeTransition(
+                        opacity: curvedAnimation,
+                        child: ScaleTransition(scale: scale, child: child),
+                      );
+                    },
+                    child: switch (widget.sendState) {
+                      SendButtonState.sending => const Padding(
+                          key: ValueKey('loading'),
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: EnteLoadingWidget(size: 20, padding: 0),
+                          ),
+                        ),
+                      SendButtonState.error => Padding(
+                          key: const ValueKey('error'),
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(
+                            Icons.error_outline,
+                            color: colorScheme.warning500,
+                            size: 24,
+                          ),
+                        ),
+                      SendButtonState.idle => IconButton(
+                          key: const ValueKey('send'),
+                          onPressed: widget.onSend,
+                          icon: Icon(
+                            Icons.send_rounded,
+                            color: colorScheme.textBase.withValues(alpha: 0.8),
+                            size: 24,
+                          ),
+                        ),
+                    },
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),

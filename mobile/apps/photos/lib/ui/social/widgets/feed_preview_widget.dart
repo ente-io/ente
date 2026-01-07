@@ -104,7 +104,7 @@ class _FeedPreviewWidgetState extends State<FeedPreviewWidget> {
     final colorScheme = getEnteColorScheme(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevated2,

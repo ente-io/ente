@@ -27,7 +27,6 @@ import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/like_collection_selector_sheet.dart";
 import "package:photos/ui/social/likes_bottom_sheet.dart";
 import "package:photos/utils/delete_file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -348,18 +347,25 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _buildHeartIcon() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: GestureDetector(
-        onTap: _toggleReaction,
-        onLongPress: _showLikesBottomSheet,
-        child: Icon(
-          _hasLiked
-              ? (Platform.isAndroid ? Icons.favorite : Icons.favorite_rounded)
-              : (Platform.isAndroid
-                  ? Icons.favorite_border
-                  : Icons.favorite_border_rounded),
-          color: _hasLiked ? const Color(0xFF08C225) : Colors.white,
+    return Tooltip(
+      message: AppLocalizations.of(context).like,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: GestureDetector(
+          onLongPress: _showLikesBottomSheet,
+          child: IconButton(
+            onPressed: _toggleReaction,
+            icon: Icon(
+              _hasLiked
+                  ? (Platform.isAndroid
+                      ? Icons.favorite
+                      : Icons.favorite_rounded)
+                  : (Platform.isAndroid
+                      ? Icons.favorite_border
+                      : Icons.favorite_border_rounded),
+              color: _hasLiked ? const Color(0xFF08C225) : Colors.white,
+            ),
+          ),
         ),
       ),
     );
@@ -499,47 +505,50 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _buildCommentIcon() {
-    return GestureDetector(
-      onTap: _openCommentsScreen,
+    return Tooltip(
+      message: AppLocalizations.of(context).comments,
       child: Padding(
         padding: const EdgeInsets.only(top: 12),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedBubbleChat,
-              color: Colors.white,
-            ),
-            if (_commentCount > 0)
-              Positioned(
-                right: -4,
-                top: -4,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 1,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.all(Radius.circular(16)),
-                    border: Border.all(
-                      color: Colors.black,
-                      width: 2,
-                      strokeAlign: BorderSide.strokeAlignOutside,
+        child: IconButton(
+          onPressed: _openCommentsScreen,
+          icon: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedBubbleChat,
+                color: Colors.white,
+              ),
+              if (_commentCount > 0)
+                Positioned(
+                  right: -4,
+                  top: -4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
                     ),
-                  ),
-                  child: Text(
-                    _commentCount > 99 ? '99+' : _commentCount.toString(),
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w500,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.all(Radius.circular(16)),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
+                    child: Text(
+                      _commentCount > 99 ? '99+' : _commentCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -549,14 +558,12 @@ class FileBottomBarState extends State<FileBottomBar> {
     final file = widget.file;
     if (file.collectionID == null) return;
 
-    routeToPage(
+    showFileCommentsBottomSheet(
       context,
-      FileCommentsScreen(
-        collectionID: file.collectionID!,
-        fileID: file.uploadedFileID!,
-      ),
+      collectionID: file.collectionID!,
+      fileID: file.uploadedFileID!,
     ).then((_) {
-      // Refresh comment count when returning from comments screen
+      // Refresh comment count when returning from comments bottom sheet
       _updateSocialState();
     });
   }
