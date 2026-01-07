@@ -73,6 +73,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   List<Reaction> _reactions = [];
   bool _isLiked = false;
   int _optimisticLikeDelta = 0;
+  int _lastNonZeroLikeCount = 0;
   bool _isLoadingParent = false;
   bool _isLoadingReactions = false;
   double _dragOffset = 0.0;
@@ -459,8 +460,14 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
     final actualCount = _reactions.where((r) => !r.isDeleted).length;
     final likeCount = (actualCount + _optimisticLikeDelta).clamp(0, 999999);
-    final showCapsule =
-        !_isLoadingReactions && showActionsCapsule && likeCount > 0;
+    if (likeCount > 0) {
+      _lastNonZeroLikeCount = likeCount;
+    }
+    final displayCount = likeCount > 0 ? likeCount : _lastNonZeroLikeCount;
+    final showCapsule = !_isLoadingReactions &&
+        showActionsCapsule &&
+        likeCount > 0 &&
+        _isOverlayDismissed;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -511,18 +518,25 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           userResolver: widget.userResolver,
                         ),
                       ),
-                      if (showCapsule)
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Opacity(
-                            opacity: capsuleOpacity,
-                            child: CommentLikeCountCapsule(
-                              likeCount: likeCount,
-                              onTap: _showCommentLikesSheet,
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: AnimatedScale(
+                          scale: showCapsule ? 1.0 : 0.8,
+                          duration: const Duration(milliseconds: 100),
+                          child: AnimatedOpacity(
+                            opacity: showCapsule ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 100),
+                            child: IgnorePointer(
+                              ignoring: !showCapsule,
+                              child: CommentLikeCountCapsule(
+                                likeCount: displayCount,
+                                onTap: _showCommentLikesSheet,
+                              ),
                             ),
                           ),
                         ),
+                      ),
                     ],
                   ),
                   if (showActionsPopup)
