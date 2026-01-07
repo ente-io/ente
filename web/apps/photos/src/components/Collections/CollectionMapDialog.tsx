@@ -225,7 +225,7 @@ function useMapData(
         [],
     );
 
-    // Clear loaded ref when dialog closes so we reload fresh data next time
+    // Clear loaded ref when dialog closes so we reload fresh data next time.
     useEffect(() => {
         if (!open) {
             loadedCollectionRef.current = null;
