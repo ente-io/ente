@@ -51,6 +51,8 @@ const (
 	UploadV2 int64 = 1 << 0
 	// Comments marks availability of the comments feature.
 	Comments int64 = 1 << 1
+	// BackupOptions gates new backup-related features.
+	BackupOptions int64 = 1 << 2
 )
 
 type FlagKey string
