@@ -15,7 +15,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/widgets/collection_selector_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
@@ -47,6 +46,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   bool _isLoading = true;
   bool _isLoadingMore = false;
   SendButtonState _sendState = SendButtonState.idle;
+  Timer? _sendLoadingTimer;
   bool _hasMoreComments = true;
   int _offset = 0;
   final Map<int, User> _userCache = {};
@@ -79,6 +79,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
 
   @override
   void dispose() {
+    _sendLoadingTimer?.cancel();
     _textController.dispose();
     _inputFocusNode.dispose();
     _scrollController.dispose();
@@ -333,7 +334,15 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty || _sendState != SendButtonState.idle) return;
 
-    setState(() => _sendState = SendButtonState.sending);
+    // Mark as sending internally (blocks duplicate sends) but don't show UI yet
+    _sendState = SendButtonState.sending;
+
+    // Only show loading indicator after 400ms delay
+    _sendLoadingTimer = Timer(const Duration(milliseconds: 400), () {
+      if (mounted && _sendState == SendButtonState.sending) {
+        setState(() {});
+      }
+    });
 
     try {
       final result = await SocialDataProvider.instance.addComment(
@@ -342,6 +351,8 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         fileID: widget.fileID,
         parentCommentID: _replyingTo?.id,
       );
+      _sendLoadingTimer?.cancel();
+
       if (result == null) {
         _logger.warning('Failed to save comment');
         _showSendError();
@@ -371,6 +382,7 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
         _textController.clear();
       }
     } catch (e) {
+      _sendLoadingTimer?.cancel();
       _logger.severe('Failed to send comment', e);
       _showSendError();
     }
@@ -379,7 +391,6 @@ class _FileCommentsScreenState extends State<FileCommentsScreen> {
   void _showSendError() {
     if (!mounted) return;
     setState(() => _sendState = SendButtonState.error);
-    showShortToast(context, "Failed to send comment");
 
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted && _sendState == SendButtonState.error) {
