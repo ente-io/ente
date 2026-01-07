@@ -5,6 +5,3 @@
 # macOS
 .DS_Store
 
-# Ignore CLAUDE.local.md files anywhere in the repository
-CLAUDE.local.md
-.sandbox-data/
