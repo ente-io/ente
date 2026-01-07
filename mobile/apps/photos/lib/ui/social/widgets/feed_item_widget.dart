@@ -17,11 +17,8 @@ class FeedItemWidget extends StatelessWidget {
   final FeedItem feedItem;
   final int currentUserID;
 
-  /// Called when the user taps on non-thumbnail areas (icon, avatar, text).
+  /// Called when the user taps anywhere on the feed item.
   final VoidCallback? onTap;
-
-  /// Called when the user taps on the photo thumbnail.
-  final VoidCallback? onThumbnailTap;
 
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
@@ -33,7 +30,6 @@ class FeedItemWidget extends StatelessWidget {
     required this.feedItem,
     required this.currentUserID,
     this.onTap,
-    this.onThumbnailTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
     super.key,
@@ -90,10 +86,10 @@ class FeedItemWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          // Photo thumbnail - separate tap target
+          // Photo thumbnail
           if (feedItem.fileID != null)
             GestureDetector(
-              onTap: onThumbnailTap,
+              onTap: onTap,
               child: _FeedThumbnail(
                 fileID: feedItem.fileID!,
                 collectionID: feedItem.collectionID,

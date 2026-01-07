@@ -155,7 +155,6 @@ class _FeedScreenState extends State<FeedScreen> {
                         onTap: () => item.type == FeedItemType.photoLike
                             ? _openPhoto(item)
                             : _openComments(item),
-                        onThumbnailTap: () => _openPhoto(item),
                       );
                     },
                   ),
