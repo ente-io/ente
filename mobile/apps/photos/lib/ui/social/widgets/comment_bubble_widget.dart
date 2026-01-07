@@ -502,7 +502,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
               alignment:
                   widget.isOwnComment ? Alignment.topRight : Alignment.topLeft,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: widget.isOwnComment
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Stack(
