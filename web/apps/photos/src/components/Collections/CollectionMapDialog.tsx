@@ -185,9 +185,11 @@ function useMapData(
     });
 
     // Track which collection we've loaded to avoid unnecessary reloads
+    // Include fileCount to detect when collection content changes
     const loadedCollectionRef = useRef<{
         summaryId: number;
         collectionId: number | undefined;
+        fileCount: number;
     } | null>(null);
 
     const loadAllThumbs = useCallback(
@@ -233,14 +235,16 @@ function useMapData(
     useEffect(() => {
         if (!open) return;
 
-        // Skip reload if we already have data for this collection
+        // Skip reload if we already have data for this collection with same file count
         const currentSummaryId = collectionSummary.id;
         const currentCollectionId = activeCollection?.id;
+        const currentFileCount = collectionSummary.fileCount;
         const loaded = loadedCollectionRef.current;
         if (
             loaded &&
             loaded.summaryId === currentSummaryId &&
-            loaded.collectionId === currentCollectionId
+            loaded.collectionId === currentCollectionId &&
+            loaded.fileCount === currentFileCount
         ) {
             return;
         }
@@ -282,6 +286,7 @@ function useMapData(
                     loadedCollectionRef.current = {
                         summaryId: currentSummaryId,
                         collectionId: currentCollectionId,
+                        fileCount: currentFileCount,
                     };
 
                     void loadAllThumbs(pointsWithThumbs, files);
@@ -302,6 +307,7 @@ function useMapData(
                 loadedCollectionRef.current = {
                     summaryId: currentSummaryId,
                     collectionId: currentCollectionId,
+                    fileCount: currentFileCount,
                 };
 
                 return;
