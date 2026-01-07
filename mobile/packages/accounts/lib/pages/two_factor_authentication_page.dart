@@ -149,8 +149,9 @@ class _TwoFactorAuthenticationPageState
             children: [
               const SizedBox(height: 24),
               Image.asset(
-                'packages/ente_lock_screen/assets/locker_pin.png',
-                height: 120,
+                'assets/lock_screen_icon.png',
+                width: 129,
+                height: 95,
               ),
               const SizedBox(height: 24),
               Text(
