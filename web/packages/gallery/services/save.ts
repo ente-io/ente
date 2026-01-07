@@ -273,6 +273,16 @@ const downloadAndSave = async (
     ) => {
         if (!filesToDownload.length || isDownloading) return;
 
+        // Reset counts first if this is a retry, before any other logic
+        if (resetFailedCount) {
+            updateSaveGroup((g) => ({
+                ...g,
+                failed: 0,
+                failureReason: undefined,
+            }));
+            failedFiles.length = 0;
+        }
+
         // If already offline, mark all files as failed so retry is available
         if (!navigator.onLine) {
             log.info("Download skipped - network is offline");
@@ -281,21 +291,17 @@ const downloadAndSave = async (
             }
             updateSaveGroup((g) => ({
                 ...g,
-                failed: g.failed + filesToDownload.length,
+                failed: filesToDownload.length,
                 failureReason: "network_offline",
             }));
             return;
         }
 
         isDownloading = true;
-        if (resetFailedCount) {
-            updateSaveGroup((g) => ({
-                ...g,
-                failed: 0,
-                failureReason: undefined,
-            }));
+        // Only clear on first download, not retry (already cleared above)
+        if (!resetFailedCount) {
+            failedFiles.length = 0;
         }
-        failedFiles.length = 0;
 
         try {
             await saveAsZip(
