@@ -8,10 +8,6 @@ packages:
   - packages/*
   - apps/photos/plugins/*
 
-# Exclude auth app to unblock UI work
-ignore:
-  - apps/auth
-
 # Scripts that can be run with `melos run <script_name>`
 scripts:
   # The very first command you should run. It links all your local packages

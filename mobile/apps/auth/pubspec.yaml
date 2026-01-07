@@ -21,64 +21,34 @@ dependencies:
   device_info_plus: ^9.1.1
   dio: ^5.8.0+1
   dir_utils:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/dir_utils
+    path: ../../packages/dir_utils
   dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
   ente_accounts:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/accounts
+    path: ../../packages/accounts
   ente_base:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/base
+    path: ../../packages/base
   ente_configuration:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/configuration
+    path: ../../packages/configuration
   ente_crypto_dart:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_events:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/events
+    path: ../../packages/events
   ente_lock_screen:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/lock_screen
+    path: ../../packages/lock_screen
   ente_logging:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/logging
+    path: ../../packages/logging
   ente_network:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/network
+    path: ../../packages/network
   ente_qr:
     path: plugins/qr
   ente_strings:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/strings
+    path: ../../packages/strings
   ente_ui:
-    git:
-      url: ../../../
-      ref: 7371617af788ded7ecd66686db0272937c76c624
-      path: mobile/packages/ui
+    path: ../../packages/ui
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
