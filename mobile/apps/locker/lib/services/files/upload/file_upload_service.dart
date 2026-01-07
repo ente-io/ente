@@ -337,7 +337,7 @@ class FileUploader {
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
-      final fileAttributes = await CryptoUtil.encryptFileWithMD5(
+      final fileAttributes = await CryptoUtil.encryptFileWithMd5(
         file.path,
         encryptedFilePath,
         key: key,

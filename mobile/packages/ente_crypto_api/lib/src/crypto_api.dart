@@ -1,12 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
-
-import 'errors.dart';
-import 'models/crypto_key_pair.dart';
-import 'models/derived_key_result.dart';
-import 'models/encryption_result.dart';
+import 'package:ente_crypto_api/src/models/crypto_key_pair.dart';
+import 'package:ente_crypto_api/src/models/derived_key_result.dart';
+import 'package:ente_crypto_api/src/models/encryption_result.dart';
 
 abstract class CryptoApi {
   Future<void> init();
