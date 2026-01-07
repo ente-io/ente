@@ -464,33 +464,13 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
         .collection;
   }
 
-  Widget _buildDragHandle(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+  Widget _buildHeader(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     return SingleChildScrollView(
       controller: widget.dragController,
       physics: const ClampingScrollPhysics(),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.only(top: 12, bottom: 4),
-          width: 32,
-          height: 4,
-          decoration: BoxDecoration(
-            color: colorScheme.strokeFaint,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    return GestureDetector(
-      onVerticalDragStart: (_) {},
-      onVerticalDragUpdate: (_) {},
-      onVerticalDragEnd: (_) {},
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 12, 8),
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -536,7 +516,6 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
         top: false,
         child: Column(
           children: [
-            _buildDragHandle(context),
             _buildHeader(context),
             Expanded(
               child: GestureDetector(
