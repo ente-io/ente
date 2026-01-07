@@ -364,30 +364,6 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     );
 };
 
-interface CommentActionsProps {
-    onReply: () => void;
-    onLike: () => void;
-    isLiked?: boolean;
-}
-
-/**
- * Action buttons (like, reply) shown below comment bubbles.
- */
-const CommentActions: React.FC<CommentActionsProps> = ({
-    onReply,
-    onLike,
-    isLiked,
-}) => (
-    <ActionsContainer>
-        <ActionButton onClick={onLike}>
-            <HeartIcon filled={isLiked} />
-        </ActionButton>
-        <ActionButton onClick={onReply}>
-            <ReplyIcon />
-        </ActionButton>
-    </ActionsContainer>
-);
-
 // =============================================================================
 // Main Component
 // =============================================================================
@@ -1900,21 +1876,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                     {comment.text}
                                                 </CommentText>
                                             </CommentBubble>
-                                            {!contextMenu && (
-                                                <CommentActions
-                                                    onReply={() =>
-                                                        handleReply(comment)
-                                                    }
-                                                    onLike={() =>
-                                                        handleLikeComment(
-                                                            comment,
-                                                        )
-                                                    }
-                                                    isLiked={likedComments.has(
-                                                        comment.id,
-                                                    )}
-                                                />
-                                            )}
                                         </CommentBubbleInner>
                                     </CommentBubbleWrapper>
                                 </Box>
@@ -2394,7 +2355,7 @@ const CommentBubbleWrapper = styled(Box, {
     justifyContent: isOwn ? "flex-end" : "flex-start",
     width: "100%",
     marginTop: isFirstOwn ? 64 : 0,
-    marginBottom: isOwn ? 24 : isLastOwn ? 48 : 24,
+    marginBottom: isOwn ? 12 : isLastOwn ? 48 : 12,
     paddingRight: isOwn ? 52 : 0,
     paddingLeft: isOwn ? 0 : 28,
     position: "relative",
@@ -2437,34 +2398,6 @@ const QuotedReplyContainer = styled(Box, {
         theme.applyStyles("dark", {
             borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
         })),
-}));
-
-// Actions
-const ActionsContainer = styled(Box)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 9999,
-    padding: "10px 14px",
-    border: "2px solid #fff",
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    transform: "translate(50%, 50%)",
-    color: "#131313",
-    ...theme.applyStyles("dark", {
-        backgroundColor: "#363636",
-        border: "2px solid #1b1b1b",
-        color: "#fff",
-    }),
-}));
-
-const ActionButton = styled(Box)(() => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
 }));
 
 // Input Area
