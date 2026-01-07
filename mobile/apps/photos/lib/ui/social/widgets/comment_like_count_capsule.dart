@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class CommentActionsCapsule extends StatelessWidget {
+class CommentLikeCountCapsule extends StatelessWidget {
   final int likeCount;
   final VoidCallback? onTap;
 
-  const CommentActionsCapsule({
+  const CommentLikeCountCapsule({
     required this.likeCount,
     this.onTap,
     super.key,
@@ -16,7 +16,9 @@ class CommentActionsCapsule extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background =
-        isDark ? const Color(0xFF161616) : const Color(0xFFF0F0F0);
+        isDark ? const Color(0xFF212121) : const Color(0xFFF0F0F0);
+    final textColor =
+        isDark ? const Color(0xFFFFFFFF) : const Color(0xFF131313);
 
     return GestureDetector(
       onTap: onTap,
@@ -41,10 +43,10 @@ class CommentActionsCapsule extends StatelessWidget {
             const SizedBox(width: 2),
             Text(
               likeCount.toString(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF666666),
+                color: textColor,
                 height: 14 / 10,
                 letterSpacing: -0.3,
               ),
