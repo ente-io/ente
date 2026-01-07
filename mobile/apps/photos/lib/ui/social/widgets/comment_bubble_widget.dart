@@ -15,6 +15,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/comment_likes_bottom_sheet.dart";
 import "package:photos/ui/social/widgets/comment_actions_capsule.dart";
 import "package:photos/ui/social/widgets/comment_actions_popup.dart";
 import "package:photos/ui/social/widgets/delete_comment_confirmation_dialog.dart";
@@ -71,6 +72,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
   Comment? _parentComment;
   List<Reaction> _reactions = [];
   bool _isLiked = false;
+  int _optimisticLikeDelta = 0;
   bool _isLoadingParent = false;
   bool _isLoadingReactions = false;
   double _dragOffset = 0.0;
@@ -128,6 +130,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       _parentComment = null;
       _reactions = [];
       _isLiked = false;
+      _optimisticLikeDelta = 0;
       _contentSize = null;
       _loadData();
       _measureContent();
@@ -168,6 +171,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     _isLiked = _reactions.any(
       (r) => r.userID == widget.currentUserID && !r.isDeleted,
     );
+    _optimisticLikeDelta = 0;
     if (mounted) setState(() => _isLoadingReactions = false);
   }
 
@@ -193,7 +197,12 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
   Future<void> _toggleLike() async {
     final previousState = _isLiked;
-    setState(() => _isLiked = !_isLiked);
+    final previousDelta = _optimisticLikeDelta;
+
+    setState(() {
+      _isLiked = !_isLiked;
+      _optimisticLikeDelta = _isLiked ? 1 : -1;
+    });
 
     try {
       await SocialDataProvider.instance.toggleReaction(
@@ -205,7 +214,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     } catch (e) {
       _logger.severe('Failed to toggle comment like', e);
       if (mounted) {
-        setState(() => _isLiked = previousState);
+        setState(() {
+          _isLiked = previousState;
+          _optimisticLikeDelta = previousDelta;
+        });
         showShortToast(context, "Failed to like comment");
       }
       return;
@@ -213,7 +225,11 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
 
     // Refresh reactions after successful toggle (best-effort, no rollback if fails)
     _reactions = await widget.onFetchReactions();
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {
+        _optimisticLikeDelta = 0;
+      });
+    }
   }
 
   void _showHighlight() {
@@ -297,6 +313,15 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         }
       }
     }
+  }
+
+  void _showCommentLikesSheet() {
+    showCommentLikesBottomSheet(
+      context,
+      reactions: _reactions,
+      collectionID: widget.collectionID,
+      currentUserID: widget.currentUserID,
+    );
   }
 
   @override
@@ -432,6 +457,11 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     final canDeleteComment = widget.isOwnComment ||
         (widget.canModerateAnonComments && widget.comment.isAnonymous);
 
+    final actualCount = _reactions.where((r) => !r.isDeleted).length;
+    final likeCount = (actualCount + _optimisticLikeDelta).clamp(0, 999999);
+    final showCapsule =
+        !_isLoadingReactions && showActionsCapsule && likeCount > 0;
+
     return Padding(
       padding: EdgeInsets.only(
         right: widget.isOwnComment ? 6 : 0,
@@ -471,9 +501,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                   Stack(
                     children: [
                       Padding(
-                        padding: showActionsCapsule
-                            ? const EdgeInsets.only(right: 16, bottom: 17)
-                            : const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.only(right: 16, bottom: 12),
                         child: _CommentBubble(
                           comment: widget.comment,
                           isOwnComment: widget.isOwnComment,
@@ -483,16 +511,15 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           userResolver: widget.userResolver,
                         ),
                       ),
-                      if (!_isLoadingReactions && showActionsCapsule)
+                      if (showCapsule)
                         Positioned(
                           right: 0,
                           bottom: 0,
                           child: Opacity(
                             opacity: capsuleOpacity,
                             child: CommentActionsCapsule(
-                              isLiked: _isLiked,
-                              onLikeTap: _toggleLike,
-                              onReplyTap: widget.onReplyTap,
+                              likeCount: likeCount,
+                              onTap: _showCommentLikesSheet,
                             ),
                           ),
                         ),
