@@ -133,7 +133,11 @@ class _FeedScreenState extends State<FeedScreen> {
               : RefreshIndicator(
                   onRefresh: _onRefresh,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    padding: EdgeInsets.only(
+                      left: 15,
+                      right: 15,
+                      bottom: MediaQuery.paddingOf(context).bottom,
+                    ),
                     itemCount: _feedItems.length,
                     itemBuilder: (context, index) {
                       final item = _feedItems[index];
