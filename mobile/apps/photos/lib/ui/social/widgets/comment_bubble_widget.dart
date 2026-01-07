@@ -438,91 +438,88 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
         top: includePadding ? 8 : 0,
         bottom: includePadding ? 8 : 0,
       ),
-      child: IntrinsicWidth(
-        child: Column(
-          crossAxisAlignment: widget.isOwnComment
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
-          children: [
-            Opacity(
-              opacity: showHeader ? 1 : 0,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: widget.isOwnComment ? 18 : 0,
-                ),
-                child: _Header(
-                  isOwnComment: widget.isOwnComment,
-                  user: widget.user,
-                  createdAt: widget.comment.createdAt,
-                  currentUserID: widget.currentUserID,
-                ),
+      child: Column(
+        crossAxisAlignment: widget.isOwnComment
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          Opacity(
+            opacity: showHeader ? 1 : 0,
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: widget.isOwnComment ? 18 : 0,
+              ),
+              child: _Header(
+                isOwnComment: widget.isOwnComment,
+                user: widget.user,
+                createdAt: widget.comment.createdAt,
+                currentUserID: widget.currentUserID,
               ),
             ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: EdgeInsets.only(left: widget.isOwnComment ? 0 : 24),
-              child: Transform.scale(
-                scale: bubbleScale,
-                alignment: widget.isOwnComment
-                    ? Alignment.topRight
-                    : Alignment.topLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      children: [
-                        Padding(
-                          padding: showActionsCapsule
-                              ? const EdgeInsets.only(right: 16, bottom: 17)
-                              : const EdgeInsets.only(right: 16),
-                          child: _CommentBubble(
-                            comment: widget.comment,
-                            isOwnComment: widget.isOwnComment,
-                            isLoadingParent: _isLoadingParent,
-                            parentComment: _parentComment,
-                            currentUserID: widget.currentUserID,
-                            userResolver: widget.userResolver,
-                          ),
-                        ),
-                        if (!_isLoadingReactions && showActionsCapsule)
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Opacity(
-                              opacity: capsuleOpacity,
-                              child: CommentActionsCapsule(
-                                isLiked: _isLiked,
-                                onLikeTap: _toggleLike,
-                                onReplyTap: widget.onReplyTap,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (showActionsPopup)
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: EdgeInsets.only(left: widget.isOwnComment ? 0 : 24),
+            child: Transform.scale(
+              scale: bubbleScale,
+              alignment:
+                  widget.isOwnComment ? Alignment.topRight : Alignment.topLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: CommentActionsPopup(
-                          isLiked: _isLiked,
-                          onLikeTap: () {
-                            _hideHighlight();
-                            _toggleLike();
-                          },
-                          onReplyTap: () {
-                            _hideHighlight();
-                            widget.onReplyTap();
-                          },
-                          onDeleteTap: canDeleteComment ? _handleDelete : null,
-                          showDelete: canDeleteComment,
+                        padding: showActionsCapsule
+                            ? const EdgeInsets.only(right: 16, bottom: 17)
+                            : const EdgeInsets.only(right: 16),
+                        child: _CommentBubble(
+                          comment: widget.comment,
+                          isOwnComment: widget.isOwnComment,
+                          isLoadingParent: _isLoadingParent,
+                          parentComment: _parentComment,
+                          currentUserID: widget.currentUserID,
+                          userResolver: widget.userResolver,
                         ),
                       ),
-                  ],
-                ),
+                      if (!_isLoadingReactions && showActionsCapsule)
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Opacity(
+                            opacity: capsuleOpacity,
+                            child: CommentActionsCapsule(
+                              isLiked: _isLiked,
+                              onLikeTap: _toggleLike,
+                              onReplyTap: widget.onReplyTap,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (showActionsPopup)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: CommentActionsPopup(
+                        isLiked: _isLiked,
+                        onLikeTap: () {
+                          _hideHighlight();
+                          _toggleLike();
+                        },
+                        onReplyTap: () {
+                          _hideHighlight();
+                          widget.onReplyTap();
+                        },
+                        onDeleteTap: canDeleteComment ? _handleDelete : null,
+                        showDelete: canDeleteComment,
+                      ),
+                    ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
