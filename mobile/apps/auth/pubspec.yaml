@@ -22,7 +22,7 @@ dependencies:
   dio: ^5.8.0+1
   dir_utils:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/dir_utils
   dots_indicator: ^3.0.0
@@ -31,17 +31,17 @@ dependencies:
   email_validator: ^3.0.0
   ente_accounts:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/accounts
   ente_base:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/base
   ente_configuration:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/configuration
   ente_crypto_dart:
@@ -49,34 +49,34 @@ dependencies:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_events:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/events
   ente_lock_screen:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/lock_screen
   ente_logging:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/logging
   ente_network:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/network
   ente_qr:
     path: plugins/qr
   ente_strings:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/strings
   ente_ui:
     git:
-      url: https://github.com/ente-io/ente.git
+      url: ../../../
       ref: 7371617af788ded7ecd66686db0272937c76c624
       path: mobile/packages/ui
   event_bus: ^2.0.0

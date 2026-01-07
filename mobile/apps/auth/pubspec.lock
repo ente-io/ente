@@ -364,9 +364,11 @@ packages:
   dir_utils:
     dependency: "direct main"
     description:
-      path: "../../packages/dir_utils"
-      relative: true
-    source: path
+      path: "mobile/packages/dir_utils"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   dots_indicator:
     dependency: "direct main"
@@ -403,23 +405,29 @@ packages:
   ente_accounts:
     dependency: "direct main"
     description:
-      path: "../../packages/accounts"
-      relative: true
-    source: path
+      path: "mobile/packages/accounts"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_base:
     dependency: "direct main"
     description:
-      path: "../../packages/base"
-      relative: true
-    source: path
+      path: "mobile/packages/base"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_configuration:
     dependency: "direct main"
     description:
-      path: "../../packages/configuration"
-      relative: true
-    source: path
+      path: "mobile/packages/configuration"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_crypto_dart:
     dependency: "direct main"
@@ -433,30 +441,38 @@ packages:
   ente_events:
     dependency: "direct main"
     description:
-      path: "../../packages/events"
-      relative: true
-    source: path
+      path: "mobile/packages/events"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_lock_screen:
     dependency: "direct main"
     description:
-      path: "../../packages/lock_screen"
-      relative: true
-    source: path
+      path: "mobile/packages/lock_screen"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_logging:
     dependency: "direct main"
     description:
-      path: "../../packages/logging"
-      relative: true
-    source: path
+      path: "mobile/packages/logging"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_network:
     dependency: "direct main"
     description:
-      path: "../../packages/network"
-      relative: true
-    source: path
+      path: "mobile/packages/network"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_qr:
     dependency: "direct main"
@@ -468,23 +484,29 @@ packages:
   ente_strings:
     dependency: "direct main"
     description:
-      path: "../../packages/strings"
-      relative: true
-    source: path
+      path: "mobile/packages/strings"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_ui:
     dependency: "direct main"
     description:
-      path: "../../packages/ui"
-      relative: true
-    source: path
+      path: "mobile/packages/ui"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   ente_utils:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../packages/utils"
-      relative: true
-    source: path
+      path: "mobile/packages/utils"
+      ref: "7371617af788ded7ecd66686db0272937c76c624"
+      resolved-ref: "7371617af788ded7ecd66686db0272937c76c624"
+      url: "../../.."
+    source: git
     version: "1.0.0"
   event_bus:
     dependency: "direct main"
