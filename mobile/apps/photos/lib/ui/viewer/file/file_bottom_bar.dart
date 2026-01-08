@@ -26,6 +26,7 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/like_collection_selector_sheet.dart";
 import "package:photos/ui/social/likes_bottom_sheet.dart";
+import "package:photos/ui/viewer/actions/suggest_delete_sheet.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import "package:photos/utils/share_util.dart";
@@ -155,15 +156,17 @@ class FileBottomBarState extends State<FileBottomBar> {
             .value ??
         false;
 
+    final Collection? collection = widget.file.collectionID != null
+        ? CollectionsService.instance.getCollectionByID(
+            widget.file.collectionID!,
+          )
+        : null;
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
     final bool isFileHidden = widget.file.isOwner &&
         widget.file.isUploaded &&
-        (CollectionsService.instance
-                .getCollectionByID(widget.file.collectionID!)
-                ?.isHidden() ??
-            false);
+        (collection?.isHidden() ?? false);
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
@@ -189,6 +192,18 @@ class FileBottomBarState extends State<FileBottomBar> {
             ),
           ),
         );
+      }
+
+      final bool canShowSuggestDelete = collection != null &&
+          flagService.internalUser &&
+          isInSharedCollection &&
+          canSuggestDeleteForFile(
+            file: widget.file,
+            collection: collection,
+          );
+
+      if (canShowSuggestDelete) {
+        children.add(_buildSuggestDeleteButton(collection));
       }
 
       children.add(
@@ -346,6 +361,22 @@ class FileBottomBarState extends State<FileBottomBar> {
     );
   }
 
+  Widget _buildSuggestDeleteButton(Collection collection) {
+    return Tooltip(
+      message: AppLocalizations.of(context).suggestDeletion,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: IconButton(
+          icon: const Icon(
+            Icons.flag_outlined,
+            color: Colors.white,
+          ),
+          onPressed: () => _onSuggestDelete(collection),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeartIcon() {
     return Tooltip(
       message: AppLocalizations.of(context).like,
@@ -494,6 +525,22 @@ class FileBottomBarState extends State<FileBottomBar> {
         showShortToast(context, "Failed to remove like");
       }
     }
+  }
+
+  Future<void> _onSuggestDelete(Collection collection) async {
+    if (widget.file.uploadedFileID == null) {
+      return;
+    }
+    await showSuggestDeleteSheet(
+      context: context,
+      onConfirm: () async {
+        await CollectionsService.instance.suggestDeleteFromCollection(
+          collection.id,
+          [widget.file],
+        );
+        widget.onFileRemoved(widget.file);
+      },
+    );
   }
 
   void _showLikesBottomSheet() {
