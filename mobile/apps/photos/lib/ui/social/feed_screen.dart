@@ -116,8 +116,9 @@ class _FeedScreenState extends State<FeedScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
+        centerTitle: false,
         leading: IconButtonWidget(
-          iconButtonType: IconButtonType.secondary,
+          iconButtonType: IconButtonType.primary,
           icon: Icons.arrow_back,
           onTap: () => Navigator.of(context).pop(),
         ),
