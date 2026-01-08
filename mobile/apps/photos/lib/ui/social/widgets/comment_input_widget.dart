@@ -99,9 +99,8 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
         right: 18,
         top: 20,
       ),
-      color: isDarkMode
-          ? const Color(0xFF0E0E0E)
-          : colorScheme.backgroundElevated,
+      color:
+          isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundElevated,
       child: SafeArea(
         top: false,
         child: Container(
