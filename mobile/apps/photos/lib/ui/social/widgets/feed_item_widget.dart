@@ -159,7 +159,9 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: colorScheme.backgroundElevated,
+              color: isDarkMode
+                  ? colorScheme.backgroundElevated
+                  : const Color(0xFFFFFFFF),
               shape: BoxShape.circle,
             ),
             child: Center(
