@@ -236,9 +236,8 @@ class _LikeCollectionSelectorSheetState
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: isDarkMode
-            ? const Color(0xFF0E0E0E)
-            : colorScheme.backgroundBase,
+        color:
+            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundBase,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(28),
         ),
@@ -438,19 +437,31 @@ class _FileThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 128,
-        height: 128,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: file != null
-              ? ThumbnailWidget(
-                  file!,
-                  thumbnailSize: thumbnailLargeSize,
-                  rawThumbnail: true,
-                )
-              : Container(color: placeholderColor),
-        ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 13, left: 13, right: 13),
+            child: SizedBox(
+              width: 128,
+              height: 128,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: file != null
+                    ? ThumbnailWidget(
+                        file!,
+                        thumbnailSize: thumbnailLargeSize,
+                        rawThumbnail: true,
+                      )
+                    : Container(color: placeholderColor),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Image.asset("assets/select_album_to_like_asset.png"),
+          ),
+        ],
       ),
     );
   }
