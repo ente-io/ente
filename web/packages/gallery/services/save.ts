@@ -32,105 +32,27 @@ interface DownloadLimits {
 let cachedLimits: DownloadLimits | undefined;
 
 /**
- * Get download limits optimized for the current device and browser.
+ * Get download limits for the current device.
  *
- * The limits are determined based on:
- * - **Device type**: iOS devices have stricter memory limits, Android varies
- * - **Browser**: Safari/WebKit has stricter blob size handling
- * - **Available memory**: Uses `navigator.deviceMemory` when available
- *
- * JSZip requires ~2-3x the final ZIP size in peak memory during generation.
- * Limits are set to stay well within browser blob/memory limits:
- * - Chrome desktop: 2GB in-memory blob limit
- * - Android Chrome: RAM/100 blob limit (40-80MB on typical devices)
- * - iOS Safari: ~2GB per-tab limit on modern devices
- *
- * Limits by platform:
- * - iOS (all browsers use WebKit): 4 concurrent, 150MB max
- * - Android (low memory): 3 concurrent, 75MB max
- * - Android (normal): 5 concurrent, 150MB max
- * - Desktop Safari: 6 concurrent, 250MB max
- * - Other mobile: 4 concurrent, 100MB max
- * - Desktop (low memory): 6 concurrent, 200MB max
- * - Desktop (normal): 8 concurrent, 400MB max
+ * - Mobile devices: 4 concurrent, 100MB max
+ * - Desktop: 8 concurrent, 250MB max
  */
 const getDownloadLimits = (): DownloadLimits => {
     if (cachedLimits) return cachedLimits;
 
     const ua = navigator.userAgent.toLowerCase();
-
-    // Detect iOS - all browsers on iOS use WebKit with strict memory limits.
-    // iPadOS 13+ reports as "Macintosh" in UA so we check maxTouchPoints.
-    const isIOS =
+    const isMobile =
         ua.includes("iphone") ||
         ua.includes("ipad") ||
         ua.includes("ipod") ||
+        ua.includes("android") ||
+        ua.includes("mobile") ||
+        ua.includes("tablet") ||
         (ua.includes("macintosh") && navigator.maxTouchPoints > 1);
 
-    // Detect Android
-    const isAndroid = ua.includes("android");
-
-    // Detect mobile (fallback for other mobile browsers)
-    const isMobile =
-        isIOS || isAndroid || ua.includes("mobile") || ua.includes("tablet");
-
-    // Detect Safari - Chrome/Firefox on macOS include "safari" in UA but also
-    // include their own name, so we exclude those.
-    const isSafari =
-        ua.includes("safari") &&
-        !ua.includes("chrome") &&
-        !ua.includes("chromium") &&
-        !ua.includes("firefox") &&
-        !ua.includes("edg");
-
-    // deviceMemory is available in Chrome-based browsers (in GB).
-    // Low memory devices (< 4GB) need more conservative limits.
-    const deviceMemory = (navigator as { deviceMemory?: number }).deviceMemory;
-    const isLowMemoryDevice = deviceMemory !== undefined && deviceMemory < 4;
-
-    // iOS - WebKit's aggressive memory management, but modern devices have
-    // ~2GB per-tab limit. 150MB * 3 (peak memory multiplier) = 450MB, safe margin.
-    if (isIOS) {
-        cachedLimits = {
-            concurrency: 4,
-            maxZipSize: 150 * 1024 * 1024, // 150MB
-        };
-        return cachedLimits;
-    }
-
-    // Android - Chrome's blob limit is RAM/100, so keep conservative.
-    // Low memory: 75MB, Normal (6GB+ devices common): 150MB.
-    if (isAndroid) {
-        cachedLimits = isLowMemoryDevice
-            ? { concurrency: 3, maxZipSize: 75 * 1024 * 1024 } // 75MB
-            : { concurrency: 5, maxZipSize: 150 * 1024 * 1024 }; // 150MB
-        return cachedLimits;
-    }
-
-    // Desktop Safari - WebKit has "very high" limits per Apple's documentation.
-    // 250MB * 3 = 750MB peak, well within safe range.
-    if (isSafari) {
-        cachedLimits = {
-            concurrency: 6,
-            maxZipSize: 250 * 1024 * 1024, // 250MB
-        };
-        return cachedLimits;
-    }
-
-    // Other mobile browsers (rare: Windows Phone, KaiOS, etc.)
-    if (isMobile) {
-        cachedLimits = {
-            concurrency: 4,
-            maxZipSize: 100 * 1024 * 1024, // 100MB
-        };
-        return cachedLimits;
-    }
-
-    // Desktop browsers (Chrome, Firefox, Edge) - most capable.
-    // Chrome has 2GB in-memory blob limit. 400MB * 3 = 1.2GB peak, safe margin.
-    cachedLimits = isLowMemoryDevice
-        ? { concurrency: 6, maxZipSize: 200 * 1024 * 1024 } // 200MB
-        : { concurrency: 8, maxZipSize: 400 * 1024 * 1024 }; // 400MB
+    cachedLimits = isMobile
+        ? { concurrency: 4, maxZipSize: 100 * 1024 * 1024 } // 100MB
+        : { concurrency: 8, maxZipSize: 250 * 1024 * 1024 }; // 250MB
 
     return cachedLimits;
 };
