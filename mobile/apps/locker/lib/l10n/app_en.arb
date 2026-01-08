@@ -210,6 +210,7 @@
   "noCollectionsFound": "No collections found",
   "createYourFirstCollection": "Create your first collection to get started",
   "createCollection": "Create collection",
+  "enterCollectionName": "Enter collection name",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
   "collectionEmptyStateTitle": "Nothing to see here",
@@ -697,7 +698,7 @@
     }
   },
   "addToCollection": "Add to collection",
-  "newCollection": "New collection",
+  "newCollection": "New Collection",
   "title": "Title",
   "editItem": "Edit item",
   "enterNewTitle": "Enter a new title",
@@ -902,7 +903,7 @@
   "subscriptionRequiredForSharing": "You need a paid subscription to share links",
   "sessionExpired": "Session expired",
   "pleaseLoginAgain": "Please login again",
-  "language": "Language",
-  "selectLanguage": "Select language",
-  "general": "General"
+  "filters": "Filters",
+  "seeAllCollections": "See all collections",
+  "clearAllFilters": "Clear all filters"
 }
