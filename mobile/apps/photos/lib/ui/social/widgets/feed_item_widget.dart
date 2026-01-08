@@ -248,11 +248,12 @@ class _StackedAvatars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final actors = _getActors();
     final displayCount = actors.length.clamp(1, 2);
 
     if (displayCount == 1) {
-      return _buildSingleAvatar(actors.first);
+      return _buildSingleAvatar(actors.first, colorScheme);
     }
 
     // Stacked avatars with overlap
@@ -269,7 +270,7 @@ class _StackedAvatars extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white,
+                  color: colorScheme.backgroundBase,
                   width: 1.167,
                 ),
               ),
@@ -284,11 +285,20 @@ class _StackedAvatars extends StatelessWidget {
           // Second (back) avatar
           Positioned(
             left: 21, // Overlap by 7px (28 - 21 = 7)
-            child: UserAvatarWidget(
-              actors[1],
-              type: AvatarType.lg,
-              currentUserID: currentUserID,
-              addStroke: false,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: colorScheme.backgroundBase,
+                  width: 1.167,
+                ),
+              ),
+              child: UserAvatarWidget(
+                actors[1],
+                type: AvatarType.lg,
+                currentUserID: currentUserID,
+                addStroke: false,
+              ),
             ),
           ),
         ],
@@ -296,12 +306,12 @@ class _StackedAvatars extends StatelessWidget {
     );
   }
 
-  Widget _buildSingleAvatar(User user) {
+  Widget _buildSingleAvatar(User user, EnteColorScheme colorScheme) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: Colors.white,
+          color: colorScheme.backgroundBase,
           width: 1.167,
         ),
       ),

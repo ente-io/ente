@@ -100,14 +100,14 @@ class _PreviewAvatarStack extends StatelessWidget {
           Positioned(
             left: 0,
             top: 0,
-            child: _buildAvatar(actors.first, showBorder: false),
+            child: _buildAvatar(actors.first, colorScheme, showBorder: false),
           ),
           // Second (bottom-right) avatar - only if multiple actors
           if (hasMultipleActors)
             Positioned(
               right: 0,
               bottom: 0,
-              child: _buildAvatar(actors[1], showBorder: true),
+              child: _buildAvatar(actors[1], colorScheme, showBorder: true),
             ),
           // Icon badge at bottom-left
           Positioned(
@@ -124,13 +124,17 @@ class _PreviewAvatarStack extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(User user, {required bool showBorder}) {
+  Widget _buildAvatar(
+    User user,
+    EnteColorScheme colorScheme, {
+    required bool showBorder,
+  }) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: showBorder
             ? Border.all(
-                color: Colors.white,
+                color: colorScheme.backgroundBase,
                 width: 1.5,
               )
             : null,
