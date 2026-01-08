@@ -5,6 +5,7 @@ import 'package:ente_ui/lifecycle_event_handler.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pinput/pinput.dart';
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
@@ -64,11 +65,16 @@ class _TwoFactorAuthenticationPageState
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
-        title: Image.asset(
-          'assets/locker-logo-blue.png',
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
           height: 24,
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -143,8 +149,9 @@ class _TwoFactorAuthenticationPageState
             children: [
               const SizedBox(height: 24),
               Image.asset(
-                'packages/ente_lock_screen/assets/locker_pin.png',
-                height: 120,
+                'assets/lock_screen_icon.png',
+                width: 129,
+                height: 95,
               ),
               const SizedBox(height: 24),
               Text(

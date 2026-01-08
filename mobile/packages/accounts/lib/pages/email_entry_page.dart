@@ -8,6 +8,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:password_strength/password_strength.dart';
 import "package:styled_text/styled_text.dart";
 
@@ -86,7 +87,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundBase,
         centerTitle: true,
-        title: Image.asset('assets/locker-logo-blue.png', height: 24),
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          height: 24,
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: colorScheme.primary700,
