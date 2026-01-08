@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
@@ -380,7 +381,7 @@ class _AlbumsHeader extends StatelessWidget {
                   Text("Like all", style: textTheme.small),
                   const SizedBox(width: 10),
                   Icon(
-                    allLiked ? Icons.favorite : Icons.favorite_border,
+                    allLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                     color: allLiked ? _greenHeartColor : colorScheme.textBase,
                     size: 16,
                   ),
@@ -505,7 +506,7 @@ class _AlbumListItem extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  state.isLiked ? Icons.favorite : Icons.favorite_border,
+                  state.isLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                   color: _greenHeartColor,
                   size: 19.2,
                 ),

@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -211,7 +212,7 @@ class _CommentLikeListItem extends StatelessWidget {
             ),
           ),
           const Icon(
-            Icons.favorite,
+            EnteIcons.likeFilled,
             color: Color(0xFF08C225),
             size: 20,
           ),

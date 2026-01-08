@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -435,7 +436,7 @@ class _LikeListItem extends StatelessWidget {
             ),
           ),
           const Icon(
-            Icons.favorite,
+            EnteIcons.likeFilled,
             color: Color(0xFF08C225),
             size: 20,
           ),

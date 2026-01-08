@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/extensions/user_extension.dart";
@@ -174,19 +175,19 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
     switch (type) {
       case FeedItemType.photoLike:
         return const Icon(
-          Icons.favorite,
+          EnteIcons.likeFilled,
           size: 18,
           color: Color(0xFF00B33C),
         );
       case FeedItemType.comment:
         return Icon(
-          Icons.chat_bubble_outline,
+          EnteIcons.commentBubbleStroke,
           size: 18,
           color: getEnteColorScheme(context).textMuted,
         );
       case FeedItemType.reply:
         return Icon(
-          Icons.reply,
+          EnteIcons.reply,
           size: 18,
           color: getEnteColorScheme(context).textMuted,
         );
@@ -195,7 +196,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Icon(
-              Icons.chat_bubble_outline,
+              EnteIcons.commentBubbleStroke,
               size: 18,
               color: getEnteColorScheme(context).textMuted,
             ),
@@ -203,7 +204,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
               right: -4,
               bottom: -4,
               child: Icon(
-                Icons.favorite,
+                EnteIcons.likeFilled,
                 size: 10,
                 color: Color(0xFF00B33C),
               ),
@@ -215,7 +216,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Icon(
-              Icons.reply,
+              EnteIcons.reply,
               size: 18,
               color: getEnteColorScheme(context).textMuted,
             ),
@@ -223,7 +224,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
               right: -4,
               bottom: -4,
               child: Icon(
-                Icons.favorite,
+                EnteIcons.likeFilled,
                 size: 10,
                 color: Color(0xFF00B33C),
               ),
