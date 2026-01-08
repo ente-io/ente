@@ -212,9 +212,8 @@ class _FirstLetterCircularAvatarState
     if (widget.user.email == Configuration.instance.getEmail()) {
       decorationColor = Colors.black;
     } else {
-      decorationColor = colorScheme.avatarColors[
-          (widget.user.id?.abs() ?? widget.user.email.length)
-              .remainder(colorScheme.avatarColors.length)];
+      decorationColor = colorScheme.avatarColors[(widget.user.email.length)
+          .remainder(colorScheme.avatarColors.length)];
     }
 
     final avatarStyle = getAvatarStyle(context, widget.type);
@@ -325,8 +324,7 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
       decorationColor = Colors.black;
     } else {
       decorationColor = colorScheme.avatarColors[
-          (user.id?.abs() ?? user.email.length)
-              .remainder(colorScheme.avatarColors.length)];
+          (user.email.length).remainder(colorScheme.avatarColors.length)];
     }
     return Container(
       color: decorationColor,
