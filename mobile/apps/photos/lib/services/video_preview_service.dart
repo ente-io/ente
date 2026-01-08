@@ -119,6 +119,10 @@ class VideoPreviewService {
         flagService.streamEnabledByDefault;
   }
 
+  Future<void> init() async {
+    await runInternalUserStreamingMigration();
+  }
+
   /// Run one-time migration for internal users to enable streaming.
   /// This migration:
   /// - Only runs once (tracked by migration flag)

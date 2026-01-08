@@ -334,8 +334,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     wrappedService.scheduleInitialLoad();
     await localSettings.initSwipeToSelectDefault();
 
-    // Run one-time migration to enable streaming for internal users
-    await VideoPreviewService.instance.runInternalUserStreamingMigration();
+    await VideoPreviewService.instance.init();
 
     logLocalSettings();
     initComplete = true;

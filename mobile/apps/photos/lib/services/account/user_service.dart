@@ -420,7 +420,7 @@ class UserService {
         }
         await dialog.hide();
         await flagService.tryRefreshFlags();
-        await VideoPreviewService.instance.runInternalUserStreamingMigration();
+        await VideoPreviewService.instance.init();
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(AccountConfiguredEvent());
       }
@@ -808,8 +808,7 @@ class UserService {
             keyEncryptionKey: keyEncryptionKey,
           );
           await flagService.tryRefreshFlags();
-          await VideoPreviewService.instance
-              .runInternalUserStreamingMigration();
+          await VideoPreviewService.instance.init();
           Configuration.instance.resetVolatilePassword();
           page = const HomeWidget();
         } else {

@@ -156,7 +156,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     await dialog.hide();
     Configuration.instance.resetVolatilePassword();
     await flagService.tryRefreshFlags();
-    await VideoPreviewService.instance.runInternalUserStreamingMigration();
+    await VideoPreviewService.instance.init();
     Bus.instance.fire(SubscriptionPurchasedEvent());
     unawaited(
       Navigator.of(context).pushAndRemoveUntil(
