@@ -226,18 +226,42 @@ const downloadAndSave = async (
         }
 
         try {
-            await saveAsZip(
-                filesToDownload,
-                title,
-                () =>
-                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 })),
-                (file) => {
-                    failedFiles.push(file);
+            // Single non-live-photo file: download directly without zipping
+            const singleFile = filesToDownload[0];
+            if (
+                filesToDownload.length === 1 &&
+                singleFile &&
+                singleFile.metadata.fileType !== FileType.livePhoto
+            ) {
+                try {
+                    const fileBlob = await downloadManager.fileBlob(singleFile);
+                    const fileName = fileFileName(singleFile);
+                    const url = URL.createObjectURL(fileBlob);
+                    saveAsFileAndRevokeObjectURL(url, fileName);
+                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
+                } catch (e) {
+                    log.error("File download failed", e);
+                    failedFiles.push(singleFile);
                     updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
-                },
-                canceller,
-                updateSaveGroup,
-            );
+                }
+            } else {
+                // Multiple files or live photo: use ZIP
+                await saveAsZip(
+                    filesToDownload,
+                    title,
+                    () =>
+                        updateSaveGroup((g) => ({
+                            ...g,
+                            success: g.success + 1,
+                        })),
+                    (file) => {
+                        failedFiles.push(file);
+                        updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
+                    },
+                    canceller,
+                    updateSaveGroup,
+                );
+            }
 
             if (!failedFiles.length) {
                 updateSaveGroup((g) => ({ ...g, retry: undefined }));
