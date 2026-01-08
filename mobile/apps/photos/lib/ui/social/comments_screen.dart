@@ -520,6 +520,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final selectedCollection = _currentCollection;
     final canModerateAnonComments = selectedCollection != null &&
         (selectedCollection.isOwner(_currentUserID) ||
@@ -527,7 +528,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: isDarkMode
+            ? const Color(0xFF0E0E0E)
+            : colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
