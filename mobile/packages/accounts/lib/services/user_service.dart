@@ -30,6 +30,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/user_details_changed_event.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_strings/ente_strings.dart';
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/components/progress_dialog.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -126,43 +127,29 @@ class UserService {
       final String? enteErrCode = e.response?.data["code"];
       if (enteErrCode != null && enteErrCode == "USER_ALREADY_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.emailAlreadyRegistered,
+            title: context.strings.oops,
+            message: context.strings.emailAlreadyRegistered,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "USER_NOT_REGISTERED") {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.emailNotRegistered,
-          ),
-        );
-      } else if (enteErrCode != null &&
-          enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
-        unawaited(
-          showErrorDialog(
-            context,
-            context.strings.oops,
-            context.strings.lockerExistingUserRequired,
-          ),
-        );
-      } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
-        unawaited(
-          showErrorDialog(
-            context,
-            "We're out of beta seats for now",
-            "This preview access has reached capacity. We'll be opening it to more users soon.",
+            title: context.strings.oops,
+            message: context.strings.emailNotRegistered,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
-          showErrorDialog(
+          showAlertBottomSheet(
             context,
-            context.strings.oops,
-            context.strings.thisEmailIsAlreadyInUse,
+            title: context.strings.oops,
+            message: context.strings.thisEmailIsAlreadyInUse,
+            assetPath: 'assets/warning-grey.png',
           ),
         );
       } else {
@@ -525,47 +512,32 @@ class UserService {
     } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
-      final dynamic data = e.response?.data;
-      final String? enteErrCode =
-          data is Map<String, dynamic> ? data["code"] as String? : null;
-      if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
-        await showErrorDialog(
+      if (e.response != null && e.response!.statusCode == 410) {
+        await showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.lockerExistingUserRequired,
-        );
-        return;
-      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
-        await showErrorDialog(
-          context,
-          "We're out of beta seats for now",
-          "This preview access has reached capacity. We'll be opening it to more users soon.",
-        );
-        return;
-      } else if (e.response != null && e.response!.statusCode == 410) {
-        await showErrorDialog(
-          context,
-          context.strings.oops,
-          context.strings.yourVerificationCodeHasExpired,
+          title: context.strings.oops,
+          message: context.strings.yourVerificationCodeHasExpired,
+          assetPath: 'assets/warning-grey.png',
         );
         Navigator.of(context).pop();
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.incorrectCode,
-          context.strings.sorryTheCodeYouveEnteredIsIncorrect,
+          title: context.strings.incorrectCode,
+          message: context.strings.sorryTheCodeYouveEnteredIsIncorrect,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.verificationFailedPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.verificationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -940,25 +912,7 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      final dynamic data = e.response?.data;
-      final String? enteErrCode =
-          data is Map<String, dynamic> ? data["code"] as String? : null;
-      if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
-        // ignore: unawaited_futures
-        showErrorDialog(
-          context,
-          context.strings.oops,
-          context.strings.lockerExistingUserRequired,
-        );
-      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
-        // ignore: unawaited_futures
-        showErrorDialog(
-          context,
-          "We're out of beta seats for now",
-          "This preview access has reached capacity. We'll be opening it to more users soon.",
-        );
-      } else if (e.response != null && e.response!.statusCode == 404) {
+      if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
@@ -971,20 +925,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.incorrectCode,
-          context.strings.authenticationFailedPleaseTryAgain,
+          title: context.strings.incorrectCode,
+          message: context.strings.authenticationFailedPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.authenticationFailedPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.authenticationFailedPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     }
   }
@@ -1037,20 +993,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.somethingWentWrongPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.somethingWentWrongPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
@@ -1086,10 +1044,11 @@ class UserService {
       );
     } catch (e) {
       await dialog.hide();
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.strings.incorrectRecoveryKey,
-        context.strings.theRecoveryKeyYouEnteredIsIncorrect,
+        title: context.strings.incorrectRecoveryKey,
+        message: context.strings.theRecoveryKeyYouEnteredIsIncorrect,
+        assetPath: 'assets/warning-grey.png',
       );
       return;
     }
@@ -1138,20 +1097,22 @@ class UserService {
         );
       } else {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          context.strings.oops,
-          context.strings.somethingWentWrongPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.somethingWentWrongPleaseTryAgain,
+          assetPath: 'assets/warning-grey.png',
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.somethingWentWrongPleaseTryAgain,
+        title: context.strings.oops,
+        message: context.strings.somethingWentWrongPleaseTryAgain,
+        assetPath: 'assets/warning-grey.png',
       );
     } finally {
       await dialog.hide();
