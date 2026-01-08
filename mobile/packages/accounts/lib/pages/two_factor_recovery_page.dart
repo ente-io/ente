@@ -61,7 +61,6 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
         centerTitle: true,
         title: SvgPicture.asset(
           'assets/svg/app-logo.svg',
-          height: 24,
           colorFilter: ColorFilter.mode(
             colorScheme.primary700,
             BlendMode.srcIn,
