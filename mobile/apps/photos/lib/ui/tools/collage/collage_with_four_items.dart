@@ -10,6 +10,8 @@ import "package:widgets_to_image/widgets_to_image.dart";
 enum Variant {
   first,
   second,
+  third,
+  fourth,
 }
 
 class CollageWithFourItems extends StatefulWidget {
@@ -20,11 +22,13 @@ class CollageWithFourItems extends StatefulWidget {
     this.fourth, {
     super.key,
     this.onControllerReady,
+    this.enableExtendedLayouts = false,
     this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third, fourth;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final bool enableExtendedLayouts;
   final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
@@ -110,6 +114,28 @@ class _CollageWithFourItemsState extends State<CollageWithFourItems>
             });
           },
         ),
+        if (widget.enableExtendedLayouts)
+          CollageLayoutIconButton(
+            child: ThirdVariantIcon(
+              isActive: _variant == Variant.third,
+            ),
+            onTap: () {
+              setState(() {
+                _variant = Variant.third;
+              });
+            },
+          ),
+        if (widget.enableExtendedLayouts)
+          CollageLayoutIconButton(
+            child: FourthVariantIcon(
+              isActive: _variant == Variant.fourth,
+            ),
+            onTap: () {
+              setState(() {
+                _variant = Variant.fourth;
+              });
+            },
+          ),
       ],
     );
   }
@@ -132,6 +158,20 @@ class _CollageWithFourItemsState extends State<CollageWithFourItems>
             _collageItem(2),
             _collageItem(3),
           ),
+        );
+      case Variant.third:
+        return ThirdVariant(
+          _collageItem(0),
+          _collageItem(1),
+          _collageItem(2),
+          _collageItem(3),
+        );
+      case Variant.fourth:
+        return FourthVariant(
+          _collageItem(0),
+          _collageItem(1),
+          _collageItem(2),
+          _collageItem(3),
         );
     }
   }
@@ -257,6 +297,116 @@ class SecondVariant extends StatelessWidget {
   }
 }
 
+class ThirdVariant extends StatelessWidget {
+  const ThirdVariant(
+    this.first,
+    this.second,
+    this.third,
+    this.fourth, {
+    super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
+    this.color = Colors.white,
+  });
+
+  final Widget first, second, third, fourth;
+  final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 2,
+              mainAxisCellCount: 2,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: second,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: third,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 3,
+              mainAxisCellCount: 1,
+              child: fourth,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FourthVariant extends StatelessWidget {
+  const FourthVariant(
+    this.first,
+    this.second,
+    this.third,
+    this.fourth, {
+    super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
+    this.color = Colors.white,
+  });
+
+  final Widget first, second, third, fourth;
+  final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 3,
+              mainAxisCellCount: 1,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: second,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: third,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: fourth,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class FirstVariantIcon extends StatelessWidget {
   const FirstVariantIcon({
     super.key,
@@ -293,6 +443,54 @@ class SecondVariantIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
       child: SecondVariant(
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+        color: Colors.transparent,
+      ),
+    );
+  }
+}
+
+class ThirdVariantIcon extends StatelessWidget {
+  const ThirdVariantIcon({
+    super.key,
+    this.isActive = false,
+  });
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollageIconContainerWidget(
+      width: 56,
+      child: ThirdVariant(
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+        color: Colors.transparent,
+      ),
+    );
+  }
+}
+
+class FourthVariantIcon extends StatelessWidget {
+  const FourthVariantIcon({
+    super.key,
+    this.isActive = false,
+  });
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollageIconContainerWidget(
+      width: 56,
+      child: FourthVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),

@@ -11,6 +11,8 @@ enum Variant {
   first,
   second,
   third,
+  fourth,
+  fifth,
 }
 
 class CollageWithThreeItems extends StatefulWidget {
@@ -20,11 +22,13 @@ class CollageWithThreeItems extends StatefulWidget {
     this.third, {
     super.key,
     this.onControllerReady,
+    this.enableExtendedLayouts = false,
     this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final bool enableExtendedLayouts;
   final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
@@ -122,6 +126,28 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems>
             });
           },
         ),
+        if (widget.enableExtendedLayouts)
+          CollageLayoutIconButton(
+            child: FourthVariantIcon(
+              isActive: _variant == Variant.fourth,
+            ),
+            onTap: () {
+              setState(() {
+                _variant = Variant.fourth;
+              });
+            },
+          ),
+        if (widget.enableExtendedLayouts)
+          CollageLayoutIconButton(
+            child: FifthVariantIcon(
+              isActive: _variant == Variant.fifth,
+            ),
+            onTap: () {
+              setState(() {
+                _variant = Variant.fifth;
+              });
+            },
+          ),
       ],
     );
   }
@@ -148,6 +174,18 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems>
             _collageItem(1),
             _collageItem(2),
           ),
+        );
+      case Variant.fourth:
+        return FourthVariant(
+          _collageItem(0),
+          _collageItem(1),
+          _collageItem(2),
+        );
+      case Variant.fifth:
+        return FifthVariant(
+          _collageItem(0),
+          _collageItem(1),
+          _collageItem(2),
         );
     }
   }
@@ -310,6 +348,104 @@ class ThirdVariant extends StatelessWidget {
   }
 }
 
+class FourthVariant extends StatelessWidget {
+  const FourthVariant(
+    this.first,
+    this.second,
+    this.third, {
+    super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
+    this.color = Colors.white,
+  });
+
+  final Widget first, second, third;
+  final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 2,
+              mainAxisCellCount: 2,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: second,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: third,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FifthVariant extends StatelessWidget {
+  const FifthVariant(
+    this.first,
+    this.second,
+    this.third, {
+    super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
+    this.color = Colors.white,
+  });
+
+  final Widget first, second, third;
+  final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 3,
+              mainAxisCellCount: 1,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 1,
+              child: second,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 2,
+              mainAxisCellCount: 1,
+              child: third,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class FirstVariantIcon extends StatelessWidget {
   const FirstVariantIcon({
     super.key,
@@ -368,6 +504,52 @@ class ThirdVariantIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
       child: ThirdVariant(
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+        color: Colors.transparent,
+      ),
+    );
+  }
+}
+
+class FourthVariantIcon extends StatelessWidget {
+  const FourthVariantIcon({
+    super.key,
+    this.isActive = false,
+  });
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollageIconContainerWidget(
+      width: 56,
+      child: FourthVariant(
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+        color: Colors.transparent,
+      ),
+    );
+  }
+}
+
+class FifthVariantIcon extends StatelessWidget {
+  const FifthVariantIcon({
+    super.key,
+    this.isActive = false,
+  });
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollageIconContainerWidget(
+      width: 56,
+      child: FifthVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
