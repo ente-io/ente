@@ -121,7 +121,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   void _onInputFocusChange() {
     if (_inputFocusNode.hasFocus && widget.sheetController.isAttached) {
       widget.sheetController.animateTo(
-        0.9,
+        0.95,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
       );
