@@ -354,6 +354,9 @@ class FileBottomBarState extends State<FileBottomBar> {
         child: GestureDetector(
           onLongPress: _showLikesBottomSheet,
           child: IconButton(
+            style: IconButton.styleFrom(
+              overlayColor: WidgetStateColor.transparent,
+            ),
             onPressed: _toggleReaction,
             icon: Icon(
               _hasLiked
