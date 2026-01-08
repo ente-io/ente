@@ -2042,14 +2042,10 @@
   "hoorayyyy": "¡Hurraaaa!",
   "nothingToTidyUpHere": "Nada que limpiar aquí",
   "deletingDash": "Eliminando - ",
-  "cLTitle1": "Presentando rituales",
-  "cLDesc1": "¿Planeando metas para 2026? Con los Rituales, puedes establecer un recordatorio en Ente Photos y rastrear tu progreso tomando fotos. Úsalos para entrenamientos, hábitos alimenticios, momentos diarios con seres queridos — cualquier cosa que quieras convertir en un hábito.",
-  "cLTitle2": "Enlaces públicos, ahora para todos",
-  "cLDesc2": "Todos los usuarios de Ente en el plan gratuito ahora pueden crear y compartir enlaces públicos a fotos y álbumes. Para prevenir el abuso, los enlaces tendrán límites sobre cuántas personas pueden verlos.",
-  "cLTitle3": "Etiqueta manualmente a personas",
-  "cLDesc3": "Ahora puedes etiquetar a la gente incluso cuando nuestra IA en el dispositivo no detecta una cara. Perfecto para mascotas, rostros parcialmente visibles o momentos en los que alguien no está realmente en la foto, pero deba incluirse.",
-  "cLTitle4": "Y más",
-  "cLDesc4": "Ahora puedes fijar álbumes compartidos. Los enlaces de álbumes son visibles para los colaboradores y los espectadores para facilitar aún más el compartimiento. Hemos solucionado algunos errores de deslizamiento de iOS y hemos actualizado la vista de fotos, incluyendo un nuevo icono favorito (dando cabida a las próximas características).",
+  "cLTitle1": "Comentarios y reacciones",
+  "cLDesc1": "Presentamos comentarios y reacciones en fotos compartidas. Puedes reaccionar o comentar una foto abriéndola y usando las acciones en la parte inferior. Todos los comentarios y reacciones entrantes serán visibles en la pestaña Compartido.",
+  "cLTitle2": "Administrador de álbumes",
+  "cLDesc2": "Ahora puedes asignar a otro usuario de Ente como administrador de tu álbum. Con esto, podrá añadir otros espectadores y colaboradores, eliminar fotos de los álbumes e incluso sugerir a los participantes que eliminen sus fotos.",
   "closeBy": "Cerrar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

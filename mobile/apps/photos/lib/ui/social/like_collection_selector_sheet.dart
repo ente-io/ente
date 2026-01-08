@@ -235,9 +235,8 @@ class _LikeCollectionSelectorSheetState
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: isDarkMode
-            ? const Color(0xFF0E0E0E)
-            : colorScheme.backgroundBase,
+        color:
+            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundBase,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(28),
         ),
