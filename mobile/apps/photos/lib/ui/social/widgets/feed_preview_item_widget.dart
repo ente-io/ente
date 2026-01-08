@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -212,10 +213,14 @@ class _FeedTypeIconBadge extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: Icon(
-          Icons.notifications_outlined,
-          size: 14,
-          color: colorScheme.textBase,
+        child: Transform.rotate(
+          angle: -0.08,
+          child: HugeIcon(
+            // Icons.notifications_outlined,
+            icon: HugeIcons.strokeRoundedNotification01,
+            size: 14,
+            color: colorScheme.textBase,
+          ),
         ),
       ),
     );

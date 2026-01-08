@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
@@ -379,7 +380,7 @@ class _AlbumsHeader extends StatelessWidget {
                   Text("Like all", style: textTheme.small),
                   const SizedBox(width: 10),
                   Icon(
-                    allLiked ? Icons.favorite : Icons.favorite_border,
+                    allLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                     color: allLiked ? _greenHeartColor : colorScheme.textBase,
                     size: 16,
                   ),
@@ -436,19 +437,31 @@ class _FileThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 128,
-        height: 128,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: file != null
-              ? ThumbnailWidget(
-                  file!,
-                  thumbnailSize: thumbnailLargeSize,
-                  rawThumbnail: true,
-                )
-              : Container(color: placeholderColor),
-        ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 13, left: 13, right: 13),
+            child: SizedBox(
+              width: 128,
+              height: 128,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: file != null
+                    ? ThumbnailWidget(
+                        file!,
+                        thumbnailSize: thumbnailLargeSize,
+                        rawThumbnail: true,
+                      )
+                    : Container(color: placeholderColor),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Image.asset("assets/select_album_to_like_asset.png"),
+          ),
+        ],
       ),
     );
   }
@@ -504,7 +517,7 @@ class _AlbumListItem extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  state.isLiked ? Icons.favorite : Icons.favorite_border,
+                  state.isLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                   color: _greenHeartColor,
                   size: 19.2,
                 ),
