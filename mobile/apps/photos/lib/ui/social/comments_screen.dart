@@ -561,11 +561,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               _comments.length + (_hasMoreComments ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index == _comments.length) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: CircularProgressIndicator(),
-                                ),
+                              return const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: EnteLoadingWidget(),
                               );
                             }
                             final comment = _comments[index];
