@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.7.17 (unreleased)
+## v1.7.17
 
 - Map view.
 - Manually tag people in photos.
