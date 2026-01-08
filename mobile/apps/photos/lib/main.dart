@@ -165,9 +165,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // App LifeCycle
     AppLifecycleService.instance.init(prefs);
-    AppLifecycleService.instance.onAppInBackground(
-      'init via: WorkManager $tlog',
-    );
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
     // Crypto rel.
     await Computer.shared().turnOn(workersCount: 4);
@@ -333,7 +332,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
     await localSettings.initSwipeToSelectDefault();
-
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
