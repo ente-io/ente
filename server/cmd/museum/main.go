@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/collections"
-	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
-	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +13,10 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/pkg/controller/collections"
+	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
+	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente/base"
 	"github.com/ente-io/museum/pkg/controller/emergency"
@@ -217,16 +218,17 @@ func main() {
 	stripeClients := billing.GetStripeClients()
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, commonBillController)
+		billingRepo, fileRepo, userRepo, notificationHistoryRepo, commonBillController)
+	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
+		billingRepo, fileRepo, userRepo, notificationHistoryRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
-		billingRepo, fileRepo, userRepo, storagBonusRepo, discordController, emailNotificationCtrl, offerController, commonBillController)
+		billingRepo, fileRepo, userRepo, storagBonusRepo, notificationHistoryRepo, discordController, emailNotificationCtrl, offerController, commonBillController)
 	billingController := controller.NewBillingController(plans,
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+	remoteStoreController = &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
 
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
@@ -1161,6 +1163,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 		} else if deleted > 0 {
 			log.WithField("count", deleted).Info("Cleaned up old fake SRP sessions")
 		}
+	})
+
+	scheduleAndRun(c, "@every 6h", func() {
+		emailNotificationCtrl.SendStorageLimitExceedingMails()
 	})
 
 	schedule(c, "@every 1m", func() {
