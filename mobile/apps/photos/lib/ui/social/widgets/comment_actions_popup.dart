@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
@@ -37,7 +38,7 @@ class CommentActionsPopup extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _ActionItem(
-              icon: isLiked ? Icons.favorite : Icons.favorite_border,
+              icon: isLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
               iconColor: isLiked ? const Color(0xFFE25454) : null,
               label: "Like",
               onTap: onLikeTap,
@@ -48,7 +49,7 @@ class CommentActionsPopup extends StatelessWidget {
               defaultIconColor: colorScheme.textBase,
             ),
             _ActionItem(
-              icon: Icons.reply,
+              icon: EnteIcons.reply,
               label: "Reply",
               onTap: onReplyTap,
               textStyle: textTheme.mini.copyWith(
