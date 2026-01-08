@@ -334,8 +334,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     wrappedService.scheduleInitialLoad();
     await localSettings.initSwipeToSelectDefault();
 
-    await VideoPreviewService.instance.init();
-
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;

@@ -111,59 +111,19 @@ class VideoPreviewService {
   final CacheManager videoCacheManager;
 
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
-  static const String _internalUserStreamingMigrationDone =
-      "internalUserStreamingMigrationDone";
 
   bool get isVideoStreamingEnabled {
-    return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
-        flagService.streamEnabledByDefault;
-  }
-
-  Future<void> init() async {
-    await runInternalUserStreamingMigration();
-  }
-
-  /// Run one-time migration for internal users to enable streaming.
-  /// This migration:
-  /// - Only runs once (tracked by migration flag)
-  /// - Only runs for internal users (when enableStreamByDefault flag is true)
-  /// - Force sets streaming to true (user can disable it later)
-  Future<void> runInternalUserStreamingMigration() async {
-    if (!config.isLoggedIn()) {
-      _logger.info("[migration] Not logged in, skipping migration");
-      return;
+    if (flagService.internalUser) {
+      return true;
     }
-
-    // Check if migration has already run
-    final migrationDone =
-        serviceLocator.prefs.getBool(_internalUserStreamingMigrationDone) ??
-            false;
-    if (migrationDone) {
-      _logger.info("[migration] Migration already completed, skipping");
-      return;
-    }
-
-    // Only run migration for internal users
-    if (!flagService.streamEnabledByDefault) {
-      _logger.info("[migration] Not an internal user, skipping migration");
-      return;
-    }
-
-    // Run migration: force enable streaming for internal user
-    _logger.info(
-      "[migration] Running one-time streaming migration for internal user",
-    );
-    await serviceLocator.prefs.setBool(_videoStreamingEnabled, true);
-    await serviceLocator.prefs.setBool(
-      _internalUserStreamingMigrationDone,
-      true,
-    );
-    _logger.info(
-      "[migration] Streaming enabled for internal user via migration",
-    );
+    return serviceLocator.prefs.getBool(_videoStreamingEnabled) ?? false;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
+    if (flagService.internalUser) {
+      return;
+    }
+
     serviceLocator.prefs.setBool(_videoStreamingEnabled, value).ignore();
     Bus.instance.fire(VideoStreamingChanged());
 
