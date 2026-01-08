@@ -392,12 +392,14 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 
 ### What happens to deleted photos in collaborative albums? {#collaborative-deletion}
 
-In collaborative albums:
+In collaborative albums, deletion permissions depend on your role:
 
+- **If you're a viewer**: You cannot delete any photos from the album.
 - **If you're a collaborator**: You can only delete photos that you uploaded. When you delete a photo you uploaded, it goes to your trash.
-- **If you're the album owner**: You can remove any photos from the album, but you can only permanently delete photos you own. Other collaborators' photos will be removed from the album but remain in their accounts.
+- **If you're an admin**: You can remove any photo from the album (including photos uploaded by others), but you can only permanently delete photos you own. Other participants' photos will be removed from the album but remain in their accounts. You can also [suggest deletion](/photos/faq/sharing-and-collaboration#suggest-deletion) for photos owned by others.
+- **If you're the album owner**: You have all admin permissions, plus you can manage link settings and delete the album.
 
-When a collaborator leaves or is removed from a shared album, any photos they uploaded are also removed from that album.
+When a participant leaves or is removed from a shared album, any photos they uploaded are also removed from that album.
 
 ### Can I recover photos after deleting my account? {#recover-after-account-deletion}
 
@@ -432,8 +434,10 @@ All selected photos will be moved to trash together.
 You may not be able to delete photos if:
 
 - They are owned by someone else who shared them with you
-- You don't have permission (you're a viewer, not a collaborator or owner)
+- You don't have permission (you're a viewer or collaborator trying to delete others' photos)
 - There's a sync issue - try refreshing or restarting the app
+
+If you're an admin or owner and want to remove photos that others uploaded, you can remove them from the album or use [suggest deletion](/photos/faq/sharing-and-collaboration#suggest-deletion).
 
 If you still can't delete photos you own, contact [support@ente.io](mailto:support@ente.io).
 
