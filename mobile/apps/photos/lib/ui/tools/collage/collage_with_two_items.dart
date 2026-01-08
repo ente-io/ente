@@ -1,9 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
-import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file.dart";
 import "package:photos/ui/tools/collage/collage_common_widgets.dart";
-import 'package:photos/ui/tools/collage/collage_item_icon.dart';
+import "package:photos/ui/tools/collage/collage_item_icon.dart";
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
+import "package:photos/ui/tools/collage/collage_swap_mixin.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
@@ -26,13 +27,18 @@ class CollageWithTwoItems extends StatefulWidget {
   State<CollageWithTwoItems> createState() => _CollageWithTwoItemsState();
 }
 
-class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
+class _CollageWithTwoItemsState extends State<CollageWithTwoItems>
+    with CollageSwapMixin<CollageWithTwoItems> {
   final _widgetsToImageController = WidgetsToImageController();
   Variant _variant = Variant.first;
 
   @override
   void initState() {
     super.initState();
+    initCollageFiles([
+      widget.first,
+      widget.second,
+    ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_widgetsToImageController);
     });
@@ -104,15 +110,25 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
     switch (_variant) {
       case Variant.first:
         return FirstVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
+          _collageItem(0),
+          _collageItem(1),
         );
       case Variant.second:
         return SecondVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
+          _collageItem(0),
+          _collageItem(1),
         );
     }
+  }
+
+  CollageItemWidget _collageItem(int index) {
+    return CollageItemWidget(
+      collageFiles[index],
+      onTap: () => onCollageItemTapped(index),
+      onLongPress: () => onCollageItemLongPressed(index),
+      isSelected: isSelectedForSwap(index),
+      isSwapActive: isSwapSelectionActive,
+    );
   }
 }
 

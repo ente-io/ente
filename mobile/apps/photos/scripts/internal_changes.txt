@@ -1,3 +1,4 @@
+- Neeraj: Collage creator: swap photos via long-press select + tap to replace
 - Ashil: (i) Like & Comment
 - Neeraj: Admin Role + Suggest Delete feature
 - Neeraj: Large files section: add type filter, lower threshold to 10MB [QOL]
