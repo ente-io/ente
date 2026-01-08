@@ -125,6 +125,11 @@ class VideoPreviewService {
   /// - Only runs for internal users (when enableStreamByDefault flag is true)
   /// - Force sets streaming to true (user can disable it later)
   Future<void> runInternalUserStreamingMigration() async {
+    if (!config.isLoggedIn()) {
+      _logger.info("[migration] Not logged in, skipping migration");
+      return;
+    }
+
     // Check if migration has already run
     final migrationDone =
         serviceLocator.prefs.getBool(_internalUserStreamingMigrationDone) ??
