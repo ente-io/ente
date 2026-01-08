@@ -63,6 +63,14 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant UserAvatarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user.email != widget.user.email) {
+      _reload();
+    }
+  }
+
+  @override
   void dispose() {
     _peopleChangedSubscription.cancel();
     _debouncer.cancelDebounceTimer();
