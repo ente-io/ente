@@ -27,7 +27,9 @@ class CommentLikeCountCapsule extends StatelessWidget {
         decoration: BoxDecoration(
           color: background,
           border: Border.all(
-            color: colorScheme.backgroundBase,
+            color: isDark
+                ? const Color(0xFF0E0E0E)
+                : colorScheme.backgroundElevated,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(42),

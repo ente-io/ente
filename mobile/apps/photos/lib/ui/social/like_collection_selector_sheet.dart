@@ -228,13 +228,16 @@ class _LikeCollectionSelectorSheetState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final mediaQuery = MediaQuery.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       constraints: BoxConstraints(
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: isDarkMode
+            ? const Color(0xFF0E0E0E)
+            : colorScheme.backgroundBase,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(28),
         ),
@@ -350,6 +353,7 @@ class _AlbumsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(25, 26, 12, 16),
@@ -365,7 +369,9 @@ class _AlbumsHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                color: colorScheme.backgroundBase,
+                color: isDarkMode
+                    ? const Color(0xFF0E0E0E)
+                    : colorScheme.backgroundBase,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -475,7 +481,9 @@ class _AlbumListItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
         decoration: BoxDecoration(
-          color: colorScheme.backgroundBase,
+          color: isDarkTheme
+              ? const Color(0xFF0E0E0E)
+              : colorScheme.backgroundBase,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(

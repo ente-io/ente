@@ -208,13 +208,16 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final mediaQuery = MediaQuery.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       constraints: BoxConstraints(
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: isDarkMode
+            ? const Color(0xFF0E0E0E)
+            : colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
