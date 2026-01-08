@@ -21,10 +21,12 @@ class CollageWithFiveItems extends StatefulWidget {
     this.fifth, {
     super.key,
     this.onControllerReady,
+    this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third, fourth, fifth;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
   State<CollageWithFiveItems> createState() => _CollageWithFiveItemsState();
@@ -47,6 +49,7 @@ class _CollageWithFiveItemsState extends State<CollageWithFiveItems>
     ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_widgetsToImageController);
+      widget.onSelectionClearSetter?.call(clearSwapSelection);
     });
   }
 

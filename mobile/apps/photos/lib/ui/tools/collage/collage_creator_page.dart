@@ -36,6 +36,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
   final _logger = Logger("CollageCreatorPage");
   WidgetsToImageController? _controller;
   bool _isSaving = false;
+  VoidCallback? _clearSwapSelection;
 
   void _onControllerReady(WidgetsToImageController controller) {
     setState(() {
@@ -45,6 +46,9 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
 
   Future<void> _saveCollage() async {
     if (_controller == null || _isSaving) return;
+
+    _clearSwapSelection?.call();
+    await Future<void>.delayed(const Duration(milliseconds: 16));
 
     setState(() {
       _isSaving = true;
@@ -118,6 +122,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[0],
           widget.files[1],
           onControllerReady: _onControllerReady,
+          onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
         );
         break;
       case 3:
@@ -126,6 +131,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[1],
           widget.files[2],
           onControllerReady: _onControllerReady,
+          onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
         );
         break;
       case 4:
@@ -135,6 +141,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[2],
           widget.files[3],
           onControllerReady: _onControllerReady,
+          onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
         );
         break;
       case 5:
@@ -145,6 +152,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[3],
           widget.files[4],
           onControllerReady: _onControllerReady,
+          onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
         );
         break;
       case 6:
@@ -156,6 +164,7 @@ class _CollageCreatorPageState extends State<CollageCreatorPage> {
           widget.files[4],
           widget.files[5],
           onControllerReady: _onControllerReady,
+          onSelectionClearSetter: (fn) => _clearSwapSelection = fn,
         );
         break;
       default:

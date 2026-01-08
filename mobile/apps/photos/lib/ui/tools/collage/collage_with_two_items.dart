@@ -18,10 +18,12 @@ class CollageWithTwoItems extends StatefulWidget {
     this.second, {
     super.key,
     this.onControllerReady,
+    this.onSelectionClearSetter,
   });
 
   final EnteFile first, second;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
   State<CollageWithTwoItems> createState() => _CollageWithTwoItemsState();
@@ -41,6 +43,7 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems>
     ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_widgetsToImageController);
+      widget.onSelectionClearSetter?.call(clearSwapSelection);
     });
   }
 

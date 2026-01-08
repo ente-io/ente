@@ -22,10 +22,12 @@ class CollageWithSixItems extends StatefulWidget {
     this.sixth, {
     super.key,
     this.onControllerReady,
+    this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third, fourth, fifth, sixth;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
   State<CollageWithSixItems> createState() => _CollageWithSixItemsState();
@@ -49,6 +51,7 @@ class _CollageWithSixItemsState extends State<CollageWithSixItems>
     ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_widgetsToImageController);
+      widget.onSelectionClearSetter?.call(clearSwapSelection);
     });
   }
 
