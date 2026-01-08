@@ -434,6 +434,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   void _updatePassword() async {
     final logOutFromOthers = await logOutFromOtherDevices(context);
+    if (logOutFromOthers == null) {
+      return;
+    }
     final dialog =
         createProgressDialog(context, context.strings.generatingEncryptionKeys);
     await dialog.show();
@@ -462,8 +465,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     }
   }
 
-  Future<bool> logOutFromOtherDevices(BuildContext context) async {
-    bool logOutFromOther = false;
+  Future<bool?> logOutFromOtherDevices(BuildContext context) async {
+    bool? logOutFromOther;
 
     await showBaseBottomSheet(
       context,
@@ -471,6 +474,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       title: context.strings.signOutFromOtherDevices,
       isDismissible: false,
       enableDrag: false,
+      showCloseButton: true,
       child: Builder(
         builder: (bottomSheetContext) {
           final colorScheme = getEnteColorScheme(bottomSheetContext);
@@ -485,6 +489,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
               GradientButton(
                 text: context.strings.doNotSignOut,
                 onTap: () {
+                  logOutFromOther = false;
                   Navigator.of(bottomSheetContext).pop();
                 },
               ),
