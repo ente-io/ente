@@ -254,8 +254,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     _overlayController.show();
     _overlayAnimationController.forward();
 
-    // Auto-dismiss after 750ms
-    Future.delayed(const Duration(milliseconds: 750), () {
+    // Auto-dismiss after 1s
+    Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted && _isAutoHighlight) {
         _hideAutoHighlight();
       }
@@ -400,11 +400,19 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
             _overlayAnimationController.status == AnimationStatus.reverse;
         return Stack(
           children: [
-            // Full-screen barrier with black opacity 0.3
+            // Full-screen barrier with black opacity
             GestureDetector(
               onTap: _isAutoHighlight ? _hideAutoHighlight : _hideHighlight,
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.3 * value),
+              child: Builder(
+                builder: (context) {
+                  final isDarkMode =
+                      Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    color: Colors.black.withValues(
+                      alpha: (isDarkMode ? 0.65 : 0.3) * value,
+                    ),
+                  );
+                },
               ),
             ),
             // Highlighted comment + popup menu
