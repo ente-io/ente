@@ -96,8 +96,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
       AppLock(
         builder: (args) => EnteApp(locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled:
-            await Configuration.instance.shouldShowLockScreen() ||
+        enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -361,9 +360,8 @@ void logLocalSettings() {
     'Swipe to select enabled': localSettings.isSwipeToSelectEnabled,
   };
 
-  final formattedSettings = settings.entries
-      .map((e) => '${e.key}: ${e.value}')
-      .join(', ');
+  final formattedSettings =
+      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
   _logger.info('Local settings - $formattedSettings');
 }
 
@@ -468,21 +466,24 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } else {
     // App is dead or FG is not active
-    runWithLogs(() async {
-      _logger.info("Background push received, no active foreground");
+    runWithLogs(
+      () async {
+        _logger.info("Background push received, no active foreground");
 
-      // Mark BG as active before starting
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(
-        kLastBGTaskHeartBeatTime,
-        DateTime.now().microsecondsSinceEpoch,
-      );
+        // Mark BG as active before starting
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(
+          kLastBGTaskHeartBeatTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
 
-      await _init(true, via: 'firebasePush');
-      if (PushService.shouldSync(message)) {
-        await _sync('firebaseBgSyncNoActiveProcess');
-      }
-    }, prefix: "[fbg]").ignore();
+        await _init(true, via: 'firebasePush');
+        if (PushService.shouldSync(message)) {
+          await _sync('firebaseBgSyncNoActiveProcess');
+        }
+      },
+      prefix: "[fbg]",
+    ).ignore();
   }
 }
 

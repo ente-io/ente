@@ -854,13 +854,16 @@ class VideoPreviewService {
     try {
       final encryptionKey = getFileKey(file);
       final playlistContent = playlist.readAsStringSync();
-      final result = await gzipAndEncryptJson({
-        "playlist": playlistContent,
-        'type': 'hls_video',
-        'width': width,
-        'height': height,
-        'size': objectSize,
-      }, encryptionKey);
+      final result = await gzipAndEncryptJson(
+        {
+          "playlist": playlistContent,
+          'type': 'hls_video',
+          'width': width,
+          'height': height,
+          'size': objectSize,
+        },
+        encryptionKey,
+      );
       final _ = await serviceLocator.enteDio.put(
         "/files/video-data",
         data: {
