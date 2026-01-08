@@ -61,7 +61,6 @@ jobs:
                   packageName: io.ente.locker
                   releaseFiles: mobile/apps/locker/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
-                  status: draft
 
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1
