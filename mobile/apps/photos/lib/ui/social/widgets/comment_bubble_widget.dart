@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
@@ -299,7 +300,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     await _hideHighlight();
     if (!mounted) return;
 
-    final confirmed = await showDeleteCommentConfirmationDialog(context);
+    final confirmed = await showDeleteCommentConfirmationDialog(
+      context,
+      commentText: widget.comment.data,
+    );
 
     if (confirmed == true) {
       try {
@@ -363,7 +367,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           opacity:
                               (_dragOffset / _replyThreshold).clamp(0.0, 1.0),
                           child: Icon(
-                            Icons.reply,
+                            EnteIcons.reply,
                             color: colorScheme.textMuted,
                             size: 24,
                           ),

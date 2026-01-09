@@ -6,13 +6,33 @@ class EnteIcons {
   static const _kFontFam = 'EnteIcons';
   static const String _kFontPkg = 'ente_icons';
 
-  static const IconData addToAlbum = IconData(
-    0xe805,
+  static const IconData commentBubbleStroke = IconData(
+    0xe800,
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );
-  static const IconData favoriteStroke = IconData(
-    0xe807,
+  static const IconData likeFilled = IconData(
+    0xe801,
+    fontFamily: _kFontFam,
+    fontPackage: _kFontPkg,
+  );
+  static const IconData lightningFilled = IconData(
+    0xe802,
+    fontFamily: _kFontFam,
+    fontPackage: _kFontPkg,
+  );
+  static const IconData sendStroke = IconData(
+    0xe803,
+    fontFamily: _kFontFam,
+    fontPackage: _kFontPkg,
+  );
+  static const IconData likeStroke = IconData(
+    0xe804,
+    fontFamily: _kFontFam,
+    fontPackage: _kFontPkg,
+  );
+  static const IconData addToAlbum = IconData(
+    0xe805,
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );
@@ -21,8 +41,13 @@ class EnteIcons {
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );
-  static const IconData lightningFilled = IconData(
-    0xe802,
+  static const IconData favoriteStroke = IconData(
+    0xe807,
+    fontFamily: _kFontFam,
+    fontPackage: _kFontPkg,
+  );
+  static const IconData reply = IconData(
+    0xe808,
     fontFamily: _kFontFam,
     fontPackage: _kFontPkg,
   );

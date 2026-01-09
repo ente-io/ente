@@ -75,8 +75,7 @@ class GalleryGroups {
 
   List<String> get groupIDs => _groupIds;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
-  Map<String,
-          ({GroupType groupType, int maxCreationTime, int minCreationTime})>
+  Map<String, ({GroupType groupType, int maxCreationTime, int minCreationTime})>
       get groupIdToGroupDataMap => _groupIdToGroupDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;

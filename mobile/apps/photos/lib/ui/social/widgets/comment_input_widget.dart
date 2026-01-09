@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -99,9 +100,8 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
         right: 18,
         top: 20,
       ),
-      color: isDarkMode
-          ? const Color(0xFF0E0E0E)
-          : colorScheme.backgroundElevated,
+      color:
+          isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundElevated,
       child: SafeArea(
         top: false,
         child: Container(
@@ -197,7 +197,7 @@ class _CommentInputWidgetState extends State<CommentInputWidget>
                           key: const ValueKey('send'),
                           onPressed: widget.onSend,
                           icon: Icon(
-                            Icons.send_rounded,
+                            EnteIcons.sendStroke,
                             color: colorScheme.textBase.withValues(alpha: 0.8),
                             size: 24,
                           ),

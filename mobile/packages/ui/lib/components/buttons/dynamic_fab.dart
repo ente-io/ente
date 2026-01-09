@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/theme/ente_theme_data.dart';
 import 'package:flutter/material.dart';
@@ -58,14 +59,14 @@ class DynamicFAB extends StatelessWidget {
         ),
       );
     } else {
-      return Container(
-        width: double.infinity,
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: OutlinedButton(
-          onPressed:
-              isFormValid! ? onPressedFunction as void Function()? : null,
-          child: Text(buttonText!),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            text: buttonText!,
+            onTap: isFormValid! ? onPressedFunction as void Function()? : null,
+          ),
         ),
       );
     }
