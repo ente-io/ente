@@ -63,10 +63,10 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
             {t("name_z_to_a")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="creation-time-desc">
-            {t("date_new_to_old")}
+            {t("created_new_to_old")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="creation-time-asc">
-            {t("date_old_to_new")}
+            {t("created_old_to_new")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="updation-time-desc">
             {t("updated_new_to_old")}

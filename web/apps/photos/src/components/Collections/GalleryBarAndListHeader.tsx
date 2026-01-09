@@ -322,14 +322,16 @@ const sortCollectionSummaries = (
                 case "name-desc":
                     return b.name.localeCompare(a.name);
                 case "creation-time-asc":
-                    return (
-                        -1 *
-                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
-                    );
-                case "creation-time-desc":
+                    // Oldest first: when b is newer, b comes after a
                     return compareCollectionsLatestFile(
                         b.latestFile,
                         a.latestFile,
+                    );
+                case "creation-time-desc":
+                    // Newest first: when a is newer, a comes before b
+                    return compareCollectionsLatestFile(
+                        a.latestFile,
+                        b.latestFile,
                     );
                 case "updation-time-asc":
                     return (a.updationTime ?? 0) - (b.updationTime ?? 0);
