@@ -9,8 +9,6 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/components/file_popup_menu_widget.dart";
-import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/sharing/album_share_info_widget.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/file_util.dart";
@@ -18,7 +16,6 @@ import "package:locker/utils/info_item_utils.dart";
 
 class FileListWidget extends StatelessWidget {
   final EnteFile file;
-  final List<OverflowMenuAction>? overflowActions;
   final bool isLastItem;
   final SelectedFiles? selectedFiles;
   final void Function(EnteFile)? onTapCallback;
@@ -27,18 +24,11 @@ class FileListWidget extends StatelessWidget {
   const FileListWidget({
     super.key,
     required this.file,
-    this.overflowActions,
     this.isLastItem = false,
     this.selectedFiles,
     this.onTapCallback,
     this.onLongPressCallback,
   });
-
-  // TODO: Re-enable file popup menu for shared files when file actions are ready
-  bool get _isFileOwnedByUser {
-    final currentUserID = Configuration.instance.getUserID();
-    return file.ownerID == currentUserID;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,38 +138,26 @@ class FileListWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 fileRowWidget,
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (showSharingIndicator && hasSharees)
-                      _buildShareesAvatars(sharees),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: isSelected
-                          ? IconButtonWidget(
-                              key: const ValueKey("selected"),
-                              icon: Icons.check_circle_rounded,
-                              iconButtonType: IconButtonType.secondary,
-                              iconColor: colorScheme.primary700,
-                            )
-                          : _isFileOwnedByUser
-                              ? FilePopupMenuWidget(
-                                  file: file,
-                                  overflowActions: overflowActions,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedMoreVertical,
-                                      color:
-                                          getEnteColorScheme(context).textBase,
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox(width: 48),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: isSelected
+                        ? IconButtonWidget(
+                            key: const ValueKey("selected"),
+                            icon: Icons.check_circle_rounded,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.primary700,
+                          )
+                        : (showSharingIndicator && hasSharees)
+                            ? _buildShareesAvatars(sharees)
+                            : const SizedBox(
+                                key: ValueKey("unselected"),
+                                width: 12,
+                              ),
+                  ),
                 ),
               ],
             ),
