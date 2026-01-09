@@ -255,8 +255,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     _overlayController.show();
     _overlayAnimationController.forward();
 
-    // Auto-dismiss after 1s
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    // Auto-dismiss after 700ms
+    Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted && _isAutoHighlight) {
         _hideAutoHighlight();
       }
