@@ -1247,7 +1247,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToCollection => 'Add to collection';
 
   @override
-  String get newCollection => 'New Collection';
+  String get newCollection => 'New collection';
 
   @override
   String get title => 'Title';

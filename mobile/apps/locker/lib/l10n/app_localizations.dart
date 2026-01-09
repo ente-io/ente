@@ -2209,7 +2209,7 @@ abstract class AppLocalizations {
   /// No description provided for @newCollection.
   ///
   /// In en, this message translates to:
-  /// **'New Collection'**
+  /// **'New collection'**
   String get newCollection;
 
   /// No description provided for @title.
