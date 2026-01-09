@@ -216,7 +216,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       });
 
       // Update notifier when filters are cleared
-      _updateDisplayedFilesNotifier();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _updateDisplayedFilesNotifier();
+      });
       return;
     }
 
@@ -271,7 +273,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     });
 
     // Update notifier with the new displayed files
-    _updateDisplayedFilesNotifier();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateDisplayedFilesNotifier();
+    });
   }
 
   Future<Map<int, List<Collection>>> _ensureCollectionsForFiles(
