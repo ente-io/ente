@@ -111,9 +111,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   void _showFilterBottomSheet(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -121,6 +118,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       builder: (bottomSheetContext) {
         return StatefulBuilder(
           builder: (context, setBottomSheetState) {
+            final colorScheme = getEnteColorScheme(context);
+            final textTheme = getEnteTextTheme(context);
             final orderedFilters = _getOrderedCollections();
             final chipModels = orderedFilters
                 .map(
@@ -566,10 +565,10 @@ class _FilterIconButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
-          child: HugeIcon(
-            icon: HugeIcons.strokeRoundedFilterHorizontal,
+          child: Icon(
+            Icons.filter_list,
             color: colorScheme.textMuted,
-            size: 20,
+            size: 24,
           ),
         ),
       ),
@@ -615,7 +614,7 @@ class _FilterChip extends StatelessWidget {
               Text(
                 label,
                 style: textTheme.small.copyWith(
-                  color: isSelected ? Colors.white : colorScheme.textBase,
+                  color: isSelected ? Colors.white : colorScheme.textMuted,
                 ),
               ),
               AnimatedSwitcher(
