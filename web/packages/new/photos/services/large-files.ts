@@ -242,10 +242,15 @@ export const largeFilesReducer = (
         case "analysisCompleted": {
             // Restore selection state from selectedFileIDs
             const selectedFileIDs = state.selectedFileIDs;
-            const largeFiles = action.largeFiles.map((item) => ({
+            const filesWithSelection = action.largeFiles.map((item) => ({
                 ...item,
                 isSelected: selectedFileIDs.has(item.file.id),
             }));
+            // Sort according to current sort order (findLargeFiles always returns desc)
+            const largeFiles = sortedCopyOfLargeFiles(
+                filesWithSelection,
+                state.sortOrder,
+            );
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
             return {
