@@ -1,7 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import ImageIcon from "@mui/icons-material/Image";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import SortIcon from "@mui/icons-material/Sort";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import {
@@ -19,10 +17,6 @@ import { CenteredFill, Overlay } from "ente-base/components/containers";
 import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "ente-base/components/OverflowMenu";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
@@ -136,6 +130,10 @@ const Page: React.FC = () => {
                             selectedSize={state.selectedSize}
                             deleteProgress={state.deleteProgress}
                             onDeleteFiles={handleDeleteFiles}
+                            onSelectAll={() => dispatch({ type: "selectAll" })}
+                            onDeselectAll={() =>
+                                dispatch({ type: "deselectAll" })
+                            }
                         />
                     );
                 }
@@ -153,8 +151,6 @@ const Page: React.FC = () => {
                 onChangeSortOrder={(sortOrder) =>
                     dispatch({ type: "changeSortOrder", sortOrder })
                 }
-                onDeselectAll={() => dispatch({ type: "deselectAll" })}
-                onSelectAll={() => dispatch({ type: "selectAll" })}
             />
             {contents}
             <FileViewer
@@ -177,8 +173,6 @@ interface NavbarProps {
     onChangeFilter: (filter: LargeFileFilter) => void;
     sortOrder: SortOrder;
     onChangeSortOrder: (sortOrder: SortOrder) => void;
-    onDeselectAll: () => void;
-    onSelectAll: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
@@ -186,8 +180,6 @@ const Navbar: React.FC<NavbarProps> = ({
     onChangeFilter,
     sortOrder,
     onChangeSortOrder,
-    onDeselectAll,
-    onSelectAll,
 }) => {
     const router = useRouter();
 
@@ -220,11 +212,10 @@ const Navbar: React.FC<NavbarProps> = ({
                     </IconButton>
                 </Box>
                 <Typography variant="h6">{t("large_files_title")}</Typography>
-                <Stack
-                    direction="row"
+                <Box
                     sx={{
-                        gap: "4px",
                         minWidth: "100px",
+                        display: "flex",
                         justifyContent: "flex-end",
                     }}
                 >
@@ -240,8 +231,7 @@ const Navbar: React.FC<NavbarProps> = ({
                             />
                         </IconButton>
                     </Tooltip>
-                    <OptionsMenu {...{ onDeselectAll, onSelectAll }} />
-                </Stack>
+                </Box>
             </Stack>
             <FilterChips {...{ filter, onChangeFilter }} />
         </Stack>
@@ -253,16 +243,22 @@ interface FilterChipsProps {
     onChangeFilter: (filter: LargeFileFilter) => void;
 }
 
+const filterChipSx = (isSelected: boolean, hasIcon: boolean) => ({
+    ...(hasIcon ? { pl: 1.5, pr: 1 } : { px: 1.5 }),
+    ...(!isSelected && { backgroundColor: "rgba(255, 255, 255, 0.12)" }),
+});
+
 const FilterChips: React.FC<FilterChipsProps> = ({
     filter,
     onChangeFilter,
 }) => (
-    <Stack direction="row" sx={{ gap: 1, px: 3, pb: 1.5, flexWrap: "wrap" }}>
+    <Stack direction="row" sx={{ gap: 1, px: 2, pb: 1.5, flexWrap: "wrap" }}>
         <Chip
             label={t("all")}
             variant={filter === "all" ? "filled" : "outlined"}
             color={filter === "all" ? "primary" : "default"}
             onClick={() => onChangeFilter("all")}
+            sx={filterChipSx(filter === "all", false)}
         />
         <Chip
             icon={<ImageIcon sx={{ fontSize: "18px !important" }} />}
@@ -270,7 +266,7 @@ const FilterChips: React.FC<FilterChipsProps> = ({
             variant={filter === "photos" ? "filled" : "outlined"}
             color={filter === "photos" ? "primary" : "default"}
             onClick={() => onChangeFilter("photos")}
-            sx={{ px: 1 }}
+            sx={filterChipSx(filter === "photos", true)}
         />
         <Chip
             icon={<VideocamIcon sx={{ fontSize: "18px !important" }} />}
@@ -278,31 +274,9 @@ const FilterChips: React.FC<FilterChipsProps> = ({
             variant={filter === "videos" ? "filled" : "outlined"}
             color={filter === "videos" ? "primary" : "default"}
             onClick={() => onChangeFilter("videos")}
-            sx={{ px: 1 }}
+            sx={filterChipSx(filter === "videos", true)}
         />
     </Stack>
-);
-
-interface OptionsMenuProps {
-    onDeselectAll: () => void;
-    onSelectAll: () => void;
-}
-
-const OptionsMenu: React.FC<OptionsMenuProps> = ({
-    onDeselectAll,
-    onSelectAll,
-}) => (
-    <OverflowMenu ariaID="large-files-options">
-        <OverflowMenuOption startIcon={<CheckBoxIcon />} onClick={onSelectAll}>
-            {t("select_all")}
-        </OverflowMenuOption>
-        <OverflowMenuOption
-            startIcon={<RemoveCircleOutlineIcon />}
-            onClick={onDeselectAll}
-        >
-            {t("deselect_all")}
-        </OverflowMenuOption>
-    </OverflowMenu>
 );
 
 const Loading: React.FC = () => (
@@ -333,7 +307,11 @@ interface LargeFilesProps {
     selectedSize: number;
     deleteProgress: number | undefined;
     onDeleteFiles: () => void;
+    onSelectAll: () => void;
+    onDeselectAll: () => void;
 }
+
+const BOTTOM_BAR_HEIGHT = 64;
 
 const LargeFiles: React.FC<LargeFilesProps> = ({
     largeFiles,
@@ -343,34 +321,34 @@ const LargeFiles: React.FC<LargeFilesProps> = ({
     selectedSize,
     deleteProgress,
     onDeleteFiles,
+    onSelectAll,
+    onDeselectAll,
 }) => (
-    <Stack sx={{ flex: 1 }}>
-        <Box sx={{ flex: 1, overflow: "hidden", paddingBlockEnd: 1 }}>
-            <Autosizer>
-                {({ width, height }) => (
-                    <LargeFilesGrid
-                        {...{
-                            width,
-                            height,
-                            largeFiles,
-                            onToggleSelection,
-                            onOpenViewer,
-                        }}
-                    />
-                )}
-            </Autosizer>
-        </Box>
-        <Stack sx={{ margin: 1 }}>
-            <DeleteButton
-                {...{
-                    selectedCount,
-                    selectedSize,
-                    deleteProgress,
-                    onDeleteFiles,
-                }}
-            />
-        </Stack>
-    </Stack>
+    <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
+        <Autosizer>
+            {({ width, height }) => (
+                <LargeFilesGrid
+                    {...{
+                        width,
+                        height,
+                        largeFiles,
+                        onToggleSelection,
+                        onOpenViewer,
+                    }}
+                />
+            )}
+        </Autosizer>
+        <BottomBar
+            {...{
+                selectedCount,
+                selectedSize,
+                deleteProgress,
+                onDeleteFiles,
+                onSelectAll,
+                onDeselectAll,
+            }}
+        />
+    </Box>
 );
 
 interface LargeFilesGridProps {
@@ -386,6 +364,7 @@ interface LargeFilesGridItemData {
     onToggleSelection: (index: number) => void;
     onOpenViewer: (index: number) => void;
     layoutParams: ThumbnailGridLayoutParams;
+    dataRowCount: number;
 }
 
 const LargeFilesGrid: React.FC<LargeFilesGridProps> = ({
@@ -401,18 +380,25 @@ const LargeFilesGrid: React.FC<LargeFilesGridProps> = ({
     );
 
     const columns = layoutParams.columns;
-    const rowCount = Math.ceil(largeFiles.length / columns);
+    const dataRowCount = Math.ceil(largeFiles.length / columns);
+    // Add an extra row for bottom padding (to account for the floating bar)
+    const rowCount = dataRowCount + 1;
 
     const itemData: LargeFilesGridItemData = {
         largeFiles,
         onToggleSelection,
         onOpenViewer,
         layoutParams,
+        dataRowCount,
     };
 
-    const itemSize = () => layoutParams.itemHeight + layoutParams.gap;
+    const itemSize = (index: number) =>
+        index === dataRowCount
+            ? BOTTOM_BAR_HEIGHT
+            : layoutParams.itemHeight + layoutParams.gap;
 
-    const itemKey = (index: number) => `row-${index}`;
+    const itemKey = (index: number) =>
+        index === dataRowCount ? "padding" : `row-${index}`;
 
     // Key based on width to force re-render when layout changes
     const key = `${width}`;
@@ -441,8 +427,19 @@ const LargeFilesGrid: React.FC<LargeFilesGridProps> = ({
 
 const GridRow: React.FC<ListChildComponentProps<LargeFilesGridItemData>> = memo(
     ({ index: rowIndex, style, data }) => {
-        const { largeFiles, onToggleSelection, onOpenViewer, layoutParams } =
-            data;
+        const {
+            largeFiles,
+            onToggleSelection,
+            onOpenViewer,
+            layoutParams,
+            dataRowCount,
+        } = data;
+
+        // Padding row at the end - render empty space
+        if (rowIndex === dataRowCount) {
+            return <div style={style} />;
+        }
+
         const columns = layoutParams.columns;
 
         // Calculate which items are in this row
@@ -489,7 +486,9 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         <TileContainer onClick={onOpen}>
             <ItemCard TileComponent={LargeFileTile} coverFile={item.file}>
                 <LargeFileTileOverlay>
-                    <SizeLabel>{formattedByteSize(item.size)}</SizeLabel>
+                    <SizeLabel className="size-label">
+                        {formattedByteSize(item.size)}
+                    </SizeLabel>
                 </LargeFileTileOverlay>
             </ItemCard>
             <Check
@@ -503,6 +502,61 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         </TileContainer>
     );
 });
+
+interface BottomBarProps {
+    selectedCount: number;
+    selectedSize: number;
+    deleteProgress: number | undefined;
+    onDeleteFiles: () => void;
+    onSelectAll: () => void;
+    onDeselectAll: () => void;
+}
+
+const BottomBar: React.FC<BottomBarProps> = ({
+    selectedCount,
+    selectedSize,
+    deleteProgress,
+    onDeleteFiles,
+    onSelectAll,
+    onDeselectAll,
+}) => {
+    const hasSelection = selectedCount > 0;
+
+    return (
+        <Stack
+            direction="row"
+            sx={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: BOTTOM_BAR_HEIGHT,
+                gap: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                background:
+                    "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)",
+                paddingBottom: 1,
+            }}
+        >
+            <FocusVisibleButton
+                sx={{ px: 5 }}
+                disabled={deleteProgress !== undefined}
+                onClick={hasSelection ? onDeselectAll : onSelectAll}
+            >
+                {hasSelection ? t("deselect_all") : t("select_all")}
+            </FocusVisibleButton>
+            <DeleteButton
+                {...{
+                    selectedCount,
+                    selectedSize,
+                    deleteProgress,
+                    onDeleteFiles,
+                }}
+            />
+        </Stack>
+    );
+};
 
 interface DeleteButtonProps {
     selectedCount: number;
@@ -518,39 +572,34 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
     onDeleteFiles,
 }) => (
     <FocusVisibleButton
-        sx={{ minWidth: "min(100%, 320px)", margin: "auto" }}
+        sx={{
+            px: 3,
+            "&.Mui-disabled": {
+                backgroundColor: "rgba(255, 255, 255, 0.12)",
+                color: "rgba(255, 255, 255, 0.5)",
+            },
+        }}
         disabled={selectedCount == 0 || deleteProgress !== undefined}
         color="critical"
         onClick={onDeleteFiles}
     >
-        <Stack
-            sx={{
-                gap: 1,
-                minHeight: "45px",
-                justifyContent: "center",
-                flex: 1,
-            }}
-        >
-            {deleteProgress !== undefined ? (
-                <LinearProgress
-                    sx={{ borderRadius: "4px" }}
-                    variant={
-                        deleteProgress === 0 ? "indeterminate" : "determinate"
-                    }
-                    value={deleteProgress}
-                    color="inherit"
-                />
-            ) : (
-                <>
-                    <Typography>
-                        {t("delete_files_button", { count: selectedCount })}
-                    </Typography>
-                    <Typography variant="small" fontWeight="regular">
-                        {formattedByteSize(selectedSize)}
-                    </Typography>
-                </>
-            )}
-        </Stack>
+        {deleteProgress !== undefined ? (
+            <LinearProgress
+                sx={{ borderRadius: "4px", width: "100%" }}
+                variant={deleteProgress === 0 ? "indeterminate" : "determinate"}
+                value={deleteProgress}
+                color="inherit"
+            />
+        ) : (
+            <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
+                <Typography>
+                    {t("delete_files_button", { count: selectedCount })}
+                </Typography>
+                <Typography variant="small" fontWeight="regular">
+                    ({formattedByteSize(selectedSize)})
+                </Typography>
+            </Stack>
+        )}
     </FocusVisibleButton>
 );
 
@@ -592,6 +641,10 @@ const TileContainer = styled("div")`
             .hover-overlay {
                 opacity: 1;
             }
+
+            .size-label {
+                opacity: 1;
+            }
         }
     }
 `;
@@ -613,13 +666,22 @@ const LargeFileTile = styled("div")`
 
 const SizeLabel = styled(Typography)`
     position: absolute;
-    bottom: 4px;
-    left: 4px;
-    background-color: rgba(0, 0, 0, 0.6);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.7) 0%,
+        transparent 100%
+    );
     color: white;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 0.65rem;
+    padding: 20px 8px 8px;
+    padding-bottom: 18px;
+    text-align: center;
+    font-size: 1.2srem;
+    font-weight: 500;
+    border-radius: 0 0 4px 4px;
+    transition: opacity 0.2s ease;
 `;
 
 const Check = styled("input")(
