@@ -43,8 +43,6 @@ class ItemListView extends StatefulWidget {
   final List<EnteFile> files;
   final List<Collection> collections;
   final Widget? emptyStateWidget;
-  final List<OverflowMenuAction>? fileOverflowActions;
-  final List<OverflowMenuAction>? collectionOverflowActions;
   final SelectedCollections? selectedCollections;
   final SelectedFiles? selectedFiles;
   final ScrollPhysics? physics;
@@ -56,8 +54,6 @@ class ItemListView extends StatefulWidget {
     this.files = const [],
     this.collections = const [],
     this.emptyStateWidget,
-    this.fileOverflowActions,
-    this.collectionOverflowActions,
     this.selectedCollections,
     this.selectedFiles,
     this.physics = const NeverScrollableScrollPhysics(),
@@ -218,7 +214,6 @@ class _ItemListViewState extends State<ItemListView> {
   }) {
     return CollectionListWidget(
       collection: collection,
-      overflowActions: widget.collectionOverflowActions,
       isLastItem: isLastItem,
       selectedCollections: widget.selectedCollections,
       onTapCallback: onTap,
@@ -234,7 +229,6 @@ class _ItemListViewState extends State<ItemListView> {
   }) {
     return FileListWidget(
       file: file,
-      overflowActions: widget.fileOverflowActions,
       isLastItem: isLastItem,
       selectedFiles: widget.selectedFiles,
       onTapCallback: onTap,
