@@ -317,13 +317,22 @@ const sortCollectionSummaries = (
     collectionSummaries
         .sort((a, b) => {
             switch (by) {
-                case "name":
+                case "name-asc":
                     return a.name.localeCompare(b.name);
+                case "name-desc":
+                    return b.name.localeCompare(a.name);
                 case "creation-time-asc":
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
+                case "creation-time-desc":
+                    return compareCollectionsLatestFile(
+                        b.latestFile,
+                        a.latestFile,
+                    );
+                case "updation-time-asc":
+                    return (a.updationTime ?? 0) - (b.updationTime ?? 0);
                 case "updation-time-desc":
                     return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }

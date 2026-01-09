@@ -173,8 +173,11 @@ export type CollectionSummaries = Map<number, CollectionSummary>;
  * the type.
  */
 export const collectionsSortBy = [
-    "name",
+    "name-asc",
+    "name-desc",
     "creation-time-asc",
+    "creation-time-desc",
+    "updation-time-asc",
     "updation-time-desc",
 ] as const;
 

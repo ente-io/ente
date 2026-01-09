@@ -1,6 +1,4 @@
-import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
-import SvgIcon from "@mui/material/SvgIcon";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -58,14 +56,23 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                 : { backgroundColor: "fill.faint" },
         ]}
     >
-        <SortByOption {...optProps} sortBy="name">
-            {t("name")}
+        <SortByOption {...optProps} sortBy="name-asc">
+            {t("name_a_to_z")}
+        </SortByOption>
+        <SortByOption {...optProps} sortBy="name-desc">
+            {t("name_z_to_a")}
+        </SortByOption>
+        <SortByOption {...optProps} sortBy="creation-time-desc">
+            {t("date_new_to_old")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="creation-time-asc">
-            {t("oldest")}
+            {t("date_old_to_new")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="updation-time-desc">
-            {t("last_updated")}
+            {t("updated_new_to_old")}
+        </SortByOption>
+        <SortByOption {...optProps} sortBy="updation-time-asc">
+            {t("updated_old_to_new")}
         </SortByOption>
     </OverflowMenu>
 );
@@ -76,19 +83,15 @@ type SortByOptionProps = Pick<
 > & { sortBy: CollectionsSortBy };
 
 const SortByOption: React.FC<React.PropsWithChildren<SortByOptionProps>> = ({
-    sortBy,
     activeSortBy,
     onChangeSortBy,
+    sortBy,
     children,
-}) => {
-    const handleClick = () => onChangeSortBy(sortBy);
-
-    return (
-        <OverflowMenuOption
-            onClick={handleClick}
-            endIcon={activeSortBy == sortBy ? <TickIcon /> : <SvgIcon />}
-        >
-            {children}
-        </OverflowMenuOption>
-    );
-};
+}) => (
+    <OverflowMenuOption
+        onClick={() => onChangeSortBy(sortBy)}
+        selected={activeSortBy === sortBy}
+    >
+        {children}
+    </OverflowMenuOption>
+);
