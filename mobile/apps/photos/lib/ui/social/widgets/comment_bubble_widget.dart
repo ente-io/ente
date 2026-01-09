@@ -369,7 +369,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           child: Icon(
                             EnteIcons.reply,
                             color: colorScheme.textMuted,
-                            size: 24,
+                            size: 20,
                           ),
                         ),
                       ),
