@@ -244,7 +244,11 @@ interface FilterChipsProps {
 }
 
 const filterChipSx = (isSelected: boolean, hasIcon: boolean) => ({
-    ...(hasIcon ? { pl: 1.5, pr: 1 } : { px: 1.5 }),
+    height: { xs: 28, sm: 32 },
+    fontSize: { xs: "0.75rem", sm: "0.8125rem" },
+    ...(hasIcon
+        ? { pl: { xs: 1, sm: 1.5 }, pr: { xs: 0.5, sm: 1 } }
+        : { px: { xs: 1, sm: 1.5 } }),
     ...(!isSelected && { backgroundColor: "rgba(255, 255, 255, 0.12)" }),
 });
 
@@ -472,8 +476,17 @@ interface GridItemProps {
     onOpen: () => void;
 }
 
+const LONG_PRESS_DURATION = 500;
+
 const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
     const checked = item.isSelected;
+    const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
+        null,
+    );
+    const isLongPress = React.useRef(false);
+    const isTouchDevice =
+        typeof window !== "undefined" &&
+        window.matchMedia("(pointer: coarse)").matches;
 
     const handleCheckboxChange: React.ChangeEventHandler<HTMLInputElement> = (
         e,
@@ -482,8 +495,46 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         onToggle();
     };
 
+    const handleTouchStart = () => {
+        isLongPress.current = false;
+        longPressTimer.current = setTimeout(() => {
+            isLongPress.current = true;
+            onToggle();
+        }, LONG_PRESS_DURATION);
+    };
+
+    const handleTouchEnd = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
+    const handleTouchMove = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
+    const handleClick = () => {
+        if (isLongPress.current) return;
+
+        // On mobile, if item is selected, tap to deselect
+        if (isTouchDevice && checked) {
+            onToggle();
+        } else {
+            onOpen();
+        }
+    };
+
     return (
-        <TileContainer onClick={onOpen}>
+        <TileContainer
+            onClick={handleClick}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={handleTouchMove}
+        >
             <ItemCard TileComponent={LargeFileTile} coverFile={item.file}>
                 <LargeFileTileOverlay>
                     <SizeLabel className="size-label">
@@ -635,15 +686,6 @@ const TileContainer = styled("div")`
         &:hover {
             input[type="checkbox"] {
                 visibility: visible;
-                opacity: 0.5;
-            }
-
-            .hover-overlay {
-                opacity: 1;
-            }
-
-            .size-label {
-                opacity: 1;
             }
         }
     }
@@ -675,13 +717,16 @@ const SizeLabel = styled(Typography)`
         transparent 100%
     );
     color: white;
-    padding: 20px 8px 8px;
-    padding-bottom: 18px;
+    padding: 16px 6px 6px;
     text-align: center;
-    font-size: 1.2srem;
+    font-size: 0.75rem;
     font-weight: 500;
     border-radius: 0 0 4px 4px;
-    transition: opacity 0.2s ease;
+
+    @media (min-width: 600px) {
+        padding: 25px 8px 12px;
+        font-size: 1rem;
+    }
 `;
 
 const Check = styled("input")(
