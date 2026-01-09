@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
@@ -27,7 +28,9 @@ class CommentLikeCountCapsule extends StatelessWidget {
         decoration: BoxDecoration(
           color: background,
           border: Border.all(
-            color: colorScheme.backgroundBase,
+            color: isDark
+                ? const Color(0xFF0E0E0E)
+                : colorScheme.backgroundElevated,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(42),
@@ -36,7 +39,7 @@ class CommentLikeCountCapsule extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
-              Icons.favorite,
+              EnteIcons.likeFilled,
               size: 14,
               color: Color(0xFF08C225),
             ),

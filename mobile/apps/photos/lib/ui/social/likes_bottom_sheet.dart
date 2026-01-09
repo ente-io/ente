@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -208,13 +209,16 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final mediaQuery = MediaQuery.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       constraints: BoxConstraints(
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: isDarkMode
+            ? const Color(0xFF0E0E0E)
+            : colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
@@ -432,7 +436,7 @@ class _LikeListItem extends StatelessWidget {
             ),
           ),
           const Icon(
-            Icons.favorite,
+            EnteIcons.likeFilled,
             color: Color(0xFF08C225),
             size: 20,
           ),

@@ -2042,14 +2042,10 @@
   "hoorayyyy": "Hurraaaa!",
   "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
   "deletingDash": "Lösche - ",
-  "cLTitle1": "Einführung von Ritualen",
-  "cLDesc1": "Gute Vorsätze für 2026? Mit Ritualen kannst du eine Erinnerung mit Ente Fotos einstellen und deinen Fortschritt mit der Aufnahme von Bildern verfolgen. Nutze es für das Fitness-Training, Essgewohnheiten, tägliche Momente mit deinen Lieben — alles, was du zu einer Gewohnheit machen möchtest.",
-  "cLTitle2": "Öffentliche Links, jetzt für alle",
-  "cLDesc2": "Alle Benutzer von Ente mit einem kostenlosen Plan können jetzt öffentliche Links zu Fotos und Alben erstellen und teilen. Um Missbrauch vorzubeugen, werden Links ein Limit haben, wie viele Personen sie sehen können.",
-  "cLTitle3": "Personen manuell markieren",
-  "cLDesc3": "Du kannst jetzt Personen in Bildern markieren, auch wenn unsere lokale KI kein Gesicht erkannt hat. Hilfreich für Haustiere, teilweise sichtbare Gesichter oder Momente, in denen jemand nicht auf einem Foto ist, aber dennoch miteinbezogen werden sollte.",
-  "cLTitle4": "Und mehr",
-  "cLDesc4": "Du kannst jetzt geteilte Alben anheften. Links zu Alben sind für Bearbeiter und Betrachter sichtbar, um das Teilen zu vereinfachen. Wir haben einige Swipe-Fehler unter iOS behoben und die Fotoansicht aktualisiert, inklusive eines neuen Favoriten-Icons (schafft Platz für kommende Features).",
+  "cLTitle1": "Kommentare und Reaktionen",
+  "cLDesc1": "Wir führen Kommentare und Reaktionen für geteilte Fotos ein. Du kannst auf ein Foto reagieren oder es kommentieren, indem du es öffnest und die Aktionen unten verwendest. Alle eingehenden Kommentare und Reaktionen sind im Tab 'Geteilt' sichtbar.",
+  "cLTitle2": "Admin für Alben",
+  "cLDesc2": "Du kannst jetzt einen anderen Ente-Benutzer als Administrator deines Albums zuweisen. Damit kann er weitere Betrachter und Mitarbeiter hinzufügen, Fotos aus Alben entfernen und sogar Teilnehmern vorschlagen, ihre Fotos zu löschen.",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

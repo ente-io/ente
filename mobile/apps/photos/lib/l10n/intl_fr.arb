@@ -2032,14 +2032,10 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Présentation des routines",
-  "cLDesc1": "Vous prenez de bonnes résolutions pour 2026 ? Avec Routines, vous pouvez définir un rappel sur Ente Photos et suivre vos progrès en prenant des photos. Utilisez-le pour faire vos entraînements, prendre des habitudes alimentaires, des moments aux quotidiens avec vos proches, tout ce que vous souhaitez qui devienne une habitude.",
-  "cLTitle2": "Liens publics, maintenant pour tout le monde",
-  "cLDesc2": "Tous les utilisateurs de Ente avec un plan gratuit peuvent maintenant créer et partager des liens publics vers des photos et des albums. Pour prévenir les abus, les liens auront des limites sur le nombre de personnes qui peuvent les voir.",
-  "cLTitle3": "Taguer manuellement une personne",
-  "cLDesc3": "Vous pouvez maintenant taguer des personnes même si notre IA sur l'appareil ne détecte pas de visage. Pratique pour les animaux de compagnie, les visages partiellement visibles ou bien les moments où quelqu'un n'est pas réellement dans la photo mais peut toujours y être inclus.",
-  "cLTitle4": "Et plus encore",
-  "cLDesc4": "Vous pouvez maintenant épingler les albums partagés. Les liens vers les albums sont visibles aux collaborateurs et aux spectateurs pour faciliter le partage. Nous avons corrigé quelques bugs de balayage sur iOS et mis à jour la vue photo, y compris un nouvel icône de favoris (faisant de la place pour des fonctionnalités à venir).",
+  "cLTitle1": "Commentaires et réactions",
+  "cLDesc1": "Nous introduisons les commentaires et les réactions sur les photos partagées. Vous pouvez réagir ou commenter une photo en l'ouvrant et en utilisant les actions en bas. Tous les commentaires et réactions entrants seront visibles dans l'onglet Partagé.",
+  "cLTitle2": "Administrateur d'albums",
+  "cLDesc2": "Vous pouvez maintenant désigner un autre utilisateur Ente comme administrateur de votre album. Avec cela, il pourra ajouter d'autres spectateurs et collaborateurs, supprimer des photos des albums et même suggérer aux participants de supprimer leurs photos.",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

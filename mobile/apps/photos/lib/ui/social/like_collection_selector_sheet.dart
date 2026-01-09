@@ -1,3 +1,4 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
@@ -228,13 +229,15 @@ class _LikeCollectionSelectorSheetState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final mediaQuery = MediaQuery.of(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       constraints: BoxConstraints(
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color:
+            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundBase,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(28),
         ),
@@ -350,6 +353,7 @@ class _AlbumsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(25, 26, 12, 16),
@@ -365,7 +369,9 @@ class _AlbumsHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                color: colorScheme.backgroundBase,
+                color: isDarkMode
+                    ? const Color(0xFF0E0E0E)
+                    : colorScheme.backgroundBase,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -374,7 +380,7 @@ class _AlbumsHeader extends StatelessWidget {
                   Text("Like all", style: textTheme.small),
                   const SizedBox(width: 10),
                   Icon(
-                    allLiked ? Icons.favorite : Icons.favorite_border,
+                    allLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                     color: allLiked ? _greenHeartColor : colorScheme.textBase,
                     size: 16,
                   ),
@@ -431,19 +437,31 @@ class _FileThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 128,
-        height: 128,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: file != null
-              ? ThumbnailWidget(
-                  file!,
-                  thumbnailSize: thumbnailLargeSize,
-                  rawThumbnail: true,
-                )
-              : Container(color: placeholderColor),
-        ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 13, left: 13, right: 13),
+            child: SizedBox(
+              width: 128,
+              height: 128,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: file != null
+                    ? ThumbnailWidget(
+                        file!,
+                        thumbnailSize: thumbnailLargeSize,
+                        rawThumbnail: true,
+                      )
+                    : Container(color: placeholderColor),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Image.asset("assets/select_album_to_like_asset.png"),
+          ),
+        ],
       ),
     );
   }
@@ -475,7 +493,9 @@ class _AlbumListItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
         decoration: BoxDecoration(
-          color: colorScheme.backgroundBase,
+          color: isDarkTheme
+              ? const Color(0xFF0E0E0E)
+              : colorScheme.backgroundBase,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -497,7 +517,7 @@ class _AlbumListItem extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  state.isLiked ? Icons.favorite : Icons.favorite_border,
+                  state.isLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                   color: _greenHeartColor,
                   size: 19.2,
                 ),

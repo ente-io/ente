@@ -1946,6 +1946,10 @@
   "hoorayyyy": "Uuhuuuulll!",
   "nothingToTidyUpHere": "Nada para arrumar aqui",
   "deletingDash": "Apagando - ",
+  "cLTitle1": "Comentários e reações",
+  "cLDesc1": "Estamos introduzindo comentários e reações em fotos compartilhadas. Você pode reagir ou comentar uma foto abrindo-a e usando as ações na parte inferior. Todos os comentários e reações recebidos serão visíveis na aba Compartilhado.",
+  "cLTitle2": "Administrador de álbuns",
+  "cLDesc2": "Agora você pode atribuir outro usuário Ente como administrador do seu álbum. Com isso, ele poderá adicionar outros visualizadores e colaboradores, remover fotos dos álbuns e até sugerir que os participantes excluam suas fotos.",
   "closeBy": "Parecida",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

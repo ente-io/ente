@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -100,21 +101,20 @@ class _PreviewAvatarStack extends StatelessWidget {
           Positioned(
             left: 0,
             top: 0,
-            child: _buildAvatar(actors.first, showBorder: false),
+            child: _buildAvatar(actors.first, colorScheme, showBorder: false),
           ),
           // Second (bottom-right) avatar - only if multiple actors
           if (hasMultipleActors)
             Positioned(
               right: 0,
               bottom: 0,
-              child: _buildAvatar(actors[1], showBorder: true),
+              child: _buildAvatar(actors[1], colorScheme, showBorder: true),
             ),
           // Icon badge at bottom-left
           Positioned(
             left: -3,
             bottom: hasMultipleActors ? _overlap - 5 : -3,
             child: _FeedTypeIconBadge(
-              type: feedItem.type,
               size: _iconSize,
               colorScheme: colorScheme,
             ),
@@ -124,13 +124,17 @@ class _PreviewAvatarStack extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(User user, {required bool showBorder}) {
+  Widget _buildAvatar(
+    User user,
+    EnteColorScheme colorScheme, {
+    required bool showBorder,
+  }) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: showBorder
             ? Border.all(
-                color: Colors.white,
+                color: colorScheme.backgroundBase,
                 width: 1.5,
               )
             : null,
@@ -178,14 +182,12 @@ class _PreviewAvatarStack extends StatelessWidget {
   }
 }
 
-/// Icon badge for feed type (comment, like, etc.)
+/// Notification icon badge for feed entry point.
 class _FeedTypeIconBadge extends StatelessWidget {
-  final FeedItemType type;
   final double size;
   final EnteColorScheme colorScheme;
 
   const _FeedTypeIconBadge({
-    required this.type,
     required this.size,
     required this.colorScheme,
   });
@@ -196,8 +198,12 @@ class _FeedTypeIconBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: colorScheme.backgroundElevated,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: colorScheme.strokeMuted,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -207,72 +213,17 @@ class _FeedTypeIconBadge extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: _buildIcon(),
+        child: Transform.rotate(
+          angle: -0.08,
+          child: HugeIcon(
+            // Icons.notifications_outlined,
+            icon: HugeIcons.strokeRoundedNotification01,
+            size: 14,
+            color: colorScheme.textBase,
+          ),
+        ),
       ),
     );
-  }
-
-  Widget _buildIcon() {
-    switch (type) {
-      case FeedItemType.photoLike:
-        return const Icon(
-          Icons.favorite,
-          size: 16,
-          color: Color(0xFF00B33C),
-        );
-      case FeedItemType.comment:
-        return Icon(
-          Icons.chat_bubble,
-          size: 14,
-          color: colorScheme.textMuted,
-        );
-      case FeedItemType.reply:
-        return Icon(
-          Icons.reply,
-          size: 16,
-          color: colorScheme.textMuted,
-        );
-      case FeedItemType.commentLike:
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Icon(
-              Icons.chat_bubble,
-              size: 14,
-              color: colorScheme.textMuted,
-            ),
-            const Positioned(
-              right: -3,
-              bottom: -3,
-              child: Icon(
-                Icons.favorite,
-                size: 8,
-                color: Color(0xFF00B33C),
-              ),
-            ),
-          ],
-        );
-      case FeedItemType.replyLike:
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Icon(
-              Icons.reply,
-              size: 14,
-              color: colorScheme.textMuted,
-            ),
-            const Positioned(
-              right: -3,
-              bottom: -3,
-              child: Icon(
-                Icons.favorite,
-                size: 8,
-                color: Color(0xFF00B33C),
-              ),
-            ),
-          ],
-        );
-    }
   }
 }
 

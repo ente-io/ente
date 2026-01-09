@@ -2042,14 +2042,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Ra mắt Thói quen",
-  "cLDesc1": "Bạn đang lên kế hoạch cho những mục tiêu năm 2026? Với Thói quen, bạn có thể đặt lời nhắc trên Ente Photos và theo dõi tiến độ bằng cách chụp ảnh. Sử dụng ứng dụng này cho việc tập luyện, thói quen ăn uống, những khoảnh khắc hàng ngày với người thân yêu—bất cứ điều gì bạn muốn biến thành thói quen.",
-  "cLTitle2": "Liên kết công khai, giờ dành cho mọi người",
-  "cLDesc2": "Tất cả người dùng Ente sử dụng gói miễn phí giờ đây có thể tạo và chia sẻ liên kết công khai đến ảnh và album. Để ngăn chặn việc lạm dụng, các liên kết sẽ có giới hạn về số người có thể xem.",
-  "cLTitle3": "Gắn thẻ mọi người theo cách thủ công",
-  "cLDesc3": "Giờ đây, bạn có thể gắn thẻ người ngay cả khi AI trên thiết bị của chúng tôi không nhận diện được khuôn mặt. Rất tiện lợi cho thú cưng, khuôn mặt chỉ hiển thị một phần hoặc những trường hợp ai đó không thực sự có mặt trong ảnh nhưng vẫn cần được đưa vào.",
-  "cLTitle4": "Và nhiều hơn thế",
-  "cLDesc4": "Giờ đây bạn có thể ghim các album được chia sẻ. Liên kết album sẽ hiển thị cho người cộng tác và người xem, giúp việc chia sẻ dễ dàng hơn. Chúng tôi đã sửa một số lỗi vuốt trên iOS và cập nhật chế độ xem ảnh, bao gồm biểu tượng yêu thích mới (chuẩn bị cho các tính năng sắp ra mắt).",
+  "cLTitle1": "Bình luận và phản ứng",
+  "cLDesc1": "Chúng tôi giới thiệu tính năng bình luận và phản ứng trên ảnh được chia sẻ. Bạn có thể phản ứng hoặc bình luận về một bức ảnh bằng cách mở nó và sử dụng các hành động ở phía dưới. Tất cả bình luận và phản ứng đến sẽ hiển thị trên tab Đã chia sẻ.",
+  "cLTitle2": "Quản trị viên cho album",
+  "cLDesc2": "Bạn giờ đây có thể chỉ định một người dùng Ente khác làm quản trị viên album của bạn. Với quyền này, họ có thể thêm người xem và cộng tác viên khác, xóa ảnh khỏi album và thậm chí đề xuất người tham gia xóa ảnh của họ.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

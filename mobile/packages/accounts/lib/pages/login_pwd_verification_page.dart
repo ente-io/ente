@@ -3,12 +3,14 @@ import "package:ente_accounts/ente_accounts.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/dynamic_fab.dart";
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import "package:logging/logging.dart";
 
 // LoginPasswordVerificationPage is a page that allows the user to enter their password to verify their identity.
@@ -34,10 +36,10 @@ class _LoginPasswordVerificationPageState
     extends State<LoginPasswordVerificationPage> {
   final _logger = Logger((_LoginPasswordVerificationPageState).toString());
   final _passwordController = TextEditingController();
-  final FocusNode _passwordFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
   String? email;
-  bool _passwordInFocus = false;
   bool _passwordVisible = false;
+  bool _passwordInFocus = false;
 
   Future<void> onPressed() async {
     FocusScope.of(context).unfocus();
@@ -58,6 +60,7 @@ class _LoginPasswordVerificationPageState
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -69,11 +72,22 @@ class _LoginPasswordVerificationPageState
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.primary700,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -108,40 +122,28 @@ class _LoginPasswordVerificationPageState
       );
     } on DioException catch (e, s) {
       await dialog.hide();
-      final String? enteErrCode = e.response?.data["code"];
-      if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
-        await _showContactSupportDialog(
-          context,
-          context.strings.oops,
-          context.strings.lockerExistingUserRequired,
-        );
-      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
-        await _showContactSupportDialog(
-          context,
-          "We're out of beta seats for now",
-          "This preview access has reached capacity. We'll be opening it to more users soon.",
-        );
-      } else if (e.response != null && e.response!.statusCode == 401) {
+
+      if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
         await _showContactSupportDialog(
           context,
-          context.strings.incorrectPasswordTitle,
-          context.strings.pleaseTryAgain,
+          title: context.strings.incorrectPasswordTitle,
+          message: context.strings.pleaseTryAgain,
         );
       } else {
         _logger.severe('API failure during SRP login', e, s);
         if (e.type == DioExceptionType.connectionError) {
           await _showContactSupportDialog(
             context,
-            context.strings.noInternetConnection,
-            context.strings.pleaseCheckYourInternetConnectionAndTryAgain,
+            title: context.strings.noInternetConnection,
+            message:
+                context.strings.pleaseCheckYourInternetConnectionAndTryAgain,
           );
         } else {
           await _showContactSupportDialog(
             context,
-            context.strings.oops,
-            context.strings.verificationFailedPleaseTryAgain,
+            title: context.strings.oops,
+            message: context.strings.verificationFailedPleaseTryAgain,
           );
         }
       }
@@ -159,13 +161,21 @@ class _LoginPasswordVerificationPageState
         return;
       } else if (e is KeyDerivationError) {
         // device is not powerful enough to perform derive key
-        final dialogChoice = await showChoiceDialog(
+        final result = await showAlertBottomSheet<bool>(
           context,
           title: context.strings.recreatePasswordTitle,
-          body: context.strings.recreatePasswordBody,
-          firstButtonLabel: context.strings.useRecoveryKey,
+          message: context.strings.recreatePasswordBody,
+          assetPath: 'assets/warning-grey.png',
+          buttons: [
+            GradientButton(
+              text: context.strings.useRecoveryKey,
+              onTap: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
         );
-        if (dialogChoice!.action == ButtonAction.first) {
+        if (result == true) {
           await UserService.instance.sendOtt(
             context,
             email!,
@@ -177,26 +187,33 @@ class _LoginPasswordVerificationPageState
         _logger.severe('unexpected error while verifying password', e, s);
         await _showContactSupportDialog(
           context,
-          context.strings.oops,
-          context.strings.verificationFailedPleaseTryAgain,
+          title: context.strings.oops,
+          message: context.strings.verificationFailedPleaseTryAgain,
         );
       }
     }
   }
 
   Future<void> _showContactSupportDialog(
-    BuildContext context,
-    String title,
-    String message,
-  ) async {
-    final dialogChoice = await showChoiceDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async {
+    final result = await showAlertBottomSheet<bool>(
       context,
       title: title,
-      body: message,
-      firstButtonLabel: context.strings.contactSupport,
-      secondButtonLabel: context.strings.ok,
+      message: message,
+      assetPath: 'assets/warning-grey.png',
+      buttons: [
+        GradientButton(
+          text: context.strings.contactSupport,
+          onTap: () {
+            Navigator.of(context).pop(true);
+          },
+        ),
+      ],
     );
-    if (dialogChoice!.action == ButtonAction.first) {
+    if (result == true) {
       await sendLogs(
         context,
         "support@ente.io",
@@ -206,6 +223,9 @@ class _LoginPasswordVerificationPageState
   }
 
   Widget _getBody() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Column(
       children: [
         Expanded(
@@ -213,142 +233,147 @@ class _LoginPasswordVerificationPageState
             child: ListView(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
-                  child: Text(
-                    context.strings.enterPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 30,
-                    left: 22,
-                    right: 20,
-                  ),
-                  child: Text(
-                    email ?? '',
-                    style: getEnteTextTheme(context).smallMuted,
-                  ),
-                ),
-                Visibility(
-                  // hidden textForm for suggesting auto-fill service for saving
-                  // password
-                  visible: false,
-                  child: TextFormField(
-                    autofillHints: const [
-                      AutofillHints.email,
-                    ],
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    initialValue: email,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: TextFormField(
-                    onFieldSubmitted: _passwordController.text.isNotEmpty
-                        ? (_) => onPressed()
-                        : null,
-                    key: const ValueKey("passwordInputField"),
-                    autofillHints: const [AutofillHints.password],
-                    decoration: InputDecoration(
-                      hintText: context.strings.enterYourPasswordHint,
-                      filled: true,
-                      contentPadding: const EdgeInsets.all(20),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _passwordInFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _passwordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _passwordVisible = !_passwordVisible;
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                    ),
-                    controller: _passwordController,
-                    autofocus: true,
-                    autocorrect: false,
-                    obscureText: !_passwordVisible,
-                    keyboardType: TextInputType.visiblePassword,
-                    focusNode: _passwordFocusNode,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    thickness: 1,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          await UserService.instance.sendOtt(
-                            context,
-                            email!,
-                            isResetPasswordScreen: true,
-                          );
-                        },
-                        child: Center(
-                          child: Text(
-                            context.strings.forgotPassword,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                      const SizedBox(height: 24),
+                      Text.rich(
+                        TextSpan(
+                          text: "${context.strings.enterThePasswordFor} ",
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textMuted,
                           ),
+                          children: [
+                            TextSpan(
+                              text: email,
+                              style: textTheme.body.copyWith(
+                                color: colorScheme.primary700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          final dialog = createProgressDialog(
-                            context,
-                            context.strings.pleaseWait,
-                          );
-                          await dialog.show();
-                          await widget.config.logout();
-                          await dialog.hide();
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
-                        },
-                        child: Center(
-                          child: Text(
-                            context.strings.changeEmail,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
+                      const SizedBox(height: 24),
+                      Text(
+                        context.strings.password,
+                        style: textTheme.bodyBold.copyWith(
+                          color: colorScheme.textBase,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      Visibility(
+                        // hidden textForm for suggesting auto-fill service for saving
+                        // password
+                        visible: false,
+                        child: TextFormField(
+                          autofillHints: const [
+                            AutofillHints.email,
+                          ],
+                          autocorrect: false,
+                          keyboardType: TextInputType.emailAddress,
+                          initialValue: email,
+                          textInputAction: TextInputAction.next,
+                        ),
+                      ),
+                      TextFormField(
+                        onFieldSubmitted: _passwordController.text.isNotEmpty
+                            ? (_) => onPressed()
+                            : null,
+                        key: const ValueKey("passwordInputField"),
+                        autofillHints: const [AutofillHints.password],
+                        decoration: InputDecoration(
+                          fillColor: colorScheme.backdropBase,
+                          filled: true,
+                          hintText: context.strings.enterYourPasswordHint,
+                          hintStyle: TextStyle(color: colorScheme.textMuted),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: _passwordInFocus
+                              ? IconButton(
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: colorScheme.textMuted,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                )
+                              : null,
+                        ),
+                        style: textTheme.body.copyWith(
+                          color: colorScheme.textBase,
+                        ),
+                        controller: _passwordController,
+                        autofocus: true,
+                        autocorrect: false,
+                        obscureText: !_passwordVisible,
+                        keyboardType: TextInputType.visiblePassword,
+                        focusNode: _passwordFocusNode,
+                        onChanged: (_) {
+                          setState(() {});
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () async {
+                              await UserService.instance.sendOtt(
+                                context,
+                                email!,
+                                isResetPasswordScreen: true,
+                              );
+                            },
+                            child: Text(
+                              "${context.strings.forgotPassword}?",
+                              style: textTheme.body.copyWith(
+                                color: colorScheme.primary700,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colorScheme.primary700,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () async {
+                              final dialog = createProgressDialog(
+                                context,
+                                context.strings.pleaseWait,
+                              );
+                              await dialog.show();
+                              await widget.config.logout();
+                              await dialog.hide();
+                              Navigator.of(context)
+                                  .popUntil((route) => route.isFirst);
+                            },
+                            child: Text(
+                              context.strings.changeEmail,
+                              style: textTheme.body.copyWith(
+                                color: colorScheme.primary700,
+                                decoration: TextDecoration.underline,
+                                decorationColor: colorScheme.primary700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

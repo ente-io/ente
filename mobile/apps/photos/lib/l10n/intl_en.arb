@@ -2067,14 +2067,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Introducing Rituals",
-  "cLDesc1": "Planning resolutions for 2026? With Rituals, you can set a reminder on Ente Photos and track your progress by taking photos. Use it for workouts, eating habits, daily moments with loved ones—anything you want to make a habit.",
-  "cLTitle2": "Public links, now for everyone",
-  "cLDesc2": "All Ente users on the free plan can now create and share public links to photos and albums. To prevent abuse, links will have limits on how many people can view them.",
-  "cLTitle3": "Manually tag people",
-  "cLDesc3": "You can now tag people even when our on-device AI doesn't detect a face. Handy for pets, partially visible faces, or moments where someone isn't actually in the photo but should still be included.",
-  "cLTitle4": "And more",
-  "cLDesc4": "You can now pin shared albums. Album links are visible to collaborators and viewers to make sharing even easier. We've fixed some iOS swiping bugs and updated the photo view, including a new favorite icon (making room for upcoming features).",
+  "cLTitle1": "Comments and reactions",
+  "cLDesc1": "We are introducing comments and reactions on shared photos. You can react or comment on a photo by opening it and using the actions at the bottom. All incoming comments and reactions will be visible on the Shared tab.",
+  "cLTitle2": "Admin for albums",
+  "cLDesc2": "You can now assign another Ente user as an administrator of your album. With this, they will be able to add other viewers and collaborators, remove photos from the albums, and even suggest participants to delete their photos.",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

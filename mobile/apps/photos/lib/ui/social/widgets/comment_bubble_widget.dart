@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
@@ -254,8 +255,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     _overlayController.show();
     _overlayAnimationController.forward();
 
-    // Auto-dismiss after 750ms
-    Future.delayed(const Duration(milliseconds: 750), () {
+    // Auto-dismiss after 1s
+    Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted && _isAutoHighlight) {
         _hideAutoHighlight();
       }
@@ -299,7 +300,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     await _hideHighlight();
     if (!mounted) return;
 
-    final confirmed = await showDeleteCommentConfirmationDialog(context);
+    final confirmed = await showDeleteCommentConfirmationDialog(
+      context,
+      commentText: widget.comment.data,
+    );
 
     if (confirmed == true) {
       try {
@@ -363,7 +367,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           opacity:
                               (_dragOffset / _replyThreshold).clamp(0.0, 1.0),
                           child: Icon(
-                            Icons.reply,
+                            EnteIcons.reply,
                             color: colorScheme.textMuted,
                             size: 24,
                           ),
@@ -400,11 +404,19 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
             _overlayAnimationController.status == AnimationStatus.reverse;
         return Stack(
           children: [
-            // Full-screen barrier with black opacity 0.3
+            // Full-screen barrier with black opacity
             GestureDetector(
               onTap: _isAutoHighlight ? _hideAutoHighlight : _hideHighlight,
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.3 * value),
+              child: Builder(
+                builder: (context) {
+                  final isDarkMode =
+                      Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    color: Colors.black.withValues(
+                      alpha: (isDarkMode ? 0.65 : 0.3) * value,
+                    ),
+                  );
+                },
               ),
             ),
             // Highlighted comment + popup menu

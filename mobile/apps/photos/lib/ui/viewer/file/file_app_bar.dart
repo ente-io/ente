@@ -13,6 +13,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -30,6 +31,7 @@ import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
@@ -181,17 +183,22 @@ class FileAppBarState extends State<FileAppBar> {
     _actions.clear();
     final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
+    final int? collectionID = widget.file.collectionID;
+    final Collection? collection = collectionID != null
+        ? CollectionsService.instance.getCollectionByID(collectionID)
+        : null;
     final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
             ?.isInSharedCollectionNotifier
             .value ??
         false;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
-      isFileHidden = CollectionsService.instance
-              .getCollectionByID(widget.file.collectionID!)
-              ?.isHidden() ??
-          false;
+      isFileHidden = collection?.isHidden() ?? false;
     }
+    final bool canSuggestDeleteAction = canSuggestDeleteForFile(
+      file: widget.file,
+      collection: collection,
+    );
     if (widget.file.isLiveOrMotionPhoto) {
       _actions.add(
         IconButton(
@@ -334,6 +341,17 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
 
+      if (canSuggestDeleteAction) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).suggestDeletion,
+            value: 13,
+            icon: Icons.flag_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+
       items.add(
         EntePopupMenuItem(
           AppLocalizations.of(context).info,
@@ -441,6 +459,10 @@ class FileAppBarState extends State<FileAppBar> {
               widget.onEditRequested(widget.file);
             } else if (value == 12) {
               await showDetailsSheet(context, widget.file);
+            } else if (value == 13) {
+              if (collection != null) {
+                await _handleSuggestDelete(collection);
+              }
             } else if (value == 10) {
               final selectedFiles = SelectedFiles();
               selectedFiles.files.add(widget.file);
@@ -455,6 +477,22 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     return _actions;
+  }
+
+  Future<void> _handleSuggestDelete(Collection collection) async {
+    if (widget.file.uploadedFileID == null) {
+      return;
+    }
+    await showSuggestDeleteSheet(
+      context: context,
+      onConfirm: () async {
+        await CollectionsService.instance.suggestDeleteFromCollection(
+          collection.id,
+          [widget.file],
+        );
+        widget.onFileRemoved(widget.file);
+      },
+    );
   }
 
   _onToggleLoopVideo() {
