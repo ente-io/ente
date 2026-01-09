@@ -366,12 +366,11 @@ class _LikesList extends StatelessWidget {
     required this.anonDisplayNames,
   });
 
-  User _getUserForReaction(Reaction reaction, String anonymousLabel) {
+  User _getUserForReaction(Reaction reaction) {
     if (reaction.isAnonymous) {
       final anonID = reaction.anonUserID;
-      final displayName = anonID != null
-          ? (anonDisplayNames[anonID] ?? anonID)
-          : anonymousLabel;
+      final displayName =
+          anonID != null ? (anonDisplayNames[anonID] ?? anonID) : "Anonymous";
       return User(
         id: reaction.userID,
         email: "${anonID ?? "anonymous"}@unknown.com",
@@ -393,7 +392,7 @@ class _LikesList extends StatelessWidget {
       itemCount: likes.length,
       itemBuilder: (context, index) {
         final reaction = likes[index];
-        final user = _getUserForReaction(reaction, l10n.anonymous);
+        final user = _getUserForReaction(reaction);
         return _LikeListItem(
           user: user,
           currentUserID: currentUserID,

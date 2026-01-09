@@ -2388,10 +2388,6 @@
       }
     }
   },
-  "anonymous": "Anonymous",
-  "@anonymous": {
-    "description": "Fallback name for anonymous users"
-  },
   "commentsCount": "{count, plural, =0{No comments} =1{1 comment} other{{count} comments}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",

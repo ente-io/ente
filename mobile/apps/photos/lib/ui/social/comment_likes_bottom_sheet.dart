@@ -81,12 +81,11 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
     }
   }
 
-  User _getUserForReaction(Reaction reaction, String anonymousLabel) {
+  User _getUserForReaction(Reaction reaction) {
     if (reaction.isAnonymous) {
       final anonID = reaction.anonUserID;
-      final displayName = anonID != null
-          ? (_anonDisplayNames[anonID] ?? anonID)
-          : anonymousLabel;
+      final displayName =
+          anonID != null ? (_anonDisplayNames[anonID] ?? anonID) : "Anonymous";
       return User(
         id: reaction.userID,
         email: "${anonID ?? "anonymous"}@unknown.com",
@@ -160,7 +159,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
                   itemCount: _likes.length,
                   itemBuilder: (context, index) {
                     final reaction = _likes[index];
-                    final user = _getUserForReaction(reaction, l10n.anonymous);
+                    final user = _getUserForReaction(reaction);
                     return _CommentLikeListItem(
                       user: user,
                       currentUserID: widget.currentUserID,

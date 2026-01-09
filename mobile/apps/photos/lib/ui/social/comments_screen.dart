@@ -389,16 +389,15 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
     _inputFocusNode.requestFocus();
   }
 
-  User _getUserForComment(Comment comment, {String? anonymousLabel}) {
+  User _getUserForComment(Comment comment) {
     if (_userCache.containsKey(comment.userID)) {
       return _userCache[comment.userID]!;
     }
 
     if (comment.isAnonymous) {
       final anonID = comment.anonUserID;
-      final displayName = anonID != null
-          ? (_anonDisplayNames[anonID] ?? anonID)
-          : (anonymousLabel ?? "Anonymous");
+      final displayName =
+          anonID != null ? (_anonDisplayNames[anonID] ?? anonID) : "Anonymous";
       final user = User(
         id: comment.userID,
         email: "${anonID ?? "anonymous"}@unknown.com",
@@ -555,7 +554,6 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -563,9 +561,6 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
     final canModerateAnonComments = selectedCollection != null &&
         (selectedCollection.isOwner(_currentUserID) ||
             selectedCollection.isAdmin(_currentUserID));
-
-    User userResolver(Comment comment) =>
-        _getUserForComment(comment, anonymousLabel: l10n.anonymous);
 
     return Container(
       decoration: BoxDecoration(
@@ -618,7 +613,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                             return CommentBubbleWidget(
                               key: key,
                               comment: comment,
-                              user: userResolver(comment),
+                              user: _getUserForComment(comment),
                               isOwnComment: comment.userID == _currentUserID,
                               canModerateAnonComments: canModerateAnonComments,
                               currentUserID: _currentUserID,
@@ -632,7 +627,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               onFetchReactions: () =>
                                   _getReactionsForComment(comment.id),
                               onReplyTap: () => _onReplyTap(comment),
-                              userResolver: userResolver,
+                              userResolver: _getUserForComment,
                               onCommentDeleted: () =>
                                   _handleCommentDeleted(comment.id),
                               onAutoHighlightDismissed: () {
@@ -648,8 +643,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
               ),
               CommentInputWidget(
                 replyingTo: _replyingTo,
-                replyingToUser:
-                    _replyingTo != null ? userResolver(_replyingTo!) : null,
+                replyingToUser: _replyingTo != null
+                    ? _getUserForComment(_replyingTo!)
+                    : null,
                 currentUserID: _currentUserID,
                 onDismissReply: _dismissReply,
                 controller: _textController,
