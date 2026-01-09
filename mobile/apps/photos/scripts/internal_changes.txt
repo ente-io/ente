@@ -9,3 +9,4 @@
 - Prateek(i): Stop streaming immediately on log-out
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Prateek: Collage creator: move save to app bar, add scrollbar, responsive layout
+- Neeraj: Priority debouncer for recent local photos (< 7 days) to reduce home gallery delay
