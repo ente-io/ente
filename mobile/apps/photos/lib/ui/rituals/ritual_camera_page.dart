@@ -337,12 +337,48 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     return null;
   }
 
+  bool get _canSwitchCamera =>
+      _cameras.length > 1 && !_saving && !_initializing;
+
+  CameraDescription? _cameraForDirection(CameraLensDirection direction) {
+    for (final camera in _cameras) {
+      if (camera.lensDirection == direction) {
+        return camera;
+      }
+    }
+    return null;
+  }
+
+  CameraDescription? _backCameraForFlip() {
+    if (_preferredBackCamera != null &&
+        _cameras.contains(_preferredBackCamera)) {
+      return _preferredBackCamera;
+    }
+    return _cameraForDirection(CameraLensDirection.back);
+  }
+
   Future<void> _switchCamera() async {
-    if (_cameras.length < 2 || _saving) return;
+    if (!_canSwitchCamera) return;
     final current = _activeCamera;
     if (current == null) return;
     final nextIndex = (_cameras.indexOf(current) + 1) % _cameras.length;
     await _initializeCamera(_cameras[nextIndex]);
+  }
+
+  Future<void> _flipCamera() async {
+    if (!_canSwitchCamera) return;
+    final current = _activeCamera;
+    if (current == null) return;
+    final bool isFront = current.lensDirection == CameraLensDirection.front;
+    final CameraDescription? target = isFront
+        ? _backCameraForFlip()
+        : _cameraForDirection(CameraLensDirection.front);
+    if (target == null || target == current) return;
+    await _initializeCamera(target);
+  }
+
+  void _handleViewFinderDoubleTap() {
+    unawaited(_flipCamera());
   }
 
   Future<void> _takePicture() async {
@@ -781,6 +817,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             Positioned.fill(
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
+                onDoubleTap: _handleViewFinderDoubleTap,
                 onScaleStart: _handleScaleStart,
                 onScaleUpdate: _handleScaleUpdate,
                 onScaleEnd: _handleScaleEnd,
@@ -936,9 +973,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 Align(
                   alignment: Alignment.centerRight,
                   child: _RoundIconButton(
-                    onTap: (_cameras.length < 2 || _saving || _initializing)
-                        ? null
-                        : _switchCamera,
+                    onTap: _canSwitchCamera ? _switchCamera : null,
                     icon: const Icon(
                       Icons.cameraswitch_rounded,
                       color: Colors.white,
