@@ -90,12 +90,7 @@ export const findLargeFiles = async (
 
         seenFileIDs.add(file.id);
 
-        largeFiles.push({
-            id: newID("lf_"),
-            file,
-            size,
-            isSelected: false,
-        });
+        largeFiles.push({ id: newID("lf_"), file, size, isSelected: false });
     }
 
     // Sort by size descending (largest first).
