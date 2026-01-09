@@ -118,7 +118,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (bottomSheetContext) {
         return StatefulBuilder(
           builder: (context, setBottomSheetState) {
@@ -604,7 +603,7 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minHeight: 40),
+          constraints: const BoxConstraints(minHeight: 44),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
             color: isSelected ? colorScheme.primary700 : backgroundColor,
