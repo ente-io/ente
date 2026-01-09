@@ -13,7 +13,8 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
-  static const int _commentsFlag = 1 << 1; // Keep in sync with server/ente/remotestore.go
+  static const int _commentsFlag =
+      1 << 1; // Keep in sync with server/ente/remotestore.go
   static const int _backupOptionsFlag = 1 << 2;
 
   final SharedPreferences _prefs;
@@ -96,7 +97,8 @@ class FlagService {
 
   bool get enableShareePin => true;
 
-  bool get isSocialEnabled => internalUser || _isServerFlagEnabled(_commentsFlag);
+  bool get isSocialEnabled =>
+      internalUser || _isServerFlagEnabled(_commentsFlag);
 
   Future<void> tryRefreshFlags() async {
     try {
