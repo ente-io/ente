@@ -1563,4 +1563,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearAllFilters => 'Clear all filters';
+
+  @override
+  String get selectLanguage => 'Select language';
+
+  @override
+  String get general => 'General';
+
+  @override
+  String get language => 'Language';
 }

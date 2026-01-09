@@ -905,5 +905,8 @@
   "pleaseLoginAgain": "Please login again",
   "filters": "Filters",
   "seeAllCollections": "See all collections",
-  "clearAllFilters": "Clear all filters"
+  "clearAllFilters": "Clear all filters",
+  "selectLanguage": "Select language",
+  "general": "General",
+  "language": "Language"
 }
