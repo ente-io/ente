@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:ente_ui/components/base_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/text_input_widget.dart';
-import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -75,10 +75,6 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
     });
   }
 
-  Future<void> _onCancel() async {
-    Navigator.of(context).pop();
-  }
-
   Future<void> _onSave() async {
     final selectedCollections = _availableCollections
         .where((c) => _selectedCollectionIds.contains(c.id))
@@ -109,81 +105,60 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Dialog(
-      backgroundColor: colorScheme.backgroundElevated2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Container(
-        width: 400,
-        constraints: const BoxConstraints(maxHeight: 600),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                FileIconUtils.getFileIcon(
-                  _fileName,
-                  size: 24,
-                  showBackground: false,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TitleBarTitleWidget(
-                    title: _fileName,
-                  ),
-                ),
-              ],
+            FileIconUtils.getFileIcon(
+              _fileName,
+              size: 24,
+              showBackground: false,
             ),
-            const SizedBox(height: 20),
-            CollectionSelectionWidget(
-              collections: _availableCollections,
-              selectedCollectionIds: _selectedCollectionIds,
-              onToggleCollection: _toggleCollection,
-              onCollectionsUpdated: _onCollectionsUpdated,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Note',
-              style: textTheme.small.copyWith(
-                color: colorScheme.textBase,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _fileName,
+                style: textTheme.body,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            const SizedBox(height: 8),
-            TextInputWidget(
-              hintText: context.l10n.optionalNote,
-              initialValue: _noteController.text,
-              onChange: (value) => _noteController.text = value,
-              maxLength: 500,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.secondary,
-                    labelText: context.l10n.cancel,
-                    onTap: _onCancel,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.primary,
-                    labelText: context.l10n.upload,
-                    onTap: _onSave,
-                    isDisabled: _selectedCollectionIds.isEmpty,
-                  ),
-                ),
-              ],
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 20),
+        CollectionSelectionWidget(
+          collections: _availableCollections,
+          selectedCollectionIds: _selectedCollectionIds,
+          onToggleCollection: _toggleCollection,
+          onCollectionsUpdated: _onCollectionsUpdated,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Note',
+          style: textTheme.small.copyWith(
+            color: colorScheme.textBase,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextInputWidget(
+          hintText: context.l10n.optionalNote,
+          initialValue: _noteController.text,
+          onChange: (value) => _noteController.text = value,
+          maxLength: 500,
+          textCapitalization: TextCapitalization.sentences,
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ButtonWidget(
+            buttonType: ButtonType.primary,
+            labelText: context.l10n.upload,
+            onTap: _onSave,
+            isDisabled: _selectedCollectionIds.isEmpty,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -194,10 +169,12 @@ Future<FileUploadDialogResult?> showFileUploadDialog(
   required List<Collection> collections,
   Collection? selectedCollection,
 }) async {
-  return showDialog<FileUploadDialogResult>(
-    context: context,
-    barrierColor: getEnteColorScheme(context).backdropBase,
-    builder: (context) => FileUploadDialog(
+  return showBaseBottomSheet<FileUploadDialogResult>(
+    context,
+    title: context.l10n.upload,
+    headerSpacing: 20,
+    isKeyboardAware: true,
+    child: FileUploadDialog(
       file: file,
       collections: collections,
       selectedCollection: selectedCollection,

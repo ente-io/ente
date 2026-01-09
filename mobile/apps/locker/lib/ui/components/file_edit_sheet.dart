@@ -1,4 +1,4 @@
-import "package:ente_ui/components/title_bar_title_widget.dart";
+import 'package:ente_ui/components/base_bottom_sheet.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -115,10 +115,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
     return filtered;
   }
 
-  Future<void> _onCancel() async {
-    Navigator.of(context).pop();
-  }
-
   Future<void> _onSave() async {
     final selectedCollections = _availableCollections
         .where((c) => _selectedCollectionIds.contains(c.id))
@@ -135,95 +131,43 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Dialog(
-      backgroundColor: colorScheme.backgroundElevated2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated2,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FormTextInputWidget(
+          controller: _titleController,
+          labelText: context.l10n.title,
+          hintText: context.l10n.enterNewTitle,
+          maxLength: 200,
+          shouldUseTextInputWidget: false,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TitleBarTitleWidget(
-                        title: context.l10n.editItem,
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _onCancel,
-                  child: Container(
-                    height: 36,
-                    width: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.backgroundElevated,
-                    ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
+        const SizedBox(height: 24),
+        CollectionSelectionWidget(
+          collections: _availableCollections,
+          selectedCollectionIds: _selectedCollectionIds,
+          onToggleCollection: _toggleCollection,
+          onCollectionsUpdated: _onCollectionsUpdated,
+          titleWidget: Text(
+            context.l10n.collections,
+            style: textTheme.body.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 24),
-            FormTextInputWidget(
-              controller: _titleController,
-              labelText: context.l10n.title,
-              hintText: context.l10n.enterNewTitle,
-              maxLength: 200,
-              shouldUseTextInputWidget: false,
-            ),
-            const SizedBox(height: 24),
-            CollectionSelectionWidget(
-              collections: _availableCollections,
-              selectedCollectionIds: _selectedCollectionIds,
-              onToggleCollection: _toggleCollection,
-              onCollectionsUpdated: _onCollectionsUpdated,
-              titleWidget: Text(
-                context.l10n.collections,
-                style: textTheme.body.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              child: GradientButton(
-                onTap: () async {
-                  await _onSave();
-                },
-                text: context.l10n.save,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 28),
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            onTap: () async {
+              await _onSave();
+            },
+            text: context.l10n.save,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -234,9 +178,12 @@ Future<FileEditDialogResult?> showFileEditDialog(
   required List<Collection> collections,
   BuildContext? snackBarContext,
 }) async {
-  return showDialog<FileEditDialogResult>(
-    context: context,
-    builder: (dialogContext) => FileEditDialog(
+  return showBaseBottomSheet<FileEditDialogResult>(
+    context,
+    title: context.l10n.editItem,
+    headerSpacing: 20,
+    isKeyboardAware: true,
+    child: FileEditDialog(
       file: file,
       collections: collections,
       snackBarContext: snackBarContext ?? context,

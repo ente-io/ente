@@ -12,7 +12,7 @@ import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
-import 'package:locker/ui/components/file_upload_dialog.dart';
+import 'package:locker/ui/components/file_upload_sheet.dart';
 import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:logging/logging.dart';
 

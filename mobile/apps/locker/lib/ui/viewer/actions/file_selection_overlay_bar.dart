@@ -14,7 +14,7 @@ import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
-import "package:locker/ui/components/add_to_collection_dialog.dart";
+import "package:locker/ui/components/add_to_collection_sheet.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/utils/collection_list_util.dart";

@@ -10,7 +10,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
-import 'package:locker/ui/components/file_upload_dialog.dart';
+import 'package:locker/ui/components/file_upload_sheet.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/utils/collection_actions.dart';
 import "package:locker/utils/file_icon_utils.dart";

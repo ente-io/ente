@@ -21,7 +21,7 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/components/input_dialog_sheet.dart";
+import "package:locker/ui/components/input_sheet.dart";
 import "package:locker/ui/components/subscription_required_dialog.dart";
 import 'package:logging/logging.dart';
 

@@ -94,7 +94,6 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
         TextField(
           controller: _textController,
           autofocus: true,
@@ -128,7 +127,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
           ),
           onSubmitted: (_) => _onSubmit(),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 36),
         SizedBox(
           width: double.infinity,
           child: GradientButton(
@@ -141,7 +140,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
   }
 }
 
-Future<dynamic> showInputSheet(
+Future<dynamic> showInputDialogSheet(
   BuildContext context, {
   required String title,
   required String hintText,
@@ -151,9 +150,10 @@ Future<dynamic> showInputSheet(
   TextCapitalization textCapitalization = TextCapitalization.words,
   int? maxLength = 200,
 }) async {
-  final result = await showBaseBottomSheet<dynamic>(
+  return showBaseBottomSheet<dynamic>(
     context,
     title: title,
+    headerSpacing: 20,
     isKeyboardAware: true,
     child: InputDialogSheet(
       title: title,
@@ -165,6 +165,4 @@ Future<dynamic> showInputSheet(
       maxLength: maxLength,
     ),
   );
-
-  return result;
 }
