@@ -1,6 +1,7 @@
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:photos/extensions/user_extension.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
@@ -98,6 +99,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final mediaQuery = MediaQuery.of(context);
@@ -123,7 +125,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "${_likes.length} ${_likes.length == 1 ? 'like' : 'likes'}",
+                    l10n.likesCount(count: _likes.length),
                     style: textTheme.bodyBold,
                   ),
                   IconButtonWidget(
@@ -144,7 +146,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
                 child: Text(
-                  "No likes yet",
+                  l10n.noLikesYet,
                   style: textTheme.smallMuted,
                   textAlign: TextAlign.center,
                 ),
@@ -161,6 +163,7 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
                     return _CommentLikeListItem(
                       user: user,
                       currentUserID: widget.currentUserID,
+                      youLabel: l10n.you,
                     );
                   },
                 ),
@@ -175,10 +178,12 @@ class _CommentLikesBottomSheetState extends State<CommentLikesBottomSheet> {
 class _CommentLikeListItem extends StatelessWidget {
   final User user;
   final int currentUserID;
+  final String youLabel;
 
   const _CommentLikeListItem({
     required this.user,
     required this.currentUserID,
+    required this.youLabel,
   });
 
   @override
@@ -199,7 +204,7 @@ class _CommentLikeListItem extends StatelessWidget {
           Expanded(
             child: Text(
               user.id == currentUserID
-                  ? "You"
+                  ? youLabel
                   : (user.displayName ?? user.email),
               style: TextStyle(
                 fontSize: 14,

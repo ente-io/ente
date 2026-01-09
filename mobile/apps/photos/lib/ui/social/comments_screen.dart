@@ -6,6 +6,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/comment_deleted_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/social/comment.dart";
@@ -26,29 +27,63 @@ Future<void> showFileCommentsBottomSheet(
   required int fileID,
   String? highlightCommentID,
 }) {
-  final sheetController = DraggableScrollableController();
-
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => DraggableScrollableSheet(
+    builder: (_) => _DraggableCommentsSheet(
+      collectionID: collectionID,
+      fileID: fileID,
+      highlightCommentID: highlightCommentID,
+    ),
+  );
+}
+
+class _DraggableCommentsSheet extends StatefulWidget {
+  final int collectionID;
+  final int fileID;
+  final String? highlightCommentID;
+
+  const _DraggableCommentsSheet({
+    required this.collectionID,
+    required this.fileID,
+    this.highlightCommentID,
+  });
+
+  @override
+  State<_DraggableCommentsSheet> createState() =>
+      _DraggableCommentsSheetState();
+}
+
+class _DraggableCommentsSheetState extends State<_DraggableCommentsSheet> {
+  final sheetController = DraggableScrollableController();
+
+  @override
+  void dispose() {
+    sheetController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 60;
+    return DraggableScrollableSheet(
       controller: sheetController,
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
+      initialChildSize: isKeyboardOpen ? 0.95 : 0.6,
+      minChildSize: isKeyboardOpen ? 0.8 : 0.4,
       maxChildSize: 0.95,
-      snap: true,
-      snapSizes: const [0.6],
+      snap: isKeyboardOpen ? false : true,
+      snapSizes: isKeyboardOpen ? null : const [0.6],
       expand: false,
       builder: (context, scrollController) => FileCommentsBottomSheet(
-        collectionID: collectionID,
-        fileID: fileID,
-        highlightCommentID: highlightCommentID,
+        collectionID: widget.collectionID,
+        fileID: widget.fileID,
+        highlightCommentID: widget.highlightCommentID,
         dragController: scrollController,
         sheetController: sheetController,
       ),
-    ),
-  );
+    );
+  }
 }
 
 class FileCommentsBottomSheet extends StatefulWidget {
@@ -484,6 +519,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     return SingleChildScrollView(
       controller: widget.dragController,
@@ -501,7 +537,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                       onCollectionSelected: _onCollectionSelected,
                     )
                   : Text(
-                      "${_comments.length} comments",
+                      l10n.commentsCount(count: _comments.length),
                       style: textTheme.bodyBold,
                     ),
             ),

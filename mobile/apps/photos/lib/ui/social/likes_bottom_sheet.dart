@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/extensions/user_extension.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/social/reaction.dart";
@@ -283,6 +284,7 @@ class _LikesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
@@ -298,7 +300,7 @@ class _LikesHeader extends StatelessWidget {
                     onCollectionSelected: onCollectionSelected,
                   )
                 : Text(
-                    "$likesCount ${likesCount == 1 ? 'like' : 'likes'}",
+                    l10n.likesCount(count: likesCount),
                     style: textTheme.bodyBold,
                   ),
           ),
@@ -318,12 +320,13 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Text(
-        "No likes yet",
+        l10n.noLikesYet,
         style: textTheme.smallMuted,
         textAlign: TextAlign.center,
       ),
@@ -336,12 +339,13 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Text(
-        "Could not load likes",
+        l10n.couldNotLoadLikes,
         style: textTheme.smallMuted,
         textAlign: TextAlign.center,
       ),
@@ -380,6 +384,8 @@ class _LikesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListView.builder(
       shrinkWrap: likes.length <= _shrinkWrapThreshold,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -390,6 +396,7 @@ class _LikesList extends StatelessWidget {
         return _LikeListItem(
           user: user,
           currentUserID: currentUserID,
+          youLabel: l10n.you,
         );
       },
     );
@@ -399,10 +406,12 @@ class _LikesList extends StatelessWidget {
 class _LikeListItem extends StatelessWidget {
   final User user;
   final int currentUserID;
+  final String youLabel;
 
   const _LikeListItem({
     required this.user,
     required this.currentUserID,
+    required this.youLabel,
   });
 
   @override
@@ -423,7 +432,7 @@ class _LikeListItem extends StatelessWidget {
           Expanded(
             child: Text(
               user.id == currentUserID
-                  ? "You"
+                  ? youLabel
                   : (user.displayName ?? user.email),
               style: TextStyle(
                 fontSize: 14,
