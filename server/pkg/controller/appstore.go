@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
+	"github.com/ente-io/museum/pkg/controller/discord"
+	"github.com/ente-io/museum/pkg/utils/email"
 	"github.com/prometheus/common/log"
 
 	"github.com/ente-io/stacktrace"
@@ -29,6 +31,7 @@ type AppStoreController struct {
 	UserRepo               *repo.UserRepository
 	BillingPlansPerCountry ente.BillingPlansPerCountry
 	CommonBillCtrl         *commonbilling.Controller
+	DiscordController      *discord.DiscordController
 	// appStoreSharedPassword is the password to be used to access AppStore APIs
 	appStoreSharedPassword string
 }
@@ -40,6 +43,7 @@ func NewAppStoreController(
 	fileRepo *repo.FileRepository,
 	userRepo *repo.UserRepository,
 	commonBillCtrl *commonbilling.Controller,
+	discordController *discord.DiscordController,
 ) *AppStoreController {
 	appleSharedSecret := viper.GetString("apple.shared-secret")
 	return &AppStoreController{
@@ -50,10 +54,34 @@ func NewAppStoreController(
 		BillingPlansPerCountry: plans,
 		appStoreSharedPassword: appleSharedSecret,
 		CommonBillCtrl:         commonBillCtrl,
+		DiscordController:      discordController,
 	}
 }
 
 var SubsUpdateNotificationTypes = []string{string(appstore.NotificationTypeDidChangeRenewalStatus), string(appstore.NotificationTypeCancel), string(appstore.NotificationTypeDidRevoke)}
+
+// validateSandboxRequest checks if the request is from sandbox environment.
+// If sandbox, it sends a Discord alert and returns an error for non-ente.io users.
+func (c *AppStoreController) validateSandboxRequest(environment string, userID int64, context string) error {
+	if environment != "Sandbox" {
+		return nil
+	}
+
+	user, err := c.UserRepo.GetUserByIDInternal(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get user for sandbox validation")
+	}
+
+	maskedEmail := email.GetMaskedEmailWithHint(user.Email)
+	c.DiscordController.Notify(fmt.Sprintf("iOS Sandbox %s for user: %s (userID: %d)",
+		context, maskedEmail, userID))
+
+	if !strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
+		return stacktrace.Propagate(ente.NewInternalError("sandbox request from external user"), "")
+	}
+
+	return nil
+}
 
 // HandleNotification handles an AppStore notification
 func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification appstore.SubscriptionNotification) error {
@@ -80,6 +108,12 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+
+	if err := c.validateSandboxRequest(string(notification.Environment), subscription.UserID,
+		fmt.Sprintf("notification (type: %s)", notification.NotificationType)); err != nil {
+		return err
+	}
+
 	expiryTimeInMillis, _ := strconv.ParseInt(latestReceiptInfo.ExpiresDate.ExpiresDateMS, 10, 64)
 	if latestReceiptInfo.ProductID == subscription.ProductID && expiryTimeInMillis*1000 < subscription.ExpiryTime {
 		// Outdated notification, no-op
@@ -153,6 +187,11 @@ func (c *AppStoreController) GetVerifiedSubscription(userID int64, productID str
 	if err != nil {
 		return ente.Subscription{}, stacktrace.Propagate(err, "")
 	}
+
+	if err := c.validateSandboxRequest(string(response.Environment), userID, "subscription verification"); err != nil {
+		return ente.Subscription{}, err
+	}
+
 	for _, plan := range plans {
 		if plan.IOSID == productID {
 			s.Storage = plan.Storage
