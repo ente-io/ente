@@ -2679,6 +2679,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'General'**
   String get general;
+
+  /// Label for user's personal usage in family breakdown
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get usageYou;
+
+  /// Label for family usage in family breakdown
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get usageFamily;
+
+  /// Label for the usage card showing items stored count
+  ///
+  /// In en, this message translates to:
+  /// **'Items stored'**
+  String get itemsStored;
+
+  /// Word 'of' used in 'X of Y' format for item count
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get of_;
 }
 
 class _AppLocalizationsDelegate

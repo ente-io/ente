@@ -904,5 +904,21 @@
   "pleaseLoginAgain": "Please login again",
   "language": "Language",
   "selectLanguage": "Select language",
-  "general": "General"
+  "general": "General",
+  "usageYou": "You",
+  "@usageYou": {
+    "description": "Label for user's personal usage in family breakdown"
+  },
+  "usageFamily": "Family",
+  "@usageFamily": {
+    "description": "Label for family usage in family breakdown"
+  },
+  "itemsStored": "Items stored",
+  "@itemsStored": {
+    "description": "Label for the usage card showing items stored count"
+  },
+  "of_": "of",
+  "@of_": {
+    "description": "Word 'of' used in 'X of Y' format for item count"
+  }
 }

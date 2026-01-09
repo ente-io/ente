@@ -1560,4 +1560,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get general => 'General';
+
+  @override
+  String get usageYou => 'You';
+
+  @override
+  String get usageFamily => 'Family';
+
+  @override
+  String get itemsStored => 'Items stored';
+
+  @override
+  String get of_ => 'of';
 }
