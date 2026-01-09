@@ -499,7 +499,7 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         isLongPress.current = false;
         longPressTimer.current = setTimeout(() => {
             isLongPress.current = true;
-            onToggle();
+            onOpen();
         }, LONG_PRESS_DURATION);
     };
 
@@ -520,8 +520,8 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
     const handleClick = () => {
         if (isLongPress.current) return;
 
-        // On mobile, if item is selected, tap to deselect
-        if (isTouchDevice && checked) {
+        // On mobile, tap to toggle selection; on desktop, tap to open
+        if (isTouchDevice) {
             onToggle();
         } else {
             onOpen();
@@ -591,7 +591,10 @@ const BottomBar: React.FC<BottomBarProps> = ({
             }}
         >
             <FocusVisibleButton
-                sx={{ px: 5 }}
+                sx={{
+                    width: { xs: 125, sm: 140 },
+                    fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                }}
                 disabled={deleteProgress !== undefined}
                 onClick={hasSelection ? onDeselectAll : onSelectAll}
             >
@@ -621,38 +624,53 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
     selectedSize,
     deleteProgress,
     onDeleteFiles,
-}) => (
-    <FocusVisibleButton
-        sx={{
-            px: 3,
-            "&.Mui-disabled": {
-                backgroundColor: "rgba(255, 255, 255, 0.12)",
-                color: "rgba(255, 255, 255, 0.5)",
-            },
-        }}
-        disabled={selectedCount == 0 || deleteProgress !== undefined}
-        color="critical"
-        onClick={onDeleteFiles}
-    >
-        {deleteProgress !== undefined ? (
-            <LinearProgress
-                sx={{ borderRadius: "4px", width: "100%" }}
-                variant={deleteProgress === 0 ? "indeterminate" : "determinate"}
-                value={deleteProgress}
-                color="inherit"
-            />
-        ) : (
-            <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
-                <Typography>
-                    {t("delete_files_button", { count: selectedCount })}
-                </Typography>
-                <Typography variant="small" fontWeight="regular">
-                    ({formattedByteSize(selectedSize)})
-                </Typography>
-            </Stack>
-        )}
-    </FocusVisibleButton>
-);
+}) => {
+    const isDeleting = deleteProgress !== undefined;
+
+    return (
+        <FocusVisibleButton
+            sx={{
+                px: { xs: 2, sm: 3 },
+                width: { xs: 220, sm: 260 },
+                minHeight: { xs: 42, sm: 44 },
+                fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                "&.Mui-disabled": isDeleting
+                    ? {
+                          // Keep critical color during deletion
+                          backgroundColor: "critical.main",
+                          color: "critical.contrastText",
+                      }
+                    : {
+                          backgroundColor: "rgba(255, 255, 255, 0.12)",
+                          color: "rgba(255, 255, 255, 0.5)",
+                      },
+            }}
+            disabled={selectedCount == 0 || isDeleting}
+            color="critical"
+            onClick={onDeleteFiles}
+        >
+            {isDeleting ? (
+                <LinearProgress
+                    sx={{ borderRadius: "4px", width: "100%" }}
+                    variant={
+                        deleteProgress === 0 ? "indeterminate" : "determinate"
+                    }
+                    value={deleteProgress}
+                    color="inherit"
+                />
+            ) : (
+                <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
+                    <Typography>
+                        {t("delete_files_button", { count: selectedCount })}
+                    </Typography>
+                    <Typography variant="small" fontWeight="regular">
+                        ({formattedByteSize(selectedSize)})
+                    </Typography>
+                </Stack>
+            )}
+        </FocusVisibleButton>
+    );
+};
 
 // --- Styled Components ---
 

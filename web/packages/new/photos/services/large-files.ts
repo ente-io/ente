@@ -189,6 +189,11 @@ export interface LargeFilesState {
      * percentage (a number between 0 and 100).
      */
     deleteProgress: number | undefined;
+    /**
+     * Set of selected file IDs (the underlying EnteFile.id).
+     * Used to persist selection across filter changes.
+     */
+    selectedFileIDs: Set<number>;
 }
 
 /**
@@ -219,6 +224,7 @@ export const largeFilesInitialState: LargeFilesState = {
     selectedCount: 0,
     selectedSize: 0,
     deleteProgress: undefined,
+    selectedFileIDs: new Set(),
 };
 
 /**
@@ -234,7 +240,12 @@ export const largeFilesReducer = (
         case "analysisFailed":
             return { ...state, analysisStatus: "failed" };
         case "analysisCompleted": {
-            const largeFiles = action.largeFiles;
+            // Restore selection state from selectedFileIDs
+            const selectedFileIDs = state.selectedFileIDs;
+            const largeFiles = action.largeFiles.map((item) => ({
+                ...item,
+                isSelected: selectedFileIDs.has(item.file.id),
+            }));
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
             return {
@@ -247,11 +258,12 @@ export const largeFilesReducer = (
         }
 
         case "changeFilter": {
-            // Reset state when filter changes, will trigger re-analysis.
+            // Preserve selectedFileIDs when filter changes
             return {
                 ...largeFilesInitialState,
                 filter: action.filter,
                 sortOrder: state.sortOrder,
+                selectedFileIDs: state.selectedFileIDs,
             };
         }
 
@@ -268,9 +280,22 @@ export const largeFilesReducer = (
             const largeFiles = [...state.largeFiles];
             const item = largeFiles[action.index]!;
             item.isSelected = !item.isSelected;
+            // Update selectedFileIDs
+            const selectedFileIDs = new Set(state.selectedFileIDs);
+            if (item.isSelected) {
+                selectedFileIDs.add(item.file.id);
+            } else {
+                selectedFileIDs.delete(item.file.id);
+            }
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
-            return { ...state, largeFiles, selectedCount, selectedSize };
+            return {
+                ...state,
+                largeFiles,
+                selectedCount,
+                selectedSize,
+                selectedFileIDs,
+            };
         }
 
         case "deselectAll": {
@@ -278,7 +303,13 @@ export const largeFilesReducer = (
                 ...item,
                 isSelected: false,
             }));
-            return { ...state, largeFiles, selectedCount: 0, selectedSize: 0 };
+            return {
+                ...state,
+                largeFiles,
+                selectedCount: 0,
+                selectedSize: 0,
+                selectedFileIDs: new Set(),
+            };
         }
 
         case "selectAll": {
@@ -286,9 +317,18 @@ export const largeFilesReducer = (
                 ...item,
                 isSelected: true,
             }));
+            const selectedFileIDs = new Set(
+                largeFiles.map((item) => item.file.id),
+            );
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
-            return { ...state, largeFiles, selectedCount, selectedSize };
+            return {
+                ...state,
+                largeFiles,
+                selectedCount,
+                selectedSize,
+                selectedFileIDs,
+            };
         }
 
         case "delete":
@@ -301,8 +341,18 @@ export const largeFilesReducer = (
             return { ...state, deleteProgress: undefined };
 
         case "deleteCompleted": {
+            const removedFileIDs = new Set(
+                state.largeFiles
+                    .filter(({ id }) => action.removedIDs.has(id))
+                    .map(({ file }) => file.id),
+            );
             const largeFiles = state.largeFiles.filter(
                 ({ id }) => !action.removedIDs.has(id),
+            );
+            const selectedFileIDs = new Set(
+                [...state.selectedFileIDs].filter(
+                    (id) => !removedFileIDs.has(id),
+                ),
             );
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
@@ -312,6 +362,7 @@ export const largeFilesReducer = (
                 selectedCount,
                 selectedSize,
                 deleteProgress: undefined,
+                selectedFileIDs,
             };
         }
     }
