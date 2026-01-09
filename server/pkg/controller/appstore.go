@@ -77,7 +77,7 @@ func (c *AppStoreController) validateSandboxRequest(environment string, userID i
 		context, maskedEmail, userID))
 
 	if !strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
-		return stacktrace.Propagate(ente.ErrBadRequest, "sandbox requests only allowed for ente.io users")
+		return stacktrace.Propagate(ente.NewInternalError("sandbox request from external user"), "")
 	}
 
 	return nil
