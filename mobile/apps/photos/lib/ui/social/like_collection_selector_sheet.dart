@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -159,7 +160,10 @@ class _LikeCollectionSelectorSheetState
       _logger.severe("Failed to toggle like", e);
       if (mounted) {
         setState(() => state.isLiked = previousState);
-        showShortToast(context, "Failed to update like");
+        showShortToast(
+          context,
+          AppLocalizations.of(context).failedToUpdateLike,
+        );
       }
     }
   }
@@ -209,10 +213,10 @@ class _LikeCollectionSelectorSheetState
           c.isLiked = false;
         }
       });
-      final msg = failed.length == 1
-          ? "Failed to like 1 album"
-          : "Failed to like ${failed.length} albums";
-      showShortToast(context, msg);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).failedToLikeAlbums(count: failed.length),
+      );
       // Don't close sheet - let user retry
       return;
     }
@@ -325,12 +329,13 @@ class _LikeCollectionSelectorSheetState
   }
 
   Widget _buildErrorState() {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Text(
-        "Could not load albums",
+        l10n.couldNotLoadAlbums,
         style: textTheme.smallMuted,
         textAlign: TextAlign.center,
       ),
@@ -351,6 +356,7 @@ class _AlbumsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -361,7 +367,7 @@ class _AlbumsHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "$albumCount ${albumCount == 1 ? 'Album' : 'Albums'}",
+            l10n.albumsCount(count: albumCount),
             style: textTheme.small,
           ),
           GestureDetector(
@@ -377,7 +383,7 @@ class _AlbumsHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Like all", style: textTheme.small),
+                  Text(l10n.likeAll, style: textTheme.small),
                   const SizedBox(width: 10),
                   Icon(
                     allLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
@@ -399,23 +405,23 @@ class _TitleSection extends StatelessWidget {
 
   const _TitleSection({required this.isVideo});
 
-  String get _subtitle => isVideo
-      ? "Select the album to like this video"
-      : "Select the album to like this photo";
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+
+    final subtitle =
+        isVideo ? l10n.selectAlbumToLikeVideo : l10n.selectAlbumToLikePhoto;
 
     return Padding(
       padding: const EdgeInsets.only(top: 27, bottom: 9),
       child: Column(
         children: [
-          Text("Like", style: textTheme.h3Bold),
+          Text(l10n.like, style: textTheme.h3Bold),
           const SizedBox(height: 9),
           Text(
-            _subtitle,
+            subtitle,
             style: textTheme.small.copyWith(color: colorScheme.textMuted),
             textAlign: TextAlign.center,
           ),
