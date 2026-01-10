@@ -13,11 +13,7 @@
     {
       "title": "Aadhaar",
       "slug": "aadhaar",
-      "altNames": [
-        "uidai",
-        "UIDAI",
-        "Unique Identification Authority of India"
-      ]
+      "altNames": ["uidai", "UIDAI", "Unique Identification Authority of India"]
     },
     {
       "title": "Accredible",
@@ -47,9 +43,7 @@
     },
     {
       "title": "aliyun",
-      "altNames": [
-        "阿里云"
-      ]
+      "altNames": ["阿里云"]
     },
     {
       "title": "Amazon"
@@ -65,11 +59,7 @@
     {
       "title": "Animal Crossing",
       "slug:": "animal_crossing",
-      "altNames": [
-        "AnimalCrossing",
-        "Bell Tree Forums",
-        "BellTree Forums"
-      ]
+      "altNames": ["AnimalCrossing", "Bell Tree Forums", "BellTree Forums"]
     },
     {
       "title": "Ankama",
@@ -78,9 +68,7 @@
     {
       "title": "Ankara University",
       "slug": "ankara_university",
-      "altNames": [
-        "Ankara Üniversitesi"
-      ]
+      "altNames": ["Ankara Üniversitesi"]
     },
     {
       "title": "Anycoin Direct",
@@ -88,9 +76,7 @@
     },
     {
       "title": "AR24",
-      "altNames": [
-        "Docaposte AR24"
-      ]
+      "altNames": ["Docaposte AR24"]
     },
     {
       "title": "Aruba",
@@ -102,17 +88,13 @@
     },
     {
       "title": "authentik",
-      "altNames": [
-        "goauthentik"
-      ],
+      "altNames": ["goauthentik"],
       "hex": "fd4b2d"
     },
     {
       "title": "Autenticacion Digital",
       "slug": "autenticacion-digital",
-      "altNames": [
-        "autenticaciondigital.and.gov.co"
-      ]
+      "altNames": ["autenticaciondigital.and.gov.co"]
     },
     {
       "title": "availity"
@@ -124,9 +106,7 @@
     {
       "title": "AzurHosts",
       "slug": "azurhosts",
-      "altNames": [
-        "minenode"
-      ]
+      "altNames": ["minenode"]
     },
     {
       "title": "AzurWare",
@@ -135,18 +115,12 @@
     {
       "title": "Badlion",
       "slug": "badlion",
-      "altNames": [
-        "Badlion Client",
-        "BadlionClient"
-      ]
+      "altNames": ["Badlion Client", "BadlionClient"]
     },
     {
       "title": "BaiduCloud",
       "slug": "baidu_cloud",
-      "altNames": [
-        "百度云",
-        "baiduyun"
-      ]
+      "altNames": ["百度云", "baiduyun"]
     },
     {
       "title": "Band",
@@ -155,10 +129,7 @@
     {
       "title": "Battle.net",
       "slug": "battlenet",
-      "altNames": [
-        "Battle net",
-        "Blizzard"
-      ]
+      "altNames": ["Battle net", "Blizzard"]
     },
     {
       "title": "Belo"
@@ -166,23 +137,16 @@
     {
       "title": "Best Buy",
       "slug": "bestbuy",
-      "altNames": [
-        "BestBuy",
-        "bestbuy.com"
-      ]
+      "altNames": ["BestBuy", "bestbuy.com"]
     },
     {
       "title": "Bethesda",
-      "altNames": [
-        "Bethesda Softworks"
-      ]
+      "altNames": ["Bethesda Softworks"]
     },
     {
       "title": "Binance",
       "slug": "binance_exchange",
-      "altNames": [
-        "币安"
-      ]
+      "altNames": ["币安"]
     },
     {
       "title": "Binance TR",
@@ -191,9 +155,7 @@
     {
       "title": "BinanceUS",
       "slug": "binance_us",
-      "altNames": [
-        "Binance US"
-      ]
+      "altNames": ["Binance US"]
     },
     {
       "title": "Bitazza",
@@ -246,9 +208,7 @@
     {
       "title": "Bloom Host",
       "slug": "bloom_host",
-      "altNames": [
-        "Bloom Host Billing"
-      ]
+      "altNames": ["Bloom Host Billing"]
     },
     {
       "title": "Bluesky",
@@ -257,22 +217,16 @@
     {
       "title": "bonify",
       "slug": "bonify",
-      "altNames": [
-        "bonify.de"
-      ]
+      "altNames": ["bonify.de"]
     },
     {
       "title": "Booking",
-      "altNames": [
-        "Booking.com"
-      ]
+      "altNames": ["Booking.com"]
     },
     {
       "title": "BorgBase",
       "slug": "borg_base",
-      "altNames": [
-        "borg"
-      ]
+      "altNames": ["borg"]
     },
     {
       "title": "Borrowell",
@@ -281,11 +235,7 @@
     {
       "title": "Brave Creators",
       "slug": "brave_creators",
-      "altNames": [
-        "Brave",
-        "Brave Rewards",
-        "Brave Browser"
-      ]
+      "altNames": ["Brave", "Brave Rewards", "Brave Browser"]
     },
     {
       "title": "Bugzilla"
@@ -293,9 +243,7 @@
     {
       "title": "Bundesagentur für Arbeit",
       "slug": "bundesagentur_fur_arbeit",
-      "altNames": [
-        "Agentur für Arbeit"
-      ]
+      "altNames": ["Agentur für Arbeit"]
     },
     {
       "title": "ButterflyMX",
@@ -321,15 +269,11 @@
       "title": "Capcom",
       "slug": "capcom",
       "hex": "0D4DA2",
-      "altNames": [
-        "Capcom Co., Ltd."
-      ]
+      "altNames": ["Capcom Co., Ltd."]
     },
     {
       "title": "Carta",
-      "altNames": [
-        "Carta.com"
-      ]
+      "altNames": ["Carta.com"]
     },
     {
       "title": "CERN",
@@ -338,9 +282,7 @@
     {
       "title": "Chaturbate",
       "slug": "chaturbate",
-      "altNames": [
-        "Chaturbate.com"
-      ]
+      "altNames": ["Chaturbate.com"]
     },
     {
       "title": "ChangeNOW"
@@ -348,11 +290,7 @@
     {
       "title": "Charles Schwab",
       "slug": "charles_schwab",
-      "altNames": [
-        "schwab",
-        "charles-schwab",
-        "charles schwab"
-      ],
+      "altNames": ["schwab", "charles-schwab", "charles schwab"],
       "hex": "01A0E0"
     },
     {
@@ -374,11 +312,7 @@
     {
       "title": "Clipper",
       "slug": "clippercard",
-      "altNames": [
-        "ClipperCard",
-        "clipper-card",
-        "Clipper Card"
-      ]
+      "altNames": ["ClipperCard", "clipper-card", "Clipper Card"]
     },
     {
       "title": "CloudAMQP"
@@ -396,9 +330,9 @@
       "title": "CoinDCX"
     },
     {
-  "title": "CoinTracking",
-  "slug": "cointracking", 
-  "altNames": ["cointracking.info", "Coin Tracking"]
+      "title": "CoinTracking",
+      "slug": "cointracking",
+      "altNames": ["cointracking.info", "Coin Tracking"]
     },
     {
       "title": "colorado",
@@ -440,10 +374,7 @@
     {
       "title": "Crypto.com",
       "slug": "crypto",
-      "altNames": [
-        "crypto",
-        "Crypto com"
-      ]
+      "altNames": ["crypto", "Crypto com"]
     },
     {
       "title": "CSAM"
@@ -451,11 +382,7 @@
     {
       "title": "CSSBuy",
       "slug": "cssbuy",
-      "altNames": [
-        "CSS Buy",
-        "CSS-Buy",
-        "cssbuy.com"
-      ]
+      "altNames": ["CSS Buy", "CSS-Buy", "cssbuy.com"]
     },
     {
       "title": "CSFloat"
@@ -474,18 +401,11 @@
     },
     {
       "title": "Cwallet",
-      "altNames": [
-        "cwallet",
-        "c-wallet",
-        "c wallet",
-        "cwallet.com"
-      ]
+      "altNames": ["cwallet", "c-wallet", "c wallet", "cwallet.com"]
     },
     {
       "title": "DCS",
-      "altNames": [
-        "Digital Combat Simulator"
-      ]
+      "altNames": ["Digital Combat Simulator"]
     },
     {
       "title": "DeepSeek",
@@ -500,10 +420,13 @@
     },
     {
       "title": "DigiFinex",
-      "altNames": [
-        "Digi Finex",
-        "Digifinex.com"
-      ]
+      "altNames": ["Digi Finex", "Digifinex.com"]
+    },
+    {
+      "title": "Dhan",
+      "slug": "dhan",
+      "altNames": ["dhan.co", "Dhan Securities"],
+      "hex": "4575D9"
     },
     {
       "title": "DirectAdmin"
@@ -523,10 +446,7 @@
     {
       "title": "Dominos",
       "slug": "dominos",
-      "altNames": [
-        "Domino's",
-        "Domino's Pizza"
-      ]
+      "altNames": ["Domino's", "Domino's Pizza"]
     },
     {
       "title": "Doppler"
@@ -545,11 +465,7 @@
     {
       "title": "Dunkin' Donuts",
       "slug": "dunkindonuts",
-      "altNames": [
-        "Dunkin'",
-        "Dunkin",
-        "Dunkin Donuts"
-      ]
+      "altNames": ["Dunkin'", "Dunkin", "Dunkin Donuts"]
     },
     {
       "title": "Dupe",
@@ -565,9 +481,7 @@
     },
     {
       "title": "ecloud",
-      "altNames": [
-        "Murena"
-      ]
+      "altNames": ["Murena"]
     },
     {
       "title": "Ecobee",
@@ -575,10 +489,7 @@
     },
     {
       "title": "emeritihealth",
-      "altNames": [
-        "Emeriti Health",
-        "Emeriti Retirement Health"
-      ]
+      "altNames": ["Emeriti Health", "Emeriti Retirement Health"]
     },
     {
       "title": "eneba"
@@ -605,17 +516,13 @@
     {
       "title": "EVEOnline",
       "slug": "eve_online",
-      "altNames": [
-        "EVE Online"
-      ],
+      "altNames": ["EVE Online"],
       "hex": "858585"
     },
     {
       "title": "exaroton",
       "slug": "exaroton",
-      "altNames": [
-        "Exaroton"
-      ],
+      "altNames": ["Exaroton"],
       "hex": "17AB17"
     },
     {
@@ -629,9 +536,7 @@
     {
       "title": "Fanatical",
       "slug": "fanatical",
-      "altNames": [
-        "FANATICAL"
-      ]
+      "altNames": ["FANATICAL"]
     },
     {
       "title": "Fastmail"
@@ -639,17 +544,12 @@
     {
       "title": "Federal Student Aid",
       "slug": "federal_student_aid",
-      "altNames": [
-        "FSA",
-        "FAFSA"
-      ]
+      "altNames": ["FSA", "FAFSA"]
     },
     {
       "title": "Fidelity",
       "slug": "fidelity",
-      "altNames": [
-        "Fidelity Investments"
-      ]
+      "altNames": ["Fidelity Investments"]
     },
     {
       "title": "FileCloud",
@@ -683,11 +583,7 @@
       "title": "FZJ",
       "slug": "fzj",
       "hex": "023d6b",
-      "altNames": [
-        "Forschungszentrum Jülich",
-        "FZJ IdP",
-        "iffLogin"
-      ]
+      "altNames": ["Forschungszentrum Jülich", "FZJ IdP", "iffLogin"]
     },
     {
       "title": "G2A"
@@ -714,10 +610,7 @@
     {
       "title": "GommeHD.net",
       "slug": "gommehd",
-      "altNames": [
-        "GommeHD",
-        "GommeHDnet"
-      ]
+      "altNames": ["GommeHD", "GommeHDnet"]
     },
     {
       "title": "Google"
@@ -725,33 +618,22 @@
     {
       "title": "Gosuslugi",
       "slug": "gosuslugi",
-      "altNames": [
-        "Госуслуги"
-      ]
+      "altNames": ["Госуслуги"]
     },
     {
       "title": "GOV.UK",
       "slug": "gov_uk",
-      "altNames": [
-        "Government Gateway"
-      ]
+      "altNames": ["Government Gateway"]
     },
     {
       "title": "Government of Canada",
       "slug": "canada_flag",
-      "altNames": [
-        "CRA",
-        "CRA/ARC",
-        "Canada Revenue Agency"
-      ]
+      "altNames": ["CRA", "CRA/ARC", "Canada Revenue Agency"]
     },
     {
       "title": "Green Man Gaming",
       "slug": "greenmangaming",
-      "altNames": [
-        "green man gaming",
-        "gmg"
-      ]
+      "altNames": ["green man gaming", "gmg"]
     },
     {
       "title": "Guideline"
@@ -770,17 +652,14 @@
       "title": "Hivelocity"
     },
     {
-  "title": "HRDocumentBox",
-  "slug": "hrdocumentbox", 
-  "altNames": ["HRDocumentBox", "HR Document Box"]
+      "title": "HRDocumentBox",
+      "slug": "hrdocumentbox",
+      "altNames": ["HRDocumentBox", "HR Document Box"]
     },
     {
       "title": "HSA Bank",
       "slug": "hsa_bank",
-      "altNames": [
-        "hsa bank",
-        "hsabank"
-      ],
+      "altNames": ["hsa bank", "hsabank"],
       "hex": "00FF85"
     },
     {
@@ -788,9 +667,7 @@
     },
     {
       "title": "HuggingFace",
-      "altNames": [
-        "Hugging Face"
-      ]
+      "altNames": ["Hugging Face"]
     },
     {
       "title": "Hulu",
@@ -800,10 +677,7 @@
     {
       "title": "IBKR",
       "slug": "ibkr",
-      "altNames": [
-        "Interactive Brokers",
-        "IB"
-      ]
+      "altNames": ["Interactive Brokers", "IB"]
     },
     {
       "title": "IceDrive",
@@ -823,9 +697,7 @@
     {
       "title": "ImmoScout24",
       "slug": "immo_scout_24",
-      "altNames": [
-        "ImmobilienScout24"
-      ]
+      "altNames": ["ImmobilienScout24"]
     },
     {
       "title": "Impact.com",
@@ -872,15 +744,11 @@
     {
       "title": "JetBrains YouTrack",
       "slug": "jetbrains-youtrack",
-      "altNames": [
-        "YouTrack"
-      ]
+      "altNames": ["YouTrack"]
     },
     {
       "title": "jianguoyun",
-      "altNames": [
-        "坚果云"
-      ]
+      "altNames": ["坚果云"]
     },
     {
       "title": "Kagi"
@@ -891,9 +759,7 @@
     },
     {
       "title": "Keygen",
-      "altNames": [
-        "keygen.sh"
-      ]
+      "altNames": ["keygen.sh"]
     },
     {
       "title": "Kick"
@@ -906,18 +772,12 @@
     },
     {
       "title": "KnownHost",
-      "altNames": [
-        "Known Host",
-        "KnownHost.com"
-      ]
+      "altNames": ["Known Host", "KnownHost.com"]
     },
     {
       "title": "Ko-fi",
       "slug": "ko_fi",
-      "altNames": [
-        "Ko fi",
-        "Kofi"
-      ]
+      "altNames": ["Ko fi", "Kofi"]
     },
     {
       "title": "Koofr"
@@ -946,9 +806,7 @@
     {
       "title": "Lark",
       "slug": "lark",
-      "altNames": [
-        "飞书"
-      ]
+      "altNames": ["飞书"]
     },
     {
       "title": "LaunchDarkly",
@@ -960,19 +818,11 @@
     {
       "title": "LifeMiles",
       "slug": "lifemiles",
-      "altNames": [
-        "Life Miles",
-        "lifemiles.com",
-        "Avianca LifeMiles"
-      ]
+      "altNames": ["Life Miles", "lifemiles.com", "Avianca LifeMiles"]
     },
     {
       "title": "lincolnfinancial",
-      "altNames": [
-        "Lincoln Financial",
-        "Lincoln Financial Group",
-        "LFG"
-      ]
+      "altNames": ["Lincoln Financial", "Lincoln Financial Group", "LFG"]
     },
     {
       "title": "LinkedIn",
@@ -981,19 +831,12 @@
     {
       "title": "Linux.Do",
       "slug": "linux_do",
-      "altNames": [
-        "LINUX DO",
-        "LinxDo"
-      ]
+      "altNames": ["LINUX DO", "LinxDo"]
     },
     {
       "title": "Local",
       "slug": "local_wp",
-      "altNames": [
-        "LocalWP",
-        "Local WP",
-        "Local Wordpress"
-      ]
+      "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
     },
     {
       "title": "Login.gov",
@@ -1002,18 +845,12 @@
     {
       "title": "Luma",
       "slug": "luma",
-      "altNames": [
-        "luma",
-        "lu.ma"
-      ]
+      "altNames": ["luma", "lu.ma"]
     },
     {
       "title": "MailCow",
       "slug": "mailcow",
-      "altNames": [
-        "mailcow",
-        "mailcow UI"
-      ]
+      "altNames": ["mailcow", "mailcow UI"]
     },
     {
       "title": "MangaDex",
@@ -1025,27 +862,16 @@
     },
     {
       "title": "Mastodon",
-      "altNames": [
-        "mstdn",
-        "fediscience",
-        "mathstodon",
-        "fosstodon"
-      ],
+      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "hex": "6364FF"
     },
     {
       "title": "matlab",
-      "altNames": [
-        "mathworks"
-      ]
+      "altNames": ["mathworks"]
     },
     {
       "title": "Mbin",
-      "altNames": [
-        "kbin",
-        "thebrainbin",
-        "gehirneimer"
-      ]
+      "altNames": ["kbin", "thebrainbin", "gehirneimer"]
     },
     {
       "title": "Memed"
@@ -1053,11 +879,7 @@
     {
       "title": "Mercado Libre",
       "slug": "mercado_libre",
-      "altNames": [
-        "Mercado Libre",
-        "MercadoLibre",
-        "MercadoLivre"
-      ]
+      "altNames": ["Mercado Libre", "MercadoLibre", "MercadoLivre"]
     },
     {
       "title": "MEXC"
@@ -1078,24 +900,16 @@
     {
       "title": "Mint Mobile",
       "slug": "mintmobile",
-      "altNames": [
-        "MintMobile"
-      ]
+      "altNames": ["MintMobile"]
     },
     {
       "title": "Mistral",
-      "altNames": [
-        "Le Chat",
-        "Mistral AI",
-        "MistralAI"
-      ]
+      "altNames": ["Le Chat", "Mistral AI", "MistralAI"]
     },
     {
       "title": "Mobile01",
       "slug": "mobile01",
-      "altNames": [
-        "M01"
-      ]
+      "altNames": ["M01"]
     },
     {
       "title": "Mozilla"
@@ -1142,10 +956,7 @@
     {
       "title": "NeteaseMail",
       "slug": "netease_mail",
-      "altNames": [
-        "网易邮箱",
-        "Mail.163"
-      ]
+      "altNames": ["网易邮箱", "Mail.163"]
     },
     {
       "title": "NextDNS"
@@ -1156,9 +967,7 @@
     },
     {
       "title": "Newton",
-      "altNames": [
-        "Newton Crypto"
-      ]
+      "altNames": ["Newton Crypto"]
     },
     {
       "title": "ngrok",
@@ -1167,18 +976,12 @@
     {
       "title": "NekoHosting",
       "slug": "nekohosting",
-      "altNames": [
-        "NekoHosting Billing",
-        "NekoHosting Dashboard"
-      ]
+      "altNames": ["NekoHosting Billing", "NekoHosting Dashboard"]
     },
     {
       "title": "NekoHosting Gaming Panel",
       "slug": "nekohosting_gp",
-      "altNames": [
-        "NekoHosting Game Panel",
-        "NekoHosting GamePanel"
-      ]
+      "altNames": ["NekoHosting Game Panel", "NekoHosting GamePanel"]
     },
     {
       "title": "Nelnet"
@@ -1189,10 +992,7 @@
     },
     {
       "title": "nintendo",
-      "altNames": [
-        "任天堂",
-        "Nintendo Account"
-      ]
+      "altNames": ["任天堂", "Nintendo Account"]
     },
     {
       "title": "Njalla"
@@ -1200,17 +1000,13 @@
     {
       "title": "NJTransit",
       "slug": "njtransit",
-      "altNames": [
-        "NJ Transit"
-      ]
+      "altNames": ["NJ Transit"]
     },
     {
       "title": "nordvpn",
       "slug": "nordaccount",
       "hex": "4687FF",
-      "altNames": [
-        "Nord Account"
-      ]
+      "altNames": ["Nord Account"]
     },
     {
       "title": "Notesnook"
@@ -1218,11 +1014,7 @@
     {
       "title": "NoIp",
       "slug": "noip",
-      "altNames": [
-        "No IP",
-        "No-IP",
-        "noip.com"
-      ]
+      "altNames": ["No IP", "No-IP", "noip.com"]
     },
     {
       "title": "Notion"
@@ -1247,17 +1039,18 @@
     {
       "title": "OpenObserve",
       "slug": "open_observe",
-      "altNames": [
-        "openobserve.ai",
-        "openobserve ai"
-      ]
+      "altNames": ["openobserve.ai", "openobserve ai"]
+    },
+    {
+      "title": "OpenRouter",
+      "slug": "openrouter",
+      "altNames": ["openrouter.ai"],
+      "hex": "6467F2"
     },
     {
       "title": "okx",
       "hex": "000000",
-      "altNames": [
-        "欧易"
-      ]
+      "altNames": ["欧易"]
     },
     {
       "title": "OnShape",
@@ -1304,16 +1097,12 @@
     {
       "title": "PebbleHost",
       "slug": "pebble_host",
-      "altNames": [
-        "Pebble Host"
-      ]
+      "altNames": ["Pebble Host"]
     },
     {
       "title": "PCPartPicker",
       "slug": "pcpartpicker",
-      "altNames": [
-        "PC Part Picker"
-      ]
+      "altNames": ["PC Part Picker"]
     },
     {
       "title": "Peerberry"
@@ -1341,24 +1130,17 @@
     {
       "title": "Postmark",
       "slug": "postmarkapp",
-      "altNames": [
-        "postmarkapp"
-      ]
+      "altNames": ["postmarkapp"]
     },
     {
       "title": "PostScan Mail",
       "slug": "postscanmail",
-      "altNames": [
-        "Post Scan Mail",
-        "PostScanMail"
-      ]
+      "altNames": ["Post Scan Mail", "PostScanMail"]
     },
     {
       "title": "Prey Project",
       "slug": "prey_project",
-      "altNames": [
-        "PreyProject"
-      ]
+      "altNames": ["PreyProject"]
     },
     {
       "title": "Privacy Guides",
@@ -1408,10 +1190,7 @@
     },
     {
       "title": "qiniuyun",
-      "altNames": [
-        "七牛云",
-        "qiniu"
-      ]
+      "altNames": ["七牛云", "qiniu"]
     },
     {
       "title": "Questrade",
@@ -1420,24 +1199,17 @@
     {
       "title": "R10.net",
       "slug": "r10",
-      "altNames": [
-        "R10",
-        "r10.net"
-      ]
+      "altNames": ["R10", "r10.net"]
     },
     {
       "title": "RaiderIO",
       "slug": "raider_io",
-      "altNames": [
-        "raider.io"
-      ]
+      "altNames": ["raider.io"]
     },
     {
       "title": "Raindrop.io",
       "slug": "raindrop_io",
-      "altNames": [
-        "Raindrop"
-      ]
+      "altNames": ["Raindrop"]
     },
     {
       "title": "randstad",
@@ -1458,20 +1230,12 @@
     },
     {
       "title": "RedotPay",
-      "altNames": [
-        "redotpay",
-        "redot pay",
-        "redot-pay",
-        "redotpay.com"
-      ]
+      "altNames": ["redotpay", "redot pay", "redot-pay", "redotpay.com"]
     },
     {
       "title": "Registro br",
       "slug": "registro_br",
-      "altNames": [
-        "registrobr",
-        "Registro.br"
-      ]
+      "altNames": ["registrobr", "Registro.br"]
     },
     {
       "title": "reMarkable"
@@ -1482,9 +1246,7 @@
     {
       "title": "Restream",
       "slug": "restream",
-      "altNames": [
-        "restream.io"
-      ]
+      "altNames": ["restream.io"]
     },
     {
       "title": "Revolt",
@@ -1531,10 +1293,7 @@
     {
       "title": "SBI",
       "slug": "sbi",
-      "altNames": [
-        "onlinesbi",
-        "State Bank of India"
-      ]
+      "altNames": ["onlinesbi", "State Bank of India"]
     },
     {
       "title": "SEI",
@@ -1560,10 +1319,7 @@
     },
     {
       "title": "Simplicity",
-      "altNames": [
-        "simplicitynz",
-        "simplicity.kiwi"
-      ]
+      "altNames": ["simplicitynz", "simplicity.kiwi"]
     },
     {
       "title": "Sipgate"
@@ -1582,10 +1338,7 @@
     {
       "title": "SMSPool",
       "slug": "sms_pool_net",
-      "altNames": [
-        "smspool.net",
-        "smspool net"
-      ]
+      "altNames": ["smspool.net", "smspool net"]
     },
     {
       "title": "SMTP2GO"
@@ -1616,19 +1369,13 @@
     {
       "title": "State Farm",
       "slug": "state_farm",
-      "altNames": [
-        "StateFarm"
-      ],
+      "altNames": ["StateFarm"],
       "hex": "EDA920"
     },
     {
       "title": "Stripchat",
       "slug": "stripchat",
-      "altNames": [
-        "Strip Chat",
-        "stripchat.com",
-        "StripChat Live"
-      ]
+      "altNames": ["Strip Chat", "stripchat.com", "StripChat Live"]
     },
     {
       "title": "STRATO",
@@ -1647,10 +1394,7 @@
     },
     {
       "title": "T-Mobile",
-      "altNames": [
-        "T Mobile",
-        "T-Mobile ID"
-      ]
+      "altNames": ["T Mobile", "T-Mobile ID"]
     },
     {
       "title": "Tableau"
@@ -1658,10 +1402,7 @@
     {
       "title": "Tally.so",
       "slug": "tally_so",
-      "altNames": [
-        "Tally Forms",
-        "Tally"
-      ],
+      "altNames": ["Tally Forms", "Tally"],
       "hex": "000000"
     },
     {
@@ -1670,40 +1411,25 @@
     {
       "title": "tencent cloud",
       "slug": "tencent_cloud",
-      "altNames": [
-        "腾讯云",
-        "tencentcloud"
-      ]
+      "altNames": ["腾讯云", "tencentcloud"]
     },
     {
       "title": "Techlore",
-      "altNames": [
-        "Techlore Courses",
-        "Techlore Forums"
-      ]
+      "altNames": ["Techlore Courses", "Techlore Forums"]
     },
     {
       "title": "Teleport",
-      "altNames": [
-        "Gravitational Teleport",
-        "GoTeleport"
-      ]
+      "altNames": ["Gravitational Teleport", "GoTeleport"]
     },
     {
       "title": "tencent cloud",
       "slug": "tencent_cloud",
-      "altNames": [
-        "腾讯云",
-        "tencentcloud"
-      ]
+      "altNames": ["腾讯云", "tencentcloud"]
     },
     {
       "title": "Terabit",
       "slug": "terabit",
-      "altNames": [
-        "Terabit Hosting",
-        "terabit.io"
-      ]
+      "altNames": ["Terabit Hosting", "terabit.io"]
     },
     {
       "title": "Termius",
@@ -1712,10 +1438,7 @@
     {
       "title": "TETR.IO",
       "slug": "tetrio",
-      "altNames": [
-        "tetrio",
-        "tetr.io"
-      ]
+      "altNames": ["tetrio", "tetr.io"]
     },
     {
       "title": "Temu",
@@ -1724,23 +1447,16 @@
     {
       "title": "The StoryGraph",
       "slug": "thestorygraph",
-      "altNames": [
-        "StoryGraph",
-        "TheStoryGraph"
-      ]
+      "altNames": ["StoryGraph", "TheStoryGraph"]
     },
     {
       "title": "ThreatLocker",
       "slug": "threatlocker",
-      "altNames": [
-        "ThreatLocker,Inc"
-      ]
+      "altNames": ["ThreatLocker,Inc"]
     },
     {
       "title": "tianyiyun",
-      "altNames": [
-        "天翼云"
-      ]
+      "altNames": ["天翼云"]
     },
     {
       "title": "TikTok"
@@ -1750,9 +1466,7 @@
     },
     {
       "title": "Tokopedia",
-      "altNames": [
-        "Tokped"
-      ]
+      "altNames": ["Tokped"]
     },
     {
       "title": "TorBox"
@@ -1762,9 +1476,7 @@
     },
     {
       "title": "Toyhouse",
-      "altNames": [
-        "Toyhou.se"
-      ]
+      "altNames": ["Toyhou.se"]
     },
     {
       "title": "Trading 212"
@@ -1805,10 +1517,7 @@
     },
     {
       "title": "Twitch",
-      "altNames": [
-        "Twitch.tv",
-        "Twitch tv"
-      ]
+      "altNames": ["Twitch.tv", "Twitch tv"]
     },
     {
       "title": "Twitter"
@@ -1816,15 +1525,11 @@
     {
       "title": "Ubiquiti",
       "slug": "ubiquiti",
-      "altNames": [
-        "Unifi SSO",
-        "Unifi",
-        "Ubiquiti SSO"
-      ]
+      "altNames": ["Unifi SSO", "Unifi", "Ubiquiti SSO"]
     },
     {
       "title": "Ubisoft",
-      "hex":"000000"
+      "hex": "000000"
     },
     {
       "title": "Ubuntu One",
@@ -1855,6 +1560,12 @@
       "title": "Upstox"
     },
     {
+      "title": "Uptimerobot",
+      "slug": "uptimerobot",
+      "altNames": ["UptimeRobot", "uptimerobot.com"],
+      "hex": "3BD771"
+    },
+    {
       "title": "US Army",
       "slug": "us_army"
     },
@@ -1865,41 +1576,28 @@
     {
       "title": "uollet",
       "slug": "uollet",
-      "altNames": [
-        "UOLLET",
-        "uollet.com.br"
-      ]
+      "altNames": ["UOLLET", "uollet.com.br"]
     },
     {
       "title": "uscis",
-      "altNames": [
-        "USCIS",
-        "myuscis",
-        "uscis.gov"
-      ]
+      "altNames": ["USCIS", "myuscis", "uscis.gov"]
     },
     {
-  "title": "VHV",
-  "slug": "vhv", 
-  "altNames": ["VHV", "VHV Versicherung"]
+      "title": "VHV",
+      "slug": "vhv",
+      "altNames": ["VHV", "VHV Versicherung"]
     },
     {
       "title": "Via Rail",
       "slug": "via_rail",
-      "altNames": [
-        "Via",
-        "VIA Rail",
-        "Via Rail Canada"
-      ]
+      "altNames": ["Via", "VIA Rail", "Via Rail Canada"]
     },
     {
       "title": "Vikunja"
     },
     {
       "title": "volcengine",
-      "altNames": [
-        "火山引擎"
-      ]
+      "altNames": ["火山引擎"]
     },
     {
       "title": "WARGAMING.NET",
@@ -1908,9 +1606,7 @@
     {
       "title": "Warner Bros.",
       "slug": "warner_bros",
-      "altNames": [
-        "Warner Brothers"
-      ]
+      "altNames": ["Warner Brothers"]
     },
     {
       "title": "Wealthfront"
@@ -1925,9 +1621,7 @@
     {
       "title": "WeMod",
       "slug": "wemod",
-      "altNames": [
-        "wemod"
-      ],
+      "altNames": ["wemod"],
       "hex": "4B63FB"
     },
     {
@@ -1956,17 +1650,12 @@
     },
     {
       "title": "WorkOS",
-      "altNames": [
-        "Work OS"
-      ]
+      "altNames": ["Work OS"]
     },
     {
       "title": "World Cube Association",
       "slug": "wca",
-      "altNames": [
-        "WCA",
-        "worldcubeassociation"
-      ]
+      "altNames": ["WCA", "worldcubeassociation"]
     },
     {
       "title": "WYZE"
@@ -1982,16 +1671,11 @@
     {
       "title": "Yandex",
       "slug": "yandex",
-      "altNames": [
-        "Ya",
-        "Яндекс"
-      ]
+      "altNames": ["Ya", "Яндекс"]
     },
     {
       "title": "YNAB",
-      "altNames": [
-        "You Need A Budget"
-      ]
+      "altNames": ["You Need A Budget"]
     },
     {
       "title": "Zoom"
@@ -2009,18 +1693,12 @@
     {
       "title": "Toshl Finance",
       "slug": "toshl_finance",
-      "altNames": [
-        "Toshl"
-      ]
+      "altNames": ["Toshl"]
     },
     {
       "title": "Tebex",
       "slug": "tebex",
-      "altNames": [
-        "tebex",
-        "tebex.io",
-        "buycraft"
-      ]
+      "altNames": ["tebex", "tebex.io", "buycraft"]
     },
     {
       "title": "xAI",
@@ -2029,10 +1707,7 @@
     {
       "title": "XVideos",
       "slug": "xvideos",
-      "altNames": [
-        "X Videos",
-        "xvideos.com"
-      ]
+      "altNames": ["X Videos", "xvideos.com"]
     },
     {
       "title": "Cronometer",
@@ -2104,19 +1779,12 @@
     {
       "title": "IBM",
       "slug": "ibm",
-      "altNames": [
-        "International Business Machines",
-        "IBMid"
-      ]
+      "altNames": ["International Business Machines", "IBMid"]
     },
     {
       "title": "Peking University",
       "slug": "peking_university",
-      "altNames": [
-        "北京大学",
-        "PKU",
-        "Peking Univ"
-      ]
+      "altNames": ["北京大学", "PKU", "Peking Univ"]
     },
     {
       "title": "Netim",
