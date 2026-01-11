@@ -513,7 +513,7 @@ class FileAppBarState extends State<FileAppBar> {
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(
         [file],
-        type: EventType.modified,
+        type: EventType.metadataChanged,
         source: "offline_toggle_single_viewer",
       ),
     );
