@@ -1,7 +1,11 @@
+import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
+import "package:ente_accounts/pages/password_entry_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
@@ -9,9 +13,9 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:locker/ui/components/recovery_key_sheet.dart";
+import "package:locker/ui/pages/home_page.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
@@ -43,14 +47,7 @@ class AccountSectionWidget extends StatelessWidget {
             );
             if (hasAuthenticated) {
               // ignore: unawaited_futures
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const ChangeEmailDialogLocker();
-                },
-                barrierColor: Colors.black.withValues(alpha: 0.85),
-                barrierDismissible: false,
-              );
+              showChangeEmailDialog(context);
             }
           },
         ),
@@ -84,6 +81,31 @@ class AccountSectionWidget extends StatelessWidget {
           },
         ),
         ExpandableChildItem(
+          title: l10n.changePassword,
+          trailingIcon: Icons.chevron_right,
+          onTap: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              l10n.authToChangeYourPassword,
+            );
+            if (hasAuthenticated) {
+              // ignore: unawaited_futures
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return PasswordEntryPage(
+                      Configuration.instance,
+                      PasswordEntryMode.update,
+                      const HomePage(),
+                    );
+                  },
+                ),
+              );
+            }
+          },
+        ),
+        ExpandableChildItem(
           title: l10n.deleteAccount,
           textColor: colorScheme.warning500,
           trailingIcon: Icons.chevron_right,
@@ -106,14 +128,20 @@ class AccountSectionWidget extends StatelessWidget {
   }
 
   void _onLogoutTapped(BuildContext context) {
-    showChoiceActionSheet(
+    showAlertBottomSheet(
       context,
-      title: context.l10n.areYouSureYouWantToLogout,
-      firstButtonLabel: context.l10n.yesLogout,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await UserService.instance.logout(context);
-      },
+      title: context.l10n.warning,
+      message: context.l10n.areYouSureYouWantToLogout,
+      assetPath: "assets/warning-grey.png",
+      buttons: [
+        GradientButton(
+          buttonType: GradientButtonType.critical,
+          text: context.l10n.yesLogout,
+          onTap: () async {
+            await UserService.instance.logout(context);
+          },
+        ),
+      ],
     );
   }
 }

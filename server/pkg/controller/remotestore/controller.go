@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller"
+	"github.com/ente-io/museum/pkg/utils/rollout"
 	"github.com/spf13/viper"
 	"golang.org/x/net/idna"
 
@@ -13,6 +14,11 @@ import (
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	backupOptionsRolloutPercentage = 20
+	backupOptionsRolloutNonce      = "backup-options-v1"
 )
 
 // Controller is interface for exposing business logic related to for remote store
@@ -78,7 +84,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		// Changing it to false will hide the option and disable multi part upload for everyone
 		// except internal user.rt
 		EnableMobMultiPart: true,
-		ServerApiFlag:      ente.UploadV2,
+		ServerApiFlag:      ente.UploadV2 | ente.Comments,
 		CastUrl:            viper.GetString("apps.cast"),
 		EmbedUrl:           viper.GetString("apps.embed-albums"),
 		CustomDomainCNAME:  viper.GetString("apps.custom-domain.cname"),
@@ -96,6 +102,9 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 			response.PassKeyEnabled = value == "true"
 		case ente.IsInternalUser:
 			response.InternalUser = value == "true"
+			if response.InternalUser {
+				response.ServerApiFlag |= ente.Comments
+			}
 		case ente.IsBetaUser:
 			response.BetaUser = value == "true"
 		case ente.CustomDomain:
@@ -104,6 +113,12 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 			}
 		}
 	}
+
+	if response.InternalUser ||
+		rollout.IsInPercentageRollout(userID, backupOptionsRolloutNonce, backupOptionsRolloutPercentage) {
+		response.ServerApiFlag |= ente.BackupOptions
+	}
+
 	return response, nil
 }
 

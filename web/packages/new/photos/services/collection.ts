@@ -49,6 +49,7 @@ import {
     savedCollections,
     savedCollectionsUpdationTime,
 } from "./photos-fdb";
+import { settingsSnapshot } from "./settings";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -1435,7 +1436,11 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  */
 export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
-    "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
+    | "enableCollect"
+    | "enableJoin"
+    | "enableComment"
+    | "validTill"
+    | "deviceLimit"
 >;
 
 /**
@@ -1452,10 +1457,12 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
+    // Only enable comments by default if the feature flag is enabled.
+    const enableComment = settingsSnapshot().isCommentsEnabled;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({ collectionID, ...attributes }),
+        body: JSON.stringify({ collectionID, enableComment, ...attributes }),
     });
     ensureOk(res);
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;

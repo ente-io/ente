@@ -1,5 +1,4 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Fab, Typography, styled } from "@mui/material";
@@ -14,6 +13,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -1101,7 +1101,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             )}
             {isFav && (
                 <FavoriteOverlay>
-                    <FavoriteRoundedIcon />
+                    <StarIcon fontSize="small" />
                 </FavoriteOverlay>
             )}
 

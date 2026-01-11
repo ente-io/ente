@@ -210,7 +210,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
         padding: const EdgeInsets.only(right: 4, top: 4),
         child: UserAvatarWidget(
           user,
-          type: AvatarType.tiny,
+          type: AvatarType.sm,
           thumbnailView: true,
         ),
       ),

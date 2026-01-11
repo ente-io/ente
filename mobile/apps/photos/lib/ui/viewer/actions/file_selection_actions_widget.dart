@@ -37,6 +37,7 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/actions/suggest_delete_sheet.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
@@ -79,11 +80,6 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-  static const String _suggestDeleteLabel = "(i) Suggest deletion";
-  static const String _suggestDeleteDialogTitle = "(i) Suggest deletion";
-  static const String _suggestDeleteDialogBody =
-      "(i) Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos";
-  static const String _suggestDeleteSentMessage = "(i) Delete suggestion sent.";
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -160,11 +156,11 @@ class _FileSelectionActionsWidgetState
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
-    final bool canSuggestDeleteAction = flagService.enableDeleteSuggestion &&
+    final bool canSuggestDeleteAction =
         (widget.type == GalleryType.sharedCollection ||
-            widget.type == GalleryType.ownedCollection) &&
-        isCollectionOwnerOrAdmin &&
-        split.ownedByOtherUsers.isNotEmpty;
+                widget.type == GalleryType.ownedCollection) &&
+            isCollectionOwnerOrAdmin &&
+            split.ownedByOtherUsers.isNotEmpty;
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
@@ -333,7 +329,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.flag_outlined,
-            labelText: _suggestDeleteLabel,
+            labelText: AppLocalizations.of(context).suggestDeletion,
             onTap: _onSuggestDelete,
           ),
         );
@@ -670,47 +666,16 @@ class _FileSelectionActionsWidgetState
     if (filesToSuggest.isEmpty) {
       return;
     }
-    final actionResult = await showActionSheet(
+    final didSuggestDelete = await showSuggestDeleteSheet(
       context: context,
-      title: _suggestDeleteDialogTitle,
-      body: _suggestDeleteDialogBody,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-      buttons: [
-        ButtonWidget(
-          labelText: _suggestDeleteLabel,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          isInAlert: true,
-          onTap: () async {
-            await CollectionsService.instance.suggestDeleteFromCollection(
-              widget.collection!.id,
-              filesToSuggest,
-            );
-            showShortToast(
-              context,
-              _suggestDeleteSentMessage,
-            );
-          },
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).cancel,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
+      onConfirm: () async {
+        await CollectionsService.instance.suggestDeleteFromCollection(
+          widget.collection!.id,
+          filesToSuggest,
+        );
+      },
     );
-    if (actionResult?.action == ButtonAction.error) {
-      await showGenericErrorDialog(
-        context: context,
-        error: actionResult?.exception ??
-            Exception("Failed to send delete suggestion"),
-      );
-    } else if (actionResult?.action == ButtonAction.first) {
+    if (didSuggestDelete) {
       widget.selectedFiles.clearAll();
       if (mounted) {
         setState(() => {});

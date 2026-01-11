@@ -1,6 +1,5 @@
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
@@ -11,6 +10,7 @@ import { FilledIconButton } from "ente-base/components/mui";
 import { Ellipsized2LineTypography } from "ente-base/components/Typography";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     BarItemTile,
     ItemCard,
@@ -27,7 +27,6 @@ import type {
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import React, {
     memo,
@@ -539,10 +538,8 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
-        {(attributes.has("pinned") ||
-            (attributes.has("shareePinned") &&
-                settingsSnapshot().isShareePinEnabled)) && (
+        {attributes.has("userFavorites") && <StarIcon fontSize="small" />}
+        {(attributes.has("pinned") || attributes.has("shareePinned")) && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}

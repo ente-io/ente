@@ -12,6 +12,8 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import 'package:photos/ui/settings/debug/social_debug_screen.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class DebugSectionWidget extends StatefulWidget {
   const DebugSectionWidget({super.key});
@@ -135,6 +137,18 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
             await IgnoredFilesService.instance.reset();
             SyncService.instance.sync().ignore();
             showShortToast(context, "Done");
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Social settings",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const SocialDebugScreen());
           },
         ),
       ],

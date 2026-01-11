@@ -13,8 +13,8 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
-import "package:photos/ui/collections/album/all_albums_page.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
@@ -136,10 +136,11 @@ class _HiddenPageState extends State<HiddenPage> {
         onViewAllTapped: () async {
           await routeToPage(
             context,
-            AllAlbumsPage(
-              collections: _hiddenCollectionsExcludingDefault,
-              title: AppLocalizations.of(context).hidden,
-              hasVerifiedLock: true,
+            CollectionListPage(
+              _hiddenCollectionsExcludingDefault,
+              sectionType: UISectionType.hiddenCollections,
+              appTitle: Text(AppLocalizations.of(context).hidden),
+              tag: "hidden",
             ),
           );
         },

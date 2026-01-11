@@ -241,7 +241,7 @@ class _AuthQrDialogState extends State<AuthQrDialog> {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: SvgPicture.asset(
-                                    'assets/svg/auth-logo.svg',
+                                    'assets/svg/app-logo.svg',
                                     height: 16,
                                     colorFilter: const ColorFilter.mode(
                                       accentColor,

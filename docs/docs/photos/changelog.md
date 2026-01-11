@@ -6,6 +6,23 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 # Changelog - Ente Photos
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
+
+## v1.7.17 (desktop) - Dec 2025
+
+- Map view.
+- Manually tag people in photos.
+- Album admins can now remove photos added by collaborators.
+- Viewers and collaborators can see and copy public links.
+- Free users can now create public links (device limit of 5).
+
+## v1.2.31 (mobile) - Dec 2025
+
+- Rituals
+- Manually tag people
+- Public links for everyone
+- Shared albums pinning
+- New favorite icon
+
 ## v1.2.28 (mobile) - Dec 2025
 
 - Ability to pin people
@@ -13,7 +30,6 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Fresh QR code designs for links
 - Performance improvements on Rewind
 - Setting to disable Swipe to Select
-
 
 ## v1.7.16 (desktop) - Nov 2025
 

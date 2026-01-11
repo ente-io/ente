@@ -10,8 +10,8 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
-import "package:photos/ui/collections/album/all_albums_page.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -86,9 +86,11 @@ class ArchivePage extends StatelessWidget {
           if (context.mounted) {
             await routeToPage(
               context,
-              AllAlbumsPage(
-                collections: collections,
-                title: AppLocalizations.of(context).archive,
+              CollectionListPage(
+                collections,
+                sectionType: UISectionType.archivedCollections,
+                appTitle: Text(AppLocalizations.of(context).archive),
+                tag: "archived",
               ),
             );
           }

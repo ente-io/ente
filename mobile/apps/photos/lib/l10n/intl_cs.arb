@@ -2033,14 +2033,10 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
-  "cLTitle1": "Představujeme Rituály",
-  "cLDesc1": "Plánujete předsevzetí na rok 2026? S Rituály si můžete nastavit připomenutí na Ente Photos a sledovat svůj pokrok pořizováním fotek. Ať už jde o workouty, stravovací návyky, nebo trávení času s vašimi blízkými – cokoliv, z čeho si chcete udělat návyk.",
-  "cLTitle2": "Veřejné odkazy, nyní pro všechny",
-  "cLDesc2": "Všichni uživatelé na bezplatném plánu mohou nyní vytvářet a sdílet veřejné odkazy na fotky a alba. Aby se zabránilo zneužití, odkazy budou mít limity, kolik lidí je může zobrazit.",
-  "cLTitle3": "Ruční označování osob",
-  "cLDesc3": "Nyní můžete označovat lidi, i v případě, kdy AI na vašem zařízení nenajde obličej. Skvělé pro mazlíčky, částečně zakryté obličeje, nebo pro okamžiky kdy chcete označit člověka, který na samotné fotce není.",
-  "cLTitle4": "A další",
-  "cLDesc4": "Nyní můžete připnout sdílená alba. Odkazy na album jsou viditelné pro spolupracovníky a diváky, aby bylo sdílení ještě snazší. Opravili jsme chyby na iOS a aktualizovali jsme zobrazení fotografií, včetně nové ikony pro oblíbené fotky (bude se hodit pro nadcházející funkce).",
+  "cLTitle1": "Komentáře a reakce",
+  "cLDesc1": "Představujeme komentáře a reakce u sdílených fotografií. Na fotografii můžete reagovat nebo ji komentovat tak, že ji otevřete a použijete akce ve spodní části. Všechny příchozí komentáře a reakce budou viditelné na kartě Sdílené.",
+  "cLTitle2": "Správce alba",
+  "cLDesc2": "Nyní můžete jinému uživateli Ente přiřadit roli správce vašeho alba. S tím bude moci přidávat další diváky a spolupracovníky, odstraňovat fotografie z alb a dokonce navrhnout účastníkům smazání jejich fotografií.",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

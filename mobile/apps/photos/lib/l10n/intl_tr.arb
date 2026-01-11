@@ -1837,5 +1837,9 @@
   "closeBy": "Kapat",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "cLTitle1": "Yorumlar ve tepkiler",
+  "cLDesc1": "Paylaşılan fotoğraflarda yorumlar ve tepkiler sunuyoruz. Bir fotoğrafı açarak ve alttaki eylemleri kullanarak tepki verebilir veya yorum yapabilirsiniz. Gelen tüm yorumlar ve tepkiler Paylaşılan sekmesinde görünür olacaktır.",
+  "cLTitle2": "Albümler için yönetici",
+  "cLDesc2": "Artık başka bir Ente kullanıcısını albümünüzün yöneticisi olarak atayabilirsiniz. Bununla, diğer izleyiciler ve ortak çalışanlar ekleyebilir, albümlerden fotoğrafları kaldırabilir ve hatta katılımcılara fotoğraflarını silmelerini önerebilir."
 }

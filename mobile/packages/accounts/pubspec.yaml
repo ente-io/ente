@@ -11,6 +11,7 @@ dependencies:
   bip39: ^1.0.6
   collection: ^1.18.0
   dio: ^5.4.0
+  dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   email_validator: ^3.0.0
   ente_base:
@@ -35,6 +36,7 @@ dependencies:
   file_saver: ^0.3.0
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.10+1
   hugeicons: ^1.1.1
   logging: ^1.2.0
   password_strength: ^0.2.0

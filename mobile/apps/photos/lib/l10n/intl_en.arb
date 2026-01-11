@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
+  "enableComment": "Comments and reactions",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
   "canNotOpenBody": "Sorry, this album cannot be opened in the app.",
@@ -1518,6 +1519,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {No admins were added} =1 {1 admin successfully added} other {{count} admins successfully added}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Add admin} =1 {Add admin} other {Add admins}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Admins can manage photos & participants.",
+  "suggestDeletion": "Suggest deletion",
+  "suggestDeletionDescription": "Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos.",
+  "deleteSuggestionSent": "Delete suggestion sent",
   "accountIsAlreadyConfigured": "Account is already configured.",
   "sessionIdMismatch": "Session ID mismatch",
   "@sessionIdMismatch": {
@@ -2042,14 +2067,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Introducing Rituals",
-  "cLDesc1": "Planning resolutions for 2026? With Rituals, you can set a reminder on Ente Photos and track your progress by taking photos. Use it for workouts, eating habits, daily moments with loved ones—anything you want to make a habit.",
-  "cLTitle2": "Public links, now for everyone",
-  "cLDesc2": "All Ente users on the free plan can now create and share public links to photos and albums. To prevent abuse, links will have limits on how many people can view them.",
-  "cLTitle3": "Manually tag people",
-  "cLDesc3": "You can now tag people even when our on-device AI doesn't detect a face. Handy for pets, partially visible faces, or moments where someone isn't actually in the photo but should still be included.",
-  "cLTitle4": "And more",
-  "cLDesc4": "You can now pin shared albums. Album links are visible to collaborators and viewers to make sharing even easier. We've fixed some iOS swiping bugs and updated the photo view, including a new favorite icon (making room for upcoming features).",
+  "cLTitle1": "Comments and reactions",
+  "cLDesc1": "We are introducing comments and reactions on shared photos. You can react or comment on a photo by opening it and using the actions at the bottom. All incoming comments and reactions will be visible on the Shared tab.",
+  "cLTitle2": "Admin for albums",
+  "cLDesc2": "You can now assign another Ente user as an administrator of your album. With this, they will be able to add other viewers and collaborators, remove photos from the albums, and even suggest participants to delete their photos.",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2243,5 +2264,137 @@
   "ritualCustomKeyboardLabel": "Custom (keyboard)",
   "ritualEmojiKeyboardHint": "Press to open emoji keyboard",
   "ritualEmojiUseAction": "Use",
-  "ritualSearchEmpty": "Build a ritual to keep your photo habit going."
+  "ritualSearchEmpty": "Build a ritual to keep your photo habit going.",
+  "feed": "Feed",
+  "likedYourPhoto": "Liked a photo",
+  "commentedOnYourPhoto": "Commented on a photo",
+  "repliedToYourComment": "Replied to a comment",
+  "likedYourComment": "Liked a comment",
+  "likedYourReply": "Liked a reply",
+  "and1Other": "and 1 other",
+  "andXOthers": "and {count} others",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "No activity yet",
+  "like": "Like",
+  "comments": "Comments",
+  "commentHint": "Say something nice!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Reply",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Are you sure?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Delete comment",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Your comment \"{comment}\" will be deleted permanently",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 like} other{{count} likes}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "No likes yet",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Could not load likes",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Failed to update like",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Failed to like 1 album} other{Failed to like {count} albums}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Could not load albums",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Like all",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Select the album to like this video",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Select the album to like this photo",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Failed to like comment",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Failed to delete comment",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(deleted)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Replying to you",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Replying to {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{No comments} =1{1 comment} other{{count} comments}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

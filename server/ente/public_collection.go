@@ -12,6 +12,7 @@ import (
 type CreatePublicAccessTokenRequest struct {
 	CollectionID  int64 `json:"collectionID" binding:"required"`
 	EnableCollect bool  `json:"enableCollect"`
+	EnableComment bool  `json:"enableComment"`
 	// defaults to true
 	EnableJoin  *bool `json:"enableJoin"`
 	ValidTill   int64 `json:"validTill"`
@@ -28,6 +29,7 @@ type UpdatePublicAccessTokenRequest struct {
 	OpsLimit        *int64                     `json:"opsLimit"`
 	EnableDownload  *bool                      `json:"enableDownload"`
 	EnableCollect   *bool                      `json:"enableCollect"`
+	EnableComment   *bool                      `json:"enableComment"`
 	DisablePassword *bool                      `json:"disablePassword"`
 	EnableJoin      *bool                      `json:"enableJoin"`
 	MinRole         *CollectionParticipantRole `json:"minRole"`
@@ -35,7 +37,7 @@ type UpdatePublicAccessTokenRequest struct {
 
 func (ut *UpdatePublicAccessTokenRequest) Validate() error {
 	if ut.DeviceLimit == nil && ut.ValidTill == nil && ut.DisablePassword == nil &&
-		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil && ut.EnableJoin == nil && ut.MinRole == nil {
+		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil && ut.EnableComment == nil && ut.EnableJoin == nil && ut.MinRole == nil {
 		return NewBadRequestWithMessage("all parameters are missing")
 	}
 
@@ -86,6 +88,7 @@ type CollectionLinkRow struct {
 	OpsLimit       *int64
 	EnableDownload bool
 	EnableCollect  bool
+	EnableComment  bool
 	EnableJoin     bool
 	MinRole        *CollectionParticipantRole
 }
@@ -114,6 +117,7 @@ type PublicURL struct {
 	EnableDownload bool   `json:"enableDownload"`
 	// Enable collect indicates whether folks can upload files in a publicly shared url
 	EnableCollect   bool `json:"enableCollect"`
+	EnableComment   bool `json:"enableComment"`
 	PasswordEnabled bool `json:"passwordEnabled"`
 	// Nonce contains the nonce value for the password if the link is password protected.
 	Nonce      *string                    `json:"nonce,omitempty"`
@@ -124,10 +128,11 @@ type PublicURL struct {
 }
 
 type PublicAccessContext struct {
-	ID           int64
-	IP           string
-	UserAgent    string
-	CollectionID int64
+	ID            int64
+	IP            string
+	UserAgent     string
+	CollectionID  int64
+	EnableComment bool
 }
 
 func FilterPublicURLsForRole(urls []PublicURL, role CollectionParticipantRole) []PublicURL {
@@ -154,7 +159,8 @@ type PublicCollectionSummary struct {
 	UpdatedAt         int64
 	DeviceAccessCount int
 	// not empty value of passHash indicates that the link is password protected.
-	PassHash *string
+	PassHash      *string
+	EnableComment bool
 }
 
 type AbuseReportRequest struct {

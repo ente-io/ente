@@ -48,17 +48,9 @@ export interface Settings {
      */
     isInternalUser: boolean;
     /**
-     * `true` if admin role management features are enabled.
+     * `true` if the comments and reactions feature is enabled.
      */
-    isAdminRoleEnabled: boolean;
-    /**
-     * `true` if public link surfaces should be shown to non-owners.
-     */
-    isSurfacePublicLinkEnabled: boolean;
-    /**
-     * `true` if sharee pin feature is enabled for shared albums.
-     */
-    isShareePinEnabled: boolean;
+    isCommentsEnabled: boolean;
 
     /**
      * `true` if maps are enabled.
@@ -118,9 +110,7 @@ export interface Settings {
 
 const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
-    isAdminRoleEnabled: false,
-    isSurfacePublicLinkEnabled: false,
-    isShareePinEnabled: false,
+    isCommentsEnabled: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
@@ -200,11 +190,21 @@ const FeatureFlags = z.object({
     internalUser: z.boolean().nullish().transform(nullToUndefined),
     betaUser: z.boolean().nullish().transform(nullToUndefined),
     mapEnabled: z.boolean().nullish().transform(nullToUndefined),
+    serverApiFlag: z.number().nullish().transform(nullToUndefined),
     castUrl: z.string().nullish().transform(nullToUndefined),
     embedUrl: z.string().nullish().transform(nullToUndefined),
     customDomain: z.string().nullish().transform(nullToUndefined),
     customDomainCNAME: z.string().nullish().transform(nullToUndefined),
 });
+
+/**
+ * Bit flags for server API features.
+ * These correspond to the constants in server/ente/remotestore.go.
+ */
+const ServerApiFlag = {
+    /** Comments feature is enabled. */
+    Comments: 1 << 1,
+};
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
@@ -212,10 +212,8 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
-    settings.isAdminRoleEnabled = (flags?.internalUser ?? false) || isDevBuild;
-    settings.isSurfacePublicLinkEnabled =
-        (flags?.internalUser ?? false) || isDevBuild;
-    settings.isShareePinEnabled = (flags?.internalUser ?? false) || isDevBuild;
+    settings.isCommentsEnabled =
+        ((flags?.serverApiFlag ?? 0) & ServerApiFlag.Comments) !== 0;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;

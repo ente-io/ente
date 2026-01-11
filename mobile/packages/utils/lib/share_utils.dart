@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:ente_strings/extensions.dart';
+import "package:ente_ui/components/base_bottom_sheet.dart";
 import 'package:ente_ui/components/buttons/button_widget.dart';
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialog_widget.dart';
+import "package:ente_ui/theme/ente_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
@@ -49,6 +52,61 @@ Future<void> shareDialog(
         buttonAction: ButtonAction.cancel,
       ),
     ],
+  );
+}
+
+Future<void> showShareSheet(
+  BuildContext context,
+  String title, {
+  required Function saveAction,
+  required Function sendAction,
+}) async {
+  return showBaseBottomSheet(
+    context,
+    headerSpacing: 20,
+    title: title,
+    child: Builder(
+      builder: (context) {
+        final textTheme = getEnteTextTheme(context);
+        final colorScheme = getEnteColorScheme(context);
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              Platform.isLinux || Platform.isWindows
+                  ? context.strings.saveOnlyDescription
+                  : context.strings.saveOrSendDescription,
+              style: textTheme.body.copyWith(
+                color: colorScheme.textMuted,
+              ),
+            ),
+            const SizedBox(height: 20),
+            GradientButton(
+              onTap: () async {
+                await saveAction();
+              },
+              text: context.strings.save,
+            ),
+            if (!Platform.isWindows && !Platform.isLinux)
+              const SizedBox(height: 20),
+            if (!Platform.isWindows && !Platform.isLinux)
+              GestureDetector(
+                onTap: () async {
+                  await sendAction();
+                },
+                child: Text(
+                  context.strings.send,
+                  style: textTheme.bodyBold.copyWith(
+                    color: colorScheme.primary700,
+                    decorationColor: colorScheme.primary700,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    ),
   );
 }
 

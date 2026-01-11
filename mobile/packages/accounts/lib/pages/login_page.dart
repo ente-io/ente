@@ -7,6 +7,7 @@ import 'package:ente_ui/components/buttons/dynamic_fab.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import "package:styled_text/tags/styled_text_tag_action.dart";
 import "package:styled_text/widgets/styled_text.dart";
@@ -70,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -81,11 +83,22 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.primary700,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -104,6 +117,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _getBody() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Column(
       children: [
         Expanded(
@@ -111,102 +127,102 @@ class _LoginPageState extends State<LoginPage> {
             child: ListView(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(
-                    context.strings.welcomeBack,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: TextFormField(
-                    autofillHints: const [AutofillHints.email],
-                    onFieldSubmitted:
-                        _emailIsValid ? (value) => onPressed() : null,
-                    decoration: InputDecoration(
-                      fillColor: _emailInputFieldColor,
-                      filled: true,
-                      hintText: context.strings.email,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
-                      ),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _emailIsValid
-                          ? Icon(
-                              Icons.check,
-                              size: 20,
-                              color: getEnteColorScheme(context).primary300,
-                            )
-                          : null,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _email = value.trim();
-                        _emailIsValid = EmailValidator.validate(_email!);
-                        if (_emailIsValid) {
-                          _emailInputFieldColor = getEnteColorScheme(context)
-                              .primary300
-                              .withOpacity(0.2);
-                        } else {
-                          _emailInputFieldColor = null;
-                        }
-                      });
-                    },
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    //initialValue: _email,
-                    autofocus: true,
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    thickness: 1,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 5,
-                        child: StyledText(
-                          text: context.strings.loginTerms,
-                          style: getEnteTextTheme(context).small,
-                          tags: {
-                            'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) =>
-                                  PlatformUtil.openWebView(
-                                context,
-                                context.strings.termsOfServicesTitle,
-                                "https://ente.io/terms",
-                              ),
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                            'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) =>
-                                  PlatformUtil.openWebView(
-                                context,
-                                context.strings.privacyPolicyTitle,
-                                "https://ente.io/privacy",
-                              ),
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          },
+                      const SizedBox(height: 24),
+                      Text(
+                        context.strings.email,
+                        style: textTheme.bodyBold.copyWith(
+                          color: colorScheme.textBase,
                         ),
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: Container(),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        autofillHints: const [AutofillHints.email],
+                        onFieldSubmitted:
+                            _emailIsValid ? (value) => onPressed() : null,
+                        decoration: InputDecoration(
+                          fillColor:
+                              _emailInputFieldColor ?? colorScheme.backdropBase,
+                          filled: true,
+                          hintText: context.strings.emailHint,
+                          hintStyle: TextStyle(color: colorScheme.textMuted),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          suffixIcon: _emailIsValid
+                              ? Icon(
+                                  Icons.check,
+                                  size: 20,
+                                  color: colorScheme.primary700,
+                                )
+                              : null,
+                        ),
+                        style: textTheme.body.copyWith(
+                          color: colorScheme.textBase,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _email = value.trim();
+                            _emailIsValid = EmailValidator.validate(_email!);
+                            if (_emailIsValid) {
+                              _emailInputFieldColor =
+                                  getEnteColorScheme(context)
+                                      .primary700
+                                      .withValues(alpha: 0.2);
+                            } else {
+                              _emailInputFieldColor = null;
+                            }
+                          });
+                        },
+                        autocorrect: false,
+                        keyboardType: TextInputType.emailAddress,
+                        //initialValue: _email,
+                        autofocus: true,
+                      ),
+                      const SizedBox(height: 24),
+                      StyledText(
+                        text: context.strings.loginTerms,
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
+                        tags: {
+                          'u-terms': StyledTextActionTag(
+                            (String? text, Map<String?, String?> attrs) =>
+                                PlatformUtil.openWebView(
+                              context,
+                              context.strings.termsOfServicesTitle,
+                              "https://ente.io/terms",
+                            ),
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: colorScheme.textMuted,
+                            ),
+                          ),
+                          'u-policy': StyledTextActionTag(
+                            (String? text, Map<String?, String?> attrs) =>
+                                PlatformUtil.openWebView(
+                              context,
+                              context.strings.privacyPolicyTitle,
+                              "https://ente.io/privacy",
+                            ),
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: colorScheme.textMuted,
+                            ),
+                          ),
+                        },
                       ),
                     ],
                   ),
@@ -215,7 +231,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ),
-        const Padding(padding: EdgeInsets.all(8)),
       ],
     );
   }

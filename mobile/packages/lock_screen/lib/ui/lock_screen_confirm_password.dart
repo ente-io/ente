@@ -1,4 +1,3 @@
-import "package:ente_lock_screen/lock_screen_config.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/dynamic_fab.dart";
@@ -6,6 +5,7 @@ import "package:ente_ui/components/text_input_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_svg/flutter_svg.dart";
 
 class LockScreenConfirmPassword extends StatefulWidget {
   const LockScreenConfirmPassword({
@@ -58,7 +58,6 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final config = LockScreenConfig.current;
     final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
@@ -70,11 +69,12 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
     }
 
     return Scaffold(
-      backgroundColor: config.getBackgroundColor(colorTheme),
+      backgroundColor: colorTheme.backgroundBase,
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
-        backgroundColor: config.getBackgroundColor(colorTheme),
+        backgroundColor: colorTheme.backgroundBase,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           onPressed: () {
             FocusScope.of(context).unfocus();
@@ -85,8 +85,14 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
             color: colorTheme.textBase,
           ),
         ),
-        centerTitle: config.showTitle,
-        title: config.titleWidget,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorTheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _isFormValid,
@@ -106,15 +112,17 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: config.showTitle ? 16.0 : 0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: config.showTitle ? 40 : 0),
-                config.iconBuilder(context, null),
-                SizedBox(height: config.showTitle ? 24 : 0),
+                const SizedBox(height: 40),
+                Image.asset(
+                  'assets/lock_screen_icon.png',
+                  width: 129,
+                  height: 95,
+                ),
+                const SizedBox(height: 24),
                 Text(
                   context.strings.reEnterPassword,
                   textAlign: TextAlign.center,
