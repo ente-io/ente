@@ -581,7 +581,6 @@ class _FileSelectionActionsWidgetState
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(
         files,
-        type: EventType.metadataChanged,
         source: "offline_toggle",
       ),
     );
