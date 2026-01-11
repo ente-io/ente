@@ -109,7 +109,7 @@ class OfflineDownloadService {
         .map((e) => e.generatedID!)
         .toList();
     await FilesDB.instance.setOfflineAvailability(ids, true);
-    sync();
+    unawaited(sync());
   }
 
   Future<void> unmarkForOfflineAccess(List<EnteFile> files) async {
