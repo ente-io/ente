@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+.output/
+dist/
+
+# WXT cache
+.wxt/
+
+# Lock files (using yarn in parent repo)
+package-lock.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
