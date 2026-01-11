@@ -10,7 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/files_updated_event.dart";
+//import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
