@@ -10,6 +10,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
+import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -26,6 +27,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import 'package:photos/services/offline_download_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -91,8 +93,9 @@ class _FileSelectionActionsWidgetState
 
   bool get _canRemoveOthersFiles =>
       widget.collection != null &&
-      CollectionsService.instance
-          .canRemoveFilesFromAllParticipants(widget.collection!);
+      CollectionsService.instance.canRemoveFilesFromAllParticipants(
+        widget.collection!,
+      );
 
   @override
   void initState() {
@@ -134,7 +137,8 @@ class _FileSelectionActionsWidgetState
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;
     final bool canRemoveOthersFiles = _canRemoveOthersFiles;
-    final int removeCount = split.ownedByCurrentUser.length +
+    final int removeCount =
+        split.ownedByCurrentUser.length +
         (canRemoveOthersFiles ? split.ownedByOtherUsers.length : 0);
 
     final bool anyOwnedFiles =
@@ -143,24 +147,28 @@ class _FileSelectionActionsWidgetState
         ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
-    final bool hasUploadedFileIDs =
-        widget.selectedFiles.files.any((file) => file.uploadedFileID != null);
-    final showCollageOption = CollageCreatorPage.isValidCount(
+    final bool hasUploadedFileIDs = widget.selectedFiles.files.any(
+      (file) => file.uploadedFileID != null,
+    );
+    final showCollageOption =
+        CollageCreatorPage.isValidCount(
           widget.selectedFiles.files.length,
         ) &&
         !widget.selectedFiles.files.any(
           (element) => element.fileType == FileType.video,
         );
-    final showDownloadOption =
-        widget.selectedFiles.files.any((element) => element.localID == null);
-    final bool isCollectionOwnerOrAdmin = widget.collection != null &&
+    final showDownloadOption = widget.selectedFiles.files.any(
+      (element) => element.localID == null,
+    );
+    final bool isCollectionOwnerOrAdmin =
+        widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
     final bool canSuggestDeleteAction =
         (widget.type == GalleryType.sharedCollection ||
-                widget.type == GalleryType.ownedCollection) &&
-            isCollectionOwnerOrAdmin &&
-            split.ownedByOtherUsers.isNotEmpty;
+            widget.type == GalleryType.ownedCollection) &&
+        isCollectionOwnerOrAdmin &&
+        split.ownedByOtherUsers.isNotEmpty;
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
@@ -224,8 +232,9 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.remove_circle_outline,
-            labelText: AppLocalizations.of(context)
-                .notPersonLabel(name: widget.person!.data.name),
+            labelText: AppLocalizations.of(
+              context,
+            ).notPersonLabel(name: widget.person!.data.name),
             onTap: _onNotpersonClicked,
           ),
         );
@@ -250,7 +259,8 @@ class _FileSelectionActionsWidgetState
         );
       }
 
-      final showUploadIcon = widget.type == GalleryType.localFolder &&
+      final showUploadIcon =
+          widget.type == GalleryType.localFolder &&
           split.ownedByCurrentUser.isEmpty;
       if (widget.type.showAddToAlbum()) {
         if (showUploadIcon) {
@@ -383,6 +393,19 @@ class _FileSelectionActionsWidgetState
           ),
         );
       }
+
+      final bool allOffline = widget.selectedFiles.files.every(
+        (element) => element.isOfflineAvailable ?? false,
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: allOffline ? "Remove offline" : "Make offline",
+          icon: allOffline ? Icons.offline_pin : Icons.offline_pin_outlined,
+          onTap: () =>
+              _toggleOffline(widget.selectedFiles.files.toList(), allOffline),
+        ),
+      );
+
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
@@ -543,6 +566,28 @@ class _FileSelectionActionsWidgetState
     return const SizedBox();
   }
 
+  Future<void> _toggleOffline(List<EnteFile> files, bool remove) async {
+    if (remove) {
+      await OfflineDownloadService.instance.unmarkForOfflineAccess(files);
+      if (mounted) {
+        showToast(context, "Removed from offline access");
+      }
+    } else {
+      await OfflineDownloadService.instance.markForOfflineAccess(files);
+      if (mounted) {
+        showToast(context, "Marked for offline access");
+      }
+    }
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        type: EventType.modified,
+        source: "offline_toggle",
+      ),
+    );
+    widget.selectedFiles.clearAll();
+  }
+
   Future<void> _editLocation() async {
     await showBarModalBottomSheet(
       shape: const RoundedRectangleBorder(
@@ -593,10 +638,14 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _moveFiles() async {
     if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
-      widget.selectedFiles
-          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.pendingUploads.toSet(),
+        skipNotify: true,
+      );
+      widget.selectedFiles.unSelectAll(
+        split.ownedByOtherUsers.toSet(),
+        skipNotify: true,
+      );
     }
     showCollectionActionSheet(
       context,
@@ -685,12 +734,16 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _removeFilesFromAlbum() async {
     if (split.pendingUploads.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.pendingUploads.toSet(),
+        skipNotify: true,
+      );
     }
     if (!_canRemoveOthersFiles && split.ownedByOtherUsers.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.ownedByOtherUsers.toSet(),
+        skipNotify: true,
+      );
     }
     final bool removingOthersFile =
         _canRemoveOthersFiles && split.ownedByOtherUsers.isNotEmpty;
@@ -745,8 +798,9 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
-    final hasPersons =
-        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
+    final hasPersons = await AddFilesToPersonPage.ensureNamedPersonsExist(
+      context,
+    );
     if (!mounted || !hasPersons) {
       return;
     }
@@ -853,10 +907,14 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _onUnhideClick() async {
     if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
-      widget.selectedFiles
-          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
-      widget.selectedFiles
-          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+      widget.selectedFiles.unSelectAll(
+        split.pendingUploads.toSet(),
+        skipNotify: true,
+      );
+      widget.selectedFiles.unSelectAll(
+        split.ownedByOtherUsers.toSet(),
+        skipNotify: true,
+      );
     }
     showCollectionActionSheet(
       context,
@@ -906,8 +964,10 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    final updatedPerson =
-        await PersonService.instance.updateAvatar(widget.person!, file);
+    final updatedPerson = await PersonService.instance.updateAvatar(
+      widget.person!,
+      file,
+    );
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
@@ -943,8 +1003,9 @@ class _FileSelectionActionsWidgetState
             isInAlert: true,
           ),
         ],
-        body: AppLocalizations.of(context)
-            .selectedItemsWillBeRemovedFromThisPerson,
+        body: AppLocalizations.of(
+          context,
+        ).selectedItemsWillBeRemovedFromThisPerson,
         actionSheetType: ActionSheetType.defaultActionSheet,
       );
       if (actionResult?.action != null) {
@@ -989,8 +1050,9 @@ class _FileSelectionActionsWidgetState
           isInAlert: true,
         ),
       ],
-      body:
-          AppLocalizations.of(context).selectedItemsWillBeRemovedFromThisPerson,
+      body: AppLocalizations.of(
+        context,
+      ).selectedItemsWillBeRemovedFromThisPerson,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null) {
@@ -1059,7 +1121,8 @@ class _FileSelectionActionsWidgetState
               await downloadToGallery(file);
               downloadedFiles++;
               dialog.update(
-                message: AppLocalizations.of(context).downloading +
+                message:
+                    AppLocalizations.of(context).downloading +
                     " ($downloadedFiles/$totalFiles)",
               );
             }),

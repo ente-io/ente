@@ -10,7 +10,9 @@ import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
+import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -24,6 +26,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
+import 'package:photos/services/offline_download_service.dart';
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -79,8 +82,9 @@ class FileAppBarState extends State<FileAppBar> {
   @override
   void initState() {
     super.initState();
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
+    _guestViewEventSubscription = Bus.instance.on<GuestViewEvent>().listen((
+      event,
+    ) {
       setState(() {
         isGuestView = event.isGuestView;
       });
@@ -88,8 +92,9 @@ class FileAppBarState extends State<FileAppBar> {
 
     // Listen to shared collection changes to rebuild actions
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = InheritedDetailPageState.maybeOf(context)
-          ?.isInSharedCollectionNotifier;
+      final notifier = InheritedDetailPageState.maybeOf(
+        context,
+      )?.isInSharedCollectionNotifier;
       notifier?.addListener(_onSharedCollectionChanged);
     });
   }
@@ -104,9 +109,9 @@ class FileAppBarState extends State<FileAppBar> {
 
   @override
   void dispose() {
-    InheritedDetailPageState.maybeOf(context)
-        ?.isInSharedCollectionNotifier
-        .removeListener(_onSharedCollectionChanged);
+    InheritedDetailPageState.maybeOf(
+      context,
+    )?.isInSharedCollectionNotifier.removeListener(_onSharedCollectionChanged);
     _guestViewEventSubscription.cancel();
     super.dispose();
   }
@@ -187,9 +192,10 @@ class FileAppBarState extends State<FileAppBar> {
     final Collection? collection = collectionID != null
         ? CollectionsService.instance.getCollectionByID(collectionID)
         : null;
-    final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
-            ?.isInSharedCollectionNotifier
-            .value ??
+    final isInSharedCollection =
+        InheritedDetailPageState.maybeOf(
+          context,
+        )?.isInSharedCollectionNotifier.value ??
         false;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
@@ -252,6 +258,15 @@ class FileAppBarState extends State<FileAppBar> {
           ),
         );
       }
+      final bool isOffline = widget.file.isOfflineAvailable ?? false;
+      items.add(
+        EntePopupMenuItem(
+          isOffline ? "Remove offline" : "Make available offline",
+          value: 14,
+          icon: isOffline ? Icons.offline_pin : Icons.offline_pin_outlined,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
       // Edit option for images, live photos, and videos
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto ||
@@ -428,6 +443,8 @@ class FileAppBarState extends State<FileAppBar> {
           onSelected: (dynamic value) async {
             if (value == 1) {
               await _download(widget.file);
+            } else if (value == 14) {
+              await _toggleOffline(widget.file);
             } else if (value == 2) {
               await _toggleFileArchiveStatus(widget.file);
             } else if (value == 3) {
@@ -479,6 +496,32 @@ class FileAppBarState extends State<FileAppBar> {
     return _actions;
   }
 
+  Future<void> _toggleOffline(EnteFile file) async {
+    final bool isOffline = file.isOfflineAvailable ?? false;
+    if (isOffline) {
+      await OfflineDownloadService.instance.unmarkForOfflineAccess([file]);
+      if (mounted) {
+        showToast(context, "Removed from offline access");
+      }
+    } else {
+      await OfflineDownloadService.instance.markForOfflineAccess([file]);
+      if (mounted) {
+        showToast(context, "Marked for offline access");
+      }
+    }
+    file.isOfflineAvailable = !isOffline;
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        [file],
+        type: EventType.modified,
+        source: "offline_toggle_single_viewer",
+      ),
+    );
+    if (mounted) {
+      setState(() => _reloadActions = true);
+    }
+  }
+
   Future<void> _handleSuggestDelete(Collection collection) async {
     if (widget.file.uploadedFileID == null) {
       return;
@@ -505,8 +548,9 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _handleHideRequest(BuildContext context) async {
     try {
-      final hideResult =
-          await CollectionsService.instance.hideFiles(context, [widget.file]);
+      final hideResult = await CollectionsService.instance.hideFiles(context, [
+        widget.file,
+      ]);
       if (hideResult) {
         widget.onFileRemoved(widget.file);
       }
@@ -560,8 +604,10 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _setAs(EnteFile file) async {
-    final dialog =
-        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
     await dialog.show();
     try {
       final File? fileToSave = await (getFile(file));
@@ -598,11 +644,11 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _requestAuthentication() async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      "Please authenticate to view more photos and videos.",
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          "Please authenticate to view more photos and videos.",
+        );
     if (hasAuthenticated) {
       Bus.instance.fire(GuestViewEvent(false, false));
       await localSettings.setOnGuestView(false);
@@ -634,8 +680,10 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _handleVideoStream(String streamType) async {
     try {
-      final bool wasAdded = await VideoPreviewService.instance
-          .addToManualQueue(widget.file, streamType);
+      final bool wasAdded = await VideoPreviewService.instance.addToManualQueue(
+        widget.file,
+        streamType,
+      );
 
       if (!wasAdded) {
         // File was already in queue
