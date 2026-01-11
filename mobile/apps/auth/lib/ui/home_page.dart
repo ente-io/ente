@@ -138,6 +138,14 @@ class _HomePageState extends State<HomePage> {
 
     searchBoxFocusNode = FocusNode();
     ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
+
+    // Programmatically request focus after widget is built to ensure keyboard
+    // appears on all Android devices (autofocus alone is unreliable on some devices)
+    if (_autoFocusSearch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        searchBoxFocusNode.requestFocus();
+      });
+    }
   }
 
   void _onAddTagPressed() {
