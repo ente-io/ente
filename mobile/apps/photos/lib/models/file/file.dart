@@ -41,6 +41,7 @@ class EnteFile {
   String? thumbnailDecryptionHeader;
   String? metadataDecryptionHeader;
   int? fileSize;
+  bool? isOfflineAvailable;
 
   String? mMdEncodedJson;
   int mMdVersion = 0;
@@ -95,8 +96,10 @@ class EnteFile {
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
-    file.location =
-        Location(latitude: asset.latitude, longitude: asset.longitude);
+    file.location = Location(
+      latitude: asset.latitude,
+      longitude: asset.longitude,
+    );
     file.fileType = fileTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = _safeGetMicroseconds(
@@ -212,8 +215,10 @@ class EnteFile {
       creationTime = exifTime.time!.microsecondsSinceEpoch;
     }
     if (mediaUploadData.exifData != null) {
-      mediaUploadData.isPanorama =
-          checkPanoramaFromEXIF(null, mediaUploadData.exifData);
+      mediaUploadData.isPanorama = checkPanoramaFromEXIF(
+        null,
+        mediaUploadData.exifData,
+      );
     }
     if (mediaUploadData.isPanorama != true &&
         fileType == FileType.image &&
@@ -235,7 +240,8 @@ class EnteFile {
         // This is done because many times the fileTimeStamp will only give us
         // the date, not time value but the photo_manager's creation time will
         // contain the time.
-        final bool useFileTimeStamp = creationTime == null ||
+        final bool useFileTimeStamp =
+            creationTime == null ||
             !areFromSameDay(
               creationTime!,
               timeFromFileName.microsecondsSinceEpoch,
@@ -330,7 +336,7 @@ class EnteFile {
   String toString() {
     return '''File(generatedID: $generatedID, localID: $localID, title: $title, 
       type: $fileType, uploadedFileId: $uploadedFileID, modificationTime: $modificationTime, 
-      ownerID: $ownerID, collectionID: $collectionID, updationTime: $updationTime)''';
+      ownerID: $ownerID, collectionID: $collectionID, updationTime: $updationTime, isOfflineAvailable: $isOfflineAvailable)''';
   }
 
   @override
@@ -387,6 +393,7 @@ class EnteFile {
     String? thumbnailDecryptionHeader,
     String? metadataDecryptionHeader,
     int? fileSize,
+    bool? isOfflineAvailable,
     String? mMdEncodedJson,
     int? mMdVersion,
     MagicMetadata? magicMetadata,
@@ -421,6 +428,7 @@ class EnteFile {
       ..metadataDecryptionHeader =
           metadataDecryptionHeader ?? this.metadataDecryptionHeader
       ..fileSize = fileSize ?? this.fileSize
+      ..isOfflineAvailable = isOfflineAvailable ?? this.isOfflineAvailable
       ..mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson
       ..mMdVersion = mMdVersion ?? this.mMdVersion
       ..magicMetadata = magicMetadata ?? this.magicMetadata

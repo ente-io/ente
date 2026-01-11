@@ -38,6 +38,7 @@ import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memory_lane/memory_lane_service.dart';
 import "package:photos/services/notification_service.dart";
+import 'package:photos/services/offline_download_service.dart';
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
@@ -96,7 +97,8 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
       AppLock(
         builder: (args) => EnteApp(locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen() ||
+        enabled:
+            await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -165,8 +167,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // App LifeCycle
     AppLifecycleService.instance.init(prefs);
-    AppLifecycleService.instance
-        .onAppInBackground('init via: WorkManager $tlog');
+    AppLifecycleService.instance.onAppInBackground(
+      'init via: WorkManager $tlog',
+    );
 
     // Crypto rel.
     await Computer.shared().turnOn(workersCount: 4);
@@ -205,6 +208,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     _logger.info("[BG TASK] sync starting");
     await _sync('bgTaskActiveProcess');
     _logger.info("[BG TASK] sync completed");
+    await OfflineDownloadService.instance.sync();
 
     _logger.info("[BG TASK] locale fetch");
     final locale = await getLocale();
@@ -306,6 +310,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await ritualsService.init();
     _logger.info("RitualsService init done $tlog");
 
+    OfflineDownloadService.instance.sync().ignore();
+
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
     }
@@ -355,8 +361,9 @@ void logLocalSettings() {
     'Swipe to select enabled': localSettings.isSwipeToSelectEnabled,
   };
 
-  final formattedSettings =
-      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+  final formattedSettings = settings.entries
+      .map((e) => '${e.key}: ${e.value}')
+      .join(', ');
   _logger.info('Local settings - $formattedSettings');
 }
 

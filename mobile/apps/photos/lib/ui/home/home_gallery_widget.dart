@@ -18,6 +18,7 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import 'package:photos/ui/offline/offline_gallery_screen.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
@@ -43,7 +44,7 @@ class HomeGalleryWidget extends StatefulWidget {
 
 class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
   late final StreamSubscription<HideSharedItemsFromHomeGalleryEvent>
-      _hideSharedFilesFromHomeSubscription;
+  _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
 
   /// This deboucner is to delay the UI update of the shared items toggle
@@ -57,15 +58,16 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
   @override
   void initState() {
     super.initState();
-    _hideSharedFilesFromHomeSubscription =
-        Bus.instance.on<HideSharedItemsFromHomeGalleryEvent>().listen((event) {
-      localSettings.setHideSharedItemsFromHomeGallery(event.shouldHide);
-      _hideSharedItemsToggleDebouncer.run(() async {
-        setState(() {
-          _shouldHideSharedItems = event.shouldHide;
+    _hideSharedFilesFromHomeSubscription = Bus.instance
+        .on<HideSharedItemsFromHomeGalleryEvent>()
+        .listen((event) {
+          localSettings.setHideSharedItemsFromHomeGallery(event.shouldHide);
+          _hideSharedItemsToggleDebouncer.run(() async {
+            setState(() {
+              _shouldHideSharedItems = event.shouldHide;
+            });
+          });
         });
-      });
-    });
   }
 
   @override
@@ -83,8 +85,8 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         final ownerID = Configuration.instance.getUserID();
         final hasSelectedAllForBackup =
             backupPreferenceService.hasSelectedAllFoldersForBackup;
-        final collectionsToHide =
-            CollectionsService.instance.archivedOrHiddenCollectionIds();
+        final collectionsToHide = CollectionsService.instance
+            .archivedOrHiddenCollectionIds();
         FileLoadResult result;
         final DBFilterOptions filterOptions = DBFilterOptions(
           hideIgnoredForUpload: true,
@@ -147,6 +149,28 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
               FileSelectionOverlayBar(
                 GalleryType.homepage,
                 widget.selectedFiles,
+              ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: SafeArea(
+                  child: FloatingActionButton(
+                    heroTag: "offline_gallery_fab",
+                    mini: true,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    child: Icon(
+                      Icons.offline_pin_outlined,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const OfflineGalleryScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ],
           ),
