@@ -3,8 +3,6 @@ import 'dart:typed_data';
 
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart' as dart_impl;
-import 'package:ente_crypto_dart/src/models/derived_key_result.dart'
-    as dart_models;
 import 'package:ente_crypto_dart/src/models/encryption_result.dart'
     as dart_models;
 
@@ -180,7 +178,12 @@ class EnteCryptoDartAdapter implements CryptoApi {
     int opsLimit,
   ) =>
       dart_impl.cryptoPwHash(
-          password, salt, memLimit, opsLimit, dart_impl.sodium);
+        password,
+        salt,
+        memLimit,
+        opsLimit,
+        dart_impl.sodium,
+      );
 
   @override
   int get pwhashMemLimitInteractive =>
