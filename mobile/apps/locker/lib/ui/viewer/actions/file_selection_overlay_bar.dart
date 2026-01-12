@@ -164,8 +164,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                       decoration: BoxDecoration(
                         color: colorScheme.backdropBase.withValues(alpha: 1.0),
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
                         ),
                         border: Border(
                           top: BorderSide(color: colorScheme.strokeFaint),

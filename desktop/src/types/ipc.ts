@@ -17,6 +17,14 @@ export interface FolderWatch {
     folderPath: string;
     syncedFiles: FolderWatchSyncedFile[];
     ignoredFiles: string[];
+    /**
+     * Whether the folder is currently accessible on disk.
+     *
+     * Folders on ejected external drives will have this set to false. This
+     * property is not persisted and is computed each time the watch list is
+     * fetched.
+     */
+    isAccessible?: boolean;
 }
 
 export type CollectionMapping = "root" | "parent";

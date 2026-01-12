@@ -15,6 +15,7 @@ import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
+import "package:locker/utils/collection_actions.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -167,6 +168,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
   Widget _buildBody(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     final safeBottomInset = MediaQuery.of(context).padding.bottom;
     final bottomPadding = safeBottomInset + 24.0;
 
@@ -235,12 +237,41 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TitleBarTitleWidget(
-            title: _getTitle(context),
-          ),
-          Text(
-            _sortedCollections.length.toString() + " items",
-            style: textTheme.smallMuted,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TitleBarTitleWidget(
+                    title: _getTitle(context),
+                  ),
+                  Text(
+                    _sortedCollections.length.toString() + " items",
+                    style: textTheme.smallMuted,
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () async {
+                  await CollectionActions.createCollection(context);
+                },
+                child: Container(
+                  height: 44,
+                  width: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: colorScheme.backdropBase,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedAdd01,
+                    color: colorScheme.textBase,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Expanded(

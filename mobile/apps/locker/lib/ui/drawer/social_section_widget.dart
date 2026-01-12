@@ -33,20 +33,20 @@ class SocialSectionWidget extends StatelessWidget {
         "https://shop.ente.io",
         launchInExternalApp: !Platform.isAndroid,
       ),
-      const _SocialsChildItem(
-        "Twitter",
+      _SocialsChildItem(
+        l10n.twitter,
         "https://twitter.com/enteio",
       ),
-      const _SocialsChildItem(
-        "Mastodon",
+      _SocialsChildItem(
+        l10n.mastodon,
         "https://fosstodon.org/@ente",
       ),
-      const _SocialsChildItem(
-        "Discord",
+      _SocialsChildItem(
+        l10n.discord,
         "https://ente.io/discord",
       ),
-      const _SocialsChildItem(
-        "Reddit",
+      _SocialsChildItem(
+        l10n.reddit,
         "https://reddit.com/r/enteio",
       ),
     ];

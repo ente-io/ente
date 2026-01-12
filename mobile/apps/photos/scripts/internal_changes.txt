@@ -1,14 +1,7 @@
-- Neeraj: Collage creator: swap photos via long-press select + tap to replace
+- Neeraj: (i) Surface shared albums in add/move-to-album flows with owner avatar
+- Neeraj: QOL: Priority debouncer for recent local photos (< 7 days) to reduce home gallery delay
+- Neeraj: QOL: Collage creator: swap photos via long-press select + tap to replace
 - Prateek: (i) Always enable video streaming
--- Release Cut Off --
-- Ashil:  Like & Comment
-- Neeraj: Admin Role + Suggest Delete feature
-- Neeraj: Large files section: add type filter, lower threshold to 10MB [QOL]
-- Neeraj: Jump to date when clicking on album from file info [QOL]
-- Neeraj: Add camera make/model search and filter by model [feature](https://github.com/ente-io/ente/discussions/5588)
-- Neeraj: Fixed order for [pinned albums](https://github.com/ente-io/ente/discussions/5979)
-- Neeraj: Show recent move/add to collections on top (in memory) [QOL]
-- Prateek: Add "Start with latest backups"  (last 7 days onwards)
-- Prateek: Collage creator: move save to app bar, add scrollbar, responsive layout
+- Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)
 - Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
 - Prateek(i): Stop streaming immediately on log-out

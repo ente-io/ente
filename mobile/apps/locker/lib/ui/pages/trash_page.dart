@@ -211,8 +211,8 @@ class _TrashPageState extends State<TrashPage> {
                   await _emptyTrash();
                 },
                 child: Container(
-                  height: 48,
-                  width: 48,
+                  height: 44,
+                  width: 44,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: colorScheme.backdropBase,

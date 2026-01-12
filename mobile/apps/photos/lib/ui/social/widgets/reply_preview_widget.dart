@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/extensions/user_extension.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -20,6 +21,7 @@ class ReplyPreviewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
@@ -50,8 +52,11 @@ class ReplyPreviewWidget extends StatelessWidget {
                 children: [
                   Text(
                     replyingToUser.id == currentUserID
-                        ? 'Replying to you'
-                        : 'Replying to ${replyingToUser.displayName ?? replyingToUser.email}',
+                        ? l10n.replyingToYou
+                        : l10n.replyingTo(
+                            name: replyingToUser.displayName ??
+                                replyingToUser.email,
+                          ),
                     style: textTheme.tiny.copyWith(
                       color: colorScheme.textBase,
                       height: 14 / 10.0,

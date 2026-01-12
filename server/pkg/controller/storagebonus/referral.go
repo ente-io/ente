@@ -63,6 +63,19 @@ func (c *Controller) GetUserReferralView(ctx *gin.Context) (*entity.GetUserRefer
 	if err2 != nil {
 		return nil, stacktrace.Propagate(err2, "failed to get storage claimed")
 	}
+	codeChangeCount, err2 := c.StorageBonus.GetCodeChangeCount(ctx, codeUser)
+	if err2 != nil {
+		return nil, stacktrace.Propagate(err2, "failed to get code change count")
+	}
+	// Calculate changes made (count - 1 since first code doesn't count as a change)
+	codeChangeAttempts := 0
+	if codeChangeCount > 1 {
+		codeChangeAttempts = codeChangeCount - 1
+	}
+	remainingAttempts := storagebonus.MaxReferralCodeChangeAllowed - codeChangeAttempts
+	if remainingAttempts < 0 {
+		remainingAttempts = 0
+	}
 
 	return &entity.GetUserReferralView{
 		PlanInfo: entity.PlanInfo{
@@ -71,11 +84,13 @@ func (c *Controller) GetUserReferralView(ctx *gin.Context) (*entity.GetUserRefer
 			StorageInGB:             referralAmountInGb,
 			MaxClaimableStorageInGB: maxClaimableReferralAmount,
 		},
-		Code:            referralCode,
-		EnableApplyCode: enableApplyCode,
-		IsFamilyMember:  isFamilyMember,
-		HasAppliedCode:  appliedReferral,
-		ClaimedStorage:  *storageClaimed,
+		Code:                        referralCode,
+		EnableApplyCode:             enableApplyCode,
+		IsFamilyMember:              isFamilyMember,
+		HasAppliedCode:              appliedReferral,
+		ClaimedStorage:              *storageClaimed,
+		CodeChangeAttempts:          codeChangeAttempts,
+		RemainingCodeChangeAttempts: remainingAttempts,
 	}, nil
 }
 

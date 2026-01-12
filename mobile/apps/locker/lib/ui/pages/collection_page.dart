@@ -292,8 +292,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     return GestureDetector(
       onTap: _shareCollection,
       child: Container(
-        height: 48,
-        width: 48,
+        height: 44,
+        width: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: colorScheme.backdropBase,
@@ -325,8 +325,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       constraints: const BoxConstraints(minWidth: 120),
       offset: const Offset(-36, 36),
       child: Container(
-        height: 48,
-        width: 48,
+        height: 44,
+        width: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: colorScheme.backdropBase,

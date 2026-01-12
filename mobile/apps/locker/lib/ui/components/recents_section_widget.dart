@@ -1,3 +1,4 @@
+import "package:ente_ui/components/close_icon_button.dart";
 import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
@@ -12,6 +13,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
+import 'package:locker/ui/pages/all_collections_page.dart';
 
 class RecentsSectionWidget extends StatefulWidget {
   final List<Collection> collections;
@@ -124,6 +126,57 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       chips: chipModels,
       showClearButton: false,
       onClearTapped: _clearAllFilters,
+      onFilterIconTapped: () => _showFilterBottomSheet(context),
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (context, setBottomSheetState) {
+            final colorScheme = getEnteColorScheme(context);
+            final textTheme = getEnteTextTheme(context);
+            final orderedFilters = _getOrderedCollections();
+            final chipModels = orderedFilters
+                .map(
+                  (collection) => _FilterChipViewModel(
+                    key: 'c_${collection.id}',
+                    label: _collectionLabel(collection),
+                    isSelected: _selectedCollections.contains(collection),
+                    onTap: () {
+                      _onCollectionSelected(collection);
+                      setBottomSheetState(() {});
+                    },
+                  ),
+                )
+                .toList();
+
+            return _FilterBottomSheet(
+              chips: chipModels,
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+              hasActiveFilters: _hasActiveFilters,
+              onSeeAllCollections: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AllCollectionsPage(),
+                  ),
+                );
+              },
+              onClearAllFilters: () {
+                _clearAllFilters();
+                setBottomSheetState(() {});
+              },
+              onClose: () => Navigator.pop(context),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -435,11 +488,13 @@ class _FilterChipsRow extends StatelessWidget {
     required this.chips,
     required this.showClearButton,
     required this.onClearTapped,
+    required this.onFilterIconTapped,
   });
 
   final List<_FilterChipViewModel> chips;
   final bool showClearButton;
   final VoidCallback onClearTapped;
+  final VoidCallback onFilterIconTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -448,9 +503,14 @@ class _FilterChipsRow extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return SizedBox(
-      height: 48,
+      height: 44,
       child: Row(
         children: [
+          _FilterIconButton(
+            onTap: onFilterIconTapped,
+            colorScheme: colorScheme,
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -469,6 +529,7 @@ class _FilterChipsRow extends StatelessWidget {
                       onTap: chip.onTap,
                       colorScheme: colorScheme,
                       textTheme: textTheme,
+                      backgroundColor: colorScheme.backdropBase,
                     ),
                   );
                 },
@@ -514,6 +575,38 @@ class _FilterChipsRow extends StatelessWidget {
   }
 }
 
+class _FilterIconButton extends StatelessWidget {
+  const _FilterIconButton({
+    required this.onTap,
+    required this.colorScheme,
+  });
+
+  final VoidCallback onTap;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Icon(
+            Icons.filter_list,
+            color: colorScheme.textMuted,
+            size: 24,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FilterChip extends StatelessWidget {
   const _FilterChip({
     required this.label,
@@ -521,6 +614,7 @@ class _FilterChip extends StatelessWidget {
     required this.onTap,
     required this.colorScheme,
     required this.textTheme,
+    required this.backgroundColor,
   });
 
   final String label;
@@ -528,6 +622,7 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback onTap;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -538,12 +633,11 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minHeight: 40),
+          constraints: const BoxConstraints(minHeight: 44),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
-            color:
-                isSelected ? colorScheme.primary700 : colorScheme.backdropBase,
-            borderRadius: const BorderRadius.all(Radius.circular(24.0)),
+            color: isSelected ? colorScheme.primary700 : backgroundColor,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -551,7 +645,7 @@ class _FilterChip extends StatelessWidget {
               Text(
                 label,
                 style: textTheme.small.copyWith(
-                  color: isSelected ? Colors.white : colorScheme.textBase,
+                  color: isSelected ? Colors.white : colorScheme.textMuted,
                 ),
               ),
               AnimatedSwitcher(
@@ -603,7 +697,7 @@ class _FilterClearButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 48),
+        constraints: const BoxConstraints(minHeight: 44),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -625,6 +719,160 @@ class _FilterClearButton extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterBottomSheet extends StatelessWidget {
+  const _FilterBottomSheet({
+    required this.chips,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.hasActiveFilters,
+    required this.onSeeAllCollections,
+    required this.onClearAllFilters,
+    required this.onClose,
+  });
+
+  final List<_FilterChipViewModel> chips;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+  final bool hasActiveFilters;
+  final VoidCallback onSeeAllCollections;
+  final VoidCallback onClearAllFilters;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          child: Row(
+            children: [
+              _ActionPillButton(
+                label: context.l10n.seeAllCollections,
+                onTap: onSeeAllCollections,
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
+              const Spacer(),
+              _ActionPillButton(
+                label: context.l10n.clearAllFilters,
+                onTap: onClearAllFilters,
+                showCloseIcon: true,
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backdropBase.withValues(alpha: 1.0),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            border: Border(
+              top: BorderSide(color: colorScheme.strokeFaint),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        context.l10n.filters,
+                        style: textTheme.largeBold,
+                      ),
+                      const CloseIconButton(),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: chips.map((chip) {
+                          return _FilterChip(
+                            label: chip.label,
+                            isSelected: chip.isSelected,
+                            onTap: chip.onTap,
+                            colorScheme: colorScheme,
+                            textTheme: textTheme,
+                            backgroundColor: colorScheme.backgroundElevated2,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionPillButton extends StatelessWidget {
+  const _ActionPillButton({
+    required this.label,
+    required this.onTap,
+    required this.colorScheme,
+    required this.textTheme,
+    this.showCloseIcon = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+  final bool showCloseIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12.0,
+          vertical: 10.0,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: textTheme.small,
+            ),
+            if (showCloseIcon) ...[
+              const SizedBox(width: 6),
+              Icon(
+                Icons.close,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+            ],
           ],
         ),
       ),

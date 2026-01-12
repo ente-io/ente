@@ -36,11 +36,11 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputDialogSheet(
+    final result = await showInputSheet(
       context,
-      title: context.l10n.createCollection,
-      hintText: context.l10n.documentsHint,
-      submitButtonLabel: context.l10n.create,
+      title: context.l10n.newCollection,
+      hintText: context.l10n.enterCollectionName,
+      submitButtonLabel: context.l10n.createCollection,
       onSubmit: (String text) async {
         if (text.trim().isEmpty) {
           return;
@@ -82,7 +82,7 @@ class CollectionActions {
       return;
     }
 
-    await showInputDialogSheet(
+    await showInputSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',
