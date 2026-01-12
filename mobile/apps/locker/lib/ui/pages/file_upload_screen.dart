@@ -139,31 +139,34 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                             borderRadius: BorderRadius.circular(24),
                           ),
                           padding: const EdgeInsets.all(12),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxHeight:
-                                  _files.length > 5 ? 360 : _files.length * 84.0,
-                            ),
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.zero,
-                              physics: _files.length > 5
-                                  ? const BouncingScrollPhysics()
-                                  : const NeverScrollableScrollPhysics(),
-                              itemCount: _files.length,
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 8),
-                              itemBuilder: (context, index) {
-                                return _buildFileItem(
-                                  _files[index],
-                                  colorScheme,
-                                  textTheme,
-                                );
-                              },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight:
+                                    _files.length > 5 ? 360 : _files.length * 84.0,
+                              ),
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                physics: _files.length > 5
+                                    ? const BouncingScrollPhysics()
+                                    : const NeverScrollableScrollPhysics(),
+                                itemCount: _files.length,
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 8),
+                                itemBuilder: (context, index) {
+                                  return _buildFileItem(
+                                    _files[index],
+                                    colorScheme,
+                                    textTheme,
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                       ],
                       TitleBarTitleWidget(
                         title: context.l10n.collectionLabel,

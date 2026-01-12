@@ -183,6 +183,7 @@ class _PersonalNotePageState
             onCollectionsUpdated: updateAvailableCollections,
             title: showCollectionSelectionTitle ? context.l10n.collections : '',
           ),
+          const SizedBox(height: 80),
         ],
       ),
     );

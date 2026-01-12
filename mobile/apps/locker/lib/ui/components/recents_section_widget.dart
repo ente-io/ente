@@ -734,22 +734,26 @@ class _FilterBottomSheet extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 200),
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: chips.map((chip) {
-                          return CollectionChip(
-                            label: chip.label,
-                            isSelected: chip.isSelected,
-                            onTap: chip.onTap,
-                            colorScheme: colorScheme,
-                            textTheme: textTheme,
-                            backgroundColor: colorScheme.backgroundElevated2,
-                          );
-                        }).toList(),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: chips.map((chip) {
+                            return CollectionChip(
+                              label: chip.label,
+                              isSelected: chip.isSelected,
+                              onTap: chip.onTap,
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
+                              backgroundColor: colorScheme.backgroundElevated2,
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                   ),
