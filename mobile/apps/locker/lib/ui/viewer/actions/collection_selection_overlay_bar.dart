@@ -77,8 +77,8 @@ class _CollectionSelectionOverlayBarState
                     decoration: BoxDecoration(
                       color: colorScheme.backdropBase,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
                       border: Border(
                         top: BorderSide(color: colorScheme.strokeFaint),

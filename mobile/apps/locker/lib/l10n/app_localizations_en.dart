@@ -235,6 +235,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createCollection => 'Create collection';
 
   @override
+  String get enterCollectionName => 'Enter collection name';
+
+  @override
   String get nothingYet => 'Nothing yet';
 
   @override
@@ -1553,11 +1556,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseLoginAgain => 'Please login again';
 
   @override
-  String get language => 'Language';
+  String get filters => 'Filters';
+
+  @override
+  String get seeAllCollections => 'See all collections';
+
+  @override
+  String get clearAllFilters => 'Clear all filters';
 
   @override
   String get selectLanguage => 'Select language';
 
   @override
   String get general => 'General';
+
+  @override
+  String get language => 'Language';
 }
