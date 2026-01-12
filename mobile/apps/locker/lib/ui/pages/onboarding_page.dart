@@ -11,6 +11,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/gradient_button.dart";
@@ -113,7 +114,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       backgroundColor: colorScheme.primary700,
       appBar: AppBar(
         leading: const SizedBox(),
-        title: Image.asset("assets/locker-logo.png", height: 24),
+        title: SvgPicture.asset("assets/svg/app-logo.svg"),
         backgroundColor: colorScheme.primary700,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -349,6 +350,7 @@ class FeatureItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -364,11 +366,7 @@ class FeatureItemWidget extends StatelessWidget {
             children: [
               Text(
                 featureTitleFirstLine,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: textTheme.largeBold.copyWith(color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ],
