@@ -8,6 +8,7 @@ import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -60,6 +61,7 @@ class CustomLockerAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final hasQuery = searchController.text.isNotEmpty;
     final showClearIcon = isSearchActive || hasQuery;
 
@@ -96,10 +98,10 @@ class CustomLockerAppBar extends StatelessWidget
                     ),
                   ),
                   isSyncing
-                      ? const Row(
+                      ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(
@@ -109,21 +111,16 @@ class CustomLockerAppBar extends StatelessWidget
                                 ),
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              "Syncing...",
-                              style: TextStyle(
+                              context.l10n.syncing,
+                              style: textTheme.body.copyWith(
                                 color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         )
-                      : Image.asset(
-                          'assets/locker-logo.png',
-                          height: 28,
-                        ),
+                      : SvgPicture.asset('assets/svg/app-logo.svg'),
                 ],
               ),
             ),
@@ -145,10 +142,8 @@ class CustomLockerAppBar extends StatelessWidget
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
-                    hintStyle: TextStyle(
+                    hintStyle: textTheme.smallBold.copyWith(
                       color: colorScheme.iconColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
                     ),
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -679,6 +674,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
+    final colorScheme = getEnteColorScheme(context);
     if (_error != null) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -688,15 +684,15 @@ class _HomePageState extends UploaderPageState<HomePage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.error_outline,
-                  color: Colors.red,
+                  color: colorScheme.warning400,
                   size: 64,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   _error!,
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: colorScheme.warning400),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),

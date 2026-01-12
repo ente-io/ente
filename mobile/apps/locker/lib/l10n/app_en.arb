@@ -288,6 +288,7 @@
     }
   },
   "uncategorized": "Uncategorized",
+  "syncing": "Syncing...",
   "syncingTrash": "Syncing trash...",
   "restoring": "Restoring...",
   "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",

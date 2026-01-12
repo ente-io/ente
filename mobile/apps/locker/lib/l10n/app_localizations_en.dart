@@ -355,6 +355,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uncategorized => 'Uncategorized';
 
   @override
+  String get syncing => 'Syncing...';
+
+  @override
   String get syncingTrash => 'Syncing trash...';
 
   @override

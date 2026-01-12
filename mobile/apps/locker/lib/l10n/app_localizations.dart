@@ -670,6 +670,12 @@ abstract class AppLocalizations {
   /// **'Uncategorized'**
   String get uncategorized;
 
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing...'**
+  String get syncing;
+
   /// No description provided for @syncingTrash.
   ///
   /// In en, this message translates to:
