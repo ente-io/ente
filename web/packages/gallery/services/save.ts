@@ -256,7 +256,10 @@ const downloadAndSave = async (
                         })),
                     (file) => {
                         failedFiles.push(file);
-                        updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
+                        updateSaveGroup((g) => ({
+                            ...g,
+                            failed: g.failed + 1,
+                        }));
                     },
                     canceller,
                     updateSaveGroup,
