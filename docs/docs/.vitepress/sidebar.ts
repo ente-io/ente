@@ -223,6 +223,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/notifications",
                             },
                             {
+                                text: "Rituals",
+                                link: "/photos/features/utilities/rituals",
+                            },
+                            {
                                 text: "Swipe to Select",
                                 link: "/photos/features/utilities/swipe-to-select",
                             },
