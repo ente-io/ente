@@ -136,7 +136,7 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
         ),
         const SizedBox(height: 16),
         Text(
-          'Note',
+          context.l10n.note,
           style: textTheme.small.copyWith(
             color: colorScheme.textBase,
           ),

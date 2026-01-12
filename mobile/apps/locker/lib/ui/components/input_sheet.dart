@@ -127,7 +127,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
           ),
           onSubmitted: (_) => _onSubmit(),
         ),
-        const SizedBox(height: 36),
+        const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
           child: GradientButton(

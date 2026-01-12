@@ -85,6 +85,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
   @override
   void dispose() {
     _titleController.dispose();
+    _captionController.dispose();
     super.dispose();
   }
 
