@@ -115,7 +115,7 @@ const Page: React.FC = () => {
                 },
             },
         });
-    }, [showMiniDialog, onGenericError]);
+    }, [showMiniDialog, onGenericError, state.largeFiles]);
 
     const handleOpenViewer = useCallback((index: number) => {
         setCurrentIndex(index);
@@ -140,7 +140,11 @@ const Page: React.FC = () => {
             case "failed":
                 return <LoadFailed />;
             case "completed":
-                if (state.largeFiles.length === 0) {
+                // Show empty state only if no files AND no deletion in progress
+                if (
+                    state.largeFiles.length === 0 &&
+                    state.deleteProgress === undefined
+                ) {
                     return <NoLargeFilesFound />;
                 } else {
                     return (
@@ -543,6 +547,14 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
     );
     const isLongPress = React.useRef(false);
 
+    // Use refs for callbacks to avoid stale closures in long-press timer
+    const onOpenRef = React.useRef(onOpen);
+    const onToggleRef = React.useRef(onToggle);
+    useEffect(() => {
+        onOpenRef.current = onOpen;
+        onToggleRef.current = onToggle;
+    }, [onOpen, onToggle]);
+
     // Memoize touch device detection to avoid media query on every render
     const isTouchDevice = useMemo(
         () =>
@@ -571,7 +583,7 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         isLongPress.current = false;
         longPressTimer.current = setTimeout(() => {
             isLongPress.current = true;
-            onOpen();
+            onOpenRef.current();
         }, LONG_PRESS_DURATION);
     };
 

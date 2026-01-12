@@ -263,6 +263,14 @@ export const largeFilesReducer = (
         }
 
         case "changeFilter": {
+            // No-op if filter hasn't actually changed
+            if (action.filter === state.filter) {
+                return state;
+            }
+            // Block filter changes during deletion to prevent state corruption
+            if (state.deleteProgress !== undefined) {
+                return state;
+            }
             // Preserve selectedFileIDs when filter changes
             return {
                 ...largeFilesInitialState,
@@ -273,6 +281,10 @@ export const largeFilesReducer = (
         }
 
         case "changeSortOrder": {
+            // Block sort order changes during deletion
+            if (state.deleteProgress !== undefined) {
+                return state;
+            }
             const sortOrder = action.sortOrder;
             const largeFiles = sortedCopyOfLargeFiles(
                 state.largeFiles,
