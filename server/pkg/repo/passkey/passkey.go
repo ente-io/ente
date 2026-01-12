@@ -148,7 +148,16 @@ func (r *Repository) CreateBeginRegistrationData(user *ente.User) (options *prot
 		return
 	}
 
-	options, session, err = r.webAuthnInstance.BeginRegistration(passkeyUser)
+	// Set residentKey to "required" to ensure passkeys are created as discoverable credentials.
+	// This is necessary for Android to show third-party password managers (1Password, Bitwarden, etc.)
+	// in the Credential Manager UI during passkey registration. Without this, Android falls back to
+	// the legacy FIDO2 API which only offers Google Password Manager.
+	authSelection := protocol.AuthenticatorSelection{
+		ResidentKey:        protocol.ResidentKeyRequirementRequired,
+		RequireResidentKey: protocol.ResidentKeyRequired(),
+		UserVerification:   protocol.VerificationPreferred,
+	}
+	options, session, err = r.webAuthnInstance.BeginRegistration(passkeyUser, webauthn.WithAuthenticatorSelection(authSelection))
 	if err != nil {
 		err = stacktrace.Propagate(err, "")
 		return
