@@ -2,21 +2,20 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:dotted_border/dotted_border.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
-import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/platform_util.dart';
 import 'package:ente_utils/share_utils.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
   final BaseConfiguration config;
@@ -68,11 +67,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         'recovery code should have $mnemonicKeyWordCount words',
       );
     }
-    final double topPadding = widget.showAppBar!
-        ? 40
-        : widget.showProgressBar
-            ? 32
-            : 120;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     Future<void> copy() async {
       await Clipboard.setData(
@@ -90,185 +86,147 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     }
 
     return Scaffold(
-      appBar: widget.showProgressBar
-          ? AppBar(
-              automaticallyImplyLeading: false,
-              elevation: 0,
-              title: Hero(
-                tag: "recovery_key",
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: 3,
-                  selectedColor: getEnteColorScheme(context).alternativeColor,
-                  roundedEdges: const Radius.circular(10),
-                  unselectedColor:
-                      getEnteColorScheme(context).stepProgressUnselectedColor,
-                ),
+      backgroundColor: colorScheme.backgroundBase,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundBase,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorScheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
+        leading: widget.showAppBar == false
+            ? const SizedBox.shrink()
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                color: colorScheme.primary700,
               ),
-            )
-          : widget.showAppBar!
-              ? AppBar(
-                  elevation: 0,
-                  title: Text(widget.title ?? context.strings.recoveryKey),
-                )
-              : null,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(20, topPadding, 20, 20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: constraints.maxWidth,
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
-                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.showAppBar!
-                          ? const SizedBox.shrink()
-                          : Text(
-                              widget.title ?? context.strings.recoveryKey,
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                      Padding(
-                        padding: EdgeInsets.all(widget.showAppBar! ? 0 : 12),
-                      ),
+                      const SizedBox(height: 24),
                       Text(
                         widget.text ??
                             context.strings.recoveryKeyOnForgotPassword,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
                       ),
-                      const Padding(padding: EdgeInsets.only(top: 24)),
+                      const SizedBox(height: 24),
                       Container(
-                        padding: const EdgeInsets.all(1),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              getEnteColorScheme(context).primary700,
-                              getEnteColorScheme(context).primary300,
-                            ],
-                            stops: const [0.0, 0.9753],
-                          ),
+                          color: colorScheme.primary700,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: DottedBorder(
-                          options: const RoundedRectDottedBorderOptions(
-                            padding: EdgeInsets.zero,
-                            strokeWidth: 1,
-                            color: Color(0xFF6B6B6B),
-                            dashPattern: [6, 6],
-                            radius: Radius.circular(8),
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Stack(
-                              children: [
-                                Column(
-                                  children: [
-                                    Builder(
-                                      builder: (context) {
-                                        final content = Container(
-                                          padding: const EdgeInsets.all(20),
-                                          width: double.infinity,
-                                          child: Text(
-                                            recoveryKey,
-                                            textAlign: TextAlign.justify,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge
-                                                ?.copyWith(
-                                                  color: Colors.white,
-                                                ),
-                                          ),
-                                        );
+                        child: Builder(
+                          builder: (context) {
+                            final content = Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 22,
+                                vertical: 24,
+                              ),
+                              child: Text(
+                                recoveryKey,
+                                textAlign: TextAlign.justify,
+                                style: textTheme.body.copyWith(
+                                  color: Colors.white,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 0.5,
+                                  height: 1.5,
+                                ),
+                              ),
+                            );
 
-                                        if (PlatformUtil.isMobile()) {
-                                          return GestureDetector(
-                                            onTap: () async => await copy(),
-                                            child: content,
-                                          );
-                                        } else {
-                                          return SelectableRegion(
-                                            focusNode: FocusNode(),
-                                            selectionControls:
-                                                PlatformUtil.selectionControls,
-                                            child: content,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: PlatformCopy(
-                                    onPressed: copy,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                            if (PlatformUtil.isMobile()) {
+                              return GestureDetector(
+                                onTap: () async => await copy(),
+                                child: content,
+                              );
+                            } else {
+                              return SelectableRegion(
+                                focusNode: FocusNode(),
+                                selectionControls:
+                                    PlatformUtil.selectionControls,
+                                child: content,
+                              );
+                            }
+                          },
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          widget.subText ??
-                              context.strings.recoveryKeySaveDescription,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 42),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _saveOptions(context, recoveryKey),
-                          ),
+                      const SizedBox(height: 20),
+                      Text(
+                        widget.subText ??
+                            context.strings.recoveryKeySaveDescription,
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            );
-          },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: _saveOptions(context, recoveryKey),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   List<Widget> _saveOptions(BuildContext context, String recoveryKey) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final List<Widget> childrens = [];
-    if (!_hasTriedToSave) {
-      childrens.add(
-        SizedBox(
-          height: 56,
-          child: ElevatedButton(
-            style: Theme.of(context).colorScheme.optionalActionButtonStyle,
-            onPressed: () async {
-              await _saveKeys();
-            },
-            child: Text(context.strings.doThisLater),
+
+    childrens.add(
+      Center(
+        child: DotsIndicator(
+          dotsCount: 3,
+          position: 2,
+          decorator: DotsDecorator(
+            activeColor: colorScheme.primary700,
+            color: colorScheme.primary700.withValues(alpha: 0.32),
+            activeShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            size: const Size(10, 10),
+            activeSize: const Size(20, 10),
+            spacing: const EdgeInsets.all(6),
           ),
         ),
-      );
-      childrens.add(const SizedBox(height: 10));
-    }
+      ),
+    );
+
+    childrens.add(const SizedBox(height: 20));
 
     childrens.add(
       GradientButton(
         onTap: () async {
-          await shareDialog(
+          await showShareSheet(
             context,
             context.strings.recoveryKey,
             saveAction: () async {
@@ -283,21 +241,20 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       ),
     );
 
-    if (_hasTriedToSave) {
-      childrens.add(const SizedBox(height: 10));
-      childrens.add(
-        SizedBox(
-          height: 56,
-          child: ElevatedButton(
-            child: Text(widget.doneText),
-            onPressed: () async {
-              await _saveKeys();
-            },
+    childrens.add(
+      TextButton(
+        onPressed: () async {
+          await _saveKeys();
+        },
+        child: Text(
+          _hasTriedToSave ? widget.doneText : context.strings.continueLabel,
+          style: textTheme.bodyBold.copyWith(
+            color: colorScheme.primary700,
           ),
         ),
-      );
-    }
-    childrens.add(const SizedBox(height: 12));
+      ),
+    );
+
     return childrens;
   }
 
@@ -352,26 +309,5 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     widget.onDone!();
-  }
-}
-
-class PlatformCopy extends StatelessWidget {
-  const PlatformCopy({
-    super.key,
-    required this.onPressed,
-  });
-
-  final void Function() onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () => onPressed(),
-      visualDensity: VisualDensity.compact,
-      icon: const Icon(
-        Icons.copy,
-        size: 16,
-      ),
-    );
   }
 }

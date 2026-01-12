@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:ente_accounts/pages/email_entry_page.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
-import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
-import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/pages/developer_settings_page.dart";
-import "package:ente_ui/pages/web_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -121,37 +119,36 @@ class _OnboardingPageState extends State<OnboardingPage> {
         scrolledUnderElevation: 0,
         centerTitle: true,
       ),
-      body: GestureDetector(
-        onTap: () async {
-          _developerModeTapCount++;
-          if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
-            _developerModeTapCount = 0;
-            final result = await showChoiceDialog(
-              context,
-              title: l10n.developerSettings,
-              firstButtonLabel: l10n.yes,
-              body: l10n.developerSettingsWarning,
-              isDismissible: false,
-            );
-            if (result?.action == ButtonAction.first) {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return DeveloperSettingsPage(Configuration.instance);
-                  },
-                ),
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () async {
+            _developerModeTapCount++;
+            if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
+              _developerModeTapCount = 0;
+              final result = await showChoiceDialog(
+                context,
+                title: l10n.developerSettings,
+                firstButtonLabel: l10n.yes,
+                body: l10n.developerSettingsWarning,
+                isDismissible: false,
               );
-              setState(() {});
+              if (result?.action == ButtonAction.first) {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return DeveloperSettingsPage(Configuration.instance);
+                    },
+                  ),
+                );
+                setState(() {});
+              }
             }
-          }
-        },
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
+          },
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
                 child: Column(
                   children: [
                     const SizedBox(height: 28),
@@ -187,63 +184,51 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ),
                     const SizedBox(height: 48),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: GradientButton(
-                        text: l10n.loginToEnteAccount,
-                        backgroundColor: Colors.white,
-                        textColor: colorScheme.primary700,
-                        onTap: _navigateToSignInPage,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () async {
-                          final result =
-                              await showAlertBottomSheet<ButtonResult>(
-                            context,
-                            title: l10n.unlockLockerNewUserTitle,
-                            message: l10n.unlockLockerNewUserBody,
-                            assetPath: "assets/file_lock.png",
-                            buttons: [
-                              GradientButton(
-                                text: l10n.checkoutEntePhotos,
-                                onTap: () => Navigator.of(context).pop(
-                                  ButtonResult(ButtonAction.first),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          GradientButton(
+                            text: l10n.loginToEnteAccount,
+                            backgroundColor: Colors.white,
+                            textColor: colorScheme.primary700,
+                            onTap: _navigateToSignInPage,
+                          ),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: GestureDetector(
+                              onTap: _navigateToSignUpPage,
+                              child: Text.rich(
+                                TextSpan(
+                                  text: "${l10n.dontHaveAccount} ",
+                                  style:
+                                      getEnteTextTheme(context).body.copyWith(
+                                            color: Colors.white,
+                                          ),
+                                  children: [
+                                    TextSpan(
+                                      text: l10n.signUp,
+                                      style: getEnteTextTheme(context)
+                                          .bodyBold
+                                          .copyWith(
+                                            color: Colors.white,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor: Colors.white,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          );
-
-                          if (result?.action == ButtonAction.first) {
-                            await Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return WebPage(
-                                    l10n.checkoutEntePhotos,
-                                    "https://ente.io/",
-                                  );
-                                },
-                              ),
-                            );
-                          }
-                        },
-                        child: Text(
-                          l10n.noAccountCta,
-                          style: getEnteTextTheme(context).bodyBold.copyWith(
-                                color: Colors.white,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.white,
-                              ),
-                        ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -274,6 +259,39 @@ class _OnboardingPageState extends State<OnboardingPage> {
             _activeDotIndex = index % _featureCount;
           });
           _startAutoScroll();
+        },
+      ),
+    );
+  }
+
+  void _navigateToSignUpPage() {
+    Widget page;
+    if (Configuration.instance.getEncryptedToken() == null) {
+      page = EmailEntryPage(Configuration.instance);
+    } else {
+      // No key
+      if (Configuration.instance.getKeyAttributes() == null) {
+        // Never had a key
+        page = PasswordEntryPage(
+          Configuration.instance,
+          PasswordEntryMode.set,
+          const HomePage(),
+        );
+      } else if (Configuration.instance.getKey() == null) {
+        // Yet to decrypt the key
+        page = PasswordReentryPage(
+          Configuration.instance,
+          const HomePage(),
+        );
+      } else {
+        // All is well
+        page = const HomePage();
+      }
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
         },
       ),
     );

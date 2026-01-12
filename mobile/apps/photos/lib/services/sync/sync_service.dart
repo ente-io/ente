@@ -17,6 +17,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/notification_service.dart';
+import 'package:photos/services/social_sync_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -212,6 +213,14 @@ class SyncService {
 
       if (!isProcessBg) {
         await smartAlbumsService.syncSmartAlbums();
+      }
+
+      // Sync social data for shared collections
+      try {
+        _logger.info("[SYNC] Starting social sync");
+        await SocialSyncService.instance.syncAllSharedCollections();
+      } catch (e) {
+        _logger.warning("[SYNC] Social sync failed, continuing", e);
       }
     } else {
       _logger.info("[SYNC] First import not completed, skipping remote");

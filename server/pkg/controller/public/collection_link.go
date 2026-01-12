@@ -50,7 +50,7 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 	for attempt := 0; attempt < 5; attempt++ {
 		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		err := c.CollectionLinkRepo.
-			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
+			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableComment, req.EnableJoin)
 		if errors.Is(err, ente.ErrAccessTokenInUse) {
 			continue
 		}
@@ -81,6 +81,7 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 			DeviceLimit:     req.DeviceLimit,
 			EnableDownload:  true,
 			EnableCollect:   req.EnableCollect,
+			EnableComment:   req.EnableComment,
 			EnableJoin:      enableJoin,
 			PasswordEnabled: false,
 			MinRole:         nil,
@@ -151,6 +152,9 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 	if req.EnableCollect != nil {
 		publicCollectionToken.EnableCollect = *req.EnableCollect
 	}
+	if req.EnableComment != nil {
+		publicCollectionToken.EnableComment = *req.EnableComment
+	}
 	if req.EnableJoin != nil {
 		publicCollectionToken.EnableJoin = *req.EnableJoin
 	}
@@ -170,6 +174,7 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 		ValidTill:       publicCollectionToken.ValidTill,
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
+		EnableComment:   publicCollectionToken.EnableComment,
 		EnableJoin:      publicCollectionToken.EnableJoin,
 		MinRole:         publicCollectionToken.MinRole,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
@@ -231,6 +236,7 @@ func (c *CollectionLinkController) GetPublicCollection(ctx *gin.Context, mustAll
 		publicURLsWithLimitedInfo = append(publicURLsWithLimitedInfo, ente.PublicURL{
 			EnableDownload:  publicUrl.EnableDownload,
 			EnableCollect:   publicUrl.EnableCollect,
+			EnableComment:   publicUrl.EnableComment,
 			PasswordEnabled: publicUrl.PasswordEnabled,
 			Nonce:           publicUrl.Nonce,
 			MemLimit:        publicUrl.MemLimit,

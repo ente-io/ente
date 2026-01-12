@@ -3,6 +3,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
     CircularProgress,
     Dialog,
@@ -30,7 +32,7 @@ import { basename, dirname } from "ente-base/file-name";
 import type { CollectionMapping, FolderWatch } from "ente-base/types/ipc";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import watcher from "services/watch";
 
 /**
@@ -52,9 +54,24 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     const { show: showMappingChoice, props: mappingChoiceVisibilityProps } =
         useModalVisibility();
 
+    const refreshWatches = async () => {
+        const ws = await watcher.getWatches();
+        setWatches(ws);
+    };
+
     useEffect(() => {
-        void watcher.getWatches().then((ws) => setWatches(ws));
+        void refreshWatches();
     }, []);
+
+    // Refresh watches when window gains focus while dialog is open.
+    // This ensures the UI updates when a folder becomes accessible again.
+    useEffect(() => {
+        if (!open) return;
+
+        const handleFocus = () => void refreshWatches();
+        window.addEventListener("focus", handleFocus);
+        return () => window.removeEventListener("focus", handleFocus);
+    }, [open]);
 
     useEffect(() => {
         const handleWatchFolderDrop = (e: DragEvent) => {
@@ -132,7 +149,9 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 </SpacedRow>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack sx={{ gap: 1, p: 1.5, height: "100%" }}>
-                        <WatchList {...{ watches, removeWatch }} />
+                        <WatchList
+                            {...{ watches, removeWatch, refreshWatches }}
+                        />
                         <FocusVisibleButton
                             fullWidth
                             color="accent"
@@ -152,12 +171,17 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     );
 };
 
-interface WatchList {
+interface WatchListProps {
     watches: FolderWatch[] | undefined;
     removeWatch: (watch: FolderWatch) => Promise<void>;
+    refreshWatches: () => Promise<void>;
 }
 
-const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
+const WatchList: React.FC<WatchListProps> = ({
+    watches,
+    removeWatch,
+    refreshWatches,
+}) =>
     watches?.length ? (
         <Stack sx={{ gap: 2, flex: 1, overflowY: "auto", pb: 2, pr: 1 }}>
             {watches.map((watch) => (
@@ -165,6 +189,7 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
                     key={watch.folderPath}
                     watch={watch}
                     removeWatch={removeWatch}
+                    onRetry={refreshWatches}
                 />
             ))}
         </Stack>
@@ -204,10 +229,25 @@ const Check: React.FC = () => (
 interface WatchEntryProps {
     watch: FolderWatch;
     removeWatch: (watch: FolderWatch) => Promise<void>;
+    onRetry: () => Promise<void>;
 }
 
-const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
+const WatchEntry: React.FC<WatchEntryProps> = ({
+    watch,
+    removeWatch,
+    onRetry,
+}) => {
     const { showMiniDialog } = useBaseContext();
+    const [isRetrying, setIsRetrying] = useState(false);
+    const isAccessible = watch.isAccessible !== false;
+    const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cleanup timer on unmount to avoid state update on unmounted component.
+    useEffect(() => {
+        return () => {
+            if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        };
+    }, []);
 
     const confirmStopWatching = () =>
         showMiniDialog({
@@ -220,10 +260,33 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
             },
         });
 
+    const handleRetry = async () => {
+        if (isRetrying) return; // Prevent multiple rapid clicks.
+        setIsRetrying(true);
+        await onRetry();
+        // Keep spinner visible briefly so user sees feedback.
+        retryTimerRef.current = setTimeout(() => setIsRetrying(false), 1000);
+    };
+
     return (
-        <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>
+        <SpacedRow
+            sx={{
+                overflow: "hidden",
+                flexShrink: 0,
+                opacity: isAccessible ? 1 : 0.7,
+            }}
+        >
             <Stack direction="row" sx={{ overflow: "hidden", gap: 1.5 }}>
-                {watch.collectionMapping == "root" ? (
+                {isRetrying ? (
+                    <CircularProgress
+                        size={24}
+                        sx={{ color: "stroke.muted" }}
+                    />
+                ) : !isAccessible ? (
+                    <Tooltip title={t("folder_not_accessible")}>
+                        <WarningAmberIcon color="warning" />
+                    </Tooltip>
+                ) : watch.collectionMapping == "root" ? (
                     <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon color="secondary" />
                     </Tooltip>
@@ -237,7 +300,11 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                     <FolderPath>{watch.folderPath}</FolderPath>
                 </Stack>
             </Stack>
-            <EntryOptions {...{ confirmStopWatching }} />
+            <EntryOptions
+                confirmStopWatching={confirmStopWatching}
+                isAccessible={isAccessible}
+                onRetry={handleRetry}
+            />
         </SpacedRow>
     );
 };
@@ -271,13 +338,24 @@ const FolderPath: React.FC<React.PropsWithChildren> = ({ children }) => (
 
 interface EntryOptionsProps {
     confirmStopWatching: () => void;
+    isAccessible: boolean;
+    onRetry: () => void;
 }
 
-const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => (
+const EntryOptions: React.FC<EntryOptionsProps> = ({
+    confirmStopWatching,
+    isAccessible,
+    onRetry,
+}) => (
     <OverflowMenu
         ariaID={"watch-mapping-option"}
         menuPaperSxProps={{ backgroundColor: "background.paper2" }}
     >
+        {!isAccessible && (
+            <OverflowMenuOption onClick={onRetry} startIcon={<RefreshIcon />}>
+                {t("retry_watching")}
+            </OverflowMenuOption>
+        )}
         <OverflowMenuOption
             color="critical"
             onClick={confirmStopWatching}

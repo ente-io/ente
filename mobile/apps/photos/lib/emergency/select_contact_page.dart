@@ -125,7 +125,7 @@ class _AddContactPage extends State<AddContactPage> {
                                 leadingIconSize: 24.0,
                                 leadingIconWidget: UserAvatarWidget(
                                   currentUser,
-                                  type: AvatarType.mini,
+                                  type: AvatarType.md,
                                 ),
                                 menuItemColor:
                                     getEnteColorScheme(context).fillFaint,

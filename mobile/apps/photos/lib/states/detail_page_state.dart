@@ -13,12 +13,14 @@ typedef FullScreenRequestCallback = void Function(
 
 class InheritedDetailPageState extends InheritedWidget {
   final ValueNotifier<bool> enableFullScreenNotifier;
+  final ValueNotifier<bool> isInSharedCollectionNotifier;
   // Cannot be const because we accept a ValueNotifier instance at runtime
   // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({
     super.key,
     required super.child,
     required this.enableFullScreenNotifier,
+    required this.isInSharedCollectionNotifier,
   });
 
   static InheritedDetailPageState of(BuildContext context) =>
@@ -66,5 +68,6 @@ class InheritedDetailPageState extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedDetailPageState oldWidget) =>
-      oldWidget.enableFullScreenNotifier != enableFullScreenNotifier;
+      oldWidget.enableFullScreenNotifier != enableFullScreenNotifier ||
+      oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier;
 }
