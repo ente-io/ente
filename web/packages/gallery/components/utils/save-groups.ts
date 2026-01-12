@@ -82,6 +82,17 @@ export interface SaveGroup {
      * - undefined: No specific reason (generic error)
      */
     failureReason?: "network_offline" | "file_error";
+    /**
+     * `true` when the ZIP file is being downloaded from memory to the user's
+     * device. This is only relevant for web downloads where files are first
+     * collected into a ZIP in memory, then saved to the device.
+     */
+    isDownloadingZip?: boolean;
+    /**
+     * The current ZIP part number being processed. Only relevant for web
+     * downloads where files are batched into multiple ZIP parts.
+     */
+    currentPart?: number;
 }
 
 /**

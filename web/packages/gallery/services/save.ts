@@ -312,11 +312,18 @@ class ZipBatcher {
     private usedNames = new Set<string>();
     private baseName: string;
     private maxZipSize: number;
+    private onStateChange?: (isDownloading: boolean, partNumber: number) => void;
 
-    constructor(baseName: string, maxZipSize: number, startingBatchIndex = 1) {
+    constructor(
+        baseName: string,
+        maxZipSize: number,
+        startingBatchIndex = 1,
+        onStateChange?: (isDownloading: boolean, partNumber: number) => void,
+    ) {
         this.baseName = baseName;
         this.maxZipSize = maxZipSize;
         this.batchIndex = startingBatchIndex;
+        this.onStateChange = onStateChange;
     }
 
     /**
@@ -324,6 +331,13 @@ class ZipBatcher {
      * This is useful for tracking progress across retries.
      */
     getNextBatchIndex(): number {
+        return this.batchIndex;
+    }
+
+    /**
+     * Get the current batch index being processed.
+     */
+    getCurrentBatchIndex(): number {
         return this.batchIndex;
     }
 
@@ -341,6 +355,8 @@ class ZipBatcher {
             this.currentBatchSize + size > this.maxZipSize
         ) {
             await this.downloadCurrentBatch();
+            // Notify that we're now preparing a new part
+            this.onStateChange?.(false, this.batchIndex);
         }
 
         // Ensure unique file names within the ZIP
@@ -361,15 +377,20 @@ class ZipBatcher {
     }
 
     private async downloadCurrentBatch(): Promise<void> {
-        const zipBlob = await this.zip.generateAsync({ type: "blob" });
-        const fileLabel =
-            this.currentFileCount === 1
-                ? "1 file"
-                : `${this.currentFileCount} files`;
-        const zipName = `${this.baseName} Part ${this.batchIndex} - ${fileLabel}.zip`;
+        this.onStateChange?.(true, this.batchIndex);
+        try {
+            const zipBlob = await this.zip.generateAsync({ type: "blob" });
+            const fileLabel =
+                this.currentFileCount === 1
+                    ? "1 file"
+                    : `${this.currentFileCount} files`;
+            const zipName = `${this.baseName} Part ${this.batchIndex} - ${fileLabel}.zip`;
 
-        const url = URL.createObjectURL(zipBlob);
-        saveAsFileAndRevokeObjectURL(url, zipName);
+            const url = URL.createObjectURL(zipBlob);
+            saveAsFileAndRevokeObjectURL(url, zipName);
+        } finally {
+            this.onStateChange?.(false, this.batchIndex);
+        }
 
         // Reset for next batch
         this.zip = new JSZip();
@@ -463,7 +484,20 @@ const saveAsZip = async (
     startingBatchIndex = 1,
 ): Promise<number> => {
     const { concurrency, maxZipSize } = getDownloadLimits();
-    const batcher = new ZipBatcher(baseName, maxZipSize, startingBatchIndex);
+    const batcher = new ZipBatcher(
+        baseName,
+        maxZipSize,
+        startingBatchIndex,
+        (isDownloading, partNumber) =>
+            updateSaveGroup((g) => ({
+                ...g,
+                isDownloadingZip: isDownloading,
+                currentPart: partNumber,
+            })),
+    );
+
+    // Set initial part number
+    updateSaveGroup((g) => ({ ...g, currentPart: startingBatchIndex }));
 
     // Queue of files to process
     let fileIndex = 0;

@@ -1,4 +1,5 @@
 import ReplayIcon from "@mui/icons-material/Replay";
+import { Typography } from "@mui/material";
 import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
@@ -7,6 +8,15 @@ import {
 } from "ente-gallery/components/utils/save-groups";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
+
+/** Maximum characters for album name before truncation */
+const MAX_ALBUM_NAME_LENGTH = 20;
+
+/** Truncate album name with ellipsis if it exceeds max length */
+const truncateAlbumName = (name: string): string => {
+    if (name.length <= MAX_ALBUM_NAME_LENGTH) return name;
+    return name.slice(0, MAX_ALBUM_NAME_LENGTH) + "...";
+};
 
 interface DownloadStatusNotificationsProps {
     /**
@@ -101,6 +111,39 @@ export const DownloadStatusNotifications: React.FC<
             failedTitle = `${t("download_failed")} (${group.failed}/${group.total})`;
         }
 
+        // Determine if this is a ZIP download (web with multiple files or live photo)
+        const isZipDownload = !group.downloadDirPath && group.total > 1;
+        const isDesktopOrSingleFile =
+            !!group.downloadDirPath || group.total === 1;
+
+        // Build the title based on download type
+        let progressTitle: string;
+        if (isZipDownload) {
+            const part = group.currentPart ?? 1;
+            progressTitle = group.isDownloadingZip
+                ? t("downloading_part", { part })
+                : t("preparing_part", { part });
+        } else if (isDesktopOrSingleFile) {
+            progressTitle =
+                group.total === 1
+                    ? t("downloading_file")
+                    : t("downloading_files");
+        } else {
+            progressTitle = t("downloading");
+        }
+
+        // Build caption: "X / Y files - Album Name"
+        const truncatedName = truncateAlbumName(group.title);
+        const progress = t("download_progress", {
+            count: group.success + group.failed,
+            total: group.total,
+        });
+        const progressCaption = (
+            <Typography variant="small" sx={{ color: "text.muted" }}>
+                {progress} - {truncatedName}
+            </Typography>
+        );
+
         return (
             <Notification
                 key={group.id}
@@ -115,15 +158,8 @@ export const DownloadStatusNotifications: React.FC<
                         ? failedTitle
                         : isSaveComplete(group)
                           ? t("download_complete")
-                          : group.downloadDirPath || group.total === 1
-                            ? t("downloading_album", { name: group.title })
-                            : t("creating_zip", { name: group.title }),
-                    caption: isSaveComplete(group)
-                        ? group.title
-                        : t("download_progress", {
-                              count: group.success + group.failed,
-                              total: group.total,
-                          }),
+                          : progressTitle,
+                    caption: isSaveComplete(group) ? group.title : progressCaption,
                     onClick: createOnClick(group),
                     endIcon: canRetry ? (
                         <ReplayIcon titleAccess={t("retry")} />
