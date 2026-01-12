@@ -146,7 +146,7 @@ class CollectionListWidget extends StatelessWidget {
           final bool isSelected =
               selectedCollections?.isCollectionSelected(collection) ?? false;
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
             decoration: BoxDecoration(
               border: Border.all(
@@ -166,7 +166,7 @@ class CollectionListWidget extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 12.0),
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
+                      duration: const Duration(milliseconds: 300),
                       switchInCurve: Curves.easeOut,
                       switchOutCurve: Curves.easeIn,
                       child: isSelected
