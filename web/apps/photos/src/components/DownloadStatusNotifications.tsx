@@ -115,7 +115,7 @@ export const DownloadStatusNotifications: React.FC<
                         ? failedTitle
                         : isSaveComplete(group)
                           ? t("download_complete")
-                          : group.downloadDirPath
+                          : group.downloadDirPath || group.total === 1
                             ? t("downloading_album", { name: group.title })
                             : t("creating_zip", { name: group.title }),
                     caption: isSaveComplete(group)
