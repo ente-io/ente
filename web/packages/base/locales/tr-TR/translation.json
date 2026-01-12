@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Bu klasörü görüntülemeyi bırakmak istiyor musunuz?",
     "stop_watching_folder_message": "Mevcut dosyalarınız silinmeyecek, ancak Ente bu klasördeki değişikliklerde bağlantılı Ente albümünü otomatik olarak güncellemeyi durduracaktır.",
     "yes_stop": "Evet, durdur",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "Klasörü değiştir",
     "view_logs": "Kayıtları görüntüle",
     "view_logs_message": "<p>Bu, yaşadığınız sorunu inceleyebilmemiz için bize e-posta ile gönderebileceğiniz hata ayıklama kayıtlarını gösterir.</p><p>Belirli dosyalarla ilgili sorunları takip edebilmemiz için dosya adları da dahil edilecektir.</p>",

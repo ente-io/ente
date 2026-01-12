@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Smettere di osservare la cartella?",
     "stop_watching_folder_message": "I tuoi file esistenti non verranno eliminati, ma Ente smetterà di aggiornare automaticamente l'album Ente collegato a questa cartella.",
     "yes_stop": "Sì, interrompi",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "Cambia Cartella",
     "view_logs": "",
     "view_logs_message": "",
