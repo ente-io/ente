@@ -356,6 +356,7 @@ const LargeFiles: React.FC<LargeFilesProps> = ({
         </Autosizer>
         <BottomBar
             {...{
+                totalCount: largeFiles.length,
                 selectedCount,
                 selectedSize,
                 deleteProgress,
@@ -567,6 +568,7 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
 });
 
 interface BottomBarProps {
+    totalCount: number;
     selectedCount: number;
     selectedSize: number;
     deleteProgress: number | undefined;
@@ -576,6 +578,7 @@ interface BottomBarProps {
 }
 
 const BottomBar: React.FC<BottomBarProps> = ({
+    totalCount,
     selectedCount,
     selectedSize,
     deleteProgress,
@@ -583,7 +586,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
     onSelectAll,
     onDeselectAll,
 }) => {
-    const hasSelection = selectedCount > 0;
+    const allSelected = selectedCount === totalCount;
 
     return (
         <Stack
@@ -608,9 +611,9 @@ const BottomBar: React.FC<BottomBarProps> = ({
                     fontSize: { xs: "0.85rem", sm: "0.9rem" },
                 }}
                 disabled={deleteProgress !== undefined}
-                onClick={hasSelection ? onDeselectAll : onSelectAll}
+                onClick={allSelected ? onDeselectAll : onSelectAll}
             >
-                {hasSelection ? t("deselect_all") : t("select_all")}
+                {allSelected ? t("deselect_all") : t("select_all")}
             </FocusVisibleButton>
             <DeleteButton
                 {...{
@@ -672,10 +675,13 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
                 />
             ) : (
                 <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
-                    <Typography>
+                    <Typography sx={{ fontSize: "inherit" }}>
                         {t("delete_files_button", { count: selectedCount })}
                     </Typography>
-                    <Typography variant="small" fontWeight="regular">
+                    <Typography
+                        sx={{ fontSize: "inherit" }}
+                        fontWeight="regular"
+                    >
                         ({formattedByteSize(selectedSize)})
                     </Typography>
                 </Stack>
