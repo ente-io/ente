@@ -16,6 +16,7 @@ import "package:photos/ui/collections/album/list_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
 import "package:photos/ui/collections/album/new_row_item.dart";
 import "package:photos/ui/collections/album/row_item.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
@@ -44,6 +45,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final SelectedAlbums? selectedAlbums;
   final double scrollBottomSafeArea;
   final bool onlyAllowSelection;
+  final UISectionType? sectionType;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
@@ -57,6 +59,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.selectedAlbums,
     this.scrollBottomSafeArea = 8,
     this.onlyAllowSelection = false,
+    this.sectionType,
   });
 
   @override
@@ -104,12 +107,15 @@ class _CollectionsFlexiGridViewWidgetState
         widget.tag +
         "_" +
         c.id.toString();
+    final bool hasVerifiedLock =
+        widget.sectionType == UISectionType.hiddenCollections;
     // ignore: unawaited_futures
     routeToPage(
       context,
       CollectionPage(
         tagPrefix: tagPrefix,
         CollectionWithThumbnail(c, thumbnail),
+        hasVerifiedLock: hasVerifiedLock,
       ),
     );
   }

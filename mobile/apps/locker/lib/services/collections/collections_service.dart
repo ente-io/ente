@@ -10,7 +10,9 @@ import "package:ente_ui/utils/toast_util.dart";
 import "package:fast_base58/fast_base58.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import 'package:locker/core/errors.dart';
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
@@ -55,13 +57,14 @@ class CollectionService {
   Future<void> init() async {
     _db = CollectionDB.instance;
     _apiClient = CollectionApiClient.instance;
+
+    Bus.instance.on<SignedInEvent>().listen((event) {
+      _logger.info("User signed in, starting initial sync.");
+      _init();
+    });
+
     if (Configuration.instance.hasConfiguredAccount()) {
       await _init();
-    } else {
-      Bus.instance.on<SignedInEvent>().listen((event) {
-        _logger.info("User signed in, starting initial sync.");
-        _init();
-      });
     }
   }
 
@@ -368,7 +371,12 @@ class CollectionService {
         );
       }
     }).catchError((error) {
-      _logger.severe("Failed to initialize collections: $error");
+      if (error is UnauthorizedError) {
+        _logger.info("Session expired, triggering logout");
+        Bus.instance.fire(TriggerLogoutEvent());
+      } else {
+        _logger.severe("Failed to initialize collections: $error");
+      }
     });
     final collections = await _db.getCollections();
     for (final collection in collections) {

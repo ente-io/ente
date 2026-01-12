@@ -18,6 +18,7 @@ import (
 
 const (
 	PublicAccessKey   = "X-Public-Access-ID"
+	PublicAnonUserKey = "X-Public-Anon-User-ID"
 	FileLinkAccessKey = "X-Public-FileLink-Access-ID"
 	CastContext       = "X-Cast-Context"
 )
@@ -133,6 +134,22 @@ func GetAccessTokenJWT(c *gin.Context) string {
 
 func MustGetPublicAccessContext(c *gin.Context) ente.PublicAccessContext {
 	return c.MustGet(PublicAccessKey).(ente.PublicAccessContext)
+}
+
+func SetPublicAnonUserID(c *gin.Context, anonID string) {
+	c.Set(PublicAnonUserKey, anonID)
+}
+
+func GetPublicAnonUserID(c *gin.Context) (*string, bool) {
+	value, ok := c.Get(PublicAnonUserKey)
+	if !ok {
+		return nil, false
+	}
+	if anonID, ok := value.(string); ok {
+		copyID := anonID
+		return &copyID, true
+	}
+	return nil, false
 }
 
 func MustGetFileLinkAccessContext(c *gin.Context) *ente.FileLinkAccessContext {

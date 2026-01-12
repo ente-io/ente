@@ -13,6 +13,9 @@ import "model.dart";
 
 class FlagService {
   static const int _uploadV2Flag = 1 << 0;
+  static const int _commentsFlag =
+      1 << 1; // Keep in sync with server/ente/remotestore.go
+  static const int _backupOptionsFlag = 1 << 2;
 
   final SharedPreferences _prefs;
   final Dio _enteDio;
@@ -48,9 +51,6 @@ class FlagService {
     return (flags.internalUser || kDebugMode) && !isDisabled;
   }
 
-  bool get enableAdminRole => internalUser;
-  bool get enableDeleteSuggestion => internalUser;
-
   bool get betaUser => flags.betaUser;
 
   bool get internalOrBetaUser => internalUser || betaUser;
@@ -67,7 +67,7 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
-  bool get enableUploadV2 => ((flags.serverApiFlag & _uploadV2Flag) != 0);
+  bool get enableUploadV2 => _isServerFlagEnabled(_uploadV2Flag);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
@@ -83,18 +83,22 @@ class FlagService {
 
   bool get useNativeVideoEditor => true;
 
-  bool get enableOnlyBackupFuturePhotos => internalUser;
+  bool get enableOnlyBackupFuturePhotos =>
+      internalUser || _isServerFlagEnabled(_backupOptionsFlag);
 
   bool get facesTimeline => internalUser;
   bool get ritualsFlag => true;
 
-  bool get pauseStreamDuringUpload => internalUser;
+  bool get stopStreamProcess => internalUser;
 
   bool get streamEnabledByDefault => internalUser;
 
   bool get manualTagFileToPerson => hasGrantedMLConsent;
 
   bool get enableShareePin => true;
+
+  bool get isSocialEnabled =>
+      internalUser || _isServerFlagEnabled(_commentsFlag);
 
   Future<void> tryRefreshFlags() async {
     try {
@@ -168,4 +172,7 @@ class FlagService {
     _prefs.setString("remote_flags", flags.toJson());
     _fetch().ignore();
   }
+
+  bool _isServerFlagEnabled(int flagBit) =>
+      (flags.serverApiFlag & flagBit) != 0;
 }

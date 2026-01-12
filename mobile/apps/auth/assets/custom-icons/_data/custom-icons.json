@@ -55,6 +55,10 @@
       "title": "Amazon"
     },
     {
+      "title": "Amica",
+      "slug": "amica"
+    },
+    {
       "title": "Amtrak",
       "slug": "amtrak"
     },
@@ -414,6 +418,10 @@
         "Colorado PEAK",
         "myColorado"
       ]
+    },
+    {
+      "title": "Computershare",
+      "slug": "computershare"
     },
     {
       "title": "ConfigCat"
@@ -1747,6 +1755,9 @@
       ]
     },
     {
+      "title": "TorBox"
+    },
+    {
       "title": "TorGuard"
     },
     {
@@ -1818,6 +1829,10 @@
     {
       "title": "Ubuntu One",
       "slug": "ubuntu_one"
+    },
+    {
+      "title": "UCF",
+      "slug": "ucf"
     },
     {
       "title": "unitedhealthgroup",

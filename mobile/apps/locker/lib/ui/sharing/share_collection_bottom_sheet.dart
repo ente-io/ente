@@ -1,5 +1,7 @@
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/base_bottom_sheet.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
@@ -10,27 +12,36 @@ import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/alert_bottom_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/sharing/add_email_bottom_sheet.dart";
 import "package:locker/utils/collection_actions.dart";
 
-class ShareCollectionBottomSheet extends StatefulWidget {
+Future<void> showShareCollectionSheet(
+  BuildContext context, {
+  required Collection collection,
+}) {
+  return showBaseBottomSheet<void>(
+    context,
+    title: context.l10n.sharedWith,
+    headerSpacing: 20,
+    child: ShareCollectionSheet(collection: collection),
+  );
+}
+
+class ShareCollectionSheet extends StatefulWidget {
   final Collection collection;
 
-  const ShareCollectionBottomSheet({
+  const ShareCollectionSheet({
     super.key,
     required this.collection,
   });
 
   @override
-  State<ShareCollectionBottomSheet> createState() =>
-      _ShareCollectionBottomSheetState();
+  State<ShareCollectionSheet> createState() => _ShareCollectionSheetState();
 }
 
-class _ShareCollectionBottomSheetState
-    extends State<ShareCollectionBottomSheet> {
+class _ShareCollectionSheetState extends State<ShareCollectionSheet> {
   late CollectionActions _collectionActions;
   final ScrollController _scrollController = ScrollController();
 
@@ -58,79 +69,31 @@ class _ShareCollectionBottomSheetState
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(colorScheme, textTheme),
-              const SizedBox(height: 20),
-              _buildShareesList(colorScheme, textTheme),
-              if (_isOwner) ...[
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: GradientButton(
-                    text: context.l10n.addEmail,
-                    onTap: () async {
-                      await showModalBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        isScrollControlled: true,
-                        builder: (context) => AddEmailBottomSheet(
-                          collection: widget.collection,
-                          onShareAdded: () {
-                            if (mounted) {
-                              setState(() {});
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(colorScheme, textTheme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.sharedWith,
-          style: textTheme.largeBold,
-        ),
-        GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.close,
-              size: 20,
-              color: colorScheme.textBase,
+        _buildShareesList(colorScheme, textTheme),
+        if (_isOwner) ...[
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: GradientButton(
+              text: context.l10n.addEmail,
+              onTap: () async {
+                await showAddEmailSheet(
+                  context,
+                  collection: widget.collection,
+                  onShareAdded: () {
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                );
+              },
             ),
           ),
-        ),
+        ],
       ],
     );
   }

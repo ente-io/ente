@@ -32,6 +32,23 @@ extension GroupTypeExtension on GroupType {
     }
   }
 
+  String getLocalizedName(BuildContext context) {
+    switch (this) {
+      case GroupType.day:
+        return AppLocalizations.of(context).groupByDay;
+      case GroupType.week:
+        return AppLocalizations.of(context).groupByWeek;
+      case GroupType.month:
+        return AppLocalizations.of(context).groupByMonth;
+      case GroupType.size:
+        return "Size";
+      case GroupType.year:
+        return AppLocalizations.of(context).groupByYear;
+      case GroupType.none:
+        return "None";
+    }
+  }
+
   bool timeGrouping() {
     return this == GroupType.day ||
         this == GroupType.week ||

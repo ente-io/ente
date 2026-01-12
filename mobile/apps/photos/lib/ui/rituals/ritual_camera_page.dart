@@ -584,58 +584,55 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       backgroundColor: Colors.black,
       body: SafeArea(
         bottom: false,
-        child: Stack(
+        child: Column(
           children: [
-            Positioned.fill(
-              child: _mode == _CameraScreenMode.capture
-                  ? _buildCameraArea(isReady, colorScheme)
-                  : _buildReviewArea(),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: _buildTopBar(textTheme),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _mode == _CameraScreenMode.capture
-                  ? _buildCaptureControls(colorScheme, isReady)
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_captures.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                            child: _ThumbnailStrip(
-                              captures: _captures,
-                              selectedIndex: _selectedIndex,
-                              controller: _thumbScrollController,
-                              onSelect: (index) {
-                                setState(() {
-                                  _selectedIndex = index;
-                                });
-                                _ensurePageVisible(index);
-                                _scrollThumbsToIndex(index);
-                              },
-                              onRemove: _removeCapture,
-                            ),
-                          ),
-                        _buildReviewControls(colorScheme, textTheme),
-                      ],
+            _buildTopBar(textTheme),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: _mode == _CameraScreenMode.capture
+                        ? _buildCameraArea(isReady, colorScheme)
+                        : _buildReviewArea(),
+                  ),
+                  if (_mode == _CameraScreenMode.capture &&
+                      _captures.isNotEmpty)
+                    Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: _ConfirmChip(
+                        count: _captures.length,
+                        onTap: _enterReview,
+                      ),
                     ),
-            ),
-            if (_mode == _CameraScreenMode.capture && _captures.isNotEmpty)
-              Positioned(
-                right: 16,
-                bottom: 161 + MediaQuery.of(context).padding.bottom,
-                child: _ConfirmChip(
-                  count: _captures.length,
-                  onTap: _enterReview,
-                ),
+                ],
               ),
+            ),
+            _mode == _CameraScreenMode.capture
+                ? _buildCaptureControls(colorScheme, isReady)
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_captures.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                          child: _ThumbnailStrip(
+                            captures: _captures,
+                            selectedIndex: _selectedIndex,
+                            controller: _thumbScrollController,
+                            onSelect: (index) {
+                              setState(() {
+                                _selectedIndex = index;
+                              });
+                              _ensurePageVisible(index);
+                              _scrollThumbsToIndex(index);
+                            },
+                            onRemove: _removeCapture,
+                          ),
+                        ),
+                      _buildReviewControls(colorScheme, textTheme),
+                    ],
+                  ),
           ],
         ),
       ),
@@ -744,7 +741,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 ? Size(rawPreviewSize.height, rawPreviewSize.width)
                 : (rawPreviewSize ?? fallbackSize);
         final FittedSizes fittedSizes = applyBoxFit(
-          BoxFit.cover,
+          BoxFit.contain,
           rotatedPreviewSize,
           viewSize,
         );
@@ -767,7 +764,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           children: [
             ClipRect(
               child: FittedBox(
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 child: SizedBox(
                   width: rotatedPreviewSize.width,
                   height: rotatedPreviewSize.height,
@@ -793,7 +790,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 ),
               ),
             ),
-            Positioned.fill(
+            Positioned.fromRect(
+              rect: previewRect,
               child: IgnorePointer(
                 child: CustomPaint(
                   painter: _GridPainter(),
@@ -887,7 +885,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           final capture = _captures[index];
           return Image.file(
             File(capture.path),
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             width: double.infinity,
             height: double.infinity,
           );

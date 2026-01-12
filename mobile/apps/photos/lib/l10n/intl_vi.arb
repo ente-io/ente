@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Xác nhận mã khôi phục của bạn",
   "addViewer": "Thêm người xem",
   "addCollaborator": "Thêm cộng tác viên",
+  "admin": "Quản trị",
+  "admins": "Quản trị viên",
+  "addAdmin": "Thêm quản trị viên",
+  "addMoreAdmins": "Thêm quản trị viên khác",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Quản trị viên và cộng tác viên có thể thêm ảnh. Quản trị viên có thể quản lý ảnh và người tham gia.",
   "addANewEmail": "Thêm một email mới",
   "orPickAnExistingOne": "Hoặc chọn một cái có sẵn",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ.",
@@ -550,6 +555,11 @@
   "removeDuplicatesDesc": "Xem và xóa các tệp bị trùng lặp.",
   "viewLargeFiles": "Tệp lớn",
   "viewLargeFilesDesc": "Xem các tệp đang chiếm nhiều dung lượng nhất.",
+  "deleteSuggestions": "Xoá đề xuất",
+  "deleteSuggestionsDesc": "Xóa những tệp được đề xuất xóa.",
+  "rejectSuggestions": "Từ chối đề xuất",
+  "noDeleteSuggestion": "Không xóa những đề xuất",
+  "youHaveNoFileSuggestedForDeletion": "Bạn không có tệp được đề xuất xóa",
   "noDuplicates": "✨ Không có trùng lặp",
   "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp nào bị trùng để xóa",
   "success": "Thành công",
@@ -584,7 +594,7 @@
     }
   },
   "familyPlans": "Gói gia đình",
-  "referrals": "Giới thiệu",
+  "referrals": "Giới thiệu bạn bè",
   "notifications": "Thông báo",
   "sharedPhotoNotifications": "Ảnh chia sẻ mới",
   "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
@@ -887,6 +897,7 @@
   "clickOnTheOverflowMenu": "• Nhấn vào menu xổ xuống",
   "click": "• Nhấn",
   "nothingToSeeHere": "Ở đây không có gì để xem! 👀",
+  "selectFoldersToBackup": "<action>Chọn các thư mục</action> để xem\nvà sao lưu trên ente.",
   "unarchiveAlbum": "Bỏ lưu trữ album",
   "archiveAlbum": "Lưu trữ album",
   "calculating": "Đang tính toán...",
@@ -1406,11 +1417,60 @@
   "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
   "showPerson": "Hiện người",
   "sort": "Sắp xếp",
+  "recent": "Gần đây",
   "mostRecent": "Mới nhất",
   "mostRelevant": "Liên quan nhất",
   "loadingYourPhotos": "Đang tải ảnh của bạn...",
   "processingImport": "Đang xử lý {folderName}...",
   "personName": "Tên người",
+  "addPerson": "Thêm người",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Thêm vào người",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Vui lòng đặt tên trong mục Mọi người trước",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ những tệp đã tải lên mới có thể được thêm vào",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Không phát hiện khuôn mặt nào, hãy chạm để thêm.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Đã thêm 1 tệp vào {personName}} other {Đã thêm {count} tệp vào {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1tệp đã được liên kết với {personName}} other {{count} tệp đã được liên kết với {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Thêm người mới",
   "addNameOrMerge": "Thêm tên hoặc hợp nhất",
   "mergeWithExisting": "Hợp nhất với người đã có",
@@ -1817,6 +1877,10 @@
   "thisMonth": "Tháng này",
   "thisYear": "Năm nay",
   "groupBy": "Phân nhóm theo",
+  "groupByDay": "Ngày",
+  "groupByWeek": "Tuần",
+  "groupByMonth": "Tháng",
+  "groupByYear": "Năm",
   "faceThumbnailGenerationFailed": "Không thể tạo ảnh thu nhỏ khuôn mặt",
   "fileAnalysisFailed": "Không thể xác định tệp",
   "editAutoAddPeople": "Sửa tự động thêm người",
@@ -1978,14 +2042,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Giới thiệu Nghi thức",
-  "cLDesc1": "Bạn đang lên kế hoạch cho năm 2026? Với Nghi thức, bạn có thể đặt lời nhắc trên Ente Photos và theo dõi tiến trình bằng cách chụp ảnh. Sử dụng cho tập luyện, thói quen ăn uống, những khoảnh khắc hàng ngày với người thân – bất cứ điều gì bạn muốn biến thành thói quen.",
-  "cLTitle2": "Liên kết công khai, giờ dành cho tất cả",
-  "cLDesc2": "Tất cả người dùng Ente trên gói miễn phí giờ đây có thể tạo và chia sẻ liên kết công khai đến ảnh và album. Để ngăn chặn lạm dụng, liên kết sẽ có giới hạn về số người có thể xem.",
-  "cLTitle3": "Gắn thẻ người thủ công",
-  "cLDesc3": "Bạn giờ có thể gắn thẻ người ngay cả khi AI trên thiết bị không phát hiện khuôn mặt. Tiện lợi cho thú cưng, khuôn mặt nhìn thấy một phần, hoặc những khoảnh khắc mà ai đó không thực sự trong ảnh nhưng vẫn nên được bao gồm.",
-  "cLTitle4": "Và hơn thế nữa",
-  "cLDesc4": "Bạn giờ có thể ghim album chia sẻ. Liên kết album hiển thị cho cộng tác viên và người xem để chia sẻ dễ dàng hơn. Chúng tôi đã sửa một số lỗi vuốt trên iOS và cập nhật chế độ xem ảnh, bao gồm biểu tượng yêu thích mới (chuẩn bị cho các tính năng sắp tới).",
+  "cLTitle1": "Bình luận và phản ứng",
+  "cLDesc1": "Chúng tôi giới thiệu tính năng bình luận và phản ứng trên ảnh được chia sẻ. Bạn có thể phản ứng hoặc bình luận về một bức ảnh bằng cách mở nó và sử dụng các hành động ở phía dưới. Tất cả bình luận và phản ứng đến sẽ hiển thị trên tab Đã chia sẻ.",
+  "cLTitle2": "Quản trị viên cho album",
+  "cLDesc2": "Bạn giờ đây có thể chỉ định một người dùng Ente khác làm quản trị viên album của bạn. Với quyền này, họ có thể thêm người xem và cộng tác viên khác, xóa ảnh khỏi album và thậm chí đề xuất người tham gia xóa ảnh của họ.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2145,17 +2205,22 @@
   "ritualAlbumNotSet": "Album chưa đặt tên",
   "ritualOpenCameraTooltip": "Mở camera thói quen",
   "ritualEditorLabel": "Trình chỉnh sửa thói quen",
-  "ritualNew": "Thói quen mới",
+  "ritualNew": "Tạo thói quen mới",
+  "ritualCreateNewTitle": "Tạo thói quen mới",
   "ritualEdit": "Sửa thói quen",
-  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterPrompt": "Tên thói quen",
   "ritualEnterDescription": "Vui lòng nhập mô tả",
+  "ritualChooseDaysLabel": "Chọn ngày cho thói quen",
   "ritualDayLabel": "Ngày",
   "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
   "ritualTimeLabel": "Thời gian",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Lưu thói quen",
+  "ritualCreateAction": "Tạo thói quen",
   "ritualUpdate": "Cập nhật thói quen",
   "ritualSelectAlbumTitle": "Chọn album",
+  "ritualChooseAlbumLabel": "Chọn một album",
+  "ritualSendReminderLabel": "Gửi lời nhắc",
   "ritualSearchOrCreate": "Tìm kiếm hoặc tạo mới",
   "ritualNoAlbumsYet": "Chưa có album nào",
   "ritualNoMatchingAlbums": "Không có album trùng khớp",
@@ -2173,6 +2238,6 @@
   "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
   "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
   "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
-  "ritualEmojiUseAction": "Sử dụng",
+  "ritualEmojiUseAction": "Dùng",
   "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
 }

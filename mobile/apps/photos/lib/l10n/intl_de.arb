@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Bestätige deinen Wiederherstellungsschlüssel",
   "addViewer": "Album teilen",
   "addCollaborator": "Bearbeiter hinzufügen",
+  "admin": "Administrator",
+  "admins": "Administratoren",
+  "addAdmin": "Administrator hinzufügen",
+  "addMoreAdmins": "Weitere Administratoren hinzufügen",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Administratoren und Bearbeiter können Fotos hinzufügen. Administratoren können auch Fotos und Teilnehmer verwalten.",
   "addANewEmail": "Neue E-Mail-Adresse hinzufügen",
   "orPickAnExistingOne": "Oder eine vorherige auswählen",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bearbeiter können Fotos & Videos zu dem geteilten Album hinzufügen.",
@@ -550,6 +555,11 @@
   "removeDuplicatesDesc": "Überprüfe und lösche Dateien, die exakte Duplikate sind.",
   "viewLargeFiles": "Große Dateien",
   "viewLargeFilesDesc": "Dateien anzeigen, die den meisten Speicherplatz belegen.",
+  "deleteSuggestions": "Vorschläge löschen",
+  "deleteSuggestionsDesc": "Dateien überprüfen, die für die Löschung vorgeschlagen wurden.",
+  "rejectSuggestions": "Vorschläge ablehnen",
+  "noDeleteSuggestion": "Keine Vorschläge zum Löschen",
+  "youHaveNoFileSuggestedForDeletion": "Du hast keine Dateien, die zum Löschen vorgeschlagen wurden",
   "noDuplicates": "✨ Keine Duplikate",
   "youveNoDuplicateFilesThatCanBeCleared": "Du hast keine Duplikate, die gelöscht werden können",
   "success": "Abgeschlossen",
@@ -887,6 +897,7 @@
   "clickOnTheOverflowMenu": "• Klicken Sie auf das Überlaufmenü",
   "click": "• Klick",
   "nothingToSeeHere": "Hier gibt es nichts zu sehen! 👀",
+  "selectFoldersToBackup": "<action>Wähle Ordner</action> zum Anzeigen und\nSichern auf Ente.",
   "unarchiveAlbum": "Album dearchivieren",
   "archiveAlbum": "Album archivieren",
   "calculating": "Wird berechnet...",
@@ -1406,11 +1417,60 @@
   "localSyncErrorMessage": "Es sieht so aus, als ob etwas schiefgelaufen ist, da die lokale Foto-Synchronisierung länger dauert als erwartet. Bitte kontaktiere unser Support-Team",
   "showPerson": "Person anzeigen",
   "sort": "Sortierung",
+  "recent": "Kürzlich",
   "mostRecent": "Neuste",
   "mostRelevant": "Nach Relevanz",
   "loadingYourPhotos": "Lade deine Fotos...",
   "processingImport": "Verarbeite {folderName}...",
   "personName": "Name der Person",
+  "addPerson": "Person hinzufügen",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Zur Person hinzufügen",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Bitte benenne zuerst eine Person in der Personen-Rubrik",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Nur hochgeladene Dateien können zu einer Person hinzugefügt werden",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Keine Gesichter erkannt, tippe zum Hinzufügen.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Eine Datei zu {personName}} other {{count} Dateien zu {personName}}} hinzugefügt",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {Eine Datei ist bereits zu {personName} hinzugefügt} other {{count} Dateien sind bereits zu {personName} hinzugefügt}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Neue Person hinzufügen",
   "addNameOrMerge": "Name hinzufügen oder zusammenführen",
   "mergeWithExisting": "Mit vorhandenem zusammenführen",
@@ -1817,6 +1877,10 @@
   "thisMonth": "Diesen Monat",
   "thisYear": "Dieses Jahr",
   "groupBy": "Gruppieren nach",
+  "groupByDay": "Tag",
+  "groupByWeek": "Woche",
+  "groupByMonth": "Monat",
+  "groupByYear": "Jahr",
   "faceThumbnailGenerationFailed": "Vorschaubilder konnten nicht erstellt werden",
   "fileAnalysisFailed": "Datei konnte nicht analysiert werden",
   "editAutoAddPeople": "Automatisch hinzugefügte Personen bearbeiten",
@@ -1978,14 +2042,10 @@
   "hoorayyyy": "Hurraaaa!",
   "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
   "deletingDash": "Lösche - ",
-  "cLTitle1": "Einführung von Ritualen",
-  "cLDesc1": "Planst du Vorsätze für 2026? Mit Ritualen kannst du eine Erinnerung in Ente Photos setzen und deinen Fortschritt durch Fotos verfolgen. Nutze es für Workouts, Essgewohnheiten, tägliche Momente mit deinen Liebsten – alles, was du zur Gewohnheit machen möchtest.",
-  "cLTitle2": "Öffentliche Links, jetzt für alle",
-  "cLDesc2": "Alle Ente-Nutzer im kostenlosen Tarif können jetzt öffentliche Links zu Fotos und Alben erstellen und teilen. Um Missbrauch zu verhindern, werden Links Grenzen haben, wie viele Personen sie ansehen können.",
-  "cLTitle3": "Personen manuell markieren",
-  "cLDesc3": "Du kannst jetzt Personen markieren, auch wenn unsere On-Device-KI kein Gesicht erkennt. Praktisch für Haustiere, teilweise sichtbare Gesichter oder Momente, in denen jemand nicht wirklich auf dem Foto ist, aber trotzdem einbezogen werden sollte.",
-  "cLTitle4": "Und mehr",
-  "cLDesc4": "Du kannst jetzt geteilte Alben anpinnen. Album-Links sind für Mitarbeiter und Betrachter sichtbar, um das Teilen noch einfacher zu machen. Wir haben einige iOS-Wischfehler behoben und die Fotoansicht aktualisiert, einschließlich eines neuen Favoriten-Symbols (Platz für kommende Funktionen).",
+  "cLTitle1": "Kommentare und Reaktionen",
+  "cLDesc1": "Wir führen Kommentare und Reaktionen für geteilte Fotos ein. Du kannst auf ein Foto reagieren oder es kommentieren, indem du es öffnest und die Aktionen unten verwendest. Alle eingehenden Kommentare und Reaktionen sind im Tab 'Geteilt' sichtbar.",
+  "cLTitle2": "Admin für Alben",
+  "cLDesc2": "Du kannst jetzt einen anderen Ente-Benutzer als Administrator deines Albums zuweisen. Damit kann er weitere Betrachter und Mitarbeiter hinzufügen, Fotos aus Alben entfernen und sogar Teilnehmern vorschlagen, ihre Fotos zu löschen.",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2145,17 +2205,22 @@
   "ritualAlbumNotSet": "Album nicht gesetzt",
   "ritualOpenCameraTooltip": "Ritualkamera öffnen",
   "ritualEditorLabel": "Ritual-Editor",
-  "ritualNew": "Neues Ritual",
+  "ritualNew": "Neues Ritual erstellen",
+  "ritualCreateNewTitle": "Neues Ritual erstellen",
   "ritualEdit": "Ritual bearbeiten",
   "ritualEnterPrompt": "Gib dein Ritual ein",
   "ritualEnterDescription": "Bitte gib eine Beschreibung ein",
+  "ritualChooseDaysLabel": "Tage für Ritual auswählen",
   "ritualDayLabel": "Tag",
   "ritualNotificationsOffHint": "Benachrichtigungen sind ausgeschaltet. Tippe auf einen Tag, um sie einzuschalten.",
   "ritualTimeLabel": "Zeitpunkt",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Ritual speichern",
+  "ritualCreateAction": "Ritual erstellen",
   "ritualUpdate": "Ritual aktualisieren",
   "ritualSelectAlbumTitle": "Album auswählen",
+  "ritualChooseAlbumLabel": "Wähle ein Album",
+  "ritualSendReminderLabel": "Erinnerung senden",
   "ritualSearchOrCreate": "Suchen oder neu erstellen",
   "ritualNoAlbumsYet": "Bisher keine Alben",
   "ritualNoMatchingAlbums": "Keine passenden Alben",

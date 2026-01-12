@@ -155,7 +155,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                               child: AlbumSharesIcons(
                                 padding: const EdgeInsets.only(left: 4, top: 4),
                                 sharees: c.getSharees(),
-                                type: AvatarType.mini,
+                                type: AvatarType.md,
                                 trailingWidget: linkIcon,
                               ),
                             ),

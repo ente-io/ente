@@ -5,6 +5,7 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
@@ -69,6 +70,7 @@ void main() async {
   debugRepaintRainbowEnabled = false;
   await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
+  FFmpegKitConfig.init().ignore();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 

@@ -1732,12 +1732,8 @@
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
   "pastYearsMemories": "Tidligere års minner",
-  "cLTitle1": "Introduserer Ritualer",
-  "cLDesc1": "Planlegger du nyttårsforsetter for 2026? Med Ritualer kan du sette en påminnelse i Ente Photos og spore fremgangen din ved å ta bilder. Bruk det til trening, spisevaner, daglige øyeblikk med kjære – alt du vil gjøre til en vane.",
-  "cLTitle2": "Offentlige lenker, nå for alle",
-  "cLDesc2": "Alle Ente-brukere på gratisplanen kan nå opprette og dele offentlige lenker til bilder og album. For å forhindre misbruk vil lenker ha begrensninger på hvor mange som kan se dem.",
-  "cLTitle3": "Merk personer manuelt",
-  "cLDesc3": "Du kan nå merke personer selv når vår AI på enheten ikke oppdager et ansikt. Nyttig for kjæledyr, delvis synlige ansikter, eller øyeblikk der noen ikke faktisk er på bildet men likevel bør inkluderes.",
-  "cLTitle4": "Og mer",
-  "cLDesc4": "Du kan nå feste delte album. Albumlenker er synlige for samarbeidspartnere og seere for å gjøre deling enda enklere. Vi har fikset noen iOS-sveipefeil og oppdatert fotovisningen, inkludert et nytt favorittikon (gjør plass til kommende funksjoner)."
+  "cLTitle1": "Kommentarer og reaksjoner",
+  "cLDesc1": "Vi introduserer kommentarer og reaksjoner på delte bilder. Du kan reagere eller kommentere et bilde ved å åpne det og bruke handlingene nederst. Alle innkommende kommentarer og reaksjoner vil være synlige i Delt-fanen.",
+  "cLTitle2": "Administrator for album",
+  "cLDesc2": "Du kan nå tildele en annen Ente-bruker som administrator av albumet ditt. Med dette kan de legge til andre seere og samarbeidspartnere, fjerne bilder fra album, og til og med foreslå at deltakere sletter bildene sine."
 }

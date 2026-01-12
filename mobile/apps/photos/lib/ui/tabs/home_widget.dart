@@ -1135,8 +1135,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (!permissionService.hasGrantedPermissions()) {
         return false;
       }
-      return !backupPreferenceService.isOnlyNewBackupEnabled &&
-          !LocalSyncService.instance.hasCompletedFirstImport();
+      return !LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
     } else {
       return !LocalSyncService.instance.hasCompletedFirstImport();
     }

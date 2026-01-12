@@ -7,6 +7,12 @@ description: Release notes of recent updates to Ente Auth
 
 A short summary list of changes to the Ente Auth mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v4.4.15 - Dec 2025
+
+- Icon picker
+- New QR code designs
+- Import andOTP backups
+
 ## v4.4.12 - Nov 2025
 
 - Continuous on-device backups

@@ -1,3 +1,4 @@
+import log from "ente-base/log";
 import { resetFileViewerDataSourceOnClose } from "ente-gallery/components/viewer/data-source";
 import {
     videoProcessingSyncIfNeeded,
@@ -115,8 +116,13 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
     // After trash sync, fetch pending removal actions and move affected files
     // to the uncategorized collection. This is gated behind the admin role
     // feature flag since it's related to admin removal functionality.
+    // Wrapped in try-catch since self-hosted servers may not have this endpoint.
     if (settingsSnapshot().isAdminRoleEnabled) {
-        await movePendingRemovalActionsToUncategorized(collections);
+        try {
+            await movePendingRemovalActionsToUncategorized(collections);
+        } catch (e) {
+            log.warn("Failed to process pending removal actions", e);
+        }
     }
     if (didUpdateFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery

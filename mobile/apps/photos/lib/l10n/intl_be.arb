@@ -1978,14 +1978,6 @@
   "hoorayyyy": "Ураааа!",
   "nothingToTidyUpHere": "Адсутнічаюць элементы для ўпарадкавання",
   "deletingDash": "Выдаленне - ",
-  "cLTitle1": "Перайсці да даты",
-  "cLDesc1": "На панэлі інфармацыі аб файле выберыце параметр «Перайсці да даты», каб паглядзець усе фатаграфіі побач з датай файла.",
-  "cLTitle2": "Больш хуткі рэдактар відэа",
-  "cLDesc2": "Рэдактар відэа быў падноўлены, што надзвычайна палепшыла яго хуткасць пры рэдагаванні вялікіх відэа, а таксама абнавіла UX.",
-  "cLTitle3": "Новыя ўспаміны",
-  "cLDesc3": "«Гуллівыя дзеці», «Зімовыя прыгоды», «Неонавыя ночы» і многае іншае.",
-  "cLTitle4": "Галерэя пейзажаў і іншае",
-  "cLDesc4": "Падтрымка альбомнай арыентацыі ў галоўнай галерэі праграмы. Паказваць людзей без звязаных з імі фатаграфій замест іх фільтрацыі. Палепшана выяўленне аспекту відэа пры абмене са знешнімі праграмамі.",
   "closeBy": "Закрыць",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2140,5 +2132,16 @@
   "ritualBadgeNewTitle": "Новае дасягненне",
   "ritualBadgePreparing": "Падрыхтоўка...",
   "ritualStreaksLabel": "Палоскі",
-  "ritualCreateYourOwn": "Стварыце свой уласны рытуал"
+  "ritualCreateYourOwn": "Стварыце свой уласны рытуал",
+  "ritualGetDailyReminders": "Атрымлівайце штодзённыя напаміны",
+  "ritualAlbumNotSet": "Альбом не ўсталяваны",
+  "ritualOpenCameraTooltip": "Адкрыць рытуальную камеру",
+  "ritualEditorLabel": "Рэдактар ​​рытуалаў",
+  "ritualEdit": "Рэдагаваць рытуал",
+  "ritualEnterPrompt": "Увядзіце свой рытуал",
+  "ritualEnterDescription": "Калі ласка, увядзіце апісанне",
+  "ritualDayLabel": "Дзень",
+  "ritualNotificationsOffHint": "Апавяшчэнні выключаны. Націсніце на дзень, каб уключыць іх.",
+  "ritualTimeLabel": "Час",
+  "ritualAlbumLabel": "Альбом"
 }

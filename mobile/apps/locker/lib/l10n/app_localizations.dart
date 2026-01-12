@@ -2518,6 +2518,66 @@ abstract class AppLocalizations {
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
 
+  /// No description provided for @important.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get important;
+
+  /// No description provided for @unimportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Unimportant'**
+  String get unimportant;
+
+  /// No description provided for @removingFromImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing from important...'**
+  String get removingFromImportant;
+
+  /// No description provided for @markingAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking as important...'**
+  String get markingAsImportant;
+
+  /// No description provided for @fileMarkedAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Item marked as important'**
+  String get fileMarkedAsImportant;
+
+  /// No description provided for @fileRemovedFromImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed from important'**
+  String get fileRemovedFromImportant;
+
+  /// Success message when items are marked as important
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item marked as important} other{{count} items marked as important}}'**
+  String filesMarkedAsImportant(int count);
+
+  /// No description provided for @allFilesAlreadyMarkedAsImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'All items are already marked as important'**
+  String get allFilesAlreadyMarkedAsImportant;
+
+  /// Error message when marking items as important fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to mark items as important: {error}'**
+  String failedToMarkFilesAsImportant(String error);
+
+  /// Error message when updating important status fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update important status: {error}'**
+  String failedToUpdateImportantStatus(String error);
+
   /// No description provided for @sorry.
   ///
   /// In en, this message translates to:
@@ -2529,12 +2589,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subscribe'**
   String get subscribe;
-
-  /// No description provided for @subscriptionRequiredForSharing.
-  ///
-  /// In en, this message translates to:
-  /// **'You need a paid subscription to share links'**
-  String get subscriptionRequiredForSharing;
 
   /// No description provided for @sharedWith.
   ///
@@ -2589,6 +2643,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove access'**
   String get removeAccess;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get sessionExpired;
+
+  /// No description provided for @pleaseLoginAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login again'**
+  String get pleaseLoginAgain;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select language'**
+  String get selectLanguage;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
 }
 
 class _AppLocalizationsDelegate

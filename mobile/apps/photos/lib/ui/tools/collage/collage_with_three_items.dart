@@ -4,7 +4,6 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/ui/tools/collage/collage_common_widgets.dart";
 import 'package:photos/ui/tools/collage/collage_item_icon.dart';
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
-import "package:photos/ui/tools/collage/collage_save_button.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
@@ -19,9 +18,11 @@ class CollageWithThreeItems extends StatefulWidget {
     this.second,
     this.third, {
     super.key,
+    this.onControllerReady,
   });
 
   final EnteFile first, second, third;
+  final ValueChanged<WidgetsToImageController>? onControllerReady;
 
   @override
   State<CollageWithThreeItems> createState() => _CollageWithThreeItemsState();
@@ -32,20 +33,45 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems> {
   Variant _variant = Variant.first;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onControllerReady?.call(_widgetsToImageController);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        WidgetsToImage(
-          controller: _widgetsToImageController,
-          child: _getCollage(),
-        ),
-        const Expanded(child: SizedBox()),
-        const CollageLayoutHeading(),
-        _getLayouts(),
-        const Padding(padding: EdgeInsets.all(4)),
-        SaveCollageButton(_widgetsToImageController),
-      ],
+    return SafeArea(
+      top: false,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    WidgetsToImage(
+                      controller: _widgetsToImageController,
+                      child: _getCollage(),
+                    ),
+                    Column(
+                      children: [
+                        const CollageLayoutHeading(),
+                        _getLayouts(),
+                        const Padding(padding: EdgeInsets.all(4)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

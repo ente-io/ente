@@ -385,14 +385,7 @@ class _CollectionSelectionOverlayBarState
         );
       }
 
-      await showModalBottomSheet(
-        context: context,
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
-        isScrollControlled: true,
-        builder: (context) => ShareCollectionBottomSheet(
-          collection: collection,
-        ),
-      );
+      await showShareCollectionSheet(context, collection: collection);
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);

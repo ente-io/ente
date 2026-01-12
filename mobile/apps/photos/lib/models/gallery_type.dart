@@ -276,7 +276,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.archive:
       case GalleryType.uncategorized:
-      case GalleryType.favorite:     
+      case GalleryType.favorite:
       case GalleryType.ownedCollection:
       case GalleryType.searchResults:
       case GalleryType.locationTag:
