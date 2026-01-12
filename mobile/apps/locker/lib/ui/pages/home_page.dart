@@ -623,6 +623,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
+                  isSyncing: !_hasCompletedInitialLoad || _isLoading,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
