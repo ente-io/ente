@@ -543,7 +543,7 @@ export const Upload: React.FC<UploadProps> = ({
                 if (pendingDesktopUploadCollectionName.current) {
                     // Include hidden collections so watch folder syncs add
                     // files to existing hidden albums instead of creating new
-                    // visible ones.
+                    // visible ones
                     uploadFilesToNewCollections(
                         "root",
                         pendingDesktopUploadCollectionName.current,
