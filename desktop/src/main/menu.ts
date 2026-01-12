@@ -109,7 +109,12 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                 ]),
             ],
         },
-        { label: "Help", submenu: [{ label: "Ente Help", click: handleHelp }] },
+        {
+            label: "Help",
+            submenu: [
+                { label: "Ente Help", click: handleHelp },
+            ],
+        },
     ]);
 };
 
