@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Przestać obserwować folder?",
     "stop_watching_folder_message": "Twoje istniejące pliki nie zostaną usunięte, ale Ente przestanie automatycznie aktualizować połączony album Ente przy zmianach w tym folderze.",
     "yes_stop": "Tak, zatrzymaj",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "Zmień Folder",
     "view_logs": "Wyświetl logi",
     "view_logs_message": "<p>Spowoduje to wyświetlenie logów debugowania, które możesz wysłać do nas na e-maila, aby pomóc w debugowaniu Twojego problemu.</p><p>Należy pamiętać, że nazwy plików będą dołączone, aby pomóc w śledzeniu problemów z konkretnymi plikami.</p>",

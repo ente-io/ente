@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "要停止监控文件夹？",
     "stop_watching_folder_message": "您现有的文件不会被删除，但 Ente 将停止自动更新链接的 Ente 相册在此文件夹中的更改。",
     "yes_stop": "是的，停止",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "更改文件夹",
     "view_logs": "查看日志",
     "view_logs_message": "<p>这将显示调试日志，您可以通过电子邮件将其发送给我们以帮助调试您的问题。</p><p>请注意，将包含文件名以帮助跟踪特定文件的问题。</p>",
