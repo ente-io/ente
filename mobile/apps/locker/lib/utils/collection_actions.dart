@@ -36,7 +36,7 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputSheet(
+    final result = await showInputDialogSheet(
       context,
       title: context.l10n.newCollection,
       hintText: context.l10n.enterCollectionName,
