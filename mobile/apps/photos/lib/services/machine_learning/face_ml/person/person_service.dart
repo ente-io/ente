@@ -27,6 +27,7 @@ typedef ManualPersonAssignmentResult = ({
 });
 
 class PersonService {
+  static const Object _attributeNotProvided = Object();
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
@@ -586,22 +587,23 @@ class PersonService {
     bool? isPinned,
     bool? hideFromMemories,
     int? version,
-    String? birthDate,
+    Object? birthDate = _attributeNotProvided,
     String? email,
   }) async {
     final person = (await getPerson(id))!;
-    final updatedPerson = person.copyWith(
-      data: person.data.copyWith(
-        name: name,
-        avatarFaceId: avatarFaceId,
-        isHidden: isHidden,
-        isPinned: isPinned,
-        hideFromMemories: hideFromMemories,
-        version: version,
-        birthDate: birthDate,
-        email: email,
-      ),
+    var updatedData = person.data.copyWith(
+      name: name,
+      avatarFaceId: avatarFaceId,
+      isHidden: isHidden,
+      isPinned: isPinned,
+      hideFromMemories: hideFromMemories,
+      version: version,
+      email: email,
     );
+    if (!identical(birthDate, _attributeNotProvided)) {
+      updatedData = updatedData.copyWith(birthDate: birthDate as String?);
+    }
+    final updatedPerson = person.copyWith(data: updatedData);
     await updatePerson(updatedPerson);
     await refreshPersonCache();
     if (hideFromMemories != null &&
