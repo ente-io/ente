@@ -1859,9 +1859,5 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Komentarze i reakcje",
-  "cLDesc1": "Wprowadzamy komentarze i reakcje na udostępnione zdjęcia. Możesz zareagować lub skomentować zdjęcie, otwierając je i używając akcji na dole. Wszystkie przychodzące komentarze i reakcje będą widoczne w zakładce Udostępnione.",
-  "cLTitle2": "Administrator albumów",
-  "cLDesc2": "Możesz teraz przypisać innego użytkownika Ente jako administratora swojego albumu. Dzięki temu będzie mógł dodawać innych widzów i współpracowników, usuwać zdjęcia z albumów, a nawet sugerować uczestnikom usunięcie ich zdjęć."
+  "deletingDash": "Usuwanie - "
 }
