@@ -39,6 +39,12 @@ class FolderWatcher {
      * we can ignore any file system events that come for it next.
      */
     private deletedFolderPaths: string[] = [];
+    /**
+     * A set of folder paths that were inaccessible in the last accessibility
+     * check. Used to detect when a folder transitions from inaccessible to
+     * accessible (e.g., when an external drive is reconnected).
+     */
+    private previouslyInaccessiblePaths = new Set<string>();
     /** `true` if we are using the uploader. */
     private uploadRunning = false;
     /** `true` if we are temporarily paused to let a user upload go through. */
@@ -96,7 +102,28 @@ class FolderWatcher {
         this.upload = upload;
         this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
+        this.initializeAccessibilityState();
         this.triggerSyncWithDisk();
+    }
+
+    /**
+     * Initialize the accessibility tracking state by capturing which watches
+     * are currently inaccessible. This allows subsequent checkAccessibility
+     * calls to detect when a folder transitions from inaccessible to accessible.
+     */
+    private initializeAccessibilityState() {
+        void this.getWatches().then((watches) => {
+            for (const watch of watches) {
+                if (watch.isAccessible === false) {
+                    this.previouslyInaccessiblePaths.add(watch.folderPath);
+                }
+            }
+            if (this.previouslyInaccessiblePaths.size > 0) {
+                log.info(
+                    `Folder watch: ${this.previouslyInaccessiblePaths.size} folder(s) currently inaccessible`,
+                );
+            }
+        });
     }
 
     /** Return `true` if we are currently using the uploader. */
@@ -144,13 +171,37 @@ class FolderWatcher {
     async checkAccessibility(): Promise<void> {
         try {
             const watches = await this.getWatches();
-            const accessibleWatches = watches.filter(
-                (w) => w.isAccessible !== false,
-            );
 
-            if (accessibleWatches.length > 0 && !this.isPaused) {
+            // Determine which folders are currently inaccessible.
+            const currentlyInaccessiblePaths = new Set<string>();
+            for (const watch of watches) {
+                if (watch.isAccessible === false) {
+                    currentlyInaccessiblePaths.add(watch.folderPath);
+                }
+            }
+
+            // Check if any previously inaccessible folder is now accessible.
+            const newlyAccessiblePaths: string[] = [];
+            for (const path of this.previouslyInaccessiblePaths) {
+                if (!currentlyInaccessiblePaths.has(path)) {
+                    // This folder was inaccessible before but is no longer in
+                    // the inaccessible set. Check if the watch still exists.
+                    const watchStillExists = watches.some(
+                        (w) => w.folderPath === path,
+                    );
+                    if (watchStillExists) {
+                        newlyAccessiblePaths.push(path);
+                    }
+                }
+            }
+
+            // Update our tracking of inaccessible paths for the next check.
+            this.previouslyInaccessiblePaths = currentlyInaccessiblePaths;
+
+            // Only trigger sync if at least one folder became accessible.
+            if (newlyAccessiblePaths.length > 0 && !this.isPaused) {
                 log.info(
-                    `Folder watch: ${accessibleWatches.length} accessible folder(s), triggering sync`,
+                    `Folder watch: ${newlyAccessiblePaths.length} folder(s) became accessible (${newlyAccessiblePaths.join(", ")}), triggering sync`,
                 );
                 this.triggerSyncWithDisk();
             }
