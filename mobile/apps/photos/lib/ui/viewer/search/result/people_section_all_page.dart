@@ -531,14 +531,12 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           return CustomScrollView(slivers: slivers);
         } else {
           final filteredNormalFaces = _filterFaces(normalFaces);
-          final filteredExtraFaces =
-              _isSearching ? <GenericSearchResult>[] : extraFaces;
-          final showExtraFaces = _showingAllFaces &&
-              filteredExtraFaces.isNotEmpty &&
-              !_isSearching;
-          if (_isLoaded &&
-              filteredNormalFaces.isEmpty &&
-              (!showExtraFaces || filteredExtraFaces.isEmpty)) {
+          final filteredExtraFaces = _filterFaces(extraFaces);
+          final hasResults = _isSearching
+              ? filteredNormalFaces.isNotEmpty || filteredExtraFaces.isNotEmpty
+              : filteredNormalFaces.isNotEmpty ||
+                  (!widget.namedOnly && filteredExtraFaces.isNotEmpty);
+          if (_isLoaded && !hasResults) {
             slivers.add(
               SliverFillRemaining(
                 child: Center(
@@ -558,31 +556,13 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
 
-          slivers.addAll(
-            [
-              (!userDismissedPersonGallerySuggestion &&
-                      !widget.namedOnly &&
-                      !_isSearching)
-                  ? SliverToBoxAdapter(
-                      child: Dismissible(
-                        key: const Key("personGallerySuggestionAll"),
-                        direction: DismissDirection.horizontal,
-                        onDismissed: (direction) {
-                          setState(() {
-                            userDismissedPersonGallerySuggestion = true;
-                          });
-                        },
-                        child: PersonGallerySuggestion(
-                          person: null,
-                          onClose: () {
-                            setState(() {
-                              userDismissedPersonGallerySuggestion = true;
-                            });
-                          },
-                        ),
-                      ),
-                    )
-                  : const SliverToBoxAdapter(child: SizedBox.shrink()),
+          if (_isSearching) {
+            final searchResults = [
+              ...filteredNormalFaces,
+              ...filteredExtraFaces,
+            ];
+            final defaultFaces = filteredNormalFaces.toSet();
+            slivers.add(
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   horizontalEdgePadding,
@@ -599,17 +579,18 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                         itemSize / (itemSize + (24 * textScaleFactor)),
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    childCount: filteredNormalFaces.length,
+                    childCount: searchResults.length,
                     (context, index) {
+                      final result = searchResults[index];
                       return !widget.namedOnly
                           ? SelectablePersonSearchExample(
-                              searchResult: filteredNormalFaces[index],
+                              searchResult: result,
                               size: itemSize,
                               selectedPeople: widget.selectedPeople!,
-                              isDefaultFace: true,
+                              isDefaultFace: defaultFaces.contains(result),
                             )
                           : PersonSearchExample(
-                              searchResult: filteredNormalFaces[index],
+                              searchResult: result,
                               size: itemSize,
                               selectedPeople: widget.selectedPeople!,
                             );
@@ -617,12 +598,38 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                   ),
                 ),
               ),
-              if (_showMoreLessOption)
-                SliverToBoxAdapter(child: _buildShowMoreOrLessButton(context)),
+            );
+            slivers.add(
               const SliverToBoxAdapter(
                 child: SizedBox(height: 16),
               ),
-              if (showExtraFaces)
+            );
+          } else {
+            final showExtraFaces =
+                _showingAllFaces && filteredExtraFaces.isNotEmpty;
+            slivers.addAll(
+              [
+                (!userDismissedPersonGallerySuggestion && !widget.namedOnly)
+                    ? SliverToBoxAdapter(
+                        child: Dismissible(
+                          key: const Key("personGallerySuggestionAll"),
+                          direction: DismissDirection.horizontal,
+                          onDismissed: (direction) {
+                            setState(() {
+                              userDismissedPersonGallerySuggestion = true;
+                            });
+                          },
+                          child: PersonGallerySuggestion(
+                            person: null,
+                            onClose: () {
+                              setState(() {
+                                userDismissedPersonGallerySuggestion = true;
+                              });
+                            },
+                          ),
+                        ),
+                      )
+                    : const SliverToBoxAdapter(child: SizedBox.shrink()),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
                     horizontalEdgePadding,
@@ -639,17 +646,17 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                           itemSize / (itemSize + (24 * textScaleFactor)),
                     ),
                     delegate: SliverChildBuilderDelegate(
-                      childCount: filteredExtraFaces.length,
+                      childCount: filteredNormalFaces.length,
                       (context, index) {
                         return !widget.namedOnly
                             ? SelectablePersonSearchExample(
-                                searchResult: filteredExtraFaces[index],
+                                searchResult: filteredNormalFaces[index],
                                 size: itemSize,
                                 selectedPeople: widget.selectedPeople!,
-                                isDefaultFace: false,
+                                isDefaultFace: true,
                               )
                             : PersonSearchExample(
-                                searchResult: filteredExtraFaces[index],
+                                searchResult: filteredNormalFaces[index],
                                 size: itemSize,
                                 selectedPeople: widget.selectedPeople!,
                               );
@@ -657,12 +664,55 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     ),
                   ),
                 ),
-              if (showExtraFaces)
+                if (_showMoreLessOption)
+                  SliverToBoxAdapter(
+                    child: _buildShowMoreOrLessButton(context),
+                  ),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 16),
                 ),
-            ],
-          );
+                if (showExtraFaces)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      horizontalEdgePadding,
+                      16,
+                      horizontalEdgePadding,
+                      16,
+                    ),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        mainAxisSpacing: gridPadding,
+                        crossAxisSpacing: gridPadding,
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio:
+                            itemSize / (itemSize + (24 * textScaleFactor)),
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        childCount: filteredExtraFaces.length,
+                        (context, index) {
+                          return !widget.namedOnly
+                              ? SelectablePersonSearchExample(
+                                  searchResult: filteredExtraFaces[index],
+                                  size: itemSize,
+                                  selectedPeople: widget.selectedPeople!,
+                                  isDefaultFace: false,
+                                )
+                              : PersonSearchExample(
+                                  searchResult: filteredExtraFaces[index],
+                                  size: itemSize,
+                                  selectedPeople: widget.selectedPeople!,
+                                );
+                        },
+                      ),
+                    ),
+                  ),
+                if (showExtraFaces)
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 16),
+                  ),
+              ],
+            );
+          }
           return CustomScrollView(slivers: slivers);
         }
       },

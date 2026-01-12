@@ -9,6 +9,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
@@ -80,6 +81,7 @@ class AddFilesToPersonPage extends StatefulWidget {
 
 class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
   late Future<List<GenericSearchResult>> _personsFuture;
+  String _searchQuery = "";
 
   @override
   void initState() {
@@ -88,6 +90,32 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
     _personsFuture = widget.initialPersons != null
         ? Future.value(widget.initialPersons!)
         : AddFilesToPersonPage.loadNamedPersons();
+  }
+
+  List<GenericSearchResult> _filterPersons(
+    List<GenericSearchResult> persons,
+  ) {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) {
+      return persons;
+    }
+    return persons
+        .where((person) => person.name().toLowerCase().contains(query))
+        .toList();
+  }
+
+  void _updateSearchQuery(String value) {
+    setState(() {
+      _searchQuery = value;
+    });
+  }
+
+  void _clearSearchQuery() {
+    if (_searchQuery.isNotEmpty) {
+      setState(() {
+        _searchQuery = "";
+      });
+    }
   }
 
   @override
@@ -100,29 +128,56 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
     const gridPadding = 16.0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).addPerson),
-        centerTitle: false,
-      ),
       body: FutureBuilder<List<GenericSearchResult>>(
         future: _personsFuture,
         builder: (context, snapshot) {
+          final slivers = <Widget>[
+            SearchableAppBar(
+              title: Text(AppLocalizations.of(context).addPerson),
+              onSearch: _updateSearchQuery,
+              onSearchClosed: _clearSearchQuery,
+              centerTitle: false,
+              searchIconPadding: const EdgeInsets.fromLTRB(
+                12,
+                12,
+                horizontalEdgePadding,
+                12,
+              ),
+            ),
+          ];
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: EnteLoadingWidget());
+            slivers.add(
+              const SliverFillRemaining(
+                child: Center(child: EnteLoadingWidget()),
+              ),
+            );
+            return CustomScrollView(slivers: slivers);
           } else if (snapshot.hasError) {
             AddFilesToPersonPage._logger.severe(
               "Failed to load persons for manual tagging",
               snapshot.error,
               snapshot.stackTrace,
             );
-            return const Center(child: Icon(Icons.error_outline_rounded));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Text(AppLocalizations.of(context).noResultsFound),
+            slivers.add(
+              const SliverFillRemaining(
+                child: Center(child: Icon(Icons.error_outline_rounded)),
+              ),
             );
+            return CustomScrollView(slivers: slivers);
           }
 
-          final results = snapshot.data!;
+          final persons = snapshot.data ?? [];
+          final results = _filterPersons(persons);
+          if (results.isEmpty) {
+            slivers.add(
+              SliverFillRemaining(
+                child: Center(
+                  child: Text(AppLocalizations.of(context).noResultsFound),
+                ),
+              ),
+            );
+            return CustomScrollView(slivers: slivers);
+          }
           final screenWidth = MediaQuery.of(context).size.width;
           final estimatedCount = (screenWidth / 100).floor();
           final crossAxisCount = estimatedCount > 0 ? estimatedCount : 1;
@@ -132,38 +187,37 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
               crossAxisCount;
 
           final bottomPadding = MediaQuery.paddingOf(context).bottom;
-          return CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalEdgePadding,
-                  16,
-                  horizontalEdgePadding,
-                  16 + bottomPadding,
+          slivers.add(
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalEdgePadding,
+                16,
+                horizontalEdgePadding,
+                16 + bottomPadding,
+              ),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  mainAxisSpacing: gridPadding,
+                  crossAxisSpacing: gridPadding,
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: itemSize / (itemSize + textHeight),
                 ),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    mainAxisSpacing: gridPadding,
-                    crossAxisSpacing: gridPadding,
-                    crossAxisCount: crossAxisCount,
-                    childAspectRatio: itemSize / (itemSize + textHeight),
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    childCount: results.length,
-                    (context, index) {
-                      final person = results[index];
-                      return _ManualPersonGridTile(
-                        result: person,
-                        size: itemSize,
-                        labelHeight: textHeight,
-                        onTap: () => _onPersonSelected(person),
-                      );
-                    },
-                  ),
+                delegate: SliverChildBuilderDelegate(
+                  childCount: results.length,
+                  (context, index) {
+                    final person = results[index];
+                    return _ManualPersonGridTile(
+                      result: person,
+                      size: itemSize,
+                      labelHeight: textHeight,
+                      onTap: () => _onPersonSelected(person),
+                    );
+                  },
                 ),
               ),
-            ],
+            ),
           );
+          return CustomScrollView(slivers: slivers);
         },
       ),
     );
