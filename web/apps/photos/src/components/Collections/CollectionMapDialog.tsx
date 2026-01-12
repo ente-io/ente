@@ -975,10 +975,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
-                        {t("no_geotagged_photos", {
-                            defaultValue:
-                                "No photos found with location information",
-                        })}
+                        {t("no_geotagged_photos")}
                     </Typography>
                 </CenteredBox>
             );
@@ -1371,7 +1368,9 @@ function CollectionSidebar({
                                 variant="small"
                                 sx={{ color: "text.muted", fontSize: "14px" }}
                             >
-                                {collectionSummary.fileCount} memories
+                                {t("photos_count", {
+                                    count: collectionSummary.fileCount,
+                                })}
                                 {visibleDate && ` · ${visibleDate}`}
                             </Typography>
                         </Box>
@@ -1429,16 +1428,20 @@ function CollectionSidebar({
                                     onClose={onClose}
                                 />
                             )}
-                            <Typography variant="body" sx={{ fontWeight: 600 }}>
-                                {t("no_photos_found_here", {
-                                    defaultValue: "No photos found here",
-                                })}
-                            </Typography>
-                            <Typography variant="small" color="text.secondary">
-                                {t("zoom_out_to_see_photos", {
-                                    defaultValue: "Zoom out to see photos",
-                                })}
-                            </Typography>
+                            <EmptyStateMessage>
+                                <Typography
+                                    variant="body"
+                                    sx={{ fontWeight: 600 }}
+                                >
+                                    {t("no_photos_found_here")}
+                                </Typography>
+                                <Typography
+                                    variant="small"
+                                    color="text.secondary"
+                                >
+                                    {t("zoom_out_to_see_photos")}
+                                </Typography>
+                            </EmptyStateMessage>
                         </EmptyState>
                     )}
                 </FileListContainer>
@@ -1899,7 +1902,9 @@ const MapCover = React.memo(function MapCover({
 
                 <CoverContentContainer>
                     <CoverTitle>{name}</CoverTitle>
-                    <CoverSubtitle>{totalCount} memories</CoverSubtitle>
+                    <CoverSubtitle>
+                        {t("photos_count", { count: totalCount })}
+                    </CoverSubtitle>
                 </CoverContentContainer>
             </CoverImageContainer>
         </CoverContainer>
@@ -2077,14 +2082,26 @@ const CenteredBoxContainer = styled(Box)({
 
 const EmptyStateContainer = styled(Box)(({ theme }) => ({
     minHeight: "100%",
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    paddingTop: 0,
+    paddingBottom: theme.spacing(4),
+    color: theme.vars.palette.text.secondary,
+    overflow: "auto",
+}));
+
+const EmptyStateMessage = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
-    paddingTop: 0,
-    paddingBottom: theme.spacing(4),
-    color: theme.vars.palette.text.secondary,
     gap: theme.spacing(1),
-    overflow: "auto",
 }));
