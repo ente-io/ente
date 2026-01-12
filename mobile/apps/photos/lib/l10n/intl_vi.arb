@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Cho phép ghép album",
   "allowAddPhotosDescription": "Cho phép người có liên kết thêm ảnh vào album chia sẻ.",
+  "enableComment": "Bình luận và bày tỏ cảm xúc",
   "passwordLock": "Khóa bằng mật khẩu",
   "canNotOpenTitle": "Không thể mở album này",
   "canNotOpenBody": "Rất tiếc, album này không thể mở trong ứng dụng.",
@@ -1518,6 +1519,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Chưa thêm quản trị viên} =1 {Đã thêm 1 quản trị viên} other {Đã thêm {count} quản trị viên}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Thêm quản trị viên} =1 {Thêm quản trị viên} other {Thêm quản trị viên}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Quản trị viên có thể quản lý ảnh và người tham gia.",
+  "suggestDeletion": "Đề xuất xóa",
+  "suggestDeletionDescription": "Những ảnh được chọn sẽ bị xóa khỏi album này. Chủ sở hữu ảnh cũng sẽ nhận được đề xuất xem xét và xóa ảnh.",
+  "deleteSuggestionSent": "Đã gửi đề xuất xóa",
   "accountIsAlreadyConfigured": "Tài khoản đã được cấu hình.",
   "sessionIdMismatch": "Mã phiên không khớp",
   "@sessionIdMismatch": {
@@ -2042,10 +2067,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Bình luận và phản ứng",
-  "cLDesc1": "Chúng tôi giới thiệu tính năng bình luận và phản ứng trên ảnh được chia sẻ. Bạn có thể phản ứng hoặc bình luận về một bức ảnh bằng cách mở nó và sử dụng các hành động ở phía dưới. Tất cả bình luận và phản ứng đến sẽ hiển thị trên tab Đã chia sẻ.",
-  "cLTitle2": "Quản trị viên cho album",
-  "cLDesc2": "Bạn giờ đây có thể chỉ định một người dùng Ente khác làm quản trị viên album của bạn. Với quyền này, họ có thể thêm người xem và cộng tác viên khác, xóa ảnh khỏi album và thậm chí đề xuất người tham gia xóa ảnh của họ.",
+  "cLTitle1": "Bình luận và bày tỏ cảm xúc",
+  "cLDesc1": "Chúng tôi đang triển khai tính năng bình luận và bày tỏ cảm xúc trên ảnh được chia sẻ. Bạn có thể bày tỏ cảm xúc hoặc bình luận về một bức ảnh bằng cách mở ảnh đó và sử dụng các thao tác ở phía dưới. Tất cả các bình luận và bày tỏ cảm xúc đến sẽ hiển thị trên tab Đã chia sẻ.",
+  "cLTitle2": "Người quản lý album",
+  "cLDesc2": "Giờ đây, bạn có thể chỉ định một người dùng Ente khác làm quản trị viên cho album của mình. Với tính năng này, họ sẽ có thể thêm người xem và cộng tác viên khác, xóa ảnh khỏi album, và thậm chí đề xuất người tham gia xóa ảnh của họ.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2239,5 +2264,137 @@
   "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
   "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
   "ritualEmojiUseAction": "Dùng",
-  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
+  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn.",
+  "feed": "Bảng tin",
+  "likedYourPhoto": "Đã thích một ảnh",
+  "commentedOnYourPhoto": "Đã bình luận một ảnh",
+  "repliedToYourComment": "Đã trả lời một bình luận",
+  "likedYourComment": "Đã thích một bình luận",
+  "likedYourReply": "Đã thích một trả lời",
+  "and1Other": "và một người khác",
+  "andXOthers": "và {count} người khác",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Chưa có hoạt động",
+  "like": "Thích",
+  "comments": "Bình luận",
+  "commentHint": "Nói gì đó tử tế!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Trả lời",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Bạn chắc chứ?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Xóa bình luận",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Bình luận của bạn \"{comment}\" sẽ bị xóa vĩnh viễn",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 thích} other{{count} thích}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Chưa có lượt thích",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Không thể tải lượt thích",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Không thể cập nhật lượt thích",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Không thể thích 1 album} other{Không thể thích {count} album}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Không thể tải album",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 album} other{{count} album}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Thích tất cả",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Chọn album để thích video này",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Chọn album để thích ảnh này",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Không thể thích bình luận",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Không thể xóa bình luận",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(đã xóa)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Đang trả lời bạn",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Trả lời đến {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Chưa có bình luận} =1{1 bình luận} other{{count} bình luận}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
