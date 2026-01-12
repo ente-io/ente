@@ -1,5 +1,5 @@
 import ReplayIcon from "@mui/icons-material/Replay";
-import { Typography } from "@mui/material";
+import { keyframes, styled, Typography } from "@mui/material";
 import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
@@ -17,6 +17,21 @@ const truncateAlbumName = (name: string): string => {
     if (name.length <= MAX_ALBUM_NAME_LENGTH) return name;
     return name.slice(0, MAX_ALBUM_NAME_LENGTH) + "...";
 };
+
+/** CSS keyframes for animating ellipsis dots */
+const ellipsisAnimation = keyframes`
+    0% { content: " ."; }
+    33% { content: " .."; }
+    66% { content: " ..."; }
+`;
+
+/** Animated ellipsis using pure CSS - no React re-renders */
+const AnimatedEllipsis = styled("span")`
+    &::after {
+        content: " .";
+        animation: ${ellipsisAnimation} 1.5s steps(1) infinite;
+    }
+`;
 
 interface DownloadStatusNotificationsProps {
     /**
@@ -117,12 +132,17 @@ export const DownloadStatusNotifications: React.FC<
             !!group.downloadDirPath || group.total === 1;
 
         // Build the title based on download type
-        let progressTitle: string;
+        let progressTitle: React.ReactNode;
         if (isZipDownload) {
             const part = group.currentPart ?? 1;
-            progressTitle = group.isDownloadingZip
-                ? t("downloading_part", { part })
-                : t("preparing_part", { part });
+            progressTitle = (
+                <>
+                    {group.isDownloadingZip
+                        ? t("downloading_part", { part })
+                        : t("preparing_part", { part })}
+                    <AnimatedEllipsis />
+                </>
+            );
         } else if (isDesktopOrSingleFile) {
             progressTitle =
                 group.total === 1
