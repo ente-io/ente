@@ -148,8 +148,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
                     key: 'c_${collection.id}',
                     label: _collectionLabel(collection),
                     isSelected: _selectedCollections.contains(collection),
-                    onTap: () {
-                      _onCollectionSelected(collection);
+                    onTap: () async {
+                      await _onCollectionSelected(collection);
                       setBottomSheetState(() {});
                     },
                   ),
@@ -169,8 +169,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
                   ),
                 );
               },
-              onClearAllFilters: () {
-                _clearAllFilters();
+              onClearAllFilters: () async {
+                await _clearAllFilters();
                 setBottomSheetState(() {});
               },
               onClose: () => Navigator.pop(context),
@@ -209,8 +209,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     );
   }
 
-  void _onCollectionSelected(Collection collection) {
-    HapticFeedback.lightImpact();
+  Future<void> _onCollectionSelected(Collection collection) async {
+    await HapticFeedback.lightImpact();
 
     setState(() {
       if (_selectedCollections.contains(collection)) {
@@ -222,18 +222,18 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       }
     });
 
-    _updateFilteredFiles();
+    await _updateFilteredFiles();
   }
 
-  void _clearAllFilters() {
-    HapticFeedback.lightImpact();
+  Future<void> _clearAllFilters() async {
+    await HapticFeedback.lightImpact();
 
     setState(() {
       _selectedCollections.clear();
       _selectionOrder.clear();
     });
 
-    _updateFilteredFiles();
+    await _updateFilteredFiles();
   }
 
   void _handleCollectionUpdates() {

@@ -84,7 +84,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
       backgroundColor: colorScheme.backgroundBase,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

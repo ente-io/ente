@@ -78,7 +78,7 @@ class CustomLockerAppBar extends StatelessWidget
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
