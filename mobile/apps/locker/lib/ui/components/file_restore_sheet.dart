@@ -31,7 +31,7 @@ class FileRestoreDialog extends StatefulWidget {
 
 class _FileRestoreDialogState extends State<FileRestoreDialog> {
   final Set<int> _selectedCollectionIds = <int>{};
-  late List<Collection> _availableCollections;
+  List<Collection> _availableCollections = [];
 
   @override
   void initState() {

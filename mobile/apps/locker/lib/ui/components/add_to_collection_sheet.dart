@@ -31,7 +31,7 @@ class AddToCollectionDialog extends StatefulWidget {
 
 class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
   final Set<int> _selectedCollectionIds = <int>{};
-  late List<Collection> _availableCollections;
+  List<Collection> _availableCollections = [];
 
   @override
   void initState() {
