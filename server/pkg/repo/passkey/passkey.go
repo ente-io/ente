@@ -152,12 +152,17 @@ func (r *Repository) CreateBeginRegistrationData(user *ente.User) (options *prot
 	// This is necessary for Android to show third-party password managers (1Password, Bitwarden, etc.)
 	// in the Credential Manager UI during passkey registration. Without this, Android falls back to
 	// the legacy FIDO2 API which only offers Google Password Manager.
-	authSelection := protocol.AuthenticatorSelection{
-		ResidentKey:        protocol.ResidentKeyRequirementRequired,
-		RequireResidentKey: protocol.ResidentKeyRequired(),
-		UserVerification:   protocol.VerificationPreferred,
+	// This feature is currently enabled only for internal users (@ente.io email addresses).
+	if strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
+		authSelection := protocol.AuthenticatorSelection{
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			RequireResidentKey: protocol.ResidentKeyRequired(),
+			UserVerification:   protocol.VerificationPreferred,
+		}
+		options, session, err = r.webAuthnInstance.BeginRegistration(passkeyUser, webauthn.WithAuthenticatorSelection(authSelection))
+	} else {
+		options, session, err = r.webAuthnInstance.BeginRegistration(passkeyUser)
 	}
-	options, session, err = r.webAuthnInstance.BeginRegistration(passkeyUser, webauthn.WithAuthenticatorSelection(authSelection))
 	if err != nil {
 		err = stacktrace.Propagate(err, "")
 		return
