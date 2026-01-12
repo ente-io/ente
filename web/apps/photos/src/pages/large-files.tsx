@@ -146,6 +146,7 @@ const Page: React.FC = () => {
                             onDeselectAll={() =>
                                 dispatch({ type: "deselectAll" })
                             }
+                            filter={state.filter}
                         />
                     );
                 }
@@ -325,6 +326,7 @@ interface LargeFilesProps {
     onDeleteFiles: () => void;
     onSelectAll: () => void;
     onDeselectAll: () => void;
+    filter: LargeFileFilter;
 }
 
 const BOTTOM_BAR_HEIGHT = 64;
@@ -339,6 +341,7 @@ const LargeFiles: React.FC<LargeFilesProps> = ({
     onDeleteFiles,
     onSelectAll,
     onDeselectAll,
+    filter,
 }) => (
     <Box sx={{ flex: 1, position: "relative", overflow: "hidden" }}>
         <Autosizer>
@@ -363,6 +366,7 @@ const LargeFiles: React.FC<LargeFilesProps> = ({
                 onDeleteFiles,
                 onSelectAll,
                 onDeselectAll,
+                filter,
             }}
         />
     </Box>
@@ -575,6 +579,7 @@ interface BottomBarProps {
     onDeleteFiles: () => void;
     onSelectAll: () => void;
     onDeselectAll: () => void;
+    filter: LargeFileFilter;
 }
 
 const BottomBar: React.FC<BottomBarProps> = ({
@@ -585,8 +590,20 @@ const BottomBar: React.FC<BottomBarProps> = ({
     onDeleteFiles,
     onSelectAll,
     onDeselectAll,
+    filter,
 }) => {
     const allSelected = selectedCount === totalCount;
+
+    const selectAllLabel = useMemo(() => {
+        switch (filter) {
+            case "photos":
+                return t("select_all_photos");
+            case "videos":
+                return t("select_all_videos");
+            default:
+                return t("select_all");
+        }
+    }, [filter]);
 
     return (
         <Stack
@@ -607,13 +624,13 @@ const BottomBar: React.FC<BottomBarProps> = ({
         >
             <FocusVisibleButton
                 sx={{
-                    width: { xs: 125, sm: 140 },
+                    width: { xs: 150, sm: 170 },
                     fontSize: { xs: "0.85rem", sm: "0.9rem" },
                 }}
                 disabled={deleteProgress !== undefined}
                 onClick={allSelected ? onDeselectAll : onSelectAll}
             >
-                {allSelected ? t("deselect_all") : t("select_all")}
+                {allSelected ? t("deselect_all") : selectAllLabel}
             </FocusVisibleButton>
             <DeleteButton
                 {...{
