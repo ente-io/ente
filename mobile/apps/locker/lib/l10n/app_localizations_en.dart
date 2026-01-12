@@ -124,6 +124,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionCannotBeDeleted => 'This collection cannot be deleted';
 
   @override
+  String get collectionCannotBeEdited => 'This collection cannot be edited';
+
+  @override
+  String get collectionCannotBeShared => 'This collection cannot be shared';
+
+  @override
   String get deleteCollection => 'Delete collection';
 
   @override
