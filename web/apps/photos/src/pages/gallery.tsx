@@ -136,6 +136,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
+import watcher from "services/watch";
 import {
     getSelectedFiles,
     performFileOp,
@@ -452,7 +453,10 @@ const Page: React.FC = () => {
             );
 
             if (electron) {
-                electron.onMainWindowFocus(() => remotePull({ silent: true }));
+                electron.onMainWindowFocus(() => {
+                    remotePull({ silent: true });
+                    void watcher.checkAccessibility();
+                });
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         })();
