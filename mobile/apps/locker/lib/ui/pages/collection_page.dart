@@ -473,7 +473,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.all(16.0),
             child: _displayedFiles.isEmpty
                 ? Center(
                     child: EmptyStateWidget(

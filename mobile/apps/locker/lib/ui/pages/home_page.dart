@@ -20,6 +20,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/states/user_details_state.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
@@ -674,34 +675,25 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildBody() {
-    final colorScheme = getEnteColorScheme(context);
     if (_error != null) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 200,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: colorScheme.warning400,
-                  size: 64,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  style: TextStyle(color: colorScheme.warning400),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _loadCollections(),
-                  child: Text(context.l10n.retry),
-                ),
-              ],
-            ),
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              EmptyStateWidget(
+                assetPath: 'assets/empty_state.png',
+                title: context.l10n.somethingWentWrong,
+                subtitle: _error!,
+                showBorder: false,
+              ),
+              const SizedBox(height: 20),
+              GradientButton(
+                onTap: _loadCollections,
+                text: context.l10n.retry,
+              ),
+            ],
           ),
         ),
       );
