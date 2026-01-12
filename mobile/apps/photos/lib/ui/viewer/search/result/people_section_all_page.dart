@@ -17,6 +17,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_widget.dart";
+import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
@@ -32,7 +33,10 @@ import "package:photos/utils/navigation_util.dart";
 class PeopleSectionAllPage extends StatefulWidget {
   const PeopleSectionAllPage({
     super.key,
+    this.startInSearchMode = false,
   });
+
+  final bool startInSearchMode;
 
   @override
   State<PeopleSectionAllPage> createState() => _PeopleSectionAllPageState();
@@ -49,12 +53,10 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
         final hasSelection = _selectedPeople.personIds.isNotEmpty;
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(SectionType.face.sectionTitle(context)),
-            centerTitle: false,
-          ),
           body: PeopleSectionAllSelectionWrapper(
             selectedPeople: _selectedPeople,
+            showSearchBar: true,
+            startInSearchMode: widget.startInSearchMode,
           ),
           bottomNavigationBar: hasSelection
               ? PeopleBottomActionBarWidget(
@@ -72,10 +74,14 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
 
 class PeopleSectionAllSelectionWrapper extends StatefulWidget {
   final SelectedPeople selectedPeople;
+  final bool showSearchBar;
+  final bool startInSearchMode;
 
   const PeopleSectionAllSelectionWrapper({
     super.key,
     required this.selectedPeople,
+    this.showSearchBar = false,
+    this.startInSearchMode = false,
   });
 
   @override
@@ -89,6 +95,8 @@ class _PeopleSectionAllSelectionWrapperState
   Widget build(BuildContext context) {
     return PeopleSectionAllWidget(
       selectedPeople: widget.selectedPeople,
+      showSearchBar: widget.showSearchBar,
+      startInSearchMode: widget.startInSearchMode,
     );
   }
 }
@@ -332,10 +340,14 @@ class PeopleSectionAllWidget extends StatefulWidget {
     super.key,
     this.selectedPeople,
     this.namedOnly = false,
+    this.showSearchBar = false,
+    this.startInSearchMode = false,
   });
 
   final SelectedPeople? selectedPeople;
   final bool namedOnly;
+  final bool showSearchBar;
+  final bool startInSearchMode;
 
   @override
   State<PeopleSectionAllWidget> createState() => _PeopleSectionAllWidgetState();
@@ -350,8 +362,45 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool _isLoaded = false;
   bool _isInitialLoad = true;
   bool userDismissedPersonGallerySuggestion = false;
+  String _searchQuery = "";
 
-  bool get _showMoreLessOption => !widget.namedOnly && extraFaces.isNotEmpty;
+  bool get _isSearching => _searchQuery.trim().isNotEmpty;
+
+  bool get _showMoreLessOption =>
+      !_isSearching && !widget.namedOnly && extraFaces.isNotEmpty;
+
+  List<GenericSearchResult> _filterFaces(
+    List<GenericSearchResult> faces,
+  ) {
+    if (!_isSearching) {
+      return faces;
+    }
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) {
+      return faces;
+    }
+    return faces.where((face) {
+      final personId = face.params[kPersonParamID] as String?;
+      if (personId == null || personId.isEmpty) {
+        return false;
+      }
+      return face.name().toLowerCase().contains(query);
+    }).toList();
+  }
+
+  void _updateSearchQuery(String value) {
+    setState(() {
+      _searchQuery = value;
+    });
+  }
+
+  void _clearSearchQuery() {
+    if (_searchQuery.isNotEmpty) {
+      setState(() {
+        _searchQuery = "";
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -452,17 +501,55 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     return FutureBuilder<List<GenericSearchResult>>(
       future: sectionData,
       builder: (context, snapshot) {
+        final slivers = <Widget>[
+          if (widget.showSearchBar)
+            SearchableAppBar(
+              title: Text(SectionType.face.sectionTitle(context)),
+              autoActivateSearch: widget.startInSearchMode,
+              onSearch: _updateSearchQuery,
+              onSearchClosed: _clearSearchQuery,
+              centerTitle: false,
+              searchIconPadding:
+                  const EdgeInsets.fromLTRB(12, 12, horizontalEdgePadding, 12),
+            ),
+        ];
         if (!_isLoaded &&
             snapshot.connectionState == ConnectionState.waiting &&
             _isInitialLoad) {
-          return const Center(child: EnteLoadingWidget());
-        } else if (snapshot.hasError) {
-          return const Center(child: Icon(Icons.error_outline_rounded));
-        } else if (normalFaces.isEmpty && _isLoaded) {
-          return Center(
-            child: Text(AppLocalizations.of(context).noResultsFound + '.'),
+          slivers.add(
+            const SliverFillRemaining(
+              child: Center(child: EnteLoadingWidget()),
+            ),
           );
+          return CustomScrollView(slivers: slivers);
+        } else if (snapshot.hasError) {
+          slivers.add(
+            const SliverFillRemaining(
+              child: Center(child: Icon(Icons.error_outline_rounded)),
+            ),
+          );
+          return CustomScrollView(slivers: slivers);
         } else {
+          final filteredNormalFaces = _filterFaces(normalFaces);
+          final filteredExtraFaces =
+              _isSearching ? <GenericSearchResult>[] : extraFaces;
+          final showExtraFaces = _showingAllFaces &&
+              filteredExtraFaces.isNotEmpty &&
+              !_isSearching;
+          if (_isLoaded &&
+              filteredNormalFaces.isEmpty &&
+              (!showExtraFaces || filteredExtraFaces.isEmpty)) {
+            slivers.add(
+              SliverFillRemaining(
+                child: Center(
+                  child: Text(
+                    AppLocalizations.of(context).noResultsFound + '.',
+                  ),
+                ),
+              ),
+            );
+            return CustomScrollView(slivers: slivers);
+          }
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
 
@@ -471,9 +558,11 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
 
-          return CustomScrollView(
-            slivers: [
-              (!userDismissedPersonGallerySuggestion && !widget.namedOnly)
+          slivers.addAll(
+            [
+              (!userDismissedPersonGallerySuggestion &&
+                      !widget.namedOnly &&
+                      !_isSearching)
                   ? SliverToBoxAdapter(
                       child: Dismissible(
                         key: const Key("personGallerySuggestionAll"),
@@ -510,17 +599,17 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                         itemSize / (itemSize + (24 * textScaleFactor)),
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    childCount: normalFaces.length,
+                    childCount: filteredNormalFaces.length,
                     (context, index) {
                       return !widget.namedOnly
                           ? SelectablePersonSearchExample(
-                              searchResult: normalFaces[index],
+                              searchResult: filteredNormalFaces[index],
                               size: itemSize,
                               selectedPeople: widget.selectedPeople!,
                               isDefaultFace: true,
                             )
                           : PersonSearchExample(
-                              searchResult: normalFaces[index],
+                              searchResult: filteredNormalFaces[index],
                               size: itemSize,
                               selectedPeople: widget.selectedPeople!,
                             );
@@ -533,7 +622,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               const SliverToBoxAdapter(
                 child: SizedBox(height: 16),
               ),
-              if (_showingAllFaces)
+              if (showExtraFaces)
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
                     horizontalEdgePadding,
@@ -550,17 +639,17 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                           itemSize / (itemSize + (24 * textScaleFactor)),
                     ),
                     delegate: SliverChildBuilderDelegate(
-                      childCount: extraFaces.length,
+                      childCount: filteredExtraFaces.length,
                       (context, index) {
                         return !widget.namedOnly
                             ? SelectablePersonSearchExample(
-                                searchResult: extraFaces[index],
+                                searchResult: filteredExtraFaces[index],
                                 size: itemSize,
                                 selectedPeople: widget.selectedPeople!,
                                 isDefaultFace: false,
                               )
                             : PersonSearchExample(
-                                searchResult: extraFaces[index],
+                                searchResult: filteredExtraFaces[index],
                                 size: itemSize,
                                 selectedPeople: widget.selectedPeople!,
                               );
@@ -568,12 +657,13 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     ),
                   ),
                 ),
-              if (_showingAllFaces)
+              if (showExtraFaces)
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 16),
                 ),
             ],
           );
+          return CustomScrollView(slivers: slivers);
         }
       },
     );
