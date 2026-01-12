@@ -22,7 +22,7 @@ import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/input_sheet.dart";
-import "package:locker/ui/components/subscription_required_dialog.dart";
+import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -36,7 +36,7 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputDialogSheet(
+    final result = await showInputSheet(
       context,
       title: context.l10n.newCollection,
       hintText: context.l10n.enterCollectionName,

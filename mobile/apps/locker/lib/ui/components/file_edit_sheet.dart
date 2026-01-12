@@ -9,24 +9,24 @@ import 'package:locker/ui/components/form_text_input_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/utils/collection_list_util.dart';
 
-class FileEditDialogResult {
+class FileEditSheetResult {
   final String title;
   final String caption;
   final List<Collection> selectedCollections;
 
-  FileEditDialogResult({
+  FileEditSheetResult({
     required this.title,
     required this.caption,
     required this.selectedCollections,
   });
 }
 
-class FileEditDialog extends StatefulWidget {
+class FileEditSheet extends StatefulWidget {
   final EnteFile file;
   final List<Collection> collections;
   final BuildContext snackBarContext;
 
-  const FileEditDialog({
+  const FileEditSheet({
     super.key,
     required this.file,
     required this.collections,
@@ -34,10 +34,10 @@ class FileEditDialog extends StatefulWidget {
   });
 
   @override
-  State<FileEditDialog> createState() => _FileEditDialogState();
+  State<FileEditSheet> createState() => _FileEditSheetState();
 }
 
-class _FileEditDialogState extends State<FileEditDialog> {
+class _FileEditSheetState extends State<FileEditSheet> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _captionController = TextEditingController();
   final Set<int> _selectedCollectionIds = <int>{};
@@ -120,7 +120,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
 
-    final result = FileEditDialogResult(
+    final result = FileEditSheetResult(
       title: _titleController.text.trim(),
       caption: _captionController.text.trim(),
       selectedCollections: selectedCollections,
@@ -165,18 +165,18 @@ class _FileEditDialogState extends State<FileEditDialog> {
   }
 }
 
-Future<FileEditDialogResult?> showFileEditDialog(
+Future<FileEditSheetResult?> showFileEditSheet(
   BuildContext context, {
   required EnteFile file,
   required List<Collection> collections,
   BuildContext? snackBarContext,
 }) async {
-  return showBaseBottomSheet<FileEditDialogResult>(
+  return showBaseBottomSheet<FileEditSheetResult>(
     context,
     title: context.l10n.editItem,
     headerSpacing: 20,
     isKeyboardAware: true,
-    child: FileEditDialog(
+    child: FileEditSheet(
       file: file,
       collections: collections,
       snackBarContext: snackBarContext ?? context,

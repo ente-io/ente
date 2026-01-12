@@ -7,29 +7,29 @@ import "package:locker/ui/components/collection_selection_widget.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/utils/collection_list_util.dart";
 
-class AddToCollectionDialogResult {
+class AddToCollectionSheetResult {
   final List<Collection> selectedCollections;
 
-  AddToCollectionDialogResult({
+  AddToCollectionSheetResult({
     required this.selectedCollections,
   });
 }
 
-class AddToCollectionDialog extends StatefulWidget {
+class AddToCollectionSheet extends StatefulWidget {
   final List<Collection> collections;
   final BuildContext snackBarContext;
 
-  const AddToCollectionDialog({
+  const AddToCollectionSheet({
     super.key,
     required this.collections,
     required this.snackBarContext,
   });
 
   @override
-  State<AddToCollectionDialog> createState() => _AddToCollectionDialogState();
+  State<AddToCollectionSheet> createState() => _AddToCollectionSheetState();
 }
 
-class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
+class _AddToCollectionSheetState extends State<AddToCollectionSheet> {
   final Set<int> _selectedCollectionIds = <int>{};
   List<Collection> _availableCollections = [];
 
@@ -69,7 +69,7 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
     }
 
     Navigator.of(context).pop(
-      AddToCollectionDialogResult(
+      AddToCollectionSheetResult(
         selectedCollections: selectedCollections,
       ),
     );
@@ -103,17 +103,17 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
   }
 }
 
-Future<AddToCollectionDialogResult?> showAddToCollectionDialog(
+Future<AddToCollectionSheetResult?> showAddToCollectionSheet(
   BuildContext context, {
   required List<Collection> collections,
   BuildContext? snackBarContext,
 }) async {
   final messengerContext = snackBarContext ?? context;
-  return showBaseBottomSheet<AddToCollectionDialogResult>(
+  return showBaseBottomSheet<AddToCollectionSheetResult>(
     context,
     title: context.l10n.addToCollection,
     headerSpacing: 20,
-    child: AddToCollectionDialog(
+    child: AddToCollectionSheet(
       collections: collections,
       snackBarContext: messengerContext,
     ),

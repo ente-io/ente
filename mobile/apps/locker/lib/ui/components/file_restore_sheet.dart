@@ -7,29 +7,29 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 
-class FileRestoreDialogResult {
+class FileRestoreSheetResult {
   final List<Collection> selectedCollections;
 
-  const FileRestoreDialogResult({
+  const FileRestoreSheetResult({
     required this.selectedCollections,
   });
 }
 
-class FileRestoreDialog extends StatefulWidget {
+class FileRestoreSheet extends StatefulWidget {
   final EnteFile file;
   final List<Collection> collections;
 
-  const FileRestoreDialog({
+  const FileRestoreSheet({
     super.key,
     required this.file,
     required this.collections,
   });
 
   @override
-  State<FileRestoreDialog> createState() => _FileRestoreDialogState();
+  State<FileRestoreSheet> createState() => _FileRestoreSheetState();
 }
 
-class _FileRestoreDialogState extends State<FileRestoreDialog> {
+class _FileRestoreSheetState extends State<FileRestoreSheet> {
   final Set<int> _selectedCollectionIds = <int>{};
   List<Collection> _availableCollections = [];
 
@@ -69,7 +69,7 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
     }
 
     Navigator.of(context).pop(
-      FileRestoreDialogResult(selectedCollections: selectedCollections),
+      FileRestoreSheetResult(selectedCollections: selectedCollections),
     );
   }
 
@@ -100,16 +100,16 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
   }
 }
 
-Future<FileRestoreDialogResult?> showFileRestoreDialog(
+Future<FileRestoreSheetResult?> showFileRestoreSheet(
   BuildContext context, {
   required EnteFile file,
   required List<Collection> collections,
 }) {
-  return showBaseBottomSheet<FileRestoreDialogResult>(
+  return showBaseBottomSheet<FileRestoreSheetResult>(
     context,
     title: context.l10n.restore,
     headerSpacing: 20,
-    child: FileRestoreDialog(
+    child: FileRestoreSheet(
       file: file,
       collections: collections,
     ),

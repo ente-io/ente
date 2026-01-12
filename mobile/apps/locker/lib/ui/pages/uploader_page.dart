@@ -69,7 +69,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
 
       // Navigate to upload screen to get collection selection
       final uploadResult =
-          await Navigator.of(context).push<FileUploadDialogResult>(
+          await Navigator.of(context).push<FileUploadSheetResult>(
         MaterialPageRoute(
           builder: (context) => FileUploadScreen(
             files: files,

@@ -4,7 +4,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/ui/components/gradient_button.dart";
 
-class InputDialogSheet extends StatefulWidget {
+class InputSheet extends StatefulWidget {
   final String title;
   final String hintText;
   final String submitButtonLabel;
@@ -13,7 +13,7 @@ class InputDialogSheet extends StatefulWidget {
   final TextCapitalization textCapitalization;
   final int? maxLength;
 
-  const InputDialogSheet({
+  const InputSheet({
     super.key,
     required this.title,
     required this.hintText,
@@ -25,10 +25,10 @@ class InputDialogSheet extends StatefulWidget {
   });
 
   @override
-  State<InputDialogSheet> createState() => _InputDialogSheetState();
+  State<InputSheet> createState() => _InputSheetState();
 }
 
-class _InputDialogSheetState extends State<InputDialogSheet> {
+class _InputSheetState extends State<InputSheet> {
   late final TextEditingController _textController;
   bool _isSubmitting = false;
   bool _isInputValid = false;
@@ -140,7 +140,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
   }
 }
 
-Future<dynamic> showInputDialogSheet(
+Future<dynamic> showInputSheet(
   BuildContext context, {
   required String title,
   required String hintText,
@@ -155,7 +155,7 @@ Future<dynamic> showInputDialogSheet(
     title: title,
     headerSpacing: 20,
     isKeyboardAware: true,
-    child: InputDialogSheet(
+    child: InputSheet(
       title: title,
       hintText: hintText,
       submitButtonLabel: submitButtonLabel,

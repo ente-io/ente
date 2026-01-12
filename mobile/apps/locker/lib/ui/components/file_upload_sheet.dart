@@ -13,22 +13,22 @@ import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/utils/file_icon_utils.dart';
 import 'package:path/path.dart' as path;
 
-class FileUploadDialogResult {
+class FileUploadSheetResult {
   final String note;
   final List<Collection> selectedCollections;
 
-  FileUploadDialogResult({
+  FileUploadSheetResult({
     required this.note,
     required this.selectedCollections,
   });
 }
 
-class FileUploadDialog extends StatefulWidget {
+class FileUploadSheet extends StatefulWidget {
   final File file;
   final List<Collection> collections;
   final Collection? selectedCollection;
 
-  const FileUploadDialog({
+  const FileUploadSheet({
     super.key,
     required this.file,
     required this.collections,
@@ -36,10 +36,10 @@ class FileUploadDialog extends StatefulWidget {
   });
 
   @override
-  State<FileUploadDialog> createState() => _FileUploadDialogState();
+  State<FileUploadSheet> createState() => _FileUploadSheetState();
 }
 
-class _FileUploadDialogState extends State<FileUploadDialog> {
+class _FileUploadSheetState extends State<FileUploadSheet> {
   final TextEditingController _noteController = TextEditingController();
   final Set<int> _selectedCollectionIds = <int>{};
   List<Collection> _availableCollections = [];
@@ -88,7 +88,7 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
       return;
     }
 
-    final result = FileUploadDialogResult(
+    final result = FileUploadSheetResult(
       note: _noteController.text.trim(),
       selectedCollections: selectedCollections,
     );
@@ -164,18 +164,18 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
   }
 }
 
-Future<FileUploadDialogResult?> showFileUploadDialog(
+Future<FileUploadSheetResult?> showFileUploadSheet(
   BuildContext context, {
   required File file,
   required List<Collection> collections,
   Collection? selectedCollection,
 }) async {
-  return showBaseBottomSheet<FileUploadDialogResult>(
+  return showBaseBottomSheet<FileUploadSheetResult>(
     context,
     title: context.l10n.upload,
     headerSpacing: 20,
     isKeyboardAware: true,
-    child: FileUploadDialog(
+    child: FileUploadSheet(
       file: file,
       collections: collections,
       selectedCollection: selectedCollection,

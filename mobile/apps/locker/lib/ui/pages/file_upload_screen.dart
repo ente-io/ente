@@ -196,7 +196,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                                   (c) => _selectedCollectionIds.contains(c.id),
                                 )
                                 .toList();
-                            final result = FileUploadDialogResult(
+                            final result = FileUploadSheetResult(
                               note: '',
                               selectedCollections: selectedCollections,
                             );

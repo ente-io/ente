@@ -15,8 +15,8 @@ import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/file_edit_sheet.dart";
-import "package:locker/ui/components/share_link_dialog.dart";
-import "package:locker/ui/components/subscription_required_dialog.dart";
+import "package:locker/ui/components/share_link_sheet.dart";
+import "package:locker/ui/components/subscription_required_sheet.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -60,7 +60,7 @@ class FileActions {
 
     final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 
-    final result = await showFileEditDialog(
+    final result = await showFileEditSheet(
       context,
       file: file,
       collections: editableCollections,

@@ -538,7 +538,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       'to add files to.',
     );
 
-    final result = await showAddToCollectionDialog(
+    final result = await showAddToCollectionSheet(
       context,
       collections: dedupedCollections,
       snackBarContext: context,
