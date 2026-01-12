@@ -1,3 +1,10 @@
+import {
+    Download01Icon,
+    Loading03Icon,
+    Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ReplayIcon from "@mui/icons-material/Replay";
 import { keyframes, styled, Typography } from "@mui/material";
 import { useBaseContext } from "ente-base/context";
@@ -10,7 +17,7 @@ import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 
 /** Maximum characters for album name before truncation */
-const MAX_ALBUM_NAME_LENGTH = 20;
+const MAX_ALBUM_NAME_LENGTH = 30;
 
 /** Truncate album name with ellipsis if it exceeds max length */
 const truncateAlbumName = (name: string): string => {
@@ -18,20 +25,24 @@ const truncateAlbumName = (name: string): string => {
     return name.slice(0, MAX_ALBUM_NAME_LENGTH) + "...";
 };
 
-/** CSS keyframes for animating ellipsis dots */
-const ellipsisAnimation = keyframes`
-    0% { content: " ."; }
-    33% { content: " .."; }
-    66% { content: " ..."; }
+/** CSS keyframes for spinning animation */
+const spinAnimation = keyframes`
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 `;
 
-/** Animated ellipsis using pure CSS - no React re-renders */
-const AnimatedEllipsis = styled("span")`
-    &::after {
-        content: " .";
-        animation: ${ellipsisAnimation} 1.5s steps(1) infinite;
-    }
+/** Spinning loading icon wrapper */
+const SpinningIconWrapper = styled("span")`
+    display: inline-flex;
+    animation: ${spinAnimation} 2s linear infinite;
 `;
+
+/** Spinning loading icon */
+const SpinningIcon: React.FC = () => (
+    <SpinningIconWrapper>
+        <HugeiconsIcon icon={Loading03Icon} size={28} />
+    </SpinningIconWrapper>
+);
 
 interface DownloadStatusNotificationsProps {
     /**
@@ -114,77 +125,105 @@ export const DownloadStatusNotifications: React.FC<
 
     return saveGroups.map((group, index) => {
         const hasErrors = isSaveCompleteWithErrors(group);
+        const isComplete = isSaveComplete(group);
         const canRetry = hasErrors && !!group.retry;
-
-        // Show specific error message based on failure reason
-        let failedTitle: string;
-        if (group.failureReason === "network_offline") {
-            failedTitle = `${t("download_failed_network_offline")} (${group.failed}/${group.total})`;
-        } else if (group.failureReason === "file_error") {
-            failedTitle = `${t("download_failed_file_error")} (${group.failed}/${group.total})`;
-        } else {
-            failedTitle = `${t("download_failed")} (${group.failed}/${group.total})`;
-        }
 
         // Determine if this is a ZIP download (web with multiple files or live photo)
         const isZipDownload = !group.downloadDirPath && group.total > 1;
         const isDesktopOrSingleFile =
             !!group.downloadDirPath || group.total === 1;
 
-        // Build the title based on download type
-        let progressTitle: React.ReactNode;
-        if (isZipDownload) {
+        // Build the status text for the caption
+        let statusText: React.ReactNode;
+        if (hasErrors) {
+            // Show specific error message based on failure reason
+            if (group.failureReason === "network_offline") {
+                statusText = t("download_failed_network_offline");
+            } else if (group.failureReason === "file_error") {
+                statusText = t("download_failed_file_error");
+            } else {
+                statusText = t("download_failed");
+            }
+        } else if (isComplete) {
+            statusText = t("download_complete");
+        } else if (isZipDownload) {
             const part = group.currentPart ?? 1;
-            progressTitle = (
-                <>
-                    {group.isDownloadingZip
-                        ? t("downloading_part", { part })
-                        : t("preparing_part", { part })}
-                    <AnimatedEllipsis />
-                </>
-            );
+            statusText = group.isDownloadingZip
+                ? t("downloading_part", { part })
+                : t("preparing_part", { part });
         } else if (isDesktopOrSingleFile) {
-            progressTitle =
+            statusText =
                 group.total === 1
                     ? t("downloading_file")
                     : t("downloading_files");
         } else {
-            progressTitle = t("downloading");
+            statusText = t("downloading");
         }
 
-        // Build caption: "X / Y files - Album Name"
-        const truncatedName = truncateAlbumName(group.title);
+        // Build caption: "Status • X / Y files"
         const progress = t("download_progress", {
             count: group.success + group.failed,
             total: group.total,
         });
-        const progressCaption = (
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                {progress} - {truncatedName}
+        const caption = (
+            <Typography
+                variant="small"
+                sx={{ color: hasErrors ? "white" : "text.muted" }}
+            >
+                {statusText}
+                {!isComplete && <> &bull; {progress}</>}
             </Typography>
         );
+
+        // Determine the start icon based on state
+        let startIcon: React.ReactNode;
+        if (hasErrors) {
+            startIcon = <ErrorOutlineIcon />;
+        } else if (isComplete) {
+            startIcon = <HugeiconsIcon icon={Tick02Icon} size={28} />;
+        } else if (isZipDownload && !group.isDownloadingZip) {
+            // Preparing state - use loading icon
+            startIcon = <SpinningIcon />;
+        } else {
+            // Downloading state
+            startIcon = <HugeiconsIcon icon={Download01Icon} size={28} />;
+        }
+
+        // Title is always the album name (truncated)
+        const truncatedName = truncateAlbumName(group.title);
 
         return (
             <Notification
                 key={group.id}
                 horizontal="left"
-                sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
+                sx={{
+                    "&&": { bottom: `${index * 80 + 20}px` },
+                    width: "min(400px, 100vw)",
+                    borderRadius: "20px",
+                    "& .MuiButton-root": {
+                        borderRadius: "20px",
+                        padding: "16px 16px 16px 20px",
+                    },
+                    "& .MuiIconButton-root": {
+                        width: "40px",
+                        height: "40px",
+                        "& svg": { fontSize: "22px" },
+                    },
+                }}
                 open={true}
                 onClose={createOnClose(group)}
                 keepOpenOnClick
                 attributes={{
                     color: hasErrors ? "critical" : "secondary",
-                    title: hasErrors
-                        ? failedTitle
-                        : isSaveComplete(group)
-                          ? t("download_complete")
-                          : progressTitle,
-                    caption: isSaveComplete(group)
-                        ? group.title
-                        : progressCaption,
+                    startIcon,
+                    title: truncatedName,
+                    caption,
                     onClick: createOnClick(group),
                     endIcon: canRetry ? (
-                        <ReplayIcon titleAccess={t("retry")} />
+                        <ReplayIcon
+                            titleAccess={t("retry")}
+                            sx={{ color: "white" }}
+                        />
                     ) : undefined,
                     onEndIconClick: canRetry
                         ? () => group.retry?.()
