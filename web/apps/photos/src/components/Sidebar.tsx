@@ -1765,14 +1765,14 @@ const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
     }, [onClose, onRootClose]);
 
     const handleDeduplicate = useCallback(() => {
-        handleRootClose();
+        onRootClose();
         void router.push("/duplicates");
-    }, [handleRootClose, router]);
+    }, [onRootClose, router]);
 
     const handleLargeFiles = useCallback(() => {
-        handleRootClose();
+        onRootClose();
         void router.push("/large-files");
-    }, [handleRootClose, router]);
+    }, [onRootClose, router]);
 
     useEffect(() => {
         if (!open || !pendingAction) return;
