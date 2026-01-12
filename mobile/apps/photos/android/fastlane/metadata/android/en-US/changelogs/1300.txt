@@ -1,0 +1,3 @@
+* Comments and reactions
+* Admin role for albums
+* Video streaming improvements
