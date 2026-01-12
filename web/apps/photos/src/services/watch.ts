@@ -369,8 +369,17 @@ class FolderWatcher {
 
             this.activeWatch = watch;
 
-            await this.moveToTrash(removed);
+            try {
+                await this.moveToTrash(removed);
+            } catch (e) {
+                log.error(
+                    "Failed to trash files from watch folder, clearing stale sync entries",
+                    e,
+                );
+            }
 
+            // Always update syncedFiles to remove stale entries, even if
+            // trashing failed. Otherwise we'll keep retrying forever.
             await ensureElectron().watch.updateSyncedFiles(
                 rest,
                 watch.folderPath,
