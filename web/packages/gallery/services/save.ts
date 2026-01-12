@@ -312,7 +312,10 @@ class ZipBatcher {
     private usedNames = new Set<string>();
     private baseName: string;
     private maxZipSize: number;
-    private onStateChange?: (isDownloading: boolean, partNumber: number) => void;
+    private onStateChange?: (
+        isDownloading: boolean,
+        partNumber: number,
+    ) => void;
 
     constructor(
         baseName: string,

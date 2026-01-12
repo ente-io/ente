@@ -159,7 +159,9 @@ export const DownloadStatusNotifications: React.FC<
                         : isSaveComplete(group)
                           ? t("download_complete")
                           : progressTitle,
-                    caption: isSaveComplete(group) ? group.title : progressCaption,
+                    caption: isSaveComplete(group)
+                        ? group.title
+                        : progressCaption,
                     onClick: createOnClick(group),
                     endIcon: canRetry ? (
                         <ReplayIcon titleAccess={t("retry")} />
