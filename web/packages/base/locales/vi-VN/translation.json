@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Dừng theo dõi thư mục?",
     "stop_watching_folder_message": "Các tệp hiện có của bạn sẽ không bị xóa, nhưng Ente sẽ ngừng tự động cập nhật album Ente liên kết khi có thay đổi trong thư mục này.",
     "yes_stop": "Có, dừng lại",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "Thay đổi Thư mục",
     "view_logs": "Xem nhật ký",
     "view_logs_message": "<p>Tải xuống nhật ký lỗi, để bạn có thể gửi qua email cho chúng tôi.</p><p>Lưu ý rằng, trong nhật ký lỗi sẽ bao gồm tên các tệp để giúp theo dõi vấn đề với từng tệp cụ thể.</p>",
