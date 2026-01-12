@@ -57,7 +57,7 @@ export const findLargeFiles = async (
     // Get collections owned by the user.
     const normalCollections = await savedNormalCollections();
     const normalOwnedCollections = normalCollections.filter(
-        ({ owner }) => owner.id == userID,
+        ({ owner }) => owner.id === userID,
     );
     const allowedCollectionIDs = new Set(
         normalOwnedCollections.map(({ id }) => id),
@@ -76,7 +76,7 @@ export const findLargeFiles = async (
         if (!allowedCollectionIDs.has(file.collectionID)) continue;
 
         // Skip files not owned by the user.
-        if (file.ownerID != userID) continue;
+        if (file.ownerID !== userID) continue;
 
         // Skip files already processed (same file in different collection).
         if (seenFileIDs.has(file.id)) continue;
@@ -282,12 +282,20 @@ export const largeFilesReducer = (
         }
 
         case "toggleSelection": {
-            const largeFiles = [...state.largeFiles];
-            const item = largeFiles[action.index]!;
-            item.isSelected = !item.isSelected;
+            const index = action.index;
+            // Bounds check to prevent crashes
+            if (index < 0 || index >= state.largeFiles.length) {
+                return state;
+            }
+            const item = state.largeFiles[index]!;
+            const newIsSelected = !item.isSelected;
+            // Create new array with immutably updated item
+            const largeFiles = state.largeFiles.map((file, i) =>
+                i === index ? { ...file, isSelected: newIsSelected } : file,
+            );
             // Update selectedFileIDs
             const selectedFileIDs = new Set(state.selectedFileIDs);
-            if (item.isSelected) {
+            if (newIsSelected) {
                 selectedFileIDs.add(item.file.id);
             } else {
                 selectedFileIDs.delete(item.file.id);
@@ -304,6 +312,17 @@ export const largeFilesReducer = (
         }
 
         case "deselectAll": {
+            // Only deselect currently visible items, preserve selections for
+            // items not in the current filtered view
+            const visibleFileIDs = new Set(
+                state.largeFiles.map((item) => item.file.id),
+            );
+            const selectedFileIDs = new Set<number>();
+            for (const id of state.selectedFileIDs) {
+                if (!visibleFileIDs.has(id)) {
+                    selectedFileIDs.add(id);
+                }
+            }
             const largeFiles = state.largeFiles.map((item) => ({
                 ...item,
                 isSelected: false,
@@ -313,18 +332,21 @@ export const largeFilesReducer = (
                 largeFiles,
                 selectedCount: 0,
                 selectedSize: 0,
-                selectedFileIDs: new Set(),
+                selectedFileIDs,
             };
         }
 
         case "selectAll": {
+            // Add currently visible items to selection, preserve existing
+            // selections from other filtered views
             const largeFiles = state.largeFiles.map((item) => ({
                 ...item,
                 isSelected: true,
             }));
-            const selectedFileIDs = new Set(
-                largeFiles.map((item) => item.file.id),
-            );
+            const selectedFileIDs = new Set(state.selectedFileIDs);
+            for (const item of largeFiles) {
+                selectedFileIDs.add(item.file.id);
+            }
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
             return {
@@ -346,19 +368,23 @@ export const largeFilesReducer = (
             return { ...state, deleteProgress: undefined };
 
         case "deleteCompleted": {
-            const removedFileIDs = new Set(
-                state.largeFiles
-                    .filter(({ id }) => action.removedIDs.has(id))
-                    .map(({ file }) => file.id),
-            );
-            const largeFiles = state.largeFiles.filter(
-                ({ id }) => !action.removedIDs.has(id),
-            );
-            const selectedFileIDs = new Set(
-                [...state.selectedFileIDs].filter(
-                    (id) => !removedFileIDs.has(id),
-                ),
-            );
+            // Single pass: filter files and collect removed file IDs
+            const largeFiles: LargeFileItem[] = [];
+            const removedFileIDs = new Set<number>();
+            for (const item of state.largeFiles) {
+                if (action.removedIDs.has(item.id)) {
+                    removedFileIDs.add(item.file.id);
+                } else {
+                    largeFiles.push(item);
+                }
+            }
+            // Filter selectedFileIDs removing deleted ones
+            const selectedFileIDs = new Set<number>();
+            for (const id of state.selectedFileIDs) {
+                if (!removedFileIDs.has(id)) {
+                    selectedFileIDs.add(id);
+                }
+            }
             const { selectedCount, selectedSize } =
                 computeSelectedCountAndSize(largeFiles);
             return {

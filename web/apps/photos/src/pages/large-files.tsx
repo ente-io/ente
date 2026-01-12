@@ -69,15 +69,26 @@ const Page: React.FC = () => {
     useRedirectIfNeedsCredentials("/large-files");
 
     useEffect(() => {
+        // Track if this effect is still current to prevent race conditions
+        let isCurrent = true;
+
         dispatch({ type: "analyze" });
         void findLargeFiles(state.filter)
-            .then((largeFiles) =>
-                dispatch({ type: "analysisCompleted", largeFiles }),
-            )
+            .then((largeFiles) => {
+                if (isCurrent) {
+                    dispatch({ type: "analysisCompleted", largeFiles });
+                }
+            })
             .catch((e: unknown) => {
-                log.error("Failed to find large files", e);
-                dispatch({ type: "analysisFailed" });
+                if (isCurrent) {
+                    log.error("Failed to find large files", e);
+                    dispatch({ type: "analysisFailed" });
+                }
             });
+
+        return () => {
+            isCurrent = false;
+        };
     }, [state.filter]);
 
     const handleDeleteFiles = useCallback(() => {
@@ -104,7 +115,7 @@ const Page: React.FC = () => {
                 },
             },
         });
-    }, [state.largeFiles, showMiniDialog, onGenericError]);
+    }, [showMiniDialog, onGenericError]);
 
     const handleOpenViewer = useCallback((index: number) => {
         setCurrentIndex(index);
@@ -129,7 +140,7 @@ const Page: React.FC = () => {
             case "failed":
                 return <LoadFailed />;
             case "completed":
-                if (state.largeFiles.length == 0) {
+                if (state.largeFiles.length === 0) {
                     return <NoLargeFilesFound />;
                 } else {
                     return (
@@ -241,7 +252,12 @@ const Navbar: React.FC<NavbarProps> = ({
                     }}
                 >
                     <IconButton onClick={handleOpenSortMenu}>
-                        <SortIcon />
+                        <SortIcon
+                            sx={{
+                                transform:
+                                    sortOrder === "asc" ? "scaleY(-1)" : "none",
+                            }}
+                        />
                     </IconButton>
                     <Menu
                         anchorEl={sortMenuAnchor}
@@ -526,9 +542,23 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
         null,
     );
     const isLongPress = React.useRef(false);
-    const isTouchDevice =
-        typeof window !== "undefined" &&
-        window.matchMedia("(pointer: coarse)").matches;
+
+    // Memoize touch device detection to avoid media query on every render
+    const isTouchDevice = useMemo(
+        () =>
+            typeof window !== "undefined" &&
+            window.matchMedia("(pointer: coarse)").matches,
+        [],
+    );
+
+    // Cleanup timer on unmount to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (longPressTimer.current) {
+                clearTimeout(longPressTimer.current);
+            }
+        };
+    }, []);
 
     const handleCheckboxChange: React.ChangeEventHandler<HTMLInputElement> = (
         e,
@@ -591,7 +621,6 @@ const GridItem: React.FC<GridItemProps> = memo(({ item, onToggle, onOpen }) => {
                 onClick={(e) => e.stopPropagation()}
             />
             {checked && <SelectedOverlay />}
-            <HoverOverlay className="hover-overlay" $checked={checked} />
         </TileContainer>
     );
 });
@@ -713,7 +742,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
                           color: "rgba(255, 255, 255, 0.5)",
                       },
             }}
-            disabled={selectedCount == 0 || isDeleting}
+            disabled={selectedCount === 0 || isDeleting}
             color="critical"
             onClick={onDeleteFiles}
         >
@@ -842,7 +871,7 @@ const Check = styled("input")(
         display: block; /* Critical for Safari */
         width: 19px;
         height: 19px;
-        background-color: #ddd;
+        background-color: ${theme.vars.palette.grey[300]};
         border-radius: 50%;
         margin: 6px;
         transition: background-color 0.3s ease, opacity 0.3s ease;
@@ -857,7 +886,7 @@ const Check = styled("input")(
         left: 50%;
         width: 5px;
         height: 11px;
-        border: solid #333;
+        border: solid ${theme.vars.palette.grey[800]};
         border-width: 0 2px 2px 0;
         transform: translate(-50%, -60%) rotate(45deg);
         transition: border-color 0.3s ease, opacity 0.3s ease;
@@ -884,7 +913,7 @@ const Check = styled("input")(
     }
 
     &:checked::after {
-        border-color: #ddd;
+        border-color: ${theme.vars.palette.grey[300]};
     }
 `,
 );
@@ -896,17 +925,3 @@ const SelectedOverlay = styled(Overlay)(
     pointer-events: none;
 `,
 );
-
-const HoverOverlay = styled("div")<{ $checked: boolean }>`
-    opacity: 0;
-    left: 0;
-    top: 0;
-    outline: none;
-    height: 40%;
-    width: 100%;
-    position: absolute;
-    pointer-events: none;
-    ${(props) =>
-        !props.$checked &&
-        "background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));"}
-`;
