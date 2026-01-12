@@ -86,6 +86,7 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
           selectedCollectionIds: _selectedCollectionIds,
           onToggleCollection: _toggleCollection,
           onCollectionsUpdated: _onCollectionsUpdated,
+          title: context.l10n.collections,
         ),
         const SizedBox(height: 28),
         SizedBox(

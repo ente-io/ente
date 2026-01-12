@@ -1,5 +1,4 @@
 import 'package:ente_ui/components/base_bottom_sheet.dart';
-import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -131,8 +130,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,12 +147,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
           selectedCollectionIds: _selectedCollectionIds,
           onToggleCollection: _toggleCollection,
           onCollectionsUpdated: _onCollectionsUpdated,
-          titleWidget: Text(
-            context.l10n.collections,
-            style: textTheme.body.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          title: context.l10n.collections,
         ),
         const SizedBox(height: 28),
         SizedBox(

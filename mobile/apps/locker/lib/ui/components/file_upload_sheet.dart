@@ -132,6 +132,7 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
           selectedCollectionIds: _selectedCollectionIds,
           onToggleCollection: _toggleCollection,
           onCollectionsUpdated: _onCollectionsUpdated,
+          title: context.l10n.collections,
         ),
         const SizedBox(height: 16),
         Text(

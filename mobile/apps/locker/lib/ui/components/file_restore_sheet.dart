@@ -84,6 +84,7 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
           selectedCollectionIds: _selectedCollectionIds,
           onToggleCollection: _toggleCollection,
           onCollectionsUpdated: _onCollectionsUpdated,
+          title: context.l10n.collections,
           singleSelectionMode: true,
         ),
         const SizedBox(height: 28),
