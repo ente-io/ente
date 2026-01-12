@@ -1,7 +1,6 @@
 import "dart:convert";
 
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_lock_screen/lock_screen_config.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_confirm_password.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
@@ -11,6 +10,7 @@ import "package:ente_ui/components/text_input_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_svg/flutter_svg.dart";
 
 /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
 /// Set to true when the app requires the user to authenticate before allowing
@@ -69,7 +69,6 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final config = LockScreenConfig.current;
     final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
@@ -81,11 +80,12 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     }
 
     return Scaffold(
-      backgroundColor: config.getBackgroundColor(colorTheme),
+      backgroundColor: colorTheme.backgroundBase,
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
-        backgroundColor: config.getBackgroundColor(colorTheme),
+        backgroundColor: colorTheme.backgroundBase,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           onPressed: () {
             FocusScope.of(context).unfocus();
@@ -96,8 +96,14 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
             color: colorTheme.textBase,
           ),
         ),
-        centerTitle: config.showTitle,
-        title: config.titleWidget,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorTheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _isFormValid,
@@ -117,15 +123,17 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: config.showTitle ? 16.0 : 0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: config.showTitle ? 40 : 0),
-                config.iconBuilder(context, null),
-                SizedBox(height: config.showTitle ? 24 : 0),
+                const SizedBox(height: 40),
+                Image.asset(
+                  'assets/lock_screen_icon.png',
+                  width: 129,
+                  height: 95,
+                ),
+                const SizedBox(height: 24),
                 Text(
                   widget.isChangingLockScreenSettings
                       ? context.strings.enterAppLockPassword

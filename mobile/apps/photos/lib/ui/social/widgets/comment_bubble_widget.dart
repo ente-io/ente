@@ -1,11 +1,13 @@
 import "dart:async";
 
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/comment_deleted_event.dart";
 import "package:photos/extensions/user_extension.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/reaction.dart";
@@ -219,7 +221,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
           _isLiked = previousState;
           _optimisticLikeDelta = previousDelta;
         });
-        showShortToast(context, "Failed to like comment");
+        showShortToast(
+          context,
+          AppLocalizations.of(context).failedToLikeComment,
+        );
       }
       return;
     }
@@ -254,8 +259,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     _overlayController.show();
     _overlayAnimationController.forward();
 
-    // Auto-dismiss after 1s
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    // Auto-dismiss after 700ms
+    Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted && _isAutoHighlight) {
         _hideAutoHighlight();
       }
@@ -299,7 +304,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     await _hideHighlight();
     if (!mounted) return;
 
-    final confirmed = await showDeleteCommentConfirmationDialog(context);
+    final confirmed = await showDeleteCommentConfirmationDialog(
+      context,
+      commentText: widget.comment.data,
+    );
 
     if (confirmed == true) {
       try {
@@ -310,7 +318,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
       } catch (e) {
         _logger.severe("Failed to delete comment", e);
         if (mounted) {
-          showShortToast(context, "Failed to delete comment");
+          showShortToast(
+            context,
+            AppLocalizations.of(context).failedToDeleteComment,
+          );
         }
       }
     }
@@ -363,9 +374,9 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           opacity:
                               (_dragOffset / _replyThreshold).clamp(0.0, 1.0),
                           child: Icon(
-                            Icons.reply,
+                            EnteIcons.reply,
                             color: colorScheme.textMuted,
-                            size: 24,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -600,6 +611,7 @@ class _InlineParentQuote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
 
     if (isLoading) {
@@ -613,12 +625,13 @@ class _InlineParentQuote extends StatelessWidget {
     }
 
     final isParentDeleted = parentComment == null;
-    final parentText = isParentDeleted ? "(deleted)" : parentComment!.data;
+    final parentText =
+        isParentDeleted ? l10n.deletedComment : parentComment!.data;
     final parentUser =
         parentComment != null ? userResolver(parentComment!) : null;
     final parentAuthor = parentComment != null
         ? (parentUser!.id == currentUserID
-            ? 'You'
+            ? l10n.you
             : (parentUser.displayName ?? parentUser.email))
         : null;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;

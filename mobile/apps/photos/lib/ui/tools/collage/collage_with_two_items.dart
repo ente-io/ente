@@ -1,14 +1,16 @@
 import "package:flutter/material.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
-import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file.dart";
 import "package:photos/ui/tools/collage/collage_common_widgets.dart";
-import 'package:photos/ui/tools/collage/collage_item_icon.dart';
+import "package:photos/ui/tools/collage/collage_item_icon.dart";
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
+import "package:photos/ui/tools/collage/collage_swap_mixin.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
   first,
   second,
+  third,
 }
 
 class CollageWithTwoItems extends StatefulWidget {
@@ -17,24 +19,34 @@ class CollageWithTwoItems extends StatefulWidget {
     this.second, {
     super.key,
     this.onControllerReady,
+    this.enableExtendedLayouts = false,
+    this.onSelectionClearSetter,
   });
 
   final EnteFile first, second;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final bool enableExtendedLayouts;
+  final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
   State<CollageWithTwoItems> createState() => _CollageWithTwoItemsState();
 }
 
-class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
+class _CollageWithTwoItemsState extends State<CollageWithTwoItems>
+    with CollageSwapMixin<CollageWithTwoItems> {
   final _widgetsToImageController = WidgetsToImageController();
   Variant _variant = Variant.first;
 
   @override
   void initState() {
     super.initState();
+    initCollageFiles([
+      widget.first,
+      widget.second,
+    ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_widgetsToImageController);
+      widget.onSelectionClearSetter?.call(clearSwapSelection);
     });
   }
 
@@ -96,6 +108,17 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
             });
           },
         ),
+        if (widget.enableExtendedLayouts)
+          CollageLayoutIconButton(
+            child: ThirdVariantIcon(
+              isActive: _variant == Variant.third,
+            ),
+            onTap: () {
+              setState(() {
+                _variant = Variant.third;
+              });
+            },
+          ),
       ],
     );
   }
@@ -104,15 +127,30 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
     switch (_variant) {
       case Variant.first:
         return FirstVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
+          _collageItem(0),
+          _collageItem(1),
         );
       case Variant.second:
         return SecondVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
+          _collageItem(0),
+          _collageItem(1),
+        );
+      case Variant.third:
+        return ThirdVariant(
+          _collageItem(0),
+          _collageItem(1),
         );
     }
+  }
+
+  CollageItemWidget _collageItem(int index) {
+    return CollageItemWidget(
+      collageFiles[index],
+      onTap: () => onCollageItemTapped(index),
+      onLongPress: () => onCollageItemLongPressed(index),
+      isSelected: isSelectedForSwap(index),
+      isSwapActive: isSwapSelectionActive,
+    );
   }
 }
 
@@ -202,6 +240,49 @@ class SecondVariant extends StatelessWidget {
   }
 }
 
+class ThirdVariant extends StatelessWidget {
+  const ThirdVariant(
+    this.first,
+    this.second, {
+    super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
+    this.color = Colors.white,
+  });
+
+  final Widget first, second;
+  final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 3,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 2,
+              mainAxisCellCount: 2,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 2,
+              child: second,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class FirstVariantIcon extends StatelessWidget {
   const FirstVariantIcon({
     super.key,
@@ -214,6 +295,28 @@ class FirstVariantIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
       child: FirstVariant(
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+        color: Colors.transparent,
+      ),
+    );
+  }
+}
+
+class ThirdVariantIcon extends StatelessWidget {
+  const ThirdVariantIcon({
+    super.key,
+    this.isActive = false,
+  });
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollageIconContainerWidget(
+      width: 56,
+      child: ThirdVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,

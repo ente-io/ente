@@ -55,4 +55,8 @@ type GetUserReferralView struct {
 	ClaimedStorage int64 `json:"claimedStorage"`
 	// Indicates if the user is part of a family and is the admin
 	IsFamilyMember bool `json:"isFamilyMember"`
+	// Number of times the user has changed their referral code
+	CodeChangeAttempts int `json:"codeChangeAttempts"`
+	// Remaining number of times the user can change their referral code
+	RemainingCodeChangeAttempts int `json:"remainingCodeChangeAttempts"`
 }

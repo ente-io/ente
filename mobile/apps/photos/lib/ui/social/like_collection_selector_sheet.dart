@@ -1,7 +1,9 @@
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -158,7 +160,10 @@ class _LikeCollectionSelectorSheetState
       _logger.severe("Failed to toggle like", e);
       if (mounted) {
         setState(() => state.isLiked = previousState);
-        showShortToast(context, "Failed to update like");
+        showShortToast(
+          context,
+          AppLocalizations.of(context).failedToUpdateLike,
+        );
       }
     }
   }
@@ -208,10 +213,10 @@ class _LikeCollectionSelectorSheetState
           c.isLiked = false;
         }
       });
-      final msg = failed.length == 1
-          ? "Failed to like 1 album"
-          : "Failed to like ${failed.length} albums";
-      showShortToast(context, msg);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).failedToLikeAlbums(count: failed.length),
+      );
       // Don't close sheet - let user retry
       return;
     }
@@ -235,9 +240,8 @@ class _LikeCollectionSelectorSheetState
         maxHeight: mediaQuery.size.height * _maxHeightFraction,
       ),
       decoration: BoxDecoration(
-        color: isDarkMode
-            ? const Color(0xFF0E0E0E)
-            : colorScheme.backgroundBase,
+        color:
+            isDarkMode ? const Color(0xFF0E0E0E) : colorScheme.backgroundBase,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(28),
         ),
@@ -325,12 +329,13 @@ class _LikeCollectionSelectorSheetState
   }
 
   Widget _buildErrorState() {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Text(
-        "Could not load albums",
+        l10n.couldNotLoadAlbums,
         style: textTheme.smallMuted,
         textAlign: TextAlign.center,
       ),
@@ -351,6 +356,7 @@ class _AlbumsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -361,7 +367,7 @@ class _AlbumsHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "$albumCount ${albumCount == 1 ? 'Album' : 'Albums'}",
+            l10n.albumsCount(count: albumCount),
             style: textTheme.small,
           ),
           GestureDetector(
@@ -377,10 +383,10 @@ class _AlbumsHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Like all", style: textTheme.small),
+                  Text(l10n.likeAll, style: textTheme.small),
                   const SizedBox(width: 10),
                   Icon(
-                    allLiked ? Icons.favorite : Icons.favorite_border,
+                    allLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                     color: allLiked ? _greenHeartColor : colorScheme.textBase,
                     size: 16,
                   ),
@@ -399,23 +405,23 @@ class _TitleSection extends StatelessWidget {
 
   const _TitleSection({required this.isVideo});
 
-  String get _subtitle => isVideo
-      ? "Select the album to like this video"
-      : "Select the album to like this photo";
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+
+    final subtitle =
+        isVideo ? l10n.selectAlbumToLikeVideo : l10n.selectAlbumToLikePhoto;
 
     return Padding(
       padding: const EdgeInsets.only(top: 27, bottom: 9),
       child: Column(
         children: [
-          Text("Like", style: textTheme.h3Bold),
+          Text(l10n.like, style: textTheme.h3Bold),
           const SizedBox(height: 9),
           Text(
-            _subtitle,
+            subtitle,
             style: textTheme.small.copyWith(color: colorScheme.textMuted),
             textAlign: TextAlign.center,
           ),
@@ -437,19 +443,31 @@ class _FileThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 128,
-        height: 128,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: file != null
-              ? ThumbnailWidget(
-                  file!,
-                  thumbnailSize: thumbnailLargeSize,
-                  rawThumbnail: true,
-                )
-              : Container(color: placeholderColor),
-        ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 13, left: 13, right: 13),
+            child: SizedBox(
+              width: 128,
+              height: 128,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: file != null
+                    ? ThumbnailWidget(
+                        file!,
+                        thumbnailSize: thumbnailLargeSize,
+                        rawThumbnail: true,
+                      )
+                    : Container(color: placeholderColor),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Image.asset("assets/select_album_to_like_asset.png"),
+          ),
+        ],
       ),
     );
   }
@@ -505,7 +523,7 @@ class _AlbumListItem extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  state.isLiked ? Icons.favorite : Icons.favorite_border,
+                  state.isLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
                   color: _greenHeartColor,
                   size: 19.2,
                 ),

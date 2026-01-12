@@ -1,9 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
-import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file.dart";
 import "package:photos/ui/tools/collage/collage_common_widgets.dart";
 import "package:photos/ui/tools/collage/collage_item_icon.dart";
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
+import "package:photos/ui/tools/collage/collage_swap_mixin.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
@@ -21,24 +22,36 @@ class CollageWithSixItems extends StatefulWidget {
     this.sixth, {
     super.key,
     this.onControllerReady,
+    this.onSelectionClearSetter,
   });
 
   final EnteFile first, second, third, fourth, fifth, sixth;
   final ValueChanged<WidgetsToImageController>? onControllerReady;
+  final ValueChanged<VoidCallback>? onSelectionClearSetter;
 
   @override
   State<CollageWithSixItems> createState() => _CollageWithSixItemsState();
 }
 
-class _CollageWithSixItemsState extends State<CollageWithSixItems> {
+class _CollageWithSixItemsState extends State<CollageWithSixItems>
+    with CollageSwapMixin<CollageWithSixItems> {
   final _widgetsToImageController = WidgetsToImageController();
   Variant _variant = Variant.first;
 
   @override
   void initState() {
     super.initState();
+    initCollageFiles([
+      widget.first,
+      widget.second,
+      widget.third,
+      widget.fourth,
+      widget.fifth,
+      widget.sixth,
+    ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onControllerReady?.call(_widgetsToImageController);
+      widget.onSelectionClearSetter?.call(clearSwapSelection);
     });
   }
 
@@ -109,26 +122,36 @@ class _CollageWithSixItemsState extends State<CollageWithSixItems> {
     switch (_variant) {
       case Variant.first:
         return FirstVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
-          CollageItemWidget(widget.third),
-          CollageItemWidget(widget.fourth),
-          CollageItemWidget(widget.fifth),
-          CollageItemWidget(widget.sixth),
+          _collageItem(0),
+          _collageItem(1),
+          _collageItem(2),
+          _collageItem(3),
+          _collageItem(4),
+          _collageItem(5),
         );
       case Variant.second:
         return SizedBox(
           width: 320,
           child: SecondVariant(
-            CollageItemWidget(widget.first),
-            CollageItemWidget(widget.second),
-            CollageItemWidget(widget.third),
-            CollageItemWidget(widget.fourth),
-            CollageItemWidget(widget.fifth),
-            CollageItemWidget(widget.sixth),
+            _collageItem(0),
+            _collageItem(1),
+            _collageItem(2),
+            _collageItem(3),
+            _collageItem(4),
+            _collageItem(5),
           ),
         );
     }
+  }
+
+  CollageItemWidget _collageItem(int index) {
+    return CollageItemWidget(
+      collageFiles[index],
+      onTap: () => onCollageItemTapped(index),
+      onLongPress: () => onCollageItemLongPressed(index),
+      isSelected: isSelectedForSwap(index),
+      isSwapActive: isSwapSelectionActive,
+    );
   }
 }
 

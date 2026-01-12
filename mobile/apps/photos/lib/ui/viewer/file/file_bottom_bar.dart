@@ -5,7 +5,6 @@ import "package:collection/collection.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -390,13 +389,7 @@ class FileBottomBarState extends State<FileBottomBar> {
             ),
             onPressed: _toggleReaction,
             icon: Icon(
-              _hasLiked
-                  ? (Platform.isAndroid
-                      ? Icons.favorite
-                      : Icons.favorite_rounded)
-                  : (Platform.isAndroid
-                      ? Icons.favorite_border
-                      : Icons.favorite_border_rounded),
+              _hasLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
               color: _hasLiked ? const Color(0xFF08C225) : Colors.white,
             ),
           ),
@@ -564,8 +557,8 @@ class FileBottomBarState extends State<FileBottomBar> {
           icon: Stack(
             clipBehavior: Clip.none,
             children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedBubbleChat,
+              const Icon(
+                EnteIcons.commentBubbleStroke,
                 color: Colors.white,
               ),
               if (_commentCount > 0)

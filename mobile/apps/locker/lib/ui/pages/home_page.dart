@@ -335,6 +335,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       title: l10n.sessionExpired,
       message: l10n.pleaseLoginAgain,
       assetPath: "assets/warning-grey.png",
+      isDismissible: false,
+      showCloseButton: false,
       buttons: [
         SizedBox(
           width: double.infinity,

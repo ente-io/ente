@@ -2,7 +2,6 @@ import "dart:convert";
 import "dart:io";
 
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_lock_screen/lock_screen_config.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/custom_pin_keypad.dart";
 import "package:ente_lock_screen/ui/lock_screen_confirm_pin.dart";
@@ -13,6 +12,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import 'package:pinput/pinput.dart';
 
 /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
@@ -49,6 +49,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
   bool isPinValid = false;
   int invalidAttemptsCount = 0;
   bool isPlatformDesktop = false;
+
   @override
   void initState() {
     super.initState();
@@ -125,26 +126,26 @@ class _LockScreenPinState extends State<LockScreenPin> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final config = LockScreenConfig.current;
 
     final pinPutDecoration = PinTheme(
-      height: config.pinBoxHeight,
-      width: config.pinBoxWidth,
-      padding: config.pinBoxPadding,
+      height: 48,
+      width: 48,
+      padding: const EdgeInsets.only(top: 6.0),
       decoration: BoxDecoration(
-        color: config.getBackgroundColor(colorTheme),
+        color: colorTheme.backgroundBase,
         border: Border.all(
-          color: config.getBorderColor(colorTheme),
+          color: colorTheme.fillMuted,
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(config.pinBoxBorderRadius),
+        borderRadius: BorderRadius.circular(15.0),
       ),
     );
     return Scaffold(
-      backgroundColor: config.getBackgroundColor(colorTheme),
+      backgroundColor: colorTheme.backgroundBase,
       appBar: AppBar(
-        backgroundColor: config.getBackgroundColor(colorTheme),
+        backgroundColor: colorTheme.backgroundBase,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop(false);
@@ -154,15 +155,21 @@ class _LockScreenPinState extends State<LockScreenPin> {
             color: colorTheme.textBase,
           ),
         ),
-        centerTitle: config.showTitle,
-        title: config.titleWidget,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorTheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
       floatingActionButton: isPlatformDesktop
           ? null
           : CustomPinKeypad(controller: _pinController),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
-        child: _getBody(colorTheme, textTheme, pinPutDecoration, config),
+        child: _getBody(colorTheme, textTheme, pinPutDecoration),
       ),
     );
   }
@@ -171,17 +178,20 @@ class _LockScreenPinState extends State<LockScreenPin> {
     EnteColorScheme colorTheme,
     EnteTextTheme textTheme,
     PinTheme pinPutDecoration,
-    LockScreenConfig config,
   ) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: config.showTitle ? 24.0 : 0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: config.showTitle ? 40 : 0),
-            config.iconBuilder(context, _pinController),
-            SizedBox(height: config.showTitle ? 24 : 0),
+            const SizedBox(height: 40),
+            Image.asset(
+              'assets/lock_screen_icon.png',
+              width: 129,
+              height: 95,
+            ),
+            const SizedBox(height: 24),
             Text(
               widget.isChangingLockScreenSettings
                   ? context.strings.enterAppLockPin
@@ -198,51 +208,42 @@ class _LockScreenPinState extends State<LockScreenPin> {
               defaultPinTheme: pinPutDecoration.copyWith(
                 textStyle: textTheme.h3Bold,
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.getBorderColor(colorTheme),
+                    color: colorTheme.fillMuted,
                   ),
                 ),
               ),
               submittedPinTheme: pinPutDecoration.copyWith(
                 textStyle: textTheme.h3Bold.copyWith(
-                  color: config.showTitle ? colorTheme.primary700 : null,
+                  color: colorTheme.primary700,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.showTitle
-                        ? colorTheme.primary700
-                        : colorTheme.fillBase,
+                    color: colorTheme.primary700,
                   ),
                 ),
               ),
               followingPinTheme: pinPutDecoration.copyWith(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.getBorderColor(colorTheme),
+                    color: colorTheme.fillMuted,
                   ),
                 ),
               ),
               focusedPinTheme: pinPutDecoration.copyWith(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.showTitle
-                        ? colorTheme.fillBase
-                        : config.getBorderColor(colorTheme),
+                    color: colorTheme.fillBase,
                   ),
                 ),
               ),
               errorPinTheme: pinPutDecoration.copyWith(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
                     color: colorTheme.warning400,
                   ),
