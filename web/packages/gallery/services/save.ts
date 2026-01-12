@@ -154,6 +154,10 @@ const downloadAndSave = async (
     const failedFiles: EnteFile[] = [];
     let isDownloading = false;
     let updateSaveGroup: UpdateSaveGroup = () => undefined;
+    // Track the next ZIP batch index across retries so part numbers continue
+    // sequentially (e.g., if initial download creates Parts 1-5 and fails,
+    // retry creates Part 6+ instead of starting over at Part 1).
+    let nextZipBatchIndex = 1;
 
     const downloadFilesDesktop = async (
         filesToDownload: EnteFile[],
@@ -246,7 +250,7 @@ const downloadAndSave = async (
                 }
             } else {
                 // Multiple files or live photo: use ZIP
-                await saveAsZip(
+                nextZipBatchIndex = await saveAsZip(
                     filesToDownload,
                     title,
                     () =>
@@ -263,6 +267,7 @@ const downloadAndSave = async (
                     },
                     canceller,
                     updateSaveGroup,
+                    nextZipBatchIndex,
                 );
             }
 
@@ -303,14 +308,23 @@ class ZipBatcher {
     private zip = new JSZip();
     private currentBatchSize = 0;
     private currentFileCount = 0;
-    private batchIndex = 1;
+    private batchIndex: number;
     private usedNames = new Set<string>();
     private baseName: string;
     private maxZipSize: number;
 
-    constructor(baseName: string, maxZipSize: number) {
+    constructor(baseName: string, maxZipSize: number, startingBatchIndex = 1) {
         this.baseName = baseName;
         this.maxZipSize = maxZipSize;
+        this.batchIndex = startingBatchIndex;
+    }
+
+    /**
+     * Get the next batch index that would be used for the next ZIP file.
+     * This is useful for tracking progress across retries.
+     */
+    getNextBatchIndex(): number {
+        return this.batchIndex;
     }
 
     /**
@@ -352,10 +366,7 @@ class ZipBatcher {
             this.currentFileCount === 1
                 ? "1 file"
                 : `${this.currentFileCount} files`;
-        const zipName =
-            this.batchIndex === 1
-                ? `${this.baseName} (${fileLabel}).zip`
-                : `${this.baseName} (${fileLabel})-${this.batchIndex}.zip`;
+        const zipName = `${this.baseName} Part ${this.batchIndex} - ${fileLabel}.zip`;
 
         const url = URL.createObjectURL(zipBlob);
         saveAsFileAndRevokeObjectURL(url, zipName);
@@ -439,6 +450,8 @@ const downloadFileForZip = async (
  * @param onSuccess Callback invoked after each file is successfully added.
  * @param onError Callback invoked when a file fails to download.
  * @param canceller An AbortController to check for cancellation.
+ * @param startingBatchIndex The batch index to start from (for retries).
+ * @returns The next batch index to use for subsequent ZIPs (useful for retries).
  */
 const saveAsZip = async (
     files: EnteFile[],
@@ -447,9 +460,10 @@ const saveAsZip = async (
     onError: (file: EnteFile, error: unknown) => void,
     canceller: AbortController,
     updateSaveGroup: UpdateSaveGroup,
-): Promise<void> => {
+    startingBatchIndex = 1,
+): Promise<number> => {
     const { concurrency, maxZipSize } = getDownloadLimits();
-    const batcher = new ZipBatcher(baseName, maxZipSize);
+    const batcher = new ZipBatcher(baseName, maxZipSize, startingBatchIndex);
 
     // Queue of files to process
     let fileIndex = 0;
@@ -589,6 +603,8 @@ const saveAsZip = async (
         if (!canceller.signal.aborted) {
             await batcher.flush();
         }
+
+        return batcher.getNextBatchIndex();
     } finally {
         // Clean up event listeners
         window.removeEventListener("offline", handleOffline);

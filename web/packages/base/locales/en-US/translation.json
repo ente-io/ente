@@ -657,6 +657,7 @@
     "unpreviewable_file_message": "This file could not be previewed",
     "download_complete": "Download complete",
     "downloading_album": "Downloading {{name}}",
+    "creating_zip": "Creating ZIP for {{name}}",
     "download_failed": "Download failed",
     "download_failed_network_offline": "Connection lost",
     "download_failed_file_error": "Some files failed",
