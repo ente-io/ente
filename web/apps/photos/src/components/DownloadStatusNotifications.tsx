@@ -17,32 +17,13 @@ import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 
 /** Maximum characters for album name before truncation */
-const MAX_ALBUM_NAME_LENGTH = 30;
+const MAX_ALBUM_NAME_LENGTH = 25;
 
 /** Truncate album name with ellipsis if it exceeds max length */
 const truncateAlbumName = (name: string): string => {
     if (name.length <= MAX_ALBUM_NAME_LENGTH) return name;
     return name.slice(0, MAX_ALBUM_NAME_LENGTH) + "...";
 };
-
-/** CSS keyframes for spinning animation */
-const spinAnimation = keyframes`
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-`;
-
-/** Spinning loading icon wrapper */
-const SpinningIconWrapper = styled("span")`
-    display: inline-flex;
-    animation: ${spinAnimation} 2s linear infinite;
-`;
-
-/** Spinning loading icon */
-const SpinningIcon: React.FC = () => (
-    <SpinningIconWrapper>
-        <HugeiconsIcon icon={Loading03Icon} size={28} />
-    </SpinningIconWrapper>
-);
 
 interface DownloadStatusNotificationsProps {
     /**
@@ -168,7 +149,10 @@ export const DownloadStatusNotifications: React.FC<
         const caption = (
             <Typography
                 variant="small"
-                sx={{ color: hasErrors ? "white" : "text.muted" }}
+                sx={{
+                    color: hasErrors ? "white" : "text.muted",
+                    fontVariantNumeric: "tabular-nums",
+                }}
             >
                 {statusText}
                 {!isComplete && <> &bull; {progress}</>}
@@ -180,13 +164,21 @@ export const DownloadStatusNotifications: React.FC<
         if (hasErrors) {
             startIcon = <ErrorOutlineIcon />;
         } else if (isComplete) {
-            startIcon = <HugeiconsIcon icon={Tick02Icon} size={28} />;
+            startIcon = (
+                <GlowingIconWrapper>
+                    <HugeiconsIcon icon={Tick02Icon} size={28} />
+                </GlowingIconWrapper>
+            );
         } else if (isZipDownload && !group.isDownloadingZip) {
             // Preparing state - use loading icon
             startIcon = <SpinningIcon />;
         } else {
             // Downloading state
-            startIcon = <HugeiconsIcon icon={Download01Icon} size={28} />;
+            startIcon = (
+                <DroppingIconWrapper>
+                    <HugeiconsIcon icon={Download01Icon} size={28} />
+                </DroppingIconWrapper>
+            );
         }
 
         // Title is always the album name (truncated)
@@ -233,3 +225,55 @@ export const DownloadStatusNotifications: React.FC<
         );
     });
 };
+
+/** CSS keyframes for spinning animation */
+const spinAnimation = keyframes`
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+`;
+
+/** CSS keyframes for drop from top animation */
+const dropAnimation = keyframes`
+    0% { transform: translateY(-100%); opacity: 0.15; }
+    50% { transform: translateY(10%); opacity: 0.6; }
+    100% { transform: translateY(0); opacity: 1; }
+`;
+
+/** CSS keyframes for green glow animation */
+const glowAnimation = keyframes`
+    0% { color: var(--mui-palette-fixed-success); }
+    100% { color: inherit; }
+`;
+
+/** CSS keyframes for fade in animation */
+const fadeInAnimation = keyframes`
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+`;
+
+/** Drop animation icon wrapper */
+const DroppingIconWrapper = styled("span")`
+    display: inline-flex;
+    animation: ${dropAnimation} 0.8s ease-out forwards;
+`;
+
+/** Glowing icon wrapper for success state */
+const GlowingIconWrapper = styled("span")`
+    display: inline-flex;
+    animation: ${glowAnimation} 2s ease-out forwards;
+`;
+
+/** Spinning loading icon wrapper */
+const SpinningIconWrapper = styled("span")`
+    display: inline-flex;
+    animation:
+        ${fadeInAnimation} 0.5s ease-out forwards,
+        ${spinAnimation} 3s linear infinite;
+`;
+
+/** Spinning loading icon */
+const SpinningIcon: React.FC = () => (
+    <SpinningIconWrapper>
+        <HugeiconsIcon icon={Loading03Icon} size={28} />
+    </SpinningIconWrapper>
+);
