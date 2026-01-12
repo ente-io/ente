@@ -34,8 +34,7 @@ jobs:
                   pull_request_title: "[locker] New translations"
                   pull_request_body: "New translations from [Crowdin](https://crowdin.com/project/ente-locker-app)"
                   pull_request_base_branch_name: "main"
-                  # TODO: Replace with actual Crowdin project ID after creating the project
-                  project_id: ${{ vars.CROWDIN_LOCKER_PROJECT_ID }}
+                  project_id: 860056
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
