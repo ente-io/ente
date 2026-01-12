@@ -56,7 +56,7 @@ import {
 } from "react-window";
 
 const Page: React.FC = () => {
-    const { onGenericError } = useBaseContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(
         largeFilesReducer,
@@ -80,18 +80,30 @@ const Page: React.FC = () => {
     }, [state.filter]);
 
     const handleDeleteFiles = useCallback(() => {
-        dispatch({ type: "delete" });
-        void deleteSelectedLargeFiles(state.largeFiles, (progress: number) =>
-            dispatch({ type: "setDeleteProgress", progress }),
-        )
-            .then((removedIDs) =>
-                dispatch({ type: "deleteCompleted", removedIDs }),
-            )
-            .catch((e: unknown) => {
-                onGenericError(e);
-                dispatch({ type: "deleteFailed" });
-            });
-    }, [state.largeFiles, onGenericError]);
+        showMiniDialog({
+            title: t("delete_files_title"),
+            message: t("delete_files_message"),
+            continue: {
+                text: t("delete_permanently"),
+                color: "critical",
+                action: () => {
+                    dispatch({ type: "delete" });
+                    void deleteSelectedLargeFiles(
+                        state.largeFiles,
+                        (progress: number) =>
+                            dispatch({ type: "setDeleteProgress", progress }),
+                    )
+                        .then((removedIDs) =>
+                            dispatch({ type: "deleteCompleted", removedIDs }),
+                        )
+                        .catch((e: unknown) => {
+                            onGenericError(e);
+                            dispatch({ type: "deleteFailed" });
+                        });
+                },
+            },
+        });
+    }, [state.largeFiles, showMiniDialog, onGenericError]);
 
     const handleOpenViewer = useCallback((index: number) => {
         setCurrentIndex(index);
