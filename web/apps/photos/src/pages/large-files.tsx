@@ -7,9 +7,10 @@ import {
     Chip,
     IconButton,
     LinearProgress,
+    Menu,
+    MenuItem,
     Stack,
     styled,
-    Tooltip,
     Typography,
 } from "@mui/material";
 import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
@@ -195,15 +196,22 @@ const Navbar: React.FC<NavbarProps> = ({
     onChangeSortOrder,
 }) => {
     const router = useRouter();
+    const [sortMenuAnchor, setSortMenuAnchor] = useState<null | HTMLElement>(
+        null,
+    );
 
-    const handleToggleSortOrder = () => {
-        onChangeSortOrder(sortOrder === "desc" ? "asc" : "desc");
+    const handleOpenSortMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setSortMenuAnchor(event.currentTarget);
     };
 
-    const sortTooltip =
-        sortOrder === "desc"
-            ? t("sort_largest_first")
-            : t("sort_smallest_first");
+    const handleCloseSortMenu = () => {
+        setSortMenuAnchor(null);
+    };
+
+    const handleSortOrderChange = (order: SortOrder) => {
+        onChangeSortOrder(order);
+        handleCloseSortMenu();
+    };
 
     return (
         <Stack
@@ -232,18 +240,35 @@ const Navbar: React.FC<NavbarProps> = ({
                         justifyContent: "flex-end",
                     }}
                 >
-                    <Tooltip title={sortTooltip}>
-                        <IconButton onClick={handleToggleSortOrder}>
-                            <SortIcon
-                                sx={{
-                                    transform:
-                                        sortOrder === "asc"
-                                            ? "scaleY(-1)"
-                                            : "none",
-                                }}
-                            />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton onClick={handleOpenSortMenu}>
+                        <SortIcon />
+                    </IconButton>
+                    <Menu
+                        anchorEl={sortMenuAnchor}
+                        open={Boolean(sortMenuAnchor)}
+                        onClose={handleCloseSortMenu}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
+                        }}
+                        transformOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                        }}
+                    >
+                        <MenuItem
+                            selected={sortOrder === "desc"}
+                            onClick={() => handleSortOrderChange("desc")}
+                        >
+                            {t("sort_largest_first")}
+                        </MenuItem>
+                        <MenuItem
+                            selected={sortOrder === "asc"}
+                            onClick={() => handleSortOrderChange("asc")}
+                        >
+                            {t("sort_smallest_first")}
+                        </MenuItem>
+                    </Menu>
                 </Box>
             </Stack>
             <FilterChips {...{ filter, onChangeFilter }} />
@@ -605,6 +630,17 @@ const BottomBar: React.FC<BottomBarProps> = ({
         }
     }, [filter]);
 
+    const deselectAllLabel = useMemo(() => {
+        switch (filter) {
+            case "photos":
+                return t("deselect_all_photos");
+            case "videos":
+                return t("deselect_all_videos");
+            default:
+                return t("deselect_all");
+        }
+    }, [filter]);
+
     return (
         <Stack
             direction="row"
@@ -630,7 +666,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
                 disabled={deleteProgress !== undefined}
                 onClick={allSelected ? onDeselectAll : onSelectAll}
             >
-                {allSelected ? t("deselect_all") : selectAllLabel}
+                {allSelected ? deselectAllLabel : selectAllLabel}
             </FocusVisibleButton>
             <DeleteButton
                 {...{

@@ -536,6 +536,8 @@
     "select_all": "Select all",
     "select_all_photos": "Select all photos",
     "select_all_videos": "Select all videos",
+    "deselect_all_photos": "Deselect all photos",
+    "deselect_all_videos": "Deselect all videos",
     "stop_uploads_title": "Stop uploads?",
     "stop_uploads_message": "Are you sure that you want to stop all the uploads in progress?",
     "yes_stop_uploads": "Yes, stop uploads",
