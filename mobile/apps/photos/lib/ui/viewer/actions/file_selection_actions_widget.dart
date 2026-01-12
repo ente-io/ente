@@ -37,6 +37,7 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/actions/suggest_delete_sheet.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
@@ -665,48 +666,16 @@ class _FileSelectionActionsWidgetState
     if (filesToSuggest.isEmpty) {
       return;
     }
-    final l10n = AppLocalizations.of(context);
-    final actionResult = await showActionSheet(
+    final didSuggestDelete = await showSuggestDeleteSheet(
       context: context,
-      title: l10n.suggestDeletion,
-      body: l10n.suggestDeletionDescription,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-      buttons: [
-        ButtonWidget(
-          labelText: l10n.suggestDeletion,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          isInAlert: true,
-          onTap: () async {
-            await CollectionsService.instance.suggestDeleteFromCollection(
-              widget.collection!.id,
-              filesToSuggest,
-            );
-            showShortToast(
-              context,
-              l10n.deleteSuggestionSent,
-            );
-          },
-        ),
-        ButtonWidget(
-          labelText: l10n.cancel,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
+      onConfirm: () async {
+        await CollectionsService.instance.suggestDeleteFromCollection(
+          widget.collection!.id,
+          filesToSuggest,
+        );
+      },
     );
-    if (actionResult?.action == ButtonAction.error) {
-      await showGenericErrorDialog(
-        context: context,
-        error: actionResult?.exception ??
-            Exception("Failed to send delete suggestion"),
-      );
-    } else if (actionResult?.action == ButtonAction.first) {
+    if (didSuggestDelete) {
       widget.selectedFiles.clearAll();
       if (mounted) {
         setState(() => {});

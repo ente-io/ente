@@ -121,8 +121,6 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     setBlockingLoad,
     onRemotePull,
 }) => {
-    const settings = useSettingsSnapshot();
-    const { isAdminRoleEnabled, isSurfacePublicLinkEnabled } = settings;
     const { onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
 
@@ -175,13 +173,11 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     );
     const isOwner = user.id == collection?.owner?.id;
     const isAdmin = currentSharee?.role == "ADMIN";
-    const canManageParticipants = isOwner || (isAdminRoleEnabled && isAdmin);
+    const canManageParticipants = isOwner || isAdmin;
     const isSharedIncoming = collectionSummary?.type == "sharedIncoming";
     const showEmailSection = !isSharedIncoming || canManageParticipants;
     const hasPublicLink = collection?.publicURLs.length > 0;
-    const showPublicShare =
-        isOwner ||
-        (isSharedIncoming && hasPublicLink && isSurfacePublicLinkEnabled);
+    const showPublicShare = isOwner || (isSharedIncoming && hasPublicLink);
 
     // Use a ref to track if we've already fetched for this dialog session
     const hasFetchedForSession = useRef(false);
@@ -303,8 +299,6 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
     collectionSummary,
     emailByUserID,
 }) => {
-    const settings = useSettingsSnapshot();
-    const { isAdminRoleEnabled } = settings;
     const isOwner = user.id == collection.owner?.id;
     const currentSharee = collection.sharees.find(
         (sharee) => sharee.id == user.id,
@@ -314,20 +308,14 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
     const ownerEmail = isOwner ? user?.email : collection.owner?.email;
 
     const collaborators = collection.sharees
-        .filter(
-            (sharee) =>
-                sharee.role == "COLLABORATOR" ||
-                (!isAdminRoleEnabled && sharee.role == "ADMIN"),
-        )
+        .filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email)
         .filter((email) => email !== undefined);
 
-    const admins = isAdminRoleEnabled
-        ? collection.sharees
-              .filter((sharee) => sharee.role == "ADMIN")
-              .map((sharee) => sharee.email)
-              .filter((email) => email !== undefined)
-        : [];
+    const admins = collection.sharees
+        .filter((sharee) => sharee.role == "ADMIN")
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
 
     const viewers = collection.sharees
         .filter((sharee) => sharee.role == "VIEWER")
@@ -337,7 +325,7 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
     const userOrEmail = (email: string) =>
         email == user.email ? t("you") : email;
 
-    if (isAdminRoleEnabled && !isOwner && isAdmin) {
+    if (!isOwner && isAdmin) {
         return (
             <Stack>
                 <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
@@ -376,7 +364,7 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     />
                 </RowButtonGroup>
             </Stack>
-            {isAdminRoleEnabled && admins.length > 0 && (
+            {admins.length > 0 && (
                 <Stack>
                     <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                         {t("admins", { defaultValue: "Admins" })}
@@ -482,9 +470,6 @@ const EmailShare: React.FC<EmailShareProps> = ({
     const { show: showManageEmail, props: manageEmailVisibilityProps } =
         useModalVisibility();
 
-    const settings = useSettingsSnapshot();
-    const { isAdminRoleEnabled } = settings;
-
     const [participantRole, setParticipantRole] =
         // Initial value is arbitrary, it always gets reset before
         // `showAddParticipant` is called.
@@ -511,7 +496,7 @@ const EmailShare: React.FC<EmailShareProps> = ({
     );
     const isOwner = user.id == collection.owner?.id;
     const isAdmin = currentSharee?.role == "ADMIN";
-    const canManageParticipants = isOwner || (isAdminRoleEnabled && isAdmin);
+    const canManageParticipants = isOwner || isAdmin;
 
     return (
         <>
@@ -556,18 +541,14 @@ const EmailShare: React.FC<EmailShareProps> = ({
                                 onClick={showAddCollaborator}
                                 label={t("add_collaborators")}
                             />
-                            {isAdminRoleEnabled ? (
-                                <>
-                                    <RowButtonDivider />
-                                    <RowButton
-                                        startIcon={<AddIcon />}
-                                        onClick={showAddAdmin}
-                                        label={t("add_admins", {
-                                            defaultValue: "Add admins",
-                                        })}
-                                    />
-                                </>
-                            ) : null}
+                            <RowButtonDivider />
+                            <RowButton
+                                startIcon={<AddIcon />}
+                                onClick={showAddAdmin}
+                                label={t("add_admins", {
+                                    defaultValue: "Add admins",
+                                })}
+                            />
                         </>
                     ) : null}
                 </RowButtonGroup>
@@ -596,7 +577,6 @@ const EmailShare: React.FC<EmailShareProps> = ({
                     wrap,
                     onRemotePull,
                     canManageParticipants,
-                    adminRoleEnabled: isAdminRoleEnabled,
                 }}
             />
         </>
@@ -931,7 +911,6 @@ type ManageEmailShareProps = ModalVisibilityProps & {
     participantCount: number;
     wrap: (f: () => Promise<void>) => () => void;
     canManageParticipants: boolean;
-    adminRoleEnabled: boolean;
 } & Pick<
         CollectionShareProps,
         | "user"
@@ -953,7 +932,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     wrap,
     onRemotePull,
     canManageParticipants,
-    adminRoleEnabled,
 }) => {
     const { show: showAddParticipant, props: addParticipantVisibilityProps } =
         useModalVisibility();
@@ -1005,25 +983,18 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const isOwner = user.id == collection.owner?.id;
 
     const collaborators = collection.sharees
-        .filter(
-            (sharee) =>
-                sharee.role == "COLLABORATOR" ||
-                (!adminRoleEnabled && sharee.role == "ADMIN"),
-        )
+        .filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email)
         .filter((email) => email !== undefined);
 
-    const admins = adminRoleEnabled
-        ? collection.sharees
-              .filter((sharee) => sharee.role == "ADMIN")
-              .map((sharee) => sharee.email)
-              .filter((email) => email !== undefined)
-        : [];
+    const admins = collection.sharees
+        .filter((sharee) => sharee.role == "ADMIN")
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
     const currentSharee = collection.sharees.find(
         (sharee) => sharee.email == user.email,
     );
     if (
-        adminRoleEnabled &&
         currentSharee?.role == "ADMIN" &&
         user.email &&
         !admins.includes(user.email)
@@ -1062,8 +1033,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             />
                         </RowButtonGroup>
                     </Stack>
-                    {adminRoleEnabled &&
-                    (admins.length > 0 || canManageParticipants) ? (
+                    {(admins.length > 0 || canManageParticipants) && (
                         <Stack>
                             <RowButtonGroupTitle
                                 icon={<AdminPanelSettingsIcon />}
@@ -1130,7 +1100,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                 ) : null}
                             </RowButtonGroup>
                         </Stack>
-                    ) : null}
+                    )}
                     <Stack>
                         <RowButtonGroupTitle icon={<ModeEditIcon />}>
                             {t("collaborators")}
@@ -1254,13 +1224,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
-                {...{
-                    onRootClose,
-                    wrap,
-                    collection,
-                    onRemotePull,
-                    adminRoleEnabled,
-                }}
+                {...{ onRootClose, wrap, collection, onRemotePull }}
                 participant={selectedParticipant}
             />
         </>
@@ -1277,7 +1241,6 @@ type ManageParticipantProps = ModalVisibilityProps & {
      * when {@link open} is `true`, but the types don't reflect this.
      */
     participant: CollectionUser | undefined;
-    adminRoleEnabled: boolean;
 } & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManageParticipant: React.FC<ManageParticipantProps> = ({
@@ -1288,7 +1251,6 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     participant,
     wrap,
     onRemotePull,
-    adminRoleEnabled,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -1405,24 +1367,16 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                     </Typography>
 
                     <RowButtonGroup>
-                        {adminRoleEnabled ? (
-                            <>
-                                <RowButton
-                                    fontWeight="regular"
-                                    onClick={createOnRoleChange("ADMIN")}
-                                    label={t("admin", {
-                                        defaultValue: "Admin",
-                                    })}
-                                    startIcon={<AdminPanelSettingsIcon />}
-                                    endIcon={
-                                        participant.role === "ADMIN" && (
-                                            <DoneIcon />
-                                        )
-                                    }
-                                />
-                                <RowButtonDivider />
-                            </>
-                        ) : null}
+                        <RowButton
+                            fontWeight="regular"
+                            onClick={createOnRoleChange("ADMIN")}
+                            label={t("admin", { defaultValue: "Admin" })}
+                            startIcon={<AdminPanelSettingsIcon />}
+                            endIcon={
+                                participant.role === "ADMIN" && <DoneIcon />
+                            }
+                        />
+                        <RowButtonDivider />
                         <RowButton
                             fontWeight="regular"
                             onClick={createOnRoleChange("COLLABORATOR")}

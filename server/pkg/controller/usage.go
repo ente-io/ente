@@ -146,6 +146,7 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
 				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", maxStorage, projectedLockerUsage))
 		}
+		// Locker uploads should not be blocked by Photos subscription limits.
 		return nil
 	}
 

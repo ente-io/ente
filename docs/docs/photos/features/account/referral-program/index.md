@@ -34,6 +34,18 @@ Referral codes can be applied within `Settings > General > Referrals > Apply Cod
 
 </div>
 
+## Customize your referral code
+
+You can personalize your referral code to make it easier to share. To change your
+code, go to `Settings > General > Referrals` and tap on your current code.
+
+Requirements for custom referral codes:
+
+- Must be between 4 and 20 characters
+- Must contain only letters and numbers (alphanumeric)
+
+Note: You can change your referral code up to **3 times**.
+
 ## Related FAQs
 
 - [How much storage can I earn through referrals?](/photos/faq/storage-and-plans#referral-storage-limit)

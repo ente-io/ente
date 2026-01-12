@@ -165,13 +165,6 @@ final darkThemeData = ThemeData(
     ),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   ),
-  inputDecorationTheme: const InputDecorationTheme().copyWith(
-    focusedBorder: const UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: Color.fromARGB(255, 152, 77, 244),
-      ),
-    ),
-  ),
   checkboxTheme: CheckboxThemeData(
     side: const BorderSide(
       color: Colors.grey,

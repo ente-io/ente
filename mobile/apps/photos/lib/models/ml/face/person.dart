@@ -3,6 +3,8 @@
 // On the device, this information is stored as [LocalEntityData] with type person.
 import "package:flutter/foundation.dart";
 
+const Object _personDataUnchanged = Object();
+
 class PersonEntity {
   final String remoteID;
   final PersonData data;
@@ -97,7 +99,7 @@ class PersonData {
     bool? isPinned,
     bool? hideFromMemories,
     int? version,
-    String? birthDate,
+    Object? birthDate = _personDataUnchanged,
     String? email,
     int? userID,
     List<String>? rejectedFaceIDs,
@@ -110,7 +112,9 @@ class PersonData {
       isHidden: isHidden ?? this.isHidden,
       isPinned: isPinned ?? this.isPinned,
       hideFromMemories: hideFromMemories ?? this.hideFromMemories,
-      birthDate: birthDate ?? this.birthDate,
+      birthDate: identical(birthDate, _personDataUnchanged)
+          ? this.birthDate
+          : birthDate as String?,
       email: email ?? this.email,
       userID: userID ?? this.userID,
       rejectedFaceIDs:

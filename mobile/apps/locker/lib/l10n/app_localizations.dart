@@ -472,6 +472,12 @@ abstract class AppLocalizations {
   /// **'Create collection'**
   String get createCollection;
 
+  /// No description provided for @enterCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter collection name'**
+  String get enterCollectionName;
+
   /// No description provided for @nothingYet.
   ///
   /// In en, this message translates to:
@@ -2661,6 +2667,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please login again'**
   String get pleaseLoginAgain;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @seeAllCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'See all collections'**
+  String get seeAllCollections;
+
+  /// No description provided for @clearAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get clearAllFilters;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select language'**
+  String get selectLanguage;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
 }
 
 class _AppLocalizationsDelegate

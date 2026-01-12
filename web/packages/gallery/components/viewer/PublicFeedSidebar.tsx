@@ -1017,7 +1017,9 @@ const LoadingContainer = styled(Box)(() => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "48px 0",
+    height: "100%",
+    // Offset for header (marginBottom: 48) + padding diff (32-24=8) = 56, halved
+    marginTop: -28,
 }));
 
 const EmptyStateText = styled(Typography)(({ theme }) => ({

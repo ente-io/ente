@@ -41,7 +41,7 @@ import {
     deleteReaction,
 } from "ente-new/photos/services/reaction";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
-import { t } from "i18next";
+import i18n, { t } from "i18next";
 import React, {
     useCallback,
     useEffect,
@@ -180,14 +180,31 @@ interface CollectionInfo {
 const formatTimeAgo = (timestampMicros: number): string => {
     // Server timestamps are in microseconds, convert to milliseconds
     const timestampMs = Math.floor(timestampMicros / 1000);
-    const diff = Date.now() - timestampMs;
+    const now = Date.now();
+    const diff = now - timestampMs;
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "now";
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 1) return t("just_now");
+    if (minutes < 60) return t("minutes_ago", { count: minutes });
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) return t("hours_ago", { count: hours });
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    if (days < 7) return t("days_ago", { count: days });
+
+    // For 7+ days, show actual date using locale-aware formatting
+    const date = new Date(timestampMs);
+    const currentYear = new Date(now).getFullYear();
+    const locale = i18n.language;
+    if (date.getFullYear() === currentYear) {
+        return date.toLocaleDateString(locale, {
+            month: "short",
+            day: "numeric",
+        });
+    }
+    return date.toLocaleDateString(locale, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
 };
 
 const getParentComment = (
@@ -347,30 +364,6 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     );
 };
 
-interface CommentActionsProps {
-    onReply: () => void;
-    onLike: () => void;
-    isLiked?: boolean;
-}
-
-/**
- * Action buttons (like, reply) shown below comment bubbles.
- */
-const CommentActions: React.FC<CommentActionsProps> = ({
-    onReply,
-    onLike,
-    isLiked,
-}) => (
-    <ActionsContainer>
-        <ActionButton onClick={onLike}>
-            <HeartIcon filled={isLiked} />
-        </ActionButton>
-        <ActionButton onClick={onReply}>
-            <ReplyIcon />
-        </ActionButton>
-    </ActionsContainer>
-);
-
 // =============================================================================
 // Main Component
 // =============================================================================
@@ -454,6 +447,11 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      * Should trigger the join album flow (with mobile deep link fallback).
      */
     onJoinAlbum?: () => void;
+    /**
+     * Whether the "Join album" option is enabled for this public link.
+     * When false, the "Join album and like/comment" buttons will be hidden.
+     */
+    enableJoin?: boolean;
 }
 
 /**
@@ -485,6 +483,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     collectionKey,
     anonUserNames,
     onJoinAlbum,
+    enableJoin = true,
 }) => {
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
@@ -1877,21 +1876,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                     {comment.text}
                                                 </CommentText>
                                             </CommentBubble>
-                                            {!contextMenu && (
-                                                <CommentActions
-                                                    onReply={() =>
-                                                        handleReply(comment)
-                                                    }
-                                                    onLike={() =>
-                                                        handleLikeComment(
-                                                            comment,
-                                                        )
-                                                    }
-                                                    isLiked={likedComments.has(
-                                                        comment.id,
-                                                    )}
-                                                />
-                                            )}
                                         </CommentBubbleInner>
                                     </CommentBubbleWrapper>
                                 </Box>
@@ -2096,6 +2080,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 onClose={() => setShowPublicCommentModal(false)}
                 onCommentAnonymously={handleCommentAnonymously}
                 onJoinAlbumToComment={handleJoinAlbumToComment}
+                enableJoin={enableJoin}
             />
             <PublicLikeModal
                 open={showPublicLikeModal}
@@ -2105,6 +2090,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 }}
                 onLikeAnonymously={handleLikeAnonymously}
                 onJoinAlbumToLike={handleJoinAlbumToLike}
+                enableJoin={enableJoin}
             />
             <AddNameModal
                 open={showAddNameModal}
@@ -2241,7 +2227,9 @@ const LoadingContainer = styled(Box)(() => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "48px 0",
+    height: "100%",
+    // Offset for header (marginBottom: 48) + padding diff (32-24=8) = 56, halved
+    marginTop: -28,
 }));
 
 const EmptyMessage = styled(Typography)(({ theme }) => ({
@@ -2367,7 +2355,7 @@ const CommentBubbleWrapper = styled(Box, {
     justifyContent: isOwn ? "flex-end" : "flex-start",
     width: "100%",
     marginTop: isFirstOwn ? 64 : 0,
-    marginBottom: isOwn ? 24 : isLastOwn ? 48 : 24,
+    marginBottom: isOwn ? 12 : isLastOwn ? 48 : 12,
     paddingRight: isOwn ? 52 : 0,
     paddingLeft: isOwn ? 0 : 28,
     position: "relative",
@@ -2410,34 +2398,6 @@ const QuotedReplyContainer = styled(Box, {
         theme.applyStyles("dark", {
             borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
         })),
-}));
-
-// Actions
-const ActionsContainer = styled(Box)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 9999,
-    padding: "10px 14px",
-    border: "2px solid #fff",
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    transform: "translate(50%, 50%)",
-    color: "#131313",
-    ...theme.applyStyles("dark", {
-        backgroundColor: "#363636",
-        border: "2px solid #1b1b1b",
-        color: "#fff",
-    }),
-}));
-
-const ActionButton = styled(Box)(() => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
 }));
 
 // Input Area

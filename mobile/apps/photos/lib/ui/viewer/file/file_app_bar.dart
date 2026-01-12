@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:io';
 
+import "package:ente_icons/ente_icons.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
@@ -12,6 +13,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -23,11 +25,13 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/video_preview_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/viewer/actions/suggest_delete_sheet.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
@@ -81,10 +85,28 @@ class FileAppBarState extends State<FileAppBar> {
         isGuestView = event.isGuestView;
       });
     });
+
+    // Listen to shared collection changes to rebuild actions
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifier = InheritedDetailPageState.maybeOf(context)
+          ?.isInSharedCollectionNotifier;
+      notifier?.addListener(_onSharedCollectionChanged);
+    });
+  }
+
+  void _onSharedCollectionChanged() {
+    if (mounted) {
+      setState(() {
+        _reloadActions = true;
+      });
+    }
   }
 
   @override
   void dispose() {
+    InheritedDetailPageState.maybeOf(context)
+        ?.isInSharedCollectionNotifier
+        .removeListener(_onSharedCollectionChanged);
     _guestViewEventSubscription.cancel();
     super.dispose();
   }
@@ -161,13 +183,22 @@ class FileAppBarState extends State<FileAppBar> {
     _actions.clear();
     final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
+    final int? collectionID = widget.file.collectionID;
+    final Collection? collection = collectionID != null
+        ? CollectionsService.instance.getCollectionByID(collectionID)
+        : null;
+    final isInSharedCollection = InheritedDetailPageState.maybeOf(context)
+            ?.isInSharedCollectionNotifier
+            .value ??
+        false;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
-      isFileHidden = CollectionsService.instance
-              .getCollectionByID(widget.file.collectionID!)
-              ?.isHidden() ??
-          false;
+      isFileHidden = collection?.isHidden() ?? false;
     }
+    final bool canSuggestDeleteAction = canSuggestDeleteForFile(
+      file: widget.file,
+      collection: collection,
+    );
     if (widget.file.isLiveOrMotionPhoto) {
       _actions.add(
         IconButton(
@@ -230,6 +261,18 @@ class FileAppBarState extends State<FileAppBar> {
             AppLocalizations.of(context).edit,
             value: 11,
             icon: Icons.tune_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+      // Add to Album option - shown when file is in shared collection
+      // (moved from bottom bar to make room for social icons)
+      if (isInSharedCollection && isFileUploaded && !isFileHidden) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).addToAlbum,
+            value: 10,
+            icon: EnteIcons.addToAlbum,
             iconColor: Theme.of(context).iconTheme.color,
           ),
         );
@@ -297,6 +340,17 @@ class FileAppBarState extends State<FileAppBar> {
           ),
         ),
       );
+
+      if (canSuggestDeleteAction) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).suggestDeletion,
+            value: 13,
+            icon: Icons.flag_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
 
       items.add(
         EntePopupMenuItem(
@@ -405,12 +459,40 @@ class FileAppBarState extends State<FileAppBar> {
               widget.onEditRequested(widget.file);
             } else if (value == 12) {
               await showDetailsSheet(context, widget.file);
+            } else if (value == 13) {
+              if (collection != null) {
+                await _handleSuggestDelete(collection);
+              }
+            } else if (value == 10) {
+              final selectedFiles = SelectedFiles();
+              selectedFiles.files.add(widget.file);
+              showCollectionActionSheet(
+                context,
+                selectedFiles: selectedFiles,
+                actionType: CollectionActionType.addFiles,
+              );
             }
           },
         ),
       );
     }
     return _actions;
+  }
+
+  Future<void> _handleSuggestDelete(Collection collection) async {
+    if (widget.file.uploadedFileID == null) {
+      return;
+    }
+    await showSuggestDeleteSheet(
+      context: context,
+      onConfirm: () async {
+        await CollectionsService.instance.suggestDeleteFromCollection(
+          collection.id,
+          [widget.file],
+        );
+        widget.onFileRemoved(widget.file);
+      },
+    );
   }
 
   _onToggleLoopVideo() {

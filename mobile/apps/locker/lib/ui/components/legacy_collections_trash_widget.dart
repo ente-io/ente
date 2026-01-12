@@ -47,26 +47,22 @@ class _CollectionsItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          border: Border.all(
-            color: colorScheme.backdropBase,
-            width: 1.5,
-          ),
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
             Container(
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                color: colorScheme.backgroundElevated,
+                color: colorScheme.fillFaint,
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(8.0),
               child: HugeIcon(
                 icon: HugeIcons.strokeRoundedWallet05,
-                color: colorScheme.textBase,
+                color: colorScheme.strokeBase,
               ),
             ),
             const SizedBox(width: 12),
@@ -104,26 +100,22 @@ class _TrashItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          border: Border.all(
-            color: colorScheme.backdropBase,
-            width: 1.5,
-          ),
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
             Container(
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                color: colorScheme.backgroundElevated,
+                color: colorScheme.fillFaint,
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(8.0),
               child: HugeIcon(
                 icon: HugeIcons.strokeRoundedDelete02,
-                color: colorScheme.textBase,
+                color: colorScheme.strokeBase,
               ),
             ),
             const SizedBox(width: 12),
@@ -163,10 +155,6 @@ class _LegacyItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          border: Border.all(
-            color: colorScheme.backdropBase,
-            width: 1.5,
-          ),
           borderRadius: borderRadius,
         ),
         child: Row(
@@ -189,11 +177,11 @@ class _LegacyItem extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 4),
             Expanded(
               child: Text(
                 context.l10n.legacy,
-                style: textTheme.small,
+                style: textTheme.body,
               ),
             ),
             Padding(

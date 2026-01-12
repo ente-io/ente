@@ -218,7 +218,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             leadingIconSize: 24.0,
                             leadingIconWidget: UserAvatarWidget(
                               currentUser,
-                              type: AvatarType.mini,
+                              type: AvatarType.md,
                               currentUserID: currentUserID,
                             ),
                             menuItemColor: colorScheme.fillFaint,
@@ -301,7 +301,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
-                            type: AvatarType.mini,
+                            type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: colorScheme.fillFaint,
@@ -382,7 +382,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
-                            type: AvatarType.mini,
+                            type: AvatarType.md,
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: colorScheme.fillFaint,

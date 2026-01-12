@@ -85,7 +85,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       backgroundColor: accentColor,
       appBar: AppBar(
         leading: const SizedBox(),
-        title: SvgPicture.asset("assets/svg/auth-logo.svg"),
+        title: SvgPicture.asset("assets/svg/app-logo.svg"),
         backgroundColor: accentColor,
         elevation: 0,
         scrolledUnderElevation: 0,

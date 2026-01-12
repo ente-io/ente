@@ -215,6 +215,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/detect-text",
                             },
                             {
+                                text: "Home Widgets",
+                                link: "/photos/features/utilities/home-widgets",
+                            },
+                            {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
                             },

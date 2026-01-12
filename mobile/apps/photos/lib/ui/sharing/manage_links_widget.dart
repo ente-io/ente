@@ -74,6 +74,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final isJoinEnabled =
         widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
+    final enableComment =
+        widget.collection!.publicURLs.firstOrNull?.enableComment ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue = CollectionsService.instance.getPublicUrl(
@@ -121,12 +123,34 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       title: AppLocalizations.of(context).allowAddingPhotos,
                     ),
                     alignCaptionedTextToLeft: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    isBottomBorderRadiusRemoved: true,
+                    menuItemColor: enteColorScheme.fillFaint,
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isCollectEnabled,
                       onChanged: () async {
                         await _updateUrlSettings(context, {
                           'enableCollect': !isCollectEnabled,
+                        });
+                      },
+                    ),
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: enteColorScheme.fillFaint,
+                  ),
+                  MenuItemWidget(
+                    key: ValueKey("Enable comment $enableComment"),
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: AppLocalizations.of(context).enableComment,
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => enableComment,
+                      onChanged: () async {
+                        await _updateUrlSettings(context, {
+                          'enableComment': !enableComment,
                         });
                       },
                     ),

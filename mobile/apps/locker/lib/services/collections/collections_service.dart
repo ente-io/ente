@@ -57,13 +57,14 @@ class CollectionService {
   Future<void> init() async {
     _db = CollectionDB.instance;
     _apiClient = CollectionApiClient.instance;
+
+    Bus.instance.on<SignedInEvent>().listen((event) {
+      _logger.info("User signed in, starting initial sync.");
+      _init();
+    });
+
     if (Configuration.instance.hasConfiguredAccount()) {
       await _init();
-    } else {
-      Bus.instance.on<SignedInEvent>().listen((event) {
-        _logger.info("User signed in, starting initial sync.");
-        _init();
-      });
     }
   }
 

@@ -176,6 +176,7 @@
   "admins": "Administratörer",
   "addAdmin": "Lägg till administratör",
   "addMoreAdmins": "Lägg till fler administratörer",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Administratörer och samarbetspartners kan lägga till foton. Administratörer kan också hantera foton och deltagare.",
   "addANewEmail": "Lägg till en ny e-postadress",
   "orPickAnExistingOne": "Eller välj en befintlig",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Samarbetspartner kan lägga till foton och videor till det delade albumet.",
@@ -207,6 +208,7 @@
   },
   "allowJoiningAlbum": "Tillåt att ansluta till albumet",
   "allowAddPhotosDescription": "Tillåt personer med länken att även lägga till foton i det delade albumet.",
+  "enableComment": "Kommentarer och reaktioner",
   "passwordLock": "Lösenordskydd",
   "canNotOpenTitle": "Kan inte öppna det här albumet",
   "canNotOpenBody": "Tyvärr kan detta album inte öppnas i appen.",
@@ -361,6 +363,7 @@
   "sorryCouldNotAddToFavorites": "Tyvärr, kunde inte lägga till i favoriterna!",
   "sorryCouldNotRemoveFromFavorites": "Tyvärr kunde inte ta bort från favoriter!",
   "subscribeToEnableSharing": "Du behöver en aktiv betald prenumeration för att möjliggöra delning.",
+  "subscribeToChangeLinkSetting": "Du behöver ett betalt abonnemang för att ändra denna länkinställning.",
   "subscribe": "Prenumerera",
   "canOnlyRemoveFilesOwnedByYou": "Kan endast ta bort filer som ägs av dig",
   "deleteSharedAlbum": "Radera delat album?",
@@ -557,6 +560,7 @@
   "deleteSuggestionsDesc": "Granska filer som har markerats för att raderas.",
   "rejectSuggestions": "Neka förslag",
   "noDeleteSuggestion": "Inga raderingsförslag",
+  "youHaveNoFileSuggestedForDeletion": "Du har inga filer som har föreslagits för borttagning",
   "noDuplicates": "✨ Inga dubbletter",
   "youveNoDuplicateFilesThatCanBeCleared": "Du har inga dubbletter som kan rensas",
   "success": "Lyckades",
@@ -695,9 +699,22 @@
   "appleId": "Apple ID",
   "playstoreSubscription": "PlayStore-prenumeration",
   "appstoreSubscription": "AppStore-prenumeration",
+  "subAlreadyLinkedErrMessage": "Din {id} är redan kopplad till ett annat Ente-konto.\nOm du vill använda din {id} med detta konto, vänligen kontakta vår support",
   "visitWebToManage": "Vänligen besök web.ente.io för att hantera ditt abonnemang",
   "couldNotUpdateSubscription": "Kunde inte uppdatera prenumeration",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vänligen kontakta support@ente.io så hjälper vi gärna till!",
   "paymentFailed": "Betalning misslyckades",
+  "paymentFailedTalkToProvider": "Prata med {providerName} support om du debiterades",
+  "@paymentFailedTalkToProvider": {
+    "description": "The text to display when the payment failed",
+    "type": "text",
+    "placeholders": {
+      "providerName": {
+        "example": "AppStore|PlayStore",
+        "type": "String"
+      }
+    }
+  },
   "continueOnFreeTrial": "Fortsätt med gratis testversion",
   "areYouSureYouWantToExit": "Är du säker på att du vill avsluta?",
   "thankYou": "Tack",
