@@ -171,7 +171,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
               radius: const Radius.circular(4),
               child: SingleChildScrollView(
                 controller: _scrollController,
-                padding: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.only(right: 12, bottom: 12),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 12,
