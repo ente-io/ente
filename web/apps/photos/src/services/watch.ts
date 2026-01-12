@@ -135,6 +135,31 @@ class FolderWatcher {
     }
 
     /**
+     * Check accessibility of all watch folders and trigger sync if any
+     * previously inaccessible folder has become accessible.
+     *
+     * This is meant to be called when the app gains focus, allowing us to
+     * detect when an external drive has been reconnected.
+     */
+    async checkAccessibility(): Promise<void> {
+        try {
+            const watches = await this.getWatches();
+            const accessibleWatches = watches.filter(
+                (w) => w.isAccessible !== false,
+            );
+
+            if (accessibleWatches.length > 0 && !this.isPaused) {
+                log.info(
+                    `Folder watch: ${accessibleWatches.length} accessible folder(s), triggering sync`,
+                );
+                this.triggerSyncWithDisk();
+            }
+        } catch (e) {
+            log.error("Error checking watch folder accessibility", e);
+        }
+    }
+
+    /**
      * Return true if we are currently syncing files that belong to the given
      * {@link folderPath}.
      */
@@ -247,6 +272,11 @@ class FolderWatcher {
         if (!watch) {
             // Possibly stale
             skip(`no folder watch for found for ${event.folderPath}`);
+            return;
+        }
+
+        if (watch.isAccessible === false) {
+            skip(`folder ${event.folderPath} is inaccessible`);
             return;
         }
 
@@ -553,6 +583,14 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     const events: WatchEvent[] = [];
 
     for (const watch of watches) {
+        // Skip inaccessible folders (e.g., ejected external drives).
+        if (watch.isAccessible === false) {
+            log.info(
+                `Skipping sync for inaccessible folder ${watch.folderPath}`,
+            );
+            continue;
+        }
+
         const folderPath = watch.folderPath;
 
         const filePaths = await electron.fs.findFiles(folderPath);
