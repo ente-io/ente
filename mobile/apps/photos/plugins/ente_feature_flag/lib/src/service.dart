@@ -97,6 +97,8 @@ class FlagService {
 
   bool get enableShareePin => true;
 
+  bool get showSharedAlbumsInMoveSheet => internalUser;
+
   bool get isSocialEnabled =>
       internalUser || _isServerFlagEnabled(_commentsFlag);
 

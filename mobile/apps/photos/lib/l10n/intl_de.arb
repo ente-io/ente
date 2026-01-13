@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Erlaube das Beitreten zum Album",
   "allowAddPhotosDescription": "Erlaube Nutzern, mit diesem Link ebenfalls Fotos zu diesem geteilten Album hinzuzufügen.",
+  "enableComment": "Kommentare und Reaktionen",
   "passwordLock": "Passwort Sperre",
   "canNotOpenTitle": "Album kann nicht geöffnet werden",
   "canNotOpenBody": "Leider kann dieses Album nicht in der App geöffnet werden.",
@@ -1518,6 +1519,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Es wurden keine Admins hinzugefügt} =1 {Ein Admin erfolgreich hinzugefügt} other {{count} Admins erfolgreich hinzugefügt}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Admin hinzufügen} =1 {Admin hinzufügen} other {Admins hinzufügen}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Admins können Fotos und Teilnehmer verwalten.",
+  "suggestDeletion": "Löschung vorschlagen",
+  "suggestDeletionDescription": "Ausgewählte Fotos werden aus diesem Album entfernt. Fotobesitzer werden zusätzlich einen Vorschlag erhalten, die Fotos zu überprüfen und zu löschen.",
+  "deleteSuggestionSent": "Löschvorschlag gesendet",
   "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
   "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
   "@sessionIdMismatch": {
@@ -2043,9 +2068,9 @@
   "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
   "deletingDash": "Lösche - ",
   "cLTitle1": "Kommentare und Reaktionen",
-  "cLDesc1": "Wir führen Kommentare und Reaktionen für geteilte Fotos ein. Du kannst auf ein Foto reagieren oder es kommentieren, indem du es öffnest und die Aktionen unten verwendest. Alle eingehenden Kommentare und Reaktionen sind im Tab 'Geteilt' sichtbar.",
+  "cLDesc1": "Wir führen Kommentare und Reaktionen für geteilte Fotos ein. Du kannst auf ein Foto reagieren oder es kommentieren, indem du es öffnest und die Aktionen unten verwendest. Alle eingehenden Kommentare und Reaktionen werden auf der Teilen-Registerkarte angezeigt.",
   "cLTitle2": "Admin für Alben",
-  "cLDesc2": "Du kannst jetzt einen anderen Ente-Benutzer als Administrator deines Albums zuweisen. Damit kann er weitere Betrachter und Mitarbeiter hinzufügen, Fotos aus Alben entfernen und sogar Teilnehmern vorschlagen, ihre Fotos zu löschen.",
+  "cLDesc2": "Du kannst jetzt einen Ente-Nutzer als Administrator für dein Album zuweisen. Auf diese Weise kann er andere Betrachter und Bearbeiter hinzufügen, Fotos aus dem Album entfernen und sogar Teilnehmern vorschlagen, ihre Fotos zu löschen.",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2235,5 +2260,137 @@
   },
   "ritualCreateNew": "Neu erstellen",
   "ritualAlbumSelectionPlaceholder": "Album auswählen",
-  "ritualPickEmojiTitle": "Emoji auswählen"
+  "ritualPickEmojiTitle": "Emoji auswählen",
+  "feed": "Feed",
+  "likedYourPhoto": "Gefällt ein Foto",
+  "commentedOnYourPhoto": "Kommentierte ein Foto",
+  "repliedToYourComment": "Antwortete auf einen Kommentar",
+  "likedYourComment": "Gefällt ein Kommentar",
+  "likedYourReply": "Gefällt eine Antwort",
+  "and1Other": "und einem anderen",
+  "andXOthers": "und {count} anderen",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Noch keine Aktivität",
+  "like": "Gefällt",
+  "comments": "Kommentare",
+  "commentHint": "Sag etwas Nettes!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Antworten",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Bist du sicher?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Kommentar löschen",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Dein Kommentar \"{comment}\" wird dauerhaft gelöscht werden",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{Ein Like} other{{count} Likes}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Noch keine Likes",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Likes konnten nicht geladen werden",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Like konnte nicht aktualisiert werden",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Ein Album konnte nicht gelikt werden} other{{count} Alben konnten nicht gelikt werden}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Alben konnten nicht geladen werden",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{Ein Album} other{{count} Alben}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Alle liken",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Wähle das Album, um das Video zu liken",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Wähle das Album, um das Foto zu liken",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Fehler beim Liken des Kommentars",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Fehler beim Löschen des Kommentars",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(gelöscht)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Antwort an dich",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Antwort an {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Keine Kommentare} =1{Ein Kommentar} other{{count} Kommentare}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

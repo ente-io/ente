@@ -36,11 +36,11 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputDialogSheet(
+    final result = await showInputSheet(
       context,
-      title: context.l10n.createCollection,
-      hintText: context.l10n.documentsHint,
-      submitButtonLabel: context.l10n.create,
+      title: context.l10n.newCollection,
+      hintText: context.l10n.enterCollectionName,
+      submitButtonLabel: context.l10n.createCollection,
       onSubmit: (String text) async {
         if (text.trim().isEmpty) {
           return;
@@ -77,7 +77,12 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    await showInputDialogSheet(
+    if (!collection.type.canEdit) {
+      showToast(context, context.l10n.collectionCannotBeEdited);
+      return;
+    }
+
+    await showInputSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',
@@ -371,46 +376,40 @@ class CollectionActions {
     List<Collection> collections, {
     VoidCallback? onSuccess,
   }) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final confirmed = await showAlertBottomSheet(
+      context,
+      title: context.l10n.leaveCollection,
+      message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.leaveCollection,
-          onTap: () async {
-            for (final col in collections) {
-              await CollectionApiClient.instance.leaveCollection(col);
-            }
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        SizedBox(
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
         ),
       ],
-      title: context.l10n.leaveCollection,
-      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
     );
-    if (actionResult?.action != null && context.mounted) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      } else if (actionResult.action == ButtonAction.first) {
-        onSuccess?.call();
-        Navigator.of(context).pop();
-        showToast(
-          context,
-          "Leave collection successfully",
-        );
+    if (confirmed == true) {
+      try {
+        for (final col in collections) {
+          await CollectionApiClient.instance.leaveCollection(col);
+        }
+        if (context.mounted) {
+          onSuccess?.call();
+          showToast(
+            context,
+            "Left ${collections.length} collection${collections.length > 1 ? 's' : ''} successfully",
+          );
+        }
+      } catch (e) {
+        _logger.severe("Failed to leave collections", e);
+        if (context.mounted) {
+          showToast(
+            context,
+            context.l10n.somethingWentWrong,
+          );
+        }
       }
     }
   }

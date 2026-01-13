@@ -124,6 +124,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionCannotBeDeleted => 'This collection cannot be deleted';
 
   @override
+  String get collectionCannotBeEdited => 'This collection cannot be edited';
+
+  @override
+  String get collectionCannotBeShared => 'This collection cannot be shared';
+
+  @override
   String get deleteCollection => 'Delete collection';
 
   @override
@@ -233,6 +239,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createCollection => 'Create collection';
+
+  @override
+  String get enterCollectionName => 'Enter collection name';
 
   @override
   String get nothingYet => 'Nothing yet';
@@ -1553,11 +1562,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseLoginAgain => 'Please login again';
 
   @override
-  String get language => 'Language';
+  String get filters => 'Filters';
+
+  @override
+  String get seeAllCollections => 'See all collections';
+
+  @override
+  String get clearAllFilters => 'Clear all filters';
 
   @override
   String get selectLanguage => 'Select language';
 
   @override
   String get general => 'General';
+
+  @override
+  String get language => 'Language';
 }

@@ -20,15 +20,15 @@ Share an entire album via a public link:
 1. Open the album you want to share
 2. Tap the Share icon
 3. Select "Create link" or "Share link"
-4. Configure link options (optional)
-5. Tap "Copy link" and share it with anyone
+4. Tap "Manage link" to configure optional [link features](#link-features) like album layout, password protection, link expiry, allow adding photos, etc
+5. Tap "Copy link" and share it
 
 **On web/desktop:**
 
 1. Open the album
 2. Click the share icon
 3. Select "Create link"
-4. Configure link options (optional)
+4. Click "Manage link" to configure optional [link features](#link-features) like album layout, password protection, link expiry, allow adding photos, etc
 5. Click "Copy link" and share it
 
 ### Quick link (from selected photos)
