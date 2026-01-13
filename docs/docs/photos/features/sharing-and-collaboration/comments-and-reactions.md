@@ -1,0 +1,252 @@
+---
+title: Comments and Reactions
+description: Engage with photos and videos in shared albums through comments and reactions
+author: shanthy17
+author_email: shanthy@ente.io
+---
+
+# Comments and Reactions
+
+Ente enables rich social interactions on your shared photos and videos through comments and reactions. Whether you're collaborating with family on a vacation album or collecting memories from a wedding, comments and reactions help you engage with shared content while maintaining end-to-end encryption.
+
+## Where comments and reactions work
+
+Comments and reactions are available on:
+
+- **Shared albums**: Albums you've shared with other Ente users or that have been shared with you
+- **Public links**: Albums shared via public links, including collect links
+- **Both authenticated and anonymous users**: Ente users can comment with their account, while public link visitors can comment anonymously
+
+Comments and reactions are **not available** on private albums that haven't been shared.
+
+## How it works
+
+All comments and reactions are end-to-end encrypted using the album's encryption key. Even though multiple people can interact with your photos, Ente's servers never have access to the unencrypted content of comments or reactions.
+
+When you comment on a photo or react to it, only people with access to that shared album can see your interactions. Anonymous commenters on public links are assigned a temporary identity that's encrypted and tied to the specific album.
+
+## Reacting to photos and videos
+
+### Adding reactions
+
+You can react to any photo or video in a shared album:
+
+**On mobile:**
+1. Open a photo in a shared album
+2. Tap the heart icon in the bottom bar
+3. Your reaction is added instantly
+
+**On web/desktop:**
+1. Open a photo in a shared album
+2. Click the heart icon in the viewer
+3. Your reaction is added instantly
+
+The heart icon fills in to show you've reacted. Tap or click it again to remove your reaction.
+
+### Viewing who reacted
+
+To see who has reacted to a photo:
+
+- The reaction count appears next to the heart icon
+- Tap/click the heart icon to see a list of everyone who reacted
+- You'll see names for Ente users and display names for anonymous reactors from public links
+
+## Commenting on photos and videos
+
+### Adding comments
+
+**On mobile:**
+1. Open a photo in a shared album
+2. Tap the comment icon in the bottom bar
+3. The comments sheet opens at the bottom
+4. Type your comment (up to 500 characters)
+5. Tap the send button
+
+**On web/desktop:**
+1. Open a photo in a shared album
+2. Click the comment icon in the viewer
+3. The comments sidebar opens on the right
+4. Type your comment and press Enter or click send
+
+Your comment appears immediately for all album participants.
+
+### Replying to comments
+
+You can reply directly to any comment to maintain conversation threads:
+
+**On mobile:**
+- **Long press** on a comment bubble and select "Reply", or
+- **Swipe right** on a comment to quickly start a reply
+- Type your reply and send
+
+**On web/desktop:**
+- Hover over a comment and click the reply icon
+- Type your reply and send
+
+Replies show a quote from the parent comment to maintain context.
+
+### Liking comments
+
+You can react to individual comments:
+
+**On mobile:**
+- **Double tap** a comment bubble to quickly like it, or
+- **Long press** on a comment and select the heart icon
+- The like count appears in the bottom-right corner of liked comments
+- Tap the like count to see who liked the comment
+
+**On web/desktop:**
+- Hover over a comment and click the heart icon
+- Click the like count to see all who reacted
+
+### Deleting comments
+
+You can delete your own comments, and album owners/admins can delete any comment:
+
+**On mobile:**
+- Long press on your comment
+- Select "Delete"
+- Confirm the deletion
+
+**On web/desktop:**
+- Hover over your comment
+- Click the delete icon (trash can)
+- Confirm the deletion
+
+Deleted comments are replaced with "(deleted)" text while preserving the conversation thread structure. Any replies remain visible.
+
+### Multi-album files
+
+If a photo appears in multiple shared albums, you can choose which album's comment thread to view:
+
+- Open the comments view
+- Use the album selector dropdown at the top
+- Switch between albums to see different comment threads
+
+Each album maintains its own separate comments and reactions for the same photo.
+
+## Comments on public links
+
+### Anonymous commenting
+
+People viewing your album through a public link can comment without creating an Ente account:
+
+**First-time visitors are prompted to:**
+1. Enter a display name (used to identify their comments)
+2. Start commenting and reacting
+
+The display name is stored encrypted and associated with their browsing session for that specific album.
+
+### Managing public link comments
+
+**Enable or disable comments:**
+
+Album owners can control whether comments are allowed on public links:
+
+1. Open album settings
+2. Go to "Manage public link"
+3. Toggle "Enable comments and reactions"
+
+When disabled, the comment and reaction buttons are hidden from public link viewers. Existing comments remain visible but no new comments can be added.
+
+**Who can delete public link comments:**
+- Anonymous commenters can delete their own comments
+- Album owners and admins can delete any comment, including anonymous ones
+
+This helps you moderate content collected through public links.
+
+## Feed - Social activity overview
+
+The Feed feature provides a centralized view of all social activity across your shared albums:
+
+**What appears in your feed:**
+- New reactions on your photos
+- New comments on your photos
+- Replies to your comments
+- Activity from all shared albums you participate in
+
+**Accessing the feed:**
+
+**On mobile:**
+- Go to the "Sharing" tab
+- Tap "Feed" at the top
+- Scroll through recent social activity
+- Tap any item to jump to that photo and see the full context
+
+**On web/desktop:**
+- The feed feature is coming soon to web and desktop
+
+The feed updates in real-time as people interact with your shared content, making it easy to stay engaged with collaborative albums without checking each one individually.
+
+## Comment and reaction limits
+
+To maintain performance and prevent abuse:
+
+- **Comment length**: Maximum 500 characters per comment
+- **Anonymous display names**: Maximum 50 characters
+- **Multi-line support**: Comments can span multiple lines for better formatting
+- **One reaction per person**: Each user/anonymous visitor can add one reaction per photo
+
+## Platform availability
+
+**Mobile apps (iOS and Android):**
+- Full support for comments and reactions
+- Can add, view, reply, like, and delete
+- Feed feature available
+- Interactive gestures (double-tap to like, swipe to reply)
+
+**Web and desktop:**
+- Full support for comments and reactions
+- Can add, view, reply, like, and delete
+- Feed feature coming soon
+
+## Privacy and encryption
+
+Comments and reactions maintain Ente's strong privacy guarantees:
+
+- **End-to-end encrypted**: All comment text and reaction data are encrypted using the album's encryption key
+- **Server-side privacy**: Ente's servers store only encrypted data and cannot read comments or reactions
+- **Reaction padding**: Reaction types are padded to a fixed size before encryption to prevent length-based analysis
+- **Anonymous privacy**: Anonymous commenter identities are encrypted per-album and not linked across different public links
+
+Even in collaborative albums with many participants, your comments remain private and can only be read by people with legitimate access to the album.
+
+## Limitations
+
+- Comments are only available in shared albums (either shared with Ente users or via public links)
+- Private albums that haven't been shared don't support comments or reactions
+- You cannot edit comments after posting (you can delete and repost if needed)
+- Comments cannot include attachments, formatting, or embedded media (text only)
+- Free plan users have the same commenting capabilities as paid users
+
+## Use cases
+
+**Family albums:**
+- Comment on vacation photos as memories unfold
+- React to cute kid moments
+- Reply to questions about specific photos
+
+**Event collection:**
+- Let wedding guests comment on photos they're uploading
+- See reactions to your favorite shots from the event
+- Engage with contributors through the feed
+
+**Collaborative projects:**
+- Discuss photo selection with team members
+- Leave feedback on specific images
+- Track activity through the feed feature
+
+## Related topics
+
+- [Collaboration](/photos/features/sharing-and-collaboration/collaboration) - Learn about collaborative albums and permissions
+- [Public links](/photos/features/sharing-and-collaboration/public-links) - Create shareable links with optional commenting
+- [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods explained
+
+## Related FAQs
+
+- [Can I comment on my private albums?](/photos/faq/sharing-and-collaboration#private-comments)
+- [Can anonymous users comment on my public links?](/photos/faq/sharing-and-collaboration#anonymous-comments)
+- [How do I disable comments on a public link?](/photos/faq/sharing-and-collaboration#disable-comments)
+- [Can I edit or format my comments?](/photos/faq/sharing-and-collaboration#edit-comments)
+- [Who can see my comments and reactions?](/photos/faq/sharing-and-collaboration#comment-visibility)
+- [Are comments and reactions encrypted?](/photos/faq/sharing-and-collaboration#comment-encryption)
