@@ -24,10 +24,10 @@ export interface SidebarActionContext {
     showAccount: () => void;
     showPreferences: () => void;
     showHelp: () => void;
+    showFreeUpSpace: () => void;
     onShowExport: () => void;
     onShowPlanSelector: () => void;
     onLogout: () => void;
-    onRouteToDeduplicate: () => Promise<unknown>;
     onShowWatchFolder: () => void;
     pseudoIDs: {
         uncategorized: number;
@@ -40,6 +40,7 @@ export interface SidebarActionContext {
     setPendingAccountAction: (a: SidebarActionID | undefined) => void;
     setPendingPreferencesAction: (a: SidebarActionID | undefined) => void;
     setPendingHelpAction: (a: SidebarActionID | undefined) => void;
+    setPendingFreeUpSpaceAction: (a: SidebarActionID | undefined) => void;
 }
 
 // Construct sidebar actions at call time so we always use initialized i18n
@@ -101,10 +102,30 @@ const sidebarActions = (): SidebarAction[] => {
             available: () => isDesktop,
         },
         {
-            id: "utility.deduplicate",
+            id: "utility.freeUpSpace",
+            label: t("free_up_space"),
+            path: [preferencesCategory, t("free_up_space")],
+            keywords: ["free", "space", "storage", "clean"],
+        },
+        {
+            id: "freeUpSpace.deduplicate",
             label: t("deduplicate_files"),
-            path: [preferencesCategory, t("deduplicate_files")],
+            path: [
+                preferencesCategory,
+                t("free_up_space"),
+                t("deduplicate_files"),
+            ],
             keywords: ["duplicate", "dedupe"],
+        },
+        {
+            id: "freeUpSpace.largeFiles",
+            label: t("large_files_title"),
+            path: [
+                preferencesCategory,
+                t("free_up_space"),
+                t("large_files_title"),
+            ],
+            keywords: ["large", "big", "files", "size", "space"],
         },
         {
             id: "utility.preferences",
@@ -332,8 +353,15 @@ export const performSidebarAction = async (
             ctx.onShowWatchFolder();
             return Promise.resolve();
 
-        case "utility.deduplicate":
-            return ctx.onRouteToDeduplicate().then(() => ctx.onClose());
+        case "utility.freeUpSpace":
+            ctx.showFreeUpSpace();
+            return Promise.resolve();
+
+        case "freeUpSpace.deduplicate":
+        case "freeUpSpace.largeFiles":
+            ctx.setPendingFreeUpSpaceAction(actionID);
+            ctx.showFreeUpSpace();
+            return Promise.resolve();
 
         case "utility.preferences":
             ctx.showPreferences();
