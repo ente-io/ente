@@ -5,6 +5,7 @@ on:
     pull_request:
         paths:
             - "mobile/apps/auth/**"
+            - "mobile/packages/**"
             - ".github/workflows/auth-lint.yml"
 
 env:
@@ -14,7 +15,7 @@ permissions:
     contents: read
 
 jobs:
-    lint:
+    auth-lint:
         runs-on: ubuntu-latest
         defaults:
             run:

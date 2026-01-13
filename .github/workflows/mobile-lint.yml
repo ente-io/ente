@@ -5,7 +5,7 @@ on:
     pull_request:
         paths:
             - "mobile/apps/photos/**"
-            - "mobile/packages/rust/**"
+            - "mobile/packages/**"
             - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 
@@ -17,7 +17,7 @@ permissions:
     contents: read
 
 jobs:
-    lint:
+    mobile-lint:
         runs-on: ubuntu-latest
         defaults:
             run:
