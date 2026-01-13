@@ -75,9 +75,9 @@ class EmptyStateWidget extends StatelessWidget {
       ),
     );
 
-    // if (!showBorder) {
-    //   return content;
-    // }
+    if (!showBorder) {
+      return content;
+    }
 
     return DottedBorder(
       options: RoundedRectDottedBorderOptions(
