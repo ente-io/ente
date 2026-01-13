@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';

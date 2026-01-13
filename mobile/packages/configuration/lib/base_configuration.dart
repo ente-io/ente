@@ -9,7 +9,7 @@ import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_base/models/private_key_attributes.dart';
 import 'package:ente_configuration/constants.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/endpoint_updated_event.dart';
 import 'package:ente_events/models/signed_in_event.dart';
@@ -121,7 +121,7 @@ class BaseConfiguration {
     // Generate a public-private keypair and encrypt the latter
     final keyPair = CryptoUtil.generateKeyPair();
     final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.secretKey.extractBytes(), masterKey);
+        CryptoUtil.encryptSync(keyPair.secretKey, masterKey);
 
     final attributes = KeyAttributes(
       CryptoUtil.bin2base64(kekSalt),
@@ -140,7 +140,7 @@ class BaseConfiguration {
     final privateAttributes = PrivateKeyAttributes(
       CryptoUtil.bin2base64(masterKey),
       CryptoUtil.bin2hex(recoveryKey),
-      CryptoUtil.bin2base64(keyPair.secretKey.extractBytes()),
+      CryptoUtil.bin2base64(keyPair.secretKey),
     );
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }

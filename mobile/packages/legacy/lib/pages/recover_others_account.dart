@@ -3,7 +3,7 @@ import "dart:typed_data";
 
 import "package:ente_accounts/models/set_keys_request.dart";
 import "package:ente_base/models/key_attributes.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/services/emergency_service.dart";
 import "package:ente_strings/ente_strings.dart";

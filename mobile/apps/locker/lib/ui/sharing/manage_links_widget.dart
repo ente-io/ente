@@ -1,6 +1,6 @@
 import "dart:convert";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";

@@ -3,7 +3,7 @@ import "dart:io";
 import "dart:typed_data";
 
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
 import "package:ente_utils/platform_util.dart";
@@ -151,19 +151,18 @@ class LockScreenSettings {
   }
 
   static Uint8List _generateSalt() {
-    return sodium.randombytes.buf(sodium.crypto.pwhash.saltBytes);
+    return CryptoUtil.getSaltToDeriveKey();
   }
 
   Future<void> setPin(String userPin) async {
     await _secureStorage.delete(key: saltKey);
     final salt = _generateSalt();
 
-    final hash = cryptoPwHash(
+    final hash = CryptoUtil.cryptoPwHash(
       utf8.encode(userPin),
       salt,
-      sodium.crypto.pwhash.memLimitInteractive,
-      sodium.crypto.pwhash.opsLimitSensitive,
-      sodium,
+      CryptoUtil.pwhashMemLimitInteractive,
+      CryptoUtil.pwhashOpsLimitSensitive,
     );
     final String saltPin = base64Encode(salt);
     final String hashedPin = base64Encode(hash);
@@ -189,12 +188,11 @@ class LockScreenSettings {
     await _secureStorage.delete(key: saltKey);
     final salt = _generateSalt();
 
-    final hash = cryptoPwHash(
+    final hash = CryptoUtil.cryptoPwHash(
       utf8.encode(pass),
       salt,
-      sodium.crypto.pwhash.memLimitInteractive,
-      sodium.crypto.pwhash.opsLimitSensitive,
-      sodium,
+      CryptoUtil.pwhashMemLimitInteractive,
+      CryptoUtil.pwhashOpsLimitSensitive,
     );
 
     await _secureStorage.write(key: saltKey, value: base64Encode(salt));

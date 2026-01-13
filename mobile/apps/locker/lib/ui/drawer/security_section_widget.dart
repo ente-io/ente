@@ -5,7 +5,7 @@ import "package:ente_accounts/models/user_details.dart";
 import "package:ente_accounts/pages/request_pwd_verification_page.dart";
 import "package:ente_accounts/services/passkey_service.dart";
 import "package:ente_accounts/services/user_service.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/auth_util.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
