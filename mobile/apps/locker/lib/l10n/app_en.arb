@@ -95,6 +95,8 @@
     }
   },
   "collectionCannotBeDeleted": "This collection cannot be deleted",
+  "collectionCannotBeEdited": "This collection cannot be edited",
+  "collectionCannotBeShared": "This collection cannot be shared",
   "deleteCollection": "Delete collection",
   "deleteCollectionConfirmation": "Are you sure you want to delete \"{collectionName}\"?",
   "@deleteCollectionConfirmation": {
@@ -210,6 +212,7 @@
   "noCollectionsFound": "No collections found",
   "createYourFirstCollection": "Create your first collection to get started",
   "createCollection": "Create collection",
+  "enterCollectionName": "Enter collection name",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
   "collectionEmptyStateTitle": "Nothing to see here",
@@ -902,7 +905,10 @@
   "subscriptionRequiredForSharing": "You need a paid subscription to share links",
   "sessionExpired": "Session expired",
   "pleaseLoginAgain": "Please login again",
-  "language": "Language",
+  "filters": "Filters",
+  "seeAllCollections": "See all collections",
+  "clearAllFilters": "Clear all filters",
   "selectLanguage": "Select language",
-  "general": "General"
+  "general": "General",
+  "language": "Language"
 }

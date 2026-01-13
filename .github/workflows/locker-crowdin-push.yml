@@ -29,8 +29,7 @@ jobs:
                   upload_sources: true
                   upload_translations: false
                   download_translations: false
-                  # TODO: Replace with actual Crowdin project ID after creating the project
-                  project_id: ${{ vars.CROWDIN_LOCKER_PROJECT_ID }}
+                  project_id: 860056
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

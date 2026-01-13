@@ -459,6 +459,13 @@ const clearCachedThumbnailIfContentChanged = async (
 };
 
 /**
+ * Return all collections (both normal and hidden) that are present in our
+ * local database.
+ */
+export const savedAllCollections = (): Promise<Collection[]> =>
+    savedCollections();
+
+/**
  * Return all normal (non-hidden) collections that are present in our local
  * database.
  */

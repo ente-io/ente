@@ -1,6 +1,6 @@
 import "dart:typed_data";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 

@@ -6,7 +6,6 @@ import "package:ente_ui/theme/text_style.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -40,37 +39,6 @@ class _TrashPageState extends State<TrashPage> {
     super.initState();
     _allTrashFiles = List.from(widget.trashFiles);
     _sortedTrashFiles = List.from(widget.trashFiles);
-  }
-
-  List<OverflowMenuAction> _getFileOverflowActions() {
-    final colorScheme = getEnteColorScheme(context);
-    return [
-      OverflowMenuAction(
-        id: 'restore',
-        label: context.l10n.restore,
-        icon: Icon(
-          Icons.restore,
-          color: colorScheme.textBase,
-          size: 20,
-        ),
-        onTap: (context, file, collection) {
-          _restoreFile(context, file!);
-        },
-      ),
-      OverflowMenuAction(
-        id: 'delete',
-        label: context.l10n.delete,
-        icon: HugeIcon(
-          icon: HugeIcons.strokeRoundedDelete01,
-          color: colorScheme.warning500,
-          size: 20,
-        ),
-        onTap: (context, file, collection) {
-          _deleteFilePermanently(context, file!);
-        },
-        isWarning: true,
-      ),
-    ];
   }
 
   void _restoreFile(BuildContext context, EnteFile file) async {
@@ -243,8 +211,8 @@ class _TrashPageState extends State<TrashPage> {
                   await _emptyTrash();
                 },
                 child: Container(
-                  height: 48,
-                  width: 48,
+                  height: 44,
+                  width: 44,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: colorScheme.backdropBase,
@@ -268,7 +236,6 @@ class _TrashPageState extends State<TrashPage> {
               : Expanded(
                   child: ItemListView(
                     files: _sortedTrashFiles.cast<EnteFile>(),
-                    fileOverflowActions: _getFileOverflowActions(),
                     physics: const BouncingScrollPhysics(),
                   ),
                 ),

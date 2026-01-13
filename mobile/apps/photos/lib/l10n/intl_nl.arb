@@ -1931,10 +1931,6 @@
   "hoorayyyy": "Hoeraaaa!",
   "nothingToTidyUpHere": "Niks op te schonen hier",
   "deletingDash": "Verwijderen - ",
-  "cLTitle1": "Opmerkingen en reacties",
-  "cLDesc1": "We introduceren opmerkingen en reacties op gedeelde foto's. Je kunt reageren of een opmerking plaatsen op een foto door deze te openen en de acties onderaan te gebruiken. Alle inkomende opmerkingen en reacties zijn zichtbaar op het tabblad Gedeeld.",
-  "cLTitle2": "Beheerder voor albums",
-  "cLDesc2": "Je kunt nu een andere Ente-gebruiker aanwijzen als beheerder van je album. Hiermee kan deze andere kijkers en medewerkers toevoegen, foto's uit albums verwijderen en zelfs deelnemers suggereren hun foto's te verwijderen.",
   "closeBy": "Nauw verwant",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

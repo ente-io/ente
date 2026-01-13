@@ -1,0 +1,18 @@
+name: ente_crypto_dart_adapter
+description: CryptoApi implementation backed by ente_crypto_dart.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  ente_crypto_api:
+    path: ../ente_crypto_api
+  ente_crypto_dart:
+    git:
+      url: https://github.com/ente-io/ente_crypto_dart.git
+  meta: ^1.11.0
+
+dev_dependencies:
+  lints: ^3.0.0
