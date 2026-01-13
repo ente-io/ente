@@ -220,11 +220,20 @@ func runImport(folderPath, albumName string, dryRun, skipMetadata bool) error {
 		return fmt.Errorf("failed to decrypt collection key: %w", err)
 	}
 
+	session := uploader.NewUploadSession(ctrl.Client, collection)
+
+	// Fetch existing files to build a duplicate detection map
+	log.Println("Fetching existing files for duplicate detection...")
+	existingFiles, err := fetchExistingFilesMap(ctx, ctrl.Client, collection.ID, collectionKey, session)
+	if err != nil {
+		debugLog("Failed to fetch existing files (will proceed without duplicate detection): %v", err)
+		existingFiles = make(map[string]bool)
+	}
+
 	// Upload each media file
 	mediaFiles := scanResult.GetMediaFiles()
 	log.Printf("\nUploading %d files...\n", len(mediaFiles))
 
-	session := uploader.NewUploadSession(ctrl.Client, collection)
 	successCount := 0
 	errorCount := 0
 
@@ -294,6 +303,22 @@ func runImport(folderPath, albumName string, dryRun, skipMetadata bool) error {
 		if err != nil {
 			log.Printf(" ERROR encrypting file key: %v\n", err)
 			errorCount++
+			continue
+		}
+
+		// Compute file hash for duplicate detection
+		fileHash, err := eCrypto.ComputeFileHash(fi.Path)
+		if err != nil {
+			debugLog("Warning: failed to compute hash for %s: %v", fi.FileName, err)
+		} else {
+			metadata.Hash = fileHash
+		}
+
+		// Check for duplicates
+		dupKey := fmt.Sprintf("%s:%s:%d", metadata.Hash, metadata.Title, metadata.FileType)
+		if existingFiles[dupKey] {
+			log.Printf(" Skipping duplicate: %s\n", fi.FileName)
+			successCount++ // Count as success since it's already there
 			continue
 		}
 
@@ -402,4 +427,52 @@ func isVideo(path string) bool {
 		return true
 	}
 	return false
+}
+
+// fetchExistingFilesMap fetches metadata for all files in a collection and builds a map for duplicate detection
+func fetchExistingFilesMap(ctx context.Context, client *api.Client, collectionID int64, collectionKey []byte, session *uploader.UploadSession) (map[string]bool, error) {
+	filesMap := make(map[string]bool)
+	sinceTime := int64(0)
+	for {
+		files, hasMore, err := client.GetFiles(ctx, collectionID, sinceTime)
+		if err != nil {
+			return nil, err
+		}
+		for _, f := range files {
+			if f.IsRemovedFromAlbum() {
+				continue
+			}
+			// Decrypt file key
+			encFileKey, _ := base64.StdEncoding.DecodeString(f.EncryptedKey)
+			nonce, _ := base64.StdEncoding.DecodeString(f.KeyDecryptionNonce)
+			fileKey, err := session.DecryptFileKey(encFileKey, nonce, collectionKey)
+			if err != nil {
+				debugLog("failed to decrypt file key for %d: %v", f.ID, err)
+				continue
+			}
+
+			// Decrypt metadata
+			encMeta, _ := base64.StdEncoding.DecodeString(f.Metadata.EncryptedData)
+			metaHeader, _ := base64.StdEncoding.DecodeString(f.Metadata.DecryptionHeader)
+			meta, err := session.DecryptMetadata(encMeta, metaHeader, fileKey)
+			if err != nil {
+				debugLog("failed to decrypt metadata for %d: %v", f.ID, err)
+				continue
+			}
+
+			if meta.Hash != "" {
+				// Key format: hash:title:fileType
+				// This matches web client's areFilesSame logic
+				key := fmt.Sprintf("%s:%s:%d", meta.Hash, meta.Title, meta.FileType)
+				filesMap[key] = true
+			}
+			if f.UpdationTime > sinceTime {
+				sinceTime = f.UpdationTime
+			}
+		}
+		if !hasMore {
+			break
+		}
+	}
+	return filesMap, nil
 }

@@ -2,12 +2,14 @@ package crypto
 
 import (
 	"bufio"
+	"encoding/base64"
 	"errors"
 	"io"
 	"log"
 	"os"
 
 	"github.com/ente-io/cli/utils/encoding"
+	"github.com/minio/blake2b-simd"
 	"golang.org/x/crypto/nacl/box"
 	"golang.org/x/crypto/nacl/secretbox"
 )
@@ -290,6 +292,28 @@ func DecryptFile(encryptedFilePath string, decryptedFilePath string, key, nonce 
 		return err
 	}
 	return nil
+}
+
+// ComputeFileHash computes a BLAKE2b hash of file content, matching web client behavior.
+// It returns the hash as a base64 encoded string.
+func ComputeFileHash(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Ente uses 32-byte BLAKE2b hashes for file content
+	hasher, err := blake2b.New(&blake2b.Config{Size: 32})
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := io.Copy(hasher, file); err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(hasher.Sum(nil)), nil
 }
 
 //func DecryptFileLib(encryptedFilePath string, decryptedFilePath string, key, nonce []byte) error {

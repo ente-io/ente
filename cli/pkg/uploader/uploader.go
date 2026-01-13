@@ -30,6 +30,7 @@ type SimpleFileMetadata struct {
 	ModificationTime int64   `json:"modificationTime"`
 	Latitude         float64 `json:"latitude,omitempty"`
 	Longitude        float64 `json:"longitude,omitempty"`
+	Hash             string  `json:"hash,omitempty"`
 }
 
 // EncryptedFileData contains the encrypted file components
@@ -66,13 +67,39 @@ func (us *UploadSession) EncryptFileData(data []byte, collectionKey []byte) (*En
 }
 
 // EncryptMetadata encrypts file metadata
-func (us *UploadSession) EncryptMetadata(metadata *SimpleFileMetadata, collectionKey []byte) (*EncryptedFileData, error) {
+func (us *UploadSession) EncryptMetadata(metadata *SimpleFileMetadata, fileKey []byte) (*EncryptedFileData, error) {
 	metadataJSON, err := json.Marshal(metadata)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal metadata: %w", err)
 	}
 
-	return us.EncryptFileData(metadataJSON, collectionKey)
+	return us.EncryptFileData(metadataJSON, fileKey)
+}
+
+// DecryptMetadata decrypts encrypted file metadata
+func (us *UploadSession) DecryptMetadata(encData, header []byte, fileKey []byte) (*SimpleFileMetadata, error) {
+	decryptor, err := crypto.NewDecryptor(fileKey, header)
+	if err != nil {
+		return nil, err
+	}
+	decryptedJSON, tag, err := decryptor.Pull(encData)
+	if err != nil {
+		return nil, err
+	}
+	if tag != crypto.TagFinal {
+		return nil, fmt.Errorf("invalid tag: %v", tag)
+	}
+
+	var metadata SimpleFileMetadata
+	if err := json.Unmarshal(decryptedJSON, &metadata); err != nil {
+		return nil, err
+	}
+	return &metadata, nil
+}
+
+// DecryptFileKey decrypts a file key using the collection key
+func (us *UploadSession) DecryptFileKey(encryptedKey, nonce, collectionKey []byte) ([]byte, error) {
+	return crypto.SecretBoxOpen(encryptedKey, nonce, collectionKey)
 }
 
 // ReadAndEncryptFile reads a file from disk and encrypts it using chunked encryption
