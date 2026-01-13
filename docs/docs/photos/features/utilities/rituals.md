@@ -1,9 +1,6 @@
 ---
 title: Rituals
 description: Build consistent photo habits with daily rituals and streak tracking in Ente Photos
-authors:
-  - name: shanthy17
-    email: shanthy@ente.io
 ---
 
 # Rituals
