@@ -213,28 +213,9 @@ Even in collaborative albums with many participants, your comments remain privat
 
 ## Limitations
 
-- Comments are only available in shared albums (either shared with Ente users or via public links)
 - Private albums that haven't been shared don't support comments or reactions
 - You cannot edit comments after posting (you can delete and repost if needed)
 - Comments cannot include attachments, formatting, or embedded media (text only)
-- Free plan users have the same commenting capabilities as paid users
-
-## Use cases
-
-**Family albums:**
-- Comment on vacation photos as memories unfold
-- React to cute kid moments
-- Reply to questions about specific photos
-
-**Event collection:**
-- Let wedding guests comment on photos they're uploading
-- See reactions to your favorite shots from the event
-- Engage with contributors through the feed
-
-**Collaborative projects:**
-- Discuss photo selection with team members
-- Leave feedback on specific images
-- Track activity through the feed feature
 
 ## Related topics
 
