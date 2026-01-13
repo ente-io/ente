@@ -363,6 +363,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool _isInitialLoad = true;
   bool userDismissedPersonGallerySuggestion = false;
   String _searchQuery = "";
+  int _suggestionReloadToken = 0;
 
   bool get _isSearching => _searchQuery.trim().isNotEmpty;
 
@@ -421,9 +422,12 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               (person) =>
                   (person.params[kClusterParamId] as String?) == event.source,
             );
-            setState(() {});
+            setState(() {
+              _suggestionReloadToken++;
+            });
           } else {
             setState(() {
+              _suggestionReloadToken++;
               _isInitialLoad = false;
               _isLoaded = false;
               sectionData = getResults();
@@ -620,6 +624,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                             });
                           },
                           child: PersonGallerySuggestion(
+                            key: ValueKey(
+                              'personGallerySuggestionAll_$_suggestionReloadToken',
+                            ),
                             person: null,
                             onClose: () {
                               setState(() {
