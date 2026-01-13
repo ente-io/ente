@@ -75,16 +75,16 @@ class EmptyStateWidget extends StatelessWidget {
       ),
     );
 
-    if (!showBorder) {
-      return content;
-    }
+    // if (!showBorder) {
+    //   return content;
+    // }
 
     return DottedBorder(
-      options: const RoundedRectDottedBorderOptions(
+      options: RoundedRectDottedBorderOptions(
         strokeWidth: 1,
-        color: Color.fromRGBO(82, 82, 82, 0.6),
-        dashPattern: [5, 5],
-        radius: Radius.circular(24),
+        color: colorScheme.textFaint,
+        dashPattern: const [5, 5],
+        radius: const Radius.circular(24),
       ),
       child: content,
     );

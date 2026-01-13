@@ -194,12 +194,12 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
         await _createNewCollection();
       },
       child: DottedBorder(
-        options: const RoundedRectDottedBorderOptions(
+        options: RoundedRectDottedBorderOptions(
           strokeWidth: 1,
           padding: EdgeInsets.zero,
-          color: Color(0xFF6B6B6B),
-          dashPattern: [5, 5],
-          radius: Radius.circular(16),
+          color: colorScheme.textFaint,
+          dashPattern: const [5, 5],
+          radius: const Radius.circular(16),
         ),
         child: Container(
           constraints: const BoxConstraints(minHeight: 42),
