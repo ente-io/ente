@@ -115,8 +115,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   bool get _isSelectionEnabled =>
       collectionViewType != CollectionViewType.sharedCollectionViewer &&
       collectionViewType != CollectionViewType.sharedCollectionCollaborator &&
-      collectionViewType != CollectionViewType.quickLink &&
-      collectionViewType != CollectionViewType.favorite;
+      collectionViewType != CollectionViewType.quickLink;
 
   @override
   void initState() {

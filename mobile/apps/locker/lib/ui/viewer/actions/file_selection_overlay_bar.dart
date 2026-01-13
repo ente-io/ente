@@ -119,16 +119,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
   }
 
-  bool get showFileSelectionOverlayBar {
-    final viewType = widget.collectionViewType;
-    if (viewType == null) return true;
-
-    return viewType != CollectionViewType.sharedCollectionViewer &&
-        viewType != CollectionViewType.sharedCollectionCollaborator &&
-        viewType != CollectionViewType.quickLink &&
-        viewType != CollectionViewType.favorite;
-  }
-
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
