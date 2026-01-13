@@ -1,3 +1,4 @@
+- Ashil: Show large thumbnail for unsupported image formats in file viewer
 - Neeraj: Collage creator: swap photos via long-press select + tap to replace
 - Prateek: (i) Always enable video streaming
 -- Release Cut Off --
