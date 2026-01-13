@@ -1,14 +1,11 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ImageIcon from "@mui/icons-material/Image";
-import SortIcon from "@mui/icons-material/Sort";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import {
     Box,
     Chip,
     IconButton,
     LinearProgress,
-    Menu,
-    MenuItem,
     Stack,
     styled,
     Typography,
@@ -37,7 +34,6 @@ import {
     largeFilesReducer,
     type LargeFileFilter,
     type LargeFileItem,
-    type SortOrder,
 } from "ente-new/photos/services/large-files";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -93,10 +89,10 @@ const Page: React.FC = () => {
 
     const handleDeleteFiles = useCallback(() => {
         showMiniDialog({
-            title: t("delete_files_title"),
-            message: t("delete_files_message"),
+            title: t("trash_files_title"),
+            message: t("trash_files_message"),
             continue: {
-                text: t("delete_permanently"),
+                text: t("move_to_trash"),
                 color: "critical",
                 action: () => {
                     dispatch({ type: "delete" });
@@ -176,10 +172,6 @@ const Page: React.FC = () => {
                 onChangeFilter={(filter) =>
                     dispatch({ type: "changeFilter", filter })
                 }
-                sortOrder={state.sortOrder}
-                onChangeSortOrder={(sortOrder) =>
-                    dispatch({ type: "changeSortOrder", sortOrder })
-                }
             />
             {contents}
             <FileViewer
@@ -200,33 +192,10 @@ export default Page;
 interface NavbarProps {
     filter: LargeFileFilter;
     onChangeFilter: (filter: LargeFileFilter) => void;
-    sortOrder: SortOrder;
-    onChangeSortOrder: (sortOrder: SortOrder) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({
-    filter,
-    onChangeFilter,
-    sortOrder,
-    onChangeSortOrder,
-}) => {
+const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
     const router = useRouter();
-    const [sortMenuAnchor, setSortMenuAnchor] = useState<null | HTMLElement>(
-        null,
-    );
-
-    const handleOpenSortMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setSortMenuAnchor(event.currentTarget);
-    };
-
-    const handleCloseSortMenu = () => {
-        setSortMenuAnchor(null);
-    };
-
-    const handleSortOrderChange = (order: SortOrder) => {
-        onChangeSortOrder(order);
-        handleCloseSortMenu();
-    };
 
     return (
         <Stack
@@ -248,48 +217,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     </IconButton>
                 </Box>
                 <Typography variant="h6">{t("large_files_title")}</Typography>
-                <Box
-                    sx={{
-                        minWidth: "100px",
-                        display: "flex",
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    <IconButton onClick={handleOpenSortMenu}>
-                        <SortIcon
-                            sx={{
-                                transform:
-                                    sortOrder === "asc" ? "scaleY(-1)" : "none",
-                            }}
-                        />
-                    </IconButton>
-                    <Menu
-                        anchorEl={sortMenuAnchor}
-                        open={Boolean(sortMenuAnchor)}
-                        onClose={handleCloseSortMenu}
-                        anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "right",
-                        }}
-                        transformOrigin={{
-                            vertical: "top",
-                            horizontal: "right",
-                        }}
-                    >
-                        <MenuItem
-                            selected={sortOrder === "desc"}
-                            onClick={() => handleSortOrderChange("desc")}
-                        >
-                            {t("sort_largest_first")}
-                        </MenuItem>
-                        <MenuItem
-                            selected={sortOrder === "asc"}
-                            onClick={() => handleSortOrderChange("asc")}
-                        >
-                            {t("sort_smallest_first")}
-                        </MenuItem>
-                    </Menu>
-                </Box>
+                <Box sx={{ minWidth: "100px" }} />
             </Stack>
             <FilterChips {...{ filter, onChangeFilter }} />
         </Stack>
