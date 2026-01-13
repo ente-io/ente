@@ -26,6 +26,7 @@ import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/states/detail_page_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
@@ -86,15 +87,27 @@ class FileAppBarState extends State<FileAppBar> {
       });
     });
 
-    // Listen to shared collection changes to rebuild actions
+    // Listen to shared collection and thumbnail fallback changes to rebuild actions
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = InheritedDetailPageState.maybeOf(context)
+      final sharedNotifier = InheritedDetailPageState.maybeOf(context)
           ?.isInSharedCollectionNotifier;
-      notifier?.addListener(_onSharedCollectionChanged);
+      sharedNotifier?.addListener(_onSharedCollectionChanged);
+
+      final fallbackNotifier = InheritedDetailPageState.maybeOf(context)
+          ?.showingThumbnailFallbackNotifier;
+      fallbackNotifier?.addListener(_onThumbnailFallbackChanged);
     });
   }
 
   void _onSharedCollectionChanged() {
+    if (mounted) {
+      setState(() {
+        _reloadActions = true;
+      });
+    }
+  }
+
+  void _onThumbnailFallbackChanged() {
     if (mounted) {
       setState(() {
         _reloadActions = true;
@@ -107,6 +120,9 @@ class FileAppBarState extends State<FileAppBar> {
     InheritedDetailPageState.maybeOf(context)
         ?.isInSharedCollectionNotifier
         .removeListener(_onSharedCollectionChanged);
+    InheritedDetailPageState.maybeOf(context)
+        ?.showingThumbnailFallbackNotifier
+        .removeListener(_onThumbnailFallbackChanged);
     _guestViewEventSubscription.cancel();
     super.dispose();
   }
@@ -181,6 +197,41 @@ class FileAppBarState extends State<FileAppBar> {
 
   List<Widget> _getActions() {
     _actions.clear();
+
+    // Show info icon when thumbnail fallback is active for THIS file
+    final fallbackFileId = InheritedDetailPageState.maybeOf(context)
+        ?.showingThumbnailFallbackNotifier
+        .value;
+    final showingFallback = fallbackFileId == widget.file.generatedID;
+    if (showingFallback) {
+      _actions.add(
+        Tooltip(
+          message:
+              "Your device doesn't support this image format. Showing a preview instead.",
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: backgroundElevated2Dark,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+          preferBelow: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            child: const Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Icon(Icons.info_outline),
+            ),
+          ),
+        ),
+      );
+    }
+
     final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
     final int? collectionID = widget.file.collectionID;
@@ -476,6 +527,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
+
     return _actions;
   }
 

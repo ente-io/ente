@@ -22,6 +22,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
@@ -60,6 +61,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   bool _convertToSupportedFormat = false;
+  bool _showingThumbnailFallback = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
@@ -179,6 +181,15 @@ class _ZoomableImageState extends State<ZoomableImage> {
               ),
             );
           },
+        ),
+      );
+    } else if (_showingThumbnailFallback) {
+      content = Center(
+        child: ThumbnailWidget(
+          _photo,
+          rawThumbnail: true,
+          thumbnailSize: thumbnailLargeSize,
+          fit: BoxFit.contain,
         ),
       );
     } else {
@@ -411,18 +422,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
         imageProvider,
         context,
         onError: (exception, s) async {
-          if (exception.toString().contains(
-                    "Codec failed to produce an image, possibly due to invalid image data",
-                  ) ||
-              exception.toString().contains(
-                    "Could not decompress image.",
-                  )) {
-            unawaited(_loadInSupportedFormat(file, e));
-          } else {
-            _logger.warning(
-              "Failed to load image ${_photo.displayName} with error: $exception",
-            );
-          }
+          _logger.warning(
+            "Failed to load image ${_photo.displayName} with error: $exception, attempting fallback",
+          );
+          unawaited(_loadInSupportedFormat(file, exception));
         },
       ).then((value) {
         if (mounted && !_loadedFinalImage && !_convertToSupportedFormat) {
@@ -476,10 +479,53 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 
+  bool _isRawFile() {
+    final extension = _photo.displayName.toLowerCase().split('.').last;
+    const rawExtensions = {
+      'arw', // Sony
+      'cr2', 'cr3', // Canon
+      'nef', 'nrw', // Nikon
+      'dng', // Adobe/generic
+      'orf', // Olympus
+      'raf', // Fuji
+      'rw2', // Panasonic
+      'pef', // Pentax
+      'srw', // Samsung
+      '3fr', 'fff', // Hasselblad
+      'rwl', // Leica
+      'x3f', // Sigma
+      'iiq', // Phase One
+      'kdc', 'dcr', // Kodak
+      'mrw', // Minolta
+      'erf', // Epson
+      'mef', // Mamiya
+      'raw', // Generic
+    };
+    return rawExtensions.contains(extension);
+  }
+
   Future<void> _loadInSupportedFormat(
     File file,
     Object unsupportedErr,
   ) async {
+    // Skip compression for RAW files - FlutterImageCompress cannot process them
+    // and will crash. Go directly to thumbnail fallback.
+    if (_isRawFile()) {
+      _logger.info(
+        "Skipping compression for RAW file ${_photo.displayName}, using thumbnail fallback",
+      );
+      _convertToSupportedFormat = true;
+      if (mounted) {
+        setState(() {
+          _showingThumbnailFallback = true;
+        });
+        InheritedDetailPageState.maybeOf(context)
+            ?.showingThumbnailFallbackNotifier
+            .value = _photo.generatedID;
+      }
+      return;
+    }
+
     _logger.info(
       "Compressing ${_photo.displayName} to viewable format due to $unsupportedErr",
     );
@@ -523,6 +569,14 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _logger.severe(
         "Failed to compress image ${_photo.displayName} to viewable format",
       );
+      if (mounted) {
+        setState(() {
+          _showingThumbnailFallback = true;
+        });
+        InheritedDetailPageState.maybeOf(context)
+            ?.showingThumbnailFallbackNotifier
+            .value = _photo.generatedID;
+      }
     }
   }
 }
