@@ -182,15 +182,19 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final controller = _controller;
+    if (state == AppLifecycleState.resumed) {
+      if (controller == null || !controller.value.isInitialized) {
+        unawaited(_initializeCamera(_activeCamera));
+      }
+      return;
+    }
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
-      controller.dispose();
+      unawaited(controller.dispose());
       _controller = null;
-    } else if (state == AppLifecycleState.resumed && _activeCamera != null) {
-      _initializeCamera(_activeCamera);
     }
   }
 
