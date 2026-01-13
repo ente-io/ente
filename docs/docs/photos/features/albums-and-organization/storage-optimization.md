@@ -160,6 +160,8 @@ From here you can:
 - Select individual files or multiple files
 - Delete selected files to free up your Ente storage quota
 
+Deleting files moves them to Trash (recoverable for 30 days) before permanent deletion
+
 ### What counts as a large file
 
 Files are shown if they:
@@ -167,13 +169,6 @@ Files are shown if they:
 - Are larger than 10 MB in size
 - Have been uploaded to Ente
 - Are owned by you (not shared files from others)
-
-### Tips for managing large files
-
-- **Long videos** typically consume the most storage - consider whether you need to keep full-resolution versions
-- **Live Photos** can be larger than regular photos due to the video component
-- **High-resolution photos** from professional cameras may be candidates for review
-- Deleting files moves them to Trash (recoverable for 30 days) before permanent deletion
 
 ## Delete suggestions
 
