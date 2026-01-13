@@ -34,7 +34,14 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
         //
         // The recommended workaround for now is to enable usePolling. Since it
         // comes at a performance cost, we only do it where needed (macOS).
-        ...(process.platform == "darwin" ? { usePolling: true } : {}),
+        //
+        // Polling with the default interval (100ms) causes high CPU usage for
+        // large folders (e.g. 10,000+ files). Increasing the interval to 5
+        // seconds significantly reduces CPU while still detecting new files
+        // within a reasonable time for a backup use case.
+        ...(process.platform == "darwin"
+            ? { usePolling: true, interval: 5000, binaryInterval: 5000 }
+            : {}),
     });
 
     watcher
