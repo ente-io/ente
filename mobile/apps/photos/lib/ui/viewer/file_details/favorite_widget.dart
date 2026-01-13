@@ -172,7 +172,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
       onTap: _onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
         width: 34,
         height: 30,
         child: rive.RiveWidgetBuilder(
