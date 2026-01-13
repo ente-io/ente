@@ -89,7 +89,7 @@ class FlagService {
   bool get facesTimeline => internalUser;
   bool get ritualsFlag => true;
 
-  bool get stopStreamProcess => internalUser;
+  bool get stopStreamProcess => true;
 
   bool get streamEnabledByDefault => internalUser;
 
