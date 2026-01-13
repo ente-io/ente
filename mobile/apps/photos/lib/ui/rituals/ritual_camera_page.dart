@@ -42,6 +42,16 @@ void openRitualCamera(BuildContext context, Ritual ritual) {
 
 enum _CameraScreenMode { capture, review }
 
+class _RitualCapture {
+  const _RitualCapture({
+    required this.file,
+    required this.mirrorPreview,
+  });
+
+  final XFile file;
+  final bool mirrorPreview;
+}
+
 class RitualCameraPage extends StatefulWidget {
   const RitualCameraPage({
     super.key,
@@ -73,7 +83,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   bool _capturing = false;
   bool _saving = false;
   String? _error;
-  List<XFile> _captures = <XFile>[];
+  List<_RitualCapture> _captures = <_RitualCapture>[];
   Collection? _album;
   bool _isPinching = false;
   double _minAvailableZoom = 1.0;
@@ -392,6 +402,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         _saving) {
       return;
     }
+    final bool shouldMirrorPreview =
+        _controller!.description.lensDirection == CameraLensDirection.front;
     setState(() {
       _capturing = true;
     });
@@ -399,7 +411,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       final XFile capture = await _controller!.takePicture();
       if (!mounted) return;
       setState(() {
-        _captures = List<XFile>.from(_captures)..add(capture);
+        _captures = List<_RitualCapture>.from(_captures)
+          ..add(
+            _RitualCapture(
+              file: capture,
+              mirrorPreview: shouldMirrorPreview,
+            ),
+          );
       });
       _ensurePageVisible(_captures.length - 1, animate: true);
       _scrollThumbsToIndex(_captures.length - 1, animate: true);
@@ -462,7 +480,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           .whenComplete(_resumePreview);
       return;
     }
-    final List<XFile> pending = List<XFile>.from(_captures);
+    final List<_RitualCapture> pending =
+        List<_RitualCapture>.from(_captures);
     bool saved = false;
     setState(() {
       _saving = true;
@@ -470,8 +489,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     try {
       final shared = pending
           .map(
-            (file) => SharedMediaFile(
-              path: file.path,
+            (capture) => SharedMediaFile(
+              path: capture.file.path,
               type: SharedMediaType.image,
             ),
           )
@@ -510,7 +529,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         setState(() {
           _saving = false;
           if (saved) {
-            _captures = <XFile>[];
+            _captures = <_RitualCapture>[];
           }
         });
       }
@@ -537,9 +556,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
 
   void _removeCapture(int index) {
     if (index < 0 || index >= _captures.length) return;
-    final file = _captures[index];
+    final capture = _captures[index];
     try {
-      File(file.path).deleteSync();
+      File(capture.file.path).deleteSync();
     } catch (_) {
       // best-effort cleanup
     }
@@ -558,16 +577,16 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
-  void _cleanupCaptures([List<XFile>? files]) {
+  void _cleanupCaptures([List<_RitualCapture>? files]) {
     final targets = files ?? _captures;
     for (final capture in targets) {
       try {
-        File(capture.path).deleteSync();
+        File(capture.file.path).deleteSync();
       } catch (_) {
         // ignore cleanup failures
       }
     }
-    _captures = <XFile>[];
+    _captures = <_RitualCapture>[];
   }
 
   Future<void> _pausePreview() async {
@@ -795,8 +814,6 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 previewRect.top + _focusPointRel!.dy * previewRect.height,
               );
 
-        final bool shouldUnmirrorPreview =
-            _activeCamera?.lensDirection == CameraLensDirection.front;
         final cameraPreview = CameraPreview(_controller!);
 
         return Stack(
@@ -808,13 +825,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 child: SizedBox(
                   width: rotatedPreviewSize.width,
                   height: rotatedPreviewSize.height,
-                  child: shouldUnmirrorPreview
-                      ? Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                          child: cameraPreview,
-                        )
-                      : cameraPreview,
+                  child: cameraPreview,
                 ),
               ),
             ),
@@ -924,11 +935,14 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         },
         itemBuilder: (context, index) {
           final capture = _captures[index];
-          return Image.file(
-            File(capture.path),
-            fit: BoxFit.contain,
-            width: double.infinity,
-            height: double.infinity,
+          return _MirroredImage(
+            mirror: capture.mirrorPreview,
+            child: Image.file(
+              File(capture.file.path),
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           );
         },
       ),
@@ -1114,9 +1128,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         offset.dx.clamp(0.0, 1.0),
         offset.dy.clamp(0.0, 1.0),
       );
-      final bool shouldUnmirrorPreview =
+      final bool shouldMirrorPreview =
           _activeCamera?.lensDirection == CameraLensDirection.front;
-      final Offset cameraPoint = shouldUnmirrorPreview
+      final Offset cameraPoint = shouldMirrorPreview
           ? Offset(1.0 - clamped.dx, clamped.dy)
           : clamped;
       controller.setExposurePoint(cameraPoint);
@@ -1165,7 +1179,7 @@ class _ThumbnailStrip extends StatelessWidget {
     required this.onRemove,
   });
 
-  final List<XFile> captures;
+  final List<_RitualCapture> captures;
   final int selectedIndex;
   final ScrollController controller;
   final ValueChanged<int> onSelect;
@@ -1186,7 +1200,7 @@ class _ThumbnailStrip extends StatelessWidget {
           return GestureDetector(
             onTap: () => onSelect(index),
             child: _ReviewThumb(
-              file: capture,
+              capture: capture,
               selected: index == selectedIndex,
               onRemove: () => onRemove(index),
             ),
@@ -1200,12 +1214,13 @@ class _ThumbnailStrip extends StatelessWidget {
 class _LatestPreview extends StatelessWidget {
   const _LatestPreview({required this.captures, required this.onTap});
 
-  final List<XFile> captures;
+  final List<_RitualCapture> captures;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final XFile? lastCapture = captures.isNotEmpty ? captures.last : null;
+    final _RitualCapture? lastCapture =
+        captures.isNotEmpty ? captures.last : null;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
       switchInCurve: Curves.easeOut,
@@ -1223,7 +1238,7 @@ class _LatestPreview extends StatelessWidget {
       child: lastCapture == null
           ? const SizedBox.shrink()
           : GestureDetector(
-              key: ValueKey(lastCapture.path),
+              key: ValueKey(lastCapture.file.path),
               onTap: onTap,
               child: SizedBox(
                 width: 48,
@@ -1233,9 +1248,12 @@ class _LatestPreview extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        File(lastCapture.path),
-                        fit: BoxFit.cover,
+                      child: _MirroredImage(
+                        mirror: lastCapture.mirrorPreview,
+                        child: Image.file(
+                          File(lastCapture.file.path),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     Positioned.fill(
@@ -1393,14 +1411,36 @@ class _RoundIconButton extends StatelessWidget {
   }
 }
 
+class _MirroredImage extends StatelessWidget {
+  const _MirroredImage({
+    required this.mirror,
+    required this.child,
+  });
+
+  final bool mirror;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!mirror) {
+      return child;
+    }
+    return Transform(
+      alignment: Alignment.center,
+      transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+      child: child,
+    );
+  }
+}
+
 class _ReviewThumb extends StatelessWidget {
   const _ReviewThumb({
-    required this.file,
+    required this.capture,
     required this.onRemove,
     required this.selected,
   });
 
-  final XFile file;
+  final _RitualCapture capture;
   final VoidCallback onRemove;
   final bool selected;
 
@@ -1419,11 +1459,14 @@ class _ReviewThumb extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.file(
-              File(file.path),
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+            child: _MirroredImage(
+              mirror: capture.mirrorPreview,
+              child: Image.file(
+                File(capture.file.path),
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
