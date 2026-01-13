@@ -188,7 +188,7 @@ export const DownloadStatusNotifications: React.FC<
             <Notification
                 key={group.id}
                 horizontal="left"
-                sx={{
+                sx={(theme) => ({
                     "&&": { bottom: `${index * 80 + 20}px` },
                     width: "min(400px, 100vw)",
                     borderRadius: "20px",
@@ -201,7 +201,21 @@ export const DownloadStatusNotifications: React.FC<
                         height: "40px",
                         "& svg": { fontSize: "22px" },
                     },
-                }}
+                    [theme.breakpoints.down("sm")]: {
+                        "&&": { bottom: `${index * 70 + 16}px` },
+                        width: "min(340px, calc(100vw - 16px))",
+                        borderRadius: "16px",
+                        "& .MuiButton-root": {
+                            borderRadius: "16px",
+                            padding: "12px 12px 12px 16px",
+                        },
+                        "& .MuiIconButton-root": {
+                            width: "36px",
+                            height: "36px",
+                            "& svg": { fontSize: "20px" },
+                        },
+                    },
+                })}
                 open={true}
                 onClose={createOnClose(group)}
                 keepOpenOnClick
