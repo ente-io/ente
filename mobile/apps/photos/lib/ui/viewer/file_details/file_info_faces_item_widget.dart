@@ -4,7 +4,9 @@ import "dart:typed_data";
 import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
@@ -47,11 +49,18 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   List<_FaceInfo> _remainingFaces = [];
   List<PersonEntity> _manualPersons = [];
   NoFacesReason? _errorReason;
+  late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
   @override
   void initState() {
     super.initState();
     loadFaces();
+    _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(loadFaces(isRefresh: true));
+    });
   }
 
   Future<void> loadFaces({bool isRefresh = false}) async {
@@ -81,6 +90,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _peopleChangedEvent.cancel();
+    super.dispose();
   }
 
   @override
