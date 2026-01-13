@@ -211,13 +211,13 @@ class CollectionActions {
 
       showToast(
         context,
-        "${collections.length} collections deleted successfully",
+        context.l10n.collectionsDeletedSuccessfully(collections.length),
       );
 
       if (isFavoriteCollection) {
         showToast(
           context,
-          "Action not supported on Favourites album",
+          context.l10n.actionNotSupportedOnFavouritesAlbum,
         );
       }
 
@@ -356,7 +356,7 @@ class CollectionActions {
           onSuccess?.call();
           showToast(
             context,
-            "Leave collection successfully",
+            context.l10n.leaveCollectionSuccessfully,
           );
         }
       } catch (e) {
@@ -399,7 +399,7 @@ class CollectionActions {
           onSuccess?.call();
           showToast(
             context,
-            "Left ${collections.length} collection${collections.length > 1 ? 's' : ''} successfully",
+            context.l10n.leftCollectionsSuccessfully(collections.length),
           );
         }
       } catch (e) {
@@ -449,7 +449,7 @@ class CollectionActions {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: "Yes, remove",
+          labelText: context.l10n.yesRemove,
           onTap: () async {
             await CollectionApiClient.instance.disableShareUrl(collection);
           },
@@ -462,9 +462,9 @@ class CollectionActions {
           labelText: context.l10n.cancel,
         ),
       ],
-      title: "Remove public link",
-      body:
-          "This will remove the public link for accessing \"${collection.name}\".",
+      title: context.l10n.removePublicLink,
+      body: context.l10n
+          .removePublicLinkConfirmation(collection.name ?? "this collection"),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

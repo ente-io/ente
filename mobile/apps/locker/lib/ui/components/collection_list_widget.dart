@@ -262,5 +262,4 @@ class CollectionListWidget extends StatelessWidget {
       ),
     );
   }
-
 }

@@ -62,7 +62,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (sharedCount > 0 && mounted) {
       showToast(
         context,
-        "Action is not supported for $sharedCount shared file${sharedCount > 1 ? 's' : ''}",
+        context.l10n.actionNotSupportedForSharedFiles(sharedCount),
       );
     }
 
@@ -230,9 +230,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                   listenable: widget.selectedFiles,
                                   builder: (context, child) {
                                     final count = widget.selectedFiles.count;
-                                    final countText = count == 1
-                                        ? '1 selected'
-                                        : '$count selected';
+                                    final countText =
+                                        context.l10n.selectedCount(count);
 
                                     return InkWell(
                                       onTap: () {
@@ -460,7 +459,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           hugeIcon: const HugeIcon(
             icon: HugeIcons.strokeRoundedArrowRight03,
           ),
-          label: "Add to",
+          label: context.l10n.addTo,
           onTap: () => _showAddToDialog(context, files),
         ),
       );
@@ -513,7 +512,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _shareFileLink(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Share is not supported for shared files");
+      showToast(context, context.l10n.shareNotSupportedForSharedFiles);
       return;
     }
     await FileActions.shareFileLink(context, file);
@@ -522,7 +521,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _editFile(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Edit is not supported for shared files");
+      showToast(context, context.l10n.editNotSupportedForSharedFiles);
       return;
     }
     await FileActions.editFile(context, file);
@@ -649,7 +648,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _deleteFile(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Delete is not supported for shared files");
+      showToast(context, context.l10n.deleteNotSupportedForSharedFiles);
       return;
     }
     await FileActions.deleteFile(
@@ -730,7 +729,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _markImportant(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Important is not supported for shared files");
+      showToast(context, context.l10n.importantNotSupportedForSharedFiles);
       return;
     }
     await FileActions.markImportant(

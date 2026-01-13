@@ -147,7 +147,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               selectedCollectionIds: _selectedCollectionIds,
               onToggleCollection: _onToggleCollection,
               onCollectionsUpdated: _onCollectionsUpdated,
-              title: showCollectionSelectionTitle ? context.l10n.collections : '',
+              title:
+                  showCollectionSelectionTitle ? context.l10n.collections : '',
             ),
           ],
         ),

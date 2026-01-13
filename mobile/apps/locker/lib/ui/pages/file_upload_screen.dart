@@ -143,8 +143,9 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                             borderRadius: BorderRadius.circular(16),
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxHeight:
-                                    _files.length > 5 ? 360 : _files.length * 84.0,
+                                maxHeight: _files.length > 5
+                                    ? 360
+                                    : _files.length * 84.0,
                               ),
                               child: ListView.separated(
                                 shrinkWrap: true,

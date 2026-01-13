@@ -2721,6 +2721,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// Number of items selected
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
+  String selectedCount(int count);
+
+  /// Message when action is not supported for shared files
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}'**
+  String actionNotSupportedForSharedFiles(int count);
+
+  /// No description provided for @addTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to'**
+  String get addTo;
+
+  /// No description provided for @shareNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Share is not supported for shared files'**
+  String get shareNotSupportedForSharedFiles;
+
+  /// No description provided for @editNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit is not supported for shared files'**
+  String get editNotSupportedForSharedFiles;
+
+  /// No description provided for @deleteNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete is not supported for shared files'**
+  String get deleteNotSupportedForSharedFiles;
+
+  /// No description provided for @importantNotSupportedForSharedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Important is not supported for shared files'**
+  String get importantNotSupportedForSharedFiles;
+
+  /// No description provided for @sharingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing'**
+  String get sharingSection;
+
+  /// No description provided for @sharingEnabledToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing enabled'**
+  String get sharingEnabledToggle;
+
+  /// No description provided for @publicLinkSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Link'**
+  String get publicLinkSection;
+
+  /// No description provided for @linkEnabledToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link enabled'**
+  String get linkEnabledToggle;
+
+  /// No description provided for @allowUploads.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow uploads'**
+  String get allowUploads;
+
+  /// No description provided for @collectionUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection updated'**
+  String get collectionUpdated;
+
+  /// No description provided for @actionNotSupportedOnFavouritesAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Action not supported on Favourites album'**
+  String get actionNotSupportedOnFavouritesAlbum;
+
+  /// No description provided for @leaveCollectionSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Left collection successfully'**
+  String get leaveCollectionSuccessfully;
+
+  /// Success message when leaving collections
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Left 1 collection successfully} other{Left {count} collections successfully}}'**
+  String leftCollectionsSuccessfully(int count);
+
+  /// No description provided for @removePublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove public link'**
+  String get removePublicLink;
+
+  /// Confirmation message when removing public link
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the public link for accessing \"{collectionName}\".'**
+  String removePublicLinkConfirmation(String collectionName);
+
+  /// Success message when collections are deleted
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}'**
+  String collectionsDeletedSuccessfully(int count);
 }
 
 class _AppLocalizationsDelegate
