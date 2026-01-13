@@ -136,7 +136,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) {
-                      return DeveloperSettingsPage(Configuration.instance);
+                      return DeveloperSettingsPage(
+                        getCurrentEndpoint: () =>
+                            Configuration.instance.getHttpEndpoint(),
+                        setEndpoint: (url) async =>
+                            Configuration.instance.setHttpEndpoint(url),
+                      );
                     },
                   ),
                 );
