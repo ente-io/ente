@@ -1,3 +1,4 @@
+- Laurens: Small improvements to rituals
 - Neeraj: QOL: Priority debouncer for recent local photos (< 7 days) to reduce home gallery delay
 - Neeraj: QOL: Collage creator: swap photos via long-press select + tap to replace
 - Prateek: (i) Always enable video streaming
