@@ -7,7 +7,7 @@ author_email: shanthy@ente.io
 
 # Comments and Reactions
 
-Ente enables rich social interactions on your shared photos and videos through comments and reactions. Whether you're collaborating with family on a vacation album or collecting memories from a wedding, comments and reactions help you engage with shared content while maintaining end-to-end encryption.
+Ente lets you comment on and react to shared photos and videos. Whether you're collaborating with family on a vacation album or collecting memories from a wedding, comments and reactions help you engage with shared content while maintaining end-to-end encryption.
 
 ## Where comments and reactions work
 
