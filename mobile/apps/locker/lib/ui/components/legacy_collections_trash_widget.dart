@@ -1,5 +1,5 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_utils/ente_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";

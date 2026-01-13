@@ -11,11 +11,11 @@ import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_strings/l10n/strings_localizations.dart";
 import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
-import 'package:ente_utils/platform_util.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -45,7 +45,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   registerCryptoApi(const EnteCryptoDartAdapter());
 
-  if (PlatformUtil.isDesktop()) {
+  if (PlatformDetector.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
     final WindowOptions windowOptions = WindowOptions(
@@ -73,7 +73,7 @@ void main() async {
 }
 
 Future<void> _initSystemTray() async {
-  if (PlatformUtil.isMobile()) return;
+  if (PlatformDetector.isMobile()) return;
   final String path = Platform.isWindows
       ? 'assets/icons/locker-icon.ico'
       : 'assets/icons/locker-icon.png';

@@ -7,6 +7,7 @@ import "package:ente_lock_screen/ui/app_lock.dart";
 import "package:ente_lock_screen/ui/lock_screen_auto_lock.dart";
 import "package:ente_lock_screen/ui/lock_screen_password.dart";
 import "package:ente_lock_screen/ui/lock_screen_pin.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
@@ -19,9 +20,8 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_utils/navigation_util.dart";
-import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
+
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -295,7 +295,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     const SizedBox(
                                       height: 24,
                                     ),
-                                    PlatformUtil.isMobile()
+                                    PlatformDetector.isMobile()
                                         ? MenuItemWidget(
                                             captionedTextWidget:
                                                 CaptionedTextWidget(
@@ -316,7 +316,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                             onTap: () => _onAutoLock(),
                                           )
                                         : const SizedBox.shrink(),
-                                    PlatformUtil.isMobile()
+                                    PlatformDetector.isMobile()
                                         ? Padding(
                                             padding: const EdgeInsets.only(
                                               top: 14,
@@ -335,7 +335,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        PlatformUtil.isMobile()
+                        PlatformDetector.isMobile()
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

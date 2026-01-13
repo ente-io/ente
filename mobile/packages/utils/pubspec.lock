@@ -106,7 +106,7 @@ packages:
     source: hosted
     version: "2.1.1"
   email_validator:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: email_validator
       sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
@@ -145,6 +145,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../logging"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_pure_utils:
+    dependency: "direct main"
+    description:
+      path: "../ente_pure_utils"
       relative: true
     source: path
     version: "1.0.0"
@@ -551,7 +558,7 @@ packages:
     source: hosted
     version: "3.2.0"
   path:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: path
       sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"

@@ -4,8 +4,8 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -49,17 +49,15 @@ class ScannerPageState extends State<ScannerPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final bool showGalleryImport = PlatformUtil.isMobile();
+    final bool showGalleryImport = PlatformDetector.isMobile();
     final theme = Theme.of(context);
     final bool isLight = theme.brightness == Brightness.light;
-    final Color galleryBackgroundColor =
-        isLight
-            ? Colors.black.withValues(alpha: 0.035)
-            : Colors.white.withValues(alpha: 0.18);
-    final Color galleryPressedColor =
-        isLight
-            ? Colors.black.withValues(alpha: 0.07)
-            : Colors.white.withValues(alpha: 0.26);
+    final Color galleryBackgroundColor = isLight
+        ? Colors.black.withValues(alpha: 0.035)
+        : Colors.white.withValues(alpha: 0.18);
+    final Color galleryPressedColor = isLight
+        ? Colors.black.withValues(alpha: 0.07)
+        : Colors.white.withValues(alpha: 0.26);
     final Color galleryIconColor = isLight ? Colors.black : Colors.white;
     return Scaffold(
       appBar: AppBar(
@@ -88,9 +86,8 @@ class ScannerPageState extends State<ScannerPage> {
                             child: totp != null
                                 ? Text(
                                     totp!,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
                                   )
                                 : const SizedBox.shrink(),
                           ),
@@ -159,8 +156,7 @@ class ScannerPageState extends State<ScannerPage> {
       _isImportingFromGallery = true;
     });
     try {
-      final Code? code =
-          await pickCodeFromGallery(context, logger: _logger);
+      final Code? code = await pickCodeFromGallery(context, logger: _logger);
       if (code == null) {
         return;
       }
