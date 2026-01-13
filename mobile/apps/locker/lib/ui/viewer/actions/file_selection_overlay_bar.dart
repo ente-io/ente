@@ -1,4 +1,5 @@
 import "package:ente_events/event_bus.dart";
+import "package:ente_icons/ente_icons.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
@@ -350,7 +351,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (showImportant) {
       actions.add(
         SelectionActionButton(
-          icon: isImportant ? Icons.star_rounded : Icons.star_border_rounded,
+          icon: isImportant ? EnteIcons.favoriteFilled : null,
+          hugeIcon: isImportant
+              ? null
+              : HugeIcon(
+                  icon: HugeIcons.strokeRoundedStar,
+                  color: colorScheme.textBase,
+                ),
           label:
               isImportant ? context.l10n.unimportant : context.l10n.important,
           onTap: () => isSingleSelection

@@ -292,6 +292,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_icons:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_icons"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_legacy:
     dependency: "direct main"
     description:
