@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_network/network.dart';
 import 'package:flutter/foundation.dart';
@@ -337,7 +337,7 @@ class FileUploader {
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
-      final fileAttributes = await CryptoUtil.encryptFileWithMD5(
+      final fileAttributes = await CryptoUtil.encryptFileWithMd5(
         file.path,
         encryptedFilePath,
         key: key,

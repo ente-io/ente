@@ -1,7 +1,7 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -69,7 +69,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
               ),
             ),
             onPressed: () => launchUrlString(
-              PlatformUtil.isDesktop()
+              PlatformDetector.isDesktop()
                   ? widget.latestVersionInfo!.release!
                   : widget.latestVersionInfo!.url!,
               mode: LaunchMode.externalApplication,

@@ -5,20 +5,21 @@ import "package:ente_accounts/models/user_details.dart";
 import "package:ente_accounts/pages/request_pwd_verification_page.dart";
 import "package:ente_accounts/services/passkey_service.dart";
 import "package:ente_accounts/services/user_service.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/auth_util.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/navigation_util.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:logging/logging.dart";
+
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({super.key});

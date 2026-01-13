@@ -7,4 +7,3 @@ class CopyIntent extends Intent {
 class CopyNextIntent extends Intent {
   const CopyNextIntent();
 }
-

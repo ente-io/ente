@@ -1,4 +1,4 @@
-import 'package:ente_auth/models/execution_states.dart'; 
+import 'package:ente_auth/models/execution_states.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/components/separators.dart';

@@ -579,7 +579,7 @@
   "addNew": "Додати нову",
   "selected": "вибрано",
   "moveMultipleToTrashMessage": "Наступну кількість кодів буде переміщено до смітника: {count}. Продовжити?",
-  "nSelected": "{count, plural, =1 {1 вибраний} one {{count} вибраний} few {{count} вибрані} many {{count} вибраних} other{{count} вибраних}}",
+  "nSelected": "{count, plural, =1 {1 вибраний} few {{count} вибрані} many {{count} вибраних} other{{count} вибраних}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -590,7 +590,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, =1 {Закріплено 1 елемент} one {Закріплено {count} елемент} few {Закріплено {count} елементи} many {Закріплено {count} елементів} other{Закріплено {count} елементів}}",
+  "pinnedCount": "{count, plural, =1 {Закріплено 1 елемент} few {Закріплено {count} елементи} many {Закріплено {count} елементів} other{Закріплено {count} елементів}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -601,7 +601,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, =1 {Відкріплено 1 елемент} one {Відкріплено {count} елемент} few {Відкріплено {count} елементи} many {Відкріплено {count} елементів} other{Відкріплено {count} елементів}}",
+  "unpinnedCount": "{count, plural, =1 {Відкріплено 1 елемент} few {Відкріплено {count} елементи} many {Відкріплено {count} елементів} other{Відкріплено {count} елементів}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

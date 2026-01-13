@@ -17,7 +17,7 @@ import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
 import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import type { EnteFile } from "ente-media/file";
 import { removeFromOwnCollection } from "ente-new/photos/services/collection";
-import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
+import { computeAllCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
@@ -369,8 +369,17 @@ class FolderWatcher {
 
             this.activeWatch = watch;
 
-            await this.moveToTrash(removed);
+            try {
+                await this.moveToTrash(removed);
+            } catch (e) {
+                log.error(
+                    "Failed to trash files from watch folder, clearing stale sync entries",
+                    e,
+                );
+            }
 
+            // Always update syncedFiles to remove stale entries, even if
+            // trashing failed. Otherwise we'll keep retrying forever.
             await ensureElectron().watch.updateSyncedFiles(
                 rest,
                 watch.folderPath,
@@ -561,7 +570,9 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await computeNormalCollectionFilesFromSaved();
+        // Use all collection files (including hidden) so that files removed
+        // from the watch folder are also removed from hidden albums.
+        const files = await computeAllCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (

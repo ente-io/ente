@@ -38,9 +38,11 @@ import "package:photos/utils/file_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
+  final ScrollController? scrollController;
 
   const FileDetailsWidget(
     this.file, {
+    this.scrollController,
     super.key,
   });
 
@@ -324,6 +326,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: CustomScrollView(
+            controller: widget.scrollController,
             physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             slivers: <Widget>[

@@ -80,8 +80,7 @@ class _VerifyIdentitySheetState extends State<VerifyIdentitySheet> {
               children: [
                 Text(
                   context.strings.emailNoEnteAccount(widget.email),
-                  style:
-                      textStyle.small.copyWith(color: colorScheme.textMuted),
+                  style: textStyle.small.copyWith(color: colorScheme.textMuted),
                 ),
                 const SizedBox(height: 20),
                 GradientButton(
@@ -101,16 +100,14 @@ class _VerifyIdentitySheetState extends State<VerifyIdentitySheet> {
               children: [
                 Text(
                   subTitle,
-                  style:
-                      textStyle.small.copyWith(color: colorScheme.textMuted),
+                  style: textStyle.small.copyWith(color: colorScheme.textMuted),
                 ),
                 const SizedBox(height: 20),
                 _verificationIDWidget(context, publicKey),
                 const SizedBox(height: 20),
                 Text(
                   bottomText,
-                  style:
-                      textStyle.small.copyWith(color: colorScheme.textMuted),
+                  style: textStyle.small.copyWith(color: colorScheme.textMuted),
                 ),
               ],
             );

@@ -579,7 +579,7 @@
   "addNew": "Dodaj nowy",
   "selected": "zaznaczone",
   "moveMultipleToTrashMessage": "Czy na pewno chcesz przenieść do kosza elementy: {count}?",
-  "nSelected": "{count, plural, one {} few {{count} zaznaczone} many {{count} zaznaczonych}=1{1 zaznaczony} other{{count} zaznaczone}}",
+  "nSelected": "{count, plural, =1{1 zaznaczony} few {{count} zaznaczone} many {{count} zaznaczonych} other{{count} zaznaczone}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -590,7 +590,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {} few {Przypięto {count} elementy} many {Przypięto {count} elementów}=1{Przypięto 1 element} other{Przypięto {count} elementów}}",
+  "pinnedCount": "{count, plural, =1{Przypięto 1 element} few {Przypięto {count} elementy} many {Przypięto {count} elementów} other{Przypięto {count} elementów}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -601,7 +601,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, one {} few {Odpięto {count} elementy} many {Odpięto {count} elementów}=1{Odpięto 1 element} other{Odpięto {count} elementów}}",
+  "unpinnedCount": "{count, plural, =1{Odpięto 1 element} few {Odpięto {count} elementy} many {Odpięto {count} elementów} other{Odpięto {count} elementów}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

@@ -417,7 +417,7 @@ class FileActions {
   }
 
   /// Toggles important status of a single file
-  static Future<void> toggleImportant(
+  static Future<void> markImportant(
     BuildContext context,
     EnteFile file, {
     VoidCallback? onSuccess,
@@ -466,7 +466,7 @@ class FileActions {
   }
 
   /// Marks multiple files as important
-  static Future<void> markMultipleAsImportant(
+  static Future<void> markMultipleImportant(
     BuildContext context,
     List<EnteFile> files, {
     VoidCallback? onSuccess,
@@ -480,7 +480,6 @@ class FileActions {
     try {
       await dialog.show();
 
-      // Use sync cache for better performance
       final filesToMark = files
           .where((file) => !FavoritesService.instance.isFavoriteCache(file))
           .toList();
