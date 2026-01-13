@@ -442,11 +442,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {
-    final currentUserID = Configuration.instance.getUserID();
-    if (file.ownerID != currentUserID) {
-      showToast(context, "Download is not supported for shared files");
-      return;
-    }
     try {
       final success = await FileUtil.downloadFile(context, file);
       if (success) {
@@ -467,13 +462,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     BuildContext context,
     List<EnteFile> files,
   ) async {
-    final ownedFiles = _getOwnedFiles(files);
-    if (ownedFiles.isEmpty) {
+    if (files.isEmpty) {
       return;
     }
 
     try {
-      final success = await FileUtil.downloadFiles(context, ownedFiles);
+      final success = await FileUtil.downloadFiles(context, files);
       if (success) {
         widget.selectedFiles.clearAll();
       }

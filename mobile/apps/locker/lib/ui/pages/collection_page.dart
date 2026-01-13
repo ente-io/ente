@@ -113,8 +113,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       isSearchActive ? _filteredFiles : _files;
 
   bool get _isSelectionEnabled =>
-      collectionViewType != CollectionViewType.sharedCollectionViewer &&
-      collectionViewType != CollectionViewType.sharedCollectionCollaborator &&
       collectionViewType != CollectionViewType.quickLink;
 
   @override
