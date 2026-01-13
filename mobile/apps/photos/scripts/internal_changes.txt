@@ -1,3 +1,4 @@
+- Ashil: QOL: Fix jank on file info sheet
 - Neeraj: Collage creator: swap photos via long-press select + tap to replace
 - Prateek: (i) Always enable video streaming
 -- Release Cut Off --
