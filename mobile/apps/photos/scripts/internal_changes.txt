@@ -1,4 +1,5 @@
 - Ashil: QOL: Fix jank on file info sheet
+- Ashil: QOL: Show large thumbnail for unsupported image formats in file viewer
 - Neeraj: (i) Surface shared albums in add/move-to-album flows with owner avatar
 - Neeraj: QOL: Priority debouncer for recent local photos (< 7 days) to reduce home gallery delay
 - Neeraj: QOL: Collage creator: swap photos via long-press select + tap to replace

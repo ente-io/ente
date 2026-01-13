@@ -14,6 +14,9 @@ typedef FullScreenRequestCallback = void Function(
 class InheritedDetailPageState extends InheritedWidget {
   final ValueNotifier<bool> enableFullScreenNotifier;
   final ValueNotifier<bool> isInSharedCollectionNotifier;
+  /// Holds the generatedID of the file currently showing thumbnail fallback.
+  /// Only the file with matching ID should display the fallback indicator.
+  final ValueNotifier<int?> showingThumbnailFallbackNotifier;
   // Cannot be const because we accept a ValueNotifier instance at runtime
   // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({
@@ -21,6 +24,7 @@ class InheritedDetailPageState extends InheritedWidget {
     required super.child,
     required this.enableFullScreenNotifier,
     required this.isInSharedCollectionNotifier,
+    required this.showingThumbnailFallbackNotifier,
   });
 
   static InheritedDetailPageState of(BuildContext context) =>
@@ -69,5 +73,7 @@ class InheritedDetailPageState extends InheritedWidget {
   @override
   bool updateShouldNotify(InheritedDetailPageState oldWidget) =>
       oldWidget.enableFullScreenNotifier != enableFullScreenNotifier ||
-      oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier;
+      oldWidget.isInSharedCollectionNotifier != isInSharedCollectionNotifier ||
+      oldWidget.showingThumbnailFallbackNotifier !=
+          showingThumbnailFallbackNotifier;
 }
