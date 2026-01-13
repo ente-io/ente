@@ -62,3 +62,31 @@ func (c *Client) GetFile(ctx context.Context, collectionID, fileID int64) (*File
 	}
 	return &res.File, err
 }
+
+// AddFilesRequest is the request to add files to a collection
+type AddFilesRequest struct {
+	CollectionID int64                `json:"collectionID"`
+	Files        []CollectionFileItem `json:"files"`
+}
+
+// AddFilesToCollection adds files to an existing collection
+func (c *Client) AddFilesToCollection(ctx context.Context, req *AddFilesRequest) error {
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetBody(req).
+		SetHeader("Content-Type", "application/json").
+		Post("/collections/add-files")
+
+	if err != nil {
+		return err
+	}
+
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+
+	return nil
+}

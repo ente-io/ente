@@ -44,6 +44,13 @@ func ScanFolder(folderPath string, collectionID int) (*ScanResult, error) {
 			return nil
 		}
 
+		fileName := filepath.Base(path)
+
+		// Skip macOS resource fork files and system files
+		if strings.HasPrefix(fileName, "._") || fileName == ".DS_Store" || fileName == "Thumbs.db" {
+			return nil
+		}
+
 		// Get relative path from folder root for pathPrefix
 		relPath, err := filepath.Rel(folderPath, path)
 		if err != nil {
@@ -51,7 +58,6 @@ func ScanFolder(folderPath string, collectionID int) (*ScanResult, error) {
 			return nil
 		}
 
-		fileName := filepath.Base(path)
 		pathPrefix := filepath.Dir(relPath)
 		if pathPrefix == "." {
 			pathPrefix = ""
@@ -126,13 +132,9 @@ func (sr *ScanResult) GetStats(collectionID int) ScanStats {
 	filesWithMetadata := 0
 
 	for _, mf := range mediaFiles {
-		// Extract path prefix
+		// Use empty pathPrefix for files in root of scan folder
+		// This matches how we store metadata keys
 		pathPrefix := ""
-		if idx := strings.LastIndex(mf.Path, string(filepath.Separator)); idx != -1 {
-			if dirPath := filepath.Dir(mf.Path); dirPath != "." {
-				pathPrefix = filepath.Base(dirPath)
-			}
-		}
 
 		if sr.GetMetadataForFile(mf.FileName, collectionID, pathPrefix) != nil {
 			filesWithMetadata++
