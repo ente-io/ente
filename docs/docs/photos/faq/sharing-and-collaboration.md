@@ -346,6 +346,125 @@ If you need real-time updates, keep the app open or check the shared album manua
 
 - No platform restrictions for link recipients
 
+## Comments and Reactions
+
+### Who can add comments and reactions? {#comments-permissions}
+
+Comments and reactions are available in **collaborative albums** based on permission levels:
+
+**Collaborators can:**
+
+- Add comments to any photo
+- React to photos with emojis
+- View all comments and reactions
+- Edit or delete their own comments
+- Remove their own reactions
+
+**Admins and album owners can:**
+
+- Everything collaborators can do
+- Manage comments if needed
+
+**Viewers cannot:**
+
+- Add comments or reactions (view-only access)
+- They can see all comments and reactions from other participants
+
+Learn more: [Comments and Reactions guide](/photos/features/sharing-and-collaboration/comments-and-reactions)
+
+### Can viewers comment on shared albums? {#viewer-comments}
+
+No, viewers have read-only access and cannot add comments or reactions. Only collaborators, admins, and album owners can add comments and reactions to photos in shared albums.
+
+If you want someone to be able to comment and react, you need to give them at least Collaborator permissions when sharing the album.
+
+### Are comments visible in public links? {#comments-public-links}
+
+No, comments and reactions are **private to collaborative albums** and are not visible through public links or collect links.
+
+Comments and reactions are only visible to participants of the collaborative album (viewers, collaborators, admins, and owners). They provide a way for trusted album participants to communicate about photos.
+
+If you share an album via a public link, people viewing through that link will not see any comments or reactions, even if the album has collaborative features enabled for Ente users.
+
+### How do I delete a comment? {#delete-comments}
+
+You can delete your own comments at any time:
+
+**On mobile:**
+
+1. Open the photo with your comment
+2. Tap the comment icon to view comments
+3. Long press your comment
+4. Select "Delete"
+5. Confirm deletion
+
+**On web/desktop:**
+
+1. Open the photo
+2. Click the comment icon to open the comment panel
+3. Hover over your comment
+4. Click the three-dot menu
+5. Select "Delete"
+
+The comment is permanently removed and syncs across all devices immediately.
+
+### Can I edit comments after posting? {#edit-comments}
+
+Yes, you can edit your own comments after posting:
+
+**On mobile:**
+
+1. Find your comment on the photo
+2. Long press the comment
+3. Select "Edit"
+4. Make your changes
+5. Tap Save
+
+**On web/desktop:**
+
+1. Open the comment in the comment panel
+2. Click the three-dot menu next to your comment
+3. Select "Edit"
+4. Update your comment
+5. Save the changes
+
+Edited comments show an "edited" indicator to other participants.
+
+### Can I disable notifications for comments? {#comment-notifications}
+
+Yes, you can control notification preferences for comments and reactions:
+
+Go to `Settings > Notifications` to:
+
+- Enable/disable comment notifications
+- Enable/disable reaction notifications
+- Choose notification delivery method (push, email)
+- Set quiet hours for notifications
+
+You can customize notifications separately for comments and reactions, so you can receive alerts for comments but not reactions (or vice versa).
+
+### Can I remove someone else's comment? {#remove-others-comments}
+
+**Album owners and admins** can manage comments from other participants if needed for moderation purposes. However, the primary expectation is that participants manage their own comments.
+
+**Collaborators and viewers** can only edit or delete their own comments.
+
+This ensures that collaborative albums remain respectful spaces while giving owners and admins the tools to moderate if necessary.
+
+### Do comments and reactions use storage? {#comments-storage}
+
+Comments and reactions use minimal storage space compared to photos and videos. They are text-based data that are encrypted and synced like all Ente content, but they do not significantly impact your storage quota.
+
+The vast majority of your storage is used by the actual photo and video files.
+
+### Are comments and reactions end-to-end encrypted? {#comments-encryption}
+
+Yes, all comments and reactions are **end-to-end encrypted** like all Ente data. Only participants in the shared album can decrypt and view the comments and reactions.
+
+Ente cannot read your comments or reactions - they are encrypted on your device before being synced to Ente's servers.
+
+Learn more: [Comments and Reactions guide](/photos/features/sharing-and-collaboration/comments-and-reactions#technical-details)
+
 ## Public Links
 
 ### How do I create a collect link to gather photos from others? {#create-collect-link}

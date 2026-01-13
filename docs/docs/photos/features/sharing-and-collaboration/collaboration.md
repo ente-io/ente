@@ -43,7 +43,7 @@ Multiple albums can be selected (long press to select), and choosing Share will 
 - Everything viewers can do, plus:
 - Add new photos and videos to the shared album
 - Remove photos they uploaded
-- Comment and react (coming soon)
+- Add comments and reactions to photos
 
 **Admins can:**
 
@@ -206,6 +206,7 @@ Currently, you cannot see who added which photos to a collect link. All collecte
 
 ## Related topics
 
+- [Comments and Reactions](/photos/features/sharing-and-collaboration/comments-and-reactions) - Interact with photos in shared albums
 - [Public links](/photos/features/sharing-and-collaboration/public-links) - Share albums via links
 - [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods explained
 - [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for links
