@@ -50,7 +50,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   double _lastScrollPosition = 0;
   int _previousSelectionCount = 0;
 
-  bool get _hasSelection => widget.selectedFiles.files.isNotEmpty;
+  bool get hasSelection => widget.selectedFiles.files.isNotEmpty;
 
   List<EnteFile> _getOwnedFiles(List<EnteFile> files) {
     final currentUserID = Configuration.instance.getUserID();
@@ -99,7 +99,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   void _onScroll() {
     final controller = widget.scrollController;
-    if (!mounted || controller == null || !_hasSelection) return;
+    if (!mounted || controller == null || !hasSelection) return;
 
     final position = controller.position;
     final current = position.pixels;
@@ -124,7 +124,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final hasSelection = widget.selectedFiles.files.isNotEmpty;
 
     return IgnorePointer(
       ignoring: !hasSelection,
@@ -161,7 +160,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                           top: BorderSide(color: colorScheme.strokeFaint),
                         ),
                       ),
-                      margin: EdgeInsets.zero,
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                         child: Column(
