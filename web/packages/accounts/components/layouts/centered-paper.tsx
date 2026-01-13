@@ -23,13 +23,15 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
         sx={[
             { minHeight: "100svh", bgcolor: "secondary.main" },
             (theme) =>
-                theme.applyStyles("dark", {
-                    bgcolor: "background.default",
-                }),
+                theme.applyStyles("dark", { bgcolor: "background.default" }),
         ]}
     >
         <NavbarBase
-            sx={{ boxShadow: "none", borderBottom: "none", bgcolor: "transparent" }}
+            sx={{
+                boxShadow: "none",
+                borderBottom: "none",
+                bgcolor: "transparent",
+            }}
         >
             <EnteLogo />
         </NavbarBase>
@@ -50,9 +52,7 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
 const AccountsPagePaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
     padding: theme.spacing(5, 3),
-    [theme.breakpoints.up("sm")]: {
-        padding: theme.spacing(5),
-    },
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
     width: "min(420px, 85vw)",
     minHeight: "375px",
     display: "flex",

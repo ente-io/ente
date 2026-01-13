@@ -13,9 +13,7 @@ import React, { useCallback, useEffect, useState } from "react";
 const AccountsPagePaper = styled(Paper)(({ theme }) => ({
     marginBlock: theme.spacing(2),
     padding: theme.spacing(5, 3),
-    [theme.breakpoints.up("sm")]: {
-        padding: theme.spacing(5),
-    },
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
     width: "min(420px, 85vw)",
     minHeight: "375px",
     display: "flex",
@@ -83,7 +81,11 @@ const Page: React.FC = () => {
             ]}
         >
             <NavbarBase
-                sx={{ boxShadow: "none", borderBottom: "none", bgcolor: "transparent" }}
+                sx={{
+                    boxShadow: "none",
+                    borderBottom: "none",
+                    bgcolor: "transparent",
+                }}
             >
                 <EnteLogo />
             </NavbarBase>
