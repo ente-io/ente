@@ -18,7 +18,7 @@ dependencies:
   confetti: ^0.8.0
   connectivity_plus: ^6.0.5
   convert: ^3.1.1
-  device_info_plus: ^9.1.1
+  device_info_plus: ^11.5.0
   dio: ^5.8.0+1
   dir_utils:
     path: ../../packages/dir_utils
