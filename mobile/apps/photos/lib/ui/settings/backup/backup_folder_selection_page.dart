@@ -262,9 +262,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     final result = await showChoiceDialog(
       context,
       title: AppLocalizations.of(context).warning,
-      body:
-          "You are currently backing up photos from $formattedDate. Please update your settings to backup all photos.",
-      firstButtonLabel: "Update settings",
+      body: AppLocalizations.of(context)
+          .backupOnlyNewPhotosWarningBody(formattedDate: formattedDate),
+      firstButtonLabel: AppLocalizations.of(context).updateSettings,
       firstButtonOnTap: () async {
         await routeToPage(
           context,

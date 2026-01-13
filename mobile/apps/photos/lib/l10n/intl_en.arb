@@ -485,10 +485,29 @@
   "pendingItems": "Pending items",
   "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
+  "selectFolders": "Select folders",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",
   "selectAll": "Select all",
   "skip": "Skip",
+  "chooseBackupModeHeader": "<i>Choose how </i>Ente backs up your photos",
+  "startWithLatestPhotos": "Start with latest photos",
+  "backingUpLastSevenDaysPhotos": "Backing up last 7 days' photos",
+  "backupOnlyNewPhotos": "Backup only new photos",
+  "backupOnlyNewPhotosAllFoldersSelected": "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "No folders are currently selected for backup.\n\nPlease select folders to continue.",
+  "backupOnlyNewPhotosWarningBody": "You are currently backing up photos from {formattedDate}. Please update your settings to backup all photos.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Update settings",
   "updatingFolderSelection": "Updating folder selection...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
   "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
