@@ -109,6 +109,7 @@ class _AlbumsSectionState extends State<AlbumsSection> {
             SectionHeader(
               SectionType.album,
               hasMore: (_albumSearchResults.length >= kSearchSectionLimit - 1),
+              showSearch: true,
             ),
             const SizedBox(height: 2),
             SizedBox(
