@@ -326,54 +326,70 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final files = selectedFiles.toList();
     final file = isSingleSelection ? files.first : null;
     final colorScheme = getEnteColorScheme(context);
+    final viewType = widget.collectionViewType;
 
-    final isImportant =
-        isSingleSelection && FavoritesService.instance.isFavoriteCache(file!);
+    final isImportant = isSingleSelection &&
+        file != null &&
+        FavoritesService.instance.isFavoriteCache(file);
+
+    final showImportant = viewType?.showMarkImportantOption ?? true;
+    final showDelete = viewType?.showDeleteOption ?? true;
+
+    final actions = <Widget>[];
+
+    actions.add(
+      SelectionActionButton(
+        hugeIcon: const HugeIcon(
+          icon: HugeIcons.strokeRoundedDownload01,
+        ),
+        label: context.l10n.save,
+        onTap: () => isSingleSelection
+            ? _downloadFile(context, file!)
+            : _downloadMultipleFiles(context, files),
+      ),
+    );
+
+    if (showImportant) {
+      actions.add(
+        SelectionActionButton(
+          icon: isImportant ? Icons.star_rounded : Icons.star_border_rounded,
+          label:
+              isImportant ? context.l10n.unimportant : context.l10n.important,
+          onTap: () => isSingleSelection
+              ? _markImportant(context, file!)
+              : _markMultipleImportant(context, files),
+        ),
+      );
+    }
+
+    if (showDelete) {
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete02,
+            color: colorScheme.warning500,
+          ),
+          label: context.l10n.delete,
+          onTap: () => isSingleSelection
+              ? _deleteFile(context, file!)
+              : _deleteMultipleFiles(context, files),
+          isDestructive: true,
+        ),
+      );
+    }
 
     return Row(
-      children: [
-        Expanded(
-          child: SelectionActionButton(
-            hugeIcon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedDownload01,
-            ),
-            label: context.l10n.save,
-            onTap: () => isSingleSelection
-                ? _downloadFile(context, file!)
-                : _downloadMultipleFiles(context, files),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SelectionActionButton(
-            icon: isImportant ? Icons.star_rounded : Icons.star_border_rounded,
-            label:
-                isImportant ? context.l10n.unimportant : context.l10n.important,
-            onTap: () => isSingleSelection
-                ? _markImportant(context, file!)
-                : _markMultipleImportant(context, files),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SelectionActionButton(
-            hugeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedDelete02,
-              color: colorScheme.warning500,
-            ),
-            label: context.l10n.delete,
-            onTap: () => isSingleSelection
-                ? _deleteFile(context, file!)
-                : _deleteMultipleFiles(context, files),
-            isDestructive: true,
-          ),
-        ),
-      ],
+      children: _buildActionRow(actions),
     );
   }
 
   Widget _buildSecondaryActionRow(Set<EnteFile> selectedFiles) {
     final actions = _getSecondaryActionsForSelection(selectedFiles);
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final colorScheme = getEnteColorScheme(context);
 
     return Container(
@@ -402,9 +418,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final isSingleSelection = selectedFiles.length == 1;
     final file = isSingleSelection ? selectedFiles.first : null;
     final files = selectedFiles.toList();
+    final viewType = widget.collectionViewType;
     final actions = <Widget>[];
 
-    if (isSingleSelection) {
+    final showEdit = viewType?.showEditOption ?? true;
+    final showShare = viewType?.showShareOption ?? true;
+    final showAddTo = viewType?.showAddToCollectionOption ?? true;
+
+    if (isSingleSelection && showEdit) {
       actions.add(
         SelectionActionButton(
           hugeIcon: const HugeIcon(
@@ -416,7 +437,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    if (isSingleSelection) {
+    if (isSingleSelection && showShare) {
       actions.add(
         SelectionActionButton(
           hugeIcon: const HugeIcon(
@@ -428,15 +449,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    actions.add(
-      SelectionActionButton(
-        hugeIcon: const HugeIcon(
-          icon: HugeIcons.strokeRoundedArrowRight03,
+    if (showAddTo) {
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowRight03,
+          ),
+          label: "Add to",
+          onTap: () => _showAddToDialog(context, files),
         ),
-        label: "Add to",
-        onTap: () => _showAddToDialog(context, files),
-      ),
-    );
+      );
+    }
 
     return actions;
   }
