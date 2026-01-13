@@ -1,10 +1,17 @@
-import { Paper, Stack, styled, Typography } from "@mui/material";
+import {
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { type MiniDialogAttributes } from "ente-base/components/MiniDialog";
-import { CenteredFill } from "ente-base/components/containers";
-import { EnteLogo } from "ente-base/components/EnteLogo";
+import { SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import { NavbarBase } from "ente-base/components/Navbar";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { saveStringAsFile } from "ente-base/utils/web";
@@ -26,6 +33,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     showMiniDialog,
 }) => {
     const [recoveryKey, setRecoveryKey] = useState<string | undefined>();
+    const fullScreen = useIsSmallWidth();
 
     const handleLoadError = useCallback(
         (e: unknown) => {
@@ -51,84 +59,60 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
         onClose();
     };
 
-    if (!open) return null;
-
     return (
-        <Stack
-            sx={[
-                { minHeight: "100svh", bgcolor: "secondary.main" },
-                (theme) =>
-                    theme.applyStyles("dark", {
-                        bgcolor: "background.default",
-                    }),
-            ]}
+        <Dialog
+            fullScreen={fullScreen}
+            open={open}
+            onClose={onClose}
+            // [Note: maxWidth "xs" on MUI dialogs]
+            //
+            // While logically the "xs" breakpoint doesn't make sense as a
+            // maxWidth value (since as a breakpoint it's value is 0), in
+            // practice MUI has hardcoded its value to a reasonable 444px.
+            // https://github.com/mui/material-ui/issues/34646.
+            maxWidth="xs"
+            fullWidth
         >
-            <NavbarBase
-                sx={{ boxShadow: "none", borderBottom: "none", bgcolor: "transparent" }}
-            >
-                <EnteLogo />
-            </NavbarBase>
-            <CenteredFill
-                sx={[
-                    { bgcolor: "secondary.main" },
-                    (theme) =>
-                        theme.applyStyles("dark", {
-                            bgcolor: "background.default",
-                        }),
-                ]}
-            >
-                <RecoveryKeyPaper>
-                    <Typography variant="h3">{t("recovery_key")}</Typography>
-                    <Typography sx={{ color: "text.muted" }}>
-                        {t("recovery_key_description")}
+            <SpacedRow sx={{ p: "8px 4px 8px 0" }}>
+                <DialogTitle variant="h3">{t("recovery_key")}</DialogTitle>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpacedRow>
+            <DialogContent>
+                <Typography sx={{ mb: 3 }}>
+                    {t("recovery_key_description")}
+                </Typography>
+                <Stack
+                    sx={{
+                        border: "1px dashed",
+                        borderColor: "stroke.muted",
+                        borderRadius: 1,
+                    }}
+                >
+                    <CodeBlock code={recoveryKey} />
+                    <Typography sx={{ m: 2 }}>
+                        {t("key_not_stored_note")}
                     </Typography>
-                    <Stack
-                        sx={{
-                            border: "1px dashed",
-                            borderColor: "stroke.muted",
-                            borderRadius: 1,
-                        }}
-                    >
-                        <CodeBlock code={recoveryKey} />
-                        <Typography sx={{ m: 2 }}>
-                            {t("key_not_stored_note")}
-                        </Typography>
-                    </Stack>
-                    <Stack direction="row" sx={{ gap: 1, mt: 2 }}>
-                        <FocusVisibleButton
-                            color="secondary"
-                            fullWidth
-                            onClick={onClose}
-                        >
-                            {t("do_this_later")}
-                        </FocusVisibleButton>
-                        <FocusVisibleButton
-                            color="accent"
-                            fullWidth
-                            onClick={handleSaveClick}
-                        >
-                            {t("save_key")}
-                        </FocusVisibleButton>
-                    </Stack>
-                </RecoveryKeyPaper>
-            </CenteredFill>
-        </Stack>
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={onClose}
+                >
+                    {t("do_this_later")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    color="accent"
+                    fullWidth
+                    onClick={handleSaveClick}
+                >
+                    {t("save_key")}
+                </FocusVisibleButton>
+            </DialogActions>
+        </Dialog>
     );
 };
-
-const RecoveryKeyPaper = styled(Paper)(({ theme }) => ({
-    marginBlock: theme.spacing(2),
-    padding: theme.spacing(5, 3),
-    [theme.breakpoints.up("sm")]: {
-        padding: theme.spacing(5),
-    },
-    width: "min(420px, 85vw)",
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(3),
-    boxShadow: "none",
-    borderRadius: "20px",
-}));
 
 const getUserRecoveryKeyMnemonic = async () =>
     recoveryKeyToMnemonic(await getUserRecoveryKey());
