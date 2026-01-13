@@ -292,6 +292,18 @@ abstract class AppLocalizations {
   /// **'This collection cannot be deleted'**
   String get collectionCannotBeDeleted;
 
+  /// No description provided for @collectionCannotBeEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection cannot be edited'**
+  String get collectionCannotBeEdited;
+
+  /// No description provided for @collectionCannotBeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection cannot be shared'**
+  String get collectionCannotBeShared;
+
   /// No description provided for @deleteCollection.
   ///
   /// In en, this message translates to:
@@ -471,6 +483,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create collection'**
   String get createCollection;
+
+  /// No description provided for @enterCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter collection name'**
+  String get enterCollectionName;
 
   /// No description provided for @nothingYet.
   ///
@@ -2662,11 +2680,23 @@ abstract class AppLocalizations {
   /// **'Please login again'**
   String get pleaseLoginAgain;
 
-  /// No description provided for @language.
+  /// No description provided for @filters.
   ///
   /// In en, this message translates to:
-  /// **'Language'**
-  String get language;
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @seeAllCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'See all collections'**
+  String get seeAllCollections;
+
+  /// No description provided for @clearAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get clearAllFilters;
 
   /// No description provided for @selectLanguage.
   ///
@@ -2679,6 +2709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'General'**
   String get general;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
 }
 
 class _AppLocalizationsDelegate

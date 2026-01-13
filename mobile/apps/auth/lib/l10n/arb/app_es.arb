@@ -540,5 +540,6 @@
   "chooseBackupLocation": "Elige la ubicación de la copia de seguridad",
   "loadDefaultLocation": "Cargando ubicación predeterminada...",
   "couldNotDetermineLocation": "No se ha podido determinar la ubicación...",
-  "saveBackup": "Guardar copia de seguridad"
+  "saveBackup": "Guardar copia de seguridad",
+  "selectFolderToContinue": "Selecciona un archivo para continuar"
 }

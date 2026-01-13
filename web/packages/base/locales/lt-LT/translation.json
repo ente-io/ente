@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Stabdyti stebėti aplanką?",
     "stop_watching_folder_message": "Jūsų esami failai nebus ištrinti, bet „Ente“ nebeatnaujins automatiškai susieto „Ente“ albumo, kai šiame aplanke bus atliekami pakeitimai.",
     "yes_stop": "Taip, stabdyti",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "Keisti aplanką",
     "view_logs": "Peržiūrėti žurnalus",
     "view_logs_message": "<p>Tai parodys derinimo žurnalus, kuriuos galėsite išsiųsti mums el. laišku, kad padėtume išspręsti problemą.</p><p>Atkreipkite dėmesį, kad failų pavadinimai bus įtraukti, kad būtų lengviau atsekti problemas su konkrečiais failais.</p>",

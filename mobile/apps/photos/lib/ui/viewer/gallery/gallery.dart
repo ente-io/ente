@@ -11,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -66,6 +67,7 @@ class Gallery extends StatefulWidget {
   final bool disableScroll;
   final Duration reloadDebounceTime;
   final Duration reloadDebounceExecutionInterval;
+  final Duration priorityReloadDebounceTime;
   final GalleryType? galleryType;
   final bool showGallerySettingsCTA;
 
@@ -119,6 +121,7 @@ class Gallery extends StatefulWidget {
     this.isScrollablePositionedList = true,
     this.reloadDebounceTime = const Duration(milliseconds: 500),
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
+    this.priorityReloadDebounceTime = const Duration(milliseconds: 200),
     this.disablePinnedGroupHeader = false,
     this.galleryType,
     this.disableVerticalPaddingForScrollbar = false,
@@ -136,6 +139,7 @@ class Gallery extends StatefulWidget {
 class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
   late final Debouncer _debouncer;
+  late final Debouncer _priorityDebouncer;
   double? groupHeaderExtent;
 
   late Logger _logger;
@@ -180,6 +184,10 @@ class GalleryState extends State<Gallery> {
       executionInterval: widget.reloadDebounceExecutionInterval,
       leading: true,
     );
+    _priorityDebouncer = Debouncer(
+      widget.priorityReloadDebounceTime,
+      leading: true,
+    );
     _sortOrderAsc = widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
@@ -197,16 +205,22 @@ class GalleryState extends State<Gallery> {
           return;
         }
 
-        _debouncer.run(() async {
+        final isPriorityEvent = event is LocalPhotosUpdatedEvent &&
+            event.hasRecentNewLocalDiscovery;
+
+        final targetDebouncer =
+            isPriorityEvent ? _priorityDebouncer : _debouncer;
+
+        targetDebouncer.run(() async {
           // In soft refresh, setState is called for entire gallery only when
           // number of child change
-          _logger.info("Soft refresh all files on ${event.reason} ");
+          _logger.info(
+            "${isPriorityEvent ? 'Priority' : 'Soft'} refresh on ${event.reason}",
+          );
           final result = await _loadFiles();
           final bool hasTriggeredSetState = _onFilesLoaded(result.files);
           if (hasTriggeredSetState && kDebugMode) {
-            _logger.info(
-              "Reloaded gallery on soft refresh all files on ${event.reason}",
-            );
+            _logger.info("Reloaded gallery on ${event.reason}");
           }
           if (!hasTriggeredSetState && mounted) {
             _updateGalleryGroups();
@@ -561,6 +575,7 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
+    _priorityDebouncer.cancelDebounceTimer();
     _scrollController.dispose();
     scrollBarInUseNotifier.dispose();
     _headerHeightNotifier.dispose();

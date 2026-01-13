@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Stop watching folder?",
     "stop_watching_folder_message": "Your existing files will not be deleted, but Ente will stop automatically updating the linked Ente album on changes in this folder.",
     "yes_stop": "Yes, stop",
+    "folder_not_accessible": "This folder is inaccessible. Syncing will resume when it's accessible. You can stop watching it if it no longer exists.",
+    "retry_watching": "Retry watching",
     "change_folder": "Change Folder",
     "view_logs": "View logs",
     "view_logs_message": "<p>This will show debug logs, which you can email to us to help debug your issue.</p><p>Note that file names will be included to help track issues with specific files.</p>",

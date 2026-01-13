@@ -1880,9 +1880,5 @@
   "closeBy": "Vicine",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  },
-  "cLTitle1": "Commenti e reazioni",
-  "cLDesc1": "Stiamo introducendo commenti e reazioni sulle foto condivise. Puoi reagire o commentare una foto aprendola e usando le azioni in basso. Tutti i commenti e le reazioni in arrivo saranno visibili nella scheda Condiviso.",
-  "cLTitle2": "Amministratore per album",
-  "cLDesc2": "Ora puoi assegnare un altro utente Ente come amministratore del tuo album. Con questo, potrà aggiungere altri visualizzatori e collaboratori, rimuovere foto dagli album e persino suggerire ai partecipanti di eliminare le loro foto."
+  }
 }

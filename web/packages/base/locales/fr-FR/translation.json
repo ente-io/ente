@@ -563,6 +563,8 @@
     "stop_watching_folder_title": "Arrêter de surveiller le dossier ?",
     "stop_watching_folder_message": "Vos fichiers existants ne seront pas supprimés, mais Ente arrêtera automatiquement de mettre à jour le lien de l'album à chaque changement sur ce dossier.",
     "yes_stop": "Oui, arrêter",
+    "folder_not_accessible": "",
+    "retry_watching": "",
     "change_folder": "Modifier le dossier",
     "view_logs": "Afficher les journaux",
     "view_logs_message": "<p>Cela va afficher les journaux de débug, que vous pourrez ensuite nous envoyer par e-mail afin de nous aider à résoudre votre problème .</p><p>Veuillez noter que les noms de fichiers seront inclus à notre gestion de tickets.</p>",

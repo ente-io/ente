@@ -280,8 +280,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           onChanged: (date) {
                             setState(() {
                               // format date to yyyy-MM-dd
-                              _selectedDate =
-                                  date?.toIso8601String().split("T").first;
+                              _selectedDate = date == null
+                                  ? null
+                                  : date.toIso8601String().split("T").first;
                             });
                           },
                         ),
