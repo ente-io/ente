@@ -2,7 +2,7 @@ import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/pages/password_entry_page.dart";
 import "package:ente_accounts/services/user_service.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/gradient_button.dart";

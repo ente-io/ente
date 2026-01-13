@@ -132,6 +132,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       footer: widget.footer,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
+      priorityReloadDebounceTime: const Duration(milliseconds: 200),
       galleryType: GalleryType.homepage,
       groupType: widget.groupType,
       showGallerySettingsCTA: true,

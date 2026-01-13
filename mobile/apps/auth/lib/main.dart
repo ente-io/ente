@@ -24,7 +24,8 @@ import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/directory_utils.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
+import 'package:ente_crypto_dart_adapter/ente_crypto_dart_adapter.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
@@ -71,6 +72,7 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerCryptoApi(const EnteCryptoDartAdapter());
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();

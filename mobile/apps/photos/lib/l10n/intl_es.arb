@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Permitir unirse al álbum",
   "allowAddPhotosDescription": "Permitir a las personas con el enlace añadir fotos al álbum compartido.",
+  "enableComment": "Comentarios y reacciones",
   "passwordLock": "Bloqueo con contraseña",
   "canNotOpenTitle": "No es posible abrir este álbum",
   "canNotOpenBody": "Lo sentimos, este álbum no se puede abrir en la aplicación.",
@@ -271,7 +272,7 @@
   "publicLinkEnabled": "Enlace público habilitado",
   "shareALink": "Compartir un enlace",
   "sharedAlbumSectionDescription": "Crea álbumes compartidos y colaborativos con otros usuarios de Ente, incluyendo usuarios de planes gratuitos.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartir con personas específicas} =1 {Compartido con 1 persona} other {Compartido con {numberOfPeople} personas}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartir con personas específicas} =1 {Compartido con una persona} other {Compartido con {numberOfPeople} personas}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -763,7 +764,7 @@
   "pleaseGrantPermissions": "Por favor, concede permiso",
   "grantPermission": "Conceder permiso",
   "privateSharing": "Compartir en privado",
-  "shareOnlyWithThePeopleYouWant": "Comparte sólo con la gente que quieres",
+  "shareOnlyWithThePeopleYouWant": "Comparte solo con la gente que quieres",
   "usePublicLinksForPeopleNotOnEnte": "Usar enlaces públicos para personas que no están en Ente",
   "allowPeopleToAddPhotos": "Permitir que la gente añada fotos",
   "shareAnAlbumNow": "Compartir un álbum ahora",
@@ -1272,7 +1273,7 @@
     }
   },
   "faces": "Caras",
-  "people": "Personas",
+  "people": "Gente",
   "contents": "Contenidos",
   "addNew": "Añadir nuevo",
   "@addNew": {
@@ -1518,6 +1519,17 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, one {}=0 {No se han añadido administradores} =1 {1 administrador añadido con éxito} other {{count} administradores añadidos con éxito}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "suggestDeletion": "Sugerir eliminación",
   "accountIsAlreadyConfigured": "La cuenta ya está configurada.",
   "sessionIdMismatch": "El ID de sesión no coincide",
   "@sessionIdMismatch": {
@@ -2042,10 +2054,6 @@
   "hoorayyyy": "¡Hurraaaa!",
   "nothingToTidyUpHere": "Nada que limpiar aquí",
   "deletingDash": "Eliminando - ",
-  "cLTitle1": "Comentarios y reacciones",
-  "cLDesc1": "Presentamos comentarios y reacciones en fotos compartidas. Puedes reaccionar o comentar una foto abriéndola y usando las acciones en la parte inferior. Todos los comentarios y reacciones entrantes serán visibles en la pestaña Compartido.",
-  "cLTitle2": "Administrador de álbumes",
-  "cLDesc2": "Ahora puedes asignar a otro usuario de Ente como administrador de tu álbum. Con esto, podrá añadir otros espectadores y colaboradores, eliminar fotos de los álbumes e incluso sugerir a los participantes que eliminen sus fotos.",
   "closeBy": "Cerrar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2239,5 +2247,24 @@
   "ritualCustomKeyboardLabel": "Personalizado (teclado)",
   "ritualEmojiKeyboardHint": "Presiona para abrir el teclado de emojis",
   "ritualEmojiUseAction": "Uso",
-  "ritualSearchEmpty": "Construye un ritual para mantener tu hábito fotográfico."
+  "ritualSearchEmpty": "Construye un ritual para mantener tu hábito fotográfico.",
+  "and1Other": "y 1 más",
+  "andXOthers": "y {count} más",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Sin actividad",
+  "comments": "Comentarios",
+  "commentHint": "¡Di algo bonito!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Responder",
+  "@reply": {
+    "description": "Reply action button label"
+  }
 }

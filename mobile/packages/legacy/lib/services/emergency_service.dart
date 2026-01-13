@@ -8,7 +8,7 @@ import "package:ente_accounts/models/srp.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_base/models/key_attributes.dart";
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_network/network.dart";
 import "package:ente_sharing/components/invite_dialog.dart";

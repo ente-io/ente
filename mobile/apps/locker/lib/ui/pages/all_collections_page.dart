@@ -14,17 +14,17 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
+import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
+import "package:locker/utils/collection_actions.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
 class AllCollectionsPage extends StatefulWidget {
   final UISectionType viewType;
-  final SelectedCollections? selectedCollections;
 
   const AllCollectionsPage({
     super.key,
     this.viewType = UISectionType.homeCollections,
-    this.selectedCollections,
   });
 
   @override
@@ -40,6 +40,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   bool showUncategorized = false;
   final _logger = Logger("AllCollectionsPage");
   StreamSubscription<CollectionsUpdatedEvent>? _collectionsUpdatedSub;
+
+  final _selectedCollections = SelectedCollections();
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -58,6 +61,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   @override
   void dispose() {
     _collectionsUpdatedSub?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -153,12 +157,10 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       body: Stack(
         children: [
           _buildBody(context),
-          // TODO(aman): Uncomment when multi-select actions are restored.
-          // CollectionSelectionOverlayBar(
-          //   collection: _sortedCollections,
-          //   selectedCollections: widget.selectedCollections!,
-          //   viewType: widget.viewType,
-          // ),
+          CollectionSelectionOverlayBar(
+            collections: _sortedCollections,
+            selectedCollections: _selectedCollections,
+          ),
         ],
       ),
     );
@@ -166,6 +168,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
   Widget _buildBody(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     final safeBottomInset = MediaQuery.of(context).padding.bottom;
     final bottomPadding = safeBottomInset + 24.0;
 
@@ -234,19 +237,48 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TitleBarTitleWidget(
-            title: _getTitle(context),
-          ),
-          Text(
-            _sortedCollections.length.toString() + " items",
-            style: textTheme.smallMuted,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TitleBarTitleWidget(
+                    title: _getTitle(context),
+                  ),
+                  Text(
+                    _sortedCollections.length.toString() + " items",
+                    style: textTheme.smallMuted,
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () async {
+                  await CollectionActions.createCollection(context);
+                },
+                child: Container(
+                  height: 44,
+                  width: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: colorScheme.backdropBase,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedAdd01,
+                    color: colorScheme.textBase,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Expanded(
             child: ItemListView(
               collections: _sortedCollections,
-              // TODO(aman): pass selectedCollections when multi-select returns.
-              selectedCollections: null,
+              selectedCollections: _selectedCollections,
+              scrollController: _scrollController,
               physics: const BouncingScrollPhysics(),
             ),
           ),

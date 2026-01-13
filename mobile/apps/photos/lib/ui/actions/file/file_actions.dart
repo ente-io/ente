@@ -1,13 +1,11 @@
 import "dart:async";
 
-import "package:flutter/cupertino.dart";
-import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -146,7 +144,6 @@ Future<void> showSingleFileDeleteSheet(
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
   guardedCheckPanorama(file).ignore();
-  final colorScheme = getEnteColorScheme(context);
   Bus.instance.fire(
     DetailsSheetEvent(
       localID: file.localID,
@@ -154,23 +151,11 @@ Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
       opened: true,
     ),
   );
-  await showBarModalBottomSheet(
-    topControl: const SizedBox.shrink(),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
-    ),
-    backgroundColor: colorScheme.backgroundElevated,
-    barrierColor: backdropFaintDark,
+  await showModalBottomSheet(
     context: context,
-    builder: (BuildContext context) {
-      return Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: FileDetailsWidget(file),
-      );
-    },
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => _DraggableDetailsSheet(file: file),
   );
   Bus.instance.fire(
     DetailsSheetEvent(
@@ -179,4 +164,64 @@ Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
       opened: false,
     ),
   );
+}
+
+class _DraggableDetailsSheet extends StatefulWidget {
+  final EnteFile file;
+  const _DraggableDetailsSheet({required this.file});
+
+  @override
+  State<_DraggableDetailsSheet> createState() => _DraggableDetailsSheetState();
+}
+
+class _DraggableDetailsSheetState extends State<_DraggableDetailsSheet> {
+  final _sheetController = DraggableScrollableController();
+  bool _isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sheetController.addListener(_onSheetSizeChanged);
+  }
+
+  @override
+  void dispose() {
+    _sheetController.removeListener(_onSheetSizeChanged);
+    _sheetController.dispose();
+    super.dispose();
+  }
+
+  void _onSheetSizeChanged() {
+    final isNowExpanded = _sheetController.size >= 0.75;
+    if (isNowExpanded != _isExpanded) {
+      setState(() {
+        _isExpanded = isNowExpanded;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 60;
+    final disableSnap = isKeyboardOpen || _isExpanded;
+    return DraggableScrollableSheet(
+      controller: _sheetController,
+      initialChildSize: disableSnap ? 0.95 : 0.75,
+      minChildSize: disableSnap ? 0.75 : 0.5,
+      maxChildSize: 0.95,
+      snap: !disableSnap,
+      snapSizes: disableSnap ? null : const [0.75],
+      expand: false,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: getEnteColorScheme(context).backgroundElevated,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        ),
+        child: FileDetailsWidget(
+          widget.file,
+          scrollController: scrollController,
+        ),
+      ),
+    );
+  }
 }

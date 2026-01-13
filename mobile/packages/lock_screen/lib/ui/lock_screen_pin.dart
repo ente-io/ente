@@ -1,7 +1,8 @@
 import "dart:convert";
 import "dart:io";
+import "dart:typed_data";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/custom_pin_keypad.dart";
 import "package:ente_lock_screen/ui/lock_screen_confirm_pin.dart";
@@ -66,12 +67,11 @@ class _LockScreenPinState extends State<LockScreenPin> {
 
   Future<bool> confirmPinAuth(String inputtedPin) async {
     final Uint8List? salt = await _lockscreenSetting.getSalt();
-    final hash = cryptoPwHash(
+    final hash = CryptoUtil.cryptoPwHash(
       utf8.encode(inputtedPin),
       salt!,
-      sodium.crypto.pwhash.memLimitInteractive,
-      sodium.crypto.pwhash.opsLimitSensitive,
-      sodium,
+      CryptoUtil.pwhashMemLimitInteractive,
+      CryptoUtil.pwhashOpsLimitSensitive,
     );
     if (widget.authPin == base64Encode(hash)) {
       invalidAttemptsCount = 0;

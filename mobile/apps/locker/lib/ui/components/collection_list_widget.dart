@@ -10,14 +10,11 @@ import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/collection_popup_menu_widget.dart";
-import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/pages/collection_page.dart";
 import "package:locker/ui/sharing/album_share_info_widget.dart";
 
 class CollectionListWidget extends StatelessWidget {
   final Collection collection;
-  final List<OverflowMenuAction>? overflowActions;
   final bool isLastItem;
   final SelectedCollections? selectedCollections;
   final void Function(Collection)? onTapCallback;
@@ -26,7 +23,6 @@ class CollectionListWidget extends StatelessWidget {
   const CollectionListWidget({
     super.key,
     required this.collection,
-    this.overflowActions,
     this.isLastItem = false,
     this.selectedCollections,
     this.onTapCallback,
@@ -150,7 +146,7 @@ class CollectionListWidget extends StatelessWidget {
           final bool isSelected =
               selectedCollections?.isCollectionSelected(collection) ?? false;
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
             decoration: BoxDecoration(
               border: Border.all(
@@ -166,58 +162,30 @@ class CollectionListWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 collectionRowWidget,
-                isFavourite
-                    ? const SizedBox.shrink()
-                    : AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        child: isSelected
-                            ? IconButtonWidget(
-                                key: const ValueKey("selected"),
-                                icon: Icons.check_circle_rounded,
-                                iconButtonType: IconButtonType.secondary,
-                                iconColor: colorScheme.primary700,
-                              )
-                            : showSharingIndicator
-                                ? Row(
-                                    key: const ValueKey("shared"),
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (hasSharees)
-                                        _buildShareesAvatars(
-                                          collection.sharees
-                                              .whereType<User>()
-                                              .toList(),
-                                        ),
-                                      CollectionPopupMenuWidget(
-                                        collection: collection,
-                                        overflowActions: overflowActions,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: HugeIcon(
-                                            icon: HugeIcons
-                                                .strokeRoundedMoreVertical,
-                                            color: colorScheme.textBase,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : CollectionPopupMenuWidget(
-                                    key: const ValueKey("menu"),
-                                    collection: collection,
-                                    overflowActions: overflowActions,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: HugeIcon(
-                                        icon:
-                                            HugeIcons.strokeRoundedMoreVertical,
-                                        color: colorScheme.textBase,
-                                      ),
-                                    ),
-                                  ),
-                      ),
+                if (!isFavourite)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: isSelected
+                          ? IconButtonWidget(
+                              key: const ValueKey("selected"),
+                              icon: Icons.check_circle_rounded,
+                              iconButtonType: IconButtonType.secondary,
+                              iconColor: colorScheme.primary700,
+                            )
+                          : (showSharingIndicator && hasSharees)
+                              ? _buildShareesAvatars(
+                                  collection.sharees.whereType<User>().toList(),
+                                )
+                              : const SizedBox(
+                                  key: ValueKey("unselected"),
+                                  width: 12,
+                                ),
+                    ),
+                  ),
               ],
             ),
           );
