@@ -631,13 +631,13 @@ class RitualsService {
     required DateTime todayMidnight,
   }) {
     if (dayKeys.isEmpty) return 0;
-    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (daysOfWeek.length != 7) return 0;
 
     final start = _streakStartDateFromDayKeys(dayKeys, todayMidnight);
     int current = 0;
     for (var day = todayMidnight; !day.isBefore(start); day = _prevDay(day)) {
       final dayIndex = day.weekday % 7; // Sunday -> 0
-      if (!daysOfWeek[dayIndex]) continue;
+      if (!_isScheduledDay(daysOfWeek, dayIndex)) continue;
 
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
@@ -658,14 +658,14 @@ class RitualsService {
     required DateTime todayMidnight,
   }) {
     if (dayKeys.isEmpty) return 0;
-    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (daysOfWeek.length != 7) return 0;
 
     final start = _streakStartDateFromDayKeys(dayKeys, todayMidnight);
     int longest = 0;
     int rolling = 0;
     for (var day = start; !day.isAfter(todayMidnight); day = _nextDay(day)) {
       final dayIndex = day.weekday % 7; // Sunday -> 0
-      if (!daysOfWeek[dayIndex]) continue;
+      if (!_isScheduledDay(daysOfWeek, dayIndex)) continue;
 
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
@@ -685,7 +685,7 @@ class RitualsService {
     required DateTime endDayInclusive,
   }) {
     if (dayKeys.isEmpty) return 0;
-    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (daysOfWeek.length != 7) return 0;
     if (endDayInclusive.isBefore(startDay)) return 0;
 
     int longest = 0;
@@ -694,7 +694,7 @@ class RitualsService {
         !day.isAfter(endDayInclusive);
         day = _nextDay(day)) {
       final dayIndex = day.weekday % 7; // Sunday -> 0
-      if (!daysOfWeek[dayIndex]) continue;
+      if (!_isScheduledDay(daysOfWeek, dayIndex)) continue;
 
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
@@ -723,6 +723,12 @@ class RitualsService {
       if (enabled) return true;
     }
     return false;
+  }
+
+  bool _isScheduledDay(List<bool> daysOfWeek, int dayIndex) {
+    if (daysOfWeek.length != 7) return false;
+    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return true;
+    return daysOfWeek[dayIndex];
   }
 
   DateTime _nextDay(DateTime day) => DateTime(day.year, day.month, day.day + 1);
