@@ -521,7 +521,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         });
         InheritedDetailPageState.maybeOf(context)
             ?.showingThumbnailFallbackNotifier
-            .value = true;
+            .value = _photo.generatedID;
       }
       return;
     }
@@ -575,7 +575,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         });
         InheritedDetailPageState.maybeOf(context)
             ?.showingThumbnailFallbackNotifier
-            .value = true;
+            .value = _photo.generatedID;
       }
     }
   }

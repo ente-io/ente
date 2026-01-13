@@ -198,11 +198,11 @@ class FileAppBarState extends State<FileAppBar> {
   List<Widget> _getActions() {
     _actions.clear();
 
-    // Show info icon when thumbnail fallback is active (leftmost position)
-    final showingFallback = InheritedDetailPageState.maybeOf(context)
-            ?.showingThumbnailFallbackNotifier
-            .value ??
-        false;
+    // Show info icon when thumbnail fallback is active for THIS file
+    final fallbackFileId = InheritedDetailPageState.maybeOf(context)
+        ?.showingThumbnailFallbackNotifier
+        .value;
+    final showingFallback = fallbackFileId == widget.file.generatedID;
     if (showingFallback) {
       _actions.add(
         Tooltip(

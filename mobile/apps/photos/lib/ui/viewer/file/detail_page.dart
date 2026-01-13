@@ -86,7 +86,7 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
   final _isInSharedCollectionNotifier = ValueNotifier(false);
-  final _showingThumbnailFallbackNotifier = ValueNotifier(false);
+  final _showingThumbnailFallbackNotifier = ValueNotifier<int?>(null);
 
   @override
   void dispose() {
@@ -374,10 +374,6 @@ class _BodyState extends State<_Body> {
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _updateSharedCollectionState(_files![index]);
-        // Reset thumbnail fallback state for new photo
-        InheritedDetailPageState.maybeOf(context)
-            ?.showingThumbnailFallbackNotifier
-            .value = false;
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
