@@ -5,5 +5,5 @@
 - Neeraj: QOL: Collage creator: swap photos via long-press select + tap to replace
 - Prateek: (i) Always enable video streaming
 - Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)
-- Prateek: (i) Stop streaming if not 75% processed for upload and thermal change
-- Prateek(i): Stop streaming immediately on log-out
+- Prateek: Stop streaming if not 75% processed for upload and thermal change
+- Prateek: Stop streaming immediately on log-out
