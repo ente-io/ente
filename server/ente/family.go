@@ -76,3 +76,19 @@ type UserUsageWithSubData struct {
 	// Email of the member. It will be populated on need basis
 	Email *string
 }
+
+// LockerFamilyMember represents a family member's locker-specific usage
+type LockerFamilyMember struct {
+	ID        uuid.UUID `json:"id"`
+	Email     string    `json:"email"`
+	IsAdmin   bool      `json:"isAdmin"`
+	Usage     int64     `json:"usage"`
+	FileCount int64     `json:"fileCount"`
+}
+
+// LockerFamilyUsageResponse returns locker-specific usage for all family members
+type LockerFamilyUsageResponse struct {
+	Members        []LockerFamilyMember `json:"members"`
+	TotalUsage     int64                `json:"totalUsage"`
+	TotalFileCount int64                `json:"totalFileCount"`
+}

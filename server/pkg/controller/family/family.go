@@ -122,6 +122,78 @@ func (c *Controller) HandleAccountDeletion(ctx context.Context, userID int64, lo
 	return nil
 }
 
+// GetLockerFamilyUsage returns locker-specific usage and file counts for all family members
+func (c *Controller) GetLockerFamilyUsage(ctx context.Context, userID int64) (ente.LockerFamilyUsageResponse, error) {
+	user, err := c.UserRepo.Get(userID)
+	if err != nil {
+		return ente.LockerFamilyUsageResponse{}, stacktrace.Propagate(err, "")
+	}
+	if user.FamilyAdminID == nil {
+		return ente.LockerFamilyUsageResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "user is not part of any family plan")
+	}
+
+	// Get family members
+	familyMembers, err := c.FamilyRepo.GetMembersWithStatus(*user.FamilyAdminID, repo.ActiveOrInvitedFamilyMemberStatus)
+	if err != nil {
+		return ente.LockerFamilyUsageResponse{}, stacktrace.Propagate(err, "")
+	}
+
+	// Collect member user IDs for active members only
+	var memberUserIDs []int64
+	memberMap := make(map[int64]*ente.FamilyMember)
+	for i := range familyMembers {
+		member := &familyMembers[i]
+		if member.Status == ente.ACCEPTED || member.Status == ente.SELF {
+			memberUserIDs = append(memberUserIDs, member.MemberUserID)
+			memberMap[member.MemberUserID] = member
+		}
+	}
+
+	if len(memberUserIDs) == 0 {
+		return ente.LockerFamilyUsageResponse{}, nil
+	}
+
+	// Get emails for members
+	usersUsageWithSubData, err := c.UserRepo.GetUserUsageWithSubData(ctx, memberUserIDs)
+	if err != nil {
+		return ente.LockerFamilyUsageResponse{}, stacktrace.Propagate(err, "")
+	}
+	emailMap := make(map[int64]string)
+	for _, userData := range usersUsageWithSubData {
+		if userData.Email != nil {
+			emailMap[userData.UserID] = *userData.Email
+		}
+	}
+
+	// Get locker-specific usage
+	lockerUsage, err := c.UsageRepo.GetLockerUsage(ctx, memberUserIDs)
+	if err != nil {
+		return ente.LockerFamilyUsageResponse{}, stacktrace.Propagate(err, "")
+	}
+
+	// Build response
+	var members []ente.LockerFamilyMember
+	for _, userUsage := range lockerUsage.Users {
+		member := memberMap[userUsage.UserID]
+		if member == nil {
+			continue
+		}
+		members = append(members, ente.LockerFamilyMember{
+			ID:        member.ID,
+			Email:     emailMap[userUsage.UserID],
+			IsAdmin:   member.IsAdmin,
+			Usage:     userUsage.Usage,
+			FileCount: userUsage.FileCount,
+		})
+	}
+
+	return ente.LockerFamilyUsageResponse{
+		Members:        members,
+		TotalUsage:     lockerUsage.TotalUsage,
+		TotalFileCount: lockerUsage.TotalFileCount,
+	}, nil
+}
+
 func (c *Controller) removeMembers(ctx context.Context, adminID int64, logger *logrus.Entry) error {
 	members, err := c.FetchMembersForAdminID(ctx, adminID)
 	if err != nil {

@@ -146,3 +146,13 @@ func (h *FamilyHandler) GetInviteInfo(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, response)
 }
+
+// GetLockerFamilyUsage returns locker-specific usage and file counts for all family members
+func (h *FamilyHandler) GetLockerFamilyUsage(c *gin.Context) {
+	response, err := h.Controller.GetLockerFamilyUsage(c, auth.GetUserID(c.Request.Header))
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
