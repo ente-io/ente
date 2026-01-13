@@ -249,7 +249,7 @@ func runImport(folderPath, albumName string, dryRun, skipMetadata bool) error {
 
 		var metadata *uploader.SimpleFileMetadata
 		if !skipMetadata {
-			if takeoutMeta := scanResult.GetMetadataForFile(fi.FileName, int(collection.ID), pathPrefix); takeoutMeta != nil {
+			if takeoutMeta := scanResult.GetMetadataForFile(fi.FileName, dummyCollectionID, pathPrefix); takeoutMeta != nil {
 				metadata = &uploader.SimpleFileMetadata{}
 				if takeoutMeta.CreationTime != nil {
 					metadata.CreationTime = *takeoutMeta.CreationTime
@@ -265,20 +265,20 @@ func runImport(folderPath, albumName string, dryRun, skipMetadata bool) error {
 			}
 		}
 
+		// Always set title to filename (required for duplicate detection)
+		if metadata == nil {
+			metadata = &uploader.SimpleFileMetadata{}
+		}
+		if metadata.Title == "" {
+			metadata.Title = fi.FileName
+		}
+
 		// Fallback to file mod time if no metadata
-		if metadata == nil || metadata.CreationTime == 0 {
+		if metadata.CreationTime == 0 {
 			modTime, _ := uploader.GetFileModTime(fi.Path)
-			if metadata == nil {
-				metadata = &uploader.SimpleFileMetadata{}
-			}
-			if metadata.CreationTime == 0 {
-				metadata.CreationTime = modTime
-			}
+			metadata.CreationTime = modTime
 			if metadata.ModificationTime == 0 {
 				metadata.ModificationTime = modTime
-			}
-			if metadata.Title == "" {
-				metadata.Title = fi.FileName
 			}
 		}
 
