@@ -527,8 +527,6 @@
     "remove_duplicates_button_count": "Delete {{count, number}} items",
     "large_files_title": "Large files",
     "no_large_files": "No large files found",
-    "sort_largest_first": "Largest first",
-    "sort_smallest_first": "Smallest first",
     "delete_files_button": "Delete {{count, number}} files",
     "all": "All",
     "photos": "Photos",
