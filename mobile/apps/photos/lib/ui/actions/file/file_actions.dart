@@ -175,15 +175,42 @@ class _DraggableDetailsSheet extends StatefulWidget {
 }
 
 class _DraggableDetailsSheetState extends State<_DraggableDetailsSheet> {
+  final _sheetController = DraggableScrollableController();
+  bool _isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sheetController.addListener(_onSheetSizeChanged);
+  }
+
+  @override
+  void dispose() {
+    _sheetController.removeListener(_onSheetSizeChanged);
+    _sheetController.dispose();
+    super.dispose();
+  }
+
+  void _onSheetSizeChanged() {
+    final isNowExpanded = _sheetController.size >= 0.75;
+    if (isNowExpanded != _isExpanded) {
+      setState(() {
+        _isExpanded = isNowExpanded;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 60;
+    final disableSnap = isKeyboardOpen || _isExpanded;
     return DraggableScrollableSheet(
-      initialChildSize: isKeyboardOpen ? 0.95 : 0.7,
-      minChildSize: isKeyboardOpen ? 0.8 : 0.5,
+      controller: _sheetController,
+      initialChildSize: disableSnap ? 0.95 : 0.75,
+      minChildSize: disableSnap ? 0.75 : 0.5,
       maxChildSize: 0.95,
-      snap: isKeyboardOpen ? false : true,
-      snapSizes: isKeyboardOpen ? null : const [0.7],
+      snap: !disableSnap,
+      snapSizes: disableSnap ? null : const [0.75],
       expand: false,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
