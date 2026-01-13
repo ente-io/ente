@@ -24,6 +24,8 @@ dependencies:
     path: ../sharing
   ente_strings:
     path: ../strings
+  ente_pure_utils:
+    path: ../ente_pure_utils
   ente_ui:
     path: ../ui
   ente_utils:

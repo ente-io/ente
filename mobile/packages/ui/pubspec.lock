@@ -148,6 +148,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_pure_utils:
+    dependency: "direct main"
+    description:
+      path: "../ente_pure_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_strings:
     dependency: "direct main"
     description:

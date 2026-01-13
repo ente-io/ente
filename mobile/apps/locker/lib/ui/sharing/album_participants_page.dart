@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
@@ -7,7 +8,6 @@ import "package:ente_ui/components/menu_section_title.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_utils/ente_utils.dart";
 import 'package:flutter/material.dart';
 import "package:locker/extensions/collection_extension.dart";
 import "package:locker/extensions/user_extension.dart";

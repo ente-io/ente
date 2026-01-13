@@ -233,6 +233,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_pure_utils:
+    dependency: "direct overridden"
+    description:
+      path: "../ente_pure_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_sharing:
     dependency: "direct main"
     description:

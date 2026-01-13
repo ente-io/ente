@@ -26,6 +26,8 @@ dependencies:
     path: ../lock_screen
   ente_network:
     path: ../network
+  ente_pure_utils:
+    path: ../ente_pure_utils
   ente_strings:
     path: ../strings
   ente_ui:

@@ -36,6 +36,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_pure_utils:
+    path: ../../packages/ente_pure_utils
   ente_sharing:
     path: ../../packages/sharing
   ente_strings:

@@ -472,6 +472,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_pure_utils:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_pure_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_qr:
     dependency: "direct main"
     description:
@@ -494,7 +501,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_utils:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: "../../packages/utils"
       relative: true
