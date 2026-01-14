@@ -5,7 +5,10 @@ import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_strings/ente_strings.dart';
+import 'package:ente_ui/components/base_bottom_sheet.dart';
+import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
+import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialogs.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/email_util.dart';
@@ -187,73 +190,59 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
-    final AlertDialog alert = AlertDialog(
-      title: Text(
-        context.strings.deleteAccount,
-        style: const TextStyle(
-          color: Colors.red,
-        ),
-      ),
-      content: RichText(
-        text: TextSpan(
-          children: [
-            const TextSpan(
-              text: "Please send an email to ",
-            ),
-            TextSpan(
-              text: "account-deletion@ente.io",
-              style: TextStyle(
-                color: Colors.orange[300],
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    await showBaseBottomSheet(
+      context,
+      title: context.strings.deleteAccount,
+      headerSpacing: 20,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                const TextSpan(
+                  text: "Please send an email to ",
+                ),
+                TextSpan(
+                  text: "account-deletion@ente.io",
+                  style: TextStyle(
+                    color: Colors.orange[300],
+                  ),
+                ),
+                const TextSpan(
+                  text:
+                      " from your registered email address.\n\nYour request will be processed within 72 hours.",
+                ),
+              ],
+              style: textTheme.body.copyWith(
+                color: colorScheme.textBase,
+                height: 1.5,
               ),
             ),
-            const TextSpan(
-              text:
-                  " from your registered email address.\n\nYour request will be processed within 72 hours.",
-            ),
-          ],
-          style: TextStyle(
-            color: getEnteColorScheme(context).surface,
-            height: 1.5,
-            fontSize: 16,
           ),
-        ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ButtonWidget(
+              buttonType: ButtonType.critical,
+              labelText: context.strings.sendEmail,
+              onTap: () async {
+                Navigator.of(context).pop();
+                await sendEmail(
+                  context,
+                  to: 'account-deletion@ente.io',
+                  subject: '[Delete account]',
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          child: Text(
-            context.strings.sendEmail,
-            style: const TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            await sendEmail(
-              context,
-              to: 'account-deletion@ente.io',
-              subject: '[Delete account]',
-            );
-          },
-        ),
-        TextButton(
-          child: Text(
-            context.strings.ok,
-            style: TextStyle(
-              color: getEnteColorScheme(context).surface,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-    // ignore: unawaited_futures
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
     );
   }
 }

@@ -1,7 +1,7 @@
 import "package:expandable/expandable.dart";
 import "package:flutter/material.dart";
 
-Widget sectionOptionSpacing = const SizedBox(height: 6);
+Widget sectionOptionSpacing = const SizedBox(height: 8);
 
 ExpandableThemeData getExpandableTheme() {
   return const ExpandableThemeData(

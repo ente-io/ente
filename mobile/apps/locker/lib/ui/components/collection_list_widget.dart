@@ -1,6 +1,5 @@
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
-import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -165,25 +164,45 @@ class CollectionListWidget extends StatelessWidget {
                 if (!isFavourite)
                   Padding(
                     padding: const EdgeInsets.only(right: 12.0),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: isSelected
-                          ? IconButtonWidget(
-                              key: const ValueKey("selected"),
-                              icon: Icons.check_circle_rounded,
-                              iconButtonType: IconButtonType.secondary,
-                              iconColor: colorScheme.primary700,
-                            )
-                          : (showSharingIndicator && hasSharees)
-                              ? _buildShareesAvatars(
-                                  collection.sharees.whereType<User>().toList(),
-                                )
-                              : const SizedBox(
-                                  key: ValueKey("unselected"),
-                                  width: 12,
-                                ),
+                    child: SizedBox(
+                      width: 44,
+                      height: 24,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            alignment: Alignment.centerRight,
+                            children: [
+                              ...previousChildren,
+                              if (currentChild != null) currentChild,
+                            ],
+                          );
+                        },
+                        child: isSelected
+                            ? Icon(
+                                key: const ValueKey("selected"),
+                                Icons.check_circle_rounded,
+                                color: colorScheme.primary700,
+                                size: 24,
+                              )
+                            : showSharingIndicator
+                                ? (isIncoming
+                                    ? _buildOwnerAvatar(collection.owner)
+                                    : (hasSharees
+                                        ? _buildShareesAvatars(
+                                            collection.sharees
+                                                .whereType<User>()
+                                                .toList(),
+                                          )
+                                        : const SizedBox(
+                                            key: ValueKey("unselected"),
+                                          )))
+                                : const SizedBox(
+                                    key: ValueKey("unselected"),
+                                  ),
+                      ),
                     ),
                   ),
               ],
@@ -198,6 +217,21 @@ class CollectionListWidget extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => CollectionPage(collection: collection),
+      ),
+    );
+  }
+
+  Widget _buildOwnerAvatar(User owner) {
+    const double avatarSize = 24.0;
+
+    return SizedBox(
+      height: avatarSize,
+      width: avatarSize,
+      child: UserAvatarWidget(
+        owner,
+        type: AvatarType.mini,
+        thumbnailView: true,
+        config: Configuration.instance,
       ),
     );
   }

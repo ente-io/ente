@@ -4,7 +4,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/ui/components/gradient_button.dart";
 
-class InputDialogSheet extends StatefulWidget {
+class InputSheet extends StatefulWidget {
   final String title;
   final String hintText;
   final String submitButtonLabel;
@@ -13,7 +13,7 @@ class InputDialogSheet extends StatefulWidget {
   final TextCapitalization textCapitalization;
   final int? maxLength;
 
-  const InputDialogSheet({
+  const InputSheet({
     super.key,
     required this.title,
     required this.hintText,
@@ -25,10 +25,10 @@ class InputDialogSheet extends StatefulWidget {
   });
 
   @override
-  State<InputDialogSheet> createState() => _InputDialogSheetState();
+  State<InputSheet> createState() => _InputSheetState();
 }
 
-class _InputDialogSheetState extends State<InputDialogSheet> {
+class _InputSheetState extends State<InputSheet> {
   late final TextEditingController _textController;
   bool _isSubmitting = false;
   bool _isInputValid = false;
@@ -94,7 +94,6 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
         TextField(
           controller: _textController,
           autofocus: true,
@@ -128,7 +127,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
           ),
           onSubmitted: (_) => _onSubmit(),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
           child: GradientButton(
@@ -151,11 +150,12 @@ Future<dynamic> showInputSheet(
   TextCapitalization textCapitalization = TextCapitalization.words,
   int? maxLength = 200,
 }) async {
-  final result = await showBaseBottomSheet<dynamic>(
+  return showBaseBottomSheet<dynamic>(
     context,
     title: title,
+    headerSpacing: 20,
     isKeyboardAware: true,
-    child: InputDialogSheet(
+    child: InputSheet(
       title: title,
       hintText: hintText,
       submitButtonLabel: submitButtonLabel,
@@ -165,6 +165,4 @@ Future<dynamic> showInputSheet(
       maxLength: maxLength,
     ),
   );
-
-  return result;
 }
