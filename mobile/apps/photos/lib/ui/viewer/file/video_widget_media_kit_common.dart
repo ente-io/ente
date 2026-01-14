@@ -16,6 +16,7 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final VideoController controller;
   final FullScreenRequestCallback? playbackCallback;
+  final TransformationController? transformationController;
   final bool isFromMemories;
   final void Function() onStreamChange;
   final bool isPreviewPlayer;
@@ -25,6 +26,7 @@ class VideoWidget extends StatefulWidget {
     this.controller,
     this.playbackCallback, {
     super.key,
+    this.transformationController,
     required this.isFromMemories,
     // ignore: unused_element
     required this.onStreamChange,
@@ -91,10 +93,25 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Video(
+    final videoWidget = Video(
       controller: widget.controller,
-      controls: (state) {
-        return ValueListenableBuilder(
+      controls: NoVideoControls,
+    );
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Video layer with zoom support
+        widget.transformationController != null
+            ? InteractiveViewer(
+                transformationController: widget.transformationController!,
+                maxScale: 4.0,
+                minScale: 1.0,
+                child: videoWidget,
+              )
+            : videoWidget,
+        // Controls overlay (fixed position, not affected by zoom)
+        ValueListenableBuilder(
           valueListenable: showControlsNotifier,
           builder: (context, value, _) {
             return AnimatedOpacity(
@@ -105,7 +122,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                 alignment: Alignment.center,
                 children: [
                   GestureDetector(
-                    behavior: HitTestBehavior.opaque,
+                    behavior: HitTestBehavior.translucent,
                     onTap: widget.isFromMemories
                         ? null
                         : () {
@@ -190,8 +207,8 @@ class _VideoWidgetState extends State<VideoWidget> {
               ),
             );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 }

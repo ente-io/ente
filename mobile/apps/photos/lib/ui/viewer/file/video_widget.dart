@@ -25,6 +25,7 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final Function({required int memoryDuration})? onFinalFileLoad;
   final bool isFromMemories;
 
@@ -32,6 +33,7 @@ class VideoWidget extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.onFinalFileLoad,
     this.isFromMemories = false,
     super.key,
@@ -164,6 +166,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         key: nativePlayerKey,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
+        shouldDisableScroll: widget.shouldDisableScroll,
         playlistData: playlistData,
         selectedPreview: playPreview,
         isFromMemories: widget.isFromMemories,
@@ -188,6 +191,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       key: mediaKitKey,
       tagPrefix: widget.tagPrefix,
       playbackCallback: widget.playbackCallback,
+      shouldDisableScroll: widget.shouldDisableScroll,
       preview: playlistData?.preview,
       selectedPreview: playPreview,
       isFromMemories: widget.isFromMemories,

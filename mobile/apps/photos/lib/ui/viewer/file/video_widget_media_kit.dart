@@ -33,6 +33,7 @@ class VideoWidgetMediaKit extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final bool isFromMemories;
   final void Function() onStreamChange;
   final File? preview;
@@ -43,6 +44,7 @@ class VideoWidgetMediaKit extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.isFromMemories = false,
     required this.onStreamChange,
     this.preview,
@@ -70,6 +72,8 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   StreamSubscription<DownloadTask>? _downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
+  final _transformationController = TransformationController();
+  bool _isZooming = false;
 
   @override
   void initState() {
@@ -78,6 +82,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _transformationController.addListener(_onZoomChanged);
 
     if (widget.selectedPreview) {
       loadPreview();
@@ -185,6 +190,8 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     }
     player.dispose();
     _captionUpdatedSubscription.cancel();
+    _transformationController.removeListener(_onZoomChanged);
+    _transformationController.dispose();
     if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
       EnteWakeLockService.instance.updateWakeLock(
         enable: true,
@@ -199,10 +206,19 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     super.dispose();
   }
 
+  void _onZoomChanged() {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    final isZoomed = scale > 1.01;
+    if (_isZooming != isZoomed) {
+      _isZooming = isZoomed;
+      widget.shouldDisableScroll?.call(isZoomed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onVerticalDragUpdate: _isGuestView
+      onVerticalDragUpdate: _isGuestView || _isZooming
           ? null
           : (d) => {
                 if (d.delta.dy > dragSensitivity)
@@ -220,6 +236,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
                 widget.file,
                 controller!,
                 widget.playbackCallback,
+                transformationController: _transformationController,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
                 isPreviewPlayer: widget.selectedPreview,
