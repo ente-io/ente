@@ -15,6 +15,7 @@ import (
 	"net/smtp"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
@@ -144,9 +145,10 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 			emailAddresses += ","
 		}
 		emailAddresses += sanitizeHeaderValue(addr)
-	}
 
-	header := "From: " + cleanFromName + " <" + cleanFromEmail + ">\n" +
+	}
+	header := "Date: " + time.Now().Format(time.RFC1123Z) + "\n" +
+		"From: " + cleanFromName + " <" + cleanFromEmail + ">\n" +
 		"To: " + emailAddresses + "\n" +
 		"Subject: " + cleanSubject + "\n" +
 		"MIME-Version: 1.0\n" +
