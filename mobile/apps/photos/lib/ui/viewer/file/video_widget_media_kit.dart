@@ -26,6 +26,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_common.dart"
     as common;
+import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 
@@ -208,7 +209,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   void _onZoomChanged() {
     final scale = _transformationController.value.getMaxScaleOnAxis();
-    final isZoomed = scale > 1.01;
+    final isZoomed = scale > kZoomThreshold;
     if (_isZooming != isZoomed) {
       _isZooming = isZoomed;
       widget.shouldDisableScroll?.call(isZoomed);
@@ -237,6 +238,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
                 controller!,
                 widget.playbackCallback,
                 transformationController: _transformationController,
+                shouldDisableScroll: widget.shouldDisableScroll,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
                 isPreviewPlayer: widget.selectedPreview,

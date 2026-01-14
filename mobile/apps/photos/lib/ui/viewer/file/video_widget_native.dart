@@ -30,6 +30,7 @@ import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_bu
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/video_stream_change.dart";
+import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -260,7 +261,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   void _onZoomChanged() {
     final scale = _transformationController.value.getMaxScaleOnAxis();
-    final isZoomed = scale > 1.01;
+    final isZoomed = scale > kZoomThreshold;
     if (_isZooming != isZoomed) {
       _isZooming = isZoomed;
       widget.shouldDisableScroll?.call(isZoomed);
@@ -304,10 +305,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                 : Stack(
                     key: const ValueKey("video_ready"),
                     children: [
-                      InteractiveViewer(
+                      ZoomableVideoViewer(
                         transformationController: _transformationController,
-                        maxScale: 4.0,
-                        minScale: 1.0,
+                        shouldDisableScroll: widget.shouldDisableScroll,
                         child: Center(
                           child: AspectRatio(
                             aspectRatio: aspectRatio ?? 1,
