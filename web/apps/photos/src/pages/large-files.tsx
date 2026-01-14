@@ -198,18 +198,15 @@ const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
     const router = useRouter();
 
     return (
-        <Stack
-            sx={(theme) => ({
-                borderBottom: `1px solid ${theme.vars.palette.divider}`,
-            })}
-        >
+        <Stack>
             <Stack
                 direction="row"
-                sx={{
+                sx={(theme) => ({
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "8px 4px",
-                }}
+                    borderBottom: `1px solid ${theme.vars.palette.divider}`,
+                })}
             >
                 <Box sx={{ minWidth: "100px" }}>
                     <IconButton onClick={router.back}>
@@ -242,7 +239,10 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     filter,
     onChangeFilter,
 }) => (
-    <Stack direction="row" sx={{ gap: 1, px: 2, pb: 1.5, flexWrap: "wrap" }}>
+    <Stack
+        direction="row"
+        sx={{ gap: 1, pl: 3, pr: 2, py: 4, flexWrap: "wrap" }}
+    >
         <Chip
             label={t("all")}
             variant={filter === "all" ? "filled" : "outlined"}
