@@ -622,22 +622,28 @@ export const clearSimilarImagesCache = async () => {
 
 /**
  * Filter groups by category based on their furthest distance.
+ *
+ * Thresholds match mobile implementation:
+ * - Close: ≤ 0.001
+ * - Similar: > 0.001 and ≤ 0.02
+ * - Related: > 0.02
  */
 export const filterGroupsByCategory = (
     groups: SimilarImageGroup[],
     category: "close" | "similar" | "related",
 ): SimilarImageGroup[] => {
-    const thresholds = {
-        close: { min: 0, max: 0.02 },
-        similar: { min: 0.02, max: 0.04 },
-        related: { min: 0.04, max: 0.08 },
-    };
-
-    const { min, max } = thresholds[category];
-
-    return groups.filter(
-        (group) => group.furthestDistance >= min && group.furthestDistance < max,
-    );
+    switch (category) {
+        case "close":
+            return groups.filter((group) => group.furthestDistance <= 0.001);
+        case "similar":
+            return groups.filter(
+                (group) =>
+                    group.furthestDistance > 0.001 &&
+                    group.furthestDistance <= 0.02,
+            );
+        case "related":
+            return groups.filter((group) => group.furthestDistance > 0.02);
+    }
 };
 
 /**
