@@ -22,6 +22,7 @@ import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
@@ -62,6 +63,8 @@ class SaveOrEditPerson extends StatefulWidget {
 class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   bool isKeypadOpen = false;
   String _inputName = "";
+  String _mergeSearchQuery = "";
+  bool _isMergeSearchActive = false;
   String? _selectedDate;
   String? _email;
   bool _isPinned = false;
@@ -72,6 +75,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
   PersonEntity? person;
   final _nameFocsNode = FocusNode();
+  final _mergeSearchFocusNode = FocusNode();
+  final _mergeSearchController = TextEditingController();
+  final _mergeSearchFieldKey = GlobalKey();
 
   @override
   void initState() {
@@ -88,6 +94,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   void dispose() {
     _debounce?.cancel();
     _nameFocsNode.dispose();
+    _mergeSearchFocusNode.dispose();
+    _mergeSearchController.dispose();
     super.dispose();
   }
 
@@ -429,18 +437,21 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             }
           } else if (snapshot.hasData) {
             final persons = snapshot.data!;
-            final filteredResults = _inputName.isNotEmpty
+            if (persons.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            final mergeQuery = _mergeSearchQuery.trim().toLowerCase();
+            final inputQuery = _inputName.trim().toLowerCase();
+            final activeQuery = mergeQuery.isNotEmpty ? mergeQuery : inputQuery;
+            final filteredResults = activeQuery.isNotEmpty
                 ? persons
                     .where(
                       (element) => element.$1.data.name
                           .toLowerCase()
-                          .contains(_inputName.toLowerCase()),
+                          .contains(activeQuery),
                     )
                     .toList()
                 : persons;
-            if (filteredResults.isEmpty) {
-              return const SizedBox.shrink();
-            }
 
             return LayoutBuilder(
               builder: (context, constraints) {
@@ -468,53 +479,80 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                         smallFontSize;
                 final childAspectRatio = tileSize /
                     (tileSize + extraVerticalSpacing + (24 * textScaleFactor));
+                final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+                final extraBottomPadding =
+                    _isMergeSearchActive ? keyboardInset : 0.0;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                      child: Text(
-                        context.l10n.orMergeWithExistingPerson,
-                        style: getEnteTextTheme(context).largeBold,
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: _isMergeSearchActive
+                            ? _buildMergeSearchField(context)
+                            : _buildMergeHeaderRow(context),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: gridPadding,
-                          mainAxisSpacing: gridPadding,
-                          childAspectRatio: childAspectRatio,
+                    if (filteredResults.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          0,
+                          20,
+                          16 + extraBottomPadding,
                         ),
-                        itemCount: filteredResults.length,
-                        itemBuilder: (context, index) {
-                          final person = filteredResults[index];
-                          return PersonGridItem(
-                            key: ValueKey(person.$1.remoteID),
-                            person: person.$1,
-                            personFile: person.$2,
-                            size: tileSize,
-                            onTap: () async {
-                              if (userAlreadyAssigned) {
-                                return;
-                              }
-                              userAlreadyAssigned = true;
-                              await ClusterFeedbackService.instance
-                                  .addClusterToExistingPerson(
-                                person: person.$1,
-                                clusterID: widget.clusterID!,
-                              );
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: gridPadding,
+                            mainAxisSpacing: gridPadding,
+                            childAspectRatio: childAspectRatio,
+                          ),
+                          itemCount: filteredResults.length,
+                          itemBuilder: (context, index) {
+                            final person = filteredResults[index];
+                            return PersonGridItem(
+                              key: ValueKey(person.$1.remoteID),
+                              person: person.$1,
+                              personFile: person.$2,
+                              size: tileSize,
+                              onTap: () async {
+                                if (userAlreadyAssigned) {
+                                  return;
+                                }
+                                userAlreadyAssigned = true;
+                                await ClusterFeedbackService.instance
+                                    .addClusterToExistingPerson(
+                                  person: person.$1,
+                                  clusterID: widget.clusterID!,
+                                );
 
-                              Navigator.pop(context, person);
-                            },
-                          );
-                        },
+                                Navigator.pop(context, person);
+                              },
+                            );
+                          },
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          0,
+                          20,
+                          16 + extraBottomPadding,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context).noResultsFound,
+                          style: getEnteTextTheme(context).small,
+                        ),
                       ),
-                    ),
                   ],
                 );
               },
@@ -524,6 +562,100 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           }
         },
       ),
+    );
+  }
+
+  void _activateMergeSearch() {
+    setState(() {
+      _isMergeSearchActive = true;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final fieldContext = _mergeSearchFieldKey.currentContext;
+      if (fieldContext != null) {
+        Scrollable.ensureVisible(
+          fieldContext,
+          alignment: 0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        ).whenComplete(() {
+          if (mounted) {
+            _mergeSearchFocusNode.requestFocus();
+          }
+        });
+      } else {
+        _mergeSearchFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _deactivateMergeSearch() {
+    setState(() {
+      _isMergeSearchActive = false;
+      _mergeSearchQuery = "";
+    });
+    _mergeSearchController.clear();
+    _mergeSearchFocusNode.unfocus();
+  }
+
+  Widget _buildMergeHeaderRow(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Row(
+      key: const ValueKey("mergeHeader"),
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            context.l10n.orMergeWithExistingPerson,
+            style: getEnteTextTheme(context).largeBold,
+          ),
+        ),
+        IconButtonWidget(
+          icon: Icons.search,
+          iconButtonType: IconButtonType.secondary,
+          iconColor: colorScheme.blurStrokePressed,
+          onTap: _activateMergeSearch,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMergeSearchField(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return TextFormField(
+      key: _mergeSearchFieldKey,
+      controller: _mergeSearchController,
+      focusNode: _mergeSearchFocusNode,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: colorScheme.fillFaint,
+        hintText: AppLocalizations.of(context).search,
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          color: colorScheme.strokeMuted,
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            Icons.cancel_rounded,
+            color: colorScheme.strokeMuted,
+          ),
+          onPressed: _deactivateMergeSearch,
+        ),
+        border: const UnderlineInputBorder(
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(12, 12, 0, 12),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: colorScheme.strokeFaint,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      onChanged: (value) {
+        setState(() {
+          _mergeSearchQuery = value.trim();
+        });
+      },
     );
   }
 

@@ -15,6 +15,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
@@ -36,6 +37,7 @@ class LinkContactToPersonSelectionPage extends StatefulWidget {
 class _LinkContactToPersonSelectionPageState
     extends State<LinkContactToPersonSelectionPage> {
   late Future<List<PersonEntity>> _personEntities;
+  String _searchQuery = "";
   final _logger = Logger('LinkContactToPersonSelectionPage');
 
   @override
@@ -55,6 +57,30 @@ class _LinkContactToPersonSelectionPageState
     });
   }
 
+  List<PersonEntity> _filterPersons(List<PersonEntity> persons) {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) {
+      return persons;
+    }
+    return persons
+        .where((person) => person.data.name.toLowerCase().contains(query))
+        .toList();
+  }
+
+  void _updateSearchQuery(String value) {
+    setState(() {
+      _searchQuery = value;
+    });
+  }
+
+  void _clearSearchQuery() {
+    if (_searchQuery.isNotEmpty) {
+      setState(() {
+        _searchQuery = "";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Building LinkContactToPersonSelectionPage");
@@ -64,77 +90,119 @@ class _LinkContactToPersonSelectionPageState
     const horizontalEdgePadding = 20.0;
     const gridPadding = 16.0;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.l10n.selectPersonToLink,
-        ),
-        centerTitle: false,
-      ),
       body: FutureBuilder<List<PersonEntity>>(
         future: _personEntities,
         builder: (context, snapshot) {
+          final slivers = <Widget>[
+            SearchableAppBar(
+              title: Text(context.l10n.selectPersonToLink),
+              onSearch: _updateSearchQuery,
+              onSearchClosed: _clearSearchQuery,
+              centerTitle: false,
+              searchIconPadding:
+                  const EdgeInsets.fromLTRB(12, 12, horizontalEdgePadding, 12),
+            ),
+          ];
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: EnteLoadingWidget());
+            slivers.add(
+              const SliverFillRemaining(
+                child: Center(child: EnteLoadingWidget()),
+              ),
+            );
+            return CustomScrollView(slivers: slivers);
           } else if (snapshot.hasError) {
             _logger.severe(
               "Failed to load _personEntities",
               snapshot.error,
               snapshot.stackTrace,
             );
-            return const Center(child: Icon(Icons.error_outline_rounded));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Text(AppLocalizations.of(context).noResultsFound + '.'),
+            slivers.add(
+              const SliverFillRemaining(
+                child: Center(child: Icon(Icons.error_outline_rounded)),
+              ),
             );
-          } else {
-            final results = snapshot.data!;
-            final screenWidth = MediaQuery.of(context).size.width;
-            final crossAxisCount = (screenWidth / 100).floor();
+            return CustomScrollView(slivers: slivers);
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            slivers.add(
+              SliverFillRemaining(
+                child: Center(
+                  child:
+                      Text(AppLocalizations.of(context).noResultsFound + '.'),
+                ),
+              ),
+            );
+            return CustomScrollView(slivers: slivers);
+          }
 
-            final itemSize = (screenWidth -
-                    ((horizontalEdgePadding * 2) +
-                        ((crossAxisCount - 1) * gridPadding))) /
-                crossAxisCount;
+          final results = _filterPersons(snapshot.data!);
+          if (results.isEmpty) {
+            slivers.add(
+              SliverFillRemaining(
+                child: Center(
+                  child:
+                      Text(AppLocalizations.of(context).noResultsFound + '.'),
+                ),
+              ),
+            );
+            return CustomScrollView(slivers: slivers);
+          }
 
-            return GridView.builder(
+          final screenWidth = MediaQuery.of(context).size.width;
+          final crossAxisCount = (screenWidth / 100).floor();
+          final itemSize = (screenWidth -
+                  ((horizontalEdgePadding * 2) +
+                      ((crossAxisCount - 1) * gridPadding))) /
+              crossAxisCount;
+
+          slivers.add(
+            SliverPadding(
               padding: const EdgeInsets.fromLTRB(
                 horizontalEdgePadding,
                 16,
                 horizontalEdgePadding,
                 96,
               ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                mainAxisSpacing: gridPadding,
-                crossAxisSpacing: gridPadding,
-                crossAxisCount: crossAxisCount,
-                childAspectRatio:
-                    itemSize / (itemSize + (24 * textScaleFactor)),
-              ),
-              itemCount: results.length,
-              itemBuilder: (context, index) {
-                return _RoundedPersonFaceWidget(
-                  onTap: () async {
-                    try {
-                      final updatedPerson = await linkPersonToContact(
-                        context,
-                        emailToLink: widget.emailToLink!,
-                        personEntity: results[index],
-                      );
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  mainAxisSpacing: gridPadding,
+                  crossAxisSpacing: gridPadding,
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio:
+                      itemSize / (itemSize + (24 * textScaleFactor)),
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  childCount: results.length,
+                  (context, index) {
+                    return _RoundedPersonFaceWidget(
+                      onTap: () async {
+                        try {
+                          final updatedPerson = await linkPersonToContact(
+                            context,
+                            emailToLink: widget.emailToLink!,
+                            personEntity: results[index],
+                          );
 
-                      if (updatedPerson != null) {
-                        Navigator.of(context).pop(updatedPerson);
-                      }
-                    } catch (e) {
-                      await showGenericErrorDialog(context: context, error: e);
-                      _logger.severe("Failed to link person to contact", e);
-                    }
+                          if (updatedPerson != null) {
+                            Navigator.of(context).pop(updatedPerson);
+                          }
+                        } catch (e) {
+                          await showGenericErrorDialog(
+                            context: context,
+                            error: e,
+                          );
+                          _logger.severe("Failed to link person to contact", e);
+                        }
+                      },
+                      itemSize: itemSize,
+                      personEntity: results[index],
+                    );
                   },
-                  itemSize: itemSize,
-                  personEntity: results[index],
-                );
-              },
-            );
-          }
+                ),
+              ),
+            ),
+          );
+
+          return CustomScrollView(slivers: slivers);
         },
       ),
     );
