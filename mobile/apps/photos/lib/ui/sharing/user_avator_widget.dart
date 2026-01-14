@@ -98,6 +98,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
+    final int cachedPixelWidth =
+        (size * MediaQuery.devicePixelRatioOf(context)).toInt();
     return _personID != null
         ? Container(
             padding:
@@ -127,6 +129,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                           ? PersonFaceWidget(
                               key: ValueKey('$personID-$lastSyncTimeForKey'),
                               personId: personID,
+                              cachedPixelWidth: cachedPixelWidth,
                               onErrorCallback: () {
                                 if (mounted) {
                                   setState(() {
