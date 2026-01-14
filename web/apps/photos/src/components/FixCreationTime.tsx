@@ -343,10 +343,20 @@ const updateFileDate = async (
         }
     }
 
-    if (!newDate) return;
+    if (!newDate) {
+        log.info(
+            `Skipping fix time for ${fileLogID(file)}: no date found for option ${fixOption}`,
+        );
+        return;
+    }
 
     const existingDate = fileCreationPhotoDate(file);
-    if (newDate.timestamp == existingDate.getTime()) return;
+    if (newDate.timestamp == existingDate.getTime()) {
+        log.info(
+            `Skipping fix time for ${fileLogID(file)}: extracted date ${newDate.timestamp} matches existing date ${existingDate.getTime()}`,
+        );
+        return;
+    }
 
     await updateFilePublicMagicMetadata(file, {
         dateTime: newDate.dateTime,
