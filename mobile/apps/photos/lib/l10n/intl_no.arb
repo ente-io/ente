@@ -1731,9 +1731,5 @@
   "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
-  "pastYearsMemories": "Tidligere års minner",
-  "cLTitle1": "Kommentarer og reaksjoner",
-  "cLDesc1": "Vi introduserer kommentarer og reaksjoner på delte bilder. Du kan reagere eller kommentere et bilde ved å åpne det og bruke handlingene nederst. Alle innkommende kommentarer og reaksjoner vil være synlige i Delt-fanen.",
-  "cLTitle2": "Administrator for album",
-  "cLDesc2": "Du kan nå tildele en annen Ente-bruker som administrator av albumet ditt. Med dette kan de legge til andre seere og samarbeidspartnere, fjerne bilder fra album, og til og med foreslå at deltakere sletter bildene sine."
+  "pastYearsMemories": "Tidligere års minner"
 }

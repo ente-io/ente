@@ -34,7 +34,14 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
         //
         // The recommended workaround for now is to enable usePolling. Since it
         // comes at a performance cost, we only do it where needed (macOS).
-        ...(process.platform == "darwin" ? { usePolling: true } : {}),
+        //
+        // Polling with the default interval (100ms) causes high CPU usage for
+        // large folders (e.g. 10,000+ files). Increasing the interval to 5
+        // seconds significantly reduces CPU while still detecting new files
+        // within a reasonable time for a backup use case.
+        ...(process.platform == "darwin"
+            ? { usePolling: true, interval: 5000, binaryInterval: 5000 }
+            : {}),
     });
 
     watcher
@@ -59,17 +66,26 @@ const eventData = (platformPath: string): [string, FolderWatch] => {
 };
 
 export const watchGet = async (watcher: FSWatcher): Promise<FolderWatch[]> => {
-    const valid: FolderWatch[] = [];
-    const deletedPaths: string[] = [];
+    const result: FolderWatch[] = [];
+    const watched = watcher.getWatched();
+
     for (const watch of folderWatches()) {
-        if (await fsIsDir(watch.folderPath)) valid.push(watch);
-        else deletedPaths.push(watch.folderPath);
+        const isAccessible = await fsIsDir(watch.folderPath);
+        result.push({ ...watch, isAccessible });
+
+        // Update the file system watcher based on accessibility.
+        if (isAccessible) {
+            // Add to watcher if not already being watched.
+            if (!watched[watch.folderPath]) {
+                watcher.add(watch.folderPath);
+            }
+        } else {
+            // Stop watching inaccessible folders.
+            watcher.unwatch(watch.folderPath);
+        }
     }
-    if (deletedPaths.length) {
-        await Promise.all(deletedPaths.map((p) => watchRemove(watcher, p)));
-        setFolderWatches(valid);
-    }
-    return valid;
+
+    return result;
 };
 
 const folderWatches = (): FolderWatch[] => watchStore.get("mappings") ?? [];
@@ -105,10 +121,17 @@ export const watchAdd = async (
 
     watcher.add(folderPath);
 
-    return watches;
+    // Return watches with isAccessible set. The newly added folder is
+    // accessible (we just verified it exists), and we check the others.
+    return await Promise.all(
+        watches.map(async (watch) => ({
+            ...watch,
+            isAccessible: await fsIsDir(watch.folderPath),
+        })),
+    );
 };
 
-export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
+export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
     const watches = folderWatches();
     const filtered = watches.filter((watch) => watch.folderPath != folderPath);
     if (watches.length == filtered.length)
@@ -117,7 +140,13 @@ export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
         );
     setFolderWatches(filtered);
     watcher.unwatch(folderPath);
-    return filtered;
+    // Return watches with isAccessible set.
+    return await Promise.all(
+        filtered.map(async (watch) => ({
+            ...watch,
+            isAccessible: await fsIsDir(watch.folderPath),
+        })),
+    );
 };
 
 export const watchUpdateSyncedFiles = (

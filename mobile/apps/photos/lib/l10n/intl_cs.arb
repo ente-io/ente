@@ -2033,10 +2033,6 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
-  "cLTitle1": "Komentáře a reakce",
-  "cLDesc1": "Představujeme komentáře a reakce u sdílených fotografií. Na fotografii můžete reagovat nebo ji komentovat tak, že ji otevřete a použijete akce ve spodní části. Všechny příchozí komentáře a reakce budou viditelné na kartě Sdílené.",
-  "cLTitle2": "Správce alba",
-  "cLDesc2": "Nyní můžete jinému uživateli Ente přiřadit roli správce vašeho alba. S tím bude moci přidávat další diváky a spolupracovníky, odstraňovat fotografie z alb a dokonce navrhnout účastníkům smazání jejich fotografií.",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

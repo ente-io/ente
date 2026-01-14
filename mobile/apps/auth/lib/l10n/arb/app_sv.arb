@@ -579,7 +579,7 @@
   "addNew": "Lägg till ny",
   "selected": "vald",
   "moveMultipleToTrashMessage": "Är du säker på att du vill flytta {count} objekt till papperskorgen?",
-  "nSelected": "{count, plural, one {}=1{1 vald} other{{count} valda}}",
+  "nSelected": "{count, plural, =1{1 vald} other{{count} valda}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -590,7 +590,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {}=1{Fäst 1 objekt} other{Fäst {count} objekt}}",
+  "pinnedCount": "{count, plural, =1{Fäst 1 objekt} other{Fäst {count} objekt}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -601,7 +601,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, one {}=1{Fäst 1 objekt} other{Fäst {count} objekt}}",
+  "unpinnedCount": "{count, plural, =1{Fäst 1 objekt} other{Fäst {count} objekt}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

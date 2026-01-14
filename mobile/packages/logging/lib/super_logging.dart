@@ -392,7 +392,8 @@ class SuperLogging {
       }
     }
 
-    logFile = File(join(dirPath, "${config.dateFmt!.format(DateTime.now())}.txt"));
+    logFile =
+        File(join(dirPath, "${config.dateFmt!.format(DateTime.now())}.txt"));
   }
 
   /// Current app version, obtained from package_info plugin.

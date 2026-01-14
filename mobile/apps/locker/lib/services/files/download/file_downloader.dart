@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_network/network.dart';
-import 'package:ente_utils/fake_progress.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/download/models/task.dart';
 import 'package:locker/services/files/download/service_locator.dart';

@@ -91,9 +91,9 @@ PODS:
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
-  - SDWebImage (5.21.2):
-    - SDWebImage/Core (= 5.21.2)
-  - SDWebImage/Core (5.21.2)
+  - SDWebImage (5.21.5):
+    - SDWebImage/Core (= 5.21.5)
+  - SDWebImage/Core (5.21.5)
   - Sentry/HybridSDK (8.46.0)
   - sentry_flutter (8.14.2):
     - Flutter
@@ -255,7 +255,7 @@ SPEC CHECKSUMS:
   app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
-  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   dir_utils: c668f14c9a72a5087d11c4722cb272de0a87ce10
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
@@ -281,7 +281,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   qr_code_scanner: d77f94ecc9abf96d9b9b8fc04ef13f611e5a147a
-  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
+  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a

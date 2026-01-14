@@ -73,7 +73,7 @@ class FileIconUtils {
   static Widget getFileIcon(
     String fileName, {
     bool showBackground = true,
-    double size = 20,
+    double size = 24,
   }) {
     final config = _getFileConfig(fileName);
 

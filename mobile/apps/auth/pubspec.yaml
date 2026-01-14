@@ -18,7 +18,7 @@ dependencies:
   confetti: ^0.8.0
   connectivity_plus: ^6.0.5
   convert: ^3.1.1
-  device_info_plus: ^9.1.1
+  device_info_plus: ^11.5.0
   dio: ^5.8.0+1
   dir_utils:
     path: ../../packages/dir_utils
@@ -32,9 +32,10 @@ dependencies:
     path: ../../packages/base
   ente_configuration:
     path: ../../packages/configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../../packages/ente_crypto_api
+  ente_crypto_dart_adapter:
+    path: ../../packages/ente_crypto_dart_adapter
   ente_events:
     path: ../../packages/events
   ente_lock_screen:
@@ -43,12 +44,16 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_pure_utils:
+    path: ../../packages/ente_pure_utils
   ente_qr:
     path: plugins/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
     path: ../../packages/ui
+  ente_utils:
+    path: ../../packages/utils
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0

@@ -1,13 +1,13 @@
 import "dart:convert";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/navigation_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_api_client.dart";
@@ -16,6 +16,7 @@ import "package:locker/services/collections/models/public_url.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
+
 
 /// A bottom sheet widget for advanced sharing options.
 ///
@@ -279,30 +280,6 @@ class _AdvancedSharingBottomSheetState
         ),
       ),
     );
-  }
-
-  Future<void> _updateUrlSettings(
-    BuildContext context,
-    Map<String, dynamic> prop, {
-    bool showProgressDialog = true,
-  }) async {
-    final dialog = showProgressDialog
-        ? createProgressDialog(context, context.l10n.pleaseWait)
-        : null;
-    await dialog?.show();
-    try {
-      await CollectionApiClient.instance
-          .updateShareUrl(widget.collection!, prop);
-      await dialog?.hide();
-      showShortToast(context, "Collection updated");
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
-      rethrow;
-    }
   }
 
   Future<void> _createPublicLink() async {

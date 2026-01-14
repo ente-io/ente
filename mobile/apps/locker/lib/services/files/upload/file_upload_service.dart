@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_network/network.dart';
 import 'package:flutter/foundation.dart';
@@ -240,7 +240,7 @@ class FileUploader {
           await _tryToUpload(file, collection, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
-          final message = "Upload timed out for file";
+          const message = "Upload timed out for file";
           _logger.warning(message);
           throw TimeoutException(message);
         },
@@ -337,7 +337,7 @@ class FileUploader {
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
-      final fileAttributes = await CryptoUtil.encryptFileWithMD5(
+      final fileAttributes = await CryptoUtil.encryptFileWithMd5(
         file.path,
         encryptedFilePath,
         key: key,
@@ -408,10 +408,10 @@ class FileUploader {
 
       final encryptedMetadataResult = await CryptoUtil.encryptData(
         utf8.encode(jsonEncode(enteFile.metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+          CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -420,7 +420,7 @@ class FileUploader {
       final metadataDecryptionHeader =
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
       final encryptedFileKeyData = CryptoUtil.encryptSync(
-        fileAttributes.key!,
+        fileAttributes.key,
         CryptoHelper.instance.getCollectionKey(collection),
       );
       final encryptedKey =
@@ -434,7 +434,7 @@ class FileUploader {
         pubMetadataRequest = await getPubMetadataRequest(
           enteFile,
           pubMetadata,
-          fileAttributes.key!,
+          fileAttributes.key,
         );
       }
       final remoteFile = await _uploadFile(

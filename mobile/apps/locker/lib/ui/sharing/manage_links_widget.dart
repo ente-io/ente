@@ -1,6 +1,7 @@
 import "dart:convert";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_crypto_api/ente_crypto_api.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -10,7 +11,6 @@ import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -22,7 +22,8 @@ import "package:locker/services/collections/models/public_url.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
-import "package:locker/utils/date_time_util.dart";
+import "package:locker/utils/date_time_util.dart" as locker_date;
+
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -116,7 +117,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           content: url.isExpired
                               ? context.l10n.expiredLinkInfo
                               : context.l10n.linkExpiresOn(
-                                  getFormattedTime(
+                                  locker_date.getFormattedTime(
                                     DateTime.fromMicrosecondsSinceEpoch(
                                       url.validTill,
                                     ),

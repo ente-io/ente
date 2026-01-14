@@ -578,7 +578,7 @@
   "addNew": "Přidat nový",
   "selected": "vybrané",
   "moveMultipleToTrashMessage": "Opravdu chcete přesunout {count} položku(y) do koše?",
-  "nSelected": "{count, plural, one {} few {{count} vybráno} many {{count} vybráno}=1{1 vybráno} other{{count} vybráno}}",
+  "nSelected": "{count, plural, =1{1 vybráno} few {{count} vybráno} many {{count} vybráno} other{{count} vybráno}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +589,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {} few {Připnuty {count} položky} many {Připnuto {count} položky}=1{Připnuta 1 položka} other{Připnuto {count} položek}}",
+  "pinnedCount": "{count, plural, =1{Připnuta 1 položka} few {Připnuty {count} položky} many {Připnuto {count} položky} other{Připnuto {count} položek}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {
@@ -600,7 +600,7 @@
       }
     }
   },
-  "unpinnedCount": "{count, plural, one {} few {Odepnuly se {count} položky} many {Odepnul se {count} položky}=1{Odepnula se 1 položka} other{Odepnulo se {count} položek}}",
+  "unpinnedCount": "{count, plural, =1{Odepnula se 1 položka} few {Odepnuly se {count} položky} many {Odepnul se {count} položky} other{Odepnulo se {count} položek}}",
   "@unpinnedCount": {
     "description": "Text to show number of items unpinned",
     "placeholders": {

@@ -6,18 +6,13 @@ import "package:ente_ui/theme/text_style.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
-import 'package:locker/services/collections/collections_service.dart';
-import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/services/trash/trash_service.dart';
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
-import 'package:locker/ui/components/file_restore_dialog.dart';
 import 'package:locker/ui/components/item_list_view.dart';
-import 'package:locker/utils/collection_list_util.dart';
 
 class TrashPage extends StatefulWidget {
   final List<TrashFile> trashFiles;
@@ -40,123 +35,6 @@ class _TrashPageState extends State<TrashPage> {
     super.initState();
     _allTrashFiles = List.from(widget.trashFiles);
     _sortedTrashFiles = List.from(widget.trashFiles);
-  }
-
-  List<OverflowMenuAction> _getFileOverflowActions() {
-    final colorScheme = getEnteColorScheme(context);
-    return [
-      OverflowMenuAction(
-        id: 'restore',
-        label: context.l10n.restore,
-        icon: Icon(
-          Icons.restore,
-          color: colorScheme.textBase,
-          size: 20,
-        ),
-        onTap: (context, file, collection) {
-          _restoreFile(context, file!);
-        },
-      ),
-      OverflowMenuAction(
-        id: 'delete',
-        label: context.l10n.delete,
-        icon: HugeIcon(
-          icon: HugeIcons.strokeRoundedDelete01,
-          color: colorScheme.warning500,
-          size: 20,
-        ),
-        onTap: (context, file, collection) {
-          _deleteFilePermanently(context, file!);
-        },
-        isWarning: true,
-      ),
-    ];
-  }
-
-  void _restoreFile(BuildContext context, EnteFile file) async {
-    final collections = await CollectionService.instance.getCollectionsForUI();
-
-    final availableCollections = uniqueCollectionsById(collections);
-
-    if (availableCollections.isEmpty) {
-      showToast(
-        context,
-        context.l10n.noCollectionsAvailableForRestore,
-      );
-      return;
-    }
-
-    final dialogResult = await showFileRestoreDialog(
-      context,
-      file: file,
-      collections: availableCollections,
-    );
-
-    if (dialogResult != null && dialogResult.selectedCollections.isNotEmpty) {
-      await _performRestore(
-        context,
-        file,
-        dialogResult.selectedCollections.first,
-      );
-    }
-  }
-
-  void _deleteFilePermanently(BuildContext context, EnteFile file) {
-    TrashService.instance.deleteFromTrash([file]).then((_) {
-      setState(() {
-        _sortedTrashFiles.remove(file);
-        _allTrashFiles.remove(file);
-      });
-      showToast(
-        context,
-        context.l10n.deletedPermanently(file.displayName),
-      );
-    }).catchError((error) {
-      showToast(
-        context,
-        context.l10n.failedToDeleteFile(error.toString()),
-      );
-    });
-  }
-
-  Future<void> _performRestore(
-    BuildContext context,
-    EnteFile file,
-    Collection targetCollection,
-  ) async {
-    final dialog = createProgressDialog(
-      context,
-      context.l10n.restoring,
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      await TrashService.instance.restore([file], targetCollection);
-
-      setState(() {
-        _sortedTrashFiles.remove(file);
-        _allTrashFiles.remove(file);
-      });
-
-      await dialog.hide();
-
-      showToast(
-        context,
-        context.l10n.restoredFileToCollection(
-          file.displayName,
-          targetCollection.name ?? 'Unnamed Collection',
-        ),
-      );
-    } catch (error) {
-      await dialog.hide();
-
-      showToast(
-        context,
-        context.l10n.failedToRestoreFile(file.displayName, error.toString()),
-      );
-    }
   }
 
   Future<void> _emptyTrash() async {
@@ -243,8 +121,8 @@ class _TrashPageState extends State<TrashPage> {
                   await _emptyTrash();
                 },
                 child: Container(
-                  height: 48,
-                  width: 48,
+                  height: 44,
+                  width: 44,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: colorScheme.backdropBase,
@@ -268,7 +146,6 @@ class _TrashPageState extends State<TrashPage> {
               : Expanded(
                   child: ItemListView(
                     files: _sortedTrashFiles.cast<EnteFile>(),
-                    fileOverflowActions: _getFileOverflowActions(),
                     physics: const BouncingScrollPhysics(),
                   ),
                 ),

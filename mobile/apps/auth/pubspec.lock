@@ -333,10 +333,10 @@ packages:
     dependency: "direct main"
     description:
       name: device_info_plus
-      sha256: "77f757b789ff68e4eaf9c56d1752309bd9f7ad557cb105b938a7f8eb89e59110"
+      sha256: "98f28b42168cc509abc92f88518882fd58061ea372d7999aecc424345c7bff6a"
       url: "https://pub.dev"
     source: hosted
-    version: "9.1.2"
+    version: "11.5.0"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -421,15 +421,29 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
-  ente_crypto_dart:
+  ente_crypto_api:
     dependency: "direct main"
+    description:
+      path: "../../packages/ente_crypto_api"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_crypto_dart:
+    dependency: transitive
     description:
       path: "."
       ref: HEAD
-      resolved-ref: f91e1545f8263df127762240c4da54a0c42835b2
+      resolved-ref: dc995b62d6ec5bca3ba47966685b2af3c42235b2
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
+  ente_crypto_dart_adapter:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_crypto_dart_adapter"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_events:
     dependency: "direct main"
     description:
@@ -458,6 +472,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_pure_utils:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_pure_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_qr:
     dependency: "direct main"
     description:
@@ -480,7 +501,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_utils:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: "../../packages/utils"
       relative: true
@@ -1999,10 +2020,10 @@ packages:
     dependency: transitive
     description:
       name: win32_registry
-      sha256: "21ec76dfc731550fd3e2ce7a33a9ea90b828fdf19a5c3bcf556fa992cfa99852"
+      sha256: "6f1b564492d0147b330dd794fee8f512cec4977957f310f9951b5f9d83618dae"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.5"
+    version: "2.1.0"
   window_manager:
     dependency: "direct main"
     description:

@@ -13,6 +13,7 @@ import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/events/trigger_logout_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
@@ -26,6 +27,7 @@ import "package:locker/ui/drawer/drawer_page.dart";
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/save_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
+import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -214,14 +216,17 @@ class _HomePageState extends UploaderPageState<HomePage>
   );
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final _searchFocusNode = FocusNode();
+  final _selectedFiles = SelectedFiles();
+  final _scrollController = ScrollController();
   bool _isLoading = true;
-  bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
+  final ValueNotifier<List<EnteFile>> _displayedFilesNotifier =
+      ValueNotifier([]);
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -318,6 +323,8 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _scrollController.dispose();
+    _displayedFilesNotifier.dispose();
     _deepLinkSubscription?.cancel();
     _triggerLogoutSubscription?.cancel();
     disposeSharing();
@@ -497,18 +504,12 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
-      // Only mark initial load complete when first sync has finished
-      // This prevents empty state while sync is in progress
-      final hasCompletedFirstSync =
-          CollectionService.instance.hasCompletedFirstSync();
-
       if (mounted) {
         setState(() {
           _collections = sortedCollections;
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
           _isLoading = false;
-          _hasCompletedInitialLoad = hasCompletedFirstSync;
         });
       }
     } catch (error) {
@@ -516,8 +517,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         setState(() {
           _error = 'Error fetching collections: $error';
           _isLoading = false;
-          _hasCompletedInitialLoad =
-              CollectionService.instance.hasCompletedFirstSync();
         });
       }
     }
@@ -586,61 +585,95 @@ class _HomePageState extends UploaderPageState<HomePage>
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return UserDetailsStateWidget(
-      child: PopScope(
-        canPop: !isSearchActive && !_isSettingsOpen,
-        onPopInvokedWithResult: (didPop, result) async {
-          if (didPop) {
-            return;
-          }
+      child: ListenableBuilder(
+        listenable: _selectedFiles,
+        builder: (context, _) {
+          final hasSelection = _selectedFiles.files.isNotEmpty;
+          return PopScope(
+            canPop: !isSearchActive && !_isSettingsOpen && !hasSelection,
+            onPopInvokedWithResult: (didPop, result) async {
+              if (didPop) {
+                return;
+              }
 
-          if (isSearchActive) {
-            _handleClearSearch();
-            return;
-          }
+              if (hasSelection) {
+                _selectedFiles.clearAll();
+                return;
+              }
 
-          if (_isSettingsOpen) {
-            scaffoldKey.currentState!.closeDrawer();
-            return;
-          }
-        },
-        child: KeyboardListener(
-          focusNode: FocusNode(),
-          onKeyEvent: handleKeyEvent,
-          child: Scaffold(
-            key: scaffoldKey,
-            backgroundColor: colorScheme.backgroundBase,
-            drawer: Drawer(
-              width: 428,
-              backgroundColor: colorScheme.backgroundBase,
-              child: _settingsPage,
-            ),
-            drawerEnableOpenDragGesture: !Platform.isAndroid,
-            onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-            appBar: CustomLockerAppBar(
-              scaffoldKey: scaffoldKey,
-              isSearchActive: isSearchActive,
-              isSyncing: !_hasCompletedInitialLoad || _isLoading,
-              searchController: searchController,
-              searchFocusNode: _searchFocusNode,
-              onSearchFocused: _handleSearchFocused,
-              onClearSearch: _handleClearSearch,
-              onSearchChanged: _handleSearchChange,
-            ),
-            body: _buildBody(),
-            floatingActionButton: isSearchActive
-                ? null
-                : FloatingActionButton(
-                    onPressed: _openSavePage,
-                    shape: const CircleBorder(),
-                    backgroundColor: colorScheme.primary700,
-                    elevation: 0,
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlusSign,
-                      color: Colors.white,
+              if (isSearchActive) {
+                _handleClearSearch();
+                return;
+              }
+
+              if (_isSettingsOpen) {
+                scaffoldKey.currentState!.closeDrawer();
+                return;
+              }
+            },
+            child: KeyboardListener(
+              focusNode: FocusNode(),
+              onKeyEvent: handleKeyEvent,
+              child: Scaffold(
+                key: scaffoldKey,
+                backgroundColor: colorScheme.backgroundBase,
+                drawer: Drawer(
+                  width: 428,
+                  backgroundColor: colorScheme.backgroundBase,
+                  child: _settingsPage,
+                ),
+                drawerEnableOpenDragGesture: !Platform.isAndroid,
+                onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+                appBar: CustomLockerAppBar(
+                  scaffoldKey: scaffoldKey,
+                  isSearchActive: isSearchActive,
+                  searchController: searchController,
+                  searchFocusNode: _searchFocusNode,
+                  onSearchFocused: _handleSearchFocused,
+                  onClearSearch: _handleClearSearch,
+                  onSearchChanged: _handleSearchChange,
+                ),
+                body: Stack(
+                  children: [
+                    _buildBody(),
+                    ValueListenableBuilder<List<EnteFile>>(
+                      valueListenable: _displayedFilesNotifier,
+                      builder: (context, displayedFiles, _) {
+                        return FileSelectionOverlayBar(
+                          selectedFiles: _selectedFiles,
+                          files: displayedFiles.isNotEmpty
+                              ? displayedFiles
+                              : _recentFiles,
+                          scrollController: _scrollController,
+                        );
+                      },
                     ),
-                  ),
-          ),
-        ),
+                  ],
+                ),
+                floatingActionButton: isSearchActive
+                    ? null
+                    : ListenableBuilder(
+                        listenable: _selectedFiles,
+                        builder: (context, _) {
+                          if (_selectedFiles.files.isNotEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return FloatingActionButton(
+                            onPressed: _openSavePage,
+                            shape: const CircleBorder(),
+                            backgroundColor: colorScheme.primary700,
+                            elevation: 0,
+                            child: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedPlusSign,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -711,6 +744,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ),
               )
             : SingleChildScrollView(
+                controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.only(
                   left: 16.0,
@@ -724,6 +758,8 @@ class _HomePageState extends UploaderPageState<HomePage>
                     RecentsSectionWidget(
                       collections: _filterOutUncategorized(_collections),
                       recentFiles: _recentFiles,
+                      selectedFiles: _selectedFiles,
+                      displayedFilesNotifier: _displayedFilesNotifier,
                     ),
                   ],
                 ),

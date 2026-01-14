@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/export/ente.dart';
@@ -9,11 +10,11 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/data/html_export.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
-import 'package:ente_auth/utils/share_utils.dart';
+import 'package:ente_auth/utils/share_utils.dart' as auth_share;
 import 'package:ente_auth/utils/toast_util.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
+import 'package:ente_utils/ente_utils.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -150,11 +151,11 @@ Future<void> _exportCodes(
   }
   Future.delayed(
     const Duration(milliseconds: 1200),
-    () async => await shareDialog(
+    () async => await auth_share.shareDialog(
       context,
       context.l10n.exportCodes,
       saveAction: () async {
-        await PlatformUtil.shareFile(
+        await FileSaverUtil.saveFile(
           exportFileName,
           extension,
           CryptoUtil.strToBin(fileContent),

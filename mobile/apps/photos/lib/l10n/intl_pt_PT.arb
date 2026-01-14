@@ -1813,9 +1813,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Comentários e reações",
-  "cLDesc1": "Estamos a introduzir comentários e reações em fotografias partilhadas. Pode reagir ou comentar uma fotografia abrindo-a e usando as ações na parte inferior. Todos os comentários e reações recebidos serão visíveis no separador Partilhado.",
-  "cLTitle2": "Administrador de álbuns",
-  "cLDesc2": "Agora pode atribuir outro utilizador Ente como administrador do seu álbum. Com isto, ele poderá adicionar outros visualizadores e colaboradores, remover fotografias dos álbuns e até sugerir aos participantes que eliminem as suas fotografias."
+  }
 }

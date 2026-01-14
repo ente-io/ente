@@ -1516,9 +1516,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "cLTitle1": "Comentarii și reacții",
-  "cLDesc1": "Introducem comentarii și reacții la fotografiile partajate. Puteți reacționa sau comenta o fotografie deschizând-o și folosind acțiunile din partea de jos. Toate comentariile și reacțiile primite vor fi vizibile în fila Partajat.",
-  "cLTitle2": "Administrator pentru albume",
-  "cLDesc2": "Acum puteți atribui un alt utilizator Ente ca administrator al albumului dumneavoastră. Cu aceasta, va putea adăuga alți vizualizatori și colaboratori, elimina fotografii din albume și chiar sugera participanților să își șteargă fotografiile."
+  "join": "Alăturare"
 }
