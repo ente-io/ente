@@ -42,6 +42,15 @@ export const removeSelectedSimilarImageGroups = async (
     const filesToAdd = new Map<number, EnteFile[]>();
     const filesToTrash: EnteFile[] = [];
 
+    // Get favorites collections to protect favorited files
+    const collections = await savedNormalCollections();
+    const userID = (await import("ente-accounts/services/user")).ensureLocalUser().id;
+    const favoritesCollectionIDs = new Set(
+        collections
+            .filter((c) => c.type === "favorites" && c.owner.id === userID)
+            .map((c) => c.id),
+    );
+
     // Handle full group selections
     for (const group of selectedGroups) {
         const retainedItem = await similarImageGroupItemToRetain(group);
@@ -52,6 +61,15 @@ export const removeSelectedSimilarImageGroups = async (
         for (const item of group.items) {
             // Skip the item we're retaining
             if (item.file.id === retainedItem.file.id) continue;
+
+            // Skip if item is individually deselected (respects item.isSelected state)
+            if (item.isSelected === false) continue;
+
+            // Skip favorited files - they should never be deleted
+            const isFavorited = Array.from(item.collectionIDs).some((cid) =>
+                favoritesCollectionIDs.has(cid),
+            );
+            if (isFavorited) continue;
 
             // Collect all collection IDs this file belongs to
             collectionIDs = collectionIDs.union(item.collectionIDs);
@@ -76,6 +94,12 @@ export const removeSelectedSimilarImageGroups = async (
     for (const group of groupsWithIndividualSelections) {
         for (const item of group.items) {
             if (!item.isSelected) continue;
+
+            // Skip favorited files - they should never be deleted
+            const isFavorited = Array.from(item.collectionIDs).some((cid) =>
+                favoritesCollectionIDs.has(cid),
+            );
+            if (isFavorited) continue;
 
             // Simply move individually selected items to trash
             // No symlink creation needed since we're not retaining anything
