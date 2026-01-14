@@ -234,7 +234,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_pure_utils:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: "../ente_pure_utils"
       relative: true

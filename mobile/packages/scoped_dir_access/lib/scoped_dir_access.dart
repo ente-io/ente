@@ -3,9 +3,10 @@
 /// - iOS: Uses security-scoped bookmarks for persistent directory access
 /// - Android: Uses Storage Access Framework (SAF) via saf_util/saf_stream
 /// - Other platforms: Uses standard file system access via file_picker
-library dir_utils;
+library scoped_dir_access;
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
@@ -75,7 +76,7 @@ class DirUtils {
   DirUtils._();
 
   static final DirUtils instance = DirUtils._();
-  static const _channel = MethodChannel('io.ente.dir_utils');
+  static const _channel = MethodChannel('io.ente.scoped_dir_access');
 
   // ============================================================
   // Directory Picker

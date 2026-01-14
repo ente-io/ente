@@ -20,8 +20,6 @@ dependencies:
   convert: ^3.1.1
   device_info_plus: ^11.5.0
   dio: ^5.8.0+1
-  dir_utils:
-    path: ../../packages/dir_utils
   dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
@@ -130,6 +128,8 @@ dependencies:
   qr_flutter: ^4.1.0
   saf_stream: any
   saf_util: any
+  scoped_dir_access:
+    path: ../../packages/scoped_dir_access
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2
   share_plus: ^11.0.0
