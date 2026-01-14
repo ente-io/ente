@@ -139,10 +139,10 @@ jobs:
               run: flutter pub get && flutter analyze --no-fatal-infos
               working-directory: mobile/packages/configuration
 
-            - name: Lint package - dir_utils
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'dir_utils')
+            - name: Lint package - scoped_dir_access
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'scoped_dir_access')
               run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/dir_utils
+              working-directory: mobile/packages/scoped_dir_access
 
             - name: Lint package - ente_crypto_api
               if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_api')
