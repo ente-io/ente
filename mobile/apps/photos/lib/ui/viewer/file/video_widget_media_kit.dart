@@ -211,7 +211,9 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     final scale = _transformationController.value.getMaxScaleOnAxis();
     final isZoomed = scale > kZoomThreshold;
     if (_isZooming != isZoomed) {
-      _isZooming = isZoomed;
+      setState(() {
+        _isZooming = isZoomed;
+      });
       widget.shouldDisableScroll?.call(isZoomed);
     }
   }
