@@ -341,7 +341,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       await CollectionApiClient.instance
           .updateShareUrl(widget.collection!, prop);
       await dialog?.hide();
-      showShortToast(context, "Collection updated");
+      showShortToast(context, context.l10n.collectionUpdated);
       if (mounted) {
         setState(() {});
       }

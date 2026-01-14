@@ -113,10 +113,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       isSearchActive ? _filteredFiles : _files;
 
   bool get _isSelectionEnabled =>
-      collectionViewType != CollectionViewType.sharedCollectionViewer &&
-      collectionViewType != CollectionViewType.sharedCollectionCollaborator &&
-      collectionViewType != CollectionViewType.quickLink &&
-      collectionViewType != CollectionViewType.favorite;
+      collectionViewType != CollectionViewType.quickLink;
 
   @override
   void initState() {
@@ -473,7 +470,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.all(16.0),
             child: _displayedFiles.isEmpty
                 ? Center(
                     child: EmptyStateWidget(
