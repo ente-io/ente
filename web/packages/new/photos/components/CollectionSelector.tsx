@@ -140,9 +140,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return (
-                        canAddToCollection(cs) && cs.type != "userFavorites"
-                    );
+                    return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
                         (canMoveToCollection(cs) ||
