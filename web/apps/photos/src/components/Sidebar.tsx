@@ -202,6 +202,7 @@ type AccountAction = Extract<
     | "account.changePassword"
     | "account.changeEmail"
     | "account.deleteAccount"
+    | "account.sessions"
 >;
 
 type PreferencesAction = Extract<
@@ -973,6 +974,11 @@ const Account: React.FC<AccountProps> = ({
         await openAccountsManagePasskeysPage();
     }, [onRootClose]);
 
+    const handleActiveSessions = useCallback(async () => {
+        await onAuthenticateUser();
+        showSessions();
+    }, [onAuthenticateUser, showSessions]);
+
     useEffect(() => {
         if (!open || !pendingAction) return;
         switch (pendingAction) {
@@ -995,9 +1001,13 @@ const Account: React.FC<AccountProps> = ({
             case "account.deleteAccount":
                 showDeleteAccount();
                 break;
+            case "account.sessions":
+                void handleActiveSessions();
+                break;
         }
         onActionHandled?.();
     }, [
+        handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
         handlePasskeys,
@@ -1008,11 +1018,6 @@ const Account: React.FC<AccountProps> = ({
         showRecoveryKey,
         showTwoFactor,
     ]);
-
-    const handleActiveSessions = async () => {
-        await onAuthenticateUser();
-        showSessions();
-    };
 
     return (
         <TitledNestedSidebarDrawer
