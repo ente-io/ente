@@ -6,7 +6,7 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
-import "package:ente_utils/platform_util.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:local_auth/local_auth.dart";
@@ -98,7 +98,7 @@ class LockScreenSettings {
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
-    if (PlatformUtil.isDesktop()) return;
+    if (PlatformDetector.isDesktop()) return;
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(

@@ -355,6 +355,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uncategorized => 'Uncategorized';
 
   @override
+  String get syncing => 'Syncing...';
+
+  @override
   String get syncingTrash => 'Syncing trash...';
 
   @override
@@ -1577,14 +1580,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get general => 'General';
 
   @override
-  String get usageYou => 'You';
+  String get language => 'Language';
 
   @override
-  String get usageFamily => 'Family';
+  String selectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String get itemsStored => 'Items stored';
+  String actionNotSupportedForSharedFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Action is not supported for $count shared files',
+      one: 'Action is not supported for 1 shared file',
+    );
+    return '$_temp0';
+  }
 
   @override
-  String get of_ => 'of';
+  String get addTo => 'Add to';
+
+  @override
+  String get shareNotSupportedForSharedFiles =>
+      'Share is not supported for shared files';
+
+  @override
+  String get editNotSupportedForSharedFiles =>
+      'Edit is not supported for shared files';
+
+  @override
+  String get deleteNotSupportedForSharedFiles =>
+      'Delete is not supported for shared files';
+
+  @override
+  String get importantNotSupportedForSharedFiles =>
+      'Important is not supported for shared files';
+
+  @override
+  String get sharingSection => 'Sharing';
+
+  @override
+  String get sharingEnabledToggle => 'Sharing enabled';
+
+  @override
+  String get publicLinkSection => 'Public Link';
+
+  @override
+  String get linkEnabledToggle => 'Link enabled';
+
+  @override
+  String get allowUploads => 'Allow uploads';
+
+  @override
+  String get collectionUpdated => 'Collection updated';
+
+  @override
+  String get actionNotSupportedOnFavouritesAlbum =>
+      'Action not supported on Favourites album';
+
+  @override
+  String get leaveCollectionSuccessfully => 'Left collection successfully';
+
+  @override
+  String leftCollectionsSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Left $count collections successfully',
+      one: 'Left 1 collection successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removePublicLink => 'Remove public link';
+
+  @override
+  String removePublicLinkConfirmation(String collectionName) {
+    return 'This will remove the public link for accessing \"$collectionName\".';
+  }
+
+  @override
+  String collectionsDeletedSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections deleted successfully',
+      one: '1 collection deleted successfully',
+    );
+    return '$_temp0';
+  }
 }

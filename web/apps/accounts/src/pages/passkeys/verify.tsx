@@ -1,10 +1,12 @@
 import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
-import { Paper, Typography, styled } from "@mui/material";
+import { Paper, Stack, Typography, styled } from "@mui/material";
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
-import { Stack100vhCenter } from "ente-base/components/containers";
+import { CenteredFill } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { NavbarBase } from "ente-base/components/Navbar";
 import { HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
@@ -275,7 +277,38 @@ const Page = () => {
         redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
-    return <Stack100vhCenter>{components[status]}</Stack100vhCenter>;
+    return (
+        <Stack
+            sx={[
+                { minHeight: "100svh", bgcolor: "secondary.main" },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+        >
+            <NavbarBase
+                sx={{
+                    boxShadow: "none",
+                    borderBottom: "none",
+                    bgcolor: "transparent",
+                }}
+            >
+                <EnteLogo />
+            </NavbarBase>
+            <CenteredFill
+                sx={[
+                    { bgcolor: "secondary.main" },
+                    (theme) =>
+                        theme.applyStyles("dark", {
+                            bgcolor: "background.default",
+                        }),
+                ]}
+            >
+                {components[status]}
+            </CenteredFill>
+        </Stack>
+    );
 };
 
 export default Page;
@@ -346,18 +379,17 @@ const LockerAccessError: React.FC<LockerAccessErrorProps> = ({
     </ContentPaper>
 );
 
-const ContentPaper = styled(Paper)`
-    width: 100%;
-    max-width: 24rem;
-    padding: 1rem;
-    /* Slight asymmetry, look visually better since the bottom half of the paper
-       is usually muted text that carries less visual weight. */
-    padding-block-end: 1.15rem;
-
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-`;
+const ContentPaper = styled(Paper)(({ theme }) => ({
+    marginBlock: theme.spacing(2),
+    padding: theme.spacing(5, 3),
+    [theme.breakpoints.up("sm")]: { padding: theme.spacing(5) },
+    width: "min(420px, 85vw)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+    boxShadow: "none",
+    borderRadius: "20px",
+}));
 
 interface VerifyProps {
     /** Called when the user presses the "Verify" button. */

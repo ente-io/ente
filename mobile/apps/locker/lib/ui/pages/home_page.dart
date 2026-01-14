@@ -8,6 +8,7 @@ import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -19,6 +20,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/states/user_details_state.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
@@ -60,6 +62,7 @@ class CustomLockerAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final hasQuery = searchController.text.isNotEmpty;
     final showClearIcon = isSearchActive || hasQuery;
 
@@ -75,7 +78,7 @@ class CustomLockerAppBar extends StatelessWidget
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -96,10 +99,10 @@ class CustomLockerAppBar extends StatelessWidget
                     ),
                   ),
                   isSyncing
-                      ? const Row(
+                      ? Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(
@@ -109,21 +112,16 @@ class CustomLockerAppBar extends StatelessWidget
                                 ),
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              "Syncing...",
-                              style: TextStyle(
+                              context.l10n.syncing,
+                              style: textTheme.body.copyWith(
                                 color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         )
-                      : Image.asset(
-                          'assets/locker-logo.png',
-                          height: 28,
-                        ),
+                      : SvgPicture.asset('assets/svg/app-logo.svg'),
                 ],
               ),
             ),
@@ -145,10 +143,8 @@ class CustomLockerAppBar extends StatelessWidget
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
-                    hintStyle: TextStyle(
+                    hintStyle: textTheme.smallBold.copyWith(
                       color: colorScheme.iconColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
                     ),
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -636,6 +632,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
+                  isSyncing: !_hasCompletedInitialLoad || _isLoading,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -689,32 +686,24 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   Widget _buildBody() {
     if (_error != null) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 200,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 64,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _loadCollections(),
-                  child: Text(context.l10n.retry),
-                ),
-              ],
-            ),
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              EmptyStateWidget(
+                assetPath: 'assets/empty_state.png',
+                title: context.l10n.somethingWentWrong,
+                subtitle: _error!,
+                showBorder: false,
+              ),
+              const SizedBox(height: 20),
+              GradientButton(
+                onTap: _loadCollections,
+                text: context.l10n.retry,
+              ),
+            ],
           ),
         ),
       );

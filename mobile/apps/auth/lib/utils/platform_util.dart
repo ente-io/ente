@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ente_auth/ui/common/web_page.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -33,7 +34,7 @@ class PlatformUtil {
     String title,
     String url,
   ) async {
-    if (PlatformUtil.isDesktop()) {
+    if (PlatformDetector.isDesktop()) {
       await launchUrlString(url);
       return;
     }

@@ -20,6 +20,8 @@ dependencies:
     path: ../ente_crypto_api
   ente_network:
     path: ../network
+  ente_pure_utils:
+    path: ../ente_pure_utils
   ente_sharing:
     path: ../sharing
   ente_strings:

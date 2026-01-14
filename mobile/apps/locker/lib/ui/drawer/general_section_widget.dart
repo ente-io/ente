@@ -1,4 +1,4 @@
-import "package:ente_utils/navigation_util.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/app.dart";

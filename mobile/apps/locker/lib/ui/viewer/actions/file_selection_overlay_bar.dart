@@ -1,4 +1,5 @@
 import "package:ente_events/event_bus.dart";
+import "package:ente_icons/ente_icons.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
@@ -14,7 +15,7 @@ import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
-import "package:locker/ui/components/add_to_collection_dialog.dart";
+import "package:locker/ui/components/add_to_collection_sheet.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/utils/collection_list_util.dart";
@@ -50,7 +51,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   double _lastScrollPosition = 0;
   int _previousSelectionCount = 0;
 
-  bool get _hasSelection => widget.selectedFiles.files.isNotEmpty;
+  bool get hasSelection => widget.selectedFiles.files.isNotEmpty;
 
   List<EnteFile> _getOwnedFiles(List<EnteFile> files) {
     final currentUserID = Configuration.instance.getUserID();
@@ -61,7 +62,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (sharedCount > 0 && mounted) {
       showToast(
         context,
-        "Action is not supported for $sharedCount shared file${sharedCount > 1 ? 's' : ''}",
+        context.l10n.actionNotSupportedForSharedFiles(sharedCount),
       );
     }
 
@@ -99,7 +100,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   void _onScroll() {
     final controller = widget.scrollController;
-    if (!mounted || controller == null || !_hasSelection) return;
+    if (!mounted || controller == null || !hasSelection) return;
 
     final position = controller.position;
     final current = position.pixels;
@@ -119,22 +120,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
   }
 
-  bool get showFileSelectionOverlayBar {
-    final viewType = widget.collectionViewType;
-    if (viewType == null) return true;
-
-    return viewType != CollectionViewType.sharedCollectionViewer &&
-        viewType != CollectionViewType.sharedCollectionCollaborator &&
-        viewType != CollectionViewType.quickLink &&
-        viewType != CollectionViewType.favorite;
-  }
-
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final hasSelection = widget.selectedFiles.files.isNotEmpty;
 
     return IgnorePointer(
       ignoring: !hasSelection,
@@ -171,7 +161,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                           top: BorderSide(color: colorScheme.strokeFaint),
                         ),
                       ),
-                      margin: EdgeInsets.zero,
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                         child: Column(
@@ -241,9 +230,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                   listenable: widget.selectedFiles,
                                   builder: (context, child) {
                                     final count = widget.selectedFiles.count;
-                                    final countText = count == 1
-                                        ? '1 selected'
-                                        : '$count selected';
+                                    final countText =
+                                        context.l10n.selectedCount(count);
 
                                     return InkWell(
                                       onTap: () {
@@ -336,54 +324,76 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final files = selectedFiles.toList();
     final file = isSingleSelection ? files.first : null;
     final colorScheme = getEnteColorScheme(context);
+    final viewType = widget.collectionViewType;
 
-    final isImportant =
-        isSingleSelection && FavoritesService.instance.isFavoriteCache(file!);
+    final isImportant = isSingleSelection &&
+        file != null &&
+        FavoritesService.instance.isFavoriteCache(file);
+
+    final showImportant = viewType?.showMarkImportantOption ?? true;
+    final showDelete = viewType?.showDeleteOption ?? true;
+
+    final actions = <Widget>[];
+
+    actions.add(
+      SelectionActionButton(
+        hugeIcon: const HugeIcon(
+          icon: HugeIcons.strokeRoundedDownload01,
+        ),
+        label: context.l10n.save,
+        onTap: () => isSingleSelection
+            ? _downloadFile(context, file!)
+            : _downloadMultipleFiles(context, files),
+      ),
+    );
+
+    if (showImportant) {
+      actions.add(
+        SelectionActionButton(
+          icon: isImportant ? EnteIcons.favoriteFilled : null,
+          hugeIcon: isImportant
+              ? null
+              : HugeIcon(
+                  icon: HugeIcons.strokeRoundedStar,
+                  color: colorScheme.textBase,
+                ),
+          label:
+              isImportant ? context.l10n.unimportant : context.l10n.important,
+          onTap: () => isSingleSelection
+              ? _markImportant(context, file!)
+              : _markMultipleImportant(context, files),
+        ),
+      );
+    }
+
+    if (showDelete) {
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete02,
+            color: colorScheme.warning500,
+          ),
+          label: context.l10n.delete,
+          onTap: () => isSingleSelection
+              ? _deleteFile(context, file!)
+              : _deleteMultipleFiles(context, files),
+          isDestructive: true,
+        ),
+      );
+    }
 
     return Row(
-      children: [
-        Expanded(
-          child: SelectionActionButton(
-            hugeIcon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedDownload01,
-            ),
-            label: context.l10n.save,
-            onTap: () => isSingleSelection
-                ? _downloadFile(context, file!)
-                : _downloadMultipleFiles(context, files),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SelectionActionButton(
-            icon: isImportant ? Icons.star_rounded : Icons.star_border_rounded,
-            label:
-                isImportant ? context.l10n.unimportant : context.l10n.important,
-            onTap: () => isSingleSelection
-                ? _markImportant(context, file!)
-                : _markMultipleImportant(context, files),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SelectionActionButton(
-            hugeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedDelete02,
-              color: colorScheme.warning500,
-            ),
-            label: context.l10n.delete,
-            onTap: () => isSingleSelection
-                ? _deleteFile(context, file!)
-                : _deleteMultipleFiles(context, files),
-            isDestructive: true,
-          ),
-        ),
-      ],
+      children: _buildActionRow(actions),
     );
   }
 
   Widget _buildSecondaryActionRow(Set<EnteFile> selectedFiles) {
     final actions = _getSecondaryActionsForSelection(selectedFiles);
+
+    if (actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final colorScheme = getEnteColorScheme(context);
 
     return Container(
@@ -412,9 +422,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final isSingleSelection = selectedFiles.length == 1;
     final file = isSingleSelection ? selectedFiles.first : null;
     final files = selectedFiles.toList();
+    final viewType = widget.collectionViewType;
     final actions = <Widget>[];
 
-    if (isSingleSelection) {
+    final showEdit = viewType?.showEditOption ?? true;
+    final showShare = viewType?.showShareOption ?? true;
+    final showAddTo = viewType?.showAddToCollectionOption ?? true;
+
+    if (isSingleSelection && showEdit) {
       actions.add(
         SelectionActionButton(
           hugeIcon: const HugeIcon(
@@ -426,7 +441,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    if (isSingleSelection) {
+    if (isSingleSelection && showShare) {
       actions.add(
         SelectionActionButton(
           hugeIcon: const HugeIcon(
@@ -438,25 +453,22 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       );
     }
 
-    actions.add(
-      SelectionActionButton(
-        hugeIcon: const HugeIcon(
-          icon: HugeIcons.strokeRoundedArrowRight03,
+    if (showAddTo) {
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedArrowRight03,
+          ),
+          label: context.l10n.addTo,
+          onTap: () => _showAddToDialog(context, files),
         ),
-        label: "Add to",
-        onTap: () => _showAddToDialog(context, files),
-      ),
-    );
+      );
+    }
 
     return actions;
   }
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {
-    final currentUserID = Configuration.instance.getUserID();
-    if (file.ownerID != currentUserID) {
-      showToast(context, "Download is not supported for shared files");
-      return;
-    }
     try {
       final success = await FileUtil.downloadFile(context, file);
       if (success) {
@@ -477,13 +489,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     BuildContext context,
     List<EnteFile> files,
   ) async {
-    final ownedFiles = _getOwnedFiles(files);
-    if (ownedFiles.isEmpty) {
+    if (files.isEmpty) {
       return;
     }
 
     try {
-      final success = await FileUtil.downloadFiles(context, ownedFiles);
+      final success = await FileUtil.downloadFiles(context, files);
       if (success) {
         widget.selectedFiles.clearAll();
       }
@@ -501,7 +512,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _shareFileLink(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Share is not supported for shared files");
+      showToast(context, context.l10n.shareNotSupportedForSharedFiles);
       return;
     }
     await FileActions.shareFileLink(context, file);
@@ -510,7 +521,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _editFile(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Edit is not supported for shared files");
+      showToast(context, context.l10n.editNotSupportedForSharedFiles);
       return;
     }
     await FileActions.editFile(context, file);
@@ -538,7 +549,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       'to add files to.',
     );
 
-    final result = await showAddToCollectionDialog(
+    final result = await showAddToCollectionSheet(
       context,
       collections: dedupedCollections,
       snackBarContext: context,
@@ -637,7 +648,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _deleteFile(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Delete is not supported for shared files");
+      showToast(context, context.l10n.deleteNotSupportedForSharedFiles);
       return;
     }
     await FileActions.deleteFile(
@@ -718,7 +729,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _markImportant(BuildContext context, EnteFile file) async {
     final currentUserID = Configuration.instance.getUserID();
     if (file.ownerID != currentUserID) {
-      showToast(context, "Important is not supported for shared files");
+      showToast(context, context.l10n.importantNotSupportedForSharedFiles);
       return;
     }
     await FileActions.markImportant(

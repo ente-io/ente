@@ -59,7 +59,6 @@ Ente provides several tools to help you optimize both your device storage and cl
 **View and delete large files:**
 
 - Identify and delete the largest files taking up storage space
-- Available under Settings > Backup > Free up space > Large files
 
 Learn more in the [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization).
 
@@ -377,7 +376,7 @@ We support **annual** subscriptions over PayPal.
 
 ### Does Ente accept crypto payments? {#crypto-payment}
 
-Yes! We support *annual plans* with crypto payments and accept the following cryptocurrencies:
+Yes! We support _annual plans_ with crypto payments and accept the following cryptocurrencies:
 
 - **Bitcoin** (BTC)
 - **Ethereum** (ETH)

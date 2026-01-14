@@ -175,7 +175,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           shouldMarkLimitedFolders: false,
         );
         if (mounted) {
-          showToast(context, "Backing up last 7 day's photos");
+          showToast(context, context.l10n.backingUpLastSevenDaysPhotos);
         }
       } else {
         await _showPermissionDeniedDialog();
@@ -252,7 +252,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   String _getHeaderText(BuildContext context) {
     if (flagService.enableOnlyBackupFuturePhotos) {
-      return "<i>Choose how </i>Ente backs up your photos";
+      return context.l10n.chooseBackupModeHeader;
     } else {
       return AppLocalizations.of(context).entePhotosPerm;
     }
@@ -267,7 +267,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           GradientButton(
             key: const ValueKey("selectFoldersButton"),
             onTap: _onTapSelectFolders,
-            text: "Select folders",
+            text: context.l10n.selectFolders,
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -278,9 +278,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
               onPressed: () => _onlyNewActionDebouncer.run(() async {
                 await _onTapOnlyNewPhotos();
               }),
-              child: const Text(
-                "Start with latest photos",
-                style: TextStyle(
+              child: Text(
+                context.l10n.startWithLatestPhotos,
+                style: const TextStyle(
                   color: Colors.black, // same for both themes
                 ),
               ),
@@ -292,7 +292,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             behavior: HitTestBehavior.opaque,
             onTap: _onTapSkip,
             child: Text(
-              "Skip",
+              context.l10n.skip,
               style: Theme.of(context)
                   .textTheme
                   .bodySmall!

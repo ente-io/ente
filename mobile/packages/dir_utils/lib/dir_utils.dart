@@ -223,8 +223,7 @@ class DirUtils {
         isStale: result['isStale'] as bool,
       );
     } on PlatformException catch (e) {
-      _logger
-          .severe('${Platform.operatingSystem}: Failed to start access: $e');
+      _logger.severe('${Platform.operatingSystem}: Failed to start access: $e');
       return null;
     }
   }
@@ -249,8 +248,7 @@ class DirUtils {
       );
       return result ?? false;
     } on PlatformException catch (e) {
-      _logger
-          .severe('${Platform.operatingSystem}: Failed to stop access: $e');
+      _logger.severe('${Platform.operatingSystem}: Failed to stop access: $e');
       return false;
     }
   }

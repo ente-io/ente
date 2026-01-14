@@ -240,7 +240,7 @@ class FileUploader {
           await _tryToUpload(file, collection, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
-          final message = "Upload timed out for file";
+          const message = "Upload timed out for file";
           _logger.warning(message);
           throw TimeoutException(message);
         },
@@ -408,10 +408,10 @@ class FileUploader {
 
       final encryptedMetadataResult = await CryptoUtil.encryptData(
         utf8.encode(jsonEncode(enteFile.metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+          CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -420,7 +420,7 @@ class FileUploader {
       final metadataDecryptionHeader =
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
       final encryptedFileKeyData = CryptoUtil.encryptSync(
-        fileAttributes.key!,
+        fileAttributes.key,
         CryptoHelper.instance.getCollectionKey(collection),
       );
       final encryptedKey =
@@ -434,7 +434,7 @@ class FileUploader {
         pubMetadataRequest = await getPubMetadataRequest(
           enteFile,
           pubMetadata,
-          fileAttributes.key!,
+          fileAttributes.key,
         );
       }
       final remoteFile = await _uploadFile(

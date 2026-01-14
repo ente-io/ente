@@ -28,6 +28,8 @@ dependencies:
     path: ../../packages/ente_crypto_dart_adapter
   ente_events:
     path: ../../packages/events
+  ente_icons:
+    path: ../../packages/ente_icons
   ente_legacy: 
     path: ../../packages/legacy
   ente_lock_screen:
@@ -36,6 +38,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_pure_utils:
+    path: ../../packages/ente_pure_utils
   ente_sharing:
     path: ../../packages/sharing
   ente_strings:
