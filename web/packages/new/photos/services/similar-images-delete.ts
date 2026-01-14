@@ -4,8 +4,8 @@ import {
     moveToTrash,
     savedNormalCollections,
 } from "./collection";
-import { clearSimilarImagesCache } from "./similar-images";
 import { pullFiles } from "./pull";
+import { clearSimilarImagesCache } from "./similar-images";
 import type { SimilarImageGroup } from "./similar-images-types";
 
 /**
@@ -42,9 +42,20 @@ export const removeSelectedSimilarImageGroups = async (
     const filesToAdd = new Map<number, EnteFile[]>();
     const filesToTrash: EnteFile[] = [];
 
+    // Get favorites collections to protect favorited files
+    const collections = await savedNormalCollections();
+    const userID = (
+        await import("ente-accounts/services/user")
+    ).ensureLocalUser().id;
+    const favoritesCollectionIDs = new Set(
+        collections
+            .filter((c) => c.type === "favorites" && c.owner.id === userID)
+            .map((c) => c.id),
+    );
+
     // Handle full group selections
     for (const group of selectedGroups) {
-        const retainedItem = similarImageGroupItemToRetain(group);
+        const retainedItem = await similarImageGroupItemToRetain(group);
 
         // For each item in the group (except the retained one), find collections
         // and add them to trash
@@ -52,6 +63,15 @@ export const removeSelectedSimilarImageGroups = async (
         for (const item of group.items) {
             // Skip the item we're retaining
             if (item.file.id === retainedItem.file.id) continue;
+
+            // Skip if item is individually deselected (respects item.isSelected state)
+            if (item.isSelected === false) continue;
+
+            // Skip favorited files - they should never be deleted
+            const isFavorited = Array.from(item.collectionIDs).some((cid) =>
+                favoritesCollectionIDs.has(cid),
+            );
+            if (isFavorited) continue;
 
             // Collect all collection IDs this file belongs to
             collectionIDs = collectionIDs.union(item.collectionIDs);
@@ -77,6 +97,12 @@ export const removeSelectedSimilarImageGroups = async (
         for (const item of group.items) {
             if (!item.isSelected) continue;
 
+            // Skip favorited files - they should never be deleted
+            const isFavorited = Array.from(item.collectionIDs).some((cid) =>
+                favoritesCollectionIDs.has(cid),
+            );
+            if (isFavorited) continue;
+
             // Simply move individually selected items to trash
             // No symlink creation needed since we're not retaining anything
             filesToTrash.push(item.file);
@@ -86,14 +112,12 @@ export const removeSelectedSimilarImageGroups = async (
     // Process adds and removes
     let np = 0;
     const ntotal =
-        filesToAdd.size +
-        (filesToTrash.length ? 1 : 0) +
-        /* sync */ 1;
+        filesToAdd.size + (filesToTrash.length ? 1 : 0) + /* sync */ 1;
     const tickProgress = () => onProgress((np++ / ntotal) * 100);
 
     // Process the adds
-    const collections = await savedNormalCollections();
-    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+    const allCollections = await savedNormalCollections();
+    const collectionsByID = new Map(allCollections.map((c) => [c.id, c]));
     for (const [collectionID, files] of filesToAdd.entries()) {
         await addToCollection(collectionsByID.get(collectionID)!, files);
         tickProgress();
@@ -122,16 +146,40 @@ export const removeSelectedSimilarImageGroups = async (
 /**
  * Find the most eligible item from a similar image group to retain.
  *
- * Give preference to files which have a caption or edited name/time,
- * otherwise pick arbitrarily.
+ * Prioritization order (matching mobile implementation):
+ * 1. Favorited files (files in a favorites collection)
+ * 2. Files with captions
+ * 3. Files with edited name/time
+ * 4. Larger file sizes
+ * 5. First item if all else is equal
  */
-const similarImageGroupItemToRetain = (
+const similarImageGroupItemToRetain = async (
     group: SimilarImageGroup,
-): SimilarImageGroup["items"][number] => {
+): Promise<SimilarImageGroup["items"][number]> => {
+    const itemsWithFavorites: SimilarImageGroup["items"] = [];
     const itemsWithCaption: SimilarImageGroup["items"] = [];
     const itemsWithOtherEdits: SimilarImageGroup["items"] = [];
 
+    // Get all collections to check for favorites
+    const collections = await savedNormalCollections();
+    const userID = (
+        await import("ente-accounts/services/user")
+    ).ensureLocalUser().id;
+    const favoritesCollectionIDs = new Set(
+        collections
+            .filter((c) => c.type === "favorites" && c.owner.id === userID)
+            .map((c) => c.id),
+    );
+
     for (const item of group.items) {
+        // Check if file is in a favorites collection
+        const isFavorited = Array.from(item.collectionIDs).some((cid) =>
+            favoritesCollectionIDs.has(cid),
+        );
+        if (isFavorited) {
+            itemsWithFavorites.push(item);
+        }
+
         const pubMM = item.file.pubMagicMetadata?.data;
         if (!pubMM) continue;
         if (pubMM.caption) itemsWithCaption.push(item);
@@ -139,16 +187,34 @@ const similarImageGroupItemToRetain = (
             itemsWithOtherEdits.push(item);
     }
 
-    // Return the first item with a caption, or first with edits, or first item
-    return itemsWithCaption[0] ?? itemsWithOtherEdits[0] ?? group.items[0]!;
+    // Helper to find item with largest file size
+    const findLargestItem = (items: SimilarImageGroup["items"]) => {
+        return items.reduce((largest, item) => {
+            const currentSize = item.file.info?.fileSize || 0;
+            const largestSize = largest.file.info?.fileSize || 0;
+            return currentSize > largestSize ? item : largest;
+        }, items[0]!);
+    };
+
+    // Return based on priority
+    if (itemsWithFavorites.length > 0) {
+        return findLargestItem(itemsWithFavorites);
+    }
+    if (itemsWithCaption.length > 0) {
+        return findLargestItem(itemsWithCaption);
+    }
+    if (itemsWithOtherEdits.length > 0) {
+        return findLargestItem(itemsWithOtherEdits);
+    }
+
+    // If no special attributes, pick the largest file
+    return findLargestItem(group.items);
 };
 
 /**
  * Calculate the total size that would be freed by removing selected groups.
  */
-export const calculateFreedSpace = (
-    groups: SimilarImageGroup[],
-): number => {
+export const calculateFreedSpace = (groups: SimilarImageGroup[]): number => {
     let freedSpace = 0;
 
     for (const group of groups) {
@@ -165,7 +231,9 @@ export const calculateFreedSpace = (
 /**
  * Calculate the number of files that would be deleted.
  */
-export const calculateDeletedFileCount = (groups: SimilarImageGroup[]): number => {
+export const calculateDeletedFileCount = (
+    groups: SimilarImageGroup[],
+): number => {
     let count = 0;
 
     for (const group of groups) {

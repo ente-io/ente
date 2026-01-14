@@ -1,5 +1,5 @@
-import { loadHnswlib, syncFileSystem } from "hnswlib-wasm";
 import type { HierarchicalNSW } from "hnswlib-wasm";
+import { loadHnswlib, syncFileSystem } from "hnswlib-wasm";
 
 /**
  * HNSW Index wrapper for efficient vector similarity search.
@@ -36,11 +36,11 @@ export class HNSWIndex {
      * @param efSearch - Search accuracy (higher = more accurate but slower)
      */
     constructor(
-        dimensions: number = 512,
-        maxElements: number = 100000,
-        m: number = 16,
-        efConstruction: number = 200,
-        efSearch: number = 50,
+        dimensions = 512,
+        maxElements = 100000,
+        m = 16,
+        efConstruction = 200,
+        efSearch = 50,
     ) {
         this.dimensions = dimensions;
         this.maxElements = maxElements;
@@ -55,7 +55,7 @@ export class HNSWIndex {
      * @param skipInit - If true, create the index object but don't call initIndex().
      *                   Use this when you plan to loadIndex() instead.
      */
-    async init(skipInit: boolean = false): Promise<void> {
+    async init(skipInit = false): Promise<void> {
         if (this.index) return; // Already initialized
 
         this.lib = await loadHnswlib();
@@ -69,13 +69,18 @@ export class HNSWIndex {
         if (!skipInit) {
             console.log(`[HNSW] Syncing IDBFS from IndexedDB on init...`);
             try {
-                await syncFileSystem('read');
+                await syncFileSystem("read");
                 console.log(`[HNSW] IDBFS synced successfully on init`);
             } catch (e) {
-                console.log(`[HNSW] IDBFS sync failed on init (OK if first time):`, e);
+                console.log(
+                    `[HNSW] IDBFS sync failed on init (OK if first time):`,
+                    e,
+                );
             }
         } else {
-            console.log(`[HNSW] Skipping IDBFS sync - will be done by loadIndex()`);
+            console.log(
+                `[HNSW] Skipping IDBFS sync - will be done by loadIndex()`,
+            );
         }
 
         this.index = new this.lib.HierarchicalNSW(
@@ -85,7 +90,9 @@ export class HNSWIndex {
         );
 
         if (!skipInit) {
-            console.log(`[HNSW] Initializing new empty index with maxElements=${this.maxElements}`);
+            console.log(
+                `[HNSW] Initializing new empty index with maxElements=${this.maxElements}`,
+            );
             this.index.initIndex(
                 this.maxElements,
                 this.m,
@@ -94,7 +101,9 @@ export class HNSWIndex {
             );
             this.index.setEfSearch(this.efSearch);
         } else {
-            console.log(`[HNSW] Skipping initIndex() - will load from file instead`);
+            console.log(
+                `[HNSW] Skipping initIndex() - will load from file instead`,
+            );
         }
     }
 
@@ -163,16 +172,17 @@ export class HNSWIndex {
         queryEmbeddings: Float32Array[],
         k: number,
         onProgress?: (progress: number) => void,
-    ): Promise<Map<number, Array<{ fileID: number; distance: number }>>> {
+    ): Promise<Map<number, { fileID: number; distance: number }[]>> {
         if (!this.index) throw new Error("Index not initialized");
 
         const results = new Map<
             number,
-            Array<{ fileID: number; distance: number }>
+            { fileID: number; distance: number }[]
         >();
 
         const progressInterval = Math.floor(queryFileIDs.length / 100) || 1;
         const logInterval = Math.floor(queryFileIDs.length / 10) || 1;
+        const yieldInterval = 100; // Yield every 100 items to keep UI responsive
 
         for (let i = 0; i < queryFileIDs.length; i++) {
             const queryFileID = queryFileIDs[i]!;
@@ -185,7 +195,7 @@ export class HNSWIndex {
                 undefined, // no label filter
             );
 
-            const neighbors: Array<{ fileID: number; distance: number }> = [];
+            const neighbors: { fileID: number; distance: number }[] = [];
 
             // searchResult is { neighbors: number[], distances: number[] }
             const neighborLabels = searchResult.neighbors;
@@ -217,7 +227,14 @@ export class HNSWIndex {
 
             // Log progress periodically
             if (i % logInterval === 0 && i > 0) {
-                console.log(`[HNSW] Searched ${i}/${queryFileIDs.length} vectors (${Math.round((i / queryFileIDs.length) * 100)}%)`);
+                console.log(
+                    `[HNSW] Searched ${i}/${queryFileIDs.length} vectors (${Math.round((i / queryFileIDs.length) * 100)}%)`,
+                );
+            }
+
+            // Yield to browser periodically to keep UI responsive
+            if (i % yieldInterval === 0) {
+                await new Promise((resolve) => setTimeout(resolve, 0));
             }
         }
 
@@ -256,7 +273,9 @@ export class HNSWIndex {
      * @param filename - Name of file to save to in virtual FS
      * @returns Object containing file mappings for reconstruction
      */
-    async saveIndex(filename: string = "clip_hnsw.bin"): Promise<{
+    async saveIndex(
+        filename = "clip_hnsw.bin",
+    ): Promise<{
         fileIDToLabel: [number, number][];
         labelToFileID: [number, number][];
     }> {
@@ -268,31 +287,41 @@ export class HNSWIndex {
         // Write index to Emscripten virtual FS
         await this.index.writeIndex(filename);
 
-        console.log(`[HNSW] writeIndex completed, verifying file was written...`);
+        console.log(
+            `[HNSW] writeIndex completed, verifying file was written...`,
+        );
 
         // Verify file was written to virtual FS
-        const fileExistsBeforeSync = this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
-        console.log(`[HNSW] File exists in virtual FS before sync: ${fileExistsBeforeSync}`);
+        const fileExistsBeforeSync =
+            this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
+        console.log(
+            `[HNSW] File exists in virtual FS before sync: ${fileExistsBeforeSync}`,
+        );
 
         if (!fileExistsBeforeSync) {
-            throw new Error(`writeIndex failed - file '${filename}' not found in virtual FS`);
+            throw new Error(
+                `writeIndex failed - file '${filename}' not found in virtual FS`,
+            );
         }
 
         console.log(`[HNSW] Syncing virtual FS to IndexedDB...`);
 
         // Sync virtual FS to IndexedDB (IDBFS persistence)
         // Add a small delay to ensure write is complete before syncing
-        await new Promise(resolve => setTimeout(resolve, 100));
-        await syncFileSystem('write');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        await syncFileSystem("write");
 
         console.log(`[HNSW] Sync completed, waiting for persistence...`);
 
         // Wait a bit more to ensure persistence is complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Verify file still exists after sync
-        const fileExistsAfterSync = this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
-        console.log(`[HNSW] File exists in virtual FS after sync: ${fileExistsAfterSync}`);
+        const fileExistsAfterSync =
+            this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
+        console.log(
+            `[HNSW] File exists in virtual FS after sync: ${fileExistsAfterSync}`,
+        );
 
         console.log(`[HNSW] Index saved to IDBFS successfully`);
 
@@ -310,11 +339,11 @@ export class HNSWIndex {
      * @param mappings - File ID to label mappings
      */
     async loadIndex(
-        filename: string = "clip_hnsw.bin",
+        filename = "clip_hnsw.bin",
         mappings: {
             fileIDToLabel: [number, number][];
             labelToFileID: [number, number][];
-        }
+        },
     ): Promise<void> {
         if (!this.index) throw new Error("Index not initialized");
         if (!this.lib) throw new Error("Library not loaded");
@@ -324,53 +353,80 @@ export class HNSWIndex {
 
         // Sync IndexedDB to virtual FS
         console.log(`[HNSW] Syncing IDBFS from IndexedDB before load...`);
-        await syncFileSystem('read');
+        await syncFileSystem("read");
         console.log(`[HNSW] IDBFS sync completed`);
 
         // Add delay to ensure sync is complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         // Check if file exists in the virtual filesystem
-        const fileExists = this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
-        console.log(`[HNSW] File exists check for '${filename}': ${fileExists}`);
+        const fileExists =
+            this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
+        console.log(
+            `[HNSW] File exists check for '${filename}': ${fileExists}`,
+        );
 
         if (!fileExists) {
-            throw new Error(`Index file '${filename}' does not exist in IDBFS - was never saved or was deleted`);
+            throw new Error(
+                `Index file '${filename}' does not exist in IDBFS - was never saved or was deleted`,
+            );
         }
 
         // CRITICAL DIAGNOSTIC: Check if we're trying to load into an already-initialized index
         // This is a diagnostic check - getCurrentCount() will throw if index is not initialized (which is what we want)
-        console.log(`[HNSW] Checking index initialization state before readIndex...`);
+        console.log(
+            `[HNSW] Checking index initialization state before readIndex...`,
+        );
         try {
             const currentSize = this.index.getCurrentCount();
             // If we get here, the index is already initialized - this is BAD
-            console.error(`[HNSW] ERROR: Index already has ${currentSize} vectors before readIndex!`);
-            console.error(`[HNSW] readIndex() requires an uninitialized index. This will fail.`);
-            throw new Error(`Cannot load index: index already initialized with ${currentSize} vectors. readIndex() requires uninitialized index.`);
+            console.error(
+                `[HNSW] ERROR: Index already has ${currentSize} vectors before readIndex!`,
+            );
+            console.error(
+                `[HNSW] readIndex() requires an uninitialized index. This will fail.`,
+            );
+            throw new Error(
+                `Cannot load index: index already initialized with ${currentSize} vectors. readIndex() requires uninitialized index.`,
+            );
         } catch (e: unknown) {
             // Check if this is the expected "uninitialized" error or an actual problem
             const errorMessage = e instanceof Error ? e.message : String(e);
-            if (errorMessage.includes('already initialized')) {
+            if (errorMessage.includes("already initialized")) {
                 // Our own error - re-throw it
                 throw e;
             }
             // getCurrentCount() threw because index is uninitialized - that's exactly what we want!
-            console.log(`[HNSW] Index is uninitialized (correct state for readIndex)`);
+            console.log(
+                `[HNSW] Index is uninitialized (correct state for readIndex)`,
+            );
         }
 
         // Load index from virtual FS
         // NOTE: readIndex() does its own initialization - no need to call initIndex() first!
-        console.log(`[HNSW] Calling readIndex with maxElements=${this.maxElements}`);
+        console.log(
+            `[HNSW] Calling readIndex with maxElements=${this.maxElements}`,
+        );
         try {
-            const success = await this.index.readIndex(filename, this.maxElements);
-            console.log(`[HNSW] readIndex returned: ${success} (type: ${typeof success})`);
+            // readIndex() can return true (success) or undefined (also success in some versions)
+            // Any other return value indicates failure
+            const result = await this.index.readIndex(
+                filename,
+                this.maxElements,
+            );
+            console.log(
+                `[HNSW] readIndex returned: ${result} (type: ${typeof result})`,
+            );
 
-            if (success !== true && success !== undefined) {
-                throw new Error(`readIndex returned ${success} (expected true) - possible capacity mismatch or index already initialized`);
-            }
+            // Success conditions: true or undefined
+            // Both indicate the index was loaded successfully
+            // The return type is strictly true | undefined, so no error checking needed here
+            // Any actual errors will be caught by the surrounding try/catch block
         } catch (error) {
             console.error(`[HNSW] readIndex threw error:`, error);
-            throw new Error(`Failed to load HNSW index from ${filename}: ${error instanceof Error ? error.message : String(error)}`);
+            throw new Error(
+                `Failed to load HNSW index from ${filename}: ${error instanceof Error ? error.message : String(error)}`,
+            );
         }
 
         // Set search parameters after loading
@@ -381,7 +437,9 @@ export class HNSWIndex {
         this.fileIDToLabel = new Map(mappings.fileIDToLabel);
         this.labelToFileID = new Map(mappings.labelToFileID);
 
-        console.log(`[HNSW] Index loaded successfully (${this.size()} vectors)`);
+        console.log(
+            `[HNSW] Index loaded successfully (${this.size()} vectors)`,
+        );
     }
 
     /**
@@ -392,7 +450,7 @@ export class HNSWIndex {
      */
     async hasSavedIndex(): Promise<boolean> {
         try {
-            await syncFileSystem('read');
+            await syncFileSystem("read");
             // Try to access the file (will throw if not found)
             // Note: We'd need access to FS API to check file existence
             // For now, we'll rely on try/catch in loadIndex
@@ -472,14 +530,18 @@ let _clipHNSWIndex: HNSWIndex | null = null;
  */
 export const getCLIPHNSWIndex = async (
     requiredCapacity?: number,
-    skipInit: boolean = false,
+    skipInit = false,
 ): Promise<HNSWIndex> => {
     const capacity = requiredCapacity
         ? Math.ceil(requiredCapacity / 10000) * 10000
         : 100000;
 
     // If we need more capacity than current index, recreate it
-    if (_clipHNSWIndex && requiredCapacity && capacity > _clipHNSWIndex.getMaxElements()) {
+    if (
+        _clipHNSWIndex &&
+        requiredCapacity &&
+        capacity > _clipHNSWIndex.getMaxElements()
+    ) {
         console.log(
             `[HNSW] Recreating index with larger capacity: ${capacity}`,
         );

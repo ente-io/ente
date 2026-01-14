@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
 import type { EnteFile } from "ente-media/file";
+import { describe, expect, it } from "vitest";
 import {
+    calculateDeletionStats,
     cosineDistance,
     cosineSimilarity,
-    formatFileSize,
-    calculateDeletionStats,
     filterGroupsByCategory,
+    formatFileSize,
     sortSimilarImageGroups,
 } from "../similar-images";
 
@@ -41,7 +41,9 @@ describe("similar-images", () => {
         it("should throw for vectors of different lengths", () => {
             const v1 = new Float32Array([1, 2, 3]);
             const v2 = new Float32Array([1, 2]);
-            expect(() => cosineDistance(v1, v2)).toThrow("Vector length mismatch");
+            expect(() => cosineDistance(v1, v2)).toThrow(
+                "Vector length mismatch",
+            );
         });
 
         it("should handle small similarity differences", () => {
@@ -160,32 +162,32 @@ describe("similar-images", () => {
 
         it("should filter close groups", () => {
             const groups = [
-                createMockGroup(0.01), // close
-                createMockGroup(0.03), // similar
-                createMockGroup(0.06), // related
+                createMockGroup(0.0005), // close (≤ 0.001)
+                createMockGroup(0.01), // similar (> 0.001 and ≤ 0.02)
+                createMockGroup(0.06), // related (> 0.02)
             ];
 
             const closeGroups = filterGroupsByCategory(groups, "close");
             expect(closeGroups.length).toBe(1);
-            expect(closeGroups[0]!.furthestDistance).toBe(0.01);
+            expect(closeGroups[0]!.furthestDistance).toBe(0.0005);
         });
 
         it("should filter similar groups", () => {
             const groups = [
-                createMockGroup(0.01), // close
-                createMockGroup(0.03), // similar
+                createMockGroup(0.0005), // close
+                createMockGroup(0.01), // similar
                 createMockGroup(0.06), // related
             ];
 
             const similarGroups = filterGroupsByCategory(groups, "similar");
             expect(similarGroups.length).toBe(1);
-            expect(similarGroups[0]!.furthestDistance).toBe(0.03);
+            expect(similarGroups[0]!.furthestDistance).toBe(0.01);
         });
 
         it("should filter related groups", () => {
             const groups = [
-                createMockGroup(0.01), // close
-                createMockGroup(0.03), // similar
+                createMockGroup(0.0005), // close
+                createMockGroup(0.01), // similar
                 createMockGroup(0.06), // related
             ];
 
@@ -195,14 +197,18 @@ describe("similar-images", () => {
         });
 
         it("should return empty for no matching groups", () => {
-            const groups = [createMockGroup(0.01)]; // only close
+            const groups = [createMockGroup(0.0005)]; // only close (≤ 0.001)
             const relatedGroups = filterGroupsByCategory(groups, "related");
             expect(relatedGroups.length).toBe(0);
         });
     });
 
     describe("sortSimilarImageGroups", () => {
-        const createMockGroup = (size: number, count: number, distance: number) => ({
+        const createMockGroup = (
+            size: number,
+            count: number,
+            distance: number,
+        ) => ({
             id: `group-${distance}`,
             items: Array(count).fill({
                 file: { id: 1, info: { fileSize: size / count } } as EnteFile,
@@ -257,9 +263,18 @@ describe("similar-images", () => {
 
         it("should sort by distance descending by default", () => {
             // Create groups with unique distances and ensure they're different
-            const group1 = { ...createMockGroup(1000, 2, 0.05), furthestDistance: 0.05 };
-            const group2 = { ...createMockGroup(1000, 2, 0.01), furthestDistance: 0.01 };
-            const group3 = { ...createMockGroup(1000, 2, 0.03), furthestDistance: 0.03 };
+            const group1 = {
+                ...createMockGroup(1000, 2, 0.05),
+                furthestDistance: 0.05,
+            };
+            const group2 = {
+                ...createMockGroup(1000, 2, 0.01),
+                furthestDistance: 0.01,
+            };
+            const group3 = {
+                ...createMockGroup(1000, 2, 0.03),
+                furthestDistance: 0.03,
+            };
             const groups = [group1, group2, group3];
 
             const sorted = sortSimilarImageGroups(groups, "distance");
@@ -270,9 +285,18 @@ describe("similar-images", () => {
         });
 
         it("should sort by distance ascending when specified", () => {
-            const group1 = { ...createMockGroup(1000, 2, 0.05), furthestDistance: 0.05 };
-            const group2 = { ...createMockGroup(1000, 2, 0.01), furthestDistance: 0.01 };
-            const group3 = { ...createMockGroup(1000, 2, 0.03), furthestDistance: 0.03 };
+            const group1 = {
+                ...createMockGroup(1000, 2, 0.05),
+                furthestDistance: 0.05,
+            };
+            const group2 = {
+                ...createMockGroup(1000, 2, 0.01),
+                furthestDistance: 0.01,
+            };
+            const group3 = {
+                ...createMockGroup(1000, 2, 0.03),
+                furthestDistance: 0.03,
+            };
             const groups = [group1, group2, group3];
 
             const sorted = sortSimilarImageGroups(groups, "distance", "asc");
@@ -324,19 +348,19 @@ describe("Edge Cases", () => {
 
     describe("filterGroupsByCategory edge cases", () => {
         it("should handle groups at exact category boundaries", () => {
-            // Groups exactly at 0.02 should be in "similar", not "close"
+            // Test boundary conditions with new thresholds
             const groups = [
                 {
                     id: "test1",
                     items: [],
-                    furthestDistance: 0.02,
+                    furthestDistance: 0.001, // boundary between close and similar
                     totalSize: 0,
                     isSelected: true,
                 },
                 {
                     id: "test2",
                     items: [],
-                    furthestDistance: 0.04,
+                    furthestDistance: 0.02, // boundary between similar and related
                     totalSize: 0,
                     isSelected: true,
                 },
@@ -346,9 +370,16 @@ describe("Edge Cases", () => {
             const similarGroups = filterGroupsByCategory(groups, "similar");
             const relatedGroups = filterGroupsByCategory(groups, "related");
 
-            expect(closeGroups.length).toBe(0); // 0.02 is not < 0.02
-            expect(similarGroups.length).toBe(1); // 0.02 is in similar [0.02, 0.04)
-            expect(relatedGroups.length).toBe(1); // 0.04 is in related [0.04, 0.08)
+            // 0.001 is in "close" (≤ 0.001)
+            expect(closeGroups.length).toBe(1);
+            expect(closeGroups[0]!.furthestDistance).toBe(0.001);
+
+            // 0.02 is in "similar" (> 0.001 and ≤ 0.02)
+            expect(similarGroups.length).toBe(1);
+            expect(similarGroups[0]!.furthestDistance).toBe(0.02);
+
+            // Nothing in "related" (> 0.02)
+            expect(relatedGroups.length).toBe(0);
         });
 
         it("should handle empty groups array", () => {
@@ -376,13 +407,14 @@ describe("Edge Cases", () => {
                 {
                     id: "test",
                     items: [],
-                    furthestDistance: 0.15,
+                    furthestDistance: 0.15, // Much larger than related threshold (> 0.02)
                     totalSize: 0,
                     isSelected: true,
                 },
             ];
             const relatedGroups = filterGroupsByCategory(groups, "related");
-            expect(relatedGroups.length).toBe(0); // Above related threshold
+            // With new thresholds, related is > 0.02, so 0.15 IS in related
+            expect(relatedGroups.length).toBe(1);
         });
     });
 
@@ -397,13 +429,15 @@ describe("Edge Cases", () => {
             const groups = [
                 {
                     id: "test",
-                    items: [{
-                        file: { id: 1 } as EnteFile,
-                        distance: 0,
-                        similarityScore: 100,
-                        collectionIDs: new Set([1]),
-                        collectionName: "Test",
-                    }],
+                    items: [
+                        {
+                            file: { id: 1 } as EnteFile,
+                            distance: 0,
+                            similarityScore: 100,
+                            collectionIDs: new Set([1]),
+                            collectionName: "Test",
+                        },
+                    ],
                     furthestDistance: 0.05,
                     totalSize: 1000,
                     isSelected: true,
@@ -434,7 +468,10 @@ describe("Edge Cases", () => {
             const sorted = sortSimilarImageGroups(groups, "size");
             expect(sorted.length).toBe(2);
             // Both have same size, order may vary but both present
-            expect(sorted.map((g) => g.id).sort()).toEqual(["group1", "group2"]);
+            expect(sorted.map((g) => g.id).sort()).toEqual([
+                "group1",
+                "group2",
+            ]);
         });
     });
 
@@ -473,13 +510,15 @@ describe("Edge Cases", () => {
             const groups = [
                 {
                     id: "test",
-                    items: [{
-                        file: { id: 1 } as EnteFile,
-                        distance: 0,
-                        similarityScore: 100,
-                        collectionIDs: new Set([1]),
-                        collectionName: "Test",
-                    }],
+                    items: [
+                        {
+                            file: { id: 1 } as EnteFile,
+                            distance: 0,
+                            similarityScore: 100,
+                            collectionIDs: new Set([1]),
+                            collectionName: "Test",
+                        },
+                    ],
                     furthestDistance: 0.01,
                     totalSize: 1000,
                     isSelected: true,
@@ -495,14 +534,20 @@ describe("Edge Cases", () => {
                     id: "test1",
                     items: [
                         {
-                            file: { id: 1, info: { fileSize: 1000 } } as EnteFile,
+                            file: {
+                                id: 1,
+                                info: { fileSize: 1000 },
+                            } as EnteFile,
                             distance: 0,
                             similarityScore: 100,
                             collectionIDs: new Set([1]),
                             collectionName: "Test",
                         },
                         {
-                            file: { id: 2, info: { fileSize: 1000 } } as EnteFile,
+                            file: {
+                                id: 2,
+                                info: { fileSize: 1000 },
+                            } as EnteFile,
                             distance: 0.01,
                             similarityScore: 99,
                             collectionIDs: new Set([1]),
