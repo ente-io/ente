@@ -276,7 +276,7 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        unawaited(Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false));
       } else {
         throw Exception("Log out action failed");
       }
@@ -285,7 +285,7 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        unawaited(Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false));
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
