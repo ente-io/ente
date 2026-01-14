@@ -57,6 +57,7 @@ class _TrashPageState extends State<TrashPage> {
 
   Future<void> _refreshTrashFiles() async {
     final trashFiles = await TrashService.instance.getTrashFiles();
+    if (!mounted) return;
     setState(() {
       _trashFiles = List.from(trashFiles);
     });
