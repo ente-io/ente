@@ -756,6 +756,7 @@ func main() {
 	publicAPI.POST("/family/accept-invite", familyHandler.AcceptInvite)
 
 	privateAPI.DELETE("/family/leave", familyHandler.Leave) // native/web app
+	privateAPI.GET("/family/locker-usage", familyHandler.GetLockerFamilyUsage)
 
 	familiesJwtAuthAPI.POST("/family/create", familyHandler.CreateFamily)
 	familiesJwtAuthAPI.POST("/family/add-member", familyHandler.InviteMember)
