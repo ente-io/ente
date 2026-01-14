@@ -1,11 +1,10 @@
 name: "Lint (locker)"
 
 on:
-    # Run on every pull request (open or push to it) that changes locker/
+    # Run on every pull request (open or push to it) that changes locker app
     pull_request:
         paths:
             - "mobile/apps/locker/**"
-            - "mobile/packages/**"
             - ".github/workflows/locker-lint.yml"
 
 env:

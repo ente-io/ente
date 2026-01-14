@@ -1,0 +1,177 @@
+name: "Lint (mobile packages)"
+
+on:
+    # Run when mobile/packages changes
+    pull_request:
+        paths:
+            - "mobile/packages/**"
+            - ".github/workflows/mobile-packages-lint.yml"
+
+env:
+    FLUTTER_VERSION: "3.32.8"
+    RUSTFLAGS: -D warnings
+
+permissions:
+    contents: read
+
+jobs:
+    packages-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Cache Rust dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      mobile/packages/rust/rust/target
+                  key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
+
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings (Core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
+            # Lint all packages
+            - name: Lint package - accounts
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/accounts
+
+            - name: Lint package - base
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/base
+
+            - name: Lint package - configuration
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/configuration
+
+            - name: Lint package - dir_utils
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/dir_utils
+
+            - name: Lint package - ente_crypto_api
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_crypto_api
+
+            - name: Lint package - ente_crypto_dart_adapter
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_crypto_dart_adapter
+
+            - name: Lint package - ente_icons
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_icons
+
+            - name: Lint package - ente_pure_utils
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_pure_utils
+
+            - name: Lint package - events
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/events
+
+            - name: Lint package - legacy
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/legacy
+
+            - name: Lint package - lock_screen
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/lock_screen
+
+            - name: Lint package - log_viewer
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/log_viewer
+
+            - name: Lint package - logging
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/logging
+
+            - name: Lint package - native_video_editor
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/native_video_editor
+
+            - name: Lint package - network
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/network
+
+            - name: Lint package - qr
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/qr
+
+            - name: Lint package - sharing
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/sharing
+
+            - name: Lint package - strings
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/strings
+
+            - name: Lint package - ui
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ui
+
+            - name: Lint package - utils
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/utils
+
+            - name: Check formatting (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo build
+
+            - name: Test (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo test
+
+            # Lint all three apps to ensure package changes don't break them
+            - name: Lint app - photos
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/apps/photos
+
+            - name: Check formatting (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo build
+
+            - name: Test (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo test
+
+            - name: Lint app - auth
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/apps/auth
+
+            - name: Lint app - locker
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/apps/locker
