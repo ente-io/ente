@@ -362,11 +362,19 @@ export class HNSWIndex {
         // NOTE: readIndex() does its own initialization - no need to call initIndex() first!
         console.log(`[HNSW] Calling readIndex with maxElements=${this.maxElements}`);
         try {
-            const success = await this.index.readIndex(filename, this.maxElements);
-            console.log(`[HNSW] readIndex returned: ${success} (type: ${typeof success})`);
+            // readIndex() can return true (success) or undefined (also success in some versions)
+            // Any other return value indicates failure
+            const result = await this.index.readIndex(filename, this.maxElements);
+            console.log(`[HNSW] readIndex returned: ${result} (type: ${typeof result})`);
 
-            if (success !== true && success !== undefined) {
-                throw new Error(`readIndex returned ${success} (expected true) - possible capacity mismatch or index already initialized`);
+            // Success conditions: true or undefined
+            // Both indicate the index was loaded successfully
+            if (result !== true && result !== undefined) {
+                throw new Error(
+                    `readIndex failed with result: ${result}. ` +
+                    `Common causes: capacity mismatch (loaded index requires different maxElements), ` +
+                    `index already initialized, or corrupted index file.`,
+                );
             }
         } catch (error) {
             console.error(`[HNSW] readIndex threw error:`, error);
