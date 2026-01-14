@@ -2835,6 +2835,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}'**
   String collectionsDeletedSuccessfully(int count);
+
+  /// No description provided for @restoreToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore to collection'**
+  String get restoreToCollection;
+
+  /// No description provided for @restoringFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring...'**
+  String get restoringFiles;
+
+  /// Success message when items are restored from trash
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}'**
+  String filesRestoredSuccessfully(int count);
+
+  /// No description provided for @failedToRestoreFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore items'**
+  String get failedToRestoreFiles;
+
+  /// No description provided for @permanentlyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete'**
+  String get permanentlyDelete;
+
+  /// Confirmation body for permanent deletion from trash
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.'**
+  String permanentlyDeleteFilesBody(int count);
+
+  /// No description provided for @yesDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get yesDelete;
+
+  /// No description provided for @deletingFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting...'**
+  String get deletingFiles;
+
+  /// Success message when items are permanently deleted from trash
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}'**
+  String filesDeletedPermanently(int count);
+
+  /// No description provided for @failedToDeleteFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete items'**
+  String get failedToDeleteFiles;
 }
 
 class _AppLocalizationsDelegate
