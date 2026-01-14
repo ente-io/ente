@@ -1,15 +1,11 @@
-import Flutter
+import FlutterMacOS
 import Foundation
-import UIKit
-import UniformTypeIdentifiers
 
 public class DirUtilsPlugin: NSObject, FlutterPlugin {
-    private var pendingResult: FlutterResult?
-
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
-            name: "io.ente.dir_utils",
-            binaryMessenger: registrar.messenger()
+            name: "io.ente.scoped_dir_access",
+            binaryMessenger: registrar.messenger
         )
         let instance = DirUtilsPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -17,8 +13,8 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "pickDirectory":
-            handlePickDirectory(result: result)
+        case "createBookmarkFromPath":
+            handleCreateBookmarkFromPath(call: call, result: result)
         case "startAccess":
             handleStartAccess(call: call, result: result)
         case "stopAccess":
@@ -38,26 +34,41 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    // MARK: - Directory Picker
+    // MARK: - Bookmark Creation
 
-    private func handlePickDirectory(result: @escaping FlutterResult) {
-        guard let viewController = UIApplication.shared.windows.first?.rootViewController else {
-            result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "Could not find root view controller", details: nil))
+    /// Creates a security-scoped bookmark from a path that was obtained from a file picker.
+    /// This must be called while the app still has access (during the same session as the picker).
+    private func handleCreateBookmarkFromPath(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any],
+              let path = args["path"] as? String else {
+            result(FlutterError(code: "INVALID_ARGS", message: "Missing 'path' argument", details: nil))
             return
         }
 
-        pendingResult = result
+        let url = URL(fileURLWithPath: path)
 
-        let picker: UIDocumentPickerViewController
-        if #available(iOS 14.0, *) {
-            picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
-        } else {
-            picker = UIDocumentPickerViewController(documentTypes: ["public.folder"], in: .open)
+        do {
+            // On macOS, we must use .withSecurityScope for app-scoped bookmarks
+            let bookmarkData = try url.bookmarkData(
+                options: .withSecurityScope,
+                includingResourceValuesForKeys: nil,
+                relativeTo: nil
+            )
+
+            let base64Bookmark = bookmarkData.base64EncodedString()
+
+            result([
+                "path": url.path,
+                "bookmark": base64Bookmark
+            ])
+        } catch {
+            NSLog("DirUtilsPlugin (macOS): Failed to create bookmark: \(error)")
+            result(FlutterError(
+                code: "BOOKMARK_ERROR",
+                message: "Failed to create bookmark: \(error.localizedDescription)",
+                details: nil
+            ))
         }
-        picker.delegate = self
-        picker.allowsMultipleSelection = false
-
-        viewController.present(picker, animated: true)
     }
 
     // MARK: - Security-Scoped Access
@@ -72,22 +83,24 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
 
         do {
             var isStale = false
-            // On iOS, security scope is implicit in the bookmark data itself
-            // (unlike macOS which requires .withSecurityScope option)
+            // On macOS, we must use .withSecurityScope when resolving
             let url = try URL(
                 resolvingBookmarkData: bookmarkData,
-                options: [],
+                options: .withSecurityScope,
                 relativeTo: nil,
                 bookmarkDataIsStale: &isStale
             )
 
+            // Critical: must call startAccessingSecurityScopedResource on the resolved URL
             let success = url.startAccessingSecurityScopedResource()
+
             result([
                 "success": success,
                 "path": url.path,
                 "isStale": isStale
             ])
         } catch {
+            NSLog("DirUtilsPlugin (macOS): Failed to start access: \(error)")
             result(FlutterError(
                 code: "ACCESS_ERROR",
                 message: "Failed to start access: \(error.localizedDescription)",
@@ -106,10 +119,9 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
 
         do {
             var isStale = false
-            // On iOS, security scope is implicit in the bookmark data itself
             let url = try URL(
                 resolvingBookmarkData: bookmarkData,
-                options: [],
+                options: .withSecurityScope,
                 relativeTo: nil,
                 bookmarkDataIsStale: &isStale
             )
@@ -117,6 +129,7 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
             url.stopAccessingSecurityScopedResource()
             result(true)
         } catch {
+            NSLog("DirUtilsPlugin (macOS): Failed to stop access: \(error)")
             result(FlutterError(
                 code: "ACCESS_ERROR",
                 message: "Failed to stop access: \(error.localizedDescription)",
@@ -240,56 +253,5 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
 
         let exists = FileManager.default.fileExists(atPath: path)
         result(exists)
-    }
-}
-
-// MARK: - UIDocumentPickerDelegate
-extension DirUtilsPlugin: UIDocumentPickerDelegate {
-    public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let result = pendingResult else { return }
-        pendingResult = nil
-
-        guard let url = urls.first else {
-            result(FlutterError(code: "NO_SELECTION", message: "No directory selected", details: nil))
-            return
-        }
-
-        // Start accessing the security-scoped resource
-        let didStartAccessing = url.startAccessingSecurityScopedResource()
-
-        defer {
-            if didStartAccessing {
-                url.stopAccessingSecurityScopedResource()
-            }
-        }
-
-        do {
-            // Create bookmark while we have security-scoped access
-            let bookmarkData = try url.bookmarkData(
-                options: .minimalBookmark,
-                includingResourceValuesForKeys: nil,
-                relativeTo: nil
-            )
-
-            let base64Bookmark = bookmarkData.base64EncodedString()
-
-            result([
-                "path": url.path,
-                "bookmark": base64Bookmark
-            ])
-        } catch {
-            NSLog("DirUtilsPlugin: Failed to create bookmark: \(error)")
-            result(FlutterError(
-                code: "BOOKMARK_ERROR",
-                message: "Failed to create bookmark: \(error.localizedDescription)",
-                details: nil
-            ))
-        }
-    }
-
-    public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        guard let result = pendingResult else { return }
-        pendingResult = nil
-        result(nil) // User cancelled
     }
 }

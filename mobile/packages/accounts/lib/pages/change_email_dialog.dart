@@ -1,10 +1,10 @@
 import 'package:ente_accounts/ente_accounts.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import 'package:ente_ui/components/base_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
 
 class ChangeEmailDialog extends StatefulWidget {
