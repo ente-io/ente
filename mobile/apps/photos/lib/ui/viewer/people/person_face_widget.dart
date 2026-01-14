@@ -24,6 +24,10 @@ class PersonFaceWidget extends StatefulWidget {
   final VoidCallback? onErrorCallback;
   final bool keepAlive;
 
+  /// Target display size in physical pixels (logical size × devicePixelRatio).
+  /// When provided, the image will be decoded at this size to reduce memory usage.
+  final int? size;
+
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
   // and that the file is not null
   const PersonFaceWidget({
@@ -32,6 +36,7 @@ class PersonFaceWidget extends StatefulWidget {
     this.useFullFile = true,
     this.onErrorCallback,
     this.keepAlive = false,
+    this.size,
     super.key,
   }) : assert(
           personId != null || clusterID != null,
@@ -88,7 +93,15 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       future: faceCropFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data != null) {
-          final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+          // Only cacheWidth (not cacheHeight) to preserve aspect ratio.
+          // Face crops are typically portrait, so constraining width ensures
+          // sufficient height for BoxFit.cover without upscaling.
+          final ImageProvider imageProvider = widget.size != null
+              ? Image.memory(
+                  snapshot.data!,
+                  cacheWidth: widget.size,
+                ).image
+              : MemoryImage(snapshot.data!);
           return Stack(
             fit: StackFit.expand,
             children: [

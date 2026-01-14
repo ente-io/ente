@@ -23,6 +23,10 @@ class FileFaceWidget extends StatefulWidget {
   final bool useFullFile;
   final bool thumbnailFallback;
 
+  /// Target display size in physical pixels (logical size × devicePixelRatio).
+  /// When provided, the image will be decoded at this size to reduce memory usage.
+  final int? size;
+
   const FileFaceWidget(
     this.file, {
     this.face,
@@ -30,6 +34,7 @@ class FileFaceWidget extends StatefulWidget {
     this.clusterID,
     this.useFullFile = true,
     this.thumbnailFallback = false,
+    this.size,
     super.key,
   });
 
@@ -63,7 +68,12 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
       future: faceCropFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+          final ImageProvider imageProvider = widget.size != null
+              ? Image.memory(
+                  snapshot.data!,
+                  cacheWidth: widget.size,
+                ).image
+              : MemoryImage(snapshot.data!);
           return Stack(
             fit: StackFit.expand,
             children: [
