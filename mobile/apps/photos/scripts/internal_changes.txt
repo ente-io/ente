@@ -1,3 +1,4 @@
+- Ashil: QOL(perf): Potential perf improvement when there are lot of shared files in gallery (Optimized PersonFaceWidget that displays face thumbnail)
 - Laurens: Small improvements to rituals
 - Ashil: QOL: Fix jank on file info sheet
 - Ashil: QOL: Show large thumbnail for unsupported image formats in file viewer
