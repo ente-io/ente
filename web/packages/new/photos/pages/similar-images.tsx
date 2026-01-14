@@ -92,7 +92,11 @@ const Page: React.FC = () => {
     }, [analyze]);
 
     const filteredGroups = useMemo(
-        () => filterGroupsByCategory(state.allSimilarImageGroups, state.categoryFilter),
+        () =>
+            filterGroupsByCategory(
+                state.allSimilarImageGroups,
+                state.categoryFilter,
+            ),
         [state.allSimilarImageGroups, state.categoryFilter],
     );
 
@@ -104,7 +108,11 @@ const Page: React.FC = () => {
                 dispatch({ type: "setRemoveProgress", progress }),
         )
             .then(({ deletedFileIDs, fullyRemovedGroupIDs }) =>
-                dispatch({ type: "removeCompleted", deletedFileIDs, fullyRemovedGroupIDs }),
+                dispatch({
+                    type: "removeCompleted",
+                    deletedFileIDs,
+                    fullyRemovedGroupIDs,
+                }),
             )
             .catch((e: unknown) => {
                 onGenericError(e);
@@ -121,10 +129,14 @@ const Page: React.FC = () => {
                 return <LoadFailed />;
             case "completed":
                 if (filteredGroups.length === 0) {
-                    return <NoSimilarImagesFound
-                        categoryFilter={state.categoryFilter}
-                        hasAnyGroups={state.allSimilarImageGroups.length > 0}
-                    />;
+                    return (
+                        <NoSimilarImagesFound
+                            categoryFilter={state.categoryFilter}
+                            hasAnyGroups={
+                                state.allSimilarImageGroups.length > 0
+                            }
+                        />
+                    );
                 } else {
                     return (
                         <SimilarImages
@@ -132,19 +144,28 @@ const Page: React.FC = () => {
                             sortOrder={state.sortOrder}
                             categoryFilter={state.categoryFilter}
                             onCategoryFilterChange={(filter) =>
-                                dispatch({ type: "changeCategoryFilter", categoryFilter: filter })
+                                dispatch({
+                                    type: "changeCategoryFilter",
+                                    categoryFilter: filter,
+                                })
                             }
                             onToggleSelection={(index) =>
                                 dispatch({ type: "toggleSelection", index })
                             }
                             onToggleItemSelection={(groupIndex, itemIndex) =>
-                                dispatch({ type: "toggleItemSelection", groupIndex, itemIndex })
+                                dispatch({
+                                    type: "toggleItemSelection",
+                                    groupIndex,
+                                    itemIndex,
+                                })
                             }
                             deletableCount={state.deletableCount}
                             deletableSize={state.deletableSize}
                             removeProgress={state.removeProgress}
                             onRemoveSimilarImages={handleRemoveSimilarImages}
-                            onToggleSelectAll={() => dispatch({ type: "toggleSelectAll" })}
+                            onToggleSelectAll={() =>
+                                dispatch({ type: "toggleSelectAll" })
+                            }
                         />
                     );
                 }
@@ -237,11 +258,15 @@ const filterGroupsByCategory = (
 ): SimilarImageGroup[] => {
     switch (category) {
         case "close":
-            return groups.filter(g => g.furthestDistance <= CLOSE_THRESHOLD);
+            return groups.filter((g) => g.furthestDistance <= CLOSE_THRESHOLD);
         case "similar":
-            return groups.filter(g => g.furthestDistance > CLOSE_THRESHOLD && g.furthestDistance <= SIMILAR_THRESHOLD);
+            return groups.filter(
+                (g) =>
+                    g.furthestDistance > CLOSE_THRESHOLD &&
+                    g.furthestDistance <= SIMILAR_THRESHOLD,
+            );
         case "related":
-            return groups.filter(g => g.furthestDistance > SIMILAR_THRESHOLD);
+            return groups.filter((g) => g.furthestDistance > SIMILAR_THRESHOLD);
     }
 };
 
@@ -263,20 +288,25 @@ const similarImagesReducer: React.Reducer<
             const allSimilarImageGroups = sortedCopyOfSimilarImageGroups(
                 action.groups,
                 state.sortOrder,
-            ).map(group => {
+            ).map((group) => {
                 const items = group.items.map((item, index) => ({
                     ...item,
                     // Select all except the first one by default
-                    isSelected: index > 0
+                    isSelected: index > 0,
                 }));
                 return {
                     ...group,
                     items,
                     // Group is selected if all deletable items (index > 0) are selected
-                    isSelected: items.length > 1 && items.slice(1).every(i => i.isSelected)
+                    isSelected:
+                        items.length > 1 &&
+                        items.slice(1).every((i) => i.isSelected),
                 };
             });
-            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                allSimilarImageGroups,
+                state.categoryFilter,
+            );
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
             return {
@@ -301,7 +331,10 @@ const similarImagesReducer: React.Reducer<
 
         case "changeCategoryFilter": {
             const categoryFilter = action.categoryFilter;
-            const filteredGroups = filterGroupsByCategory(state.allSimilarImageGroups, categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                state.allSimilarImageGroups,
+                categoryFilter,
+            );
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
             return { ...state, categoryFilter, deletableCount, deletableSize };
@@ -309,7 +342,10 @@ const similarImagesReducer: React.Reducer<
 
         case "toggleSelection": {
             const allSimilarImageGroups = [...state.allSimilarImageGroups];
-            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                allSimilarImageGroups,
+                state.categoryFilter,
+            );
             const group = filteredGroups[action.index]!;
 
             // Toggle group state
@@ -321,7 +357,7 @@ const similarImagesReducer: React.Reducer<
             // (Unless we want "select all" to include first? Standard dedup behavior is keep 1)
             group.items = group.items.map((item, idx) => ({
                 ...item,
-                isSelected: idx === 0 ? false : newIsSelected
+                isSelected: idx === 0 ? false : newIsSelected,
             }));
 
             const { deletableCount, deletableSize } =
@@ -336,7 +372,10 @@ const similarImagesReducer: React.Reducer<
 
         case "toggleItemSelection": {
             const allSimilarImageGroups = [...state.allSimilarImageGroups];
-            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                allSimilarImageGroups,
+                state.categoryFilter,
+            );
             const group = filteredGroups[action.groupIndex]!;
             const items = [...group.items];
             const item = items[action.itemIndex]!;
@@ -348,7 +387,9 @@ const similarImagesReducer: React.Reducer<
             // Update group selection state (checked if all deletable items are selected)
             // We ignore the first item for "group selected" definition typically
             const deletableItems = items.slice(1);
-            group.isSelected = deletableItems.length > 0 && deletableItems.every(i => i.isSelected);
+            group.isSelected =
+                deletableItems.length > 0 &&
+                deletableItems.every((i) => i.isSelected);
 
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
@@ -362,20 +403,25 @@ const similarImagesReducer: React.Reducer<
 
         case "toggleSelectAll": {
             const allSimilarImageGroups = [...state.allSimilarImageGroups];
-            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                allSimilarImageGroups,
+                state.categoryFilter,
+            );
 
             // Check if all filtered groups are currently selected
-            const areAllSelected = filteredGroups.length > 0 && filteredGroups.every(g => g.isSelected);
+            const areAllSelected =
+                filteredGroups.length > 0 &&
+                filteredGroups.every((g) => g.isSelected);
 
             // Toggle state
             const targetState = !areAllSelected;
 
-            filteredGroups.forEach(group => {
+            filteredGroups.forEach((group) => {
                 group.isSelected = targetState;
                 group.items = group.items.map((item, idx) => ({
                     ...item,
                     // If selecting: select all except first. If deselecting: deselect all.
-                    isSelected: targetState ? (idx > 0) : false
+                    isSelected: targetState ? idx > 0 : false,
                 }));
             });
 
@@ -401,7 +447,10 @@ const similarImagesReducer: React.Reducer<
                     })),
                 }),
             );
-            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                allSimilarImageGroups,
+                state.categoryFilter,
+            );
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
             return {
@@ -429,14 +478,16 @@ const similarImagesReducer: React.Reducer<
                     ...group,
                     isSelected: false,
                     items: group.items
-                        .filter((item) => !action.deletedFileIDs.has(item.file.id))
-                        .map((item) => ({
-                            ...item,
-                            isSelected: false,
-                        })),
+                        .filter(
+                            (item) => !action.deletedFileIDs.has(item.file.id),
+                        )
+                        .map((item) => ({ ...item, isSelected: false })),
                 }))
                 .filter((group) => group.items.length > 1); // Remove groups with only 1 item left
-            const filteredGroups = filterGroupsByCategory(allSimilarImageGroups, state.categoryFilter);
+            const filteredGroups = filterGroupsByCategory(
+                allSimilarImageGroups,
+                state.categoryFilter,
+            );
             const { deletableCount, deletableSize } =
                 calculateDeletableStats(filteredGroups);
             return {
@@ -606,7 +657,8 @@ const NoSimilarImagesFound: React.FC<NoSimilarImagesFoundProps> = ({
     }
 
     // If there are groups but none in this category, show category-specific message
-    const categoryDisplayName = categoryFilter === "close" ? "close" : categoryFilter;
+    const categoryDisplayName =
+        categoryFilter === "close" ? "close" : categoryFilter;
 
     return (
         <CenteredFill>
@@ -650,8 +702,9 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
     onRemoveSimilarImages,
     onToggleSelectAll,
 }) => {
-
-    const areAllSelected = similarImageGroups.length > 0 && similarImageGroups.every(g => g.isSelected);
+    const areAllSelected =
+        similarImageGroups.length > 0 &&
+        similarImageGroups.every((g) => g.isSelected);
     const isDeletionInProgress = removeProgress !== undefined;
 
     return (
@@ -676,7 +729,11 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                     )}
                 </Autosizer>
             </Box>
-            <Stack direction="row" spacing={2} sx={{ margin: 2, alignItems: "stretch" }}>
+            <Stack
+                direction="row"
+                spacing={2}
+                sx={{ margin: 2, alignItems: "stretch" }}
+            >
                 <FocusVisibleButton
                     variant="outlined"
                     onClick={onToggleSelectAll}
@@ -696,7 +753,9 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                         disableRipple
                         sx={{ marginRight: 1 }}
                     />
-                    {areAllSelected ? t("deselect_all_groups") : t("select_all_in_groups")}
+                    {areAllSelected
+                        ? t("deselect_all_groups")
+                        : t("select_all_in_groups")}
                 </FocusVisibleButton>
                 <Box sx={{ flex: 1 }}>
                     <RemoveButton
@@ -736,7 +795,7 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                             }}
                         />
                         <Typography
-                            variant="body2"
+                            variant="body"
                             sx={{ textAlign: "center", mt: 1 }}
                         >
                             {Math.round(removeProgress)}%
@@ -744,7 +803,7 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                     </Box>
                 )}
             </Backdrop>
-        </Stack >
+        </Stack>
     );
 };
 
@@ -760,7 +819,9 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
     <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
             value={categoryFilter}
-            onChange={(_, newValue) => onCategoryFilterChange(newValue as CategoryFilter)}
+            onChange={(_, newValue) =>
+                onCategoryFilterChange(newValue as CategoryFilter)
+            }
             centered
         >
             <Tab label={t("close_by")} value="close" />
@@ -792,10 +853,12 @@ const SimilarImagesList: React.FC<SimilarImagesListProps> = ({
         [width],
     );
 
-    const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
+    const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(
+        new Set(),
+    );
 
     const toggleExpanded = useCallback((groupId: string) => {
-        setExpandedGroups(prev => {
+        setExpandedGroups((prev) => {
             const next = new Set(prev);
             if (next.has(groupId)) {
                 next.delete(groupId);
@@ -807,30 +870,48 @@ const SimilarImagesList: React.FC<SimilarImagesListProps> = ({
     }, []);
 
     const itemData = useMemo(
-        () => ({ layoutParams, similarImageGroups, onToggleSelection, onToggleItemSelection, expandedGroups, toggleExpanded }),
-        [layoutParams, similarImageGroups, onToggleSelection, onToggleItemSelection, expandedGroups, toggleExpanded],
+        () => ({
+            layoutParams,
+            similarImageGroups,
+            onToggleSelection,
+            onToggleItemSelection,
+            expandedGroups,
+            toggleExpanded,
+        }),
+        [
+            layoutParams,
+            similarImageGroups,
+            onToggleSelection,
+            onToggleItemSelection,
+            expandedGroups,
+            toggleExpanded,
+        ],
     );
 
     const itemCount = similarImageGroups.length;
 
-    const itemSize = useCallback((index: number) => {
-        const group = similarImageGroups[index];
-        if (!group) return 0;
+    const itemSize = useCallback(
+        (index: number) => {
+            const group = similarImageGroups[index];
+            if (!group) return 0;
 
-        const fixedHeight = 24 + 42 + 4 + 1 + 20 + 16; // Header + divider + padding
-        const isExpanded = expandedGroups.has(group.id);
+            const fixedHeight = 24 + 42 + 4 + 1 + 20 + 16; // Header + divider + padding
+            const isExpanded = expandedGroups.has(group.id);
 
-        let cellCount = group.items.length;
-        if (!isExpanded && cellCount > 6) {
-            // 6 items + 1 "more" button
-            cellCount = 7;
-        }
+            let cellCount = group.items.length;
+            if (!isExpanded && cellCount > 6) {
+                // 6 items + 1 "more" button
+                cellCount = 7;
+            }
 
-        const rows = Math.ceil(cellCount / layoutParams.columns);
-        const gridHeight = rows * layoutParams.itemHeight + (rows - 1) * layoutParams.gap;
+            const rows = Math.ceil(cellCount / layoutParams.columns);
+            const gridHeight =
+                rows * layoutParams.itemHeight + (rows - 1) * layoutParams.gap;
 
-        return fixedHeight + gridHeight + 8;
-    }, [similarImageGroups, expandedGroups, layoutParams]);
+            return fixedHeight + gridHeight + 8;
+        },
+        [similarImageGroups, expandedGroups, layoutParams],
+    );
 
     const listRef = React.useRef<VariableSizeList>(null);
 
@@ -868,8 +949,19 @@ type SimilarImagesListItemData = Pick<
 };
 
 const SimilarImagesListRow = memo(
-    ({ index, style, data }: ListChildComponentProps<SimilarImagesListItemData>) => {
-        const { layoutParams, similarImageGroups, onToggleSelection, onToggleItemSelection, expandedGroups, toggleExpanded } = data;
+    ({
+        index,
+        style,
+        data,
+    }: ListChildComponentProps<SimilarImagesListItemData>) => {
+        const {
+            layoutParams,
+            similarImageGroups,
+            onToggleSelection,
+            onToggleItemSelection,
+            expandedGroups,
+            toggleExpanded,
+        } = data;
         const group = similarImageGroups[index]!;
         const { isSelected } = group;
 
@@ -986,10 +1078,14 @@ const GroupContent: React.FC<GroupContentProps> = ({
                         coverFile={item.file}
                         sx={{
                             // Visual feedback for selected items: darken the image
-                            filter: item.isSelected ? "brightness(0.5)" : "none",
+                            filter: item.isSelected
+                                ? "brightness(0.5)"
+                                : "none",
                             transition: "filter 0.2s ease-in-out",
                             "&:hover": {
-                                filter: item.isSelected ? "brightness(0.4)" : "brightness(0.9)",
+                                filter: item.isSelected
+                                    ? "brightness(0.4)"
+                                    : "brightness(0.9)",
                             },
                         }}
                     >
@@ -1005,16 +1101,17 @@ const GroupContent: React.FC<GroupContentProps> = ({
                                 checked={item.isSelected || false}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onToggleItemSelection(groupIndex, itemIndex);
+                                    onToggleItemSelection(
+                                        groupIndex,
+                                        itemIndex,
+                                    );
                                 }}
                                 sx={{
                                     color: "white",
                                     backgroundColor: "rgba(0, 0, 0, 0.5)",
                                     borderRadius: "4px",
                                     padding: "4px",
-                                    "&.Mui-checked": {
-                                        color: "primary.main",
-                                    },
+                                    "&.Mui-checked": { color: "primary.main" },
                                     // Make checkbox always visible or visible on hover/selected
                                     // Based on mobile standard, usually always visible provides better affordance
                                 }}
@@ -1024,8 +1121,13 @@ const GroupContent: React.FC<GroupContentProps> = ({
                             <Ellipsized2LineTypography variant="body">
                                 {item.collectionName}
                             </Ellipsized2LineTypography>
-                            <Typography variant="small" sx={{ opacity: 0.7, fontSize: '0.75rem' }}>
-                                {formattedByteSize(item.file.info?.fileSize ?? 0)}
+                            <Typography
+                                variant="small"
+                                sx={{ opacity: 0.7, fontSize: "0.75rem" }}
+                            >
+                                {formattedByteSize(
+                                    item.file.info?.fileSize ?? 0,
+                                )}
                             </Typography>
                         </TileBottomTextOverlay>
                     </ItemCard>
@@ -1082,9 +1184,7 @@ const RemoveButton: React.FC<RemoveButtonProps> = ({
             paddingX: 3,
             minHeight: "48px",
             bgcolor: "error.main",
-            "&:hover": {
-                bgcolor: "error.dark",
-            },
+            "&:hover": { bgcolor: "error.dark" },
         }}
     >
         <span>{t("remove")}</span>
