@@ -160,32 +160,32 @@ describe("similar-images", () => {
 
         it("should filter close groups", () => {
             const groups = [
-                createMockGroup(0.01), // close
-                createMockGroup(0.03), // similar
-                createMockGroup(0.06), // related
+                createMockGroup(0.0005), // close (≤ 0.001)
+                createMockGroup(0.01), // similar (> 0.001 and ≤ 0.02)
+                createMockGroup(0.06), // related (> 0.02)
             ];
 
             const closeGroups = filterGroupsByCategory(groups, "close");
             expect(closeGroups.length).toBe(1);
-            expect(closeGroups[0]!.furthestDistance).toBe(0.01);
+            expect(closeGroups[0]!.furthestDistance).toBe(0.0005);
         });
 
         it("should filter similar groups", () => {
             const groups = [
-                createMockGroup(0.01), // close
-                createMockGroup(0.03), // similar
+                createMockGroup(0.0005), // close
+                createMockGroup(0.01), // similar
                 createMockGroup(0.06), // related
             ];
 
             const similarGroups = filterGroupsByCategory(groups, "similar");
             expect(similarGroups.length).toBe(1);
-            expect(similarGroups[0]!.furthestDistance).toBe(0.03);
+            expect(similarGroups[0]!.furthestDistance).toBe(0.01);
         });
 
         it("should filter related groups", () => {
             const groups = [
-                createMockGroup(0.01), // close
-                createMockGroup(0.03), // similar
+                createMockGroup(0.0005), // close
+                createMockGroup(0.01), // similar
                 createMockGroup(0.06), // related
             ];
 
@@ -195,7 +195,7 @@ describe("similar-images", () => {
         });
 
         it("should return empty for no matching groups", () => {
-            const groups = [createMockGroup(0.01)]; // only close
+            const groups = [createMockGroup(0.0005)]; // only close (≤ 0.001)
             const relatedGroups = filterGroupsByCategory(groups, "related");
             expect(relatedGroups.length).toBe(0);
         });
@@ -324,19 +324,19 @@ describe("Edge Cases", () => {
 
     describe("filterGroupsByCategory edge cases", () => {
         it("should handle groups at exact category boundaries", () => {
-            // Groups exactly at 0.02 should be in "similar", not "close"
+            // Test boundary conditions with new thresholds
             const groups = [
                 {
                     id: "test1",
                     items: [],
-                    furthestDistance: 0.02,
+                    furthestDistance: 0.001, // boundary between close and similar
                     totalSize: 0,
                     isSelected: true,
                 },
                 {
                     id: "test2",
                     items: [],
-                    furthestDistance: 0.04,
+                    furthestDistance: 0.02, // boundary between similar and related
                     totalSize: 0,
                     isSelected: true,
                 },
@@ -346,9 +346,16 @@ describe("Edge Cases", () => {
             const similarGroups = filterGroupsByCategory(groups, "similar");
             const relatedGroups = filterGroupsByCategory(groups, "related");
 
-            expect(closeGroups.length).toBe(0); // 0.02 is not < 0.02
-            expect(similarGroups.length).toBe(1); // 0.02 is in similar [0.02, 0.04)
-            expect(relatedGroups.length).toBe(1); // 0.04 is in related [0.04, 0.08)
+            // 0.001 is in "close" (≤ 0.001)
+            expect(closeGroups.length).toBe(1);
+            expect(closeGroups[0]!.furthestDistance).toBe(0.001);
+
+            // 0.02 is in "similar" (> 0.001 and ≤ 0.02)
+            expect(similarGroups.length).toBe(1);
+            expect(similarGroups[0]!.furthestDistance).toBe(0.02);
+
+            // Nothing in "related" (> 0.02)
+            expect(relatedGroups.length).toBe(0);
         });
 
         it("should handle empty groups array", () => {
@@ -376,13 +383,14 @@ describe("Edge Cases", () => {
                 {
                     id: "test",
                     items: [],
-                    furthestDistance: 0.15,
+                    furthestDistance: 0.15, // Much larger than related threshold (> 0.02)
                     totalSize: 0,
                     isSelected: true,
                 },
             ];
             const relatedGroups = filterGroupsByCategory(groups, "related");
-            expect(relatedGroups.length).toBe(0); // Above related threshold
+            // With new thresholds, related is > 0.02, so 0.15 IS in related
+            expect(relatedGroups.length).toBe(1);
         });
     });
 
