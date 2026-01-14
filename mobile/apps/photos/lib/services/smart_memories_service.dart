@@ -53,9 +53,9 @@ class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
   final _memoriesDB = MemoriesDB.instance;
 
-  static const _clipSimilarImageThreshold = 0.75;
-  static const _clipActivityQueryThreshold = 0.25;
-  static const _clipMemoryTypeQueryThreshold = 0.25;
+  static const _clipSimilarImageThreshold = 0.80;
+  static const _clipActivityQueryThreshold = 0.20;
+  static const _clipMemoryTypeQueryThreshold = 0.225;
 
   static const yearsBefore = 30;
 
