@@ -116,8 +116,8 @@ export const removeSelectedSimilarImageGroups = async (
     const tickProgress = () => onProgress((np++ / ntotal) * 100);
 
     // Process the adds
-    const collections = await savedNormalCollections();
-    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+    const allCollections = await savedNormalCollections();
+    const collectionsByID = new Map(allCollections.map((c) => [c.id, c]));
     for (const [collectionID, files] of filesToAdd.entries()) {
         await addToCollection(collectionsByID.get(collectionID)!, files);
         tickProgress();
