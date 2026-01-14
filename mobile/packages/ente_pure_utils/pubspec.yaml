@@ -9,8 +9,6 @@ environment:
 
 dependencies:
   email_validator: ^3.0.0
-  ente_logging:
-    path: ../logging
   flutter:
     sdk: flutter
   intl: ^0.20.2
