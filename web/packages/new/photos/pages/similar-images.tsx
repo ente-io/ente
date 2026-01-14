@@ -229,7 +229,7 @@ const initialSimilarImagesState: SimilarImagesState = {
 
 // Thresholds matching mobile implementation
 const CLOSE_THRESHOLD = 0.001;
-const SIMILAR_THRESHOLD = 0.02;
+const SIMILAR_THRESHOLD = 0.04;
 
 const filterGroupsByCategory = (
     groups: SimilarImageGroup[],
@@ -968,7 +968,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
     isExpanded,
     onToggleExpanded,
 }) => {
-    const { items, isSelected: isGroupSelected } = group;
+    const { items } = group;
 
     const visibleItems = isExpanded ? items : items.slice(0, 6);
     const remainingCount = items.length - 6;
