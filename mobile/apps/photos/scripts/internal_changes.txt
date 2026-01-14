@@ -1,3 +1,4 @@
+- Ashil: QOL: Pinch to zoom on video
 - Laurens: Small improvements to rituals
 - Ashil: QOL: Fix jank on file info sheet
 - Ashil: QOL: Show large thumbnail for unsupported image formats in file viewer
