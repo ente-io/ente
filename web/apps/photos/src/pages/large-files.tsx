@@ -239,7 +239,10 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     filter,
     onChangeFilter,
 }) => (
-    <Stack direction="row" sx={{ gap: 1, pl: 3, pr: 2, py: 4, flexWrap: "wrap" }}>
+    <Stack
+        direction="row"
+        sx={{ gap: 1, pl: 3, pr: 2, py: 4, flexWrap: "wrap" }}
+    >
         <Chip
             label={t("all")}
             variant={filter === "all" ? "filled" : "outlined"}
