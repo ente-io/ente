@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name             = 'dir_utils'
+  s.name             = 'scoped_dir_access'
   s.version          = '1.0.0'
   s.summary          = 'Cross-platform directory utilities with persistent access support'
   s.description      = <<-DESC

@@ -1,5 +1,5 @@
-name: dir_utils
-description: Cross-platform directory utilities with persistent access support (iOS security-scoped bookmarks, Android SAF)
+name: scoped_dir_access
+description: Cross-platform directory access with security-scoped persistent access (iOS/macOS security-scoped bookmarks, Android SAF)
 version: 1.0.0
 homepage: https://github.com/ente-io/ente
 
