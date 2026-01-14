@@ -67,7 +67,7 @@ class _ZoomableVideoViewerState extends State<ZoomableVideoViewer> {
       onPointerCancel: _onPointerCancel,
       child: InteractiveViewer(
         transformationController: widget.transformationController,
-        maxScale: 4.0,
+        maxScale: 10.0,
         minScale: 1.0,
         child: widget.child,
       ),
