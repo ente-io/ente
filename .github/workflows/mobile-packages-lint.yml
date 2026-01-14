@@ -89,7 +89,11 @@ jobs:
         needs: detect-changes
         runs-on: ubuntu-latest
         # Skip if no packages need linting
-        if: needs.detect-changes.outputs.packages != '' || needs.detect-changes.outputs.lint_all == 'true'
+        if: needs.detect-changes.outputs.lint_all == 'true' || toJson(fromJson(needs.detect-changes.outputs.packages)) != '[]'
+        strategy:
+            fail-fast: false
+            matrix:
+                package: ${{ fromJson(needs.detect-changes.outputs.packages) }}
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@v4
@@ -120,131 +124,107 @@ jobs:
               working-directory: mobile/packages/rust
 
             - name: Generate strings localizations
+              if: matrix.package == 'strings'
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
 
-            # Lint all packages (conditionally based on what changed)
-            - name: Lint package - accounts
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'accounts')
+            # Lint the package from the matrix
+            - name: Lint package - ${{ matrix.package }}
               run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/accounts
+              working-directory: mobile/packages/${{ matrix.package }}
 
-            - name: Lint package - base
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'base')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/base
+    rust-lint:
+        needs: detect-changes
+        runs-on: ubuntu-latest
+        if: needs.detect-changes.outputs.rust_changed == 'true'
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
 
-            - name: Lint package - configuration
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'configuration')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/configuration
+            - name: Cache Rust dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      mobile/packages/rust/rust/target
+                  key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
 
-            - name: Lint package - dir_utils
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'dir_utils')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/dir_utils
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
 
-            - name: Lint package - ente_crypto_api
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_api')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/ente_crypto_api
-
-            - name: Lint package - ente_crypto_dart_adapter
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_dart_adapter')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/ente_crypto_dart_adapter
-
-            - name: Lint package - ente_icons
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_icons')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/ente_icons
-
-            - name: Lint package - ente_pure_utils
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_pure_utils')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/ente_pure_utils
-
-            - name: Lint package - events
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'events')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/events
-
-            - name: Lint package - legacy
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'legacy')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/legacy
-
-            - name: Lint package - lock_screen
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'lock_screen')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/lock_screen
-
-            - name: Lint package - log_viewer
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'log_viewer')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/log_viewer
-
-            - name: Lint package - logging
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'logging')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/logging
-
-            - name: Lint package - native_video_editor
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'native_video_editor')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/native_video_editor
-
-            - name: Lint package - network
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'network')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/network
-
-            - name: Lint package - qr
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'qr')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/qr
-
-            - name: Lint package - sharing
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'sharing')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/sharing
-
-            - name: Lint package - strings
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'strings')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/strings
-
-            - name: Lint package - ui
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ui')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/ui
-
-            - name: Lint package - utils
-              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'utils')
-              run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/utils
+            - name: Generate Rust bindings (Core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
 
             - name: Check formatting (ente_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
 
             - name: Run clippy (ente_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo build
 
             - name: Test (ente_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
               working-directory: mobile/packages/rust/rust
               run: cargo test
 
-            # Lint all three apps to ensure package changes don't break them
+            - name: Generate Rust bindings (photos app)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/apps/photos
+
+            - name: Check formatting (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo build
+
+            - name: Test (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo test
+
+    apps-lint:
+        needs: detect-changes
+        runs-on: ubuntu-latest
+        if: needs.detect-changes.outputs.lint_photos == 'true' || needs.detect-changes.outputs.lint_auth == 'true' || needs.detect-changes.outputs.lint_locker == 'true'
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Cache Rust dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      mobile/packages/rust/rust/target
+                  key: ${{ runner.os }}-cargo-packages-${{ hashFiles('mobile/packages/**/Cargo.lock') }}
+
+            - name: Install Flutter Rust Bridge
+              if: needs.detect-changes.outputs.lint_photos == 'true'
+              run: cargo install flutter_rust_bridge_codegen
+
             - name: Generate Rust bindings (photos app)
               if: needs.detect-changes.outputs.lint_photos == 'true'
               run: flutter_rust_bridge_codegen generate
@@ -254,26 +234,6 @@ jobs:
               if: needs.detect-changes.outputs.lint_photos == 'true'
               run: flutter pub get && flutter analyze --no-fatal-infos
               working-directory: mobile/apps/photos
-
-            - name: Check formatting (ente_photos_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
-
-            - name: Run clippy (ente_photos_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo clippy --all-targets --all-features
-
-            - name: Build (ente_photos_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo build
-
-            - name: Test (ente_photos_rust)
-              if: needs.detect-changes.outputs.rust_changed == 'true'
-              working-directory: mobile/apps/photos/rust
-              run: cargo test
 
             - name: Lint app - auth
               if: needs.detect-changes.outputs.lint_auth == 'true'
