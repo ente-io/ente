@@ -10,7 +10,7 @@
 #
 # Output (JSON to stdout):
 #   {
-#     "packages": ["pkg1", "pkg2", "pkg3"],
+#     "packages": "pkg1 pkg2 pkg3",
 #     "lint_photos": "true/false",
 #     "lint_auth": "true/false",
 #     "lint_locker": "true/false",
@@ -165,23 +165,10 @@ main() {
 
     # If linting all, return all packages
     if [ "$lint_all" = "true" ]; then
-        local all_pkgs=$(find "$PACKAGES_DIR" -maxdepth 1 -type d -not -name "packages" -not -name "rust" -exec basename {} \; | sort)
-
-        # Convert to JSON array
-        local json_array="["
-        local first=true
-        for pkg in $all_pkgs; do
-            if [ "$first" = true ]; then
-                json_array="$json_array\"$pkg\""
-                first=false
-            else
-                json_array="$json_array, \"$pkg\""
-            fi
-        done
-        json_array="$json_array]"
+        local all_pkgs=$(find "$PACKAGES_DIR" -maxdepth 1 -type d -not -name "packages" -not -name "rust" -exec basename {} \; | sort | tr '\n' ' ')
 
         echo "{"
-        echo "  \"packages\": $json_array,"
+        echo "  \"packages\": \"$all_pkgs\","
         echo "  \"lint_photos\": \"true\","
         echo "  \"lint_auth\": \"true\","
         echo "  \"lint_locker\": \"true\","
@@ -206,7 +193,7 @@ main() {
     # If no packages changed, nothing to lint
     if [ -z "$(echo $changed_pkgs | tr -d ' ')" ]; then
         echo "{"
-        echo "  \"packages\": [],"
+        echo "  \"packages\": \"\","
         echo "  \"lint_photos\": \"false\","
         echo "  \"lint_auth\": \"false\","
         echo "  \"lint_locker\": \"false\","
@@ -226,22 +213,9 @@ main() {
     local lint_auth=$(check_app_affected "auth" "$affected_pkgs")
     local lint_locker=$(check_app_affected "locker" "$affected_pkgs")
 
-    # Convert affected_pkgs to JSON array
-    local json_array="["
-    local first=true
-    for pkg in $affected_pkgs; do
-        if [ "$first" = true ]; then
-            json_array="$json_array\"$pkg\""
-            first=false
-        else
-            json_array="$json_array, \"$pkg\""
-        fi
-    done
-    json_array="$json_array]"
-
     # Output JSON
     echo "{"
-    echo "  \"packages\": $json_array,"
+    echo "  \"packages\": \"$affected_pkgs\","
     echo "  \"lint_photos\": \"$lint_photos\","
     echo "  \"lint_auth\": \"$lint_auth\","
     echo "  \"lint_locker\": \"$lint_locker\","

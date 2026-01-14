@@ -64,7 +64,7 @@ jobs:
                   echo "$RESULT"
 
                   # Extract values from JSON
-                  PACKAGES=$(echo "$RESULT" | jq -c '.packages')
+                  PACKAGES=$(echo "$RESULT" | jq -r '.packages')
                   LINT_PHOTOS=$(echo "$RESULT" | jq -r '.lint_photos')
                   LINT_AUTH=$(echo "$RESULT" | jq -r '.lint_auth')
                   LINT_LOCKER=$(echo "$RESULT" | jq -r '.lint_locker')
@@ -89,11 +89,7 @@ jobs:
         needs: detect-changes
         runs-on: ubuntu-latest
         # Skip if no packages need linting
-        if: needs.detect-changes.outputs.lint_all == 'true' || toJson(fromJson(needs.detect-changes.outputs.packages)) != '[]'
-        strategy:
-            fail-fast: false
-            matrix:
-                package: ${{ fromJson(needs.detect-changes.outputs.packages) }}
+        if: needs.detect-changes.outputs.lint_all == 'true' || needs.detect-changes.outputs.packages != ''
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@v4
@@ -124,14 +120,109 @@ jobs:
               working-directory: mobile/packages/rust
 
             - name: Generate strings localizations
-              if: matrix.package == 'strings'
               run: flutter gen-l10n
               working-directory: mobile/packages/strings
 
-            # Lint the package from the matrix
-            - name: Lint package - ${{ matrix.package }}
+            # Lint all affected packages conditionally
+            - name: Lint package - accounts
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'accounts')
               run: flutter pub get && flutter analyze --no-fatal-infos
-              working-directory: mobile/packages/${{ matrix.package }}
+              working-directory: mobile/packages/accounts
+
+            - name: Lint package - base
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'base')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/base
+
+            - name: Lint package - configuration
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'configuration')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/configuration
+
+            - name: Lint package - dir_utils
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'dir_utils')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/dir_utils
+
+            - name: Lint package - ente_crypto_api
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_api')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_crypto_api
+
+            - name: Lint package - ente_crypto_dart_adapter
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_crypto_dart_adapter')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_crypto_dart_adapter
+
+            - name: Lint package - ente_icons
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_icons')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_icons
+
+            - name: Lint package - ente_pure_utils
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ente_pure_utils')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ente_pure_utils
+
+            - name: Lint package - events
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'events')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/events
+
+            - name: Lint package - legacy
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'legacy')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/legacy
+
+            - name: Lint package - lock_screen
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'lock_screen')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/lock_screen
+
+            - name: Lint package - log_viewer
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'log_viewer')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/log_viewer
+
+            - name: Lint package - logging
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'logging')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/logging
+
+            - name: Lint package - native_video_editor
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'native_video_editor')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/native_video_editor
+
+            - name: Lint package - network
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'network')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/network
+
+            - name: Lint package - qr
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'qr')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/qr
+
+            - name: Lint package - sharing
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'sharing')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/sharing
+
+            - name: Lint package - strings
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'strings')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/strings
+
+            - name: Lint package - ui
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'ui')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/ui
+
+            - name: Lint package - utils
+              if: needs.detect-changes.outputs.lint_all == 'true' || contains(needs.detect-changes.outputs.packages, 'utils')
+              run: flutter pub get && flutter analyze --no-fatal-infos
+              working-directory: mobile/packages/utils
 
     rust-lint:
         needs: detect-changes
