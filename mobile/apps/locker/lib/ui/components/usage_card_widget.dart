@@ -63,7 +63,7 @@ class _DotsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03)
+      ..color = textBaseDark.withValues(alpha: 0.03)
       ..style = PaintingStyle.fill;
 
     final horizontalCount = (size.width / _horizontalSpacing).ceil() + 1;
@@ -88,9 +88,6 @@ class _DotsPainter extends CustomPainter {
 class _UsageContent extends StatelessWidget {
   final UserDetails? userDetails;
   final bool isLoading;
-
-  static const Color _youColor = Color.fromRGBO(8, 194, 373, 1);
-  static const Color _familyColor = Color.fromRGBO(244, 217, 59, 1);
 
   const _UsageContent({
     required this.userDetails,
@@ -185,7 +182,7 @@ class _UsageContent extends StatelessWidget {
                       width: constraints.maxWidth * familyProgress,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: _familyColor,
+                        color: textBaseDark,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     );
@@ -198,7 +195,7 @@ class _UsageContent extends StatelessWidget {
                     height: 8,
                     decoration: BoxDecoration(
                       color: showFamilyBreakup
-                          ? _youColor
+                          ? colorScheme.primary700
                           : colorScheme.primary700,
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -215,9 +212,9 @@ class _UsageContent extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _youColor,
+                  color: colorScheme.primary700,
                 ),
               ),
               const SizedBox(width: 4),
@@ -231,7 +228,7 @@ class _UsageContent extends StatelessWidget {
                 height: 8,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _familyColor,
+                  color: textBaseDark,
                 ),
               ),
               const SizedBox(width: 4),
