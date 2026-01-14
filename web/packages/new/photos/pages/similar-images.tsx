@@ -119,7 +119,10 @@ const Page: React.FC = () => {
                 return <LoadFailed />;
             case "completed":
                 if (filteredGroups.length === 0) {
-                    return <NoSimilarImagesFound />;
+                    return <NoSimilarImagesFound
+                        categoryFilter={state.categoryFilter}
+                        hasAnyGroups={state.allSimilarImageGroups.length > 0}
+                    />;
                 } else {
                     return (
                         <SimilarImages
@@ -580,13 +583,44 @@ const LoadFailed: React.FC = () => (
     </CenteredFill>
 );
 
-const NoSimilarImagesFound: React.FC = () => (
-    <CenteredFill>
-        <Typography color="text.secondary" sx={{ textAlign: "center" }}>
-            {t("no_similar_images_found")}
-        </Typography>
-    </CenteredFill>
-);
+interface NoSimilarImagesFoundProps {
+    categoryFilter: CategoryFilter;
+    hasAnyGroups: boolean;
+}
+
+const NoSimilarImagesFound: React.FC<NoSimilarImagesFoundProps> = ({
+    categoryFilter,
+    hasAnyGroups,
+}) => {
+    // If there are no groups at all, show generic message
+    if (!hasAnyGroups) {
+        return (
+            <CenteredFill>
+                <Typography color="text.secondary" sx={{ textAlign: "center" }}>
+                    {t("no_similar_images_found")}
+                </Typography>
+            </CenteredFill>
+        );
+    }
+
+    // If there are groups but none in this category, show category-specific message
+    const categoryDisplayName = categoryFilter === "close" ? "close" : categoryFilter;
+
+    return (
+        <CenteredFill>
+            <Typography color="text.secondary" sx={{ textAlign: "center" }}>
+                No {categoryDisplayName} images found
+            </Typography>
+            <Typography
+                color="text.secondary"
+                variant="small"
+                sx={{ textAlign: "center", mt: 1 }}
+            >
+                Try checking other categories
+            </Typography>
+        </CenteredFill>
+    );
+};
 
 interface SimilarImagesProps {
     similarImageGroups: SimilarImageGroup[];
