@@ -1139,7 +1139,7 @@ class UserService {
   }
 
   bool hasEmailMFAEnabled() {
-    return _preferences.getBool(kIsEmailMFAEnabled) ?? true;
+    return _preferences.getBool(kIsEmailMFAEnabled) ?? false;
   }
 
   Future<void> updateEmailMFA(bool isEnabled) async {

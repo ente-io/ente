@@ -1326,7 +1326,7 @@ class UserService {
     if (profile != null && profile.profileData != null) {
       return profile.profileData!.isEmailMFAEnabled;
     }
-    return true;
+    return false;
   }
 
   Future<void> updateEmailMFA(bool isEnabled) async {
