@@ -217,10 +217,10 @@ type SimilarImagesAction =
     | { type: "setAnalysisProgress"; progress: number }
     | { type: "analysisFailed" }
     | {
-        type: "analysisCompleted";
-        groups: SimilarImageGroup[];
-        computationTimeMs: number;
-    }
+          type: "analysisCompleted";
+          groups: SimilarImageGroup[];
+          computationTimeMs: number;
+      }
     | { type: "changeSortOrder"; sortOrder: SortOrder }
     | { type: "changeCategoryFilter"; categoryFilter: CategoryFilter }
     | { type: "toggleSelection"; index: number }
@@ -231,10 +231,10 @@ type SimilarImagesAction =
     | { type: "setRemoveProgress"; progress: number }
     | { type: "removeFailed" }
     | {
-        type: "removeCompleted";
-        deletedFileIDs: Set<number>;
-        fullyRemovedGroupIDs: Set<string>;
-    };
+          type: "removeCompleted";
+          deletedFileIDs: Set<number>;
+          fullyRemovedGroupIDs: Set<string>;
+      };
 
 const initialSimilarImagesState: SimilarImagesState = {
     analysisStatus: undefined,

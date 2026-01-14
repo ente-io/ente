@@ -4,8 +4,8 @@ import {
     moveToTrash,
     savedNormalCollections,
 } from "./collection";
-import { clearSimilarImagesCache } from "./similar-images";
 import { pullFiles } from "./pull";
+import { clearSimilarImagesCache } from "./similar-images";
 import type { SimilarImageGroup } from "./similar-images-types";
 
 /**
@@ -44,7 +44,9 @@ export const removeSelectedSimilarImageGroups = async (
 
     // Get favorites collections to protect favorited files
     const collections = await savedNormalCollections();
-    const userID = (await import("ente-accounts/services/user")).ensureLocalUser().id;
+    const userID = (
+        await import("ente-accounts/services/user")
+    ).ensureLocalUser().id;
     const favoritesCollectionIDs = new Set(
         collections
             .filter((c) => c.type === "favorites" && c.owner.id === userID)
@@ -110,9 +112,7 @@ export const removeSelectedSimilarImageGroups = async (
     // Process adds and removes
     let np = 0;
     const ntotal =
-        filesToAdd.size +
-        (filesToTrash.length ? 1 : 0) +
-        /* sync */ 1;
+        filesToAdd.size + (filesToTrash.length ? 1 : 0) + /* sync */ 1;
     const tickProgress = () => onProgress((np++ / ntotal) * 100);
 
     // Process the adds
@@ -162,7 +162,9 @@ const similarImageGroupItemToRetain = async (
 
     // Get all collections to check for favorites
     const collections = await savedNormalCollections();
-    const userID = (await import("ente-accounts/services/user")).ensureLocalUser().id;
+    const userID = (
+        await import("ente-accounts/services/user")
+    ).ensureLocalUser().id;
     const favoritesCollectionIDs = new Set(
         collections
             .filter((c) => c.type === "favorites" && c.owner.id === userID)
@@ -212,9 +214,7 @@ const similarImageGroupItemToRetain = async (
 /**
  * Calculate the total size that would be freed by removing selected groups.
  */
-export const calculateFreedSpace = (
-    groups: SimilarImageGroup[],
-): number => {
+export const calculateFreedSpace = (groups: SimilarImageGroup[]): number => {
     let freedSpace = 0;
 
     for (const group of groups) {
@@ -231,7 +231,9 @@ export const calculateFreedSpace = (
 /**
  * Calculate the number of files that would be deleted.
  */
-export const calculateDeletedFileCount = (groups: SimilarImageGroup[]): number => {
+export const calculateDeletedFileCount = (
+    groups: SimilarImageGroup[],
+): number => {
     let count = 0;
 
     for (const group of groups) {

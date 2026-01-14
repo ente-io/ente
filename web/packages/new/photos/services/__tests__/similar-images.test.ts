@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
 import type { EnteFile } from "ente-media/file";
+import { describe, expect, it } from "vitest";
 import {
+    calculateDeletionStats,
     cosineDistance,
     cosineSimilarity,
-    formatFileSize,
-    calculateDeletionStats,
     filterGroupsByCategory,
+    formatFileSize,
     sortSimilarImageGroups,
 } from "../similar-images";
 
@@ -41,7 +41,9 @@ describe("similar-images", () => {
         it("should throw for vectors of different lengths", () => {
             const v1 = new Float32Array([1, 2, 3]);
             const v2 = new Float32Array([1, 2]);
-            expect(() => cosineDistance(v1, v2)).toThrow("Vector length mismatch");
+            expect(() => cosineDistance(v1, v2)).toThrow(
+                "Vector length mismatch",
+            );
         });
 
         it("should handle small similarity differences", () => {
@@ -202,7 +204,11 @@ describe("similar-images", () => {
     });
 
     describe("sortSimilarImageGroups", () => {
-        const createMockGroup = (size: number, count: number, distance: number) => ({
+        const createMockGroup = (
+            size: number,
+            count: number,
+            distance: number,
+        ) => ({
             id: `group-${distance}`,
             items: Array(count).fill({
                 file: { id: 1, info: { fileSize: size / count } } as EnteFile,
@@ -257,9 +263,18 @@ describe("similar-images", () => {
 
         it("should sort by distance descending by default", () => {
             // Create groups with unique distances and ensure they're different
-            const group1 = { ...createMockGroup(1000, 2, 0.05), furthestDistance: 0.05 };
-            const group2 = { ...createMockGroup(1000, 2, 0.01), furthestDistance: 0.01 };
-            const group3 = { ...createMockGroup(1000, 2, 0.03), furthestDistance: 0.03 };
+            const group1 = {
+                ...createMockGroup(1000, 2, 0.05),
+                furthestDistance: 0.05,
+            };
+            const group2 = {
+                ...createMockGroup(1000, 2, 0.01),
+                furthestDistance: 0.01,
+            };
+            const group3 = {
+                ...createMockGroup(1000, 2, 0.03),
+                furthestDistance: 0.03,
+            };
             const groups = [group1, group2, group3];
 
             const sorted = sortSimilarImageGroups(groups, "distance");
@@ -270,9 +285,18 @@ describe("similar-images", () => {
         });
 
         it("should sort by distance ascending when specified", () => {
-            const group1 = { ...createMockGroup(1000, 2, 0.05), furthestDistance: 0.05 };
-            const group2 = { ...createMockGroup(1000, 2, 0.01), furthestDistance: 0.01 };
-            const group3 = { ...createMockGroup(1000, 2, 0.03), furthestDistance: 0.03 };
+            const group1 = {
+                ...createMockGroup(1000, 2, 0.05),
+                furthestDistance: 0.05,
+            };
+            const group2 = {
+                ...createMockGroup(1000, 2, 0.01),
+                furthestDistance: 0.01,
+            };
+            const group3 = {
+                ...createMockGroup(1000, 2, 0.03),
+                furthestDistance: 0.03,
+            };
             const groups = [group1, group2, group3];
 
             const sorted = sortSimilarImageGroups(groups, "distance", "asc");
@@ -405,13 +429,15 @@ describe("Edge Cases", () => {
             const groups = [
                 {
                     id: "test",
-                    items: [{
-                        file: { id: 1 } as EnteFile,
-                        distance: 0,
-                        similarityScore: 100,
-                        collectionIDs: new Set([1]),
-                        collectionName: "Test",
-                    }],
+                    items: [
+                        {
+                            file: { id: 1 } as EnteFile,
+                            distance: 0,
+                            similarityScore: 100,
+                            collectionIDs: new Set([1]),
+                            collectionName: "Test",
+                        },
+                    ],
                     furthestDistance: 0.05,
                     totalSize: 1000,
                     isSelected: true,
@@ -442,7 +468,10 @@ describe("Edge Cases", () => {
             const sorted = sortSimilarImageGroups(groups, "size");
             expect(sorted.length).toBe(2);
             // Both have same size, order may vary but both present
-            expect(sorted.map((g) => g.id).sort()).toEqual(["group1", "group2"]);
+            expect(sorted.map((g) => g.id).sort()).toEqual([
+                "group1",
+                "group2",
+            ]);
         });
     });
 
@@ -481,13 +510,15 @@ describe("Edge Cases", () => {
             const groups = [
                 {
                     id: "test",
-                    items: [{
-                        file: { id: 1 } as EnteFile,
-                        distance: 0,
-                        similarityScore: 100,
-                        collectionIDs: new Set([1]),
-                        collectionName: "Test",
-                    }],
+                    items: [
+                        {
+                            file: { id: 1 } as EnteFile,
+                            distance: 0,
+                            similarityScore: 100,
+                            collectionIDs: new Set([1]),
+                            collectionName: "Test",
+                        },
+                    ],
                     furthestDistance: 0.01,
                     totalSize: 1000,
                     isSelected: true,
@@ -503,14 +534,20 @@ describe("Edge Cases", () => {
                     id: "test1",
                     items: [
                         {
-                            file: { id: 1, info: { fileSize: 1000 } } as EnteFile,
+                            file: {
+                                id: 1,
+                                info: { fileSize: 1000 },
+                            } as EnteFile,
                             distance: 0,
                             similarityScore: 100,
                             collectionIDs: new Set([1]),
                             collectionName: "Test",
                         },
                         {
-                            file: { id: 2, info: { fileSize: 1000 } } as EnteFile,
+                            file: {
+                                id: 2,
+                                info: { fileSize: 1000 },
+                            } as EnteFile,
                             distance: 0.01,
                             similarityScore: 99,
                             collectionIDs: new Set([1]),

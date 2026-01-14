@@ -1,9 +1,12 @@
 import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
+import type {
+    CachedHNSWIndexMetadata,
+    CachedSimilarImages,
+} from "../similar-images-types";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
-import type { CachedSimilarImages, CachedHNSWIndexMetadata } from "../similar-images-types";
 
 /**
  * ML DB schema.
@@ -491,7 +494,9 @@ export const invalidateSimilarImagesCacheForFiles = async (
     _fileIDs: number[],
 ): Promise<void> => {
     // For now, we clear the entire cache when files change.
-    // In the future, we could do incremental updates.
+    // In the future, we could do incremental updates using _fileIDs.
+    void _fileIDs; // Mark as intentionally unused
+
     await clearSimilarImagesCache();
 };
 
@@ -521,7 +526,7 @@ export const saveHNSWIndexMetadata = async (
  * @returns The cached metadata, or undefined if not found.
  */
 export const loadHNSWIndexMetadata = async (
-    id: string = "clip-hnsw-index",
+    id = "clip-hnsw-index",
 ): Promise<CachedHNSWIndexMetadata | undefined> => {
     const db = await mlDB();
     return db.get("hnsw-index-metadata", id);
@@ -549,5 +554,5 @@ export const clearHNSWIndexMetadata = async (): Promise<void> => {
  */
 export const generateFileIDHash = (fileIDs: number[]): string => {
     const sorted = [...fileIDs].sort((a, b) => a - b);
-    return hashString(sorted.join(','));
+    return hashString(sorted.join(","));
 };

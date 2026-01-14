@@ -1,5 +1,11 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Stack, styled, Typography, type SxProps, type Theme } from "@mui/material";
+import {
+    Stack,
+    styled,
+    Typography,
+    type SxProps,
+    type Theme,
+} from "@mui/material";
 import { CenteredFill, Overlay } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import log from "ente-base/log";
