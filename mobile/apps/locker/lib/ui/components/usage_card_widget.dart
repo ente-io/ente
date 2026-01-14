@@ -107,16 +107,14 @@ class _UsageContent extends StatelessWidget {
             100;
     final userFileCount = userDetails?.fileCount ?? 0;
 
-    // TODO: Aman enable family breakdown when API provides family file count data.
-    const showFamilyBreakup = false;
-
-    final familyTotalFileCount =
-        showFamilyBreakup ? _getFamilyTotalFileCount() : userFileCount;
+    final showFamilyBreakup = _shouldShowFamilyBreakup();
 
     final userProgress =
         isLoading ? 0.0 : (userFileCount / maxFileCount).clamp(0.0, 1.0);
-    final familyProgress =
-        isLoading ? 0.0 : (familyTotalFileCount / maxFileCount).clamp(0.0, 1.0);
+    final familyProgress = showFamilyBreakup && !isLoading
+        ? (userDetails!.lockerFamilyUsage!.familyFileCount / maxFileCount)
+            .clamp(0.0, 1.0)
+        : 0.0;
 
     final formattedUsed = NumberFormat().format(userFileCount);
     final formattedMax = NumberFormat().format(maxFileCount);
@@ -252,10 +250,6 @@ class _UsageContent extends StatelessWidget {
   bool _shouldShowFamilyBreakup() {
     if (userDetails == null) return false;
     if (!userDetails!.isPartOfFamily()) return false;
-    return userDetails!.familyMemberStorageLimit() == null;
-  }
-
-  int _getFamilyTotalFileCount() {
-    return userDetails?.fileCount ?? 0;
+    return userDetails!.lockerFamilyUsage != null;
   }
 }

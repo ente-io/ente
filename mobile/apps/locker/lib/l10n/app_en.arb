@@ -975,5 +975,9 @@
         "example": "3"
       }
     }
-  }
+  },
+  "itemsStored": "Items stored",
+  "of_": "of",
+  "usageYou": "You",
+  "usageFamily": "Family"
 }
