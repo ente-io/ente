@@ -282,30 +282,6 @@ class _AdvancedSharingBottomSheetState
     );
   }
 
-  Future<void> _updateUrlSettings(
-    BuildContext context,
-    Map<String, dynamic> prop, {
-    bool showProgressDialog = true,
-  }) async {
-    final dialog = showProgressDialog
-        ? createProgressDialog(context, context.l10n.pleaseWait)
-        : null;
-    await dialog?.show();
-    try {
-      await CollectionApiClient.instance
-          .updateShareUrl(widget.collection!, prop);
-      await dialog?.hide();
-      showShortToast(context, "Collection updated");
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
-      rethrow;
-    }
-  }
-
   Future<void> _createPublicLink() async {
     final success = await CollectionActions.enableUrl(
       context,

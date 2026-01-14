@@ -15,4 +15,4 @@ dependencies:
   meta: ^1.11.0
 
 dev_dependencies:
-  lints: ^3.0.0
+  flutter_lints: ^5.0.0
