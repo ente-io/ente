@@ -64,7 +64,7 @@ jobs:
                   echo "$RESULT"
 
                   # Extract values from JSON
-                  PACKAGES=$(echo "$RESULT" | jq -r '.packages')
+                  PACKAGES=$(echo "$RESULT" | jq -c '.packages')
                   LINT_PHOTOS=$(echo "$RESULT" | jq -r '.lint_photos')
                   LINT_AUTH=$(echo "$RESULT" | jq -r '.lint_auth')
                   LINT_LOCKER=$(echo "$RESULT" | jq -r '.lint_locker')
