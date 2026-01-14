@@ -5,10 +5,9 @@ import 'package:ente_accounts/pages/email_entry_page.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
-import 'package:ente_ui/components/buttons/button_widget.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
 import "package:ente_ui/pages/developer_settings_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import "package:flutter_svg/flutter_svg.dart";
@@ -126,28 +125,35 @@ class _OnboardingPageState extends State<OnboardingPage> {
             _developerModeTapCount++;
             if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
               _developerModeTapCount = 0;
-              final result = await showChoiceDialog(
+              await showAlertBottomSheet(
                 context,
                 title: l10n.developerSettings,
-                firstButtonLabel: l10n.yes,
-                body: l10n.developerSettingsWarning,
+                message: l10n.developerSettingsWarning,
+                assetPath: 'assets/warning-grey.png',
                 isDismissible: false,
-              );
-              if (result?.action == ButtonAction.first) {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return DeveloperSettingsPage(
-                        getCurrentEndpoint: () =>
-                            Configuration.instance.getHttpEndpoint(),
-                        setEndpoint: (url) async =>
-                            Configuration.instance.setHttpEndpoint(url),
+                showCloseButton: false,
+                buttons: [
+                  GradientButton(
+                    text: l10n.yes,
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return DeveloperSettingsPage(
+                              getCurrentEndpoint: () =>
+                                  Configuration.instance.getHttpEndpoint(),
+                              setEndpoint: (url) async =>
+                                  Configuration.instance.setHttpEndpoint(url),
+                            );
+                          },
+                        ),
                       );
+                      setState(() {});
                     },
                   ),
-                );
-                setState(() {});
-              }
+                ],
+              );
             }
           },
           child: CustomScrollView(
