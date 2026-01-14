@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ente_logging/logging.dart';
+import "package:logging/logging.dart";
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
