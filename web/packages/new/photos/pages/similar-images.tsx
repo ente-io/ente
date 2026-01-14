@@ -3,8 +3,10 @@ import DoneIcon from "@mui/icons-material/Done";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import SortIcon from "@mui/icons-material/Sort";
 import {
+    Backdrop,
     Box,
     Checkbox,
+    CircularProgress,
     Divider,
     IconButton,
     LinearProgress,
@@ -650,6 +652,7 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
 }) => {
 
     const areAllSelected = similarImageGroups.length > 0 && similarImageGroups.every(g => g.isSelected);
+    const isDeletionInProgress = removeProgress !== undefined;
 
     return (
         <Stack sx={{ flex: 1 }}>
@@ -677,6 +680,7 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                 <FocusVisibleButton
                     variant="outlined"
                     onClick={onToggleSelectAll}
+                    disabled={isDeletionInProgress}
                     sx={{
                         flex: 1,
                         borderColor: "divider",
@@ -696,7 +700,7 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                 </FocusVisibleButton>
                 <Box sx={{ flex: 1 }}>
                     <RemoveButton
-                        disabled={deletableCount === 0 || removeProgress !== undefined}
+                        disabled={deletableCount === 0 || isDeletionInProgress}
                         deletableCount={deletableCount}
                         deletableSize={deletableSize}
                         progress={removeProgress}
@@ -704,6 +708,42 @@ const SimilarImages: React.FC<SimilarImagesProps> = ({
                     />
                 </Box>
             </Stack>
+
+            {/* Deletion progress overlay */}
+            <Backdrop
+                open={isDeletionInProgress}
+                sx={{
+                    color: "#fff",
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                    flexDirection: "column",
+                    gap: 2,
+                }}
+            >
+                <CircularProgress color="inherit" size={60} />
+                <Typography variant="h6">Deleting similar images...</Typography>
+                {removeProgress !== undefined && (
+                    <Box sx={{ width: "300px" }}>
+                        <LinearProgress
+                            variant="determinate"
+                            value={removeProgress}
+                            sx={{
+                                height: 8,
+                                borderRadius: 4,
+                                bgcolor: "rgba(255, 255, 255, 0.2)",
+                                "& .MuiLinearProgress-bar": {
+                                    bgcolor: "white",
+                                },
+                            }}
+                        />
+                        <Typography
+                            variant="body2"
+                            sx={{ textAlign: "center", mt: 1 }}
+                        >
+                            {Math.round(removeProgress)}%
+                        </Typography>
+                    </Box>
+                )}
+            </Backdrop>
         </Stack >
     );
 };
