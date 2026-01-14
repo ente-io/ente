@@ -6,13 +6,12 @@ import (
 )
 
 type UserDetailsResponse struct {
-	Email        string                     `json:"email,omitempty"`
-	Usage        int64                      `json:"usage"`
-	Subscription ente.Subscription          `json:"subscription"`
-	FamilyData   *ente.FamilyMemberResponse `json:"familyData,omitempty"`
-	FileCount    *int64                     `json:"fileCount,omitempty"`
-	// LockerFamilyUsage contains locker-specific family usage data (only for Locker app)
-	LockerFamilyUsage *LockerFamilyUsage `json:"lockerFamilyUsage,omitempty"`
+	Email             string                     `json:"email,omitempty"`
+	Usage             int64                      `json:"usage"`
+	Subscription      ente.Subscription          `json:"subscription"`
+	FamilyData        *ente.FamilyMemberResponse `json:"familyData,omitempty"`
+	FileCount         *int64                     `json:"fileCount,omitempty"`
+	LockerFamilyUsage *LockerFamilyUsage         `json:"lockerFamilyUsage,omitempty"`
 	// Deprecated field. Client doesn't consume this field. We can completely remove it after Aug 2023
 	SharedCollectionsCount *int64                           `json:"sharedCollectionsCount,omitempty"`
 	StorageBonus           int64                            `json:"storageBonus"`
@@ -22,6 +21,5 @@ type UserDetailsResponse struct {
 
 // LockerFamilyUsage contains locker-specific usage data for family members
 type LockerFamilyUsage struct {
-	// FamilyFileCount is the total file count for all family members
 	FamilyFileCount int64 `json:"familyFileCount"`
 }
