@@ -148,6 +148,10 @@ jobs:
               run: cargo test
 
             # Lint all three apps to ensure package changes don't break them
+            - name: Generate Rust bindings (photos app)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/apps/photos
+
             - name: Lint app - photos
               run: flutter pub get && flutter analyze --no-fatal-infos
               working-directory: mobile/apps/photos
