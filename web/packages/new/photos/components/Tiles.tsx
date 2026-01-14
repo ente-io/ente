@@ -60,6 +60,9 @@ interface ItemCardProps {
  * covering it with an opaque overlay.
  */
 export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
+    TileComponent,
+    coverFile,
+    coverFaceID,
     isScrolling,
     onClick,
     sx,
