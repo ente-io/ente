@@ -66,7 +66,10 @@ class _ClusterPageState extends State<ClusterPage> {
   void initState() {
     super.initState();
     ClusterFeedbackService.setLastViewedClusterID(widget.clusterID);
-    files = widget.searchResult;
+    files = List<EnteFile>.from(widget.searchResult)
+      ..sort(
+        (a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0),
+      );
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromEverywhere ||
@@ -142,7 +145,7 @@ class _ClusterPageState extends State<ClusterPage> {
       tagPrefix: widget.tagPrefix + widget.tagPrefix,
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
-      initialFiles: widget.searchResult,
+      initialFiles: files,
       header: widget.showNamingBanner && files.isNotEmpty
           ? PeopleBanner(
               type: PeopleBannerType.addName,
