@@ -15,7 +15,9 @@ import {
 } from "@mui/material";
 import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
@@ -179,8 +181,11 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         return a.name.localeCompare(b.name);
                     case "creation-time-asc":
                         return (
-                            (a.latestFile?.metadata.creationTime ?? 0) -
-                            (b.latestFile?.metadata.creationTime ?? 0)
+                            -1 *
+                            compareCollectionsLatestFile(
+                                b.latestFile,
+                                a.latestFile,
+                            )
                         );
                     case "updation-time-desc":
                         return (b.updationTime ?? 0) - (a.updationTime ?? 0);
@@ -479,4 +484,22 @@ const useCollectionSelectorSortByLocalState = (
     };
 
     return [value, setter] as const;
+};
+
+const compareCollectionsLatestFile = (
+    first: EnteFile | undefined,
+    second: EnteFile | undefined,
+) => {
+    if (!first) {
+        return 1;
+    } else if (!second) {
+        return -1;
+    } else {
+        const sortedFiles = sortFiles([first, second]);
+        if (sortedFiles[0]?.id !== first.id) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
 };
