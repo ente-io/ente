@@ -20,7 +20,6 @@ import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:logging/logging.dart";
 
-
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({super.key});
 

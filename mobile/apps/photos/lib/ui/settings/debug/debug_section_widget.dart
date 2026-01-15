@@ -1,4 +1,5 @@
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/service_locator.dart";
@@ -13,7 +14,6 @@ import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/debug/social_debug_screen.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class DebugSectionWidget extends StatefulWidget {
   const DebugSectionWidget({super.key});

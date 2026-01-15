@@ -17,7 +17,6 @@ import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
 
-
 /// A bottom sheet widget for advanced sharing options.
 ///
 /// This widget provides advanced configuration options for:

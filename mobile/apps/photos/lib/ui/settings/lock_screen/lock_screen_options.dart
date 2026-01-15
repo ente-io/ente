@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
@@ -15,7 +16,6 @@ import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
 import "package:photos/utils/lock_screen_settings.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});

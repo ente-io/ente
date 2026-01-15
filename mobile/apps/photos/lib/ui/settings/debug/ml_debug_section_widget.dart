@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math" show Random;
 import "dart:typed_data" show Float32List;
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
@@ -13,7 +14,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";

@@ -1,4 +1,5 @@
 import "package:collection/collection.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -18,8 +19,6 @@ import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/date_time.dart";
 
 // OtherContactPage is used to start recovery process for other user's account
 // Based on the state of the contact & recovery session, it will show
@@ -77,7 +76,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
           microseconds: recoverySession!.waitTill,
         ),
       );
-      waitTill = getFormattedTime(context, dateTime);
+      waitTill = getFormattedTime(dateTime, context: context);
     }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);

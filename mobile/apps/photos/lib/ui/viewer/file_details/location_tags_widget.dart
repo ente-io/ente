@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:ui";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_map/flutter_map.dart";
@@ -22,7 +23,6 @@ import "package:photos/ui/map/tile/layers.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class LocationTagsWidget extends StatefulWidget {
   final EnteFile file;

@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
@@ -14,7 +15,6 @@ import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery_group_type_picker_page.dart";
 import "package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class GallerySettingsScreen extends StatefulWidget {
   final bool fromGalleryLayoutSettingsCTA;

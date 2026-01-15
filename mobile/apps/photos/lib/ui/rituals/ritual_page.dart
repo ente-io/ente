@@ -3,6 +3,7 @@ import "dart:math" as math;
 import "dart:ui" as ui;
 
 import "package:ente_icons/ente_icons.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -25,7 +26,6 @@ import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_share_card.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 

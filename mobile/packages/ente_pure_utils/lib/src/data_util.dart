@@ -67,14 +67,18 @@ num roundGBsToTBs(sizeInGBs) {
   }
 }
 
-/// Computes the MD5 hash of a file.
+/// Computes the MD5 hash of a file or a portion of it.
+///
+/// [filePath] - Path to the file
+/// [start] - Optional starting byte position for partial hash computation
+/// [end] - Optional ending byte position for partial hash computation
 ///
 /// Returns base64-encoded MD5 hash suitable for HTTP Content-MD5 header.
-Future<String> computeMd5(String filePath) async {
+Future<String> computeMd5(String filePath, {int? start, int? end}) async {
   final file = File(filePath);
   final output = AccumulatorSink<Digest>();
   final input = md5.startChunkedConversion(output);
-  await file.openRead().forEach(input.add);
+  await file.openRead(start, end).forEach(input.add);
   input.close();
   return base64Encode(output.events.single.bytes);
 }

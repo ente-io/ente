@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math" as math;
 
 import "package:ente_icons/ente_icons.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
@@ -14,7 +15,6 @@ import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/rituals/start_new_ritual_card.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class RitualsBanner extends StatelessWidget {
   const RitualsBanner({super.key});

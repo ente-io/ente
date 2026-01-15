@@ -1,7 +1,6 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:photos/core/constants.dart';
-import "package:photos/utils/standalone/date_time.dart";
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test("parseDateTimeFromFile", () {
@@ -50,14 +49,5 @@ void main() {
         debugPrint("Parsed $val as ${parsedValue?.toIso8601String()}");
       }
     }
-  });
-
-  test("verify constants", () {
-    final date = DateTime.fromMicrosecondsSinceEpoch(jan011981Time).toUtc();
-    expect(
-      date.year == 1981 && date.month == 1,
-      true,
-      reason: "constant mismatch : ${date.toIso8601String()}",
-    );
   });
 }
