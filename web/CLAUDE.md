@@ -8,6 +8,7 @@ When making commits, follow these rules:
 - Subject line under 72 chars as a single sentence (no body text, no bullets, no lists)
 - NO emojis
 - NO promotional text or links
+- NO Co-Authored-By lines
 - ONLY run pre-commit checks (format, lint, typecheck, build) when explicitly creating a commit
 
 Example:

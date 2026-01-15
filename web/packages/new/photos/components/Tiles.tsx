@@ -258,3 +258,12 @@ export const TileBottomTextOverlay = styled(Overlay)`
     background: linear-gradient(transparent 30%, 80%, rgba(0 0 0 / 0.7));
     color: white;
 `;
+
+/**
+ * An {@link Overlay} for use with large file tiles, providing a container
+ * for selection indicators and file size labels.
+ */
+export const LargeFileTileOverlay = styled(Overlay)`
+    display: flex;
+    pointer-events: none;
+`;

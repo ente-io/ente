@@ -31,7 +31,7 @@ class SettingsWidgets extends StatelessWidget {
         style: getEnteTextTheme(context).bodyMuted,
         textAlign: TextAlign.left,
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: 12),
     ]);
 
     if (hasLoggedIn) {
@@ -69,13 +69,10 @@ class SettingsWidgets extends StatelessWidget {
       const AboutSectionWidget(),
     ]);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: contents,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: contents,
     );
   }
 }

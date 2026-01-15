@@ -18,15 +18,16 @@ dependencies:
     path: ../base
   ente_configuration:
     path: ../configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../ente_crypto_api
   ente_events:
     path: ../events
   ente_lock_screen:
     path: ../lock_screen
   ente_network:
     path: ../network
+  ente_pure_utils:
+    path: ../ente_pure_utils
   ente_strings:
     path: ../strings
   ente_ui:

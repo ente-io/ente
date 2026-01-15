@@ -418,7 +418,7 @@ extension CustomColorScheme on ColorScheme {
   Color get primaryColor => brightness == Brightness.light
       ? const Color(0xFF9610D6)
       : const Color(0xFF9610D6);
-      
+
   Color get onBoardingBodyColor => brightness == Brightness.light
       ? const Color.fromRGBO(0, 0, 0, 0.38)
       : const Color.fromRGBO(255, 255, 255, 0.38);

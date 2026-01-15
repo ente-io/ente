@@ -64,7 +64,7 @@ import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     createAlbum,
-    isHiddenCollection,
+    savedAllCollections,
     savedNormalCollections,
 } from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
@@ -541,13 +541,17 @@ export const Upload: React.FC<UploadProps> = ({
             if (isPendingDesktopUpload.current) {
                 isPendingDesktopUpload.current = false;
                 if (pendingDesktopUploadCollectionName.current) {
+                    // Include hidden collections so watch folder syncs add
+                    // files to existing hidden albums instead of creating new
+                    // visible ones
                     uploadFilesToNewCollections(
                         "root",
                         pendingDesktopUploadCollectionName.current,
+                        true,
                     );
                     pendingDesktopUploadCollectionName.current = undefined;
                 } else {
-                    uploadFilesToNewCollections("parent");
+                    uploadFilesToNewCollections("parent", undefined, true);
                 }
                 return;
             }
@@ -631,6 +635,7 @@ export const Upload: React.FC<UploadProps> = ({
     const uploadFilesToNewCollections = async (
         mapping: CollectionMapping,
         collectionName?: string,
+        includeHiddenCollections?: boolean,
     ) => {
         preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
@@ -654,7 +659,12 @@ export const Upload: React.FC<UploadProps> = ({
         const collections: Collection[] = [];
         try {
             await onRemoteFilesPull!();
-            const existingCollections = await savedNormalCollections();
+            // Include hidden collections when syncing from watch folders so
+            // that new files go to the existing hidden album instead of
+            // creating a new visible album with the same name.
+            const existingCollections = includeHiddenCollections
+                ? await savedAllCollections()
+                : await savedNormalCollections();
             let index = 0;
             for (const [
                 collectionName,
@@ -1053,8 +1063,6 @@ const matchExistingOrCreateAlbum = async (
             (collection.type == "album" ||
                 collection.type == "folder" ||
                 collection.type == "uncategorized") &&
-            // Not hidden
-            !isHiddenCollection(collection) &&
             // Not a quicklink
             collection.magicMetadata?.data.subType !=
                 CollectionSubType.quicklink &&

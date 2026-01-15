@@ -124,7 +124,7 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                     <TitleSection>
                         <Title>{t("give_it_a_like")}</Title>
                         {enableJoin && (
-                            <Subtitle>{t("public_reaction_subtitle")}</Subtitle>
+                            <Subtitle>{t("public_like_subtitle")}</Subtitle>
                         )}
                     </TitleSection>
 

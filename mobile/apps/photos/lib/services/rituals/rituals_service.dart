@@ -31,6 +31,7 @@ class RitualsService {
   Timer? _debounce;
   int _refreshGeneration = 0;
   StreamSubscription<FilesUpdatedEvent>? _filesUpdatedSubscription;
+  final Set<String> _notificationRescheduleInFlight = <String>{};
 
   static const _ritualsPrefsKey = "activity_rituals_v1";
 
@@ -60,6 +61,7 @@ class RitualsService {
         unawaited(_handleCollectionRenamed(event.collectionID!));
         return;
       }
+      unawaited(_handleRitualNotificationsForUpdatedFiles(event));
       _scheduleRefresh();
     });
     _scheduleRefresh(initial: true, scheduleAllRituals: true);
@@ -490,6 +492,13 @@ class RitualsService {
     );
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final todayIndex = today.weekday % 7;
+    final shouldCheckToday = ritual.daysOfWeek.length == 7 &&
+        ritual.daysOfWeek[todayIndex];
+    final albumId = ritual.albumId;
+    final skipToday = shouldCheckToday && albumId != null && albumId > 0
+        ? await _hasAddedPhotoToday(albumId)
+        : false;
     final baseId = ritual.id.hashCode & 0x7fffffff;
     final l10n = await LanguageService.locals;
     int scheduled = 0;
@@ -500,6 +509,9 @@ class RitualsService {
       final targetDate = today.add(Duration(days: offset));
       final dayIndex = targetDate.weekday % 7; // Sunday -> 0
       if (!ritual.daysOfWeek[dayIndex]) continue;
+      if (offset == 0 && skipToday) {
+        continue;
+      }
       final icon = ritual.icon.isEmpty ? "📸" : ritual.icon;
       final title =
           ritual.title.trim().isEmpty ? icon : "$icon ${ritual.title.trim()}";
@@ -534,6 +546,84 @@ class RitualsService {
     }
   }
 
+  Future<void> _handleRitualNotificationsForUpdatedFiles(
+    FilesUpdatedEvent event,
+  ) async {
+    if (event.type != EventType.addedOrUpdated) return;
+    final updatedCollectionIds = event.updatedFiles
+        .map((file) => file.collectionID)
+        .whereType<int>()
+        .where((id) => id > 0)
+        .toSet();
+    if (updatedCollectionIds.isEmpty) return;
+    final rituals = stateNotifier.value.rituals;
+    if (rituals.isEmpty) return;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final todayIndex = today.weekday % 7;
+
+    for (final ritual in rituals) {
+      final albumId = ritual.albumId;
+      if (albumId == null || albumId <= 0) continue;
+      if (!updatedCollectionIds.contains(albumId)) continue;
+      if (!ritual.remindersEnabled) continue;
+      if (ritual.daysOfWeek.length != 7 ||
+          !ritual.daysOfWeek[todayIndex]) {
+        continue;
+      }
+      if (_notificationRescheduleInFlight.contains(ritual.id)) {
+        continue;
+      }
+      _notificationRescheduleInFlight.add(ritual.id);
+      try {
+        final hasAddedToday = await _hasAddedPhotoToday(albumId);
+        if (hasAddedToday) {
+          await _scheduleRitualNotifications(ritual);
+        }
+      } finally {
+        _notificationRescheduleInFlight.remove(ritual.id);
+      }
+    }
+  }
+
+  Future<bool> _hasAddedPhotoToday(int albumId) async {
+    final userId = Configuration.instance.getUserID();
+    if (userId == null) return false;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final start = today.microsecondsSinceEpoch;
+    final end = tomorrow.microsecondsSinceEpoch;
+    try {
+      final lowerBound = max(start - 1, 0);
+      final files = await FilesDB.instance.getNewFilesInCollection(
+        albumId,
+        lowerBound,
+      );
+      for (final file in files) {
+        final addedTime = file.addedTime;
+        if (addedTime == null || addedTime < start || addedTime >= end) {
+          continue;
+        }
+        final ownerMatches =
+            file.ownerID == null ? true : file.ownerID == userId;
+        if (!ownerMatches) continue;
+        final eligible =
+            (file.uploadedFileID != null && file.uploadedFileID != -1) ||
+                (file.localID != null && file.localID!.isNotEmpty);
+        if (!eligible) continue;
+        return true;
+      }
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to check ritual album additions for $albumId",
+        e,
+        s,
+      );
+    }
+    return false;
+  }
+
   @visibleForTesting
   int currentScheduledStreakFromDayKeys(
     Set<int> dayKeys,
@@ -541,13 +631,13 @@ class RitualsService {
     required DateTime todayMidnight,
   }) {
     if (dayKeys.isEmpty) return 0;
-    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (daysOfWeek.length != 7) return 0;
 
     final start = _streakStartDateFromDayKeys(dayKeys, todayMidnight);
     int current = 0;
     for (var day = todayMidnight; !day.isBefore(start); day = _prevDay(day)) {
       final dayIndex = day.weekday % 7; // Sunday -> 0
-      if (!daysOfWeek[dayIndex]) continue;
+      if (!_isScheduledDay(daysOfWeek, dayIndex)) continue;
 
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
@@ -568,14 +658,14 @@ class RitualsService {
     required DateTime todayMidnight,
   }) {
     if (dayKeys.isEmpty) return 0;
-    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (daysOfWeek.length != 7) return 0;
 
     final start = _streakStartDateFromDayKeys(dayKeys, todayMidnight);
     int longest = 0;
     int rolling = 0;
     for (var day = start; !day.isAfter(todayMidnight); day = _nextDay(day)) {
       final dayIndex = day.weekday % 7; // Sunday -> 0
-      if (!daysOfWeek[dayIndex]) continue;
+      if (!_isScheduledDay(daysOfWeek, dayIndex)) continue;
 
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
@@ -595,7 +685,7 @@ class RitualsService {
     required DateTime endDayInclusive,
   }) {
     if (dayKeys.isEmpty) return 0;
-    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (daysOfWeek.length != 7) return 0;
     if (endDayInclusive.isBefore(startDay)) return 0;
 
     int longest = 0;
@@ -604,7 +694,7 @@ class RitualsService {
         !day.isAfter(endDayInclusive);
         day = _nextDay(day)) {
       final dayIndex = day.weekday % 7; // Sunday -> 0
-      if (!daysOfWeek[dayIndex]) continue;
+      if (!_isScheduledDay(daysOfWeek, dayIndex)) continue;
 
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
@@ -633,6 +723,12 @@ class RitualsService {
       if (enabled) return true;
     }
     return false;
+  }
+
+  bool _isScheduledDay(List<bool> daysOfWeek, int dayIndex) {
+    if (daysOfWeek.length != 7) return false;
+    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return true;
+    return daysOfWeek[dayIndex];
   }
 
   DateTime _nextDay(DateTime day) => DateTime(day.year, day.month, day.day + 1);

@@ -393,15 +393,13 @@ List<DateTime> _lastScheduledDaysInclusive({
   required int count,
 }) {
   final daysOfWeek = ritual.daysOfWeek;
-  if (daysOfWeek.length != 7 || !daysOfWeek.any((enabled) => enabled)) {
-    return const [];
-  }
+  if (daysOfWeek.length != 7) return const [];
 
   final result = <DateTime>[];
   for (int offset = 0; result.length < count && offset < 366; offset++) {
     final day = todayMidnight.subtract(Duration(days: offset));
     final weekdayIndex = day.weekday % 7; // Sunday-first
-    if (!daysOfWeek[weekdayIndex]) continue;
+    if (!_isScheduledDay(daysOfWeek, weekdayIndex)) continue;
     result.add(day);
   }
   return result.reversed.toList(growable: false);
@@ -413,15 +411,13 @@ List<DateTime> _nextScheduledDaysInclusive({
   required int count,
 }) {
   final daysOfWeek = ritual.daysOfWeek;
-  if (daysOfWeek.length != 7 || !daysOfWeek.any((enabled) => enabled)) {
-    return const [];
-  }
+  if (daysOfWeek.length != 7) return const [];
 
   final result = <DateTime>[];
   for (int offset = 0; result.length < count && offset < 366; offset++) {
     final day = todayMidnight.add(Duration(days: offset));
     final weekdayIndex = day.weekday % 7; // Sunday-first
-    if (!daysOfWeek[weekdayIndex]) continue;
+    if (!_isScheduledDay(daysOfWeek, weekdayIndex)) continue;
     result.add(day);
   }
   return result.toList(growable: false);
@@ -508,19 +504,31 @@ int _scheduledSlotsSinceCreation({
   if (todayMidnight.isBefore(createdDayMidnight)) return 0;
 
   final daysOfWeek = ritual.daysOfWeek;
-  if (daysOfWeek.length != 7 || !daysOfWeek.any((enabled) => enabled)) {
-    return 0;
-  }
+  if (daysOfWeek.length != 7) return 0;
 
   int slots = 0;
   for (int offset = 1; slots < maxSlots && offset < 366; offset++) {
     final day = todayMidnight.subtract(Duration(days: offset));
     if (day.isBefore(createdDayMidnight)) break;
     final weekdayIndex = day.weekday % 7; // Sunday-first
-    if (!daysOfWeek[weekdayIndex]) continue;
+    if (!_isScheduledDay(daysOfWeek, weekdayIndex)) continue;
     slots += 1;
   }
   return slots;
+}
+
+bool _hasAnyEnabledRitualDays(List<bool> daysOfWeek) {
+  if (daysOfWeek.length != 7) return false;
+  for (final enabled in daysOfWeek) {
+    if (enabled) return true;
+  }
+  return false;
+}
+
+bool _isScheduledDay(List<bool> daysOfWeek, int dayIndex) {
+  if (daysOfWeek.length != 7) return false;
+  if (!_hasAnyEnabledRitualDays(daysOfWeek)) return true;
+  return daysOfWeek[dayIndex];
 }
 
 const _tightTextHeightBehavior = TextHeightBehavior(

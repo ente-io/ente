@@ -2033,14 +2033,6 @@
   "hoorayyyy": "Viscaaaa!",
   "nothingToTidyUpHere": "Res a endreçar aquí",
   "deletingDash": "Esborrant - ",
-  "cLTitle1": "Presentant els Rituals",
-  "cLDesc1": "Planejant propòsits per al 2026? Amb Rituals, pots configurar un recordatori a Ente Photos i fer un seguiment del teu progrés fent fotos. Fes-lo servir per a entrenaments, hàbits alimentaris, moments diaris amb els éssers estimats... qualsevol cosa que vulguis convertir en un hàbit.",
-  "cLTitle2": "Enllaços públics, ara per a tothom",
-  "cLDesc2": "Tots els usuaris d'Ente amb el pla gratuït ara poden crear i compartir enllaços públics a fotos i àlbums. Per evitar abusos, els enllaços tindran límits pel que fa al nombre de persones que els podran veure.",
-  "cLTitle3": "Etiquetar manualment les persones",
-  "cLDesc3": "Ara pots etiquetar persones fins i tot quan la nostra IA del dispositiu no detecta cap cara. Pràctic per a mascotes, cares parcialment visibles o moments en què algú no surt a la foto però que hauria d'estar-hi inclòs.",
-  "cLTitle4": "I més",
-  "cLDesc4": "Ara pots fixar àlbums compartits. Els enllaços dels àlbums són visibles per als col·laboradors i els espectadors per facilitar encara més la compartició. Hem corregit alguns errors de lliscar amb el dit a iOS i hem actualitzat la vista de fotos, incloent-hi una nova icona de preferits (que fa espai per a les funcions futures).",
   "closeBy": "A prop",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

@@ -181,9 +181,9 @@ class _PersonalNotePageState
             selectedCollectionIds: selectedCollectionIds,
             onToggleCollection: toggleCollectionSelection,
             onCollectionsUpdated: updateAvailableCollections,
-            titleWidget:
-                showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+            title: showCollectionSelectionTitle ? context.l10n.collections : '',
           ),
+          const SizedBox(height: 80),
         ],
       ),
     );

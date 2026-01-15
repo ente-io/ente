@@ -1,14 +1,11 @@
-import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
-import "package:locker/models/ui_section_type.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
@@ -17,12 +14,11 @@ import "package:logging/logging.dart";
 
 class CollectionSelectionOverlayBar extends StatefulWidget {
   final SelectedCollections selectedCollections;
-  final List<Collection> collection;
-  final UISectionType viewType;
+  final List<Collection> collections;
+
   const CollectionSelectionOverlayBar({
     required this.selectedCollections,
-    required this.collection,
-    this.viewType = UISectionType.homeCollections,
+    required this.collections,
     super.key,
   });
 
@@ -34,6 +30,27 @@ class CollectionSelectionOverlayBar extends StatefulWidget {
 class _CollectionSelectionOverlayBarState
     extends State<CollectionSelectionOverlayBar> {
   static final _logger = Logger('CollectionSelectionOverlayBar');
+
+  int get _currentUserID => Configuration.instance.getUserID()!;
+
+  List<Collection> _getOwnedCollections(List<Collection> collections) {
+    final ownedCollections =
+        collections.where((c) => c.isOwner(_currentUserID)).toList();
+
+    final sharedCount = collections.length - ownedCollections.length;
+    if (sharedCount > 0 && mounted) {
+      showToast(
+        context,
+        "Skipped $sharedCount shared collection${sharedCount > 1 ? 's' : ''} - you can only leave shared collections",
+      );
+    }
+
+    return ownedCollections;
+  }
+
+  List<Collection> _getSharedIncomingCollections(List<Collection> collections) {
+    return collections.where((c) => !c.isOwner(_currentUserID)).toList();
+  }
 
   @override
   void initState() {
@@ -48,9 +65,8 @@ class _CollectionSelectionOverlayBarState
   }
 
   void _onSelectionChanged() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
@@ -75,18 +91,17 @@ class _CollectionSelectionOverlayBarState
             child: hasSelection
                 ? Container(
                     decoration: BoxDecoration(
-                      color: colorScheme.backdropBase,
+                      color: colorScheme.backdropBase.withValues(alpha: 1.0),
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
                       border: Border(
                         top: BorderSide(color: colorScheme.strokeFaint),
                       ),
                     ),
                     child: Padding(
-                      padding:
-                          EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
+                      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -97,7 +112,7 @@ class _CollectionSelectionOverlayBarState
                                 builder: (context, child) {
                                   final isAllSelected =
                                       widget.selectedCollections.count ==
-                                          widget.collection.length;
+                                          widget.collections.length;
                                   final buttonText = isAllSelected
                                       ? context.l10n.deselectAll
                                       : context.l10n.selectAll;
@@ -111,7 +126,7 @@ class _CollectionSelectionOverlayBarState
                                         widget.selectedCollections.clearAll();
                                       } else {
                                         widget.selectedCollections.select(
-                                          widget.collection.toSet(),
+                                          widget.collections.toSet(),
                                         );
                                       }
                                     },
@@ -121,21 +136,20 @@ class _CollectionSelectionOverlayBarState
                                         borderRadius: BorderRadius.circular(50),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                        vertical: 14.0,
+                                        horizontal: 12.0,
+                                        vertical: 10.0,
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             buttonText,
-                                            style: textTheme.body,
+                                            style: textTheme.small,
                                           ),
                                           const SizedBox(width: 6),
                                           Icon(
                                             iconData,
-                                            color: getEnteColorScheme(context)
-                                                .textBase,
+                                            color: colorScheme.textBase,
                                             size: 20,
                                           ),
                                         ],
@@ -164,21 +178,20 @@ class _CollectionSelectionOverlayBarState
                                         borderRadius: BorderRadius.circular(50),
                                       ),
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                        vertical: 14.0,
+                                        horizontal: 12.0,
+                                        vertical: 10.0,
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             countText,
-                                            style: textTheme.body,
+                                            style: textTheme.small,
                                           ),
                                           const SizedBox(width: 6),
                                           Icon(
                                             Icons.close,
-                                            color: getEnteColorScheme(context)
-                                                .textBase,
+                                            color: colorScheme.textBase,
                                             size: 20,
                                           ),
                                         ],
@@ -189,8 +202,8 @@ class _CollectionSelectionOverlayBarState
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          _buildActionButtons(),
+                          const SizedBox(height: 12),
+                          _buildPrimaryActionButtons(),
                         ],
                       ),
                     ),
@@ -202,41 +215,78 @@ class _CollectionSelectionOverlayBarState
     );
   }
 
-  Widget _buildActionButtons() {
-    return ListenableBuilder(
-      listenable: widget.selectedCollections,
-      builder: (context, child) {
-        final selectedCollections = widget.selectedCollections.collections;
-        if (selectedCollections.isEmpty) {
-          return const SizedBox.shrink();
-        }
+  Widget _buildPrimaryActionButtons() {
+    final colorScheme = getEnteColorScheme(context);
+    final selectedCollections = widget.selectedCollections.collections;
+    if (selectedCollections.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-        final actions = _getActionsForSelection(selectedCollections);
+    final isSingleSelection = selectedCollections.length == 1;
+    final collection = isSingleSelection ? selectedCollections.first : null;
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeInOut,
-          switchOutCurve: Curves.easeInOut,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SizeTransition(
-                sizeFactor: animation,
-                child: child,
-              ),
-            );
+    final ownedCollections =
+        selectedCollections.where((c) => c.isOwner(_currentUserID)).toList();
+    final sharedIncomingCollections = _getSharedIncomingCollections(
+      selectedCollections.toList(),
+    );
+
+    final hasOwnedCollections = ownedCollections.isNotEmpty;
+    final hasSharedIncoming = sharedIncomingCollections.isNotEmpty;
+
+    final primaryActions = <Widget>[
+      if (isSingleSelection && hasOwnedCollections)
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedNavigation06,
+          ),
+          label: context.l10n.share,
+          onTap: () => _shareCollection(collection!),
+        ),
+      if (isSingleSelection && hasOwnedCollections)
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedPencilEdit02,
+          ),
+          label: context.l10n.edit,
+          onTap: () => _editCollection(collection!),
+        ),
+      if (hasSharedIncoming)
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedLogout02,
+            color: colorScheme.warning500,
+          ),
+          label: context.l10n.leaveCollection,
+          onTap: () => _leaveCollections(sharedIncomingCollections),
+          isDestructive: true,
+        ),
+      if (hasOwnedCollections)
+        SelectionActionButton(
+          hugeIcon: HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete02,
+            color: colorScheme.warning500,
+          ),
+          label: context.l10n.delete,
+          onTap: () {
+            if (isSingleSelection) {
+              _deleteCollection(collection!);
+            } else {
+              _deleteMultipleCollections(selectedCollections);
+            }
           },
-          child: actions.length > 1
-              ? Row(
-                  key: const ValueKey('multi_action'),
-                  children: _buildActionRow(actions),
-                )
-              : Row(
-                  key: const ValueKey('single_action'),
-                  children: [Expanded(child: actions.first)],
-                ),
-        );
-      },
+          isDestructive: true,
+        ),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: _buildActionRow(primaryActions),
+      ),
     );
   }
 
@@ -251,159 +301,101 @@ class _CollectionSelectionOverlayBarState
     return children;
   }
 
-  List<Widget> _getActionsForSelection(
-    Set<Collection> selectedCollections,
-  ) {
-    final colorScheme = getEnteColorScheme(context);
-    final isSingleSelection = selectedCollections.length == 1;
-    final collection = isSingleSelection ? selectedCollections.first : null;
-    final actions = <Widget>[];
-    final viewType = widget.viewType;
-
-    if (viewType == UISectionType.homeCollections ||
-        viewType == UISectionType.outgoingCollections) {
-      if (isSingleSelection) {
-        actions.addAll([
-          SelectionActionButton(
-            hugeIcon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedNavigation06,
-            ),
-            label: context.l10n.share,
-            onTap: () => _shareCollection(collection!),
-          ),
-          SelectionActionButton(
-            hugeIcon: const HugeIcon(
-              icon: HugeIcons.strokeRoundedPencilEdit02,
-            ),
-            label: context.l10n.edit,
-            onTap: () {
-              _editCollection(collection!);
-            },
-          ),
-          SelectionActionButton(
-            hugeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedDelete02,
-              color: colorScheme.warning500,
-            ),
-            label: context.l10n.delete,
-            onTap: () {
-              _deleteCollection(collection!);
-            },
-            isDestructive: true,
-          ),
-        ]);
-      } else {
-        actions.addAll([
-          SelectionActionButton(
-            hugeIcon: HugeIcon(
-              icon: HugeIcons.strokeRoundedDelete02,
-              color: colorScheme.warning500,
-            ),
-            label: context.l10n.delete,
-            onTap: () {
-              _deleteMultipleCollections(
-                widget.selectedCollections.collections,
-              );
-            },
-            isDestructive: true,
-          ),
-        ]);
-      }
-    } else {
-      actions.add(
-        SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedNavigation06,
-          ),
-          label: context.l10n.share,
-          onTap: _leaveCollection,
-        ),
-      );
+  Future<void> _editCollection(Collection collection) async {
+    final ownedCollections = _getOwnedCollections([collection]);
+    if (ownedCollections.isEmpty) {
+      widget.selectedCollections.clearAll();
+      return;
     }
 
-    return actions;
-  }
-
-  Future<void> _editCollection(Collection collection) async {
     try {
-      await CollectionActions.editCollection(
-        context,
-        collection,
-      );
-      widget.selectedCollections.clearAll();
+      await CollectionActions.editCollection(context, collection);
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-
     widget.selectedCollections.clearAll();
   }
 
   Future<void> _deleteCollection(Collection collection) async {
+    final ownedCollections = _getOwnedCollections([collection]);
+    if (ownedCollections.isEmpty) {
+      widget.selectedCollections.clearAll();
+      return;
+    }
+
     try {
       await CollectionActions.deleteCollection(context, collection);
-      widget.selectedCollections.clearAll();
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-
     widget.selectedCollections.clearAll();
   }
 
-  Future<void> _deleteMultipleCollections(
-    Set<Collection> collections,
-  ) async {
+  Future<void> _deleteMultipleCollections(Set<Collection> collections) async {
+    final ownedCollections = _getOwnedCollections(collections.toList());
+    if (ownedCollections.isEmpty) {
+      widget.selectedCollections.clearAll();
+      return;
+    }
+
     try {
       await CollectionActions.deleteMultipleCollections(
         context,
-        collections.toList(),
+        ownedCollections,
       );
-      widget.selectedCollections.clearAll();
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-
     widget.selectedCollections.clearAll();
   }
 
   Future<void> _shareCollection(Collection collection) async {
-    final collectionViewType = getCollectionViewType(
-      collection,
-      Configuration.instance.getUserID()!,
-    );
-    try {
-      if ((collectionViewType != CollectionViewType.ownedCollection &&
-          collectionViewType != CollectionViewType.sharedCollectionViewer &&
-          collectionViewType !=
-              CollectionViewType.sharedCollectionCollaborator &&
-          collectionViewType != CollectionViewType.hiddenOwnedCollection &&
-          collectionViewType != CollectionViewType.favorite)) {
-        throw Exception(
-          "Cannot share collection of type $collectionViewType",
-        );
-      }
+    final ownedCollections = _getOwnedCollections([collection]);
+    if (ownedCollections.isEmpty) {
+      widget.selectedCollections.clearAll();
+      return;
+    }
 
+    if (!collection.type.canShare) {
+      showToast(context, context.l10n.collectionCannotBeShared);
+      widget.selectedCollections.clearAll();
+      return;
+    }
+
+    try {
       await showShareCollectionSheet(context, collection: collection);
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-
     widget.selectedCollections.clearAll();
   }
 
-  Future<void> _leaveCollection() async {
-    await CollectionActions.leaveMultipleCollection(
-      context,
-      widget.selectedCollections.collections.toList(),
-      onSuccess: () {
-        Bus.instance.fire(
-          CollectionsUpdatedEvent("leave_collection"),
+  Future<void> _leaveCollections(List<Collection> collections) async {
+    if (collections.isEmpty) {
+      widget.selectedCollections.clearAll();
+      return;
+    }
+
+    try {
+      if (collections.length == 1) {
+        await CollectionActions.leaveCollection(
+          context,
+          collections.first,
         );
-      },
-    );
+      } else {
+        await CollectionActions.leaveMultipleCollection(
+          context,
+          collections,
+        );
+      }
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
     widget.selectedCollections.clearAll();
   }
 }

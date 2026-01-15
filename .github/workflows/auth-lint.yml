@@ -1,7 +1,7 @@
 name: "Lint (auth)"
 
 on:
-    # Run on every pull request (open or push to it) that changes auth/
+    # Run on every pull request (open or push to it) that changes auth app
     pull_request:
         paths:
             - "mobile/apps/auth/**"
@@ -14,7 +14,7 @@ permissions:
     contents: read
 
 jobs:
-    lint:
+    auth-lint:
         runs-on: ubuntu-latest
         defaults:
             run:

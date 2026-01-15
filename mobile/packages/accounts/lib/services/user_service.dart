@@ -25,7 +25,7 @@ import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/user_details_changed_event.dart';
 import 'package:ente_network/network.dart';
@@ -276,7 +276,7 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        unawaited(Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false));
       } else {
         throw Exception("Log out action failed");
       }
@@ -285,7 +285,7 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        unawaited(Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false));
         return;
       }
       //This future is for waiting for the dialog from which logout() is called

@@ -10,7 +10,7 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
-import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
@@ -19,7 +19,6 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
@@ -51,6 +50,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1021,7 +1021,7 @@ class _HomePageState extends State<HomePage> {
               _pressedKeys.contains(LogicalKeyboardKey.controlRight));
 
       if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyW) {
-        if (PlatformUtil.isDesktop()) {
+        if (PlatformDetector.isDesktop()) {
           windowManager.close();
           return true;
         }
@@ -1304,7 +1304,7 @@ class _HomePageState extends State<HomePage> {
     return ValueListenableBuilder<bool>(
       valueListenable: _codeDisplayStore.isSelectionModeActive,
       builder: (context, isSelecting, child) {
-        final bool isDesktop = PlatformUtil.isDesktop();
+        final bool isDesktop = PlatformDetector.isDesktop();
         final appBar = _buildStandardAppBar(l10n, isDesktop);
         return PopScope(
           canPop: false,
@@ -1752,14 +1752,15 @@ class _HomePageState extends State<HomePage> {
                         code,
                         isCompactMode: isCompactMode,
                         sortKey: _codeSortKey,
-                        enableDesktopContextActions: PlatformUtil.isDesktop(),
+                        enableDesktopContextActions:
+                            PlatformDetector.isDesktop(),
                         selectedCodesBuilder: _selectedCodesForContextMenu,
                       );
                     }),
                     itemCount: _filteredCodes.length + indexOffset,
                   );
 
-                  if (PlatformUtil.isDesktop() && crossAxisCount > 1) {
+                  if (PlatformDetector.isDesktop() && crossAxisCount > 1) {
                     return GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTapUp: (_) {
@@ -1802,7 +1803,7 @@ class _HomePageState extends State<HomePage> {
                             isCompactMode: isCompactMode,
                             sortKey: _codeSortKey,
                             enableDesktopContextActions:
-                                PlatformUtil.isDesktop(),
+                                PlatformDetector.isDesktop(),
                             selectedCodesBuilder: _selectedCodesForContextMenu,
                             focusNode: index == 0 ? _firstItemFocusNode : null,
                           );
@@ -2179,7 +2180,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
-    if (PlatformUtil.isDesktop()) {
+    if (PlatformDetector.isDesktop()) {
       return FloatingActionButton(
         onPressed: () => _redirectToManualEntryPage(),
         child: const Icon(Icons.add),
@@ -2215,7 +2216,7 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
-        if (PlatformUtil.isMobile())
+        if (PlatformDetector.isMobile())
           SpeedDialChild(
             child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02),
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
