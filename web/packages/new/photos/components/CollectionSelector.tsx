@@ -13,9 +13,10 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
     LargeTileButton,
@@ -25,9 +26,12 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
+    collectionsSortBy,
+    type CollectionsSortBy,
     type CollectionSummaries,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
+import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -128,6 +132,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useCollectionSelectorSortByLocalState("name");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -168,7 +173,19 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     );
                 }
             })
-            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort((a, b) => {
+                switch (sortBy) {
+                    case "name":
+                        return a.name.localeCompare(b.name);
+                    case "creation-time-asc":
+                        return (
+                            (a.latestFile?.metadata.creationTime ?? 0) -
+                            (b.latestFile?.metadata.creationTime ?? 0)
+                        );
+                    case "updation-time-desc":
+                        return (b.updationTime ?? 0) - (a.updationTime ?? 0);
+                }
+            })
             .sort((a, b) => b.sortPriority - a.sortPriority)
             .sort((a, b) => {
                 // Prioritize the active collection (if any) to appear first.
@@ -183,7 +200,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         setFilteredCollections(collections);
-    }, [collectionSummaries, attributes, open, onClose]);
+    }, [collectionSummaries, attributes, open, onClose, sortBy]);
 
     const searchFilteredCollections = useMemo(() => {
         if (!searchTerm.trim()) {
@@ -264,9 +281,14 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                                 </Typography>
                             </Box>
                         </Stack>
-                        <Box sx={{ margin: "-10px" }}>
-                            <DialogCloseIconButton onClose={handleClose} />
-                        </Box>
+                        <CollectionsSortOptions
+                            activeSortBy={sortBy}
+                            onChangeSortBy={setSortBy}
+                            nestedInDialog
+                        />
+                        <FilledIconButton onClick={handleClose}>
+                            <CloseIcon />
+                        </FilledIconButton>
                     </Stack>
                     <SearchField value={searchTerm} onChange={setSearchTerm} />
                 </Stack>
@@ -433,4 +455,28 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
             }}
         />
     );
+};
+
+/**
+ * A hook that maintains the collection selector sort order both as in-memory
+ * and local storage state.
+ */
+const useCollectionSelectorSortByLocalState = (
+    initialValue: CollectionsSortBy,
+) => {
+    const key = "collectionSelectorSortBy";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const value = localStorage.getItem(key);
+        if (value && includes(collectionsSortBy, value)) setValue(value);
+    }, []);
+
+    const setter = (value: CollectionsSortBy) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter] as const;
 };
