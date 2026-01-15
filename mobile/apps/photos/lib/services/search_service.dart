@@ -1023,6 +1023,7 @@ class SearchService {
           sortKey: localSettings.peopleSortKey(),
           nameSortAscending: localSettings.peopleNameSortAscending,
           updatedSortAscending: localSettings.peopleUpdatedSortAscending,
+          photosSortAscending: localSettings.peoplePhotosSortAscending,
         ),
       );
       if (limit != null) {

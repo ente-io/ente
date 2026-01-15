@@ -375,6 +375,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   late PeopleSortKey _sortKey;
   bool _nameSortAscending = true;
   bool _updatedSortAscending = false;
+  bool _photosSortAscending = false;
 
   static const double _sortMenuItemHeight = 52;
   static const double _sortMenuCornerRadius = 12;
@@ -424,6 +425,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     _sortKey = settings.peopleSortKey();
     _nameSortAscending = settings.peopleNameSortAscending;
     _updatedSortAscending = settings.peopleUpdatedSortAscending;
+    _photosSortAscending = settings.peoplePhotosSortAscending;
     sectionData = getResults(init: true);
 
     final streamsToListenTo = SectionType.face.viewAllUpdateEvents();
@@ -515,7 +517,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       case PeopleSortKey.lastUpdated:
         return _updatedSortAscending;
       case PeopleSortKey.mostPhotos:
-        return false;
+        return _photosSortAscending;
     }
   }
 
@@ -528,12 +530,15 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         _updatedSortAscending = !_updatedSortAscending;
         return true;
       case PeopleSortKey.mostPhotos:
-        return false;
+        _photosSortAscending = !_photosSortAscending;
+        return true;
     }
   }
 
   bool _canToggleSortDirection(PeopleSortKey key) {
-    return key == PeopleSortKey.name || key == PeopleSortKey.lastUpdated;
+    return key == PeopleSortKey.name ||
+        key == PeopleSortKey.lastUpdated ||
+        key == PeopleSortKey.mostPhotos;
   }
 
   void _sortFaces(List<GenericSearchResult> faces) {
@@ -543,6 +548,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         sortKey: _sortKey,
         nameSortAscending: _nameSortAscending,
         updatedSortAscending: _updatedSortAscending,
+        photosSortAscending: _photosSortAscending,
       ),
     );
   }
@@ -551,6 +557,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     await localSettings.setPeopleSortKey(_sortKey);
     await localSettings.setPeopleNameSortAscending(_nameSortAscending);
     await localSettings.setPeopleUpdatedSortAscending(_updatedSortAscending);
+    await localSettings.setPeoplePhotosSortAscending(_photosSortAscending);
     Bus.instance.fire(PeopleSortOrderChangeEvent());
   }
 

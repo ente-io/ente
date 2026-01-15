@@ -54,6 +54,7 @@ class LocalSettings {
   static const kPeopleSortKey = "people_sort_key";
   static const kPeopleSortNameAscending = "people_sort_name_ascending";
   static const kPeopleSortUpdatedAscending = "people_sort_updated_ascending";
+  static const kPeopleSortPhotosAscending = "people_sort_photos_ascending";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
@@ -116,6 +117,13 @@ class LocalSettings {
 
   Future<void> setPeopleUpdatedSortAscending(bool value) async {
     await _prefs.setBool(kPeopleSortUpdatedAscending, value);
+  }
+
+  bool get peoplePhotosSortAscending =>
+      _prefs.getBool(kPeopleSortPhotosAscending) ?? false;
+
+  Future<void> setPeoplePhotosSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortPhotosAscending, value);
   }
 
   GroupType getGalleryGroupType() {

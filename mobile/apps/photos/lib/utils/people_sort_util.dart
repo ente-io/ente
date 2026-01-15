@@ -7,11 +7,13 @@ class PeopleSortConfig {
   final PeopleSortKey sortKey;
   final bool nameSortAscending;
   final bool updatedSortAscending;
+  final bool photosSortAscending;
 
   const PeopleSortConfig({
     required this.sortKey,
     required this.nameSortAscending,
     required this.updatedSortAscending,
+    required this.photosSortAscending,
   });
 }
 
@@ -46,7 +48,10 @@ void sortPeopleFaces(
     int compareValue;
     switch (config.sortKey) {
       case PeopleSortKey.mostPhotos:
-        compareValue = b.fileCount().compareTo(a.fileCount());
+        compareValue = a.fileCount().compareTo(b.fileCount());
+        if (!config.photosSortAscending) {
+          compareValue = -compareValue;
+        }
         break;
       case PeopleSortKey.name:
         if (!aHasPerson) {
