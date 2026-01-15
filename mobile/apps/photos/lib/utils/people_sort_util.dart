@@ -49,9 +49,13 @@ void sortPeopleFaces(
         compareValue = b.fileCount().compareTo(a.fileCount());
         break;
       case PeopleSortKey.name:
-        compareValue = compareAsciiLowerCaseNatural(a.name(), b.name());
-        if (!config.nameSortAscending) {
-          compareValue = -compareValue;
+        if (!aHasPerson) {
+          compareValue = b.fileCount().compareTo(a.fileCount());
+        } else {
+          compareValue = compareAsciiLowerCaseNatural(a.name(), b.name());
+          if (!config.nameSortAscending) {
+            compareValue = -compareValue;
+          }
         }
         break;
       case PeopleSortKey.lastUpdated:
