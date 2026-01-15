@@ -1,3 +1,4 @@
+- Ashil: QOL: Pause video when using jump to date
 - Ashil: QOL(perf): Potential perf improvement when there are lot of shared files in gallery (Optimized PersonFaceWidget that displays face thumbnail)
 - Ashil: QOL: Pinch to zoom on video
 - Laurens: Small improvements to rituals

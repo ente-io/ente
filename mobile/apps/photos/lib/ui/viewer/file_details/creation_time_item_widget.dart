@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -28,6 +30,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
+        Bus.instance.fire(PauseVideoEvent());
         routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
       },
       child: InfoItemWidget(

@@ -10,6 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -66,6 +67,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   final _progressNotifier = ValueNotifier<double?>(null);
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
+  late StreamSubscription<ResumeVideoEvent> resumeVideoSubscription;
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool _isGuestView = false;
@@ -93,6 +95,10 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
+    });
+    resumeVideoSubscription =
+        Bus.instance.on<ResumeVideoEvent>().listen((event) {
+      player.play();
     });
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -182,6 +188,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
+    resumeVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);

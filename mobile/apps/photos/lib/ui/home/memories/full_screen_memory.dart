@@ -8,7 +8,9 @@ import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -376,6 +378,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 fullScreenState?._toggleAnimation(
                                   pause: true,
                                 );
+                                Bus.instance.fire(PauseVideoEvent());
                                 await routeToPage(
                                   context,
                                   JumpToDateGallery(
@@ -383,6 +386,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                         inheritedData.memories[value].file,
                                   ),
                                 );
+                                Bus.instance.fire(ResumeVideoEvent());
                                 fullScreenState?._toggleAnimation(
                                   pause: false,
                                 );
