@@ -54,6 +54,13 @@ export interface CollectionSelectorAttributes {
      */
     sourceCollectionSummaryID?: number;
     /**
+     * If set, this collection will be shown first in the list.
+     *
+     * This is useful for the "upload" action, where the user is viewing a
+     * specific collection and might want to upload to it.
+     */
+    activeCollectionID?: number;
+    /**
      * Callback invoked when the user selects the option to create a new
      * collection.
      */
@@ -135,6 +142,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             return;
         }
 
+        const activeCollectionID = attributes.activeCollectionID;
         const collections = [...collectionSummaries.values()]
             .filter((cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
@@ -161,7 +169,13 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 }
             })
             .sort((a, b) => a.name.localeCompare(b.name))
-            .sort((a, b) => b.sortPriority - a.sortPriority);
+            .sort((a, b) => b.sortPriority - a.sortPriority)
+            .sort((a, b) => {
+                // Prioritize the active collection (if any) to appear first.
+                if (a.id === activeCollectionID) return -1;
+                if (b.id === activeCollectionID) return 1;
+                return 0;
+            });
 
         if (collections.length === 0) {
             onClose();
