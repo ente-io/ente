@@ -1490,7 +1490,6 @@ class SearchService {
       final peopleToSharedFiles = <User, List<EnteFile>>{};
       final peopleToSharedAlbums = <String, List<Collection>>{};
       final existingEmails = <String>{};
-      final familyEmails = UserService.instance.getEmailIDsOfFamilyMember();
       final List<Collection> collections = _collectionService
           .getCollectionsForUI(includedShared: true, includeCollab: true);
 
@@ -1508,7 +1507,6 @@ class SearchService {
         }
       }
 
-      int peopleCount = 0;
       for (EnteFile file in allFiles) {
         if (file.isOwner) continue;
 
@@ -1517,47 +1515,24 @@ class SearchService {
         if (peopleToSharedFiles.containsKey(fileOwner)) {
           peopleToSharedFiles[fileOwner]!.add(file);
         } else {
-          if (limit != null && limit <= peopleCount) continue;
           peopleToSharedFiles[fileOwner] = [file];
           existingEmails.add(fileOwner.email);
-          peopleCount++;
         }
       }
 
       final allRelevantEmails =
           UserService.instance.getEmailIDsOfRelevantContacts();
 
-      int? remainingLimit = limit != null ? limit - peopleCount : null;
-      if (remainingLimit != null) {
-        // limit - peopleCount will never be negative as of writing this.
-        // Just in case if something changes in future, we are handling it here.
-        remainingLimit = max(remainingLimit, 0);
-      }
       final emailsWithNoSharedFiles =
           allRelevantEmails.difference(existingEmails);
 
-      if (remainingLimit == null) {
-        for (final email in emailsWithNoSharedFiles) {
-          final user = User(email: email);
-          peopleToSharedFiles[user] = [];
-        }
-      } else {
-        for (final email in emailsWithNoSharedFiles) {
-          if (remainingLimit == 0) break;
-          final user = User(email: email);
-          peopleToSharedFiles[user] = [];
-          remainingLimit = remainingLimit! - 1;
-        }
+      for (final email in emailsWithNoSharedFiles) {
+        final user = User(email: email);
+        peopleToSharedFiles[user] = [];
       }
 
       final sortedEntries = peopleToSharedFiles.entries.toList();
       sortedEntries.sort((a, b) {
-        final isAFamily = familyEmails.contains(a.key.email);
-        final isBFamily = familyEmails.contains(b.key.email);
-        if (isAFamily != isBFamily) {
-          return isAFamily ? -1 : 1;
-        }
-
         final countComparison = b.value.length.compareTo(a.value.length);
         if (countComparison != 0) {
           return countComparison;
@@ -1570,7 +1545,10 @@ class SearchService {
         return aName.compareTo(bName);
       });
 
-      for (var entry in sortedEntries) {
+      final limitedEntries =
+          limit != null ? sortedEntries.take(limit).toList() : sortedEntries;
+
+      for (var entry in limitedEntries) {
         final user = entry.key;
         final files = entry.value;
         final name = user.displayName != null && user.displayName!.isNotEmpty
