@@ -1,4 +1,4 @@
-import "package:photos/utils/standalone/parse.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 
 /// Bounding box of a face.
 ///

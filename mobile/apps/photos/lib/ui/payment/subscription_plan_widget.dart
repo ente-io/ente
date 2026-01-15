@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/scheduler.dart";
@@ -6,7 +7,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/utils/standalone/data.dart';
 
 class SubscriptionPlanWidget extends StatefulWidget {
   const SubscriptionPlanWidget({

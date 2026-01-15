@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
@@ -18,7 +19,6 @@ import "package:photos/ui/settings/language_picker.dart";
 import "package:photos/ui/settings/memories_settings_screen.dart";
 import "package:photos/ui/settings/notification_settings_screen.dart";
 import "package:photos/ui/settings/widget_settings_screen.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
   const GeneralSectionWidget({super.key});

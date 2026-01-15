@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:math";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
@@ -28,8 +29,6 @@ import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search_tab/contacts_section.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({super.key});

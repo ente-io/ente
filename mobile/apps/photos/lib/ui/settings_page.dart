@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
@@ -29,7 +30,6 @@ import 'package:photos/ui/settings/storage_card_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;

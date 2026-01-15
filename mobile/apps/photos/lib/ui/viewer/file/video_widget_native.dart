@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
@@ -34,8 +35,6 @@ import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/standalone/date_time.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
 class VideoWidgetNative extends StatefulWidget {

@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
@@ -12,7 +13,6 @@ import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/ui/settings/widgets/albums_widget_settings.dart";
 import "package:photos/ui/settings/widgets/memories_widget_settings.dart";
 import "package:photos/ui/settings/widgets/people_widget_settings.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class WidgetSettingsScreen extends StatelessWidget {
   const WidgetSettingsScreen({super.key});

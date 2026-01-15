@@ -11,7 +11,7 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/services/trash/trash_service.dart';
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
-import "package:locker/ui/components/empty_state_widget.dart"; 
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 
 class TrashPage extends StatefulWidget {

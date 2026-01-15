@@ -1,6 +1,6 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:photos/extensions/input_formatter.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";

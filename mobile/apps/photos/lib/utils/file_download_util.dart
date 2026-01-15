@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as file_path;
@@ -23,8 +24,6 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/standalone/data.dart";
-import "package:photos/utils/standalone/fake_progress.dart";
 
 final _logger = Logger("file_download_util");
 

@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import "package:path/path.dart";
-import "package:photos/utils/standalone/data.dart";
+
+import 'data_util.dart';
 
 class DirectoryStat {
   final String path;

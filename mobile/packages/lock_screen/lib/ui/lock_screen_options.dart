@@ -22,7 +22,6 @@ import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
-
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
 

@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
@@ -13,7 +14,6 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AllQuickLinksPage extends StatefulWidget {
   final List<Collection> quickLinks;

@@ -22,8 +22,6 @@ import "package:locker/services/collections/models/public_url.dart";
 import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
-import "package:locker/utils/date_time_util.dart" as locker_date;
-
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -117,7 +115,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           content: url.isExpired
                               ? context.l10n.expiredLinkInfo
                               : context.l10n.linkExpiresOn(
-                                  locker_date.getFormattedTime(
+                                  getFormattedTime(
                                     DateTime.fromMicrosecondsSinceEpoch(
                                       url.validTill,
                                     ),

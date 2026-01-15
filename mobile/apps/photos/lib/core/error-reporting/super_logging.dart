@@ -4,6 +4,7 @@ import 'dart:core';
 import 'dart:io';
 
 import "package:dio/dio.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +20,6 @@ import 'package:photos/models/typedefs.dart';
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/ram_check_util.dart";
-import "package:photos/utils/standalone/task_queue.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

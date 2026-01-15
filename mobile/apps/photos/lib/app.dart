@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -24,7 +25,6 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/bg_task_utils.dart";
 import "package:photos/utils/intent_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class EnteApp extends StatefulWidget {
   final AdaptiveThemeMode? savedThemeMode;

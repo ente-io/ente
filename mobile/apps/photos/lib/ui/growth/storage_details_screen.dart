@@ -1,5 +1,6 @@
 import "dart:math";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
@@ -10,7 +11,6 @@ import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/utils/standalone/data.dart";
 
 class StorageDetailsScreen extends StatefulWidget {
   final ReferralView referralView;

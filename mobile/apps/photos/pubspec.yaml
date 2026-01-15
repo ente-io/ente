@@ -62,6 +62,8 @@ dependencies:
     path: ../../packages/ente_icons
   ente_photos_rust:
     path: rust_builder
+  ente_pure_utils:
+    path: ../../packages/ente_pure_utils
   ente_qr_ui:
     path: ../../packages/qr
   ente_rust:
