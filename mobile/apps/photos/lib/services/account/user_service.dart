@@ -59,6 +59,7 @@ class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
   static const kReferralSource = "referral_source";
+  static const kIsEmailMFAEnabled = "is_email_mfa_enabled";
 
   final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
@@ -215,7 +216,7 @@ class UserService {
 
   Future<UserDetails> getUserDetailsV2({
     bool memoryCount = true,
-    bool shouldCache = false,
+    bool shouldCache = true,
   }) async {
     _logger.info("Fetching user details");
     try {
@@ -228,6 +229,12 @@ class UserService {
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
         await _preferences.setString(keyUserDetails, userDetails.toJson());
+        if (userDetails.profileData != null) {
+          await _preferences.setBool(
+            kIsEmailMFAEnabled,
+            userDetails.profileData!.isEmailMFAEnabled,
+          );
+        }
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
           await setEmail(userDetails.email);
@@ -1322,11 +1329,11 @@ class UserService {
   }
 
   bool hasEmailMFAEnabled() {
-    final UserDetails? profile = getCachedUserDetails();
-    if (profile != null && profile.profileData != null) {
-      return profile.profileData!.isEmailMFAEnabled;
-    }
-    return true;
+    return _preferences.getBool(kIsEmailMFAEnabled) ?? false;
+  }
+
+  Future<void> setEmailMFAStatus(bool isEnabled) async {
+    await _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
   }
 
   Future<void> updateEmailMFA(bool isEnabled) async {
@@ -1337,6 +1344,8 @@ class UserService {
           "isEnabled": isEnabled,
         },
       );
+
+      await _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
 
       final UserDetails? profile = getCachedUserDetails();
       if (profile != null && profile.profileData != null) {
