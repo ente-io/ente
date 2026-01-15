@@ -216,7 +216,7 @@ class UserService {
 
   Future<UserDetails> getUserDetailsV2({
     bool memoryCount = true,
-    bool shouldCache = false,
+    bool shouldCache = true,
   }) async {
     _logger.info("Fetching user details");
     try {
