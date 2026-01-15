@@ -93,7 +93,14 @@ function getBaseActions(
 
     // People mode actions
     if (barMode === "people") {
-        return ["favorite", "download", "addToAlbum", "archive", "hide", "trash"];
+        return [
+            "favorite",
+            "download",
+            "addToAlbum",
+            "archive",
+            "hide",
+            "trash",
+        ];
     }
 
     // Trash actions
@@ -161,8 +168,12 @@ const modificationActions: FileContextAction[] = [
 /**
  * Inserts "addPerson" before the first modification action in the array.
  */
-function insertAddPersonBeforeModifications(actions: FileContextAction[]): void {
-    const insertIndex = actions.findIndex((a) => modificationActions.includes(a));
+function insertAddPersonBeforeModifications(
+    actions: FileContextAction[],
+): void {
+    const insertIndex = actions.findIndex((a) =>
+        modificationActions.includes(a),
+    );
     if (insertIndex !== -1) {
         actions.splice(insertIndex, 0, "addPerson");
     } else {

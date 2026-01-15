@@ -325,6 +325,11 @@ export const FileList: React.FC<FileListProps> = ({
         fileIndex: number;
     } | null>(null);
 
+    // Track selection state before right-click modified it
+    const previousSelectionRef = useRef<SelectedState | null>(null);
+    // Track if an action was taken from the context menu
+    const contextMenuActionTakenRef = useRef(false);
+
     const listRef = useRef<VariableSizeList | null>(null);
     const outerRef = useRef<HTMLDivElement | null>(null);
 
@@ -648,8 +653,15 @@ export const FileList: React.FC<FileListProps> = ({
             event.preventDefault();
             event.stopPropagation();
 
+            // Reset tracking for this menu open.
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+
             // Handle selection behavior on right-click
             if (!selected[file.id]) {
+                // Store current selection before replacing it
+                previousSelectionRef.current = { ...selected };
+
                 // File not selected: clear selection and select only this file
                 const isOwnFile = file.ownerID === user?.id;
                 const context =
@@ -690,8 +702,28 @@ export const FileList: React.FC<FileListProps> = ({
 
     // Handle context menu close
     const handleContextMenuClose = useCallback(() => {
+        // Defer restore so a menu-item click can mark the close as action-driven.
+        void Promise.resolve().then(() => {
+            if (
+                !contextMenuActionTakenRef.current &&
+                previousSelectionRef.current
+            ) {
+                setSelected(previousSelectionRef.current);
+            }
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+        });
+
         setContextMenu(null);
-    }, []);
+    }, [setSelected]);
+
+    const handleContextMenuActionWithTracking = useCallback(
+        (action: FileContextAction) => {
+            contextMenuActionTakenRef.current = true;
+            onContextMenuAction?.(action);
+        },
+        [onContextMenuAction],
+    );
 
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
@@ -934,7 +966,7 @@ export const FileList: React.FC<FileListProps> = ({
                     anchorPosition={contextMenu?.position}
                     onClose={handleContextMenuClose}
                     actions={contextMenuActions}
-                    onAction={onContextMenuAction}
+                    onAction={handleContextMenuActionWithTracking}
                     selectedCount={selected.count}
                 />
             )}

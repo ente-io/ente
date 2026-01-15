@@ -315,7 +315,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                             onClick={handleAddToCollection}
                         />
                         {!!onShowAssignPersonDialog && (
-                            <AddPersonButton onClick={onShowAssignPersonDialog} />
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <ArchiveButton onClick={handleArchive} />
                         <HideButton onClick={handleHide} />
@@ -329,7 +331,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                             onClick={handleAddToCollection}
                         />
                         {!!onShowAssignPersonDialog && (
-                            <AddPersonButton onClick={onShowAssignPersonDialog} />
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <ArchiveButton onClick={handleArchive} />
                         <HideButton onClick={handleHide} />
@@ -346,7 +350,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <>
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
-                            <AddPersonButton onClick={onShowAssignPersonDialog} />
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <MoveToCollectionButton
                             onClick={handleMoveToCollection}
@@ -357,7 +363,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <>
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
-                            <AddPersonButton onClick={onShowAssignPersonDialog} />
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <RemoveFromCollectionButton
                             onClick={handleRemoveFromCollection}
@@ -367,7 +375,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <>
                         <DownloadButton onClick={handleDownload} />
                         {!!onShowAssignPersonDialog && (
-                            <AddPersonButton onClick={onShowAssignPersonDialog} />
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <UnhideButton onClick={handleUnhide} />
                         <DeleteButton onClick={handleDelete} />
@@ -385,7 +395,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                             onClick={handleAddToCollection}
                         />
                         {!!onShowAssignPersonDialog && (
-                            <AddPersonButton onClick={onShowAssignPersonDialog} />
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         {collectionSummary?.id === PseudoCollectionID.all ? (
                             <ArchiveButton onClick={handleArchive} />

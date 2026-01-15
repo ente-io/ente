@@ -1439,8 +1439,9 @@ const Page: React.FC = () => {
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
                             createFileOpHandler,
-                            onShowAssignPersonDialog:
-                                showContextMenuAssignPerson,
+                            onShowAssignPersonDialog: showAddPersonAction
+                                ? showContextMenuAssignPerson
+                                : undefined,
                         }}
                     />
                 ) : barMode == "hidden-albums" ? (
