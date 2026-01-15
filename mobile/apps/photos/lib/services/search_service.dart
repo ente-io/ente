@@ -808,6 +808,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getAllFace(
     int? limit, {
     required int minClusterSize,
+    bool showIgnoredOnly = false,
   }) async {
     try {
       debugPrint("getting faces");
@@ -898,7 +899,8 @@ class SearchService {
       for (final personID in orderedPersonIds) {
         final files = personIdToFiles[personID]!;
         final PersonEntity p = personIdToPerson[personID]!;
-        if (p.data.isIgnored) continue;
+        final bool isIgnored = p.data.isIgnored;
+        if (showIgnoredOnly != isIgnored) continue;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
@@ -957,64 +959,68 @@ class SearchService {
               .compareTo(clusterIdToFiles[a]!.length),
         );
 
-      for (final clusterId in sortedClusterIds) {
-        final files = clusterIdToFiles[clusterId]!;
-        final String clusterName = clusterId;
+      if (!showIgnoredOnly) {
+        for (final clusterId in sortedClusterIds) {
+          final files = clusterIdToFiles[clusterId]!;
+          final String clusterName = clusterId;
 
-        if (clusterIDToPersonID[clusterId] != null) {
-          final String personID = clusterIDToPersonID[clusterId]!;
-          final PersonEntity? p = personIdToPerson[personID];
-          if (p != null) {
-            // This should not be possible since it should be handled in the above loop, logging just in case
-            _logger.severe(
-              "`getAllFace`: Something unexpected happened, Cluster $clusterId should not have person id $personID",
-              Exception(
-                'Some unexpected error occurred in getAllFace wrt cluster to person mapping',
-              ),
-            );
-          } else {
-            // This should not happen, means a clusterID is still assigned to a personID of a person that no longer exists
-            // Logging the error and deleting the clusterID to personID mapping
-            _logger.severe(
-              "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}, deleting the mapping",
-              Exception('ClusterID assigned to a person that no longer exists'),
-            );
-            await mlDataDB.removeClusterToPerson(
-              personID: personID,
-              clusterID: clusterId,
-            );
-          }
-        }
-        if (files.length < minClusterSize) continue;
-        facesResult.add(
-          GenericSearchResult(
-            ResultType.faces,
-            "",
-            files,
-            params: {
-              kClusterParamId: clusterId,
-              kFileID: files.first.uploadedFileID,
-            },
-            onResultTap: (ctx) {
-              routeToPage(
-                ctx,
-                ClusterPage(
-                  files,
-                  tagPrefix: "${ResultType.faces.toString()}_$clusterName",
-                  clusterID: clusterId,
+          if (clusterIDToPersonID[clusterId] != null) {
+            final String personID = clusterIDToPersonID[clusterId]!;
+            final PersonEntity? p = personIdToPerson[personID];
+            if (p != null) {
+              // This should not be possible since it should be handled in the above loop, logging just in case
+              _logger.severe(
+                "`getAllFace`: Something unexpected happened, Cluster $clusterId should not have person id $personID",
+                Exception(
+                  'Some unexpected error occurred in getAllFace wrt cluster to person mapping',
                 ),
               );
-            },
-            hierarchicalSearchFilter: FaceFilter(
-              personId: null,
-              clusterId: clusterId,
-              faceName: null,
-              faceFile: files.first,
-              occurrence: kMostRelevantFilter,
-              matchedUploadedIDs: filesToUploadedFileIDs(files),
+            } else {
+              // This should not happen, means a clusterID is still assigned to a personID of a person that no longer exists
+              // Logging the error and deleting the clusterID to personID mapping
+              _logger.severe(
+                "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}, deleting the mapping",
+                Exception(
+                  'ClusterID assigned to a person that no longer exists',
+                ),
+              );
+              await mlDataDB.removeClusterToPerson(
+                personID: personID,
+                clusterID: clusterId,
+              );
+            }
+          }
+          if (files.length < minClusterSize) continue;
+          facesResult.add(
+            GenericSearchResult(
+              ResultType.faces,
+              "",
+              files,
+              params: {
+                kClusterParamId: clusterId,
+                kFileID: files.first.uploadedFileID,
+              },
+              onResultTap: (ctx) {
+                routeToPage(
+                  ctx,
+                  ClusterPage(
+                    files,
+                    tagPrefix: "${ResultType.faces.toString()}_$clusterName",
+                    clusterID: clusterId,
+                  ),
+                );
+              },
+              hierarchicalSearchFilter: FaceFilter(
+                personId: null,
+                clusterId: clusterId,
+                faceName: null,
+                faceFile: files.first,
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(files),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       if (facesResult.isEmpty) return [];
       sortPeopleFaces(

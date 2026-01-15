@@ -367,6 +367,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   List<GenericSearchResult> extraFaces = [];
   final streamSubscriptions = <StreamSubscription>[];
   bool _showingAllFaces = false;
+  bool _showingIgnoredPeople = false;
   bool _isLoaded = false;
   bool _isInitialLoad = true;
   bool userDismissedPersonGallerySuggestion = false;
@@ -383,7 +384,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool get _isSearching => _searchQuery.trim().isNotEmpty;
 
   bool get _showMoreLessOption =>
-      !_isSearching && !widget.namedOnly && extraFaces.isNotEmpty;
+      !_isSearching &&
+      !widget.namedOnly &&
+      !_showingIgnoredPeople &&
+      extraFaces.isNotEmpty;
 
   List<GenericSearchResult> _filterFaces(
     List<GenericSearchResult> faces,
@@ -416,6 +420,14 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         _searchQuery = "";
       });
     }
+  }
+
+  void _toggleIgnoredPeopleView() {
+    setState(() {
+      _showingIgnoredPeople = !_showingIgnoredPeople;
+      _isLoaded = false;
+      sectionData = getResults();
+    });
   }
 
   @override
@@ -459,28 +471,36 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   }
 
   Future<List<GenericSearchResult>> getResults({bool init = false}) async {
-    final allFaces = await SearchService.instance
-        .getAllFace(null, minClusterSize: kMinimumClusterSizeAllFaces);
+    final allFaces = await SearchService.instance.getAllFace(
+      null,
+      minClusterSize: kMinimumClusterSizeAllFaces,
+      showIgnoredOnly: _showingIgnoredPeople,
+    );
     normalFaces.clear();
     extraFaces.clear();
-    for (final face in allFaces) {
-      if (face.fileCount() >= kMinimumClusterSizeSearchResult ||
-          face.name().isNotEmpty) {
-        normalFaces.add(face);
-      } else {
-        extraFaces.add(face);
+    if (_showingIgnoredPeople) {
+      normalFaces.addAll(allFaces);
+    } else {
+      for (final face in allFaces) {
+        if (face.fileCount() >= kMinimumClusterSizeSearchResult ||
+            face.name().isNotEmpty) {
+          normalFaces.add(face);
+        } else {
+          extraFaces.add(face);
+        }
       }
-    }
-    if (normalFaces.isEmpty && extraFaces.isNotEmpty) {
-      normalFaces = extraFaces;
-      extraFaces = [];
+      if (normalFaces.isEmpty && extraFaces.isNotEmpty) {
+        normalFaces.addAll(extraFaces);
+        extraFaces.clear();
+      }
     }
     if (widget.showSearchBar) {
       _sortFaces(normalFaces);
       _sortFaces(extraFaces);
     }
+    final showAllFaces = _showingAllFaces || _showingIgnoredPeople;
     final results =
-        _showingAllFaces ? [...normalFaces, ...extraFaces] : normalFaces;
+        showAllFaces ? [...normalFaces, ...extraFaces] : normalFaces;
 
     if (widget.namedOnly) {
       results.removeWhere(
@@ -594,6 +614,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                   const EdgeInsets.fromLTRB(12, 12, horizontalEdgePadding, 12),
               actions: [
                 Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: _buildIgnoredPeopleToggle(colorScheme),
+                ),
+                Padding(
                   padding: const EdgeInsets.only(right: horizontalEdgePadding),
                   child: _buildSortMenu(context, textTheme, colorScheme),
                 ),
@@ -692,11 +716,14 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               ),
             );
           } else {
+            final showAllFaces = _showingAllFaces || _showingIgnoredPeople;
             final showExtraFaces =
-                _showingAllFaces && filteredExtraFaces.isNotEmpty;
+                showAllFaces && filteredExtraFaces.isNotEmpty;
             slivers.addAll(
               [
-                (!userDismissedPersonGallerySuggestion && !widget.namedOnly)
+                (!userDismissedPersonGallerySuggestion &&
+                        !widget.namedOnly &&
+                        !_showingIgnoredPeople)
                     ? SliverToBoxAdapter(
                         child: Dismissible(
                           key: const Key("personGallerySuggestionAll"),
@@ -875,6 +902,17 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           iconColor: colorScheme.textMuted,
         ),
       ),
+    );
+  }
+
+  Widget _buildIgnoredPeopleToggle(EnteColorScheme colorScheme) {
+    return IconButtonWidget(
+      icon: _showingIgnoredPeople
+          ? Icons.visibility_rounded
+          : Icons.visibility_off_rounded,
+      iconButtonType: IconButtonType.secondary,
+      iconColor: colorScheme.textMuted,
+      onTap: _toggleIgnoredPeopleView,
     );
   }
 
