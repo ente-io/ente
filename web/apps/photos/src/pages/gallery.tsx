@@ -53,6 +53,7 @@ import {
     hasPendingAlbumToJoin,
     processPendingAlbumJoin,
 } from "ente-new/albums/services/join-album";
+import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -103,7 +104,10 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
-import { addManualFileAssignmentsToPerson } from "ente-new/photos/services/ml";
+import {
+    addManualFileAssignmentsToPerson,
+    isMLEnabled,
+} from "ente-new/photos/services/ml";
 import {
     savedCollectionFiles,
     savedCollections,
@@ -129,6 +133,7 @@ import {
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
+import type { FileContextAction } from "ente-new/photos/utils/file-actions";
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
@@ -224,6 +229,25 @@ const Page: React.FC = () => {
 
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
+
+    // Modal visibility for the context menu "Add Person" action
+    const {
+        show: showContextMenuAssignPerson,
+        props: contextMenuAssignPersonProps,
+    } = useModalVisibility();
+
+    // Named people available for assignment (used by context menu)
+    const namedPeople = useMemo(
+        () =>
+            (peopleState?.visiblePeople ?? []).filter(
+                (p) => p.type == "cgroup" && !!p.name,
+            ),
+        [peopleState],
+    );
+    const showAddPersonAction = useMemo(
+        () => isMLEnabled() && namedPeople.length > 0,
+        [namedPeople],
+    );
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
@@ -930,6 +954,15 @@ const Page: React.FC = () => {
         [selected, filteredFiles, clearSelection],
     );
 
+    // Handler for selecting a person from the context menu assign person dialog
+    const handleContextMenuSelectPerson = useCallback(
+        (personID: string) => {
+            contextMenuAssignPersonProps.onClose();
+            void handleAddPersonToSelectedFiles(personID);
+        },
+        [contextMenuAssignPersonProps, handleAddPersonToSelectedFiles],
+    );
+
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
@@ -1138,6 +1171,118 @@ const Page: React.FC = () => {
         [],
     );
 
+    /**
+     * Handle a context menu action on a file.
+     *
+     * This handler is called when the user right-clicks on a file thumbnail
+     * and selects an action from the context menu.
+     */
+    const handleContextMenuAction = useCallback(
+        (action: FileContextAction) => {
+            // The selection should already be set by FileList's handleContextMenu
+            // We just need to invoke the appropriate action handler
+            switch (action) {
+                case "download":
+                    createFileOpHandler("download")();
+                    break;
+                case "favorite":
+                    createFileOpHandler("favorite")();
+                    break;
+                case "archive":
+                    createFileOpHandler("archive")();
+                    break;
+                case "unarchive":
+                    createFileOpHandler("unarchive")();
+                    break;
+                case "hide":
+                    createFileOpHandler("hide")();
+                    break;
+                case "fixTime":
+                    createFileOpHandler("fixTime")();
+                    break;
+                case "trash":
+                    showMiniDialog({
+                        title: t("trash_files_title"),
+                        message: t("trash_files_message"),
+                        continue: {
+                            text: t("move_to_trash"),
+                            color: "critical",
+                            action: createFileOpHandler("trash"),
+                        },
+                    });
+                    break;
+                case "deletePermanently":
+                    showMiniDialog({
+                        title: t("delete_files_title"),
+                        message: t("delete_files_message"),
+                        continue: {
+                            text: t("delete"),
+                            color: "critical",
+                            action: createFileOpHandler("deletePermanently"),
+                        },
+                    });
+                    break;
+                case "restore":
+                    handleOpenCollectionSelector({
+                        action: "restore",
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("restore"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("restore"),
+                    });
+                    break;
+                case "addToAlbum":
+                    handleOpenCollectionSelector({
+                        action: "add",
+                        sourceCollectionSummaryID: activeCollectionSummary?.id,
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("add"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("add"),
+                    });
+                    break;
+                case "moveToAlbum":
+                    handleOpenCollectionSelector({
+                        action: "move",
+                        sourceCollectionSummaryID: activeCollectionSummary?.id,
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("move"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("move"),
+                    });
+                    break;
+                case "removeFromAlbum":
+                    if (activeCollection) {
+                        handleRemoveFilesFromCollection(activeCollection);
+                    }
+                    break;
+                case "unhide":
+                    handleOpenCollectionSelector({
+                        action: "unhide",
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("unhide"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("unhide"),
+                    });
+                    break;
+                case "addPerson":
+                    showContextMenuAssignPerson();
+                    break;
+            }
+        },
+        [
+            createFileOpHandler,
+            createOnCreateForCollectionOp,
+            createOnSelectForCollectionOp,
+            handleOpenCollectionSelector,
+            handleRemoveFilesFromCollection,
+            showMiniDialog,
+            showContextMenuAssignPerson,
+            activeCollectionSummary,
+            activeCollection,
+        ],
+    );
+
     const handleCloseCollectionSelector = useCallback(
         () => setOpenCollectionSelector(false),
         [],
@@ -1294,8 +1439,8 @@ const Page: React.FC = () => {
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
                             createFileOpHandler,
-                            onAddPersonToSelectedFiles:
-                                handleAddPersonToSelectedFiles,
+                            onShowAssignPersonDialog:
+                                showContextMenuAssignPerson,
                         }}
                     />
                 ) : barMode == "hidden-albums" ? (
@@ -1395,6 +1540,12 @@ const Page: React.FC = () => {
                 onAuthenticateUser={authenticateUser}
             />
             <WhatsNew {...whatsNewVisibilityProps} />
+            <AssignPersonDialog
+                {...contextMenuAssignPersonProps}
+                people={namedPeople}
+                title={t("add_a_person")}
+                onSelectPerson={handleContextMenuSelectPerson}
+            />
             {!isInSearchMode &&
             !isFirstLoad &&
             !state.collectionFiles.length &&
@@ -1430,6 +1581,8 @@ const Page: React.FC = () => {
                         "sharedIncoming",
                     )}
                     isInHiddenSection={barMode == "hidden-albums"}
+                    onContextMenuAction={handleContextMenuAction}
+                    showAddPersonAction={showAddPersonAction}
                     {...{
                         favoriteFileIDs,
                         collectionNameByID,
