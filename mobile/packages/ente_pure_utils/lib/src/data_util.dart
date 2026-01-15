@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 
 final storageUnits = ["bytes", "KB", "MB", "GB", "TB"];
