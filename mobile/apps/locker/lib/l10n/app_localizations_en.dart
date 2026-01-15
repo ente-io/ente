@@ -1679,6 +1679,60 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get restoreToCollection => 'Restore to collection';
+
+  @override
+  String get restoringFiles => 'Restoring...';
+
+  @override
+  String filesRestoredSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items restored successfully',
+      one: '1 item restored successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedToRestoreFiles => 'Failed to restore items';
+
+  @override
+  String get permanentlyDelete => 'Permanently delete';
+
+  @override
+  String permanentlyDeleteFilesBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'These $count items',
+      one: 'This item',
+    );
+    return '$_temp0 will be permanently deleted and cannot be recovered.';
+  }
+
+  @override
+  String get yesDelete => 'Yes, delete';
+
+  @override
+  String get deletingFiles => 'Deleting...';
+
+  @override
+  String filesDeletedPermanently(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items deleted permanently',
+      one: '1 item deleted permanently',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedToDeleteFiles => 'Failed to delete items';
+
+  @override
   String get itemsStored => 'Items stored';
 
   @override

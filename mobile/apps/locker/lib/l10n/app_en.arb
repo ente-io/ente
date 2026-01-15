@@ -976,6 +976,43 @@
       }
     }
   },
+  "restoreToCollection": "Restore to collection",
+  "restoringFiles": "Restoring...",
+  "filesRestoredSuccessfully": "{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}",
+  "@filesRestoredSuccessfully": {
+    "description": "Success message when items are restored from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToRestoreFiles": "Failed to restore items",
+  "permanentlyDelete": "Permanently delete",
+  "permanentlyDeleteFilesBody": "{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.",
+  "@permanentlyDeleteFilesBody": {
+    "description": "Confirmation body for permanent deletion from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDelete": "Yes, delete",
+  "deletingFiles": "Deleting...",
+  "filesDeletedPermanently": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
+  "@filesDeletedPermanently": {
+    "description": "Success message when items are permanently deleted from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToDeleteFiles": "Failed to delete items",
   "itemsStored": "Items stored",
   "of_": "of",
   "usageYou": "You",

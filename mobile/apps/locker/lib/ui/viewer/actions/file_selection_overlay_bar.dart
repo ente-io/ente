@@ -1,6 +1,7 @@
 import "package:ente_events/event_bus.dart";
 import "package:ente_icons/ente_icons.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
@@ -15,6 +16,7 @@ import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/add_to_collection_sheet.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
@@ -28,12 +30,14 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final List<EnteFile> files;
   final CollectionViewType? collectionViewType;
   final ScrollController? scrollController;
+  final bool isTrashMode;
 
   const FileSelectionOverlayBar({
     required this.selectedFiles,
     required this.files,
     this.collectionViewType,
     this.scrollController,
+    this.isTrashMode = false,
     super.key,
   });
 
@@ -320,10 +324,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _buildPrimaryActionRow(Set<EnteFile> selectedFiles) {
-    final isSingleSelection = selectedFiles.length == 1;
     final files = selectedFiles.toList();
-    final file = isSingleSelection ? files.first : null;
     final colorScheme = getEnteColorScheme(context);
+
+    if (widget.isTrashMode) {
+      return _buildTrashActionRow(files, colorScheme);
+    }
+
+    final isSingleSelection = selectedFiles.length == 1;
+    final file = isSingleSelection ? files.first : null;
     final viewType = widget.collectionViewType;
 
     final isImportant = isSingleSelection &&
@@ -387,10 +396,42 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     );
   }
 
+  Widget _buildTrashActionRow(
+    List<EnteFile> files,
+    EnteColorScheme colorScheme,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: _buildActionRow([
+          SelectionActionButton(
+            hugeIcon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedRefresh,
+            ),
+            label: context.l10n.restore,
+            onTap: () => _restoreFiles(context, files),
+          ),
+          SelectionActionButton(
+            hugeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: colorScheme.warning500,
+            ),
+            label: context.l10n.delete,
+            onTap: () => _deleteFromTrash(context, files),
+            isDestructive: true,
+          ),
+        ]),
+      ),
+    );
+  }
+
   Widget _buildSecondaryActionRow(Set<EnteFile> selectedFiles) {
     final actions = _getSecondaryActionsForSelection(selectedFiles);
 
-    if (actions.isEmpty) {
+    if (actions.isEmpty || widget.isTrashMode) {
       return const SizedBox.shrink();
     }
 
@@ -759,5 +800,112 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         Bus.instance.fire(CollectionsUpdatedEvent('files_marked_important'));
       },
     );
+  }
+
+  Future<void> _restoreFiles(BuildContext context, List<EnteFile> files) async {
+    _logger.info('Opening restore dialog for ${files.length} file(s)');
+
+    final allCollections =
+        await CollectionService.instance.getCollectionsForUI();
+    final dedupedCollections = uniqueCollectionsById(allCollections);
+
+    final result = await showAddToCollectionSheet(
+      context,
+      collections: dedupedCollections,
+      snackBarContext: context,
+    );
+
+    if (result == null || result.selectedCollections.isEmpty) {
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    final targetCollection = result.selectedCollections.first;
+
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.restoringFiles,
+      isDismissible: false,
+    );
+
+    await dialog.show();
+
+    try {
+      await TrashService.instance.restore(files, targetCollection);
+
+      await dialog.hide();
+
+      widget.selectedFiles.clearAll();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.filesRestoredSuccessfully(files.length),
+        );
+      }
+    } catch (e, stackTrace) {
+      await dialog.hide();
+      _logger.severe('Failed to restore files: $e', e, stackTrace);
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.failedToRestoreFiles,
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteFromTrash(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    final confirmation = await showDeleteConfirmationSheet(
+      context,
+      title: context.l10n.permanentlyDelete,
+      body: context.l10n.permanentlyDeleteFilesBody(files.length),
+      deleteButtonLabel: context.l10n.yesDelete,
+      assetPath: "assets/collection_delete_icon.png",
+    );
+
+    if (confirmation?.buttonResult.action != ButtonAction.first) {
+      return;
+    }
+
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.deletingFiles,
+      isDismissible: false,
+    );
+
+    await dialog.show();
+
+    try {
+      await TrashService.instance.deleteFromTrash(files);
+
+      Bus.instance.fire(CollectionsUpdatedEvent('files_deleted_from_trash'));
+
+      await dialog.hide();
+
+      widget.selectedFiles.clearAll();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.filesDeletedPermanently(files.length),
+        );
+      }
+    } catch (e, stackTrace) {
+      await dialog.hide();
+      _logger.severe('Failed to delete files from trash: $e', e, stackTrace);
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.failedToDeleteFiles,
+        );
+      }
+    }
   }
 }
