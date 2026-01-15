@@ -2016,6 +2016,7 @@
     }
   },
   "size": "Size",
+  "closest": "Closest",
   "similarity": "Similarity",
   "analyzingPhotosLocally": "Analyzing your photos locally...",
   "lookingForVisualSimilarities": "Looking for visual similarities...",
