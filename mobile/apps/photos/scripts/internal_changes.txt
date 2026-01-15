@@ -1,3 +1,4 @@
+- Ashil: QOL: Pause video when using jump to date
 - Neeraj: Collage creator: swap photos via long-press select + tap to replace
 - Prateek: (i) Always enable video streaming
 -- Release Cut Off --
