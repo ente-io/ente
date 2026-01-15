@@ -9,15 +9,15 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/directory_utils.dart';
-import 'package:ente_auth/utils/platform_util.dart';
-import 'package:ente_auth/utils/share_utils.dart';
+import 'package:ente_auth/utils/directory_utils.dart' as auth_dir;
+import 'package:ente_auth/utils/share_utils.dart' as auth_share;
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_logging/logging.dart';
-import "package:file_saver/file_saver.dart";
+import 'package:ente_utils/ente_utils.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:intl/intl.dart";
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -84,7 +84,7 @@ Future<void> sendLogs(
         onTap: () async {
           Future.delayed(
             const Duration(milliseconds: 200),
-            () => shareDialog(
+            () => auth_share.shareDialog(
               context,
               title,
               saveAction: () async {
@@ -150,7 +150,7 @@ Future<String> getZippedLogsFile(BuildContext context) async {
   await dialog.show();
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory("$logsPath/logs");
-  final tempPath = (await DirectoryUtils.getTempsDir()).path;
+  final tempPath = (await auth_dir.DirectoryUtils.getTempsDir()).path;
   final zipFilePath =
       "$tempPath/logs-${Configuration.instance.getUserID() ?? 0}.zip";
   final encoder = ZipFileEncoder();
@@ -199,7 +199,7 @@ Future<void> shareLogs(
   if (result?.action != null && result!.action == ButtonAction.second) {
     Future.delayed(
       const Duration(milliseconds: 200),
-      () => shareDialog(
+      () => auth_share.shareDialog(
         context,
         context.l10n.exportLogs,
         saveAction: () async {
@@ -228,7 +228,7 @@ Future<void> exportLogs(
         'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
 
     final bytes = await File(zipFilePath).readAsBytes();
-    await PlatformUtil.shareFile(
+    await FileSaverUtil.saveFile(
       logFileName,
       'zip',
       bytes,

@@ -164,6 +164,12 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 			}
 			result.FamilyData = familyData
 		}
+		// For Locker app, include family usage data
+		if app == ente.Locker {
+			result.LockerFamilyUsage = &details.LockerFamilyUsage{
+				FamilyFileCount: lockerUsage.TotalFileCount,
+			}
+		}
 	}
 
 	return result, nil

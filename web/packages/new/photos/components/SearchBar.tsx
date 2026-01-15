@@ -223,7 +223,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         // We anyways need the ref so that we can blur on selecting a person
         // from the default options. So also use it to blur the entire Select
         // (including the menu) when the user selects an option.
-        selectRef.current?.blur();
+        //
+        // Only blur when an actual option was selected, not when clearing
+        // (e.g., via backspace on empty input).
+        if (value) selectRef.current?.blur();
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
@@ -286,6 +289,12 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         setIsFocused(false);
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Escape") {
+            selectRef.current?.blur();
+        }
+    };
+
     return (
         <SearchInputWrapper>
             <AsyncSelect
@@ -297,6 +306,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onChange={handleChange}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 isClearable
                 escapeClearsValue
                 menuIsOpen={

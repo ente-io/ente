@@ -9,6 +9,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
@@ -30,6 +31,7 @@ import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_bu
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/video_stream_change.dart";
+import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -41,6 +43,7 @@ class VideoWidgetNative extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final bool isFromMemories;
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
@@ -51,6 +54,7 @@ class VideoWidgetNative extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.isFromMemories = false,
     required this.onStreamChange,
     super.key,
@@ -69,6 +73,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   static const verticalMargin = 64.0;
   final _progressNotifier = ValueNotifier<double?>(null);
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
+  late StreamSubscription<ResumeVideoEvent> resumeVideoSubscription;
   bool _isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   NativeVideoPlayerController? _controller;
@@ -89,6 +94,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   int position = 0;
+  final _transformationController = TransformationController();
+  bool _isZooming = false;
 
   @override
   void initState() {
@@ -97,6 +104,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _transformationController.addListener(_onZoomChanged);
 
     if (widget.selectedPreview) {
       loadPreview();
@@ -106,6 +114,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       _controller?.pause();
+    });
+    resumeVideoSubscription =
+        Bus.instance.on<ResumeVideoEvent>().listen((event) {
+      _controller?.play();
     });
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -237,6 +249,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
+    resumeVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -246,9 +259,22 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _captionUpdatedSubscription.cancel();
+    _transformationController.removeListener(_onZoomChanged);
+    _transformationController.dispose();
     EnteWakeLockService.instance
         .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
     super.dispose();
+  }
+
+  void _onZoomChanged() {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    final isZoomed = scale > kZoomThreshold;
+    if (_isZooming != isZoomed) {
+      setState(() {
+        _isZooming = isZoomed;
+      });
+      widget.shouldDisableScroll?.call(isZoomed);
+    }
   }
 
   @override
@@ -265,7 +291,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
         },
         child: GestureDetector(
-          onVerticalDragUpdate: _isGuestView
+          onVerticalDragUpdate: _isGuestView || _isZooming
               ? null
               : (d) => {
                     if (d.delta.dy > dragSensitivity)
@@ -288,16 +314,20 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                 : Stack(
                     key: const ValueKey("video_ready"),
                     children: [
-                      Center(
-                        child: AspectRatio(
-                          aspectRatio: aspectRatio ?? 1,
-                          child: NativeVideoPlayerView(
-                            onViewReady: _initializeController,
+                      ZoomableVideoViewer(
+                        transformationController: _transformationController,
+                        shouldDisableScroll: widget.shouldDisableScroll,
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: aspectRatio ?? 1,
+                            child: NativeVideoPlayerView(
+                              onViewReady: _initializeController,
+                            ),
                           ),
                         ),
                       ),
                       GestureDetector(
-                        behavior: HitTestBehavior.opaque,
+                        behavior: HitTestBehavior.translucent,
                         onTap: widget.isFromMemories
                             ? null
                             : () {

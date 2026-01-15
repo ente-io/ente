@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_configuration/base_configuration.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_strings/ente_strings.dart';
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';

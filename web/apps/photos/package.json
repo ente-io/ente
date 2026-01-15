@@ -3,6 +3,8 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
+        "@hugeicons/core-free-icons": "^1.1.0",
+        "@hugeicons/react": "^1.1.4",
         "chrono-node": "^2.9.0",
         "debounce": "^2.2.0",
         "ente-accounts": "*",

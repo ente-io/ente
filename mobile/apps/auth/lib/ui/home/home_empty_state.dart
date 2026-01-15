@@ -2,8 +2,9 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/home/widgets/rounded_action_buttons.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
-import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/navigation_util.dart' as auth_nav;
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -26,7 +27,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
         ? 'assets/svg/empty-state-bg-dark.svg'
         : 'assets/svg/empty-state-bg-light.svg';
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final extraBottomPadding = PlatformUtil.isMobile()
+    final extraBottomPadding = PlatformDetector.isMobile()
         ? (bottomPadding > 0 ? bottomPadding : 24.0)
         : 24.0;
 
@@ -96,7 +97,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (PlatformUtil.isMobile()) ...[
+                        if (PlatformDetector.isMobile()) ...[
                           RoundedButton(
                             label: l10n.importScanQrCode,
                             onPressed: onScanTap,
@@ -122,7 +123,10 @@ class HomeEmptyStateWidget extends StatelessWidget {
                             TextLinkButton(
                               label: l10n.importCodes,
                               onTap: () {
-                                routeToPage(context, const ImportCodePage());
+                                auth_nav.routeToPage(
+                                  context,
+                                  const ImportCodePage(),
+                                );
                               },
                             ),
                             TextLinkButton(

@@ -2032,10 +2032,6 @@
   "hoorayyyy": "耶～～！",
   "nothingToTidyUpHere": "这里没什么可清理的",
   "deletingDash": "正在删除 - ",
-  "cLTitle1": "评论和反应",
-  "cLDesc1": "我们推出了共享照片的评论和反应功能。您可以通过打开照片并使用底部的操作来对照片进行反应或评论。所有收到的评论和反应都将显示在「共享」标签页中。",
-  "cLTitle2": "相册管理员",
-  "cLDesc2": "您现在可以将另一个 Ente 用户指定为您相册的管理员。通过这个功能，他们将能够添加其他查看者和协作者，从相册中删除照片，甚至建议参与者删除他们的照片。",
   "closeBy": "关闭",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

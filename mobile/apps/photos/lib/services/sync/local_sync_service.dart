@@ -318,16 +318,17 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      _checkAndFireLocalAssetUpdateEvent(allFiles, files.isNotEmpty);
+      _checkAndFireLocalAssetUpdateEvent(allFiles, files);
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
 
   void _checkAndFireLocalAssetUpdateEvent(
     List<EnteFile> allFiles,
-    bool discoveredNewFiles,
+    List<EnteFile> newlyInsertedFiles,
   ) {
     if (allFiles.isEmpty) return;
+    final bool discoveredNewFiles = newlyInsertedFiles.isNotEmpty;
     if (!discoveredNewFiles) {
       allFiles.removeWhere(
         (file) =>
@@ -338,8 +339,24 @@ class LocalSyncService {
         return;
       }
     }
+
+    // Check if any NEWLY INSERTED files were created in the last 7 days
+    bool hasRecentNewLocalDiscovery = false;
+    if (discoveredNewFiles) {
+      final sevenDaysAgo = DateTime.now()
+          .subtract(const Duration(days: 7))
+          .microsecondsSinceEpoch;
+      hasRecentNewLocalDiscovery = newlyInsertedFiles.any(
+        (file) => (file.creationTime ?? 0) > sevenDaysAgo,
+      );
+    }
+
     Bus.instance.fire(
-      LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+      LocalPhotosUpdatedEvent(
+        allFiles,
+        source: "loadedPhoto",
+        hasRecentNewLocalDiscovery: hasRecentNewLocalDiscovery,
+      ),
     );
   }
 

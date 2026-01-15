@@ -194,6 +194,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                               )
                             : FaceSearchResult(
                                 searchResult,
+                                displaySize: size - 2,
                                 isDefaultFace: isDefaultFace,
                               );
                       } else {
@@ -305,10 +306,12 @@ class SelectablePersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
+  final double displaySize;
   final bool isDefaultFace;
 
   const FaceSearchResult(
     this.searchResult, {
+    required this.displaySize,
     super.key,
     this.isDefaultFace = false,
   });
@@ -316,9 +319,12 @@ class FaceSearchResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
+    final int cachedPixelWidth =
+        (displaySize * MediaQuery.devicePixelRatioOf(context)).toInt();
     return PersonFaceWidget(
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
+      cachedPixelWidth: cachedPixelWidth,
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),

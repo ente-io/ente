@@ -261,7 +261,10 @@ class PersonSearchExample extends StatelessWidget {
                                 searchResult.previewThumbnail()!,
                                 shouldShowSyncStatus: false,
                               )
-                            : FaceSearchResult(searchResult);
+                            : FaceSearchResult(
+                                searchResult,
+                                displaySize: size - 2,
+                              );
                       } else {
                         child = const NoThumbnailWidget(
                           addBorder: false,
@@ -368,15 +371,23 @@ class PersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
+  final double displaySize;
 
-  const FaceSearchResult(this.searchResult, {super.key});
+  const FaceSearchResult(
+    this.searchResult, {
+    required this.displaySize,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
+    final int cachedPixelWidth =
+        (displaySize * MediaQuery.devicePixelRatioOf(context)).toInt();
     return PersonFaceWidget(
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
+      cachedPixelWidth: cachedPixelWidth,
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),

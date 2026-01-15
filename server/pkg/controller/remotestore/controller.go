@@ -84,7 +84,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		// Changing it to false will hide the option and disable multi part upload for everyone
 		// except internal user.rt
 		EnableMobMultiPart: true,
-		ServerApiFlag:      ente.UploadV2,
+		ServerApiFlag:      ente.UploadV2 | ente.Comments,
 		CastUrl:            viper.GetString("apps.cast"),
 		EmbedUrl:           viper.GetString("apps.embed-albums"),
 		CustomDomainCNAME:  viper.GetString("apps.custom-domain.cname"),

@@ -14,17 +14,19 @@ import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
+import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home/widgets/rounded_action_buttons.dart';
 import 'package:ente_auth/ui/home_page.dart';
-import 'package:ente_auth/ui/settings/developer_settings_page.dart';
 import 'package:ente_auth/ui/settings/developer_settings_widget.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_events/event_bus.dart';
+import 'package:ente_ui/components/alert_bottom_sheet.dart';
+import 'package:ente_ui/pages/developer_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -208,25 +210,37 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _developerModeTapCount++;
     if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
       _developerModeTapCount = 0;
-      final result = await showChoiceDialog(
+      await showAlertBottomSheet(
         context,
         title: context.l10n.developerSettings,
-        firstButtonLabel: context.l10n.yes,
-        body: context.l10n.developerSettingsWarning,
+        message: context.l10n.developerSettingsWarning,
+        assetPath: 'assets/warning-grey.png',
         isDismissible: false,
-      );
-      if (result?.action == ButtonAction.first) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const DeveloperSettingsPage();
+        showCloseButton: false,
+        buttons: [
+          GradientButton(
+            text: context.l10n.yes,
+            onTap: () async {
+              Navigator.of(context).pop();
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return DeveloperSettingsPage(
+                      getCurrentEndpoint: () =>
+                          Configuration.instance.getHttpEndpoint(),
+                      setEndpoint: (url) async =>
+                          Configuration.instance.setHttpEndpoint(url),
+                    );
+                  },
+                ),
+              );
+              if (mounted) {
+                setState(() {});
+              }
             },
           ),
-        );
-        if (mounted) {
-          setState(() {});
-        }
-      }
+        ],
+      );
     }
   }
 

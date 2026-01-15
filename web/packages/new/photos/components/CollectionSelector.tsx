@@ -140,17 +140,24 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(cs);
+                    return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else if (attributes.action == "restore") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else {
-                    return canMoveToCollection(cs);
+                    // "move" and "unhide"
+                    return (
+                        canMoveToCollection(cs) && cs.type != "userFavorites"
+                    );
                 }
             })
             .sort((a, b) => a.name.localeCompare(b.name))
