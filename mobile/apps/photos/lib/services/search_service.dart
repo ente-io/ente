@@ -58,6 +58,7 @@ import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/people_sort_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
 
 class SearchService {
@@ -957,9 +958,6 @@ class SearchService {
         );
 
       for (final clusterId in sortedClusterIds) {
-        if (limit != null && facesResult.length >= limit) {
-          break;
-        }
         final files = clusterIdToFiles[clusterId]!;
         final String clusterName = clusterId;
 
@@ -1019,6 +1017,14 @@ class SearchService {
         );
       }
       if (facesResult.isEmpty) return [];
+      sortPeopleFaces(
+        facesResult,
+        PeopleSortConfig(
+          sortKey: localSettings.peopleSortKey(),
+          nameSortAscending: localSettings.peopleNameSortAscending,
+          updatedSortAscending: localSettings.peopleUpdatedSortAscending,
+        ),
+      );
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
       } else {

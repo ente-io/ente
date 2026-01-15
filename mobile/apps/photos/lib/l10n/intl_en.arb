@@ -778,6 +778,7 @@
   "name": "Name",
   "newest": "Newest",
   "lastUpdated": "Last updated",
+  "updated": "Updated",
   "deleteEmptyAlbums": "Delete empty albums",
   "deleteEmptyAlbumsWithQuestionMark": "Delete empty albums?",
   "deleteAlbumsDialogBody": "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",

@@ -7,6 +7,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/events/people_sort_order_change_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -33,6 +34,7 @@ class _AllSectionsExamplesProviderState
 
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
   late StreamSubscription<PeopleChangedEvent> _onPeopleChangedEvent;
+  late StreamSubscription<PeopleSortOrderChangeEvent> _peopleSortChangedEvent;
   late StreamSubscription<TabChangedEvent> _tabChangeEvent;
   bool hasPendingUpdate = false;
   bool isOnSearchTab = false;
@@ -54,6 +56,10 @@ class _AllSectionsExamplesProviderState
     });
     _onPeopleChangedEvent =
         Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      onDataUpdate();
+    });
+    _peopleSortChangedEvent =
+        Bus.instance.on<PeopleSortOrderChangeEvent>().listen((event) {
       onDataUpdate();
     });
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -123,6 +129,7 @@ class _AllSectionsExamplesProviderState
   void dispose() {
     _onPeopleChangedEvent.cancel();
     _filesUpdatedEvent.cancel();
+    _peopleSortChangedEvent.cancel();
     _tabChangeEvent.cancel();
     _debouncer.cancelDebounceTimer();
     super.dispose();
