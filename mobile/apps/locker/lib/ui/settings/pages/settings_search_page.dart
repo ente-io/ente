@@ -351,12 +351,12 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           behavior: HitTestBehavior.opaque,
           onTap: () => _onSettingTapped(setting),
           child: Container(
-            height: 56,
+            height: 60,
             decoration: BoxDecoration(
               color: colorScheme.backdropBase,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
                 Expanded(

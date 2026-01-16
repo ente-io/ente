@@ -51,7 +51,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
             children: [
               TitleBarTitleWidget(title: l10n.theme),
               const SizedBox(height: 24),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.systemTheme,
                 showChevron: false,
                 trailing: currentThemeMode == AdaptiveThemeMode.system
@@ -60,7 +60,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                 onTap: () => _setTheme(AdaptiveThemeMode.system),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.lightTheme,
                 showChevron: false,
                 trailing: currentThemeMode == AdaptiveThemeMode.light
@@ -69,7 +69,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                 onTap: () => _setTheme(AdaptiveThemeMode.light),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.darkTheme,
                 showChevron: false,
                 trailing: currentThemeMode == AdaptiveThemeMode.dark

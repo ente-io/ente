@@ -36,7 +36,7 @@ class SecuritySettingsPage extends StatelessWidget {
             children: [
               TitleBarTitleWidget(title: l10n.security),
               const SizedBox(height: 24),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.appLock,
                 onTap: () => _onAppLockTapped(context),
               ),

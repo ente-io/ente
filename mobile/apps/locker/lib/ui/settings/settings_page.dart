@@ -26,102 +26,74 @@ class SettingsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    const groupSpacing = SizedBox(height: 8);
+    const itemSpacing = SizedBox(height: 8);
 
     final List<Widget> contents = [];
 
     if (hasLoggedIn) {
       contents.add(
-        SettingsGroup(
-          children: [
-            SettingsItem(
-              icon: HugeIcons.strokeRoundedUser,
-              title: l10n.account,
-              onTap: () => _navigateTo(context, const AccountSettingsPage()),
-            ),
-          ],
+        SettingsItem(
+          icon: HugeIcons.strokeRoundedUser,
+          title: l10n.account,
+          onTap: () => _navigateTo(context, const AccountSettingsPage()),
         ),
       );
-      contents.add(groupSpacing);
+      contents.add(itemSpacing);
 
       contents.add(
-        SettingsGroup(
-          children: [
-            SettingsItem(
-              icon: HugeIcons.strokeRoundedSecurityCheck,
-              title: l10n.security,
-              onTap: () => _navigateTo(context, const SecuritySettingsPage()),
-            ),
-          ],
+        SettingsItem(
+          icon: HugeIcons.strokeRoundedSecurityCheck,
+          title: l10n.security,
+          onTap: () => _navigateTo(context, const SecuritySettingsPage()),
         ),
       );
-      contents.add(groupSpacing);
+      contents.add(itemSpacing);
 
       contents.add(
-        SettingsGroup(
-          children: [
-            SettingsItem(
-              icon: HugeIcons.strokeRoundedSun03,
-              title: l10n.appearance,
-              onTap: () => _navigateTo(context, const ThemeSettingsPage()),
-            ),
-          ],
+        SettingsItem(
+          icon: HugeIcons.strokeRoundedSun03,
+          title: l10n.appearance,
+          onTap: () => _navigateTo(context, const ThemeSettingsPage()),
         ),
       );
-      contents.add(groupSpacing);
+      contents.add(itemSpacing);
     }
 
     contents.add(
-      SettingsGroup(
-        children: [
-          SettingsItem(
-            icon: HugeIcons.strokeRoundedSettings01,
-            title: l10n.general,
-            onTap: () => _onGeneralTapped(context),
-          ),
-        ],
+      SettingsItem(
+        icon: HugeIcons.strokeRoundedSettings01,
+        title: l10n.general,
+        onTap: () => _onGeneralTapped(context),
       ),
     );
-    contents.add(groupSpacing);
+    contents.add(itemSpacing);
 
     contents.add(
-      SettingsGroup(
-        children: [
-          SettingsItem(
-            icon: HugeIcons.strokeRoundedHelpCircle,
-            title: l10n.helpAndSupport,
-            onTap: () => _navigateTo(context, const SupportPage()),
-          ),
-        ],
+      SettingsItem(
+        icon: HugeIcons.strokeRoundedHelpCircle,
+        title: l10n.helpAndSupport,
+        onTap: () => _navigateTo(context, const SupportPage()),
       ),
     );
-    contents.add(groupSpacing);
+    contents.add(itemSpacing);
 
     contents.add(
-      SettingsGroup(
-        children: [
-          SettingsItem(
-            icon: HugeIcons.strokeRoundedInformationCircle,
-            title: l10n.aboutUs,
-            onTap: () => _navigateTo(context, const AboutPage()),
-          ),
-        ],
+      SettingsItem(
+        icon: HugeIcons.strokeRoundedInformationCircle,
+        title: l10n.aboutUs,
+        onTap: () => _navigateTo(context, const AboutPage()),
       ),
     );
 
     if (hasLoggedIn) {
-      contents.add(groupSpacing);
+      contents.add(itemSpacing);
       contents.add(
-        SettingsGroup(
-          children: [
-            SettingsItem(
-              icon: HugeIcons.strokeRoundedLogout05,
-              title: l10n.logout,
-              iconColor: getEnteColorScheme(context).warning400,
-              textColor: getEnteColorScheme(context).warning400,
-              onTap: () => _onLogoutTapped(context),
-            ),
-          ],
+        SettingsItem(
+          icon: HugeIcons.strokeRoundedLogout05,
+          title: l10n.logout,
+          iconColor: getEnteColorScheme(context).warning400,
+          textColor: getEnteColorScheme(context).warning400,
+          onTap: () => _onLogoutTapped(context),
         ),
       );
     }

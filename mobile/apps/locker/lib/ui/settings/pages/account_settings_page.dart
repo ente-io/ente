@@ -42,22 +42,22 @@ class AccountSettingsPage extends StatelessWidget {
             children: [
               TitleBarTitleWidget(title: l10n.account),
               const SizedBox(height: 24),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.changeEmail,
                 onTap: () => _onChangeEmailTapped(context),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.recoveryKey,
                 onTap: () => _onRecoveryKeyTapped(context),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.changePassword,
                 onTap: () => _onChangePasswordTapped(context),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.deleteAccount,
                 textColor: colorScheme.warning500,
                 onTap: () => _onDeleteAccountTapped(context),

@@ -35,7 +35,7 @@ class GeneralSettingsPage extends StatelessWidget {
             children: [
               TitleBarTitleWidget(title: l10n.general),
               const SizedBox(height: 24),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.selectLanguage,
                 onTap: () => _onLanguageTapped(context),
               ),

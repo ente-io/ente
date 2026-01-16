@@ -36,22 +36,22 @@ class SupportPage extends StatelessWidget {
             children: [
               TitleBarTitleWidget(title: l10n.support),
               const SizedBox(height: 24),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.contactSupport,
                 onTap: () => _onContactSupportTapped(context),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.help,
                 onTap: () => _onHelpTapped(context),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.suggestFeatures,
                 onTap: () => _onSuggestFeaturesTapped(),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.reportABug,
                 onTap: () => _onReportBugTapped(context),
               ),

@@ -34,17 +34,17 @@ class AboutPage extends StatelessWidget {
             children: [
               TitleBarTitleWidget(title: l10n.about),
               const SizedBox(height: 24),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.weAreOpenSource,
                 onTap: () => _onOpenSourceTapped(),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.privacy,
                 onTap: () => _onPrivacyTapped(context),
               ),
               const SizedBox(height: 8),
-              SettingsOptionWidget(
+              SettingsItem(
                 title: l10n.termsOfServicesTitle,
                 onTap: () => _onTermsTapped(context),
               ),
