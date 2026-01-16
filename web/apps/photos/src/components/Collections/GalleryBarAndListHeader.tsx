@@ -11,9 +11,7 @@ import {
     isSaveComplete,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
-import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
-import type { EnteFile } from "ente-media/file";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -322,17 +320,11 @@ const sortCollectionSummaries = (
                 case "name-desc":
                     return b.name.localeCompare(a.name);
                 case "creation-time-asc":
-                    // Oldest first: when b is newer, b comes after a
-                    return compareCollectionsLatestFile(
-                        b.latestFile,
-                        a.latestFile,
-                    );
+                    // Oldest first: lower ID = created earlier
+                    return a.id - b.id;
                 case "creation-time-desc":
-                    // Newest first: when a is newer, a comes before b
-                    return compareCollectionsLatestFile(
-                        a.latestFile,
-                        b.latestFile,
-                    );
+                    // Newest first: higher ID = created later
+                    return b.id - a.id;
                 case "updation-time-asc":
                     return (a.updationTime ?? 0) - (b.updationTime ?? 0);
                 case "updation-time-desc":
@@ -340,21 +332,3 @@ const sortCollectionSummaries = (
             }
         })
         .sort((a, b) => b.sortPriority - a.sortPriority);
-
-const compareCollectionsLatestFile = (
-    first: EnteFile | undefined,
-    second: EnteFile | undefined,
-) => {
-    if (!first) {
-        return 1;
-    } else if (!second) {
-        return -1;
-    } else {
-        const sortedFiles = sortFiles([first, second]);
-        if (sortedFiles[0]?.id !== first.id) {
-            return 1;
-        } else {
-            return -1;
-        }
-    }
-};
