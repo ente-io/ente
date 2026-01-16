@@ -13,21 +13,20 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        children: [
-          _LegacyItem(),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: _CollectionsItem()),
-              SizedBox(width: 8),
-              Expanded(child: _TrashItem()),
-            ],
-          ),
-        ],
-      ),
+    const sectionSpacing = SizedBox(height: 8);
+
+    return const Column(
+      children: [
+        _LegacyItem(),
+        sectionSpacing,
+        Row(
+          children: [
+            Expanded(child: _CollectionsItem()),
+            SizedBox(width: 8),
+            Expanded(child: _TrashItem()),
+          ],
+        ),
+      ],
     );
   }
 }

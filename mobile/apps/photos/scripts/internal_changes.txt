@@ -1,5 +1,6 @@
 - Neeraj: Referral screen redesign
 - Neeraj: Settings screen redesign
+- Ashil: Fix app getting stuck in splash screen after backup restore or device migration
 - Ashil: QOL: Fix home gallery getting cut on the right end on landscape mode (affects tablets)
 - Ashil: QOL: Fix uncategorized page not updating after move
 - Ashil: QOL: Pause video when using jump to date
