@@ -1,0 +1,37 @@
+name: "Fuzz (rust/core)"
+
+on:
+    workflow_dispatch:
+    schedule:
+        # Weekly (Sunday 00:00 UTC)
+        - cron: "0 0 * * 0"
+
+permissions:
+    contents: read
+
+jobs:
+    fuzz:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install nightly toolchain
+              uses: dtolnay/rust-toolchain@nightly
+
+            - name: Cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      rust/core/target
+                      rust/core/fuzz/target
+                  key: ${{ runner.os }}-cargo-fuzz-${{ hashFiles('rust/core/Cargo.lock') }}
+
+            - name: Install cargo-fuzz
+              run: cargo +nightly install cargo-fuzz
+
+            - name: Run fuzz target (secretbox)
+              working-directory: rust/core
+              run: cargo +nightly fuzz run secretbox -- -max_total_time=300
