@@ -1,3 +1,5 @@
+- Neeraj: Referral screen redesign
+- Neeraj: Settings screen redesign
 - Ashil: QOL: Fix home gallery getting cut on the right end on landscape mode (affects tablets)
 - Ashil: QOL: Fix uncategorized page not updating after move
 - Ashil: QOL: Pause video when using jump to date
@@ -13,3 +15,4 @@
 - Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)
 - Prateek: Stop streaming if not 75% processed for upload and thermal change
 - Prateek: Stop streaming immediately on log-out
+

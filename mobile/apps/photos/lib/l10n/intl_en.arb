@@ -306,6 +306,7 @@
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
   "apply": "Apply",
   "failedToApplyCode": "Failed to apply code",
+  "invalidReferralCode": "Invalid code",
   "enterReferralCode": "Enter referral code",
   "codeAppliedPageTitle": "Code applied",
   "changeYourReferralCode": "Change your code",

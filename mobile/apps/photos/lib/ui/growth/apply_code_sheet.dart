@@ -1,44 +1,45 @@
 import "package:dio/dio.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/storage_bonus/storage_bonus.dart";
+import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/base_bottom_sheet.dart";
-import "package:photos/utils/dialog_util.dart";
+import "package:photos/ui/growth/code_success_screen.dart";
 
-Future<bool?> showChangeReferralCodeSheet(
+Future<bool?> showApplyCodeSheet(
   BuildContext context, {
-  required String currentCode,
-  required VoidCallback onCodeChanged,
+  required ReferralView referralView,
+  required UserDetails userDetails,
 }) {
   return showBaseBottomSheet<bool>(
     context,
-    title: AppLocalizations.of(context).changeYourReferralCode,
+    title: AppLocalizations.of(context).applyCodeTitle,
     headerSpacing: 20,
-    child: _ChangeReferralCodeContent(
-      currentCode: currentCode,
-      onCodeChanged: onCodeChanged,
+    child: _ApplyCodeContent(
+      referralView: referralView,
+      userDetails: userDetails,
     ),
   );
 }
 
-class _ChangeReferralCodeContent extends StatefulWidget {
-  final String currentCode;
-  final VoidCallback onCodeChanged;
+class _ApplyCodeContent extends StatefulWidget {
+  final ReferralView referralView;
+  final UserDetails userDetails;
 
-  const _ChangeReferralCodeContent({
-    required this.currentCode,
-    required this.onCodeChanged,
+  const _ApplyCodeContent({
+    required this.referralView,
+    required this.userDetails,
   });
 
   @override
-  State<_ChangeReferralCodeContent> createState() =>
-      _ChangeReferralCodeContentState();
+  State<_ApplyCodeContent> createState() => _ApplyCodeContentState();
 }
 
-class _ChangeReferralCodeContentState
-    extends State<_ChangeReferralCodeContent> {
+class _ApplyCodeContentState extends State<_ApplyCodeContent> {
   late TextEditingController _controller;
   bool _isLoading = false;
   String? _errorMessage;
@@ -46,7 +47,7 @@ class _ChangeReferralCodeContentState
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.currentCode);
+    _controller = TextEditingController();
     _controller.addListener(_onTextChanged);
   }
 
@@ -63,13 +64,11 @@ class _ChangeReferralCodeContentState
     });
   }
 
-  bool get _hasChanges =>
-      _controller.text.trim().length >= 4 &&
-      _controller.text.trim() != widget.currentCode;
+  bool get _isValid => _controller.text.trim().length >= 4;
 
-  Future<void> _saveCode() async {
-    final newCode = _controller.text.trim();
-    if (newCode.isEmpty || newCode == widget.currentCode) {
+  Future<void> _applyCode() async {
+    final code = _controller.text.trim();
+    if (code.length < 4) {
       return;
     }
 
@@ -79,31 +78,37 @@ class _ChangeReferralCodeContentState
     });
 
     try {
-      await storageBonusService.updateCode(newCode);
-      widget.onCodeChanged();
+      await storageBonusService.applyCode(code);
       if (mounted) {
         Navigator.of(context).pop(true);
+        // Navigate to success screen
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CodeSuccessScreen(
+              widget.referralView,
+              widget.userDetails,
+            ),
+          ),
+        );
       }
-    } catch (e, s) {
-      Logger("ChangeReferralCodeSheet").severe("Failed to update code", e, s);
-      if (e is DioException) {
-        if (e.response?.statusCode == 400) {
-          setState(() {
-            _errorMessage = AppLocalizations.of(context).unavailableReferralCode;
-          });
-        } else if (e.response?.statusCode == 429) {
-          setState(() {
-            _errorMessage = AppLocalizations.of(context).codeChangeLimitReached;
-          });
-        } else {
-          if (mounted) {
-            await showGenericErrorDialog(context: context, error: e);
+    } catch (e) {
+      Logger("ApplyCodeSheet").severe("Failed to apply code", e);
+      if (mounted) {
+        String errorMessage = AppLocalizations.of(context).failedToApplyCode;
+        if (e is DioException &&
+            e.response != null &&
+            e.response!.data != null) {
+          final code = e.response!.data["code"];
+          if (code == "INVALID_CODE") {
+            errorMessage = AppLocalizations.of(context).invalidReferralCode;
+          } else if (code != null) {
+            errorMessage =
+                "${AppLocalizations.of(context).failedToApplyCode}: $code";
           }
         }
-      } else {
-        if (mounted) {
-          await showGenericErrorDialog(context: context, error: e);
-        }
+        setState(() {
+          _errorMessage = errorMessage;
+        });
       }
     } finally {
       if (mounted) {
@@ -125,8 +130,6 @@ class _ChangeReferralCodeContentState
 
     const greenColor = Color(0xFF08C225);
     const warningRedColor = Color(0xFFF63A3A);
-    final helperTextColor =
-        _errorMessage != null ? warningRedColor : colorScheme.textMuted;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -140,6 +143,7 @@ class _ChangeReferralCodeContentState
           ),
           child: TextField(
             controller: _controller,
+            inputFormatters: [UpperCaseTextFormatter()],
             textCapitalization: TextCapitalization.characters,
             style: textTheme.body,
             decoration: InputDecoration(
@@ -148,28 +152,28 @@ class _ChangeReferralCodeContentState
                 horizontal: 16,
                 vertical: 20,
               ),
-              hintText: AppLocalizations.of(context).enterCode,
+              hintText: AppLocalizations.of(context).enterReferralCode,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
             ),
           ),
         ),
         const SizedBox(height: 9),
-        // Warning/helper text
+        // Helper/error text
         Text(
-          _errorMessage ?? AppLocalizations.of(context).referralCodeHint,
+          _errorMessage ?? AppLocalizations.of(context).enterCodeDescription,
           style: textTheme.mini.copyWith(
-            color: helperTextColor,
+            color: _errorMessage != null ? warningRedColor : colorScheme.textMuted,
           ),
         ),
         const SizedBox(height: 20),
-        // Save button
+        // Apply button
         SizedBox(
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: _isLoading || !_hasChanges ? null : _saveCode,
+            onPressed: _isLoading || !_isValid ? null : _applyCode,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _hasChanges ? greenColor : colorScheme.fillMuted,
+              backgroundColor: _isValid ? greenColor : colorScheme.fillMuted,
               foregroundColor: Colors.white,
               disabledBackgroundColor: colorScheme.fillMuted,
               disabledForegroundColor: colorScheme.textMuted,
@@ -188,9 +192,9 @@ class _ChangeReferralCodeContentState
                     ),
                   )
                 : Text(
-                    AppLocalizations.of(context).saveCode,
+                    AppLocalizations.of(context).apply,
                     style: textTheme.bodyBold.copyWith(
-                      color: _hasChanges ? Colors.white : colorScheme.textMuted,
+                      color: _isValid ? Colors.white : colorScheme.textMuted,
                     ),
                   ),
           ),

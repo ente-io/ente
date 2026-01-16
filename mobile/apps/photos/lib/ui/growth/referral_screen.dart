@@ -11,7 +11,7 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/growth/apply_code_screen.dart";
+import "package:photos/ui/growth/apply_code_sheet.dart";
 import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/share_util.dart";
@@ -226,11 +226,14 @@ class ReferralWidget extends StatelessWidget {
                 trailingIcon: Icons.chevron_right_outlined,
                 trailingIconIsMuted: true,
                 onTap: () async {
-                  await routeToPage(
+                  final result = await showApplyCodeSheet(
                     context,
-                    ApplyCodeScreen(referralView, userDetails),
+                    referralView: referralView,
+                    userDetails: userDetails,
                   );
-                  notifyParent();
+                  if (result == true) {
+                    notifyParent();
+                  }
                 },
               ),
               const SizedBox(height: 8),
