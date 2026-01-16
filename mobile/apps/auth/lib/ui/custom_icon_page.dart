@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:ente_auth/services/preference_service.dart';
