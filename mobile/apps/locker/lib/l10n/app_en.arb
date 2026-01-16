@@ -1015,5 +1015,8 @@
       }
     }
   },
-  "failedToDeleteFiles": "Failed to delete items"
+  "failedToDeleteFiles": "Failed to delete items",
+  "searchSettings": "Search settings",
+  "suggestions": "Suggestions",
+  "noResultsFound": "No results found"
 }

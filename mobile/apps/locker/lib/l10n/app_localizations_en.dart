@@ -1740,4 +1740,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToDeleteFiles => 'Failed to delete items';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get noResultsFound => 'No results found';
 }
