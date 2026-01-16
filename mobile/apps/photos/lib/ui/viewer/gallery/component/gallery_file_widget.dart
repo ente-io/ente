@@ -63,7 +63,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   Widget build(BuildContext context) {
     final Widget fileContent = _buildFileContent(context);
 
-    // Wrap with swipe selection when not in single selection mode
     if (!widget.limitSelectionToOne) {
       return SwipeSelectableFileWidget(
         file: widget.file,

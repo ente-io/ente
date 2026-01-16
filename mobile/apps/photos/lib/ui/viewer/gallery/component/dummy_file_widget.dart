@@ -21,7 +21,6 @@ class DummyFileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const Widget dummyContent = SizedBox.expand();
 
-    // Wrap with swipe selection when not in single selection mode
     if (!limitSelectionToOne) {
       return SwipeSelectableFileWidget(
         file: file,
