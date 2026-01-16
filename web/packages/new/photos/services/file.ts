@@ -289,8 +289,12 @@ const putFilesPublicMagicMetadata = async (
  *
  * @param long The new longitude.
  */
-export const updateFilesLocation = (
+export const updateFilesLocation = async (
     files: EnteFile[],
     lat: number,
     long: number,
-) => batched(files, (b) => updateFilesPublicMagicMetadata(b, { lat, long }));
+): Promise<void> => {
+    await batched(files, (b) =>
+        updateFilesPublicMagicMetadata(b, { lat, long }),
+    );
+};

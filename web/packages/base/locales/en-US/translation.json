@@ -106,6 +106,8 @@
     "exit_fullscreen": "Exit fullscreen",
     "go_fullscreen": "Go fullscreen",
     "zoom": "Zoom",
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
     "play": "Play",
     "pause": "Pause",
     "previous": "Previous",
@@ -801,6 +803,8 @@
     "album_layout": "Album layout",
     "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
     "edit_location": "Edit location",
+    "add_location": "Add location",
+    "add_location_button": "Add",
     "save_location": "Save location",
     "tap_to_select_location": "Click on the map to select a location"
 }

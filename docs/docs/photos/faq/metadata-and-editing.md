@@ -114,20 +114,27 @@ This is useful for:
 
 ### Can I bulk edit photo locations? {#bulk-edit-locations}
 
-Yes! You can bulk-edit location coordinates from the mobile app:
+Yes! You can bulk-edit location coordinates:
+
+**On mobile:**
 
 1. Long press to multi-select the photos you want to edit
-2. Select "Edit location" from the action bar
+2. Tap "Edit location" from the action bar
 3. Choose the correct location on the map
-4. Apply to all selected photos
+4. Tap Save
+
+**On web:**
+
+1. Click to select photos (Ctrl/Cmd+click or Shift+click for multiple)
+2. Click the edit location icon in the selection bar
+3. Click on the map to set the location, or drag the pin to adjust
+4. Click "Save location"
 
 This is useful for:
 
 - Adding location to photos without GPS data
 - Correcting wrong GPS coordinates
 - Organizing photos by location after the fact
-
-**Note**: This feature is currently only available on the mobile app.
 
 ### How do I fix incorrect photo dates? {#fix-incorrect-dates}
 
@@ -182,17 +189,24 @@ Yes! You can manually add location data to any photo:
 **On mobile:**
 
 1. Select the photo(s)
-2. Choose "Edit location" from the menu
+2. Tap "Edit location" from the menu
 3. Select the location on the map
-4. Save
+4. Tap Save
+
+**On web:**
+
+1. Open the photo and click the info button (i)
+2. In the Location section, click "Add"
+3. Click on the map to set the location, or drag the pin to adjust
+4. Click "Save location"
+
+You can also add location to multiple photos at once. Learn more at [Bulk edit photo locations](#bulk-edit-locations).
 
 This adds GPS coordinates to the photo's metadata, allowing you to:
 
 - View them on the map
 - Search by location
 - Organize photos by where they were taken
-
-See [Bulk edit photo locations](#can-i-bulk-edit-photo-locations) for editing multiple photos at once.
 
 ## Exporting Metadata
 
@@ -283,19 +297,16 @@ When you edit metadata on one device:
 
 ### Can I edit metadata on all platforms? {#platform-support}
 
-**Available on mobile and desktop:**
+**Available on mobile, web, and desktop:**
 
 - Adding descriptions
 - Editing filenames
 - Viewing all EXIF data
+- Adding and editing locations
 
 **Desktop only:**
 
 - Bulk editing dates ("Fix time" feature)
-
-**Mobile only:**
-
-- Bulk editing locations
 
 We're working on bringing all editing features to all platforms.
 

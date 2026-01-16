@@ -66,18 +66,18 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
+import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
 import { FilePeopleList } from "ente-new/photos/components/PeopleList";
 import {
     usePeopleStateSnapshot,
     useSettingsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
-import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import {
     updateFileCaption,
     updateFileFileName,
-    updateFilesLocation,
     updateFilePublicMagicMetadata,
+    updateFilesLocation,
 } from "ente-new/photos/services/file";
 import {
     addManualFileAssignmentsToPerson,
@@ -353,7 +353,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     />
                 )}
 
-                {location && (
+                {location ? (
                     <>
                         <InfoItem
                             icon={<LocationOnOutlinedIcon />}
@@ -379,7 +379,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             trailingButton={
                                 <Stack direction="row" sx={{ gap: 1 }}>
                                     {allowEdits && (
-                                        <EditButton onClick={showEditLocation} />
+                                        <EditButton
+                                            onClick={showEditLocation}
+                                        />
                                     )}
                                     <CopyButton
                                         size="medium"
@@ -396,6 +398,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             />
                         )}
                     </>
+                ) : (
+                    allowEdits && (
+                        <InfoItem
+                            icon={<LocationOnOutlinedIcon />}
+                            title={t("location")}
+                            caption={
+                                <LinkButtonUndecorated
+                                    onClick={showEditLocation}
+                                >
+                                    {t("add_location_button")}
+                                </LinkButtonUndecorated>
+                            }
+                        />
+                    )
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlinedIcon />}

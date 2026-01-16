@@ -67,6 +67,9 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
         return file ? fileLocation(file) : undefined;
     }, [files]);
 
+    // Capture whether we're adding (vs editing) when dialog opens
+    const [isAddingLocation, setIsAddingLocation] = useState(false);
+
     // Reset selected location and states only when dialog opens
     const prevOpenRef = useRef(false);
     useEffect(() => {
@@ -74,9 +77,11 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
             setSelectedLocation(initialLocation);
             setIsLoading(false);
             setIsSuccess(false);
+            // Determine add vs edit based on whether any file has location at open time
+            setIsAddingLocation(!files.some((file) => fileLocation(file)));
         }
         prevOpenRef.current = open;
-    }, [open, initialLocation]);
+    }, [open, initialLocation, files]);
 
     const hasLocationChanged = useMemo(() => {
         if (!selectedLocation) return false;
@@ -124,6 +129,7 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
                     canConfirm={hasLocationChanged}
                     isLoading={isLoading}
                     isSuccess={isSuccess}
+                    isAddingLocation={isAddingLocation}
                 />
                 <Box sx={{ flex: 1, position: "relative" }}>
                     <EditableMap
@@ -151,6 +157,7 @@ interface TitleBarProps {
     canConfirm: boolean;
     isLoading: boolean;
     isSuccess: boolean;
+    isAddingLocation: boolean;
 }
 
 const TitleBar: React.FC<TitleBarProps> = ({
@@ -159,6 +166,7 @@ const TitleBar: React.FC<TitleBarProps> = ({
     canConfirm,
     isLoading,
     isSuccess,
+    isAddingLocation,
 }) => (
     <Stack
         direction="row"
@@ -170,11 +178,11 @@ const TitleBar: React.FC<TitleBarProps> = ({
             borderColor: "divider",
         }}
     >
-        <IconButton onClick={onBack}>
+        <IconButton onClick={onBack} aria-label={t("close")}>
             <ArrowBackIcon />
         </IconButton>
         <Typography variant="h6" sx={{ flex: 1 }}>
-            {t("edit_location")}
+            {t(isAddingLocation ? "add_location" : "edit_location")}
         </Typography>
         {isLoading ? (
             <Box
@@ -341,21 +349,21 @@ const EditableMap: React.FC<EditableMapProps> = ({
             <MapContainer ref={mapContainerRef} />
             <MapOverlay>
                 {selectedLocation ? (
-                    <Typography variant="body2" sx={{ color: "text.muted" }}>
+                    <Typography variant="body" sx={{ color: "text.muted" }}>
                         {selectedLocation.latitude.toFixed(6)},{" "}
                         {selectedLocation.longitude.toFixed(6)}
                     </Typography>
                 ) : (
-                    <Typography variant="body2" sx={{ color: "text.muted" }}>
+                    <Typography variant="body" sx={{ color: "text.muted" }}>
                         {t("tap_to_select_location")}
                     </Typography>
                 )}
             </MapOverlay>
             <ZoomControls>
-                <ZoomButton onClick={handleZoomIn}>
+                <ZoomButton onClick={handleZoomIn} aria-label={t("zoom_in")}>
                     <AddIcon />
                 </ZoomButton>
-                <ZoomButton onClick={handleZoomOut}>
+                <ZoomButton onClick={handleZoomOut} aria-label={t("zoom_out")}>
                     <RemoveIcon />
                 </ZoomButton>
             </ZoomControls>
@@ -369,10 +377,7 @@ const MapWrapper = styled("div")({
     position: "relative",
 });
 
-const MapContainer = styled("div")({
-    height: "100%",
-    width: "100%",
-});
+const MapContainer = styled("div")({ height: "100%", width: "100%" });
 
 const MapOverlay = styled("div")(({ theme }) => ({
     position: "absolute",
