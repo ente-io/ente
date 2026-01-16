@@ -8,7 +8,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/email_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
@@ -55,88 +54,88 @@ class HelpSupportPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      SettingsGroupedCard(
-                        children: [
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).help,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedHelpCircle,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      AppLocalizations.of(context).help,
-                                      "https://ente.io/help",
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).reportABug,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedBug02,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await sendLogs(
-                                context,
-                                AppLocalizations.of(context).reportBug,
-                                bugsEmail,
-                              );
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).contactSupport,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedMail01,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await sendEmail(context, to: supportEmail);
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).suggestFeatures,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedIdea01,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await launchUrlString(
-                                githubDiscussionsUrl,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).crashReporting,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedAlert02,
-                            ),
-                            trailingWidget: ToggleSwitchWidget(
-                              value: () => SuperLogging.shouldReportCrashes(),
-                              onChanged: () async {
-                                await SuperLogging.setShouldReportCrashes(
-                                  !SuperLogging.shouldReportCrashes(),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).help,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedHelpCircle,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return WebPage(
+                                  AppLocalizations.of(context).help,
+                                  "https://ente.io/help",
                                 );
                               },
                             ),
-                          ),
-                        ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).reportABug,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedBug02,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await sendLogs(
+                            context,
+                            AppLocalizations.of(context).reportBug,
+                            bugsEmail,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).contactSupport,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedMail01,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await sendEmail(context, to: supportEmail);
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).suggestFeatures,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedIdea01,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await launchUrlString(
+                            githubDiscussionsUrl,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).crashReporting,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedAlert02,
+                        ),
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => SuperLogging.shouldReportCrashes(),
+                          onChanged: () async {
+                            await SuperLogging.setShouldReportCrashes(
+                              !SuperLogging.shouldReportCrashes(),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
