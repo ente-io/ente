@@ -567,12 +567,12 @@ class FileUploader {
 
   /*
   _checkIfWithinStorageLimit verifies if the file size for encryption and upload
-   is within Locker's storage limit. It throws StorageLimitExceededError if the
-   limit is exceeded. For family plan users, it checks against the combined
-   family storage usage. This check is best effort and may not be completely
-   accurate due to UserDetail cache.
-   Locker storage limits: Free tier = 1GB, Paid tier = 10GB (shared for family)
-   Note: Local storageBuffer is 20MB to account for encryption overhead.
+   is within the storage limit. It throws StorageLimitExceededError if the limit
+    is exceeded. This check is best effort and may not be completely accurate
+    due to UserDetail cache. It prevents infinite loops when clients attempt to
+    upload files that exceed the server's storage limit + buffer.
+    Note: Local storageBuffer is 20MB, server storageBuffer is 50MB, and an
+    additional 30MB is reserved for thumbnails and encryption overhead.
    */
   Future<void> _checkIfWithinStorageLimit(File fileToBeUploaded) async {
     try {
@@ -580,26 +580,21 @@ class FileUploader {
       if (userDetails == null) {
         return;
       }
+      // add k20MBStorageBuffer to the free storage
+      final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
       final num fileSize = await fileToBeUploaded.length();
+      if (fileSize > freeStorage) {
+        _logger.warning(
+          'Storage limit exceeded fileSize $fileSize and freeStorage $freeStorage',
+        );
+        throw StorageLimitExceededError();
+      }
       if (fileSize > kMaxFileSize10Gib) {
         _logger.warning('File size exceeds 10GiB fileSize $fileSize');
         throw InvalidFileError(
           'file size above 10GiB',
           InvalidReason.tooLargeFile,
         );
-      }
-      // Use Locker's specific storage limit (1GB free, 10GB paid/family)
-      final num maxStorage =
-          userDetails.getLockerStorageLimit() + k20MBStorageBuffer;
-      // For family users, getFamilyOrPersonalUsage returns combined family usage
-      final num currentUsage = userDetails.getFamilyOrPersonalUsage();
-      final num freeStorage = maxStorage - currentUsage;
-      if (fileSize > freeStorage) {
-        _logger.warning(
-          'Storage limit exceeded: fileSize $fileSize, '
-          'currentUsage $currentUsage, maxStorage $maxStorage',
-        );
-        throw StorageLimitExceededError();
       }
     } catch (e) {
       if (e is StorageLimitExceededError || e is InvalidFileError) {
