@@ -454,6 +454,12 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get save;
 
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
   /// No description provided for @deleteFile.
   ///
   /// In en, this message translates to:
@@ -2695,13 +2701,13 @@ abstract class AppLocalizations {
   /// No description provided for @seeAllCollections.
   ///
   /// In en, this message translates to:
-  /// **'See all collections'**
+  /// **'All collections'**
   String get seeAllCollections;
 
   /// No description provided for @clearAllFilters.
   ///
   /// In en, this message translates to:
-  /// **'Clear all filters'**
+  /// **'Clear all'**
   String get clearAllFilters;
 
   /// No description provided for @selectLanguage.

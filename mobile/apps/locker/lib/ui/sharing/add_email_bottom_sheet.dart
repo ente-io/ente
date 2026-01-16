@@ -55,7 +55,8 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
   bool _emailIsValid = false;
   DateTime? _scheduledDate;
   TimeOfDay? _scheduledTime;
-  final CollectionParticipantRole _selectedRole = CollectionParticipantRole.viewer;
+  final CollectionParticipantRole _selectedRole =
+      CollectionParticipantRole.viewer;
 
   final _textController = TextEditingController();
   final _textFieldFocusNode = FocusNode();
