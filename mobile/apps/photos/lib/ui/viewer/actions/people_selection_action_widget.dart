@@ -11,6 +11,8 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
+import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
+import "package:photos/ui/viewer/people/merge_clusters_to_person_sheet.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -59,6 +61,15 @@ class _PeopleSelectionActionWidgetState
         .toList();
   }
 
+  List<String> _getNamedSelectedPersonIds(
+    Iterable<String> personIds,
+    Map<String, PersonEntity> personMap,
+  ) {
+    return personIds
+        .where((id) => (personMap[id]?.data.name ?? "").isNotEmpty)
+        .toList();
+  }
+
   void _selectionChangedListener() {
     if (mounted) {
       setState(() {});
@@ -85,15 +96,13 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
         final onlyPersonSelected =
             selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
-        final onePersonAndClusters =
-            selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
         final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
             selectedPersonIds.every(
               (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
             );
         final bool showEditAction = onlyOnePerson;
         final bool showReviewAction = onlyOnePerson;
-        final bool showMergeAction = onePersonAndClusters;
+        final bool showMergeAction = selectedClusterIds.isNotEmpty;
         final bool showResetAction = onlyOnePerson;
         final bool showAutoAddAction = onlyPersonSelected;
         final bool showPinAction = onlyPersonSelected &&
@@ -404,31 +413,44 @@ class _PeopleSelectionActionWidgetState
   Future<void> _onMerge() async {
     final selectedPersonIds = _getSelectedPersonIds();
     final selectedClusterIds = _getSelectedClusterIds();
-    if (selectedPersonIds.length != 1 || selectedClusterIds.isEmpty) return;
+    if (selectedClusterIds.isEmpty) return;
 
-    await showChoiceDialog(
-      context,
-      title: AppLocalizations.of(context).areYouSureYouWantToMergeThem,
-      body: AppLocalizations.of(context)
-          .allUnnamedGroupsWillBeMergedIntoTheSelectedPerson,
-      firstButtonLabel: AppLocalizations.of(context).confirm,
-      firstButtonOnTap: () async {
-        try {
-          final personMap = await personEntitiesMapFuture;
-          final personID = selectedPersonIds.first;
-          final person = personMap[personID];
-          if (person == null) return;
-          for (final clusterID in selectedClusterIds) {
-            await ClusterFeedbackService.instance.addClusterToExistingPerson(
-              clusterID: clusterID,
-              person: person,
-            );
-          }
-          widget.selectedPeople.clearAll();
-        } catch (e, s) {
-          _logger.severe('Merging clusters failed', e, s);
-        }
-      },
-    );
+    final personMap = await personEntitiesMapFuture;
+    if (!mounted) return;
+    final namedSelectedPersonIds =
+        _getNamedSelectedPersonIds(selectedPersonIds, personMap);
+
+    String? targetPersonId;
+    if (namedSelectedPersonIds.length == 1) {
+      targetPersonId = namedSelectedPersonIds.first;
+    } else {
+      final initialPersons =
+          await AddFilesToPersonPage.prefetchNamedPersons(context);
+      if (!mounted) return;
+      if (initialPersons == null || initialPersons.isEmpty) {
+        return;
+      }
+      targetPersonId = await showMergeClustersToPersonSheet(
+        context,
+        initialPersons: initialPersons,
+      );
+      if (!mounted) return;
+    }
+
+    if (targetPersonId == null || targetPersonId.isEmpty) return;
+
+    final person = personMap[targetPersonId];
+    if (person == null) return;
+    try {
+      for (final clusterID in selectedClusterIds) {
+        await ClusterFeedbackService.instance.addClusterToExistingPerson(
+          clusterID: clusterID,
+          person: person,
+        );
+      }
+      widget.selectedPeople.clearAll();
+    } catch (e, s) {
+      _logger.severe('Merging clusters failed', e, s);
+    }
   }
 }
