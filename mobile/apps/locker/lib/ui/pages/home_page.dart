@@ -159,6 +159,7 @@ class CustomLockerAppBar extends StatelessWidget
                         icon: HugeIcons.strokeRoundedSearch01,
                         color: colorScheme.primary700,
                         size: 20,
+                        strokeWidth: 1.75,
                       ),
                     ),
                     prefixIconConstraints: const BoxConstraints(
