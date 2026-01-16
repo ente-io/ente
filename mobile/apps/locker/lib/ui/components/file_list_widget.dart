@@ -8,7 +8,6 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/sharing/album_share_info_widget.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
@@ -41,12 +40,7 @@ class FileListWidget extends StatelessWidget {
     final bool isOwner = collection != null &&
         currentUserID != null &&
         collection.isOwner(currentUserID);
-    final List<User> sharees =
-        collection?.sharees.whereType<User>().toList() ?? const [];
-    final bool hasSharees = sharees.isNotEmpty;
-    final bool isOutgoing = isOwner && hasSharees;
     final bool isIncoming = collection != null && !isOwner;
-    final bool showSharingIndicator = isOutgoing || isIncoming;
 
     final fileRowWidget = Flexible(
       flex: 6,
@@ -61,7 +55,7 @@ class FileListWidget extends StatelessWidget {
                   padding: const EdgeInsets.all(10.0),
                   child: _buildFileIcon(),
                 ),
-                if (showSharingIndicator)
+                if (isIncoming)
                   Positioned(
                     right: 1,
                     bottom: 10,
@@ -72,9 +66,7 @@ class FileListWidget extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.all(1.0),
                       child: HugeIcon(
-                        icon: isOutgoing
-                            ? HugeIcons.strokeRoundedCircleArrowUpRight
-                            : HugeIcons.strokeRoundedCircleArrowDownLeft,
+                        icon: HugeIcons.strokeRoundedCircleArrowDownLeft,
                         strokeWidth: 2.0,
                         color: colorScheme.primary700,
                         size: 16.0,
@@ -162,14 +154,8 @@ class FileListWidget extends StatelessWidget {
                               color: colorScheme.primary700,
                               size: 24,
                             )
-                          : showSharingIndicator
-                              ? (isIncoming
-                                  ? _buildOwnerAvatar(collection.owner)
-                                  : (hasSharees
-                                      ? _buildShareesAvatars(sharees)
-                                      : const SizedBox(
-                                          key: ValueKey("unselected"),
-                                        )))
+                          : isIncoming
+                              ? _buildOwnerAvatar(collection.owner)
                               : const SizedBox(
                                   key: ValueKey("unselected"),
                                 ),
@@ -210,33 +196,6 @@ class FileListWidget extends StatelessWidget {
         type: AvatarType.mini,
         thumbnailView: true,
         config: Configuration.instance,
-      ),
-    );
-  }
-
-  Widget _buildShareesAvatars(List<User> sharees) {
-    if (sharees.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    const int limitCountTo = 1;
-    const double avatarSize = 24.0;
-    const double overlapPadding = 20.0;
-
-    final hasMore = sharees.length > limitCountTo;
-
-    final double totalWidth =
-        hasMore ? avatarSize + overlapPadding : avatarSize;
-
-    return SizedBox(
-      height: avatarSize,
-      width: totalWidth,
-      child: AlbumSharesIcons(
-        sharees: sharees,
-        padding: EdgeInsets.zero,
-        limitCountTo: limitCountTo,
-        type: AvatarType.mini,
-        removeBorder: true,
       ),
     );
   }
