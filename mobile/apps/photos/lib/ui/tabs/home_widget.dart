@@ -750,13 +750,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
           body: Stack(
             children: [
-              SafeArea(
-                bottom: false,
-                child: Builder(
-                  builder: (context) {
-                    return _getBody(context);
-                  },
-                ),
+              Builder(
+                builder: (context) {
+                  return _getBody(context);
+                },
               ),
               if (isChristmasPeriod())
                 ValueListenableBuilder<double>(
