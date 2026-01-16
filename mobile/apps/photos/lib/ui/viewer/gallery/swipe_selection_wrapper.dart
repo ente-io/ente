@@ -65,7 +65,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   static const double _baselineMaxScrollSpeed = 12.0; // 1440 px/s (12 * 120fps)
   static const double _speedExponent = 1.20; // Power curve exponent
   // Filters touch jitter on Samsung S series devices
-  static const double _movementThreshold = 3.0;
+  static const double _movementThreshold = 4.0;
 
   @override
   void initState() {
