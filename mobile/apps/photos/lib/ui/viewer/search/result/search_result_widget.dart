@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import 'package:photos/ente_theme_data.dart';
@@ -9,7 +10,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
 import 'package:photos/ui/viewer/search/result/search_result_page.dart';
 import 'package:photos/ui/viewer/search/result/search_thumbnail_widget.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class SearchResultWidget extends StatelessWidget {
   final SearchResult searchResult;
@@ -166,6 +166,10 @@ class SearchResultWidget extends StatelessWidget {
         return "Person";
       case ResultType.uploader:
         return "Uploaded by";
+      case ResultType.cameraMake:
+        return "Camera Make";
+      case ResultType.cameraModel:
+        return "Camera Model";
     }
   }
 }

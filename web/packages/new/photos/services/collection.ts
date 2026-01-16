@@ -49,6 +49,7 @@ import {
     savedCollections,
     savedCollectionsUpdationTime,
 } from "./photos-fdb";
+import { settingsSnapshot } from "./settings";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -456,6 +457,13 @@ const clearCachedThumbnailIfContentChanged = async (
         await thumbnailCache.delete(updatedFile.id.toString());
     }
 };
+
+/**
+ * Return all collections (both normal and hidden) that are present in our
+ * local database.
+ */
+export const savedAllCollections = (): Promise<Collection[]> =>
+    savedCollections();
 
 /**
  * Return all normal (non-hidden) collections that are present in our local
@@ -1435,7 +1443,11 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  */
 export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
-    "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
+    | "enableCollect"
+    | "enableJoin"
+    | "enableComment"
+    | "validTill"
+    | "deviceLimit"
 >;
 
 /**
@@ -1452,10 +1464,12 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
+    // Only enable comments by default if the feature flag is enabled.
+    const enableComment = settingsSnapshot().isCommentsEnabled;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({ collectionID, ...attributes }),
+        body: JSON.stringify({ collectionID, enableComment, ...attributes }),
     });
     ensureOk(res);
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
@@ -1655,4 +1669,103 @@ export const movePendingRemovalActionsToUncategorized = async (
         // source collection, which is the primary goal here)
         await moveFromCollection(collectionID, targetCollection, filesToMove);
     }
+};
+
+/**
+ * Remove files from the uncategorized collection if they exist in other
+ * user-owned albums.
+ *
+ * This is a cleanup operation that helps users remove duplicates from their
+ * uncategorized collection. Files that exist both in uncategorized and in
+ * other albums are moved out of uncategorized to one of those albums.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param uncategorizedCollection The user's uncategorized collection.
+ */
+export const cleanUncategorized = async (
+    uncategorizedCollection: Collection,
+): Promise<number> => {
+    const userID = ensureLocalUser().id;
+    const collections = await savedCollections();
+    const collectionFiles = await savedCollectionFiles();
+
+    // Get files in the uncategorized collection
+    const uncategorizedFiles = collectionFiles.filter(
+        (f) => f.collectionID == uncategorizedCollection.id,
+    );
+
+    if (!uncategorizedFiles.length) return 0;
+
+    // Build a map from file ID to the collections it belongs to (excluding
+    // uncategorized itself)
+    const fileIDToCollectionIDs = new Map<number, number[]>();
+    for (const file of collectionFiles) {
+        if (file.collectionID == uncategorizedCollection.id) continue;
+        const existing = fileIDToCollectionIDs.get(file.id);
+        if (existing) {
+            existing.push(file.collectionID);
+        } else {
+            fileIDToCollectionIDs.set(file.id, [file.collectionID]);
+        }
+    }
+
+    // Filter to only user-owned normal collections (not hidden, not shared)
+    const userOwnedCollectionIDs = new Set(
+        collections
+            .filter(
+                (c) =>
+                    c.owner.id == userID &&
+                    c.type != "uncategorized" &&
+                    !isHiddenCollection(c),
+            )
+            .map((c) => c.id),
+    );
+
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+
+    // Find files that exist in other user-owned collections
+    const filesToClean = uncategorizedFiles.filter((file) => {
+        const otherCollectionIDs = fileIDToCollectionIDs.get(file.id);
+        if (!otherCollectionIDs) return false;
+        // Check if any of these collections are user-owned normal collections
+        return otherCollectionIDs.some((cid) =>
+            userOwnedCollectionIDs.has(cid),
+        );
+    });
+
+    if (!filesToClean.length) return 0;
+
+    // Group files by their target collection for efficient batching
+    const filesByTargetCollection = new Map<number, EnteFile[]>();
+    for (const file of filesToClean) {
+        const otherCollectionIDs = fileIDToCollectionIDs.get(file.id)!;
+        const targetCollectionID = otherCollectionIDs.find((cid) =>
+            userOwnedCollectionIDs.has(cid),
+        );
+        if (!targetCollectionID) continue;
+
+        const existing = filesByTargetCollection.get(targetCollectionID) ?? [];
+        existing.push(file);
+        filesByTargetCollection.set(targetCollectionID, existing);
+    }
+
+    // Move files in batches per target collection
+    let cleanedCount = 0;
+    for (const [targetCollectionID, files] of filesByTargetCollection) {
+        const targetCollection = collectionsByID.get(targetCollectionID);
+        if (!targetCollection) continue;
+
+        // Move files from uncategorized to the target collection.
+        // This effectively removes them from uncategorized since they already
+        // exist in the target.
+        await moveFromCollection(
+            uncategorizedCollection.id,
+            targetCollection,
+            files,
+        );
+        cleanedCount += files.length;
+    }
+
+    return cleanedCount;
 };

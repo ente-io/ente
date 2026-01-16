@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Bestätige deinen Wiederherstellungsschlüssel",
   "addViewer": "Album teilen",
   "addCollaborator": "Bearbeiter hinzufügen",
+  "admin": "Administrator",
+  "admins": "Administratoren",
+  "addAdmin": "Administrator hinzufügen",
+  "addMoreAdmins": "Weitere Administratoren hinzufügen",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Administratoren und Bearbeiter können Fotos hinzufügen. Administratoren können auch Fotos und Teilnehmer verwalten.",
   "addANewEmail": "Neue E-Mail-Adresse hinzufügen",
   "orPickAnExistingOne": "Oder eine vorherige auswählen",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bearbeiter können Fotos & Videos zu dem geteilten Album hinzufügen.",
@@ -203,6 +208,7 @@
   },
   "allowJoiningAlbum": "Erlaube das Beitreten zum Album",
   "allowAddPhotosDescription": "Erlaube Nutzern, mit diesem Link ebenfalls Fotos zu diesem geteilten Album hinzuzufügen.",
+  "enableComment": "Kommentare und Reaktionen",
   "passwordLock": "Passwort Sperre",
   "canNotOpenTitle": "Album kann nicht geöffnet werden",
   "canNotOpenBody": "Leider kann dieses Album nicht in der App geöffnet werden.",
@@ -550,6 +556,11 @@
   "removeDuplicatesDesc": "Überprüfe und lösche Dateien, die exakte Duplikate sind.",
   "viewLargeFiles": "Große Dateien",
   "viewLargeFilesDesc": "Dateien anzeigen, die den meisten Speicherplatz belegen.",
+  "deleteSuggestions": "Vorschläge löschen",
+  "deleteSuggestionsDesc": "Dateien überprüfen, die für die Löschung vorgeschlagen wurden.",
+  "rejectSuggestions": "Vorschläge ablehnen",
+  "noDeleteSuggestion": "Keine Vorschläge zum Löschen",
+  "youHaveNoFileSuggestedForDeletion": "Du hast keine Dateien, die zum Löschen vorgeschlagen wurden",
   "noDuplicates": "✨ Keine Duplikate",
   "youveNoDuplicateFilesThatCanBeCleared": "Du hast keine Duplikate, die gelöscht werden können",
   "success": "Abgeschlossen",
@@ -887,6 +898,7 @@
   "clickOnTheOverflowMenu": "• Klicken Sie auf das Überlaufmenü",
   "click": "• Klick",
   "nothingToSeeHere": "Hier gibt es nichts zu sehen! 👀",
+  "selectFoldersToBackup": "<action>Wähle Ordner</action> zum Anzeigen und\nSichern auf Ente.",
   "unarchiveAlbum": "Album dearchivieren",
   "archiveAlbum": "Album archivieren",
   "calculating": "Wird berechnet...",
@@ -1406,11 +1418,60 @@
   "localSyncErrorMessage": "Es sieht so aus, als ob etwas schiefgelaufen ist, da die lokale Foto-Synchronisierung länger dauert als erwartet. Bitte kontaktiere unser Support-Team",
   "showPerson": "Person anzeigen",
   "sort": "Sortierung",
+  "recent": "Kürzlich",
   "mostRecent": "Neuste",
   "mostRelevant": "Nach Relevanz",
   "loadingYourPhotos": "Lade deine Fotos...",
   "processingImport": "Verarbeite {folderName}...",
   "personName": "Name der Person",
+  "addPerson": "Person hinzufügen",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Zur Person hinzufügen",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Bitte benenne zuerst eine Person in der Personen-Rubrik",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Nur hochgeladene Dateien können zu einer Person hinzugefügt werden",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Keine Gesichter erkannt, tippe zum Hinzufügen.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Eine Datei zu {personName}} other {{count} Dateien zu {personName}}} hinzugefügt",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {Eine Datei ist bereits zu {personName} hinzugefügt} other {{count} Dateien sind bereits zu {personName} hinzugefügt}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Neue Person hinzufügen",
   "addNameOrMerge": "Name hinzufügen oder zusammenführen",
   "mergeWithExisting": "Mit vorhandenem zusammenführen",
@@ -1458,6 +1519,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Es wurden keine Admins hinzugefügt} =1 {Ein Admin erfolgreich hinzugefügt} other {{count} Admins erfolgreich hinzugefügt}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Admin hinzufügen} =1 {Admin hinzufügen} other {Admins hinzufügen}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Admins können Fotos und Teilnehmer verwalten.",
+  "suggestDeletion": "Löschung vorschlagen",
+  "suggestDeletionDescription": "Ausgewählte Fotos werden aus diesem Album entfernt. Fotobesitzer werden zusätzlich einen Vorschlag erhalten, die Fotos zu überprüfen und zu löschen.",
+  "deleteSuggestionSent": "Löschvorschlag gesendet",
   "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
   "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
   "@sessionIdMismatch": {
@@ -1817,6 +1902,10 @@
   "thisMonth": "Diesen Monat",
   "thisYear": "Dieses Jahr",
   "groupBy": "Gruppieren nach",
+  "groupByDay": "Tag",
+  "groupByWeek": "Woche",
+  "groupByMonth": "Monat",
+  "groupByYear": "Jahr",
   "faceThumbnailGenerationFailed": "Vorschaubilder konnten nicht erstellt werden",
   "fileAnalysisFailed": "Datei konnte nicht analysiert werden",
   "editAutoAddPeople": "Automatisch hinzugefügte Personen bearbeiten",
@@ -1978,14 +2067,10 @@
   "hoorayyyy": "Hurraaaa!",
   "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
   "deletingDash": "Lösche - ",
-  "cLTitle1": "Einführung von Ritualen",
-  "cLDesc1": "Planst du Vorsätze für 2026? Mit Ritualen kannst du eine Erinnerung in Ente Photos setzen und deinen Fortschritt durch Fotos verfolgen. Nutze es für Workouts, Essgewohnheiten, tägliche Momente mit deinen Liebsten – alles, was du zur Gewohnheit machen möchtest.",
-  "cLTitle2": "Öffentliche Links, jetzt für alle",
-  "cLDesc2": "Alle Ente-Nutzer im kostenlosen Tarif können jetzt öffentliche Links zu Fotos und Alben erstellen und teilen. Um Missbrauch zu verhindern, werden Links Grenzen haben, wie viele Personen sie ansehen können.",
-  "cLTitle3": "Personen manuell markieren",
-  "cLDesc3": "Du kannst jetzt Personen markieren, auch wenn unsere On-Device-KI kein Gesicht erkennt. Praktisch für Haustiere, teilweise sichtbare Gesichter oder Momente, in denen jemand nicht wirklich auf dem Foto ist, aber trotzdem einbezogen werden sollte.",
-  "cLTitle4": "Und mehr",
-  "cLDesc4": "Du kannst jetzt geteilte Alben anpinnen. Album-Links sind für Mitarbeiter und Betrachter sichtbar, um das Teilen noch einfacher zu machen. Wir haben einige iOS-Wischfehler behoben und die Fotoansicht aktualisiert, einschließlich eines neuen Favoriten-Symbols (Platz für kommende Funktionen).",
+  "cLTitle1": "Kommentare und Reaktionen",
+  "cLDesc1": "Wir führen Kommentare und Reaktionen für geteilte Fotos ein. Du kannst auf ein Foto reagieren oder es kommentieren, indem du es öffnest und die Aktionen unten verwendest. Alle eingehenden Kommentare und Reaktionen werden auf der Teilen-Registerkarte angezeigt.",
+  "cLTitle2": "Admin für Alben",
+  "cLDesc2": "Du kannst jetzt einen Ente-Nutzer als Administrator für dein Album zuweisen. Auf diese Weise kann er andere Betrachter und Bearbeiter hinzufügen, Fotos aus dem Album entfernen und sogar Teilnehmern vorschlagen, ihre Fotos zu löschen.",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2145,17 +2230,22 @@
   "ritualAlbumNotSet": "Album nicht gesetzt",
   "ritualOpenCameraTooltip": "Ritualkamera öffnen",
   "ritualEditorLabel": "Ritual-Editor",
-  "ritualNew": "Neues Ritual",
+  "ritualNew": "Neues Ritual erstellen",
+  "ritualCreateNewTitle": "Neues Ritual erstellen",
   "ritualEdit": "Ritual bearbeiten",
   "ritualEnterPrompt": "Gib dein Ritual ein",
   "ritualEnterDescription": "Bitte gib eine Beschreibung ein",
+  "ritualChooseDaysLabel": "Tage für Ritual auswählen",
   "ritualDayLabel": "Tag",
   "ritualNotificationsOffHint": "Benachrichtigungen sind ausgeschaltet. Tippe auf einen Tag, um sie einzuschalten.",
   "ritualTimeLabel": "Zeitpunkt",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Ritual speichern",
+  "ritualCreateAction": "Ritual erstellen",
   "ritualUpdate": "Ritual aktualisieren",
   "ritualSelectAlbumTitle": "Album auswählen",
+  "ritualChooseAlbumLabel": "Wähle ein Album",
+  "ritualSendReminderLabel": "Erinnerung senden",
   "ritualSearchOrCreate": "Suchen oder neu erstellen",
   "ritualNoAlbumsYet": "Bisher keine Alben",
   "ritualNoMatchingAlbums": "Keine passenden Alben",
@@ -2170,5 +2260,137 @@
   },
   "ritualCreateNew": "Neu erstellen",
   "ritualAlbumSelectionPlaceholder": "Album auswählen",
-  "ritualPickEmojiTitle": "Emoji auswählen"
+  "ritualPickEmojiTitle": "Emoji auswählen",
+  "feed": "Feed",
+  "likedYourPhoto": "Gefällt ein Foto",
+  "commentedOnYourPhoto": "Kommentierte ein Foto",
+  "repliedToYourComment": "Antwortete auf einen Kommentar",
+  "likedYourComment": "Gefällt ein Kommentar",
+  "likedYourReply": "Gefällt eine Antwort",
+  "and1Other": "und einem anderen",
+  "andXOthers": "und {count} anderen",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Noch keine Aktivität",
+  "like": "Gefällt",
+  "comments": "Kommentare",
+  "commentHint": "Sag etwas Nettes!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Antworten",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Bist du sicher?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Kommentar löschen",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Dein Kommentar \"{comment}\" wird dauerhaft gelöscht werden",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{Ein Like} other{{count} Likes}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Noch keine Likes",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Likes konnten nicht geladen werden",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Like konnte nicht aktualisiert werden",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Ein Album konnte nicht gelikt werden} other{{count} Alben konnten nicht gelikt werden}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Alben konnten nicht geladen werden",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{Ein Album} other{{count} Alben}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Alle liken",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Wähle das Album, um das Video zu liken",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Wähle das Album, um das Foto zu liken",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Fehler beim Liken des Kommentars",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Fehler beim Löschen des Kommentars",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(gelöscht)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Antwort an dich",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Antwort an {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Keine Kommentare} =1{Ein Kommentar} other{{count} Kommentare}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

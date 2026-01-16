@@ -3,6 +3,7 @@ import "dart:math";
 import "dart:ui";
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -23,7 +24,6 @@ import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class LocationsSection extends StatefulWidget {
   final List<GenericSearchResult> locationsSearchResults;

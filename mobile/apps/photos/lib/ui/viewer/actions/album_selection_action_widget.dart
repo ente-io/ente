@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -18,7 +19,6 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/add_participant_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
@@ -110,13 +110,47 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).archive,
-        icon: Icons.archive_outlined,
-        onTap: _archiveClick,
-      ),
-    );
+    if (widget.sectionType == UISectionType.archivedCollections) {
+      // For archived albums: show unarchive and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unarchive,
+          icon: Icons.unarchive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else if (widget.sectionType == UISectionType.hiddenCollections) {
+      // For hidden albums: show unhide and delete
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).unhide,
+          icon: Icons.visibility_outlined,
+          onTap: _onHideClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+    } else {
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).archive,
+          icon: Icons.archive_outlined,
+          onTap: _archiveClick,
+        ),
+      );
+    }
 
     if (widget.sectionType == UISectionType.incomingCollections) {
       // Pin/Unpin options for incoming collections (uses sharee metadata)
@@ -193,10 +227,8 @@ class _AlbumSelectionActionWidgetState
     final actions = <ActionTypesToShow>[
       ActionTypesToShow.addViewer,
       ActionTypesToShow.addCollaborator,
+      ActionTypesToShow.addAdmin,
     ];
-    if (flagService.enableAdminRole) {
-      actions.add(ActionTypesToShow.addAdmin);
-    }
     await routeToPage(
       context,
       AddParticipantPage(widget.selectedAlbums.albums.toList(), actions),

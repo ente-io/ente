@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/models/file/file.dart";
@@ -9,13 +10,14 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/video_stream_change.dart";
-import "package:photos/utils/standalone/date_time.dart";
-import "package:photos/utils/standalone/debouncer.dart";
+import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final VideoController controller;
   final FullScreenRequestCallback? playbackCallback;
+  final TransformationController? transformationController;
+  final Function(bool)? shouldDisableScroll;
   final bool isFromMemories;
   final void Function() onStreamChange;
   final bool isPreviewPlayer;
@@ -25,6 +27,8 @@ class VideoWidget extends StatefulWidget {
     this.controller,
     this.playbackCallback, {
     super.key,
+    this.transformationController,
+    this.shouldDisableScroll,
     required this.isFromMemories,
     // ignore: unused_element
     required this.onStreamChange,
@@ -91,10 +95,24 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Video(
+    final videoWidget = Video(
       controller: widget.controller,
-      controls: (state) {
-        return ValueListenableBuilder(
+      controls: NoVideoControls,
+    );
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Video layer with zoom support
+        widget.transformationController != null
+            ? ZoomableVideoViewer(
+                transformationController: widget.transformationController!,
+                shouldDisableScroll: widget.shouldDisableScroll,
+                child: videoWidget,
+              )
+            : videoWidget,
+        // Controls overlay (fixed position, not affected by zoom)
+        ValueListenableBuilder(
           valueListenable: showControlsNotifier,
           builder: (context, value, _) {
             return AnimatedOpacity(
@@ -105,7 +123,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                 alignment: Alignment.center,
                 children: [
                   GestureDetector(
-                    behavior: HitTestBehavior.opaque,
+                    behavior: HitTestBehavior.translucent,
                     onTap: widget.isFromMemories
                         ? null
                         : () {
@@ -190,8 +208,8 @@ class _VideoWidgetState extends State<VideoWidget> {
               ),
             );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 }

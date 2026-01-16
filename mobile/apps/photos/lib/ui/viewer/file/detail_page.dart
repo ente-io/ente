@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:extended_image/extended_image.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
@@ -29,7 +31,6 @@ import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/thumbnail_util.dart";
 
 enum DetailPageMode {
@@ -44,12 +45,17 @@ class DetailPageConfiguration {
   final DetailPageMode mode;
   final bool isLocalOnlyContext;
 
+  /// Callback invoked with the page context after the page is ready.
+  /// Useful for showing bottom sheets or dialogs after navigation completes.
+  final void Function(BuildContext context)? onPageReady;
+
   DetailPageConfiguration(
     this.files,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
     this.isLocalOnlyContext = false,
+    this.onPageReady,
   });
 
   DetailPageConfiguration copyWith({
@@ -79,10 +85,14 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
+  final _isInSharedCollectionNotifier = ValueNotifier(false);
+  final _showingThumbnailFallbackNotifier = ValueNotifier<int?>(null);
 
   @override
   void dispose() {
     _enableFullScreenNotifier.dispose();
+    _isInSharedCollectionNotifier.dispose();
+    _showingThumbnailFallbackNotifier.dispose();
     super.dispose();
   }
 
@@ -93,6 +103,8 @@ class _DetailPageState extends State<DetailPage> {
     // when the body is rebuilt, which can reset state stored in it.
     return InheritedDetailPageState(
       enableFullScreenNotifier: _enableFullScreenNotifier,
+      isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
+      showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
       child: _Body(widget.config),
     );
   }
@@ -131,6 +143,13 @@ class _BodyState extends State<_Body> {
         isGuestView = event.isGuestView;
         swipeLocked = event.swipeLocked;
       });
+    });
+
+    // Update shared collection state after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateSharedCollectionState(_files![_selectedIndexNotifier.value]);
+      widget.config.onPageReady?.call(context);
     });
   }
 
@@ -354,6 +373,7 @@ class _BodyState extends State<_Body> {
           _selectedIndexNotifier.value = index;
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
+        _updateSharedCollectionState(_files![index]);
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -479,5 +499,27 @@ class _BodyState extends State<_Body> {
       context,
       "Please authenticate to view more photos and videos.",
     );
+  }
+
+  Future<void> _updateSharedCollectionState(EnteFile file) async {
+    final fileID = file.uploadedFileID;
+    final notifier =
+        InheritedDetailPageState.maybeOf(context)?.isInSharedCollectionNotifier;
+
+    if (notifier == null) return;
+
+    if (fileID == null) {
+      notifier.value = false;
+      return;
+    }
+
+    final isShared =
+        await CollectionsService.instance.isFileInSharedCollection(fileID);
+
+    // Guard: Only update if still showing the same file
+    // (user may have swiped to a different file while awaiting)
+    if (_files![_selectedIndexNotifier.value].uploadedFileID == fileID) {
+      notifier.value = isShared;
+    }
   }
 }

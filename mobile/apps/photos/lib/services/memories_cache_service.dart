@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io" show File;
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
@@ -12,7 +13,6 @@ import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import "package:photos/events/memory_seen_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
@@ -29,7 +29,6 @@ import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/cache_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -224,9 +223,8 @@ class MemoriesCacheService {
     }
     return _memoriesGetLock.synchronized(() async {
       if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
-        final currentMemories = _cachedMemories!
-            .where((memory) => memory.shouldShowNow())
-            .toList();
+        final currentMemories =
+            _cachedMemories!.where((memory) => memory.shouldShowNow()).toList();
         if (currentMemories.isNotEmpty) {
           _logger.info("Found memories in memory cache");
           return currentMemories;

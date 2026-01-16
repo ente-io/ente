@@ -524,7 +524,6 @@
   "dropReviewAndroid": "Lascia una recensione sul Play Store",
   "supportEnte": "Supporta <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Dacci una stella su Github",
-  "free10GB": "10GB gratis su <bold-green>ente</bold-green> Foto",
   "loginWithAuthAccount": "Accedi con il tuo account Auth",
   "freeStorageOffer": "10% di sconto su <bold-green>ente</bold-green> Foto",
   "freeStorageOfferDescription": "Utilizzare il codice \"AUTH\" per ottenere il 10% di sconto al primo anno",
@@ -578,7 +577,7 @@
   "addNew": "Aggiungi nuovo",
   "selected": "selezionato",
   "moveMultipleToTrashMessage": "Sei sicuro di voler spostare {count} elementi nel cestino?",
-  "nSelected": "{count, plural, one {}=1{1 selezionato} other{{count} selezionati}}",
+  "nSelected": "{count, plural, =1{1 selezionato} other{{count} selezionati}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -589,7 +588,7 @@
       }
     }
   },
-  "pinnedCount": "{count, plural, one {}=1{1 elemento fissato} other{{count} elementi fissati}}",
+  "pinnedCount": "{count, plural, =1{1 elemento fissato} other{{count} elementi fissati}}",
   "@pinnedCount": {
     "description": "Text to show number of items pinned",
     "placeholders": {

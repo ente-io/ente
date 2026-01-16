@@ -54,7 +54,8 @@ class CaptionedTextWidgetV2 extends StatelessWidget {
                             TextSpan(
                               text: ' \u2022 $subTitle',
                               style: enteTextTheme.small.copyWith(
-                                color: subTitleColor ?? enteColorScheme.textMuted,
+                                color:
+                                    subTitleColor ?? enteColorScheme.textMuted,
                               ),
                             ),
                         ],

@@ -512,7 +512,6 @@
   "dropReviewAndroid": "Deja una reseña en la Play Store",
   "supportEnte": "Apoya a <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Danos una estrella en GitHub",
-  "free10GB": "10 GB gratis en <bold-green>ente</bold-green> Fotos",
   "loginWithAuthAccount": "Inicia sesión con tu cuenta de Auth",
   "freeStorageOffer": "10% de descuento en <bold-green>ente</bold-green> fotos",
   "freeStorageOfferDescription": "Usa el cupón \"AUTH\" para obtener un 10% de descuento en el primer año",
@@ -541,5 +540,6 @@
   "chooseBackupLocation": "Elige la ubicación de la copia de seguridad",
   "loadDefaultLocation": "Cargando ubicación predeterminada...",
   "couldNotDetermineLocation": "No se ha podido determinar la ubicación...",
-  "saveBackup": "Guardar copia de seguridad"
+  "saveBackup": "Guardar copia de seguridad",
+  "selectFolderToContinue": "Selecciona un archivo para continuar"
 }

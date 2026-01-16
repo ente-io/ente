@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' show max;
 
 import "package:collection/collection.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
@@ -1266,8 +1267,8 @@ class _EmailSectionState extends State<_EmailSection> {
   @override
   Widget build(BuildContext context) {
     const limitCountTo = 5;
-    final avatarSize = getAvatarSize(AvatarType.small);
-    final overlapPadding = getOverlapPadding(AvatarType.small);
+    final avatarSize = getAvatarSize(AvatarType.xl);
+    final overlapPadding = getOverlapPadding(AvatarType.xl);
     if (_email == null || _email!.isEmpty) {
       return AnimatedSize(
         duration: const Duration(milliseconds: 200),
@@ -1295,7 +1296,7 @@ class _EmailSectionState extends State<_EmailSection> {
                       child: AlbumSharesIcons(
                         sharees: _contacts,
                         limitCountTo: limitCountTo,
-                        type: AvatarType.small,
+                        type: AvatarType.xl,
                         padding: EdgeInsets.zero,
                         stackAlignment: Alignment.center,
                       ),

@@ -270,6 +270,80 @@ Notifications are currently only available on mobile apps. See the [Notification
 
 Open `Settings > General > Notifications` to enable or disable specific notification categories. All categories are enabled by default when you grant notification permission.
 
+## Home Widgets
+
+### How do I add a home widget? {#add-home-widget}
+
+**On iOS:**
+
+1. Long press on your home screen until apps start jiggling
+2. Tap the **+** button in the top left corner
+3. Search for "Ente" or scroll to find Ente Photos
+4. Choose the widget type (Memories, Albums, or People)
+5. Select your preferred widget size
+6. Tap **Add Widget**
+
+**On Android:**
+
+1. Long press on an empty area of your home screen
+2. Tap **Widgets**
+3. Find and expand **Ente Photos**
+4. Long press your desired widget and drag it to your home screen
+
+Learn more in the [Home Widgets guide](/photos/features/utilities/home-widgets).
+
+### How do I configure which albums appear on my widget? {#configure-widget-albums}
+
+Open `Settings > General > Home widget > Albums widget` in the Ente app.
+
+From here, you can select which albums to display. By default, the **Favorites** album is selected. You can select multiple albums to show more variety on your home screen.
+
+Learn more in the [Home Widgets guide](/photos/features/utilities/home-widgets#configuring-the-albums-widget).
+
+### Why does the People widget require face recognition? {#people-widget-face-recognition}
+
+The People widget displays photos of specific people from your library. To identify people in your photos, Ente needs to use face recognition, which is part of the machine learning features.
+
+To use the People widget:
+
+1. Enable face recognition in `Settings > General > Advanced > Machine learning`
+2. Wait for face indexing to complete
+3. Open `Settings > General > Home widget > People widget` to select people
+
+Learn more about [Face recognition](/photos/features/search-and-discovery/face-recognition).
+
+### How often do widgets refresh? {#widget-refresh-rate}
+
+Widgets automatically refresh approximately every **15 minutes**. This refresh happens in the background by the operating system, so you'll see different photos throughout the day without manual intervention.
+
+Opening the Ente app also triggers a widget sync, which can update your widgets sooner.
+
+### Widget not showing photos {#widget-not-showing-photos}
+
+If your widget appears blank or isn't showing photos:
+
+1. **Open the Ente app** and wait for it to sync completely
+2. **Check your configuration** - ensure you have photos in the configured albums or people
+3. **Verify storage** - make sure your device has enough storage for widget cache
+4. **Remove and re-add the widget** to force a refresh
+5. **Check background app refresh** - ensure Ente is allowed to refresh in the background in your device settings
+
+If the People widget shows no options, make sure face recognition is enabled and has finished indexing your photos.
+
+### What types of memories appear in the Memories widget? {#memories-widget-types}
+
+The Memories widget can display three types of memories:
+
+- **On This Day**: Photos from the same date in previous years
+- **Past Years**: Memories from past years
+- **Smart Memories**: AI-curated memorable moments
+
+You can toggle which memory types appear by opening `Settings > General > Home widget > Memories widget`.
+
+### Are widgets available on desktop or web? {#widgets-platform-availability}
+
+No, home widgets are only available on mobile apps (iOS and Android). Desktop apps and web browsers do not support home screen widgets.
+
 ## Other Advanced Features
 
 ### Can I access Ente from multiple browsers? {#multiple-browsers}

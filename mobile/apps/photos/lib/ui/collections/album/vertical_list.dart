@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
@@ -14,21 +15,24 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class AlbumVerticalListWidget extends StatefulWidget {
   final List<Collection> collections;
+  final List<Collection> recentCollections;
+  final List<Collection> sharedCollections;
   final CollectionActionType actionType;
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
@@ -48,6 +52,8 @@ class AlbumVerticalListWidget extends StatefulWidget {
     this.searchQuery,
     this.shouldShowCreateAlbum, {
     required this.selectedCollections,
+    this.recentCollections = const [],
+    this.sharedCollections = const [],
     this.enableSelection = false,
     this.onSelectionChanged,
     super.key,
@@ -72,36 +78,194 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
             ? widget.selectedPeople!.length
             : widget.selectedFiles?.files.length ?? 0;
 
-    if (widget.collections.isEmpty) {
+    final hasRecentCollections = widget.recentCollections.isNotEmpty;
+    final hasSharedCollections = widget.sharedCollections.isNotEmpty;
+
+    if (widget.collections.isEmpty &&
+        !hasRecentCollections &&
+        !hasSharedCollections) {
       if (widget.shouldShowCreateAlbum) {
         return _getNewAlbumWidget(context, filesCount);
       }
       return const EmptyState();
     }
+
+    // Calculate item count:
+    // - Create new album (optional)
+    // - Recent header (if recent collections exist)
+    // - Recent collections
+    // - Divider (if recent collections exist and regular collections exist)
+    // - All collections
+    // - Shared header (if shared collections exist)
+    // - Shared collections
+    final createAlbumOffset = widget.shouldShowCreateAlbum ? 1 : 0;
+    final recentHeaderOffset = hasRecentCollections ? 1 : 0;
+    final recentItemsCount = widget.recentCollections.length;
+    final showDivider = hasRecentCollections && widget.collections.isNotEmpty;
+    final dividerOffset = showDivider ? 1 : 0;
+    final sharedHeaderOffset = hasSharedCollections ? 1 : 0;
+    final sharedItemsCount = widget.sharedCollections.length;
+
+    final totalItemCount = createAlbumOffset +
+        recentHeaderOffset +
+        recentItemsCount +
+        dividerOffset +
+        widget.collections.length +
+        sharedHeaderOffset +
+        sharedItemsCount;
+
     return ListView.separated(
       itemBuilder: (context, index) {
+        // Create new album button
         if (index == 0 && widget.shouldShowCreateAlbum) {
           return _getNewAlbumWidget(context, filesCount);
         }
-        final item =
-            widget.collections[index - (widget.shouldShowCreateAlbum ? 1 : 0)];
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => widget.enableSelection
-              ? _toggleCollectionSelection(item)
-              : _albumListItemOnTap(context, item),
-          child: AlbumColumnItemWidget(
-            item,
-            selectedCollections: widget.selectedCollections,
-          ),
-        );
+
+        final adjustedIndex = index - createAlbumOffset;
+
+        // Recent header
+        if (hasRecentCollections && adjustedIndex == 0) {
+          return _buildSectionHeader(
+            context,
+            AppLocalizations.of(context).recent,
+          );
+        }
+
+        // Recent collections
+        final recentStartIndex = recentHeaderOffset;
+        if (hasRecentCollections &&
+            adjustedIndex >= recentStartIndex &&
+            adjustedIndex < recentStartIndex + recentItemsCount) {
+          final recentIndex = adjustedIndex - recentStartIndex;
+          final item = widget.recentCollections[recentIndex];
+          return _buildCollectionItem(context, item);
+        }
+
+        // Divider between recent and regular collections
+        final dividerIndex = recentStartIndex + recentItemsCount;
+        if (showDivider && adjustedIndex == dividerIndex) {
+          return _buildDivider(context);
+        }
+
+        // Regular collections
+        final collectionsStartIndex =
+            recentStartIndex + recentItemsCount + dividerOffset;
+        final collectionsEndIndex =
+            collectionsStartIndex + widget.collections.length;
+        if (adjustedIndex >= collectionsStartIndex &&
+            adjustedIndex < collectionsEndIndex) {
+          final collectionIndex = adjustedIndex - collectionsStartIndex;
+          final item = widget.collections[collectionIndex];
+          return _buildCollectionItem(context, item);
+        }
+
+        // Shared header
+        final sharedHeaderIndex = collectionsEndIndex;
+        if (hasSharedCollections && adjustedIndex == sharedHeaderIndex) {
+          return _buildSectionHeader(
+            context,
+            "Shared with you",
+          );
+        }
+
+        // Shared collections
+        final sharedStartIndex = sharedHeaderIndex + sharedHeaderOffset;
+        if (hasSharedCollections && adjustedIndex >= sharedStartIndex) {
+          final sharedIndex = adjustedIndex - sharedStartIndex;
+          final item = widget.sharedCollections[sharedIndex];
+          return _buildSharedCollectionItem(context, item);
+        }
+
+        return const SizedBox.shrink();
       },
       separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemCount:
-          widget.collections.length + (widget.shouldShowCreateAlbum ? 1 : 0),
+      itemCount: totalItemCount,
       shrinkWrap: false,
       physics: const BouncingScrollPhysics(),
     );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Text(
+        title,
+        style: textTheme.smallMuted.copyWith(color: colorScheme.textMuted),
+      ),
+    );
+  }
+
+  Widget _buildDivider(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: colorScheme.strokeFaint,
+      ),
+    );
+  }
+
+  Widget _buildCollectionItem(BuildContext context, Collection item) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => widget.enableSelection
+          ? _toggleCollectionSelection(item)
+          : _albumListItemOnTap(context, item),
+      child: AlbumColumnItemWidget(
+        item,
+        selectedCollections: widget.selectedCollections,
+      ),
+    );
+  }
+
+  Widget _buildSharedCollectionItem(BuildContext context, Collection item) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _sharedAlbumOnTap(context, item),
+      child: AlbumColumnItemWidget(
+        item,
+        selectedCollections: widget.selectedCollections,
+      ),
+    );
+  }
+
+  Future<void> _sharedAlbumOnTap(
+    BuildContext context,
+    Collection item,
+  ) async {
+    // Show dialog asking if user wants to add instead of move
+    final result = await showChoiceActionSheet(
+      context,
+      title: "Can't move to shared albums",
+      body:
+          "Items can only be added to shared albums, not moved. Would you like to add instead?\n\n(i) This option is shown for internal users only",
+      icon: Icons.info_outline,
+      firstButtonLabel: AppLocalizations.of(context).add,
+      secondButtonLabel: AppLocalizations.of(context).cancel,
+    );
+    if (result?.action == ButtonAction.first) {
+      // Perform add operation after dialog is dismissed
+      final success = await _addToCollection(context, item.id, true);
+      if (success) {
+        showShortToast(
+          context,
+          AppLocalizations.of(context)
+              .addedSuccessfullyTo(albumName: item.displayName),
+        );
+        Navigator.pop(context);
+        await _navigateToCollection(context, item);
+      }
+    } else if (result?.action == ButtonAction.error &&
+        result?.exception != null) {
+      await showGenericErrorDialog(
+        context: context,
+        error: result!.exception,
+      );
+    }
   }
 
   Future<void> _toggleCollectionSelection(
@@ -358,6 +522,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       sharedFiles: widget.sharedFiles,
     );
     if (result) {
+      CollectionsService.instance.recordCollectionUsage(collectionID);
       widget.selectedFiles?.clearAll();
     }
     return result;
@@ -386,6 +551,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         fromCollectionID: fromCollectionID,
       );
       await dialog.hide();
+      CollectionsService.instance.recordCollectionUsage(toCollectionID);
       unawaited(RemoteSyncService.instance.sync(silently: true));
       widget.selectedFiles?.clearAll();
 
@@ -420,6 +586,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     try {
       await CollectionsService.instance
           .restore(toCollectionID, widget.selectedFiles!.files.toList());
+      CollectionsService.instance.recordCollectionUsage(toCollectionID);
       unawaited(RemoteSyncService.instance.sync(silently: true));
       widget.selectedFiles?.clearAll();
       await dialog.hide();

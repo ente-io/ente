@@ -1,4 +1,3 @@
-
 import "package:ente_sharing/models/user.dart";
 
 extension UserExtension on User {

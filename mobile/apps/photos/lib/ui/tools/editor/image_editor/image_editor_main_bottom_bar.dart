@@ -5,7 +5,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_constants.dart";
-import "package:pro_image_editor/mixins/converted_configs.dart";
+import 'package:pro_image_editor/core/mixins/converted_configs.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorMainBottomBar extends StatefulWidget with SimpleConfigsAccess {
@@ -115,7 +115,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                           svgPath: "assets/image-editor/image-editor-paint.svg",
                           label: AppLocalizations.of(context).draw,
                           onTap: () {
-                            widget.editor.openPaintingEditor();
+                            widget.editor.openPaintEditor();
                           },
                         ),
                         CircularIconButton(

@@ -30,11 +30,13 @@ export type SidebarActionID =
     | "shortcuts.trash"
     | "utility.account"
     | "utility.watchFolders"
-    | "utility.deduplicate"
+    | "utility.freeUpSpace"
     | "utility.preferences"
     | "utility.help"
     | "utility.export"
     | "utility.logout"
+    | "freeUpSpace.deduplicate"
+    | "freeUpSpace.largeFiles"
     | "account.subscription"
     | "account.recoveryKey"
     | "account.twoFactor"
@@ -71,6 +73,8 @@ export type SearchSuggestion = { label: string } & (
     | { type: "fileType"; fileType: FileType }
     | { type: "fileName"; fileIDs: number[] }
     | { type: "fileCaption"; fileIDs: number[] }
+    | { type: "cameraMake"; fileIDs: number[] }
+    | { type: "cameraModel"; fileIDs: number[] }
     | { type: "date"; dateComponents: SearchDateComponents }
     | { type: "location"; locationTag: LocationTag }
     | { type: "city"; city: City }

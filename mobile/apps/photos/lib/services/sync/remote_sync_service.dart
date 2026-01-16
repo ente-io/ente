@@ -127,9 +127,7 @@ class RemoteSyncService {
       }
       await _pullDiff();
       await trashSyncService.syncTrash();
-      if (flagService.enableAdminRole) {
-        await _collectionsService.movePendingRemovalActionsToUncategorized();
-      }
+      await _collectionsService.movePendingRemovalActionsToUncategorized();
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
         await syncDeviceCollectionFilesForUpload();

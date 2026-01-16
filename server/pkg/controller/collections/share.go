@@ -146,6 +146,9 @@ func (c *CollectionController) UnShare(ctx *gin.Context, cID int64, fromUserID i
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
+	if err := c.removeUserSocialActivity(ctx.Request.Context(), cID, toUserID); err != nil {
+		return nil, err
+	}
 	err = c.CastRepo.RevokeForGivenUserAndCollection(ctx, cID, toUserID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -181,6 +184,9 @@ func (c *CollectionController) Leave(ctx *gin.Context, cID int64) error {
 	err = c.CollectionRepo.UnShare(cID, userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if err := c.removeUserSocialActivity(ctx.Request.Context(), cID, userID); err != nil {
+		return err
 	}
 	return nil
 }
@@ -224,14 +230,6 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
 		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
-			return ente.PublicURL{}, stacktrace.Propagate(err, "")
-		}
-		// Free user - check @ente.io domain restriction
-		user, userErr := c.UserRepo.Get(userID)
-		if userErr != nil {
-			return ente.PublicURL{}, stacktrace.Propagate(userErr, "")
-		}
-		if !strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
 		// Override device limit for free users
@@ -326,6 +324,14 @@ func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) 
 		}
 		diff[idx].Action = nil
 		diff[idx].ActionUserID = nil
+		if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
+			// This indicates that the file is deleted, but we still have a stale entry in the collection
+			reqContextLogger.WithFields(log.Fields{
+				"file_id":    diff[idx].ID,
+				"updated_at": diff[idx].UpdationTime,
+			}).Warning("stale collection_file found")
+			diff[idx].IsDeleted = true
+		}
 	}
 	return diff, hasMore, nil
 }

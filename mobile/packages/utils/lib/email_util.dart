@@ -1,16 +1,19 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_logging/logging.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart' as pure_utils;
 import 'package:ente_strings/extensions.dart';
+import 'package:ente_ui/components/base_bottom_sheet.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
+import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialog_widget.dart';
 import 'package:ente_ui/pages/log_file_viewer.dart';
-import 'package:ente_utils/directory_utils.dart';
-import 'package:ente_utils/platform_util.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
+import 'package:ente_utils/file_saver_util.dart';
 import 'package:ente_utils/share_utils.dart';
 import "package:file_saver/file_saver.dart";
 import 'package:flutter/material.dart';
@@ -28,7 +31,7 @@ bool isValidEmail(String? email) {
   if (email == null) {
     return false;
   }
-  return EmailValidator.validate(email);
+  return pure_utils.isValidEmail(email);
 }
 
 Future<void> sendLogs(
@@ -180,7 +183,7 @@ Future<String> getZippedLogsFile({
 }) async {
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory("$logsPath/$logsSubPath");
-  final tempPath = (await DirectoryUtils.getTempsDir()).path;
+  final tempPath = (await pure_utils.DirectoryUtils.getTempsDir()).path;
   final zipFilePath = "$tempPath/logs.zip";
   final encoder = ZipFileEncoder();
   encoder.create(zipFilePath);
@@ -201,7 +204,7 @@ Future<void> exportLogs(
         'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
 
     final bytes = await File(zipFilePath).readAsBytes();
-    await PlatformUtil.shareFile(
+    await FileSaverUtil.saveFile(
       logFileName,
       'zip',
       bytes,
@@ -283,28 +286,34 @@ Future<String> _clientInfo(BaseConfiguration? configuration) async {
 }
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        icon: const Icon(Icons.email_outlined),
-        title: Text('Email us at $toEmail'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: toEmail));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Email address copied')),
-              );
-            },
-            child: const Text('Copy Email Address'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      );
-    },
+  showBaseBottomSheet(
+    context,
+    title: 'Contact Support',
+    headerSpacing: 20,
+    child: Builder(
+      builder: (bottomSheetContext) {
+        final colorScheme = getEnteColorScheme(bottomSheetContext);
+        final textTheme = getEnteTextTheme(bottomSheetContext);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Email us at $toEmail',
+              style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(height: 20),
+            GradientButton(
+              text: 'Copy Email Address',
+              onTap: () async {
+                await Clipboard.setData(ClipboardData(text: toEmail));
+                Navigator.of(bottomSheetContext).pop();
+                showShortToast(context, 'Email address copied');
+              },
+            ),
+          ],
+        );
+      },
+    ),
   );
 }

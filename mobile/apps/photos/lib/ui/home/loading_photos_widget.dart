@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
@@ -14,7 +15,6 @@ import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import "package:photos/utils/email_util.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
   final bool isOnboardingFlow;

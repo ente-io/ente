@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -27,9 +28,7 @@ import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
-import 'package:photos/utils/standalone/date_time.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -74,6 +73,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final isJoinEnabled =
         widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
+    final enableComment =
+        widget.collection!.publicURLs.firstOrNull?.enableComment ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue = CollectionsService.instance.getPublicUrl(
@@ -121,12 +122,34 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       title: AppLocalizations.of(context).allowAddingPhotos,
                     ),
                     alignCaptionedTextToLeft: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    isBottomBorderRadiusRemoved: true,
+                    menuItemColor: enteColorScheme.fillFaint,
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isCollectEnabled,
                       onChanged: () async {
                         await _updateUrlSettings(context, {
                           'enableCollect': !isCollectEnabled,
+                        });
+                      },
+                    ),
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: enteColorScheme.fillFaint,
+                  ),
+                  MenuItemWidget(
+                    key: ValueKey("Enable comment $enableComment"),
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: AppLocalizations.of(context).enableComment,
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => enableComment,
+                      onChanged: () async {
+                        await _updateUrlSettings(context, {
+                          'enableComment': !enableComment,
                         });
                       },
                     ),
@@ -161,10 +184,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               ? AppLocalizations.of(context).expiredLinkInfo
                               : AppLocalizations.of(context).linkExpiresOn(
                                   expiryTime: getFormattedTime(
-                                    context,
                                     DateTime.fromMicrosecondsSinceEpoch(
                                       url.validTill,
                                     ),
+                                    context: context,
                                   ),
                                 ),
                         )

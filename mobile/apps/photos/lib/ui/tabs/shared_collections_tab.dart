@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:math";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
@@ -12,6 +13,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -19,6 +21,7 @@ import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/social/widgets/feed_preview_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
@@ -26,8 +29,6 @@ import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search_tab/contacts_section.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({super.key});
@@ -161,6 +162,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
+            if (flagService.isSocialEnabled) const FeedPreviewWidget(),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [

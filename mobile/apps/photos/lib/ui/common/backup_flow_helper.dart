@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
@@ -10,7 +11,6 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 final _logger = Logger("BackupFlowHelper");
 
@@ -82,6 +82,15 @@ Future<bool?> _handleFirstImportFlow(BuildContext context) async {
     await _showPermissionDeniedDialog(context);
     return null;
   }
+
+  // Trigger local sync before showing the loading widget.
+  // The skip flag was cleared above, so sync will now proceed with first import.
+  // We use LocalSyncService.sync() directly because:
+  // 1. It has its own _existingSync guard - returns existing future if already running
+  // 2. It's all we need for first import (fires completedFirstGalleryImport event)
+  // 3. Avoids race conditions with SyncService._doSync() calling syncAll()
+  _logger.info("Triggering local sync for first import from backup flow");
+  unawaited(LocalSyncService.instance.sync());
 
   return routeToPage<bool>(
     context,

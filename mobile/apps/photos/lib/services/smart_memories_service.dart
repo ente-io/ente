@@ -3,6 +3,7 @@ import "dart:developer" as dev show log;
 import "dart:math" show Random, max, min;
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
@@ -13,7 +14,6 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";

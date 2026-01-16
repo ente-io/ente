@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:collection/collection.dart' show IterableExtension;
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -14,6 +15,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
@@ -131,6 +133,17 @@ class _HiddenPageState extends State<HiddenPage> {
           return _hiddenCollectionsExcludingDefault;
         },
         hasVerifiedLock: true,
+        onViewAllTapped: () async {
+          await routeToPage(
+            context,
+            CollectionListPage(
+              _hiddenCollectionsExcludingDefault,
+              sectionType: UISectionType.hiddenCollections,
+              appTitle: Text(AppLocalizations.of(context).hidden),
+              tag: "hidden",
+            ),
+          );
+        },
       ),
     );
     return GalleryBoundariesProvider(

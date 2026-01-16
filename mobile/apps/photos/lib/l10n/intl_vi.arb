@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Xác nhận mã khôi phục của bạn",
   "addViewer": "Thêm người xem",
   "addCollaborator": "Thêm cộng tác viên",
+  "admin": "Quản trị",
+  "admins": "Quản trị viên",
+  "addAdmin": "Thêm quản trị viên",
+  "addMoreAdmins": "Thêm quản trị viên khác",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Quản trị viên và cộng tác viên có thể thêm ảnh. Quản trị viên có thể quản lý ảnh và người tham gia.",
   "addANewEmail": "Thêm một email mới",
   "orPickAnExistingOne": "Hoặc chọn một cái có sẵn",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ.",
@@ -203,6 +208,7 @@
   },
   "allowJoiningAlbum": "Cho phép ghép album",
   "allowAddPhotosDescription": "Cho phép người có liên kết thêm ảnh vào album chia sẻ.",
+  "enableComment": "Bình luận và bày tỏ cảm xúc",
   "passwordLock": "Khóa bằng mật khẩu",
   "canNotOpenTitle": "Không thể mở album này",
   "canNotOpenBody": "Rất tiếc, album này không thể mở trong ứng dụng.",
@@ -550,6 +556,11 @@
   "removeDuplicatesDesc": "Xem và xóa các tệp bị trùng lặp.",
   "viewLargeFiles": "Tệp lớn",
   "viewLargeFilesDesc": "Xem các tệp đang chiếm nhiều dung lượng nhất.",
+  "deleteSuggestions": "Xoá đề xuất",
+  "deleteSuggestionsDesc": "Xóa những tệp được đề xuất xóa.",
+  "rejectSuggestions": "Từ chối đề xuất",
+  "noDeleteSuggestion": "Không xóa những đề xuất",
+  "youHaveNoFileSuggestedForDeletion": "Bạn không có tệp được đề xuất xóa",
   "noDuplicates": "✨ Không có trùng lặp",
   "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp nào bị trùng để xóa",
   "success": "Thành công",
@@ -584,7 +595,7 @@
     }
   },
   "familyPlans": "Gói gia đình",
-  "referrals": "Giới thiệu",
+  "referrals": "Giới thiệu bạn bè",
   "notifications": "Thông báo",
   "sharedPhotoNotifications": "Ảnh chia sẻ mới",
   "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
@@ -887,6 +898,7 @@
   "clickOnTheOverflowMenu": "• Nhấn vào menu xổ xuống",
   "click": "• Nhấn",
   "nothingToSeeHere": "Ở đây không có gì để xem! 👀",
+  "selectFoldersToBackup": "<action>Chọn các thư mục</action> để xem\nvà sao lưu trên ente.",
   "unarchiveAlbum": "Bỏ lưu trữ album",
   "archiveAlbum": "Lưu trữ album",
   "calculating": "Đang tính toán...",
@@ -1406,11 +1418,60 @@
   "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
   "showPerson": "Hiện người",
   "sort": "Sắp xếp",
+  "recent": "Gần đây",
   "mostRecent": "Mới nhất",
   "mostRelevant": "Liên quan nhất",
   "loadingYourPhotos": "Đang tải ảnh của bạn...",
   "processingImport": "Đang xử lý {folderName}...",
   "personName": "Tên người",
+  "addPerson": "Thêm người",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Thêm vào người",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
+  "pleaseNamePersonInPeopleSectionFirst": "Vui lòng đặt tên trong mục Mọi người trước",
+  "@pleaseNamePersonInPeopleSectionFirst": {
+    "description": "Shown when manual tagging requires at least one named person."
+  },
+  "onlyUploadedFilesCanBeAddedToPerson": "Chỉ những tệp đã tải lên mới có thể được thêm vào",
+  "@onlyUploadedFilesCanBeAddedToPerson": {
+    "description": "Shown when user tries to manually tag files that are not uploaded yet."
+  },
+  "noFacesDetectedTapToAdd": "Không phát hiện khuôn mặt nào, hãy chạm để thêm.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
+  "addedFilesToPerson": "{count, plural, =1 {Đã thêm 1 tệp vào {personName}} other {Đã thêm {count} tệp vào {personName}}}",
+  "@addedFilesToPerson": {
+    "description": "Toast shown after manually tagging one or more files to a person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1tệp đã được liên kết với {personName}} other {{count} tệp đã được liên kết với {personName}}}",
+  "@filesAlreadyLinkedToPerson": {
+    "description": "Toast shown when selected files are already manually tagged to the selected person.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      },
+      "personName": {
+        "type": "String",
+        "example": "Alex"
+      }
+    }
+  },
   "addNewPerson": "Thêm người mới",
   "addNameOrMerge": "Thêm tên hoặc hợp nhất",
   "mergeWithExisting": "Hợp nhất với người đã có",
@@ -1458,6 +1519,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Chưa thêm quản trị viên} =1 {Đã thêm 1 quản trị viên} other {Đã thêm {count} quản trị viên}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Thêm quản trị viên} =1 {Thêm quản trị viên} other {Thêm quản trị viên}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Quản trị viên có thể quản lý ảnh và người tham gia.",
+  "suggestDeletion": "Đề xuất xóa",
+  "suggestDeletionDescription": "Những ảnh được chọn sẽ bị xóa khỏi album này. Chủ sở hữu ảnh cũng sẽ nhận được đề xuất xem xét và xóa ảnh.",
+  "deleteSuggestionSent": "Đã gửi đề xuất xóa",
   "accountIsAlreadyConfigured": "Tài khoản đã được cấu hình.",
   "sessionIdMismatch": "Mã phiên không khớp",
   "@sessionIdMismatch": {
@@ -1817,6 +1902,10 @@
   "thisMonth": "Tháng này",
   "thisYear": "Năm nay",
   "groupBy": "Phân nhóm theo",
+  "groupByDay": "Ngày",
+  "groupByWeek": "Tuần",
+  "groupByMonth": "Tháng",
+  "groupByYear": "Năm",
   "faceThumbnailGenerationFailed": "Không thể tạo ảnh thu nhỏ khuôn mặt",
   "fileAnalysisFailed": "Không thể xác định tệp",
   "editAutoAddPeople": "Sửa tự động thêm người",
@@ -1978,14 +2067,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Giới thiệu Nghi thức",
-  "cLDesc1": "Bạn đang lên kế hoạch cho năm 2026? Với Nghi thức, bạn có thể đặt lời nhắc trên Ente Photos và theo dõi tiến trình bằng cách chụp ảnh. Sử dụng cho tập luyện, thói quen ăn uống, những khoảnh khắc hàng ngày với người thân – bất cứ điều gì bạn muốn biến thành thói quen.",
-  "cLTitle2": "Liên kết công khai, giờ dành cho tất cả",
-  "cLDesc2": "Tất cả người dùng Ente trên gói miễn phí giờ đây có thể tạo và chia sẻ liên kết công khai đến ảnh và album. Để ngăn chặn lạm dụng, liên kết sẽ có giới hạn về số người có thể xem.",
-  "cLTitle3": "Gắn thẻ người thủ công",
-  "cLDesc3": "Bạn giờ có thể gắn thẻ người ngay cả khi AI trên thiết bị không phát hiện khuôn mặt. Tiện lợi cho thú cưng, khuôn mặt nhìn thấy một phần, hoặc những khoảnh khắc mà ai đó không thực sự trong ảnh nhưng vẫn nên được bao gồm.",
-  "cLTitle4": "Và hơn thế nữa",
-  "cLDesc4": "Bạn giờ có thể ghim album chia sẻ. Liên kết album hiển thị cho cộng tác viên và người xem để chia sẻ dễ dàng hơn. Chúng tôi đã sửa một số lỗi vuốt trên iOS và cập nhật chế độ xem ảnh, bao gồm biểu tượng yêu thích mới (chuẩn bị cho các tính năng sắp tới).",
+  "cLTitle1": "Bình luận và bày tỏ cảm xúc",
+  "cLDesc1": "Chúng tôi đang triển khai tính năng bình luận và bày tỏ cảm xúc trên ảnh được chia sẻ. Bạn có thể bày tỏ cảm xúc hoặc bình luận về một bức ảnh bằng cách mở ảnh đó và sử dụng các thao tác ở phía dưới. Tất cả các bình luận và bày tỏ cảm xúc đến sẽ hiển thị trên tab Đã chia sẻ.",
+  "cLTitle2": "Người quản lý album",
+  "cLDesc2": "Giờ đây, bạn có thể chỉ định một người dùng Ente khác làm quản trị viên cho album của mình. Với tính năng này, họ sẽ có thể thêm người xem và cộng tác viên khác, xóa ảnh khỏi album, và thậm chí đề xuất người tham gia xóa ảnh của họ.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2145,17 +2230,22 @@
   "ritualAlbumNotSet": "Album chưa đặt tên",
   "ritualOpenCameraTooltip": "Mở camera thói quen",
   "ritualEditorLabel": "Trình chỉnh sửa thói quen",
-  "ritualNew": "Thói quen mới",
+  "ritualNew": "Tạo thói quen mới",
+  "ritualCreateNewTitle": "Tạo thói quen mới",
   "ritualEdit": "Sửa thói quen",
-  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterPrompt": "Tên thói quen",
   "ritualEnterDescription": "Vui lòng nhập mô tả",
+  "ritualChooseDaysLabel": "Chọn ngày cho thói quen",
   "ritualDayLabel": "Ngày",
   "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
   "ritualTimeLabel": "Thời gian",
   "ritualAlbumLabel": "Album",
   "ritualSave": "Lưu thói quen",
+  "ritualCreateAction": "Tạo thói quen",
   "ritualUpdate": "Cập nhật thói quen",
   "ritualSelectAlbumTitle": "Chọn album",
+  "ritualChooseAlbumLabel": "Chọn một album",
+  "ritualSendReminderLabel": "Gửi lời nhắc",
   "ritualSearchOrCreate": "Tìm kiếm hoặc tạo mới",
   "ritualNoAlbumsYet": "Chưa có album nào",
   "ritualNoMatchingAlbums": "Không có album trùng khớp",
@@ -2173,6 +2263,138 @@
   "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
   "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
   "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
-  "ritualEmojiUseAction": "Sử dụng",
-  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
+  "ritualEmojiUseAction": "Dùng",
+  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn.",
+  "feed": "Bảng tin",
+  "likedYourPhoto": "Đã thích một ảnh",
+  "commentedOnYourPhoto": "Đã bình luận một ảnh",
+  "repliedToYourComment": "Đã trả lời một bình luận",
+  "likedYourComment": "Đã thích một bình luận",
+  "likedYourReply": "Đã thích một trả lời",
+  "and1Other": "và một người khác",
+  "andXOthers": "và {count} người khác",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Chưa có hoạt động",
+  "like": "Thích",
+  "comments": "Bình luận",
+  "commentHint": "Nói gì đó tử tế!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Trả lời",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Bạn chắc chứ?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Xóa bình luận",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Bình luận của bạn \"{comment}\" sẽ bị xóa vĩnh viễn",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 thích} other{{count} thích}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Chưa có lượt thích",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Không thể tải lượt thích",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Không thể cập nhật lượt thích",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Không thể thích 1 album} other{Không thể thích {count} album}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Không thể tải album",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 album} other{{count} album}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Thích tất cả",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Chọn album để thích video này",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Chọn album để thích ảnh này",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Không thể thích bình luận",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Không thể xóa bình luận",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(đã xóa)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Đang trả lời bạn",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Trả lời đến {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{Chưa có bình luận} =1{1 bình luận} other{{count} bình luận}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

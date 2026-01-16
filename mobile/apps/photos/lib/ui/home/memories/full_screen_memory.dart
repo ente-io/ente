@@ -3,12 +3,15 @@ import "dart:io";
 import "dart:math";
 import "dart:ui";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
+import "package:photos/events/resume_video_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -24,7 +27,6 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
 //There are two states of variables that FullScreenMemory depends on:
@@ -376,6 +378,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 fullScreenState?._toggleAnimation(
                                   pause: true,
                                 );
+                                Bus.instance.fire(PauseVideoEvent());
                                 await routeToPage(
                                   context,
                                   JumpToDateGallery(
@@ -383,6 +386,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                         inheritedData.memories[value].file,
                                   ),
                                 );
+                                Bus.instance.fire(ResumeVideoEvent());
                                 fullScreenState?._toggleAnimation(
                                   pause: false,
                                 );

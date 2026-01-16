@@ -2,6 +2,7 @@ import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
+import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
@@ -17,12 +18,17 @@ import {
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import log from "ente-base/log";
 import {
     hlsGenerationStatusSnapshot,
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
+import {
+    isMLSupported,
+    mlStatusSnapshot,
+    peopleStateSnapshot,
+} from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
@@ -156,6 +162,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
+    // Subscribe to people state so that we re-render when people data arrives.
+    // This is needed because shouldShowEmptyState reads peopleStateSnapshot().
+    usePeopleStateSnapshot();
     // The currently selected option.
     //
     // We need to use `null` instead of `undefined` to indicate missing values,
@@ -186,6 +195,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     }, []);
 
     const handleChange = (value: SearchOption | null) => {
+        log.info(`[SearchBar] Option selected"`);
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
@@ -213,7 +223,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         // We anyways need the ref so that we can blur on selecting a person
         // from the default options. So also use it to blur the entire Select
         // (including the menu) when the user selects an option.
-        selectRef.current?.blur();
+        //
+        // Only blur when an actual option was selected, not when clearing
+        // (e.g., via backspace on empty input).
+        if (value) selectRef.current?.blur();
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
@@ -222,6 +235,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 
             // If the input is cleared, also clear the selected value.
             if (value === "") {
+                log.info("[SearchBar] Input cleared, resetting selection");
                 setValue(null);
                 setInputValue("");
                 // Notify parent but don't exit search mode on mobile
@@ -233,6 +247,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const resetSearch = () => {
+        log.info("[SearchBar] Resetting search state");
         // Dismiss the search menu if it is open.
         selectRef.current?.blur();
 
@@ -255,11 +270,13 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleFocus = () => {
+        log.info("[SearchBar] Search input focused");
         setIsFocused(true);
         // A workaround to show the suggestions again for the current non-empty
         // search string if the user focuses back on the input field after
         // moving focus elsewhere.
         if (inputValue) {
+            log.info(`[SearchBar] Re-triggering search for existing input"`);
             selectRef.current?.onInputChange(inputValue, {
                 action: "set-value",
                 prevInputValue: "",
@@ -268,7 +285,14 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleBlur = () => {
+        log.info("[SearchBar] Search input blurred");
         setIsFocused(false);
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Escape") {
+            selectRef.current?.blur();
+        }
     };
 
     return (
@@ -282,22 +306,42 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onChange={handleChange}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 isClearable
                 escapeClearsValue
-                menuIsOpen={isFocused && inputValue !== ""}
+                menuIsOpen={
+                    isFocused && (inputValue !== "" || shouldShowEmptyState(""))
+                }
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 placeholder={t("search_hint")}
-                noOptionsMessage={({ inputValue }) =>
-                    inputValue ? (
-                        t("no_results")
-                    ) : shouldShowEmptyState(inputValue) ? (
-                        <EmptyState
-                            onSelectPeople={handleSelectPeople}
-                            onSelectPerson={handleSelectPerson}
-                        />
-                    ) : null
-                }
+                loadingMessage={() => {
+                    log.info(`[SearchBar] loadingMessage: Loading results"`);
+                    return null;
+                }}
+                noOptionsMessage={({ inputValue }) => {
+                    if (inputValue) {
+                        log.info(
+                            `[SearchBar] noOptionsMessage: No results found"`,
+                        );
+                        return t("no_results");
+                    }
+                    if (shouldShowEmptyState(inputValue)) {
+                        log.info(
+                            "[SearchBar] noOptionsMessage: Showing empty state",
+                        );
+                        return (
+                            <EmptyState
+                                onSelectPeople={handleSelectPeople}
+                                onSelectPerson={handleSelectPerson}
+                            />
+                        );
+                    }
+                    log.info(
+                        "[SearchBar] noOptionsMessage: Returning null (no menu content)",
+                    );
+                    return null;
+                }}
             />
 
             {isInSearchMode && (
@@ -321,12 +365,31 @@ const SearchInputWrapper = styled("div")`
 `;
 
 const loadOptions = pDebounce(async (input: string) => {
-    const [sidebarActions, photoOptions] = await Promise.all([
-        sidebarSearchOptionsForString(input),
-        searchOptionsForString(input),
-    ]);
+    log.info("[SearchBar] Loading search options");
+    const startTime = performance.now();
 
-    return [...photoOptions, ...sidebarActions];
+    try {
+        const [sidebarActions, photoOptions] = await Promise.all([
+            sidebarSearchOptionsForString(input),
+            searchOptionsForString(input),
+        ]);
+
+        const duration = performance.now() - startTime;
+        log.info(
+            `[SearchBar] Search options loaded in ${duration.toFixed(0)}ms: ` +
+                `${photoOptions.length} photo options, ${sidebarActions.length} sidebar actions`,
+        );
+
+        return [...photoOptions, ...sidebarActions];
+    } catch (e) {
+        const duration = performance.now() - startTime;
+        log.error(
+            `[SearchBar] Failed to load search options after ${duration.toFixed(0)}ms`,
+            e,
+        );
+        // Re-throw so react-select can handle it, but now we have visibility
+        throw e;
+    }
 }, 250);
 
 // const loadOptions = pDebounce(searchOptionsForString, 250);
@@ -444,6 +507,9 @@ const iconForOption = (option: SearchOption | undefined) => {
             return <ImageIcon />;
         case "date":
             return <CalendarIcon />;
+        case "cameraMake":
+        case "cameraModel":
+            return <CameraIcon />;
         case "sidebarAction":
             return <SettingsIcon />;
         case "location":
@@ -482,22 +548,42 @@ const shouldShowEmptyState = (inputValue: string) => {
     if (!isMLSupported && !isHLSGenerationSupported) {
         // Neither of ML or HLS generation is supported on current client. This
         // is the code path for web.
+        log.info(
+            "[SearchBar] shouldShowEmptyState: false (ML and HLS not supported)",
+        );
         return false;
     }
 
     const mlStatus = mlStatusSnapshot();
     const vpStatus = hlsGenerationStatusSnapshot();
-    if (
-        (!mlStatus || mlStatus.phase == "disabled") &&
-        (!vpStatus?.enabled || vpStatus.status != "processing")
-    ) {
-        // ML is either not supported or currently disabled AND video processing
-        // is either not supported or currently not happening. Don't show the
-        // empty state.
-        return false;
+    log.info("[SearchBar] shouldShowEmptyState check", {
+        isMLSupported,
+        isHLSGenerationSupported,
+        mlPhase: mlStatus?.phase ?? "undefined",
+        vpEnabled: vpStatus?.enabled ?? false,
+        vpStatus: vpStatus?.enabled ? vpStatus.status : "disabled",
+    });
+
+    const isMLInactive =
+        !mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done";
+    const isVideoProcessing =
+        vpStatus?.enabled && vpStatus.status == "processing";
+
+    if (isMLInactive && !isVideoProcessing) {
+        // ML is inactive AND video processing is not happening.
+        // Only show empty state if there are people to display.
+        const people = peopleStateSnapshot()?.visiblePeople;
+        const hasPeople = people && people.length > 0;
+        if (!hasPeople) {
+            log.info(
+                "[SearchBar] shouldShowEmptyState: false (ML inactive, no video processing, no people)",
+            );
+            return false;
+        }
     }
 
     // Show it otherwise.
+    log.info("[SearchBar] shouldShowEmptyState: true");
     return true;
 };
 
@@ -512,6 +598,13 @@ const EmptyState: React.FC<
     const people = usePeopleStateSnapshot()?.visiblePeople;
     const vpStatus = useHLSGenerationStatusSnapshot();
 
+    log.info("[SearchBar] EmptyState render", {
+        mlPhase: mlStatus?.phase ?? "undefined",
+        peopleCount: people?.length ?? 0,
+        vpEnabled: vpStatus?.enabled ?? false,
+        vpStatus: vpStatus?.enabled ? vpStatus.status : "disabled",
+    });
+
     let label: string | undefined;
     switch (mlStatus?.phase) {
         case undefined:
@@ -520,25 +613,30 @@ const EmptyState: React.FC<
             // If ML is not running, see if video processing is.
             if (vpStatus?.enabled && vpStatus.status == "processing") {
                 label = t("processing_videos_status");
+                log.info("[SearchBar] Status: Processing videos in progress");
             }
             break;
         case "scheduled":
             label = t("indexing_scheduled");
+            log.info("[SearchBar] Status: Photo indexing scheduled");
             break;
         case "indexing":
             label = t("indexing_photos");
+            log.info("[SearchBar] Status: Indexing photos in progress");
             break;
         case "fetching":
             label = t("indexing_fetching");
+            log.info("[SearchBar] Status: Fetching data for indexing");
             break;
         case "clustering":
             label = t("indexing_people");
+            log.info("[SearchBar] Status: Clustering people/faces");
             break;
     }
 
-    // If ML is disabled and we're not video processing, then don't show the
-    // empty state content.
-    if ((!mlStatus || mlStatus.phase == "disabled") && !label) {
+    // If there's nothing to show (no people and no status label), return empty.
+    const hasPeople = people && people.length > 0;
+    if (!hasPeople && !label) {
         return <></>;
     }
 
@@ -656,6 +754,12 @@ const labelForOption = (option: SearchOption) => {
 
         case "fileCaption":
             return t("description");
+
+        case "cameraMake":
+            return t("cameraMake", { defaultValue: "Camera Make" });
+
+        case "cameraModel":
+            return t("cameraModel", { defaultValue: "Camera Model" });
 
         case "date":
             return t("date");

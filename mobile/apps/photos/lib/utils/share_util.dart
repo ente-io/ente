@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:io";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -15,7 +16,6 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/standalone/date_time.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
 import "package:uuid/uuid.dart";

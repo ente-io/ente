@@ -21,11 +21,11 @@ import 'package:ente_auth/ui/home/shortcuts.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
@@ -343,7 +343,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           : const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Builder(
         builder: (context) {
-          if (PlatformUtil.isDesktop()) {
+          if (PlatformDetector.isDesktop()) {
             return ValueListenableBuilder<Set<String>>(
               valueListenable: CodeDisplayStore.instance.selectedCodeIds,
               builder: (context, selectedIds, _) {

@@ -170,22 +170,62 @@ Choose carefully based on whether you want to keep the photos or remove them ent
 
 ### Deleting from collaborative albums
 
-In collaborative albums, deletion permissions vary:
+In collaborative albums, deletion permissions vary by role:
+
+**If you're a viewer:**
+
+- You cannot delete any photos from the album
+- You can only view and download photos
 
 **If you're a collaborator:**
 
 - You can only delete photos that you uploaded
 - When you delete your photo, it goes to your trash
-- You cannot delete photos uploaded by other collaborators
+- You cannot delete photos uploaded by others
+
+**If you're an admin:**
+
+- You can remove any photo from the album (including photos uploaded by others)
+- You can only permanently delete photos you own
+- Other participants' photos will be removed from the album but remain in their accounts
+- You can suggest deletion for photos owned by others (see below)
 
 **If you're the album owner:**
 
-- You can remove any photos from the album
-- You can only permanently delete photos you own
-- Other collaborators' photos will be removed from the album but remain in their accounts
+- You have all admin permissions, plus:
+- You can manage link settings
+- You can delete the entire album
 
 **When someone leaves:**
-When a collaborator leaves or is removed from a shared album, any photos they uploaded are also removed from that album (but remain in their personal library).
+When a participant leaves or is removed from a shared album, any photos they uploaded are also removed from that album (but remain in their personal library).
+
+### Suggest deletion
+
+Album owners and admins can suggest that other participants delete their photos from shared albums. This helps curate shared albums while respecting photo ownership.
+
+**How suggest deletion works:**
+
+1. Open a shared album where you are owner or admin
+2. Select photos owned by other participants
+3. Tap the suggest deletion action
+4. Confirm the suggestion
+
+**What happens:**
+
+- Photos are immediately removed from the album
+- Photo owners receive the suggestion in their Delete Suggestions queue
+- Photo owners can review suggestions in `Settings > Backup > Free up space > Delete suggestions`
+- Photo owners can accept (delete) or reject (keep) each suggestion
+
+This is useful for:
+
+- Filtering blurry or duplicate photos after a group trip
+- Curating event albums by suggesting removal of low-quality shots
+- Helping participants identify photos they might want to delete
+
+> **Note**: Suggest deletion is currently available on mobile apps only.
+
+Learn more in the [collaboration guide](/photos/features/sharing-and-collaboration/collaboration#suggest-deletion).
 
 ### Shared photos
 
@@ -242,6 +282,8 @@ This prevents accidental deletion when reorganizing files on your computer. If y
 - [Can I delete photos that are shared with me?](/photos/faq/albums-and-organization#delete-shared-photos)
 - [Do deleted photos on my device also delete from Ente?](/photos/faq/albums-and-organization#device-deletion-sync)
 - [What happens to deleted photos in collaborative albums?](/photos/faq/albums-and-organization#collaborative-deletion)
+- [What is suggest deletion?](/photos/faq/sharing-and-collaboration#suggest-deletion)
+- [How do I review delete suggestions?](/photos/faq/sharing-and-collaboration#review-delete-suggestions)
 
 **Troubleshooting:**
 

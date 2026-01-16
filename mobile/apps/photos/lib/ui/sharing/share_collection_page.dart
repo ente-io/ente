@@ -1,12 +1,11 @@
 import 'package:collection/collection.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
-
 import 'package:photos/core/configuration.dart';
 import 'package:photos/extensions/user_extension.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/api/collection/user.dart';
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -22,7 +21,6 @@ import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
@@ -85,7 +83,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     _sharees = widget.collection.sharees;
     final bool hasUrl = widget.collection.hasLink;
     final bool isOwner = widget.collection.owner.id == userID;
-    final bool adminRoleEnabled = flagService.enableAdminRole;
     final bool canManageParticipants = isOwner;
     final children = <Widget>[];
     children.add(
@@ -104,38 +101,36 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     );
 
     if (canManageParticipants) {
-      if (adminRoleEnabled) {
-        children.add(
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: AppLocalizations.of(context).addAdmin,
-              makeTextBold: true,
-            ),
-            leadingIcon: Icons.add,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
-            isTopBorderRadiusRemoved: _sharees.isNotEmpty,
-            isBottomBorderRadiusRemoved: true,
-            onTap: () async {
-              await routeToPage(
-                context,
-                AddParticipantPage(
-                  [widget.collection],
-                  const [ActionTypesToShow.addAdmin],
-                ),
-              );
-              if (mounted) {
-                setState(() => {});
-              }
-            },
+      children.add(
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).addAdmin,
+            makeTextBold: true,
           ),
-        );
-        children.add(
-          DividerWidget(
-            dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).fillFaint,
-          ),
-        );
-      }
+          leadingIcon: Icons.add,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          isTopBorderRadiusRemoved: _sharees.isNotEmpty,
+          isBottomBorderRadiusRemoved: true,
+          onTap: () async {
+            await routeToPage(
+              context,
+              AddParticipantPage(
+                [widget.collection],
+                const [ActionTypesToShow.addAdmin],
+              ),
+            );
+            if (mounted) {
+              setState(() => {});
+            }
+          },
+        ),
+      );
+      children.add(
+        DividerWidget(
+          dividerType: DividerType.menu,
+          bgColor: getEnteColorScheme(context).fillFaint,
+        ),
+      );
       children.add(
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
@@ -144,8 +139,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
           leadingIcon: Icons.add,
           menuItemColor: getEnteColorScheme(context).fillFaint,
-          isTopBorderRadiusRemoved:
-              adminRoleEnabled ? true : _sharees.isNotEmpty,
+          isTopBorderRadiusRemoved: true,
           isBottomBorderRadiusRemoved: true,
           onTap: () async {
             // ignore: unawaited_futures
@@ -401,7 +395,7 @@ class EmailItemWidget extends StatelessWidget {
                     sharees: collection.getSharees(),
                     padding: const EdgeInsets.all(0),
                     limitCountTo: 10,
-                    type: AvatarType.mini,
+                    type: AvatarType.md,
                     removeBorder: false,
                   ),
                 ),

@@ -56,6 +56,10 @@ Ente provides several tools to help you optimize both your device storage and cl
 - Use ML to find visually similar (but not identical) photos
 - Keep only the best shots and delete the rest
 
+**View and delete large files:**
+
+- Identify and delete the largest files taking up storage space
+
 Learn more in the [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization).
 
 ### Do items in trash count against my storage? {#trash-storage-count}
@@ -106,7 +110,6 @@ Yes, we offer 10 GB of storage for free, forever.
 
 On the free plan, you cannot:
 
-- Create public links
 - Set up family plans
 
 All other features work on the free plan, including:
@@ -115,9 +118,9 @@ All other features work on the free plan, including:
 - End-to-end encryption
 - Map view
 - Machine learning (face recognition, magic search)
-- Share albums
+- Creating /receiving shared albums
+- Public links (device limit of 5)
 - Background sync
-- Receiving shared albums from others
 
 ### Is there an x GB plan? {#specific-plan-size}
 
@@ -373,7 +376,7 @@ We support **annual** subscriptions over PayPal.
 
 ### Does Ente accept crypto payments? {#crypto-payment}
 
-Yes! We support *annual plans* with crypto payments and accept the following cryptocurrencies:
+Yes! We support _annual plans_ with crypto payments and accept the following cryptocurrencies:
 
 - **Bitcoin** (BTC)
 - **Ethereum** (ETH)

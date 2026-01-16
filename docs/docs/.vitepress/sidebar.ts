@@ -215,8 +215,16 @@ export const sidebar = [
                                 link: "/photos/features/utilities/detect-text",
                             },
                             {
+                                text: "Home Widgets",
+                                link: "/photos/features/utilities/home-widgets",
+                            },
+                            {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
+                            },
+                            {
+                                text: "Rituals",
+                                link: "/photos/features/utilities/rituals",
                             },
                             {
                                 text: "Swipe to Select",
@@ -426,6 +434,10 @@ export const sidebar = [
                     {
                         text: "Ente on Windows",
                         link: "/self-hosting/guides/windows",
+                    },
+                    {
+                        text: "Ente-Photos on Kubernetes (community helm-chart)",
+                        link: "/self-hosting/guides/photos-k8s-helm",
                     },
                 ],
             },

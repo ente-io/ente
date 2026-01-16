@@ -342,6 +342,36 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               _removeIncomingCollections(collections);
               final shouldShowCreateAlbum =
                   widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
+
+              // Get recently used collections (only when not searching)
+              List<Collection> recentCollections = [];
+              if (_searchQuery.isEmpty && !_showOnlyHiddenCollections) {
+                recentCollections = CollectionsService.instance
+                    .getRecentlyUsedCollections()
+                    .where((c) => !c.isQuickLinkCollection())
+                    .toList();
+                // Remove recent collections from the main list to avoid duplicates
+                final recentIds = recentCollections.map((c) => c.id).toSet();
+                collections.removeWhere((c) => recentIds.contains(c.id));
+              }
+
+              // Get shared collections for move action (internal users only)
+              List<Collection> sharedCollections = [];
+              if (widget.actionType == CollectionActionType.moveFiles &&
+                  flagService.showSharedAlbumsInMoveSheet) {
+                sharedCollections = _getSharedCollections();
+                // Filter shared collections by search query
+                if (_searchQuery.isNotEmpty) {
+                  sharedCollections = sharedCollections
+                      .where(
+                        (c) => c.displayName
+                            .toLowerCase()
+                            .contains(_searchQuery.toLowerCase()),
+                      )
+                      .toList();
+                }
+              }
+
               final searchResults = _searchQuery.isNotEmpty
                   ? collections
                       .where(
@@ -365,6 +395,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                     widget.selectedPeople,
                     _searchQuery,
                     shouldShowCreateAlbum,
+                    recentCollections: recentCollections,
+                    sharedCollections: sharedCollections,
                     enableSelection: _enableSelection,
                     selectedCollections: _selectedCollections,
                     onSelectionChanged: () {
@@ -380,6 +412,31 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         ),
       ),
     );
+  }
+
+  List<Collection> _getSharedCollections() {
+    final userID = Configuration.instance.getUserID()!;
+    // Get collections where user is collaborator/admin (can add files)
+    final allCollections = CollectionsService.instance.getCollectionsForUI(
+      includeCollab: true,
+      includeUncategorized: false,
+    );
+    // Filter to only non-owner collections (incoming shared albums)
+    final sharedCollections = allCollections
+        .where(
+          (c) =>
+              !c.isOwner(userID) &&
+              !c.isQuickLinkCollection() &&
+              c.type != CollectionType.favorites,
+        )
+        .toList();
+    sharedCollections.sort((first, second) {
+      return compareAsciiLowerCaseNatural(
+        first.displayName,
+        second.displayName,
+      );
+    });
+    return sharedCollections;
   }
 
   Future<List<Collection>> _getCollections() async {
@@ -435,7 +492,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           recentlyCreated.add(collection);
           continue;
         }
-        if (collection.isPinned) {
+        final bool isPinned =
+            collection.isPinned || collection.hasShareePinned();
+        if (isPinned) {
           pinned.add(collection);
         } else {
           unpinned.add(collection);

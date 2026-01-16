@@ -67,7 +67,7 @@ PODS:
     - FlutterMacOS
   - objective_c (0.0.1):
     - Flutter
-  - open_file_ios (0.0.1):
+  - open_file_ios (1.0.3):
     - Flutter
   - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
@@ -77,9 +77,9 @@ PODS:
     - FlutterMacOS
   - privacy_screen (0.0.1):
     - Flutter
-  - SDWebImage (5.21.3):
-    - SDWebImage/Core (= 5.21.3)
-  - SDWebImage/Core (5.21.3)
+  - SDWebImage (5.21.5):
+    - SDWebImage/Core (= 5.21.5)
+  - SDWebImage/Core (5.21.5)
   - Sentry/HybridSDK (8.46.0)
   - sentry_flutter (8.14.2):
     - Flutter
@@ -210,12 +210,12 @@ SPEC CHECKSUMS:
   listen_sharing_intent: fe0b9a59913cc124dd6cbd55cd9f881de5f75759
   local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
-  open_file_ios: 5ff7526df64e4394b4fe207636b67a95e83078bb
+  open_file_ios: 46184d802ee7959203f6392abcfa0dd49fdb5be0
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
-  SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
+  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a

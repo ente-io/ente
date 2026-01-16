@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:io';
 import "dart:math";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:native_video_editor/native_video_editor.dart';
@@ -30,7 +31,6 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import "package:photos/ui/tools/editor/video_rotate_page.dart";
 import "package:photos/ui/tools/editor/video_trim_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:video_editor/video_editor.dart";
 
 class VideoEditorPage extends StatefulWidget {

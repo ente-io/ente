@@ -20,7 +20,6 @@ import {
     isArchivedCollection,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
@@ -1491,11 +1490,15 @@ const createCollectionSummaries = (
             type = "sharedIncoming";
             attributes.add("shared");
             attributes.add("sharedIncoming");
+            const userRole = collection.sharees.find(
+                (s) => s.id == user.id,
+            )?.role;
             attributes.add(
-                collection.sharees.find((s) => s.id == user.id)?.role ==
-                    "COLLABORATOR"
-                    ? "sharedIncomingCollaborator"
-                    : "sharedIncomingViewer",
+                userRole == "ADMIN"
+                    ? "sharedIncomingAdmin"
+                    : userRole == "COLLABORATOR"
+                      ? "sharedIncomingCollaborator"
+                      : "sharedIncomingViewer",
             );
         } else if (collectionType == "uncategorized") {
             type = "uncategorized";
@@ -1555,9 +1558,7 @@ const createCollectionSummaries = (
             sortPriority = CollectionSummarySortPriority.pinned;
         }
         // Check for sharee pinned (for incoming shared collections)
-        // Only apply when the feature flag is enabled
         if (
-            settingsSnapshot().isShareePinEnabled &&
             type == "sharedIncoming" &&
             collection.sharedMagicMetadata?.data.order == CollectionOrder.pinned
         ) {
@@ -1581,6 +1582,12 @@ const createCollectionSummaries = (
         }
 
         const collectionFiles = filesByCollection.get(collection.id);
+
+        // Hide empty favorites from collection bar
+        if (type == "userFavorites" && !collectionFiles?.length) {
+            attributes.add("hideFromCollectionBar");
+        }
+
         collectionSummaries.set(collection.id, {
             id: collection.id,
             type,

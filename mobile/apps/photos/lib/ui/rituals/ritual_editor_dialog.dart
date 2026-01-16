@@ -12,7 +12,9 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/column_item.dart";
+import "package:photos/ui/collections/album/new_list_item.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/dialog_util.dart";
 
 Future<void> showRitualEditor(BuildContext context, {Ritual? ritual}) async {
   await _showRitualEditor(context, ritual: ritual);
@@ -648,7 +650,7 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
     final textTheme = getEnteTextTheme(context);
     final l10n = context.l10n;
     final trimmedQuery = _controller.text.trim();
-    final bool canCreateAlbum = trimmedQuery.isNotEmpty;
+    final bool showNewAlbumRow = trimmedQuery.isEmpty;
     final queryLower = trimmedQuery.toLowerCase();
     final filteredAlbums = queryLower.isEmpty
         ? widget.albums
@@ -659,13 +661,70 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
             .toList();
 
     Future<void> createAlbum() async {
-      final trimmed = _controller.text.trim();
-      if (trimmed.isEmpty) return;
-      final created = await service.createAlbum(trimmed);
+      Collection? created;
+      final result = await showTextInputDialog(
+        context,
+        title: l10n.albumTitle,
+        submitButtonLabel: l10n.ok,
+        hintText: l10n.enterAlbumName,
+        onSubmit: (name) async {
+          final trimmedName = name.trim();
+          if (trimmedName.isEmpty) return;
+          created = await service.createAlbum(trimmedName);
+        },
+        showOnlyLoadingState: true,
+        textCapitalization: TextCapitalization.words,
+        popnavAfterSubmission: true,
+      );
+      if (!context.mounted) return;
+      if (result is Exception) {
+        await showGenericErrorDialog(context: context, error: result);
+        return;
+      }
+      if (created == null) return;
       if (!context.mounted) return;
       _selected = created;
       widget.onSelected(created);
       Navigator.of(context).pop();
+    }
+
+    final newAlbumRow = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: createAlbum,
+      child: const NewAlbumListItemWidget(),
+    );
+
+    Widget buildEmptyState() {
+      final message = widget.albums.isEmpty
+          ? l10n.ritualNoAlbumsYet
+          : l10n.ritualNoMatchingAlbums;
+      if (!showNewAlbumRow) {
+        return Center(
+          child: Text(
+            message,
+            style: textTheme.small.copyWith(
+              color: colorScheme.textMuted,
+            ),
+          ),
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          newAlbumRow,
+          const SizedBox(height: 12),
+          Expanded(
+            child: Center(
+              child: Text(
+                message,
+                style: textTheme.small.copyWith(
+                  color: colorScheme.textMuted,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
     }
 
     return MediaQuery.removeViewInsets(
@@ -717,7 +776,7 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                     controller: _controller,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      hintText: l10n.ritualSearchOrCreate,
+                      hintText: l10n.searchByAlbumNameHint,
                       prefixIcon: const Icon(Icons.search_rounded),
                       filled: true,
                       fillColor: colorScheme.fillFaint,
@@ -748,20 +807,19 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                   child: SizedBox(
                     height: 360,
                     child: filteredAlbums.isEmpty
-                        ? Center(
-                            child: Text(
-                              widget.albums.isEmpty
-                                  ? l10n.ritualNoAlbumsYet
-                                  : l10n.ritualNoMatchingAlbums,
-                              style: textTheme.small.copyWith(
-                                color: colorScheme.textMuted,
-                              ),
-                            ),
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: buildEmptyState(),
                           )
                         : ListView.separated(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemBuilder: (context, index) {
-                              final album = filteredAlbums[index];
+                              if (showNewAlbumRow && index == 0) {
+                                return newAlbumRow;
+                              }
+                              final albumIndex =
+                                  index - (showNewAlbumRow ? 1 : 0);
+                              final album = filteredAlbums[albumIndex];
                               return GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () {
@@ -779,43 +837,9 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                             },
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 10),
-                            itemCount: filteredAlbums.length,
+                            itemCount: filteredAlbums.length +
+                                (showNewAlbumRow ? 1 : 0),
                           ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: canCreateAlbum
-                            ? colorScheme.primary500
-                            : colorScheme.fillMuted,
-                        foregroundColor: colorScheme.backgroundBase,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      onPressed: canCreateAlbum ? createAlbum : null,
-                      child: Text(
-                        canCreateAlbum
-                            ? l10n.ritualCreateAlbumWithName(
-                                albumName: trimmedQuery,
-                              )
-                            : l10n.ritualCreateNew,
-                        style: textTheme.bodyBold.copyWith(
-                          color: canCreateAlbum
-                              ? Colors.white
-                              : colorScheme.textMuted,
-                        ),
-                      ),
-                    ),
                   ),
                 ),
               ],

@@ -2,13 +2,13 @@ import "dart:async";
 import "dart:io";
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/db/common/base.dart";
 import "package:photos/db/common/conflict_algo.dart";
-import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -585,6 +585,56 @@ class FilesDB with SqlDbBase {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids;
+  }
+
+  /// Checks which (fileID, collectionID) pairs exist in the database.
+  ///
+  /// Returns a set of keys in the format "collectionID_fileID" for files that exist.
+  /// This is more efficient than calling getUploadedFile() for each pair.
+  Future<Set<String>> getExistingFileKeys(
+    Set<(int fileID, int collectionID)> pairs,
+  ) async {
+    if (pairs.isEmpty) return {};
+
+    final db = await instance.sqliteAsyncDB;
+    final existingKeys = <String>{};
+
+    // Build a query with OR conditions for each pair
+    // SQLite has a limit on compound SELECT statements, so we batch
+    const batchSize = 100;
+    final pairsList = pairs.toList();
+
+    for (var i = 0; i < pairsList.length; i += batchSize) {
+      final batch = pairsList.sublist(
+        i,
+        i + batchSize > pairsList.length ? pairsList.length : i + batchSize,
+      );
+
+      final conditions = batch
+          .map(
+            (_) => '($columnUploadedFileID = ? AND $columnCollectionID = ?)',
+          )
+          .join(' OR ');
+
+      final args = <Object>[];
+      for (final (fileID, collectionID) in batch) {
+        args.add(fileID);
+        args.add(collectionID);
+      }
+
+      final results = await db.getAll(
+        'SELECT $columnUploadedFileID, $columnCollectionID FROM $filesTable WHERE $conditions',
+        args,
+      );
+
+      for (final row in results) {
+        final fileID = row[columnUploadedFileID] as int;
+        final collectionID = row[columnCollectionID] as int;
+        existingKeys.add('${collectionID}_$fileID');
+      }
+    }
+
+    return existingKeys;
   }
 
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(

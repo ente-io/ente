@@ -53,6 +53,13 @@ export const batched = async <T, U>(
 };
 
 /**
+ * Return all files (from both normal and hidden collections) present in our
+ * local database.
+ */
+export const computeAllCollectionFilesFromSaved = async () =>
+    savedCollectionFiles();
+
+/**
  * Return all normal (non-hidden) files present in our local database.
  *
  * The long name and the "compute" in it is to signal that this is not just a DB

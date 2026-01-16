@@ -17,7 +17,7 @@ Share directly with specific people who have Ente accounts:
 
 - Invite by email address
 - Recipients need an Ente account
-- Choose Viewer or Collaborator permissions
+- Choose Viewer, Collaborator, or Admin permissions
 - Each photo's storage counts towards whoever uploaded it
 - Perfect for ongoing collaboration with family and friends
 
@@ -86,7 +86,6 @@ https://pics.example.org/?t=...
 
 **Requirements:**
 
-- Active Ente subscription (required for public sharing)
 - Your own domain or subdomain
 - Ability to add a CNAME DNS record
 
@@ -108,6 +107,18 @@ Regular albums continue to work perfectly on your custom domain - only the Trip 
 
 Learn more in the [Custom domains guide](/photos/features/sharing-and-collaboration/custom-domains/).
 
+### How can my partner and I automatically share all photos we take with each other? {#auto-share-partners}
+
+You can do this by adding your partner as a viewer or collaborator to your camera folder, and asking them to do the same for you. On Android this is the **Camera** folder, and on iOS this is **Recents** (or equivalent).
+
+Any new photos backed up to these folders will automatically be shared and synced to the other person's device. This results in two separate albums — one for your photos and one for your partner's — where both of you can view and add photos.
+
+### Does Ente have a shared library feature where all photos are shared with another account (similar to Google Photos Partner Sharing/iCloud Shared Photo Library)? {#shared-library}
+
+Ente has shared albums but does not support sharing your entire library in one click. However, you can share all albums by selecting one album, choosing the "all" option on the bottom right, which selects all albums and then you can share in one go with a partner (they can be [viewer or collaborator](/photos/features/sharing-and-collaboration/collaboration#collaborating-with-ente-users)).
+
+[Smart albums](/photos/features/albums-and-organization/auto-add-people#auto-add-people-to-albums-smart-albums) let you auto-add specific people to albums as well.
+
 ## Collaboration
 
 ### How do I share an album with other Ente users? {#share-with-users}
@@ -115,7 +126,7 @@ Learn more in the [Custom domains guide](/photos/features/sharing-and-collaborat
 1. Open the album you want to share
 2. Tap/click the Share icon
 3. Select "Share with Ente users" or enter email addresses
-4. Choose permissions (Viewer or Collaborator)
+4. Choose permissions (Viewer, Collaborator, or Admin)
 5. Send the invitation
 
 The recipient will receive a notification and can access the shared album from their Ente app. They must have an Ente account to receive shared albums.
@@ -140,23 +151,29 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 
 Permissions depend on your role:
 
+**Viewers can:**
+
+- View all photos in the album
+- Download photos
+- Add photos to their own albums (creates a copy)
+
 **Collaborators can:**
 
+- Everything viewers can do, plus:
 - Add photos to the shared album
 - Delete photos they uploaded themselves
-- View all photos in the album
 
-**Collaborators cannot:**
+**Admins can:**
 
-- Delete photos uploaded by others
-- Delete the album itself
-- Change album settings or permissions
+- Everything collaborators can do, plus:
+- Remove any photo from the album (including photos uploaded by others)
+- Add or remove participants (as Admin, Collaborator, or Viewer)
+- Suggest deletion for photos owned by others
 
 **Album owner can:**
 
-- Remove any photos from the album
-- Only permanently delete photos they own
-- Remove or change permissions for collaborators
+- Everything admins can do, plus:
+- Manage link settings (passwords, expiry, device limits)
 - Delete the entire album
 
 ### What happens when I remove a collaborator from an album? {#remove-collaborator}
@@ -179,6 +196,114 @@ When a collaborator is removed from a shared album (or when they leave the album
 
 - Can be created on all platforms (mobile, web, desktop)
 - Anyone with the link can add photos via web browser
+
+### What can admins do in shared albums? {#admin-permissions}
+
+Admins have elevated permissions that help them manage shared albums:
+
+**Admins can:**
+
+- Everything collaborators can do (view, add photos)
+- Remove any photo from the album (including photos uploaded by others)
+- Add or remove participants (as Admin, Collaborator, or Viewer)
+- Suggest deletion for photos owned by others
+
+**Admins cannot:**
+
+- Manage link settings (passwords, expiry, device limits)
+- Delete the album itself
+- Permanently delete photos they don't own
+
+Admins are ideal for trusted participants who help curate and manage the album, such as family members or event co-organizers.
+
+Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/collaboration#permissions-explained)
+
+### How do I add someone as an admin? {#add-admin}
+
+1. Open the album you want to share
+2. Tap/click the Share icon
+3. Enter the person's email address
+4. Select "Admin" as the permission level
+5. Send the invitation
+
+You can also change an existing participant's role to Admin by opening the album's sharing settings and updating their permissions.
+
+### What's the difference between admin and collaborator? {#admin-vs-collaborator}
+
+| Permission | Collaborator | Admin |
+| --- | --- | --- |
+| View and download photos | ✓ | ✓ |
+| Add photos to album | ✓ | ✓ |
+| Remove own photos | ✓ | ✓ |
+| Remove any photo | ✗ | ✓ |
+| Manage participants | ✗ | ✓ |
+| Suggest deletion | ✗ | ✓ |
+| Manage link settings | ✗ | ✗ |
+
+Use **Collaborator** for participants who should only add and view photos. Use **Admin** for trusted participants who help manage the album.
+
+### Can admins manage link settings? {#admin-link-settings}
+
+No, only the album owner can manage link settings (passwords, expiry, device limits). Admins can manage participants and photos, but cannot change link settings or delete the album.
+
+### What is suggest deletion? {#suggest-deletion}
+
+Suggest deletion allows album owners and admins to suggest that other participants delete their photos from shared albums.
+
+**How it works:**
+
+1. Open a shared album where you are owner or admin
+2. Select photos owned by other participants
+3. Tap the suggest deletion action
+4. Confirm the suggestion
+
+**What happens:**
+
+- Photos are immediately removed from the album
+- Photo owners receive the suggestion in their Delete Suggestions queue
+- Photo owners can accept (delete) or reject (keep) each suggestion
+
+This is useful for curating shared albums after group trips or events by suggesting removal of blurry, duplicate, or unwanted shots.
+
+> **Note**: Suggest deletion is currently available on mobile apps only.
+
+Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/collaboration#suggest-deletion)
+
+### How do I suggest deleting photos in a shared album? {#use-suggest-deletion}
+
+**On mobile:**
+
+1. Open a shared album where you are owner or admin
+2. Select photos that belong to other participants
+3. Tap the suggest deletion action (flag icon)
+4. Confirm the suggestion
+
+The photos will be removed from the album immediately, and the photo owners will receive delete suggestions to review.
+
+> **Note**: Suggest deletion is currently available on mobile apps only.
+
+### How do I review delete suggestions? {#review-delete-suggestions}
+
+If album owners or admins suggest deleting your photos, you can review these suggestions:
+
+**On mobile:**
+
+Open `Settings > Backup > Free up space > Delete suggestions` to see photos suggested for deletion.
+
+For each suggestion, you can:
+
+- **Accept**: Move the photo to Trash (can be recovered within 30 days)
+- **Reject**: Keep the photo and dismiss the suggestion
+
+The photo was already removed from the shared album when the suggestion was made. Accepting deletes the photo from your account. Rejecting keeps it in your account (but not in the album).
+
+> **Note**: Delete suggestions is currently available on mobile apps only.
+
+Learn more: [Storage optimization guide](/photos/features/albums-and-organization/storage-optimization#delete-suggestions)
+
+### Is suggest deletion available on web? {#suggest-deletion-web}
+
+No, suggest deletion and reviewing delete suggestions are currently available on mobile apps (iOS and Android) only. We're working on adding this feature to web and desktop in the future.
 
 ### Why am I not getting notifications when photos are added to shared albums? {#shared-album-notifications}
 
@@ -270,7 +395,7 @@ Make sure you have sufficient storage available if you're expecting many people 
 Yes! Public links (including collect links) support several protective features:
 
 - **Link expiry**: Set the link to automatically expire after a duration you define
-- **Device limits**: Prevent people from forwarding your link to too many devices
+- **Device limits**: Limit how many devices can access the link (a "device" is identified by the combination of IP address and browser/app, so the same browser on a different network counts as a separate device)
 - **Password protection**: Add an additional password that users must enter to access the link
 - **Prevent downloads**: Disable the option to download original photos (though screenshots can't be prevented)
 
@@ -363,27 +488,31 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-Direct (peer-to-peer) album sharing is now available on every plan, including the free tier. Public links are only available to paid customers. This limitation helps safeguard against potential platform abuse.
+Album sharing and public links are now available on every plan, including the free tier. Free plan users can create public links with a [device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5. This limitation helps safeguard against potential platform abuse.
 
 Free users can:
 
+- Create and receive shared albums
 - Share albums directly with other Ente users
-- Receive and view albums shared with them
+- Create public links ([device limit](https://ente.io/help/photos/features/sharing-and-collaboration/public-links#device-limits) of 5)
 - View public links shared with them
 - Add photos to collect links that allow uploads
 
-To create public links, you'll need a paid subscription.
+Paid users can:
+
+- Create public links with no device limit
+- Access all other premium features
 
 ### Can I change permissions for collaborators after sharing? {#change-permissions}
 
-Yes, the album owner can change permissions at any time:
+Yes, the album owner or admins can change permissions at any time:
 
 1. Open the shared album
 2. Open sharing settings
-3. Find the collaborator
-4. Change their role from Collaborator to Viewer (or vice versa)
+3. Find the participant
+4. Change their role (Viewer, Collaborator, or Admin)
 
-Viewers can only view photos, while Collaborators can both view and add photos.
+Viewers can only view and download photos. Collaborators can also add photos. Admins can manage photos and participants.
 
 ### What happens to shared albums if I cancel my subscription? {#cancel-subscription-impact}
 

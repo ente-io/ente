@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import "package:path/path.dart";
@@ -43,7 +44,6 @@ import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/network_util.dart";
-import 'package:photos/utils/standalone/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -979,6 +979,12 @@ class FileUploader {
       if (exifTime.offsetTime != null) {
         pubMetadata[offsetTimeKey] = exifTime.offsetTime;
       }
+    }
+    if ((mediaUploadData.cameraMake ?? '').isNotEmpty) {
+      pubMetadata[cameraMakeKey] = mediaUploadData.cameraMake;
+    }
+    if ((mediaUploadData.cameraModel ?? '').isNotEmpty) {
+      pubMetadata[cameraModelKey] = mediaUploadData.cameraModel;
     }
     return pubMetadata;
   }

@@ -55,6 +55,10 @@
       "title": "Amazon"
     },
     {
+      "title": "Amica",
+      "slug": "amica"
+    },
+    {
       "title": "Amtrak",
       "slug": "amtrak"
     },
@@ -308,6 +312,10 @@
       "slug": "caltrain"
     },
     {
+      "title": "Canada Life",
+      "slug": "canada_life"
+    },
+    {
       "title": "Canva"
     },
     {
@@ -414,6 +422,10 @@
         "Colorado PEAK",
         "myColorado"
       ]
+    },
+    {
+      "title": "Computershare",
+      "slug": "computershare"
     },
     {
       "title": "ConfigCat"
@@ -1040,6 +1052,10 @@
       ]
     },
     {
+      "title": "Medeo",
+      "slug": "medeo"
+    },
+    {
       "title": "Memed"
     },
     {
@@ -1449,6 +1465,10 @@
       "hex": "488aec"
     },
     {
+      "title": "RedFlagDeals",
+      "slug": "redflagdeals"
+    },
+    {
       "title": "RedotPay",
       "altNames": [
         "redotpay",
@@ -1747,6 +1767,9 @@
       ]
     },
     {
+      "title": "TorBox"
+    },
+    {
       "title": "TorGuard"
     },
     {
@@ -1818,6 +1841,10 @@
     {
       "title": "Ubuntu One",
       "slug": "ubuntu_one"
+    },
+    {
+      "title": "UCF",
+      "slug": "ucf"
     },
     {
       "title": "unitedhealthgroup",

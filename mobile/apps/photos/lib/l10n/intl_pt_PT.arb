@@ -1813,13 +1813,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Apresentamos os Rituais",
-  "cLDesc1": "A planear resoluções para 2026? Com os Rituais, pode definir um lembrete no Ente Photos e acompanhar o seu progresso tirando fotografias. Use para treinos, hábitos alimentares, momentos diários com entes queridos – tudo o que quiser transformar num hábito.",
-  "cLTitle2": "Ligações públicas, agora para todos",
-  "cLDesc2": "Todos os utilizadores Ente no plano gratuito podem agora criar e partilhar ligações públicas para fotografias e álbuns. Para prevenir abusos, as ligações terão limites de quantas pessoas podem visualizá-las.",
-  "cLTitle3": "Marcar pessoas manualmente",
-  "cLDesc3": "Agora pode marcar pessoas mesmo quando a nossa IA no dispositivo não deteta um rosto. Útil para animais de estimação, rostos parcialmente visíveis, ou momentos onde alguém não está realmente na fotografia mas deveria ser incluído.",
-  "cLTitle4": "E mais",
-  "cLDesc4": "Agora pode fixar álbuns partilhados. As ligações de álbuns são visíveis para colaboradores e visualizadores para facilitar ainda mais a partilha. Corrigimos alguns bugs de deslizamento no iOS e atualizámos a visualização de fotografias, incluindo um novo ícone de favoritos (abrindo espaço para funcionalidades futuras)."
+  }
 }

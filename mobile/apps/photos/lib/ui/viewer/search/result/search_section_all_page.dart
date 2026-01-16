@@ -1,9 +1,9 @@
 import "dart:async";
 
 import "package:collection/collection.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/events/event.dart";
-import "package:photos/extensions/list.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -17,7 +17,6 @@ import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/ui/viewer/search/result/searchable_item.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class SearchSectionAllPage extends StatefulWidget {
   final SectionType sectionType;

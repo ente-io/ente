@@ -149,10 +149,10 @@ packages:
     dependency: transitive
     description:
       name: cross_file
-      sha256: "942a4791cd385a68ccb3b32c71c427aba508a1bb949b86dff2adbe4049f16239"
+      sha256: "701dcfc06da0882883a2657c445103380e53e647060ad8d9dfb710c100996608"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5"
+    version: "0.3.5+1"
   crypto:
     dependency: "direct main"
     description:
@@ -173,10 +173,10 @@ packages:
     dependency: transitive
     description:
       name: cupertino_http
-      sha256: "72187f715837290a63479a5b0ae709f4fedad0ed6bd0441c275eceaa02d5abae"
+      sha256: "82cbec60c90bf785a047a9525688b6dacac444e177e1d5a5876963d3c50369e8"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "2.4.0"
   dbus:
     dependency: transitive
     description:
@@ -262,8 +262,15 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
-  ente_crypto_dart:
+  ente_crypto_api:
     dependency: "direct main"
+    description:
+      path: "../../packages/ente_crypto_api"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_crypto_dart:
+    dependency: transitive
     description:
       path: "."
       ref: HEAD
@@ -271,10 +278,24 @@ packages:
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
+  ente_crypto_dart_adapter:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_crypto_dart_adapter"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_events:
     dependency: "direct main"
     description:
       path: "../../packages/events"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_icons:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_icons"
       relative: true
     source: path
     version: "1.0.0"
@@ -303,6 +324,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/network"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_pure_utils:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_pure_utils"
       relative: true
     source: path
     version: "1.0.0"
@@ -370,10 +398,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: "289279317b4b16eb2bb7e271abccd4bf84ec9bdcbe999e278a94b804f5630418"
+      sha256: d07d37192dbf97461359c1518788f203b0c9102cfd2c35a716b823741219542c
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   file:
     dependency: transitive
     description:
@@ -386,10 +414,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_picker
-      sha256: f8f4ea435f791ab1f817b4e338ed958cb3d04ba43d6736ffc39958d950754967
+      sha256: d974b6ba2606371ac71dd94254beefb6fa81185bde0b59bdc1df09885da85fde
       url: "https://pub.dev"
     source: hosted
-    version: "10.3.6"
+    version: "10.3.8"
   file_saver:
     dependency: "direct main"
     description:
@@ -605,10 +633,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_svg
-      sha256: "055de8921be7b8e8b98a233c7a5ef84b3a6fcc32f46f1ebf5b9bb3576d108355"
+      sha256: "87fbd7c534435b6c5d9d98b01e1fd527812b82e68ddd8bd35fc45ed0fa8f0a95"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.2"
+    version: "2.2.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -687,18 +715,18 @@ packages:
     dependency: "direct main"
     description:
       name: hugeicons
-      sha256: "036d917bd12e2dee331de7910a11417ebf6c80be1962c0d63ee945e3184f0937"
+      sha256: d19c0e2b57ccf455dd8ef08b84da40ae6dbba898c92960a0a0ada77df7865b8a
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.5"
   image:
     dependency: transitive
     description:
       name: image
-      sha256: "4e973fcf4caae1a4be2fa0a13157aa38a8f9cb049db6529aa00b4d71abc4d928"
+      sha256: "492bd52f6c4fbb6ee41f781ff27765ce5f627910e1e0cbecfa3d9add5562604c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.4"
+    version: "4.7.2"
   intl:
     dependency: "direct main"
     description:
@@ -887,18 +915,18 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "9f034ba1eeca53ddb339bc8f4813cb07336a849cd735559b60cdc068ecce2dc7"
+      sha256: "1f81ed9e41909d44162d7ec8663b2c647c202317cc0b56d3d56f6a13146a0b64"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.0"
+    version: "9.1.0"
   open_file:
     dependency: "direct main"
     description:
       name: open_file
-      sha256: d17e2bddf5b278cb2ae18393d0496aa4f162142ba97d1a9e0c30d476adf99c0e
+      sha256: b22decdae85b459eac24aeece48f33845c6f16d278a9c63d75c5355345ca236b
       url: "https://pub.dev"
     source: hosted
-    version: "3.5.10"
+    version: "3.5.11"
   open_file_android:
     dependency: transitive
     description:
@@ -911,10 +939,10 @@ packages:
     dependency: transitive
     description:
       name: open_file_ios
-      sha256: "02996f01e5f6863832068e97f8f3a5ef9b613516db6897f373b43b79849e4d07"
+      sha256: a5acd07ba1f304f807a97acbcc489457e1ad0aadff43c467987dd9eef814098f
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   open_file_linux:
     dependency: transitive
     description:
@@ -927,10 +955,10 @@ packages:
     dependency: transitive
     description:
       name: open_file_mac
-      sha256: "1440b1e37ceb0642208cfeb2c659c6cda27b25187a90635c9d1acb7d0584d324"
+      sha256: cd293f6750de6438ab2390513c99128ade8c974825d4d8128886d1cda8c64d01
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   open_file_platform_interface:
     dependency: transitive
     description:
@@ -1460,10 +1488,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_linux
-      sha256: "4e9ba368772369e3e08f231d2301b4ef72b9ff87c31192ef471b380ef29a4935"
+      sha256: d5e14138b3bc193a0f63c10a53c94b91d399df0512b1f29b94a043db7482384a
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   url_launcher_macos:
     dependency: transitive
     description:
@@ -1492,10 +1520,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_windows
-      sha256: "3284b6d2ac454cf34f114e1d3319866fdd1e19cdc329999057e44ffe936cfa77"
+      sha256: "712c70ab1b99744ff066053cbe3e80c73332b38d46e5e945c98689b2e66fc15f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.4"
+    version: "3.1.5"
   uuid:
     dependency: "direct main"
     description:
@@ -1618,4 +1646,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.8.0 <4.0.0"
-  flutter: ">=3.29.0"
+  flutter: ">=3.32.0"

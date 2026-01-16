@@ -645,6 +645,16 @@
   resolved "https://registry.yarnpkg.com/@fontsource-variable/inter/-/inter-5.2.8.tgz#29b11476f5149f6a443b4df6516e26002d87941a"
   integrity sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==
 
+"@hugeicons/core-free-icons@^1.1.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@hugeicons/core-free-icons/-/core-free-icons-1.2.1.tgz#c741eaa8bbf1453e9282a64c19a8bbcc8cef5f19"
+  integrity sha512-ho0QdGMkgL+kt+QsZocCsKvJou1rfyVQWARrxIhNLi+9tCKayUUtD9jlHgioaRphmskSl84TxrDm9Ae0G4Uu1g==
+
+"@hugeicons/react@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@hugeicons/react/-/react-1.1.4.tgz#1662f11ebb42c7e16fa7e16e04615db666813a06"
+  integrity sha512-gsc3eZyd2fGqRUThW9+lfjxxsOkz6KNVmRXRgJjP32GL0OnnLJnl3hytKt47CBbiQj2xE2kCw+rnP3UQCThcKw==
+
 "@humanfs/core@^0.19.1":
   version "0.19.1"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.1.tgz#17c55ca7d426733fe3c561906b8173c336b40a77"
@@ -976,10 +986,10 @@
     reselect "^5.1.1"
     use-sync-external-store "^1.6.0"
 
-"@next/env@15.5.7":
-  version "15.5.7"
-  resolved "https://registry.yarnpkg.com/@next/env/-/env-15.5.7.tgz#4168db34ae3bc9fd9ad3b951d327f4cfc38d4362"
-  integrity sha512-4h6Y2NyEkIEN7Z8YxkA27pq6zTkS09bUSYC0xjd0NpwFxjnIKeZEeH591o5WECSmjpUhLn3H2QLJcDye3Uzcvg==
+"@next/env@15.5.9":
+  version "15.5.9"
+  resolved "https://registry.yarnpkg.com/@next/env/-/env-15.5.9.tgz#53c2c34dc17cd87b61f70c6cc211e303123b2ab8"
+  integrity sha512-4GlTZ+EJM7WaW2HEZcyU317tIQDjkQIyENDLxYJfSWlfqguN+dHkZgyQTV/7ykvobU7yEH5gKvreNrH4B6QgIg==
 
 "@next/swc-darwin-arm64@15.5.7":
   version "15.5.7"
@@ -3406,12 +3416,12 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-next@^15.5.7:
-  version "15.5.7"
-  resolved "https://registry.yarnpkg.com/next/-/next-15.5.7.tgz#4507700b2bbcaf2c9fb7a9ad25c0dac2ba4a9a75"
-  integrity sha512-+t2/0jIJ48kUpGKkdlhgkv+zPTEOoXyr60qXe68eB/pl3CMJaLeIGjzp5D6Oqt25hCBiBTt8wEeeAzfJvUKnPQ==
+next@^15.5.9:
+  version "15.5.9"
+  resolved "https://registry.yarnpkg.com/next/-/next-15.5.9.tgz#1b80d05865cc27e710fb4dcfc6fd9e726ed12ad4"
+  integrity sha512-agNLK89seZEtC5zUHwtut0+tNrc0Xw4FT/Dg+B/VLEo9pAcS9rtTKpek3V6kVcVwsB2YlqMaHdfZL4eLEVYuCg==
   dependencies:
-    "@next/env" "15.5.7"
+    "@next/env" "15.5.9"
     "@swc/helpers" "0.5.15"
     caniuse-lite "^1.0.30001579"
     postcss "8.4.31"

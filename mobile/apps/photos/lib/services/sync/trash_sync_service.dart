@@ -4,6 +4,7 @@ import "dart:math";
 
 import 'package:dio/dio.dart';
 import "package:ente_crypto/ente_crypto.dart";
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -12,7 +13,6 @@ import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/events/trash_updated_event.dart';
-import 'package:photos/extensions/list.dart';
 import 'package:photos/models/api/collection/trash_item_request.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';

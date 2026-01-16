@@ -3,12 +3,12 @@ import "dart:convert";
 import "dart:developer";
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
@@ -27,6 +27,7 @@ typedef ManualPersonAssignmentResult = ({
 });
 
 class PersonService {
+  static const Object _attributeNotProvided = Object();
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
@@ -586,22 +587,23 @@ class PersonService {
     bool? isPinned,
     bool? hideFromMemories,
     int? version,
-    String? birthDate,
+    Object? birthDate = _attributeNotProvided,
     String? email,
   }) async {
     final person = (await getPerson(id))!;
-    final updatedPerson = person.copyWith(
-      data: person.data.copyWith(
-        name: name,
-        avatarFaceId: avatarFaceId,
-        isHidden: isHidden,
-        isPinned: isPinned,
-        hideFromMemories: hideFromMemories,
-        version: version,
-        birthDate: birthDate,
-        email: email,
-      ),
+    var updatedData = person.data.copyWith(
+      name: name,
+      avatarFaceId: avatarFaceId,
+      isHidden: isHidden,
+      isPinned: isPinned,
+      hideFromMemories: hideFromMemories,
+      version: version,
+      email: email,
     );
+    if (!identical(birthDate, _attributeNotProvided)) {
+      updatedData = updatedData.copyWith(birthDate: birthDate as String?);
+    }
+    final updatedPerson = person.copyWith(data: updatedData);
     await updatePerson(updatedPerson);
     await refreshPersonCache();
     if (hideFromMemories != null &&

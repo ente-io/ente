@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -29,7 +30,6 @@ import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart"
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class SharedPublicCollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
