@@ -1012,5 +1012,9 @@
       }
     }
   },
-  "failedToDeleteFiles": "Failed to delete items"
+  "failedToDeleteFiles": "Failed to delete items",
+  "itemsStored": "Items stored",
+  "of_": "of",
+  "usageYou": "You",
+  "usageFamily": "Family"
 }

@@ -102,6 +102,8 @@ class FileUploader {
     try {
       _logger.info('Starting upload of info file');
 
+      _checkIfWithinFileCountLimit();
+
       // Generate a file key for encryption
       final fileKey = CryptoUtil.generateKey();
 
@@ -334,6 +336,7 @@ class FileUploader {
       }
       _logger.info('Source file size: $sourceFileSize bytes');
 
+      _checkIfWithinFileCountLimit();
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
@@ -460,7 +463,8 @@ class FileUploader {
           e is WiFiUnavailableError ||
           e is SilentlyCancelUploadsError ||
           e is InvalidFileError ||
-          e is FileTooLargeForPlanError)) {
+          e is FileTooLargeForPlanError ||
+          e is FileLimitReachedError)) {
         _logger.severe("File upload failed", e, s);
       }
       if (e is InvalidFileError) {
@@ -468,7 +472,8 @@ class FileUploader {
       }
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||
-          e is NoActiveSubscriptionError)) {
+          e is NoActiveSubscriptionError ||
+          e is FileLimitReachedError)) {
         // file upload can not be retried in such cases without user intervention
         uploadHardFailure = true;
       }
@@ -527,6 +532,40 @@ class FileUploader {
   }
 
   /*
+  _checkIfWithinFileCountLimit verifies if the user has reached their file count
+   limit. It throws FileLimitReachedError if the limit is reached. For family
+   plan users, it checks the combined family file count against the shared limit.
+   This check is best effort and may not be completely accurate due to UserDetail
+   cache.
+   */
+  void _checkIfWithinFileCountLimit() {
+    try {
+      final userDetails = UserService.instance.getCachedUserDetails();
+      if (userDetails == null) {
+        return;
+      }
+      final maxFileCount = userDetails.getLockerFileLimit();
+      final currentFileCount =
+          userDetails.isPartOfFamily() && userDetails.lockerFamilyUsage != null
+              ? userDetails.lockerFamilyUsage!.familyFileCount
+              : userDetails.fileCount;
+      if (currentFileCount >= maxFileCount) {
+        _logger.warning(
+          'File count limit reached: currentFileCount $currentFileCount, '
+          'maxFileCount $maxFileCount',
+        );
+        throw FileLimitReachedError();
+      }
+    } catch (e) {
+      if (e is FileLimitReachedError) {
+        rethrow;
+      } else {
+        _logger.severe('Error checking file count limit', e);
+      }
+    }
+  }
+
+  /*
   _checkIfWithinStorageLimit verifies if the file size for encryption and upload
    is within the storage limit. It throws StorageLimitExceededError if the limit
     is exceeded. This check is best effort and may not be completely accurate
@@ -545,8 +584,9 @@ class FileUploader {
       final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
       final num fileSize = await fileToBeUploaded.length();
       if (fileSize > freeStorage) {
-        _logger.warning('Storage limit exceeded fileSize $fileSize and '
-            'freeStorage $freeStorage');
+        _logger.warning(
+          'Storage limit exceeded fileSize $fileSize and freeStorage $freeStorage',
+        );
         throw StorageLimitExceededError();
       }
       if (fileSize > kMaxFileSize10Gib) {
