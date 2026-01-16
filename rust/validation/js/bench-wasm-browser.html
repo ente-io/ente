@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ente WASM Bench (Browser)</title>
+    <style>
+      body {
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        margin: 2rem;
+        line-height: 1.5;
+      }
+
+      .controls {
+        display: grid;
+        gap: 0.75rem;
+        max-width: 520px;
+      }
+
+      fieldset {
+        border: 1px solid #ccc;
+        padding: 0.75rem 1rem 1rem;
+      }
+
+      legend {
+        padding: 0 0.5rem;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      input[type='number'] {
+        width: 6rem;
+      }
+
+      button {
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+      }
+
+      .results {
+        margin-top: 2rem;
+      }
+
+      #status {
+        font-weight: 600;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 0.45rem 0.6rem;
+        text-align: left;
+        font-variant-numeric: tabular-nums;
+      }
+
+      th {
+        background: #f6f6f6;
+      }
+
+      .summary {
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WASM Benchmark (Browser)</h1>
+    <p>Results render below once the benchmark finishes.</p>
+
+    <div class="controls">
+      <fieldset>
+        <legend>Implementation</legend>
+        <label>
+          <input type="checkbox" id="run-rust" checked />
+          Rust WASM (ente-core)
+        </label>
+        <label>
+          <input type="checkbox" id="run-js" checked />
+          JS WASM (libsodium-wrappers-sumo)
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Iterations</legend>
+        <label>
+          Warmup iterations
+          <input type="number" id="warmup-iters" min="0" value="1" />
+        </label>
+        <label>
+          Iteration scale
+          <input type="number" id="iter-scale" min="1" value="1" />
+        </label>
+      </fieldset>
+
+      <button id="run-bench" type="button">Run Bench</button>
+    </div>
+
+    <section class="results">
+      <p id="status">Idle</p>
+      <div id="results"></div>
+    </section>
+
+    <script type="module" src="./bench-wasm-browser.mjs"></script>
+  </body>
+</html>
