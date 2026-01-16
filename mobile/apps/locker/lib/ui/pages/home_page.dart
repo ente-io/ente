@@ -627,7 +627,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   backgroundColor: colorScheme.backgroundBase,
                   child: _settingsPage,
                 ),
-                drawerEnableOpenDragGesture: !Platform.isAndroid,
+                drawerEnableOpenDragGesture: true,
                 onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
