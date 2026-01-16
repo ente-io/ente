@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
@@ -15,7 +16,6 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AlbumsSection extends StatefulWidget {
   final List<AlbumSearchResult> albumSearchResults;

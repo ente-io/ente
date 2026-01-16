@@ -12,11 +12,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 
 const helpUrl =
@@ -44,8 +41,17 @@ class _VideoStreamingSettingsPageState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final pageBackgroundColor =
+        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+
     final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
+
     return Scaffold(
+      backgroundColor: pageBackgroundColor,
       bottomNavigationBar: !hasEnabled
           ? SafeArea(
               child: Padding(
@@ -67,119 +73,125 @@ class _VideoStreamingSettingsPageState
               ),
             )
           : null,
-      appBar: hasEnabled
-          ? null
-          : PreferredSize(
-              preferredSize: const Size.fromHeight(154),
-              child: TitleBarWidget(
-                reducedExpandedHeight: 16,
-                flexibleSpaceTitle: TitleBarTitleWidget(
-                  title: AppLocalizations.of(context).videoStreaming,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.strokeBase,
+                  size: 24,
                 ),
-                actionIcons: const [],
-                isSliver: false,
               ),
-            ),
-      body: hasEnabled
-          ? CustomScrollView(
-              primary: false,
-              slivers: <Widget>[
-                TitleBarWidget(
-                  reducedExpandedHeight: 16,
-                  flexibleSpaceTitle: TitleBarTitleWidget(
-                    title: AppLocalizations.of(context).videoStreaming,
-                  ),
-                  actionIcons: const [],
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.only(left: 16, right: 16),
-                    child: Column(
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: AppLocalizations.of(context)
-                                    .videoStreamingDescriptionLine1,
-                              ),
-                              const TextSpan(text: " "),
-                              TextSpan(
-                                text: AppLocalizations.of(context)
-                                    .videoStreamingDescriptionLine2,
-                              ),
-                              const TextSpan(text: " "),
-                              TextSpan(
-                                text: AppLocalizations.of(context).moreDetails,
-                                style: TextStyle(
-                                  color: getEnteColorScheme(context).primary500,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = openHelp,
-                              ),
-                            ],
-                          ),
-                          style: getEnteTextTheme(context).mini.copyWith(
-                                color: getEnteColorScheme(context).textMuted,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                    ).copyWith(top: 30),
-                    child: _getStreamingSettings(context),
-                  ),
-                ),
-              ],
-            )
-          : Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Image.asset(
-                      "assets/enable-streaming-static.png",
-                      height: 160,
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text.rich(
-                        TextSpan(
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context).videoStreaming,
+                style: textTheme.h3Bold,
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: hasEnabled
+                    ? SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            TextSpan(
-                              text: AppLocalizations.of(context)
-                                  .videoStreamingDescriptionLine1,
-                            ),
-                            const TextSpan(text: "\n"),
-                            TextSpan(
-                              text: AppLocalizations.of(context)
-                                  .videoStreamingDescriptionLine2,
-                            ),
-                            const TextSpan(text: "\n"),
-                            TextSpan(
-                              text: AppLocalizations.of(context).moreDetails,
-                              style: TextStyle(
-                                color: getEnteColorScheme(context).primary500,
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: AppLocalizations.of(context)
+                                        .videoStreamingDescriptionLine1,
+                                  ),
+                                  const TextSpan(text: " "),
+                                  TextSpan(
+                                    text: AppLocalizations.of(context)
+                                        .videoStreamingDescriptionLine2,
+                                  ),
+                                  const TextSpan(text: " "),
+                                  TextSpan(
+                                    text: AppLocalizations.of(context)
+                                        .moreDetails,
+                                    style: TextStyle(
+                                      color: colorScheme.primary500,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = openHelp,
+                                  ),
+                                ],
                               ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = openHelp,
+                              style: textTheme.mini
+                                  .copyWith(color: colorScheme.textMuted),
                             ),
+                            const SizedBox(height: 24),
+                            MenuItemWidgetNew(
+                              title: AppLocalizations.of(context).enabled,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () => hasEnabled,
+                                onChanged: () async {
+                                  await toggleVideoStreaming();
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const VideoStreamingStatusWidget(),
                           ],
                         ),
-                        style: getEnteTextTheme(context).smallMuted,
-                        textAlign: TextAlign.center,
+                      )
+                    : Center(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                "assets/enable-streaming-static.png",
+                                height: 160,
+                              ),
+                              const SizedBox(height: 16),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: AppLocalizations.of(context)
+                                            .videoStreamingDescriptionLine1,
+                                      ),
+                                      const TextSpan(text: "\n"),
+                                      TextSpan(
+                                        text: AppLocalizations.of(context)
+                                            .videoStreamingDescriptionLine2,
+                                      ),
+                                      const TextSpan(text: "\n"),
+                                      TextSpan(
+                                        text: AppLocalizations.of(context)
+                                            .moreDetails,
+                                        style: TextStyle(
+                                          color: colorScheme.primary500,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = openHelp,
+                                      ),
+                                    ],
+                                  ),
+                                  style: textTheme.smallMuted,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              const SizedBox(height: 140),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 140),
-                  ],
-                ),
               ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -199,32 +211,6 @@ class _VideoStreamingSettingsPageState
     await VideoPreviewService.instance.setIsVideoStreamingEnabled(!isEnabled);
     if (!mounted) return;
     setState(() {});
-  }
-
-  Widget _getStreamingSettings(BuildContext context) {
-    final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
-    final colorScheme = getEnteColorScheme(context);
-
-    return Column(
-      children: [
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: AppLocalizations.of(context).enabled,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => hasEnabled,
-            onChanged: () async {
-              await toggleVideoStreaming();
-            },
-          ),
-          singleBorderRadius: 8,
-          alignCaptionedTextToLeft: true,
-          menuItemColor: colorScheme.fillFaint,
-        ),
-        const SizedBox(height: 8),
-        const VideoStreamingStatusWidget(),
-      ],
-    );
   }
 }
 
@@ -272,37 +258,31 @@ class VideoStreamingStatusWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+
     return Column(
       children: [
         if (_netProcessed != null)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              MenuItemWidget(
-                captionedTextWidget: CaptionedTextWidget(
-                  title: AppLocalizations.of(context).processed,
-                ),
+              MenuItemWidgetNew(
+                title: AppLocalizations.of(context).processed,
                 trailingWidget: Text(
                   _netProcessed == 0
                       ? '0%'
                       : '${(_netProcessed! * 100.0).toStringAsFixed(2)}%',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: textTheme.small,
                 ),
-                singleBorderRadius: 8,
-                alignCaptionedTextToLeft: true,
-                isGestureDetectorDisabled: true,
-                key: ValueKey("processed_items_" + _netProcessed.toString()),
-                menuItemColor: colorScheme.fillFaint,
+                key: ValueKey("processed_items_$_netProcessed"),
               ),
               const SizedBox(height: 12),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   AppLocalizations.of(context).videoStreamingNote,
-                  style: getEnteTextTheme(context).mini.copyWith(
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
+                  style: textTheme.mini.copyWith(color: colorScheme.textMuted),
                 ),
               ),
             ],

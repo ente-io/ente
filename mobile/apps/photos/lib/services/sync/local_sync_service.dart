@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -16,7 +17,6 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
@@ -25,7 +25,6 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/import/diff.dart";
 import "package:photos/services/sync/import/local_assets.dart";
 import "package:photos/services/sync/import/model.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';

@@ -591,6 +591,7 @@ export const Upload: React.FC<UploadProps> = ({
 
             onOpenCollectionSelector?.({
                 action: "upload",
+                activeCollectionID: props.activeCollection?.id,
                 onSelectCollection: uploadFilesToExistingCollection,
                 onCreateCollection: showNextModal,
                 onCancel: handleCollectionSelectorCancel,

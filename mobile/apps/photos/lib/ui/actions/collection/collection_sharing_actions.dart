@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart' hide isValidEmail;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -30,7 +31,6 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
-import 'package:photos/utils/standalone/date_time.dart';
 import "package:styled_text/styled_text.dart";
 
 class CollectionActions {

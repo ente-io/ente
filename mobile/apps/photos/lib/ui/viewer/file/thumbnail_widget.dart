@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math";
 import "dart:typed_data";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -25,7 +26,6 @@ import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_context_state.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/standalone/task_queue.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {

@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:collection/collection.dart";
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -18,7 +19,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
-import "package:photos/utils/standalone/task_queue.dart";
 
 typedef _TimelineComputationResult = ({
   MemoryLanePersonTimeline timeline,

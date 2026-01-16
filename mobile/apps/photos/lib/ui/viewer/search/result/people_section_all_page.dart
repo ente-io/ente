@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:photos/events/event.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -27,7 +28,6 @@ import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/ui/viewer/people/pinned_person_badge.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class PeopleSectionAllPage extends StatefulWidget {
   const PeopleSectionAllPage({

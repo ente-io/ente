@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:math";
 
 import "package:collection/collection.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
@@ -13,7 +14,6 @@ import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";

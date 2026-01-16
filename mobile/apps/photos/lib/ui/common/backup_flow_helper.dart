@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
@@ -10,7 +11,6 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 final _logger = Logger("BackupFlowHelper");
 

@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -9,7 +10,6 @@ import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class BackupSectionWidget extends StatefulWidget {
   const BackupSectionWidget({super.key});

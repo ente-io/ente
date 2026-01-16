@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -9,7 +10,6 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/standalone/date_time.dart";
 
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});
@@ -94,7 +94,7 @@ class _SessionsPageState extends State<SessionsPage> {
                     const Padding(padding: EdgeInsets.all(8)),
                     Flexible(
                       child: Text(
-                        getFormattedTime(context, lastUsedTime),
+                        getFormattedTime(lastUsedTime, context: context),
                         style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
