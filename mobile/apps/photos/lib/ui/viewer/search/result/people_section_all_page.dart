@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
@@ -614,10 +615,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                   const EdgeInsets.fromLTRB(12, 12, horizontalEdgePadding, 12),
               actions: [
                 Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _buildIgnoredPeopleToggle(colorScheme),
-                ),
-                Padding(
                   padding: const EdgeInsets.only(right: horizontalEdgePadding),
                   child: _buildSortMenu(context, textTheme, colorScheme),
                 ),
@@ -867,16 +864,24 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               details.globalPosition.dx,
               details.globalPosition.dy + 50,
             ),
-            items: List.generate(sortKeys.length, (index) {
-              final key = sortKeys[index];
-              return _buildSortMenuItem(
-                key,
-                index == sortKeys.length - 1,
+            items: [
+              ...List.generate(sortKeys.length, (index) {
+                final key = sortKeys[index];
+                return _buildSortMenuItem(
+                  key,
+                  index == sortKeys.length - 1,
+                  textTheme,
+                  colorScheme,
+                  l10n,
+                );
+              }),
+              _buildIgnoredPeopleMenuItem(
+                context,
                 textTheme,
                 colorScheme,
                 l10n,
-              );
-            }),
+              ),
+            ],
           );
           if (!mounted || selectedKey == null) {
             return;
@@ -902,17 +907,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           iconColor: colorScheme.textMuted,
         ),
       ),
-    );
-  }
-
-  Widget _buildIgnoredPeopleToggle(EnteColorScheme colorScheme) {
-    return IconButtonWidget(
-      icon: _showingIgnoredPeople
-          ? Icons.visibility_rounded
-          : Icons.visibility_off_rounded,
-      iconButtonType: IconButtonType.secondary,
-      iconColor: colorScheme.textMuted,
-      onTap: _toggleIgnoredPeopleView,
     );
   }
 
@@ -1003,6 +997,49 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 color: colorScheme.textMuted,
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<PeopleSortKey> _buildIgnoredPeopleMenuItem(
+    BuildContext context,
+    EnteTextTheme textTheme,
+    EnteColorScheme colorScheme,
+    AppLocalizations l10n,
+  ) {
+    return PopupMenuItem<PeopleSortKey>(
+      value: null,
+      onTap: _toggleIgnoredPeopleView,
+      padding: EdgeInsets.zero,
+      height: _sortMenuItemHeight,
+      child: Container(
+        width: double.infinity,
+        height: _sortMenuItemHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              width: 0.5,
+              color: colorScheme.strokeFaint,
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.showIgnored,
+              style: textTheme.miniMuted,
+            ),
+            IgnorePointer(
+              child: CupertinoSwitch(
+                value: _showingIgnoredPeople,
+                onChanged: (_) {},
+                activeTrackColor: colorScheme.primary500,
+              ),
+            ),
           ],
         ),
       ),

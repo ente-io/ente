@@ -1220,6 +1220,7 @@
   "visibility": "Visibility",
   "hideFromMemories": "Hide from memories",
   "showInMemories": "Show in memories",
+  "showIgnored": "Show ignored",
   "create": "Create",
   "viewAll": "View all",
   "nothingSharedWithYouYet": "Nothing shared with you yet",
