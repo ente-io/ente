@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
@@ -163,8 +164,12 @@ import {
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, watchFolderView } =
-        usePhotosAppContext();
+    const {
+        showLoadingBar,
+        hideLoadingBar,
+        watchFolderView,
+        showNotification,
+    } = usePhotosAppContext();
 
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
@@ -950,8 +955,22 @@ const Page: React.FC = () => {
                 selectedFiles.map((f) => f.id),
             );
             clearSelection();
+            const personName = namedPeople.find((p) => p.id === personID)?.name;
+            showNotification({
+                color: "secondary",
+                startIcon: <CheckCircleIcon />,
+                title: t("added_to_person"),
+                caption: personName,
+                autoHideDuration: 3000,
+            });
         },
-        [selected, filteredFiles, clearSelection],
+        [
+            selected,
+            filteredFiles,
+            clearSelection,
+            showNotification,
+            namedPeople,
+        ],
     );
 
     // Handler for selecting a person from the context menu assign person dialog
