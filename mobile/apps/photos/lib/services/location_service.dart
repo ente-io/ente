@@ -328,13 +328,16 @@ Map<City, List<EnteFile>> getCityResults(Map args) {
   final Map<City, List<EnteFile>> results = {};
   for (final file in files) {
     if (!file.hasLocation) continue; // Skip files without location
+    final fileLocation = file.location!;
     for (final city in matchingCities) {
-      final cityLocation = Location(latitude: city.lat, longitude: city.lng);
-      if (isFileInsideLocationTag(
-        cityLocation,
-        file.location!,
-        defaultCityRadius,
-      )) {
+      final x = city.lat - fileLocation.latitude!;
+      final y = city.lng - fileLocation.longitude!;
+
+      // Bounding box pre-filter: quick rejection for points clearly outside
+      if (x.abs() > city.a || y.abs() > city.b) continue;
+
+      // Ellipse containment check using pre-computed squared parameters
+      if ((x * x) / city.aSquare + (y * y) / city.bSquare <= 1) {
         results.putIfAbsent(city, () => []).add(file);
         break; // Stop searching once a file is matched with a city
       }
@@ -392,19 +395,43 @@ class City {
   final double lat;
   final double lng;
 
+  /// Pre-computed ellipse parameter for location containment check.
+  /// a = (defaultCityRadius * scaleFactor(lat)) / kilometersPerDegree
+  final double a;
+
+  /// Pre-computed squared ellipse parameter: a * a
+  final double aSquare;
+
+  /// Pre-computed ellipse parameter: defaultCityRadius / kilometersPerDegree
+  final double b;
+
+  /// Pre-computed squared ellipse parameter: b * b
+  final double bSquare;
+
   City({
     required this.city,
     required this.country,
     required this.lat,
     required this.lng,
+    required this.a,
+    required this.aSquare,
+    required this.b,
+    required this.bSquare,
   });
 
   factory City.fromMap(Map<String, dynamic> map) {
+    final lat = map['lat']?.toDouble() ?? 0.0;
+    final a = (defaultCityRadius * scaleFactor(lat)) / kilometersPerDegree;
+    const b = defaultCityRadius / kilometersPerDegree;
     return City(
       city: map['city'] ?? '',
       country: map['country'] ?? '',
-      lat: map['lat']?.toDouble() ?? 0.0,
+      lat: lat,
       lng: map['lng']?.toDouble() ?? 0.0,
+      a: a,
+      aSquare: a * a,
+      b: b,
+      bSquare: b * b,
     );
   }
 
