@@ -14,7 +14,7 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+      padding: EdgeInsets.only(top: 16.0),
       child: Column(
         children: [
           _LegacyItem(),
@@ -41,37 +41,36 @@ class _CollectionsItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => _openCollections(context),
-      borderRadius: borderRadius,
       child: Container(
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
-            Container(
-              height: 40,
+            SizedBox(
               width: 40,
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(8.0),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedWallet05,
-                color: colorScheme.strokeBase,
+              height: 40,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedWallet05,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.l10n.collections,
-                style: textTheme.small,
+                style: textTheme.body,
                 overflow: TextOverflow.ellipsis,
-                maxLines: 2,
+                maxLines: 1,
               ),
             ),
           ],
@@ -94,37 +93,36 @@ class _TrashItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => _openTrash(context),
-      borderRadius: borderRadius,
       child: Container(
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
-            Container(
-              height: 40,
+            SizedBox(
               width: 40,
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(8.0),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedDelete02,
-                color: colorScheme.strokeBase,
+              height: 40,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.l10n.trash,
-                style: textTheme.small,
+                style: textTheme.body,
                 overflow: TextOverflow.ellipsis,
-                maxLines: 2,
+                maxLines: 1,
               ),
             ),
           ],
@@ -149,47 +147,39 @@ class _LegacyItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => openLegacyPage(context),
-      borderRadius: borderRadius,
       child: Container(
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
         ),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
             SizedBox(
-              height: 60,
-              width: 60,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary700.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: colorScheme.primary700,
-                  ),
+              width: 40,
+              height: 40,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFavourite,
+                  color: colorScheme.primary700,
+                  size: 24,
                 ),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.l10n.legacy,
                 style: textTheme.body,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: Icon(
-                Icons.chevron_right,
-                color: colorScheme.textMuted,
-              ),
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.textMuted,
             ),
           ],
         ),
