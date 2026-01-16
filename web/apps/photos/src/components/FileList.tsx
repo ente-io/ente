@@ -325,9 +325,16 @@ export const FileList: React.FC<FileListProps> = ({
         fileIndex: number;
     } | null>(null);
 
-    // Track selection state before right-click modified it
+    // Track selection state before right-click modified it.
+    // If there are already 3 files explicitly selected via checkmarks,
+    // right-clicking an unselected item will store the previous selections
+    // in this ref and temporarily select only the right-clicked file.
+    // If no action is taken from the context menu, the previous selection
+    // is restored when the menu closes.
     const previousSelectionRef = useRef<SelectedState | null>(null);
-    // Track if an action was taken from the context menu
+    // Track whether an action was taken from the context menu.
+    // This ref works in conjunction with previousSelectionRef: if an action
+    // is taken, the previous selection is not reverted when the context menu closes.
     const contextMenuActionTakenRef = useRef(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
