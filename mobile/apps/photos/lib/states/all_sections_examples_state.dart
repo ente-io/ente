@@ -40,6 +40,8 @@ class _AllSectionsExamplesProviderState
   bool isOnSearchTab = false;
   bool _firstLoadInProgressOrComplete = false;
   final _logger = Logger("AllSectionsExamplesProvider");
+  static const _initialLoadDelay = Duration(seconds: 10);
+  Timer? _initialLoadTimer;
 
   final _debouncer = Debouncer(
     const Duration(seconds: 3),
@@ -66,7 +68,8 @@ class _AllSectionsExamplesProviderState
       if (event.source == TabChangedEventSource.pageView &&
           event.selectedIndex == 3) {
         isOnSearchTab = true;
-        if (hasPendingUpdate) {
+        _cancelInitialLoadTimer();
+        if (hasPendingUpdate || !_firstLoadInProgressOrComplete) {
           hasPendingUpdate = false;
           reloadAllSections();
         }
@@ -75,7 +78,7 @@ class _AllSectionsExamplesProviderState
       }
     });
 
-    Future.delayed(const Duration(seconds: 3), () {
+    _initialLoadTimer = Timer(_initialLoadDelay, () {
       if (!_firstLoadInProgressOrComplete) {
         reloadAllSections();
       }
@@ -125,12 +128,18 @@ class _AllSectionsExamplesProviderState
     });
   }
 
+  void _cancelInitialLoadTimer() {
+    _initialLoadTimer?.cancel();
+    _initialLoadTimer = null;
+  }
+
   @override
   void dispose() {
     _onPeopleChangedEvent.cancel();
     _filesUpdatedEvent.cancel();
     _peopleSortChangedEvent.cancel();
     _tabChangeEvent.cancel();
+    _cancelInitialLoadTimer();
     _debouncer.cancelDebounceTimer();
     super.dispose();
   }
