@@ -480,8 +480,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           .whenComplete(_resumePreview);
       return;
     }
-    final List<_RitualCapture> pending =
-        List<_RitualCapture>.from(_captures);
+    final List<_RitualCapture> pending = List<_RitualCapture>.from(_captures);
     bool saved = false;
     setState(() {
       _saving = true;
@@ -1130,9 +1129,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       );
       final bool shouldMirrorPreview =
           _activeCamera?.lensDirection == CameraLensDirection.front;
-      final Offset cameraPoint = shouldMirrorPreview
-          ? Offset(1.0 - clamped.dx, clamped.dy)
-          : clamped;
+      final Offset cameraPoint =
+          shouldMirrorPreview ? Offset(1.0 - clamped.dx, clamped.dy) : clamped;
       controller.setExposurePoint(cameraPoint);
       controller.setFocusPoint(cameraPoint);
       _showFocusIndicator(clamped);

@@ -493,8 +493,8 @@ class RitualsService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final todayIndex = today.weekday % 7;
-    final shouldCheckToday = ritual.daysOfWeek.length == 7 &&
-        ritual.daysOfWeek[todayIndex];
+    final shouldCheckToday =
+        ritual.daysOfWeek.length == 7 && ritual.daysOfWeek[todayIndex];
     final albumId = ritual.albumId;
     final skipToday = shouldCheckToday && albumId != null && albumId > 0
         ? await _hasAddedPhotoToday(albumId)
@@ -567,8 +567,7 @@ class RitualsService {
       if (albumId == null || albumId <= 0) continue;
       if (!updatedCollectionIds.contains(albumId)) continue;
       if (!ritual.remindersEnabled) continue;
-      if (ritual.daysOfWeek.length != 7 ||
-          !ritual.daysOfWeek[todayIndex]) {
+      if (ritual.daysOfWeek.length != 7 || !ritual.daysOfWeek[todayIndex]) {
         continue;
       }
       if (_notificationRescheduleInFlight.contains(ritual.id)) {

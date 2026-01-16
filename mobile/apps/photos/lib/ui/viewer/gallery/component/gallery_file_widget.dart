@@ -6,7 +6,6 @@ import "package:photos/core/constants.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
@@ -62,14 +61,10 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Check if swipe selection should be enabled
-    final shouldEnableSwipeSelection =
-        localSettings.isSwipeToSelectEnabled && !widget.limitSelectionToOne;
-
     final Widget fileContent = _buildFileContent(context);
 
-    // Wrap with swipe selection if enabled
-    if (shouldEnableSwipeSelection) {
+    // Wrap with swipe selection when not in single selection mode
+    if (!widget.limitSelectionToOne) {
       return SwipeSelectableFileWidget(
         file: widget.file,
         selectedFiles: widget.selectedFiles,

@@ -14,6 +14,7 @@ typedef FullScreenRequestCallback = void Function(
 class InheritedDetailPageState extends InheritedWidget {
   final ValueNotifier<bool> enableFullScreenNotifier;
   final ValueNotifier<bool> isInSharedCollectionNotifier;
+
   /// Holds the generatedID of the file currently showing thumbnail fallback.
   /// Only the file with matching ID should display the fallback indicator.
   final ValueNotifier<int?> showingThumbnailFallbackNotifier;
