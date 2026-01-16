@@ -7,7 +7,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
+import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -563,7 +563,7 @@ const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const EditLocationButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("edit_location")}>
         <IconButton {...{ onClick }}>
-            <LocationOnIcon />
+            <EditLocationAltIcon />
         </IconButton>
     </Tooltip>
 );

@@ -72,9 +72,11 @@ import {
     usePeopleStateSnapshot,
     useSettingsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
+import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import {
     updateFileCaption,
     updateFileFileName,
+    updateFilesLocation,
     updateFilePublicMagicMetadata,
 } from "ente-new/photos/services/file";
 import {
@@ -208,6 +210,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         useModalVisibility();
     const { show: showAssignPerson, props: assignPersonVisibilityProps } =
         useModalVisibility();
+    const { show: showEditLocation, props: editLocationVisibilityProps } =
+        useModalVisibility();
 
     const assignablePeople = useMemo(
         () =>
@@ -234,11 +238,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const canAddPerson = isMLEnabled() && assignablePeople.length > 0;
 
-    const location = useMemo(
+    const fileLocationValue = useMemo(
         // Prefer the location in the EnteFile, then fall back to Exif.
         () => fileLocation(file) ?? exif?.parsed?.location,
         [file, exif],
     );
+
+    // Local state to track updated location before file prop refreshes
+    const [localLocation, setLocalLocation] = useState<Location | undefined>();
+    const location = localLocation ?? fileLocationValue;
+
+    // Reset local location when file changes
+    useEffect(() => {
+        setLocalLocation(undefined);
+    }, [file.id]);
 
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
@@ -280,6 +293,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         assignPersonVisibilityProps.onClose();
         try {
             await addManualFileAssignmentsToPerson(personID, [file.id]);
+        } catch (e) {
+            onGenericError(e);
+        }
+    };
+
+    const handleEditLocationConfirm = async (newLocation: Location) => {
+        try {
+            await updateFilesLocation(
+                [file],
+                newLocation.latitude,
+                newLocation.longitude,
+            );
+            setLocalLocation(newLocation);
+            await onFileMetadataUpdate?.();
         } catch (e) {
             onGenericError(e);
         }
@@ -350,14 +377,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 )
                             }
                             trailingButton={
-                                <CopyButton
-                                    size="medium"
-                                    text={openStreetMapLink(location)}
-                                />
+                                <Stack direction="row" sx={{ gap: 1 }}>
+                                    {allowEdits && (
+                                        <EditButton onClick={showEditLocation} />
+                                    )}
+                                    <CopyButton
+                                        size="medium"
+                                        text={openStreetMapLink(location)}
+                                    />
+                                </Stack>
                             }
                         />
                         {allowMap && (
                             <MapBox
+                                key={`${location.latitude}-${location.longitude}`}
                                 location={location}
                                 mapEnabled={mapEnabled}
                             />
@@ -433,6 +466,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     people={assignablePeople}
                     title={t("add_a_person")}
                     onSelectPerson={handleAddPerson}
+                />
+            )}
+
+            {allowEdits && (
+                <EditLocationDialog
+                    {...editLocationVisibilityProps}
+                    files={[file]}
+                    onConfirm={handleEditLocationConfirm}
                 />
             )}
         </FileInfoSidebar>
