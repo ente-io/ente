@@ -47,7 +47,6 @@ import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
 
 class SaveOrEditPerson extends StatefulWidget {
