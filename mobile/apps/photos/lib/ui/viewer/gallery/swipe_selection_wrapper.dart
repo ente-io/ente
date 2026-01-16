@@ -64,6 +64,8 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   static const double _baselineRefreshRate = 120.0;
   static const double _baselineMaxScrollSpeed = 12.0; // 1440 px/s (12 * 120fps)
   static const double _speedExponent = 1.20; // Power curve exponent
+  // Filters touch jitter on Samsung S series devices
+  static const double _movementThreshold = 3.0;
 
   @override
   void initState() {
@@ -128,7 +130,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
             // Only applies if pointer down was for the initial selection (continuous gesture)
             final dx = event.delta.dx.abs();
             final dy = event.delta.dy.abs();
-            if (dx > 0.1 || dy > 0.1) {
+            if (dx > _movementThreshold || dy > _movementThreshold) {
               widget.swipeActiveNotifier.value = true;
             }
           }
@@ -142,7 +144,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
 
             // Track initial movement direction if not yet determined
             if (_initialMovementWasHorizontal == null &&
-                (dx > 0.1 || dy > 0.1)) {
+                (dx > _movementThreshold || dy > _movementThreshold)) {
               _initialMovementWasHorizontal = dx > dy;
             }
 
