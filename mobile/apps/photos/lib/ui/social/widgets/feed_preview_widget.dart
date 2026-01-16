@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -11,8 +12,6 @@ import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/social/feed_screen.dart";
 import "package:photos/ui/social/widgets/feed_preview_item_widget.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 /// Widget that displays a preview of the latest feed item.
 ///

@@ -89,6 +89,9 @@ export const matchJSONMetadata = (
         extension = "." + extension;
     }
 
+    // Save the original name before any modifications for fallback lookups.
+    const originalName = name;
+
     // Trim off a suffix like "(1)" from the name, remembering what we trimmed
     // since we need to add it back later.
     //
@@ -162,6 +165,18 @@ export const matchJSONMetadata = (
     );
 
     takeoutMetadata = parsedMetadataJSONMap.get(key);
+    if (takeoutMetadata) return takeoutMetadata;
+
+    // Some Google Takeout exports keep the numbered suffix in its original
+    // position instead of moving it to the end. For example, "skytree (2).jpg"
+    // may have metadata in "skytree (2).jpg.supplemental-metadata.json" instead
+    // of "skytree.jpg.supplemental-metadata(2).json". Try that pattern too.
+    if (numberedSuffix) {
+        const originalBaseFileName = `${originalName}${extension}${supplSuffix}`;
+        key = makeKey(originalBaseFileName.slice(0, maxGoogleFileNameLength));
+        takeoutMetadata = parsedMetadataJSONMap.get(key);
+    }
+
     return takeoutMetadata;
 };
 

@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:math';
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
@@ -20,7 +21,6 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
   /*

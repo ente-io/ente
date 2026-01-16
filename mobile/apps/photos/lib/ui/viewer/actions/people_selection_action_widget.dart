@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -14,7 +15,6 @@ import "package:photos/ui/components/bottom_action_bar/selection_action_button_w
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class PeopleSelectionActionWidget extends StatefulWidget {
   final SelectedPeople selectedPeople;

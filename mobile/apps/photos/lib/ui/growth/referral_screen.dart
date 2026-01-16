@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
@@ -16,9 +17,7 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/growth/apply_code_screen.dart";
 import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
-import "package:photos/utils/standalone/data.dart";
 import "package:tuple/tuple.dart";
 
 class ReferralScreen extends StatefulWidget {

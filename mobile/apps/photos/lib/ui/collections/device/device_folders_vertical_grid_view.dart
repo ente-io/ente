@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:math";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -14,7 +15,6 @@ import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/searchable_appbar.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import "package:photos/utils/standalone/debouncer.dart";
 
 class DeviceFolderVerticalGridView extends StatefulWidget {
   final Widget? appTitle;

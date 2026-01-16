@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
@@ -15,7 +16,6 @@ import "package:photos/ui/tools/collage/collage_with_six_items.dart";
 import "package:photos/ui/tools/collage/collage_with_three_items.dart";
 import "package:photos/ui/tools/collage/collage_with_two_items.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 class CollageCreatorPage extends StatefulWidget {

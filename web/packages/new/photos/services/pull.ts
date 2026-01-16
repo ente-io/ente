@@ -13,7 +13,7 @@ import {
 } from "./collection";
 import { isMLSupported, mlSync, pullMLStatus } from "./ml";
 import { searchDataSync } from "./search";
-import { pullSettings, settingsSnapshot } from "./settings";
+import { pullSettings } from "./settings";
 import { pullTrash, type TrashItem } from "./trash";
 
 /**
@@ -114,15 +114,12 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
         videoPrunePermanentlyDeletedFileIDsIfNeeded,
     );
     // After trash sync, fetch pending removal actions and move affected files
-    // to the uncategorized collection. This is gated behind the admin role
-    // feature flag since it's related to admin removal functionality.
+    // to the uncategorized collection.
     // Wrapped in try-catch since self-hosted servers may not have this endpoint.
-    if (settingsSnapshot().isAdminRoleEnabled) {
-        try {
-            await movePendingRemovalActionsToUncategorized(collections);
-        } catch (e) {
-            log.warn("Failed to process pending removal actions", e);
-        }
+    try {
+        await movePendingRemovalActionsToUncategorized(collections);
+    } catch (e) {
+        log.warn("Failed to process pending removal actions", e);
     }
     if (didUpdateFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery

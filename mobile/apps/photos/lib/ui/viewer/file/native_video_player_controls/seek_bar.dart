@@ -1,11 +1,11 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class SeekBar extends StatefulWidget {
   final NativeVideoPlayerController controller;

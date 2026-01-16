@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -17,7 +18,6 @@ import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/settings/app_icon_selection_screen.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/streaming/video_streaming_settings_page.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class AdvancedSettingsScreen extends StatelessWidget {
   const AdvancedSettingsScreen({super.key});

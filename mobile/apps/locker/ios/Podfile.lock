@@ -67,7 +67,7 @@ PODS:
     - FlutterMacOS
   - objective_c (0.0.1):
     - Flutter
-  - open_file_ios (0.0.1):
+  - open_file_ios (1.0.3):
     - Flutter
   - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
@@ -210,7 +210,7 @@ SPEC CHECKSUMS:
   listen_sharing_intent: fe0b9a59913cc124dd6cbd55cd9f881de5f75759
   local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
-  open_file_ios: 5ff7526df64e4394b4fe207636b67a95e83078bb
+  open_file_ios: 46184d802ee7959203f6392abcfa0dd49fdb5be0
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564

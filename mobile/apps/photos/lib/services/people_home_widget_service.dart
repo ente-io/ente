@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:collection/collection.dart";
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +14,6 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 

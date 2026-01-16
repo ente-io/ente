@@ -2,13 +2,13 @@ import "dart:async";
 import "dart:io";
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/db/common/base.dart";
 import "package:photos/db/common/conflict_algo.dart";
-import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';

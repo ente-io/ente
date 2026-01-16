@@ -25,6 +25,7 @@ import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
+import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_actions.dart';
 import "package:logging/logging.dart";
 
@@ -59,6 +60,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   bool isFavorite = false;
 
   final _selectedFiles = SelectedFiles();
+  final _scrollController = ScrollController();
 
   @override
   void onFileUploadComplete() {
@@ -103,11 +105,15 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   @override
   void dispose() {
     _collectionUpdateSubscription.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
   List<EnteFile> get _displayedFiles =>
       isSearchActive ? _filteredFiles : _files;
+
+  bool get _isSelectionEnabled =>
+      collectionViewType != CollectionViewType.quickLink;
 
   @override
   void initState() {
@@ -256,11 +262,12 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           alignment: Alignment.bottomCenter,
           children: [
             _buildBody(colorScheme, textTheme),
-            // TODO(aman): Re-enable file multi-select overlay when bulk actions return.
-            // FileSelectionOverlayBar(
-            //   files: _displayedFiles,
-            //   selectedFiles: _selectedFiles,
-            // ),
+            FileSelectionOverlayBar(
+              files: _displayedFiles,
+              selectedFiles: _selectedFiles,
+              collectionViewType: collectionViewType,
+              scrollController: _scrollController,
+            ),
           ],
         ),
       ),
@@ -282,8 +289,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     return GestureDetector(
       onTap: _shareCollection,
       child: Container(
-        height: 48,
-        width: 48,
+        height: 44,
+        width: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: colorScheme.backdropBase,
@@ -315,8 +322,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       constraints: const BoxConstraints(minWidth: 120),
       offset: const Offset(-36, 36),
       child: Container(
-        height: 48,
-        width: 48,
+        height: 44,
+        width: 44,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: colorScheme.backdropBase,
@@ -463,7 +470,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            padding: const EdgeInsets.all(16.0),
             child: _displayedFiles.isEmpty
                 ? Center(
                     child: EmptyStateWidget(
@@ -476,9 +483,10 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 : ItemListView(
                     key: ValueKey(_displayedFiles.length),
                     files: _displayedFiles,
-                    // TODO(aman): pass selectedFiles when multi-select returns.
-                    selectedFiles: null,
+                    selectedFiles: _selectedFiles,
+                    scrollController: _scrollController,
                     physics: const BouncingScrollPhysics(),
+                    selectionEnabled: _isSelectionEnabled,
                   ),
           ),
         ),

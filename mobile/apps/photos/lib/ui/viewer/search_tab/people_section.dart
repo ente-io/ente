@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
@@ -23,7 +24,6 @@ import 'package:photos/ui/viewer/people/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class PeopleSection extends StatefulWidget {
   final SectionType sectionType = SectionType.face;
@@ -261,7 +261,10 @@ class PersonSearchExample extends StatelessWidget {
                                 searchResult.previewThumbnail()!,
                                 shouldShowSyncStatus: false,
                               )
-                            : FaceSearchResult(searchResult);
+                            : FaceSearchResult(
+                                searchResult,
+                                displaySize: size - 2,
+                              );
                       } else {
                         child = const NoThumbnailWidget(
                           addBorder: false,
@@ -368,15 +371,23 @@ class PersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
+  final double displaySize;
 
-  const FaceSearchResult(this.searchResult, {super.key});
+  const FaceSearchResult(
+    this.searchResult, {
+    required this.displaySize,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
+    final int cachedPixelWidth =
+        (displaySize * MediaQuery.devicePixelRatioOf(context)).toInt();
     return PersonFaceWidget(
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
+      cachedPixelWidth: cachedPixelWidth,
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),

@@ -1,5 +1,6 @@
 import "dart:io";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
@@ -23,7 +24,6 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
@@ -210,8 +210,8 @@ class BackupSettingsScreen extends StatelessWidget {
         bgColor: colorScheme.fillFaint,
       ),
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Backup only new photos",
+        captionedTextWidget: CaptionedTextWidget(
+          title: context.l10n.backupOnlyNewPhotos,
         ),
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: ToggleSwitchWidget(
@@ -298,8 +298,8 @@ class BackupSettingsScreen extends StatelessWidget {
     final result = await showActionSheet(
       context: context,
       buttons: [
-        const ButtonWidget(
-          labelText: "Select folders",
+        ButtonWidget(
+          labelText: context.l10n.selectFolders,
           buttonType: ButtonType.primary,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: false,
@@ -324,12 +324,12 @@ class BackupSettingsScreen extends StatelessWidget {
           isInAlert: true,
         ),
       ],
-      title: "Backup only new photos",
+      title: context.l10n.backupOnlyNewPhotos,
       body: hasAllFoldersSelected
-          ? "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
+          ? context.l10n.backupOnlyNewPhotosAllFoldersSelected
           : allowContinueAnyway
-              ? "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
-              : "No folders are currently selected for backup.\n\nPlease select folders to continue.",
+              ? context.l10n.backupOnlyNewPhotosNoFoldersSelectedContinue
+              : context.l10n.backupOnlyNewPhotosNoFoldersSelectedRequire,
     );
 
     if (result?.action == null || result!.action == ButtonAction.cancel) {

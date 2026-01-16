@@ -17,9 +17,8 @@ dependencies:
     path: ../accounts
   ente_configuration:
     path: ../configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../ente_crypto_api
   ente_network:
     path: ../network
   ente_strings:

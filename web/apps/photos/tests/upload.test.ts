@@ -143,6 +143,11 @@ const fileNameToJSONMappingCases = [
         filename: "20220322_205147-edited(1).jpg",
         jsonFilename: "20220322_205147.jpg.supplemental-metadata(1).json",
     },
+    // Some exports keep the numbered suffix in the original position
+    {
+        filename: "skytree (2).jpg",
+        jsonFilename: "skytree (2).jpg.supplemental-metadata.json",
+    },
 ];
 
 export async function testUpload() {

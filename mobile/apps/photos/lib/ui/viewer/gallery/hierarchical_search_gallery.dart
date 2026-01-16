@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -22,7 +23,6 @@ import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class HierarchicalSearchGallery extends StatefulWidget {
   final String tagPrefix;

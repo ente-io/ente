@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -10,7 +11,6 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class AllSectionsExamplesProvider extends StatefulWidget {
   final Widget child;

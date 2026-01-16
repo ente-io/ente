@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
@@ -184,7 +185,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               showOnlyLoadingState: true,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
-                showShortToast(context, "Link copied to clipboard");
+                showShortToast(context, context.l10n.linkCopiedToClipboard);
               },
               isBottomBorderRadiusRemoved: true,
             ),
@@ -292,7 +293,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.collection.displayName ?? "Collection",
+          widget.collection.displayName ?? context.l10n.collectionLabel,
           style:
               Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16),
         ),

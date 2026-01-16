@@ -1,5 +1,6 @@
 import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class CommentActionsPopup extends StatelessWidget {
@@ -20,6 +21,7 @@ class CommentActionsPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -40,7 +42,7 @@ class CommentActionsPopup extends StatelessWidget {
             _ActionItem(
               icon: isLiked ? EnteIcons.likeFilled : EnteIcons.likeStroke,
               iconColor: isLiked ? const Color(0xFFE25454) : null,
-              label: "Like",
+              label: l10n.like,
               onTap: onLikeTap,
               textStyle: textTheme.mini.copyWith(
                 height: 19 / 12,
@@ -50,7 +52,7 @@ class CommentActionsPopup extends StatelessWidget {
             ),
             _ActionItem(
               icon: EnteIcons.reply,
-              label: "Reply",
+              label: l10n.reply,
               onTap: onReplyTap,
               textStyle: textTheme.mini.copyWith(
                 height: 19 / 12,
@@ -61,7 +63,7 @@ class CommentActionsPopup extends StatelessWidget {
             if (showDelete)
               _ActionItem(
                 icon: Icons.delete_outline_rounded,
-                label: "Delete",
+                label: l10n.delete,
                 onTap: onDeleteTap!,
                 textStyle: textTheme.mini.copyWith(
                   height: 19 / 12,

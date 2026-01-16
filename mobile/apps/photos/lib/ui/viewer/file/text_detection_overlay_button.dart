@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -11,7 +12,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/text_detection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class TextDetectionOverlayButton extends StatefulWidget {
   final EnteFile file;

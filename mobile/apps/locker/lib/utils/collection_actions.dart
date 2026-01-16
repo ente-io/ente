@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
@@ -10,7 +11,6 @@ import 'package:ente_ui/components/buttons/models/button_type.dart';
 import "package:ente_ui/components/progress_dialog.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
 import 'package:locker/l10n/l10n.dart';
@@ -21,8 +21,8 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/components/input_dialog_sheet.dart";
-import "package:locker/ui/components/subscription_required_dialog.dart";
+import "package:locker/ui/components/input_sheet.dart";
+import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -36,11 +36,11 @@ class CollectionActions {
   }) async {
     Collection? createdCollection;
 
-    final result = await showInputDialogSheet(
+    final result = await showInputSheet(
       context,
-      title: context.l10n.createCollection,
-      hintText: context.l10n.documentsHint,
-      submitButtonLabel: context.l10n.create,
+      title: context.l10n.newCollection,
+      hintText: context.l10n.enterCollectionName,
+      submitButtonLabel: context.l10n.createCollection,
       onSubmit: (String text) async {
         if (text.trim().isEmpty) {
           return;
@@ -77,7 +77,12 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    await showInputDialogSheet(
+    if (!collection.type.canEdit) {
+      showToast(context, context.l10n.collectionCannotBeEdited);
+      return;
+    }
+
+    await showInputSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',
@@ -206,13 +211,13 @@ class CollectionActions {
 
       showToast(
         context,
-        "${collections.length} collections deleted successfully",
+        context.l10n.collectionsDeletedSuccessfully(collections.length),
       );
 
       if (isFavoriteCollection) {
         showToast(
           context,
-          "Action not supported on Favourites album",
+          context.l10n.actionNotSupportedOnFavouritesAlbum,
         );
       }
 
@@ -351,7 +356,7 @@ class CollectionActions {
           onSuccess?.call();
           showToast(
             context,
-            "Leave collection successfully",
+            context.l10n.leaveCollectionSuccessfully,
           );
         }
       } catch (e) {
@@ -371,46 +376,40 @@ class CollectionActions {
     List<Collection> collections, {
     VoidCallback? onSuccess,
   }) async {
-    final actionResult = await showActionSheet(
-      context: context,
+    final confirmed = await showAlertBottomSheet(
+      context,
+      title: context.l10n.leaveCollection,
+      message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: context.l10n.leaveCollection,
-          onTap: () async {
-            for (final col in collections) {
-              await CollectionApiClient.instance.leaveCollection(col);
-            }
-          },
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: context.l10n.cancel,
+        SizedBox(
+          child: GradientButton(
+            text: context.l10n.leaveCollection,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
         ),
       ],
-      title: context.l10n.leaveCollection,
-      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
     );
-    if (actionResult?.action != null && context.mounted) {
-      if (actionResult!.action == ButtonAction.error) {
-        await showGenericErrorDialog(
-          context: context,
-          error: actionResult.exception,
-        );
-      } else if (actionResult.action == ButtonAction.first) {
-        onSuccess?.call();
-        Navigator.of(context).pop();
-        showToast(
-          context,
-          "Leave collection successfully",
-        );
+    if (confirmed == true) {
+      try {
+        for (final col in collections) {
+          await CollectionApiClient.instance.leaveCollection(col);
+        }
+        if (context.mounted) {
+          onSuccess?.call();
+          showToast(
+            context,
+            context.l10n.leftCollectionsSuccessfully(collections.length),
+          );
+        }
+      } catch (e) {
+        _logger.severe("Failed to leave collections", e);
+        if (context.mounted) {
+          showToast(
+            context,
+            context.l10n.somethingWentWrong,
+          );
+        }
       }
     }
   }
@@ -450,7 +449,7 @@ class CollectionActions {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: "Yes, remove",
+          labelText: context.l10n.yesRemove,
           onTap: () async {
             await CollectionApiClient.instance.disableShareUrl(collection);
           },
@@ -463,9 +462,9 @@ class CollectionActions {
           labelText: context.l10n.cancel,
         ),
       ],
-      title: "Remove public link",
-      body:
-          "This will remove the public link for accessing \"${collection.name}\".",
+      title: context.l10n.removePublicLink,
+      body: context.l10n
+          .removePublicLinkConfirmation(collection.name ?? "this collection"),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

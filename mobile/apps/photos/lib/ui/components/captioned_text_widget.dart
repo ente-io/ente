@@ -1,6 +1,6 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import "package:photos/utils/string_util.dart";
 
 class CaptionedTextWidget extends StatelessWidget {
   final String title;

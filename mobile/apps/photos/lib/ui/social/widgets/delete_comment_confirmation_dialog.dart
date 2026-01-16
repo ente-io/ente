@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/gradient_button.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -34,6 +35,7 @@ class _DeleteCommentConfirmationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -78,13 +80,13 @@ class _DeleteCommentConfirmationSheet extends StatelessWidget {
                 ],
               ),
               Text(
-                "Are you sure?",
+                l10n.areYouSure,
                 style: textTheme.h3Bold,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                'Your comment "$truncatedComment" will be deleted permanently',
+                l10n.deleteCommentConfirmation(comment: truncatedComment),
                 style: textTheme.body.copyWith(color: colorScheme.textMuted),
                 textAlign: TextAlign.center,
               ),
@@ -93,7 +95,7 @@ class _DeleteCommentConfirmationSheet extends StatelessWidget {
                 width: double.infinity,
                 child: GradientButton(
                   onTap: () => Navigator.of(context).pop(true),
-                  text: "Delete comment",
+                  text: l10n.deleteComment,
                   linearGradientColors: const [
                     Color(0xFFF63A3A),
                     Color(0xFFF63A3A),

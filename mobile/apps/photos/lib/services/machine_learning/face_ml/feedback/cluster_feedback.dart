@@ -3,6 +3,7 @@ import 'dart:developer' as dev show log;
 import "dart:math" show Random, min;
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/linalg.dart";
@@ -10,7 +11,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
