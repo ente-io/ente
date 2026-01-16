@@ -1,0 +1,37 @@
+[package]
+name = "ente-core-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+ente-core = { path = ".." }
+
+[[bin]]
+name = "secretbox"
+path = "fuzz_targets/secretbox.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "sealed_box"
+path = "fuzz_targets/sealed_box.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "stream"
+path = "fuzz_targets/stream.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "argon"
+path = "fuzz_targets/argon.rs"
+test = false
+doc = false
