@@ -1,0 +1,60 @@
+{
+  "results": [
+    {
+      "impl": "js-libsodium",
+      "case": "secretbox",
+      "op": "encrypt",
+      "sizeBytes": 1048576,
+      "iterations": 50,
+      "durationMs": 94.291666
+    },
+    {
+      "impl": "js-libsodium",
+      "case": "secretbox",
+      "op": "decrypt",
+      "sizeBytes": 1048576,
+      "iterations": 50,
+      "durationMs": 92.576042
+    },
+    {
+      "impl": "js-libsodium",
+      "case": "stream",
+      "op": "encrypt",
+      "sizeBytes": 1048576,
+      "iterations": 10,
+      "durationMs": 14.568916
+    },
+    {
+      "impl": "js-libsodium",
+      "case": "stream",
+      "op": "decrypt",
+      "sizeBytes": 1048576,
+      "iterations": 10,
+      "durationMs": 15.816958
+    },
+    {
+      "impl": "js-libsodium",
+      "case": "stream",
+      "op": "encrypt",
+      "sizeBytes": 52428800,
+      "iterations": 3,
+      "durationMs": 133.46925
+    },
+    {
+      "impl": "js-libsodium",
+      "case": "stream",
+      "op": "decrypt",
+      "sizeBytes": 52428800,
+      "iterations": 3,
+      "durationMs": 232.793125
+    },
+    {
+      "impl": "js-libsodium",
+      "case": "argon2id",
+      "op": "derive",
+      "sizeBytes": 0,
+      "iterations": 3,
+      "durationMs": 207.18375
+    }
+  ]
+}
