@@ -2914,6 +2914,30 @@ abstract class AppLocalizations {
   /// **'Failed to delete items'**
   String get failedToDeleteFiles;
 
+  /// No description provided for @itemsStored.
+  ///
+  /// In en, this message translates to:
+  /// **'Items stored'**
+  String get itemsStored;
+
+  /// No description provided for @of_.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get of_;
+
+  /// No description provided for @usageYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get usageYou;
+
+  /// No description provided for @usageFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get usageFamily;
+
   /// No description provided for @searchSettings.
   ///
   /// In en, this message translates to:

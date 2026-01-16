@@ -1742,6 +1742,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToDeleteFiles => 'Failed to delete items';
 
   @override
+  String get itemsStored => 'Items stored';
+
+  @override
+  String get of_ => 'of';
+
+  @override
+  String get usageYou => 'You';
+
+  @override
+  String get usageFamily => 'Family';
+
+  @override
   String get searchSettings => 'Search settings';
 
   @override
