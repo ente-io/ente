@@ -1019,8 +1019,7 @@
   "itemsStored": "Items stored",
   "of_": "of",
   "usageYou": "You",
-  "usageFamily": "Family"
-  "failedToDeleteFiles": "Failed to delete items",
+  "usageFamily": "Family",
   "searchSettings": "Search settings",
   "suggestions": "Suggestions",
   "noResultsFound": "No results found"
