@@ -1,5 +1,8 @@
 import "dart:async";
 
+import "package:ente_accounts/services/user_service.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
@@ -157,8 +160,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       if (hasLoggedIn)
         _SearchableSetting(
           title: l10n.logout,
-          category: l10n.account,
-          page: const AccountSettingsPage(),
+          category: l10n.logout,
+          onTap: _onLogoutTapped,
         ),
     ];
   }
@@ -211,8 +214,30 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
   }
 
   void _onSettingTapped(_SearchableSetting setting) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => setting.page),
+    if (setting.onTap != null) {
+      setting.onTap!();
+    } else if (setting.page != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => setting.page!),
+      );
+    }
+  }
+
+  void _onLogoutTapped() {
+    showAlertBottomSheet(
+      context,
+      title: context.l10n.warning,
+      message: context.l10n.areYouSureYouWantToLogout,
+      assetPath: "assets/warning-grey.png",
+      buttons: [
+        GradientButton(
+          buttonType: GradientButtonType.critical,
+          text: context.l10n.yesLogout,
+          onTap: () async {
+            await UserService.instance.logout(context);
+          },
+        ),
+      ],
     );
   }
 
@@ -396,11 +421,13 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
 class _SearchableSetting {
   final String title;
   final String category;
-  final Widget page;
+  final Widget? page;
+  final VoidCallback? onTap;
 
   const _SearchableSetting({
     required this.title,
     required this.category,
-    required this.page,
+    this.page,
+    this.onTap,
   });
 }
