@@ -1,3 +1,4 @@
+- Ashil: Fix app getting stuck in splash screen when opening app after migrating to new device
 - Ashil: QOL: Fix home gallery getting cut on the right end on landscape mode (affects tablets)
 - Ashil: QOL: Fix uncategorized page not updating after move
 - Ashil: QOL: Pause video when using jump to date
