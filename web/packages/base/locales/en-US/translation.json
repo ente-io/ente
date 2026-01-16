@@ -799,5 +799,8 @@
     "continuous": "Continuous",
     "trip": "Trip",
     "album_layout": "Album layout",
-    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location."
+    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
+    "edit_location": "Edit location",
+    "save_location": "Save location",
+    "tap_to_select_location": "Click on the map to select a location"
 }

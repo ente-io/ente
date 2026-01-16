@@ -7,6 +7,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -148,6 +149,12 @@ interface SelectedFileOptionsProps {
      */
     onAddPersonToSelectedFiles?: (personID: string) => Promise<void>;
     /**
+     * Called when the user wants to edit the location of the selected files.
+     *
+     * Only shown when at least one owned file is selected.
+     */
+    onEditLocation?: () => void;
+    /**
      * The total number of files available in the current view.
      */
     totalFileCount: number;
@@ -175,6 +182,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     createOnSelectForCollectionOp,
     createFileOpHandler,
     onAddPersonToSelectedFiles,
+    onEditLocation,
     totalFileCount,
     onSelectAll,
 }) => {
@@ -354,6 +362,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <>
                         <FavoriteButton onClick={handleFavorite} />
                         <FixTimeButton onClick={handleFixTime} />
+                        {onEditLocation && selectedOwnFileCount > 0 && (
+                            <EditLocationButton onClick={onEditLocation} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
@@ -424,6 +435,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                 <FavoriteButton onClick={handleFavorite} />
                             )}
                         <FixTimeButton onClick={handleFixTime} />
+                        {onEditLocation && selectedOwnFileCount > 0 && (
+                            <EditLocationButton onClick={onEditLocation} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
@@ -542,6 +556,14 @@ const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("fix_creation_time")}>
         <IconButton {...{ onClick }}>
             <ClockIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const EditLocationButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("edit_location")}>
+        <IconButton {...{ onClick }}>
+            <LocationOnIcon />
         </IconButton>
     </Tooltip>
 );

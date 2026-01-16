@@ -42,6 +42,7 @@ import {
     masterKeyFromSession,
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
+import type { Location } from "ente-base/types";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
@@ -57,6 +58,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
+import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import { Export } from "ente-new/photos/components/Export";
 import { PlanSelector } from "ente-new/photos/components/PlanSelector";
 import {
@@ -102,7 +104,10 @@ import {
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
-import { updateFilesVisibility } from "ente-new/photos/services/file";
+import {
+    updateFilesLocation,
+    updateFilesVisibility,
+} from "ente-new/photos/services/file";
 import { addManualFileAssignmentsToPerson } from "ente-new/photos/services/ml";
 import {
     savedCollectionFiles,
@@ -257,6 +262,8 @@ const Page: React.FC = () => {
         props: authenticateUserVisibilityProps,
     } = useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
+    const { show: showEditLocation, props: editLocationVisibilityProps } =
         useModalVisibility();
 
     // Progress UI state for single-file add-to-album from the FileViewer
@@ -957,6 +964,25 @@ const Page: React.FC = () => {
         [selected, filteredFiles, clearSelection],
     );
 
+    const handleEditLocationConfirm = useCallback(
+        async (location: Location) => {
+            const selectedFiles = getSelectedFiles(selected, filteredFiles);
+            // Only update files owned by the user
+            const userFiles = selectedFiles.filter(
+                (f) => f.ownerID == user!.id,
+            );
+            if (userFiles.length > 0) {
+                await updateFilesLocation(
+                    userFiles,
+                    location.latitude,
+                    location.longitude,
+                );
+            }
+            void remotePull({ silent: true });
+        },
+        [selected, filteredFiles, user, remotePull],
+    );
+
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
         options?: { shouldExitSearchMode?: boolean },
@@ -1326,6 +1352,7 @@ const Page: React.FC = () => {
                             onAddPersonToSelectedFiles:
                                 handleAddPersonToSelectedFiles,
                         }}
+                        onEditLocation={showEditLocation}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
@@ -1516,6 +1543,11 @@ const Page: React.FC = () => {
                 }
                 phase={addToAlbumProgress.phase}
                 albumName={addToAlbumProgress.albumName}
+            />
+            <EditLocationDialog
+                {...editLocationVisibilityProps}
+                files={getSelectedFiles(selected, filteredFiles)}
+                onConfirm={handleEditLocationConfirm}
             />
         </FullScreenDropZone>
     );
