@@ -608,6 +608,33 @@ const Page: React.FC = () => {
         setSelected(selected);
     };
 
+    const handleSelectAll = () => {
+        if (!user || !filteredFiles.length) return;
+
+        const selected = {
+            ownCount: 0,
+            count: 0,
+            collectionID: activeCollectionID,
+            context:
+                barMode == "people" && activePersonID
+                    ? { mode: "people" as const, personID: activePersonID }
+                    : {
+                          mode: barMode as "albums" | "hidden-albums",
+                          collectionID: activeCollectionID!,
+                      },
+        };
+
+        filteredFiles.forEach((item) => {
+            if (item.ownerID === user.id) {
+                selected.ownCount++;
+            }
+            selected.count++;
+            // @ts-expect-error Selection code needs type fixing
+            selected[item.id] = true;
+        });
+        setSelected(selected);
+    };
+
     const clearSelection = () => {
         if (!selected.count) {
             return;
@@ -1290,6 +1317,8 @@ const Page: React.FC = () => {
                             handleRemoveFilesFromCollection
                         }
                         onOpenCollectionSelector={handleOpenCollectionSelector}
+                        totalFileCount={filteredFiles.length}
+                        onSelectAll={handleSelectAll}
                         {...{
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
