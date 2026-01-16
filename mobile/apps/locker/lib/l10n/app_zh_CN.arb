@@ -74,7 +74,7 @@
   "homeLockerEmptySubtitle": "点击 + 按钮开始使用",
   "uploadDocument": "上传文档",
   "items": "{count} 个项目",
-  "files": "{count} 个项目",
+  "files": "{count, plural, =0{没有项目} =1{1 个项目} other{{count} 个项目}}",
   "createCollectionTooltip": "创建集合",
   "uploadDocumentTooltip": "上传文档",
   "restore": "恢复",

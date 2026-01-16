@@ -74,7 +74,7 @@
   "homeLockerEmptySubtitle": "點擊 + 按鈕開始使用",
   "uploadDocument": "上傳文件",
   "items": "{count} 個項目",
-  "files": "{count} 個項目",
+  "files": "{count, plural, =0{沒有項目} =1{1 個項目} other{{count} 個項目}}",
   "createCollectionTooltip": "建立集合",
   "uploadDocumentTooltip": "上傳文件",
   "restore": "還原",

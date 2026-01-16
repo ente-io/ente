@@ -74,7 +74,7 @@
   "homeLockerEmptySubtitle": "+ 버튼을 클릭하여 시작하세요",
   "uploadDocument": "문서 업로드",
   "items": "{count}개 항목",
-  "files": "{count}개 항목",
+  "files": "{count, plural, =0{항목 없음} =1{1개 항목} other{{count}개 항목}}",
   "createCollectionTooltip": "컬렉션 만들기",
   "uploadDocumentTooltip": "문서 업로드",
   "restore": "복원",
