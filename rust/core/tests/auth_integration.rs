@@ -215,6 +215,7 @@ mod password_change {
 
         let (new_attrs, _) = generate_key_attributes_for_new_password_with_strength(
             &master_key,
+            &signup.key_attributes,
             new_password,
             KeyDerivationStrength::Interactive,
         )
