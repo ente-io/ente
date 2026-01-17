@@ -203,7 +203,7 @@ pub fn derive_sensitive_key_with_salt_adaptive(
         });
     }
 
-    if MEMLIMIT_SENSITIVE % MEMLIMIT_MODERATE != 0 {
+    if !MEMLIMIT_SENSITIVE.is_multiple_of(MEMLIMIT_MODERATE) {
         return Err(CryptoError::InvalidKeyDerivationParams(format!(
             "Memory limit {} must be divisible by {}",
             MEMLIMIT_SENSITIVE, MEMLIMIT_MODERATE
