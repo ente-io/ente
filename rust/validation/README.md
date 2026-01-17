@@ -6,6 +6,7 @@ Validation and benchmarks for `ente-core` against libsodium.
 
 ```bash
 cargo run -p ente-validation --bin ente-validation
+cargo run -p ente-validation --bin ente-validation --release
 ```
 
 Covers cross-implementation checks for secretbox, stream, sealed box, KDF,
