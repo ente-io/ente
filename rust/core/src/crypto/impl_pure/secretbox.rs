@@ -19,8 +19,6 @@ pub struct EncryptedData {
     pub encrypted_data: Vec<u8>,
     /// The nonce used for encryption (24 bytes).
     pub nonce: Vec<u8>,
-    /// The key used for encryption (32 bytes).
-    pub key: Vec<u8>,
 }
 
 /// Result of SecretBox encryption with a separate nonce.
@@ -30,8 +28,6 @@ pub struct SecretBoxCiphertext {
     pub ciphertext: Vec<u8>,
     /// The nonce used for encryption (24 bytes).
     pub nonce: Vec<u8>,
-    /// The key used for encryption (32 bytes).
-    pub key: Vec<u8>,
 }
 
 /// Size of a SecretBox key in bytes.
@@ -65,7 +61,6 @@ pub fn encrypt(plaintext: &[u8], key: &[u8]) -> Result<EncryptedData> {
     Ok(EncryptedData {
         encrypted_data: result,
         nonce,
-        key: key.to_vec(),
     })
 }
 
@@ -84,11 +79,7 @@ pub fn encrypt_with_key(plaintext: &[u8], key: &[u8]) -> Result<SecretBoxCiphert
     let nonce = keys::generate_secretbox_nonce();
     let ciphertext = encrypt_with_nonce(plaintext, &nonce, key)?;
 
-    Ok(SecretBoxCiphertext {
-        ciphertext,
-        nonce,
-        key: key.to_vec(),
-    })
+    Ok(SecretBoxCiphertext { ciphertext, nonce })
 }
 
 /// Encrypt plaintext with a provided nonce.
@@ -236,6 +227,23 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_encrypt_result_structs_do_not_store_key() {
+        let key = keys::generate_key();
+
+        let encrypted = encrypt(b"test", &key).unwrap();
+        let EncryptedData {
+            encrypted_data: _,
+            nonce: _,
+        } = encrypted;
+
+        let encrypted = encrypt_with_key(b"test", &key).unwrap();
+        let SecretBoxCiphertext {
+            ciphertext: _,
+            nonce: _,
+        } = encrypted;
+    }
+
+    #[test]
     fn test_encrypt_decrypt() {
         let key = keys::generate_key();
         let plaintext = b"Hello, World!";
@@ -267,10 +275,8 @@ mod tests {
         let encrypted = encrypt_with_key(plaintext, &key).unwrap();
         assert_eq!(encrypted.ciphertext.len(), MAC_BYTES + plaintext.len());
         assert_eq!(encrypted.nonce.len(), NONCE_BYTES);
-        assert_eq!(encrypted.key, key);
 
-        let decrypted =
-            decrypt_with_key(&encrypted.ciphertext, &encrypted.key, &encrypted.nonce).unwrap();
+        let decrypted = decrypt_with_key(&encrypted.ciphertext, &key, &encrypted.nonce).unwrap();
         assert_eq!(decrypted, plaintext);
     }
 

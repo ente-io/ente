@@ -56,6 +56,13 @@ pub fn derive_subkey(
         });
     }
 
+    if key.len() != KEY_BYTES {
+        return Err(crate::crypto::CryptoError::InvalidKeyLength {
+            expected: KEY_BYTES,
+            actual: key.len(),
+        });
+    }
+
     // Build salt: subkey_id (8 bytes LE) || zeros (8 bytes)
     let mut salt = [0u8; 16];
     salt[0..8].copy_from_slice(&subkey_id.to_le_bytes());
@@ -214,6 +221,20 @@ mod tests {
         let subkey = derive_subkey(&master_key, 32, 1, b"").unwrap();
 
         assert_eq!(subkey.len(), 32);
+    }
+
+    #[test]
+    fn test_invalid_master_key_length() {
+        let bad_key = vec![0x42u8; 31];
+        let result = derive_subkey(&bad_key, 32, 1, b"context");
+
+        assert!(matches!(
+            result,
+            Err(crate::crypto::CryptoError::InvalidKeyLength {
+                expected: KEY_BYTES,
+                actual: 31
+            })
+        ));
     }
 
     #[test]
