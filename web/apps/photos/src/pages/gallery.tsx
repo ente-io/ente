@@ -346,6 +346,13 @@ const Page: React.FC = () => {
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
+    const selectedFilesInView = useMemo(
+        () => getSelectedFiles(selected, filteredFiles),
+        [selected, filteredFiles],
+    );
+    const isAllSelectedInView =
+        filteredFiles.length > 0 &&
+        selectedFilesInView.length === filteredFiles.length;
 
     // TODO: Move into reducer
     const barCollectionSummaries = useMemo(
@@ -966,9 +973,8 @@ const Page: React.FC = () => {
 
     const handleEditLocationConfirm = useCallback(
         async (location: Location) => {
-            const selectedFiles = getSelectedFiles(selected, filteredFiles);
             // Only update files owned by the user
-            const userFiles = selectedFiles.filter(
+            const userFiles = selectedFilesInView.filter(
                 (f) => f.ownerID == user!.id,
             );
             if (userFiles.length > 0) {
@@ -980,7 +986,7 @@ const Page: React.FC = () => {
             }
             void remotePull({ silent: true });
         },
-        [selected, filteredFiles, user, remotePull],
+        [selectedFilesInView, user, remotePull],
     );
 
     const handleSelectSearchOption = (
@@ -1343,8 +1349,8 @@ const Page: React.FC = () => {
                             handleRemoveFilesFromCollection
                         }
                         onOpenCollectionSelector={handleOpenCollectionSelector}
-                        totalFileCount={filteredFiles.length}
                         onSelectAll={handleSelectAll}
+                        isAllSelected={isAllSelectedInView}
                         {...{
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
@@ -1546,7 +1552,7 @@ const Page: React.FC = () => {
             />
             <EditLocationDialog
                 {...editLocationVisibilityProps}
-                files={getSelectedFiles(selected, filteredFiles)}
+                files={selectedFilesInView}
                 onConfirm={handleEditLocationConfirm}
             />
         </FullScreenDropZone>

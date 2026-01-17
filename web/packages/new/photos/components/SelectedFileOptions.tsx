@@ -155,13 +155,13 @@ interface SelectedFileOptionsProps {
      */
     onEditLocation?: () => void;
     /**
-     * The total number of files available in the current view.
-     */
-    totalFileCount: number;
-    /**
      * Called when the user wants to select all files.
      */
     onSelectAll: () => void;
+    /**
+     * If true, all files in the current view are selected.
+     */
+    isAllSelected: boolean;
 }
 
 /**
@@ -183,8 +183,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     createFileOpHandler,
     onAddPersonToSelectedFiles,
     onEditLocation,
-    totalFileCount,
     onSelectAll,
+    isAllSelected,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -348,12 +348,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                           })}
                 </Typography>
                 <SelectAllToggleButton
-                    isAllSelected={selectedFileCount >= totalFileCount}
-                    onClick={
-                        selectedFileCount < totalFileCount
-                            ? onSelectAll
-                            : onClearSelection
-                    }
+                    isAllSelected={isAllSelected}
+                    onClick={isAllSelected ? onClearSelection : onSelectAll}
                 />
 
                 <Box sx={{ mr: "auto" }} />

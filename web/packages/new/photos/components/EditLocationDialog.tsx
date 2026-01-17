@@ -133,6 +133,7 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
                 />
                 <Box sx={{ flex: 1, position: "relative" }}>
                     <EditableMap
+                        open={open}
                         initialLocation={initialLocation}
                         selectedLocation={selectedLocation}
                         onLocationSelect={setSelectedLocation}
@@ -221,12 +222,14 @@ const TitleBar: React.FC<TitleBarProps> = ({
 );
 
 interface EditableMapProps {
+    open: boolean;
     initialLocation: Location | undefined;
     selectedLocation: Location | undefined;
     onLocationSelect: (location: Location) => void;
 }
 
 const EditableMap: React.FC<EditableMapProps> = ({
+    open,
     initialLocation,
     selectedLocation,
     onLocationSelect,
@@ -234,6 +237,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const markerRef = useRef<L.Marker | null>(null);
+    const prevOpenRef = useRef(open);
     // Capture initial location at mount time to avoid map reset on file updates
     const initialLocationRef = useRef(initialLocation);
 
@@ -314,26 +318,36 @@ const EditableMap: React.FC<EditableMapProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Update marker position when selectedLocation changes externally
+    // Sync marker when selection changes; recenter only when the dialog opens.
     useEffect(() => {
-        if (
-            selectedLocation &&
-            markerRef.current &&
-            mapRef.current &&
-            leaflet
-        ) {
-            const currentPos = markerRef.current.getLatLng();
-            if (
-                currentPos.lat !== selectedLocation.latitude ||
-                currentPos.lng !== selectedLocation.longitude
-            ) {
-                markerRef.current.setLatLng([
-                    selectedLocation.latitude,
-                    selectedLocation.longitude,
-                ]);
-            }
+        const wasOpen = prevOpenRef.current;
+        prevOpenRef.current = open;
+        if (!open || !mapRef.current || !leaflet) return;
+        const didOpen = !wasOpen;
+        const nextLocation = selectedLocation ?? initialLocation;
+        if (!nextLocation) return;
+        const position: L.LatLngTuple = [
+            nextLocation.latitude,
+            nextLocation.longitude,
+        ];
+
+        if (markerRef.current) {
+            markerRef.current.setLatLng(position);
+        } else {
+            const marker = leaflet
+                .marker(position, { draggable: true })
+                .addTo(mapRef.current);
+            markerRef.current = marker;
+
+            marker.on("dragend", () => {
+                const pos = marker.getLatLng();
+                onLocationSelect({ latitude: pos.lat, longitude: pos.lng });
+            });
         }
-    }, [selectedLocation]);
+        if (didOpen) {
+            mapRef.current.setView(position, mapRef.current.getZoom());
+        }
+    }, [open, initialLocation, selectedLocation, onLocationSelect]);
 
     const handleZoomIn = (e: React.MouseEvent) => {
         e.stopPropagation();

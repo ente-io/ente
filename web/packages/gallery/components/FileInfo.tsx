@@ -238,20 +238,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const canAddPerson = isMLEnabled() && assignablePeople.length > 0;
 
-    const fileLocationValue = useMemo(
-        // Prefer the location in the EnteFile, then fall back to Exif.
-        () => fileLocation(file) ?? exif?.parsed?.location,
-        [file, exif],
-    );
+    // Prefer the location in the EnteFile, then fall back to Exif.
+    const fileLocationValue = fileLocation(file) ?? exif?.parsed?.location;
 
-    // Local state to track updated location before file prop refreshes
-    const [localLocation, setLocalLocation] = useState<Location | undefined>();
-    const location = localLocation ?? fileLocationValue;
-
-    // Reset local location when file changes
-    useEffect(() => {
-        setLocalLocation(undefined);
-    }, [file.id]);
+    const location = fileLocationValue;
 
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
@@ -305,7 +295,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 newLocation.latitude,
                 newLocation.longitude,
             );
-            setLocalLocation(newLocation);
             await onFileMetadataUpdate?.();
         } catch (e) {
             onGenericError(e);
@@ -980,31 +969,51 @@ const MapBox: React.FC<MapBoxProps> = ({ location, mapEnabled }) => {
     const zoom = 16;
 
     const mapBoxContainerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<L.Map | null>(null);
+    const markerRef = useRef<L.Marker | null>(null);
 
     useEffect(() => {
-        const mapContainer = mapBoxContainerRef.current;
-        if (mapEnabled) {
-            const position: L.LatLngTuple = [
-                location.latitude,
-                location.longitude,
-            ];
-            if (mapContainer && !mapContainer.hasChildNodes()) {
-                // @ts-ignore
-                const map = leaflet.map(mapContainer).setView(position, zoom);
-                // @ts-ignore
-                leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
-                // @ts-ignore
-                leaflet.marker(position).addTo(map).openPopup();
+        if (!leaflet) return;
+        if (!mapEnabled) {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+                markerRef.current = null;
             }
-        } else {
-            if (mapContainer?.hasChildNodes()) {
-                if (mapContainer.firstChild) {
-                    mapContainer.removeChild(mapContainer.firstChild);
-                }
-            }
+            return;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mapEnabled]);
+
+        const mapContainer = mapBoxContainerRef.current;
+        if (!mapContainer) return;
+
+        const position: L.LatLngTuple = [location.latitude, location.longitude];
+        if (!mapRef.current) {
+            // @ts-ignore
+            const map = leaflet.map(mapContainer).setView(position, zoom);
+            // @ts-ignore
+            leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
+            // @ts-ignore
+            markerRef.current = leaflet.marker(position).addTo(map);
+            mapRef.current = map;
+        } else {
+            mapRef.current.setView(position, zoom);
+            markerRef.current?.setLatLng(position);
+        }
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+                markerRef.current = null;
+            }
+        };
+    }, [
+        mapEnabled,
+        location.latitude,
+        location.longitude,
+        zoom,
+        attribution,
+        urlTemplate,
+    ]);
 
     return mapEnabled ? (
         <MapBoxContainer ref={mapBoxContainerRef} />
