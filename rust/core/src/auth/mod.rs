@@ -6,12 +6,12 @@ mod api;
 mod key_gen;
 mod login;
 mod recovery;
-#[cfg(any(test, feature = "srp"))]
+#[cfg(feature = "srp")]
 mod srp;
 mod types;
 
 // SRP session type (behind the `srp` feature)
-#[cfg(any(test, feature = "srp"))]
+#[cfg(feature = "srp")]
 pub use srp::SrpSession;
 
 /// Stub type when the `srp` feature is disabled.
@@ -19,12 +19,12 @@ pub use srp::SrpSession;
 /// This allows downstream crates to reference [`SrpSession`] in signatures and
 /// get a runtime error if they accidentally call it without enabling the
 /// feature.
-#[cfg(not(any(test, feature = "srp")))]
+#[cfg(not(feature = "srp"))]
 pub struct SrpSession {
     _private: (),
 }
 
-#[cfg(not(any(test, feature = "srp")))]
+#[cfg(not(feature = "srp"))]
 impl SrpSession {
     fn feature_disabled() -> types::AuthError {
         types::AuthError::Srp(
