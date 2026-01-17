@@ -172,24 +172,26 @@ impl ApiClient {
 
             // Try to parse as JSON to get error details
             if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
-                log::error!(
+                log::debug!(
                     "API error: status={}, body={}",
                     status,
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={status}, body={error_text}");
+                log::debug!("API error: status={status}, body={error_text}");
             }
 
-            return Err(Error::Generic(format!(
-                "API error ({status}): {error_text}"
-            )));
+            return Err(Error::api_error(
+                status.as_u16(),
+                format!("API error ({status}): {error_text}"),
+            ));
         }
 
         let text = response.text().await?;
+        log::trace!("Raw API response: {}", &text[..500.min(text.len())]);
         serde_json::from_str(&text).map_err(|e| {
-            log::error!("Failed to deserialize response: {e}");
-            log::error!(
+            log::debug!("Failed to deserialize response: {e}");
+            log::debug!(
                 "Response text (first 1000 chars): {}",
                 &text[..1000.min(text.len())]
             );
@@ -205,15 +207,6 @@ impl ApiClient {
     {
         let url = format!("{}{}", self.base_url, path);
 
-        // Debug log the JSON being sent
-        if path.contains("verify-session") {
-            log::debug!(
-                "POST {} with JSON: {}",
-                url,
-                serde_json::to_string_pretty(body)?
-            );
-        }
-
         let request = self.client.post(&url).json(body);
         let request = self.build_request(request, account_id);
 
@@ -228,29 +221,68 @@ impl ApiClient {
 
             // Try to parse as JSON to get error details
             if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
-                log::error!(
+                log::debug!(
                     "API error: status={}, body={}",
                     status,
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={status}, body={error_text}");
+                log::debug!("API error: status={status}, body={error_text}");
             }
 
-            return Err(Error::Generic(format!(
-                "API error ({status}): {error_text}"
-            )));
+            return Err(Error::api_error(
+                status.as_u16(),
+                format!("API error ({status}): {error_text}"),
+            ));
         }
 
         let text = response.text().await?;
+
         serde_json::from_str(&text).map_err(|e| {
-            log::error!("Failed to deserialize response: {e}");
-            log::error!(
+            log::debug!("Failed to deserialize response: {e}");
+            log::debug!(
                 "Response text (first 1000 chars): {}",
                 &text[..1000.min(text.len())]
             );
             Error::Generic(format!("Deserialization failed: {e}"))
         })
+    }
+
+    /// Make a POST request that expects no response body
+    pub async fn post_empty<B>(&self, path: &str, body: &B, account_id: Option<&str>) -> Result<()>
+    where
+        B: Serialize,
+    {
+        let url = format!("{}{}", self.base_url, path);
+        let request = self.client.post(&url).json(body);
+        let request = self.build_request(request, account_id);
+
+        let response = self.execute_with_retry(request).await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let error_text = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
+
+            if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
+                log::debug!(
+                    "API error: status={}, body={}",
+                    status,
+                    serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
+                );
+            } else {
+                log::debug!("API error: status={status}, body={error_text}");
+            }
+
+            return Err(Error::api_error(
+                status.as_u16(),
+                format!("API error ({status}): {error_text}"),
+            ));
+        }
+
+        Ok(())
     }
 
     /// Make a PUT request
@@ -274,24 +306,25 @@ impl ApiClient {
 
             // Try to parse as JSON to get error details
             if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
-                log::error!(
+                log::debug!(
                     "API error: status={}, body={}",
                     status,
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={status}, body={error_text}");
+                log::debug!("API error: status={status}, body={error_text}");
             }
 
-            return Err(Error::Generic(format!(
-                "API error ({status}): {error_text}"
-            )));
+            return Err(Error::api_error(
+                status.as_u16(),
+                format!("API error ({status}): {error_text}"),
+            ));
         }
 
         let text = response.text().await?;
         serde_json::from_str(&text).map_err(|e| {
-            log::error!("Failed to deserialize response: {e}");
-            log::error!(
+            log::debug!("Failed to deserialize response: {e}");
+            log::debug!(
                 "Response text (first 1000 chars): {}",
                 &text[..1000.min(text.len())]
             );
@@ -316,18 +349,19 @@ impl ApiClient {
 
             // Try to parse as JSON to get error details
             if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
-                log::error!(
+                log::debug!(
                     "API error: status={}, body={}",
                     status,
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={status}, body={error_text}");
+                log::debug!("API error: status={status}, body={error_text}");
             }
 
-            return Err(Error::Generic(format!(
-                "API error ({status}): {error_text}"
-            )));
+            return Err(Error::api_error(
+                status.as_u16(),
+                format!("API error ({status}): {error_text}"),
+            ));
         }
 
         Ok(())
@@ -341,11 +375,15 @@ impl ApiClient {
         let response = self.execute_with_retry(request).await?;
 
         if !response.status().is_success() {
+            let status = response.status();
             let error_text = response
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Error::Generic(format!("Download error: {error_text}")));
+            return Err(Error::api_error(
+                status.as_u16(),
+                format!("Download error: {error_text}"),
+            ));
         }
 
         Ok(response.bytes().await?.to_vec())

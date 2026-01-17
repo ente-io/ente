@@ -1,0 +1,8 @@
+{
+  "name": "ente-validation-bench",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "libsodium-wrappers-sumo": "^0.7.15"
+  }
+}
