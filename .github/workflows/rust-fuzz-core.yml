@@ -2,9 +2,12 @@ name: "Fuzz (rust/core)"
 
 on:
     workflow_dispatch:
-    schedule:
-        # Weekly (Sunday 00:00 UTC)
-        - cron: "0 0 * * 0"
+    push:
+        paths:
+            - "rust/core/**"
+    pull_request:
+        paths:
+            - "rust/core/**"
 
 permissions:
     contents: read
