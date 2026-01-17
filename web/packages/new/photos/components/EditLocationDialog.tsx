@@ -1,5 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -11,8 +11,8 @@ import {
     Stack,
     styled,
     Typography,
-    type DialogProps,
 } from "@mui/material";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { haveWindow } from "ente-base/env";
 import type { Location } from "ente-base/types";
@@ -54,6 +54,7 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
     files,
     onConfirm,
 }) => {
+    const fullScreen = useIsSmallWidth();
     const [selectedLocation, setSelectedLocation] = useState<
         Location | undefined
     >(undefined);
@@ -121,10 +122,23 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
     };
 
     return (
-        <FullScreenDialog open={open} onClose={onClose}>
+        <Dialog
+            {...{ open, onClose, fullScreen }}
+            maxWidth={false}
+            slotProps={{
+                paper: {
+                    sx: !fullScreen
+                        ? {
+                              width: "min(900px, calc(100vw - 64px))",
+                              height: "min(700px, calc(100vh - 64px))",
+                          }
+                        : undefined,
+                },
+            }}
+        >
             <Stack sx={{ height: "100%", width: "100%" }}>
                 <TitleBar
-                    onBack={onClose}
+                    onClose={onClose}
                     onConfirm={handleConfirm}
                     canConfirm={hasLocationChanged}
                     isLoading={isLoading}
@@ -140,20 +154,12 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
                     />
                 </Box>
             </Stack>
-        </FullScreenDialog>
+        </Dialog>
     );
 };
 
-const FullScreenDialog = styled((props: DialogProps) => (
-    <Dialog fullScreen {...props} />
-))({
-    "& .MuiDialog-paper": {
-        backgroundColor: "var(--mui-palette-background-default)",
-    },
-});
-
 interface TitleBarProps {
-    onBack: () => void;
+    onClose: () => void;
     onConfirm: () => void;
     canConfirm: boolean;
     isLoading: boolean;
@@ -162,7 +168,7 @@ interface TitleBarProps {
 }
 
 const TitleBar: React.FC<TitleBarProps> = ({
-    onBack,
+    onClose,
     onConfirm,
     canConfirm,
     isLoading,
@@ -179,8 +185,8 @@ const TitleBar: React.FC<TitleBarProps> = ({
             borderColor: "divider",
         }}
     >
-        <IconButton onClick={onBack} aria-label={t("close")}>
-            <ArrowBackIcon />
+        <IconButton onClick={onClose} aria-label={t("close")} color="secondary">
+            <CloseIcon />
         </IconButton>
         <Typography variant="h6" sx={{ flex: 1 }}>
             {t(isAddingLocation ? "add_location" : "edit_location")}
@@ -259,7 +265,7 @@ const EditableMap: React.FC<EditableMapProps> = ({
 
         // Determine initial view
         const defaultCenter: L.LatLngTuple = [20, 0]; // World view
-        const defaultZoom = 3;
+        const defaultZoom = 2;
 
         const hasInitialLocation =
             initialLat !== undefined && initialLng !== undefined;
