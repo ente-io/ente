@@ -40,7 +40,12 @@ class FileListWidget extends StatelessWidget {
     final bool isOwner = collection != null &&
         currentUserID != null &&
         collection.isOwner(currentUserID);
+    final List<User> sharees =
+        collection?.sharees.whereType<User>().toList() ?? const [];
+    final bool hasSharees = sharees.isNotEmpty;
+    final bool isOutgoing = isOwner && hasSharees;
     final bool isIncoming = collection != null && !isOwner;
+    final bool showSharingIndicator = isOutgoing || isIncoming;
 
     final fileRowWidget = Flexible(
       flex: 6,
@@ -55,7 +60,7 @@ class FileListWidget extends StatelessWidget {
                   padding: const EdgeInsets.all(10.0),
                   child: _buildFileIcon(),
                 ),
-                if (isIncoming)
+                if (showSharingIndicator)
                   Positioned(
                     right: 1,
                     bottom: 10,
@@ -66,7 +71,9 @@ class FileListWidget extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.all(1.0),
                       child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedCircleArrowDownLeft,
+                        icon: isOutgoing
+                            ? HugeIcons.strokeRoundedCircleArrowUpRight
+                            : HugeIcons.strokeRoundedCircleArrowDownLeft,
                         strokeWidth: 2.0,
                         color: colorScheme.primary700,
                         size: 16.0,
