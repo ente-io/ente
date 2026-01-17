@@ -12,6 +12,8 @@ export const appHomeRoute: string = {
     embed: "/" /* The embed app doesn't use this either. */,
     share: "/" /* The locker public app also doesn't use this. */,
     photos: "/gallery",
+    // Ensu (chat) web app.
+    ensu: "/chat",
 }[appName];
 
 let _stashedRedirect: string | undefined;

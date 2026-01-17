@@ -1,0 +1,18 @@
+{
+    "name": "ensu",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@fontsource/cormorant-garamond": "^5.2.7",
+        "@fontsource/jetbrains-mono": "^5.2.7",
+        "@fontsource/source-serif-4": "^5.2.7",
+        "@tauri-apps/api": "^1.5.0",
+        "ente-accounts": "*",
+        "ente-base": "*",
+        "ente-new": "*",
+        "ente-wasm": "*"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}

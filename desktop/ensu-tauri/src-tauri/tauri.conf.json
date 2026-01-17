@@ -1,0 +1,39 @@
+{
+  "build": {
+    "beforeDevCommand": "cd ../../web && yarn build:wasm && yarn workspace ensu next dev -p 3010",
+    "beforeBuildCommand": "cd ../../web && ENTE_TAURI=1 yarn build:ensu && ENTE_TAURI=1 yarn workspace ensu next export",
+    "devPath": "http://localhost:3010",
+    "distDir": "../../web/apps/ensu/out"
+  },
+  "package": {
+    "productName": "Ensu",
+    "version": "0.0.1"
+  },
+  "tauri": {
+    "windows": [
+      {
+        "title": "Ensu",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true
+      }
+    ],
+    "bundle": {
+      "active": true,
+      "identifier": "io.ente.ensu",
+      "icon": ["icons/icon.png"]
+    },
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      }
+    },
+    "security": {
+      "csp": null
+    }
+  }
+}

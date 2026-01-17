@@ -12,7 +12,7 @@ const getTheme = (appName: AppName): Theme => {
     return createTheme({
         cssVariables: { colorSchemeSelector: "class" },
         colorSchemes,
-        typography,
+        typography: getTypography(appName),
         components,
         shape: {
             // Increase the default border radius multiplier from 4 to 8.
@@ -130,10 +130,34 @@ const getColors = (appName: AppName) => ({
                 ? _colors.accentAuth
                 : appName == "share"
                   ? _colors.accentShare
-                  : _colors.accentPhotos,
+                  : appName == "ensu"
+                    ? _colors.accentEnsu
+                    : _colors.accentPhotos,
+        accentDark:
+            appName == "ensu"
+                ? _colors.accentEnsuDark
+                : appName == "auth"
+                  ? _colors.accentAuth
+                  : appName == "share"
+                    ? _colors.accentShare
+                    : _colors.accentPhotos,
     },
-    ...{ light: appName == "share" ? _colors.lightShare : _colors.light },
-    ...{ dark: appName == "share" ? _colors.darkShare : _colors.dark },
+    ...{
+        light:
+            appName == "share"
+                ? _colors.lightShare
+                : appName == "ensu"
+                  ? _colors.lightEnsu
+                  : _colors.light,
+    },
+    ...{
+        dark:
+            appName == "share"
+                ? _colors.darkShare
+                : appName == "ensu"
+                  ? _colors.darkEnsu
+                  : _colors.dark,
+    },
 });
 
 /**
@@ -147,6 +171,8 @@ const _colors = {
     accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
     accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
     accentShare: { dark: "#0056CC", main: "#1071FF", light: "#1071FF" },
+    accentEnsu: { dark: "#7C6408", main: "#9A7E0A", light: "#B89A1F" },
+    accentEnsuDark: { dark: "#FFD700", main: "#FFD700", light: "#FFD700" },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -192,6 +218,43 @@ const _colors = {
             button: "0px 4px 4px rgba(0 0 0 / 0.25)",
         },
     },
+    lightEnsu: {
+        background: {
+            default: "#F8F5F0",
+            paper: "#F8F5F0",
+            paper2: "#FFFDF8",
+            searchInput: "#F0EBE4",
+        },
+        backdrop: {
+            base: "rgba(248 245 240 / 0.92)",
+            muted: "rgba(248 245 240 / 0.75)",
+            faint: "rgba(248 245 240 / 0.30)",
+        },
+        text: {
+            base: "#1A1A1A",
+            muted: "#8A8680",
+            faint: "rgba(138 134 128 / 0.50)",
+        },
+        fill: {
+            base: "#1A1A1A",
+            muted: "rgba(26 26 26 / 0.12)",
+            faint: "#F0EBE4",
+            faintHover: "#E7E1D8",
+            fainter: "#F8F5F0",
+        },
+        secondary: { main: "#F0EBE4", hover: "#E7E1D8" },
+        stroke: {
+            base: "#1A1A1A",
+            muted: "rgba(26 26 26 / 0.24)",
+            faint: "#D4D0C8",
+            fainter: "rgba(26 26 26 / 0.06)",
+        },
+        boxShadow: {
+            paper: "0px 0px 10px rgba(0 0 0 / 0.18)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.14), 0px 3px 6px rgba(0 0 0 / 0.10)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.18)",
+        },
+    },
     darkShare: {
         background: {
             default: "#161616",
@@ -222,6 +285,43 @@ const _colors = {
             muted: "rgba(255 255 255 / 0.24)",
             faint: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.12)",
+        },
+        boxShadow: {
+            paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.50), 0px 3px 6px rgba(0 0 0 / 0.25)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.75)",
+        },
+    },
+    darkEnsu: {
+        background: {
+            default: "#141414",
+            paper: "#1E1E1E",
+            paper2: "#1E1E1E",
+            searchInput: "#1E1E1E",
+        },
+        backdrop: {
+            base: "rgba(20 20 20 / 0.90)",
+            muted: "rgba(20 20 20 / 0.65)",
+            faint: "rgba(20 20 20 / 0.20)",
+        },
+        text: {
+            base: "#E8E4DF",
+            muted: "#777777",
+            faint: "rgba(119 119 119 / 0.50)",
+        },
+        fill: {
+            base: "#E8E4DF",
+            muted: "rgba(232 228 223 / 0.16)",
+            faint: "#1E1E1E",
+            faintHover: "#2A2A2A",
+            fainter: "#141414",
+        },
+        secondary: { main: "#1E1E1E", hover: "#2A2A2A" },
+        stroke: {
+            base: "#E8E4DF",
+            muted: "rgba(232 228 223 / 0.24)",
+            faint: "#2A2A2A",
+            fainter: "rgba(232 228 223 / 0.12)",
         },
         boxShadow: {
             paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
@@ -414,9 +514,9 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
             success: { main: colors.fixed.success },
             warning: { main: colors.fixed.golden },
             accent: {
-                main: colors.accent.main,
-                dark: colors.accent.dark,
-                light: colors.accent.light,
+                main: colors.accentDark.main,
+                dark: colors.accentDark.dark,
+                light: colors.accentDark.light,
                 contrastText: colors.fixed.white,
             },
             critical: {
@@ -492,7 +592,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * to bother with the light variant (though for consistency of specifying every
  * value, we alias it the same weight as regular, 500).
  */
-const typography: TypographyVariantsOptions = {
+const baseTypography: TypographyVariantsOptions = {
     fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
@@ -519,10 +619,49 @@ const typography: TypographyVariantsOptions = {
         fontWeight: 600 /* Medium */,
     },
     body: { fontSize: "16px", lineHeight: "20px" },
+    message: { fontSize: "15px", lineHeight: "1.7", fontWeight: 400 },
+    code: {
+        fontSize: "13px",
+        lineHeight: "1.45",
+        fontWeight: 400,
+        fontFamily: '"JetBrains Mono", monospace',
+    },
     small: { fontSize: "14px", lineHeight: "17px" },
     mini: { fontSize: "12px", lineHeight: "15px" },
     tiny: { fontSize: "10px", lineHeight: "12px" },
 };
+
+const getTypography = (appName: AppName): TypographyVariantsOptions => {
+    if (appName !== "ensu") return baseTypography;
+
+    const serifFamily = '"Cormorant Garamond", serif';
+
+    const messageFamily = '"Source Serif 4", serif';
+    const codeFamily = '"JetBrains Mono", monospace';
+
+    return {
+        ...baseTypography,
+        h1: { ...baseTypography.h1, fontFamily: serifFamily, fontWeight: 500 },
+        h2: { ...baseTypography.h2, fontFamily: serifFamily, fontWeight: 500 },
+        h3: { ...baseTypography.h3, fontFamily: serifFamily, fontWeight: 500 },
+        h4: { ...baseTypography.h4, fontFamily: serifFamily, fontWeight: 500 },
+        h5: { ...baseTypography.h5, fontFamily: serifFamily, fontWeight: 500 },
+        h6: { ...baseTypography.h6, fontFamily: serifFamily, fontWeight: 500 },
+        message: {
+            ...(baseTypography.message ?? {}),
+            fontFamily: messageFamily,
+            fontWeight: 400,
+        },
+        code: {
+            ...(baseTypography.code ?? {}),
+            fontFamily: codeFamily,
+            fontWeight: 400,
+        },
+    };
+};
+
+// Use the base typography for component style overrides (Button sizing, etc.).
+const typography = baseTypography;
 
 /**
  * > [!NOTE]
@@ -555,7 +694,14 @@ const components: Components = {
             // body1, which is "body".
             variant: "body",
             // Map all our custom variants to <p>.
-            variantMapping: { body: "p", small: "p", mini: "p", tiny: "p" },
+            variantMapping: {
+                body: "p",
+                message: "p",
+                small: "p",
+                mini: "p",
+                tiny: "p",
+                code: "code",
+            },
         },
     },
 
@@ -846,6 +992,11 @@ export const authTheme = getTheme("auth");
  * This is the same as the dark theme for the photos app.
  */
 export const castTheme = getTheme("cast");
+
+/**
+ * The MUI {@link Theme} to use for the Ensu app.
+ */
+export const ensuTheme = getTheme("ensu");
 
 /**
  * The MUI {@link Theme} to use for the locker public app.

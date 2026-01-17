@@ -6,7 +6,6 @@ import {
     DialogTitle,
     IconButton,
     InputAdornment,
-    Link,
     TextField,
     type ModalProps,
 } from "@mui/material";
@@ -86,6 +85,24 @@ type FormProps = ContentsProps & {
     initialAPIOrigin: string;
 };
 
+const HELP_URL = "https://ente.io/help/self-hosting/";
+
+const openHelpLink = async () => {
+    if (typeof window === "undefined") return;
+
+    if ("__TAURI__" in window || "__TAURI_IPC__" in window) {
+        try {
+            const { open } = await import("@tauri-apps/api/shell");
+            await open(HELP_URL);
+            return;
+        } catch (error) {
+            log.error("Failed to open help link", error);
+        }
+    }
+
+    window.open(HELP_URL, "_blank", "noopener,noreferrer");
+};
+
 const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
     const formik = useFormik({
         initialValues: { apiOrigin: initialAPIOrigin },
@@ -150,19 +167,14 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                         input: {
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <Link
-                                        href="https://ente.io/help/self-hosting/guides/custom-server/"
-                                        target="_blank"
-                                        rel="noopener"
+                                    <IconButton
+                                        aria-label={t("more_information")}
+                                        color="secondary"
+                                        edge="end"
+                                        onClick={() => void openHelpLink()}
                                     >
-                                        <IconButton
-                                            aria-label={t("more_information")}
-                                            color="secondary"
-                                            edge="end"
-                                        >
-                                            <InfoOutlinedIcon />
-                                        </IconButton>
-                                    </Link>
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
                                 </InputAdornment>
                             ),
                         },
