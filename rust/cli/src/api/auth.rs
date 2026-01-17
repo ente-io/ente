@@ -122,6 +122,15 @@ impl<'a> AuthClient<'a> {
             .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, &proof)
             .await?;
 
+        if let Some(srp_m2) = &auth_response.srp_m2 {
+            let server_proof = STANDARD.decode(srp_m2)?;
+            srp_session.verify_m2(&server_proof).map_err(|_| {
+                crate::models::error::Error::AuthenticationFailed(
+                    "Server proof verification failed".to_string(),
+                )
+            })?;
+        }
+
         Ok((auth_response, creds.kek))
     }
 
