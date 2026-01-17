@@ -9,7 +9,7 @@
 import type { SiteMatch } from "@/lib/types/messages";
 
 export default defineContentScript({
-  matches: ["<all_urls>"],
+  matches: ["https://*/*", "http://localhost/*"],
   runAt: "document_idle",
   main() {
     // Skip iframes and non-HTTPS pages (except localhost for dev)

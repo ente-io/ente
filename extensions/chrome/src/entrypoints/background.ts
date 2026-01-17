@@ -15,6 +15,8 @@ export default defineBackground(() => {
   // Auto-lock timer
   let lockTimer: ReturnType<typeof setTimeout> | null = null;
   const AUTO_LOCK_ALARM = "autoLock";
+  const TOKEN_CHECK_ALARM = "tokenCheck";
+  const TOKEN_CHECK_INTERVAL_MINUTES = 10;
   // Master key is kept in-memory only to avoid persistence risks
   let inMemoryMasterKey: string | null = null;
 
@@ -58,6 +60,7 @@ export default defineBackground(() => {
 
     // Enforce auto-lock on startup to cover service worker restarts
     await enforceAutoLockOnStartup();
+    await scheduleTokenCheck();
   };
 
   /**
@@ -140,6 +143,49 @@ export default defineBackground(() => {
   };
 
   /**
+   * Schedule periodic token validity checks.
+   */
+  const scheduleTokenCheck = async () => {
+    const { localStorage } = await import("@/lib/storage");
+    const user = await localStorage.getUser();
+    await chrome.alarms.clear(TOKEN_CHECK_ALARM);
+    if (user?.token) {
+      await chrome.alarms.create(TOKEN_CHECK_ALARM, {
+        delayInMinutes: TOKEN_CHECK_INTERVAL_MINUTES,
+        periodInMinutes: TOKEN_CHECK_INTERVAL_MINUTES,
+      });
+    }
+  };
+
+  /**
+   * Validate the current auth token and lock/clear if invalid.
+   */
+  const validateToken = async () => {
+    const { localStorage, sessionStorage, clearAllData } = await import("@/lib/storage");
+    const { checkSessionValidity } = await import("@/lib/api/auth");
+    const user = await localStorage.getUser();
+    if (!user?.token) {
+      return;
+    }
+
+    try {
+      const result = await checkSessionValidity(user.token);
+      if (!result.isValid || result.passwordChanged) {
+        console.warn("Token invalid or password changed, locking and clearing data");
+        inMemoryMasterKey = null;
+        await clearAllData();
+        await setPendingLogin(null);
+        await sessionStorage.setUnlocked(false);
+        await chrome.alarms.clear(AUTO_LOCK_ALARM);
+        await chrome.alarms.clear(TOKEN_CHECK_ALARM);
+      }
+    } catch (e) {
+      // Network/temporary issues should not log the user out
+      console.error("Token validation failed", e);
+    }
+  };
+
+  /**
    * Lock the extension.
    */
   const lock = async (): Promise<void> => {
@@ -181,6 +227,7 @@ export default defineBackground(() => {
 
       // Reset auto-lock timer
       await resetLockTimer();
+      await scheduleTokenCheck();
 
       return { success: true };
     } catch (e) {
@@ -304,7 +351,7 @@ export default defineBackground(() => {
       await localStorage.setUser(user);
       await localStorage.setKeyAttributes(keyAttributes);
 
-      // Store master key in session
+      // Keep master key in-memory only
       inMemoryMasterKey = masterKey;
       await sessionStorage.setUnlocked(true);
 
@@ -317,6 +364,7 @@ export default defineBackground(() => {
 
       // Reset auto-lock timer
       await resetLockTimer();
+      await scheduleTokenCheck();
 
       return { success: true };
     } catch (e) {
@@ -521,6 +569,8 @@ export default defineBackground(() => {
   chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === AUTO_LOCK_ALARM) {
       await lock();
+    } else if (alarm.name === TOKEN_CHECK_ALARM) {
+      await validateToken();
     }
   });
 });
