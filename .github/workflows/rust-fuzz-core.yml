@@ -2,9 +2,6 @@ name: "Fuzz (rust/core)"
 
 on:
     workflow_dispatch:
-    push:
-        paths:
-            - "rust/core/**"
     pull_request:
         paths:
             - "rust/core/**"
