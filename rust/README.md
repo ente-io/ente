@@ -38,6 +38,11 @@
 └───────────────────────────┘
 ```
 
+## Contents (this repo)
+
+- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
+- `rust/cli/` - Rust CLI (work-in-progress).
+
 ## Directory Structure
 
 ```
@@ -48,26 +53,15 @@ rust/
 │   ├── Cargo.toml
 │   └── Cargo.lock
 │
-├── core/                   # Pure Rust business logic
-│   ├── src/
-│   │   ├── lib.rs
-│   │   └── urls.rs
-│   └── Cargo.toml          # crate name: ente-core
-│
-└── validation/             # Crypto validation + benchmarks vs libsodium
+└── core/                   # Pure Rust shared logic
     ├── src/
-    │   ├── main.rs
-    │   └── bin/
-    │       └── bench.rs
-    ├── wasm/               # WASM bench bindings
-    │   ├── src/
-    │   │   └── lib.rs
-    │   └── Cargo.toml      # crate name: ente-validation-wasm
-    ├── js/                 # JS + WASM benchmarks
-    │   ├── bench-wasm.mjs
-    │   ├── bench-wasm-browser.mjs
-    │   └── bench-wasm-browser.html
-    └── Cargo.toml          # crate name: ente-validation
+    │   ├── lib.rs
+    │   ├── crypto/
+    │   └── auth/
+    ├── docs/
+    │   ├── crypto.md
+    │   └── auth.md
+    └── Cargo.toml          # crate name: ente-core
 
 web/packages/wasm/          # WASM bindings (lives in web workspace)
 ├── src/
@@ -95,7 +89,7 @@ mobile/apps/photos/rust/    # Photos app-specific FRB bindings
 **Crates:**
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
-- `ente-validation` - validation + benchmarks vs libsodium
+  - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
 - `ente_photos_rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)
@@ -109,8 +103,6 @@ A Rust library that provides the `#[wasm_bindgen]` attribute macro. When you ann
 1. Marks the function for export to JavaScript
 2. Handles type conversions between Rust and JS (e.g., `String` ↔ JS string, `i64` ↔ `BigInt`)
 3. Generates metadata that the wasm-bindgen CLI uses to create JS/TS glue code
-
-The library itself is lightweight - just macros and runtime types.
 
 ### [wasm-pack](https://github.com/drager/wasm-pack)
 
@@ -144,37 +136,14 @@ cargo build      # build
 cargo test       # test
 ```
 
-**ente-validation (rust/validation/):**
+**ente-cli (rust/cli/):**
 
 ```sh
-cargo run -p ente-validation --bin ente-validation    # validation suite
-cargo run -p ente-validation --bin bench              # benchmarks (debug)
-cargo run -p ente-validation --bin bench --release    # benchmarks (release)
-```
-
-**ente-validation wasm benchmarks (rust/validation/):**
-
-Node (rust-core wasm vs libsodium-wrappers-sumo wasm):
-
-```sh
-wasm-pack build --target nodejs rust/validation/wasm  # wasm bench build
-cd rust/validation/js
-npm install
-node bench-wasm.mjs                                   # wasm benchmarks
-```
-
-Browser (Chrome):
-
-```sh
-wasm-pack build --target web rust/validation/wasm
-cd rust/validation
-python3 -m http.server 8000
-```
-
-Open:
-
-```text
-http://localhost:8000/js/bench-wasm-browser.html
+cargo fmt        # format
+cargo clippy     # lint
+cargo build      # build
+cargo test       # test
+cargo run -- --help
 ```
 
 **ente-wasm (web/packages/wasm/):**
@@ -215,48 +184,3 @@ flutter_rust_bridge_codegen generate
 flutter_rust_bridge_codegen generate
 flutter test
 ```
-
-## Future
-
-### CLI Migration
-
-A WIP CLI lives in `rust/cli/` and depends on ente-core via path dependency.
-
-Next steps:
-
-1. Move code from CLI to ente-core, adding tests as we migrate.
-2. Update CLI to use ente-core implementations
-3. Prune CLI dependencies as code moves to core
-
-### WASM Compatibility
-
-Core crate must handle deps that don't compile to WASM:
-
-| Dependency             | Issue            | Solution                                                                                |
-| ---------------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| `libsodium-sys-stable` | Native C library | Feature-gate; use pure Rust crypto (e.g., `chacha20poly1305` crate) or WebCrypto via JS |
-| `rusqlite`             | Native SQLite    | Feature-gate; WASM uses IndexedDB via JS interop                                        |
-| `tokio` (full)         | Threading        | Use WASM-compatible features only                                                       |
-| Filesystem ops         | No FS in browser | Abstract behind traits                                                                  |
-
-**Approach:** Cargo feature flags in ente-core?
-
-```toml
-[features]
-default = ["native"]
-native = ["libsodium-sys-stable", "rusqlite/bundled"]
-wasm = ["getrandom/js"]
-```
-
-### Other notes
-
-- Never panic across FFI boundary - always return Result or map errors
-- Keep binding functions thin - logic belongs in ente-core
-- Mobile binary size: LTO + symbol stripping
-
-## Tests
-
-- **ente-core:** Standard `cargo test` - comprehensive unit tests
-- **ente_photos_rust:** Minimal FRB smoke test in Dart to catch binding drift
-- **ente-wasm:** Vitest tests in web package
-- **Golden fixtures:** Share test vectors across native/FRB/WASM for crypto parity
