@@ -38,23 +38,54 @@
 └───────────────────────────┘
 ```
 
-## Contents (this repo)
-
-- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
-- `rust/cli/` - Rust CLI (work-in-progress).
-
 ## Directory Structure
+
+Rust crates live under `rust/`.
 
 ```
 rust/
 ├── cli/                    # CLI package
 │   ├── src/
-│   └── Cargo.toml
-└── core/                   # Pure Rust business logic
+│   │   └── main.rs
+│   ├── Cargo.toml
+│   └── Cargo.lock
+│
+└── core/                   # Pure Rust shared logic
     ├── src/
     ├── docs/
     └── Cargo.toml          # crate name: ente-core
 ```
+
+Related integrations (outside this folder):
+
+- `web/packages/wasm/` - WASM bindings around `ente-core` (`ente-wasm`)
+- `mobile/packages/rust/` - Flutter Rust Bridge bindings around `ente-core` (`ente_rust`)
+- `mobile/apps/photos/rust/` - Photos app-specific Rust crate (`ente_photos_rust`)
+
+## Crates
+
+- `ente-core` (`rust/core`) - shared crypto + auth helpers
+  - Docs:
+    - `rust/core/docs/crypto.md`
+    - `rust/core/docs/auth.md`
+- `ente-rs` (`rust/cli`) - Rust CLI
+- `ente-wasm` (`web/packages/wasm`) - wasm-bindgen wrapper for web
+- `ente_rust` (`mobile/packages/rust`) - shared FRB wrapper for mobile
+- `ente_photos_rust` (`mobile/apps/photos/rust`) - Photos-specific FRB crate
+
+## Tooling
+
+### wasm-bindgen
+
+`#[wasm_bindgen]` exports Rust APIs to JavaScript and handles type conversions.
+
+### wasm-pack
+
+Build helper for WASM crates. In this repo it’s used via the web workspace scripts.
+
+### Flutter Rust Bridge (FRB)
+
+Used for Flutter integration. The FRB crates wrap `ente-core` and generate Dart bindings.
 
 ## Development
 
@@ -67,4 +98,9 @@ cargo build
 cargo test
 ```
 
-See `rust/core/README.md` for module docs.
+**ente-rs (rust/cli/):**
+
+```sh
+cargo test
+cargo run -- --help
+```
