@@ -7,8 +7,10 @@ The `auth` module provides high-level authentication operations for Ente clients
 - **Recovery**: Account recovery with recovery key
 - **SRP Login**: Client-side SRP exchange using derived credentials
 
-SRP protocol exchange is handled in the application layer. This module only
-provides credential derivation and secret decryption helpers.
+SRP protocol exchange is orchestrated in the application layer (HTTP calls),
+but `ente-core` provides `SrpSession` (behind the `srp` feature) to compute
+SRP proofs and verify the server response. This module provides credential
+derivation, SRP session helpers, and secret decryption.
 
 ## Architecture
 
@@ -26,6 +28,7 @@ provides credential derivation and secret decryption helpers.
 │                      ente-core/auth (This Module)                │
 ├─────────────────────────────────────────────────────────────────┤
 │  • derive_srp_credentials() - Password → KEK + login key         │
+│  • SrpSession               - SRP proofs (A/M1/M2)               │
 │  • derive_kek()             - Password → KEK only                │
 │  • decrypt_secrets()        - KEK → master key, secret key, token│
 │  • generate_keys()          - Signup key generation              │
@@ -47,11 +50,11 @@ User                    App                     Server              ente-core
  │                       │ derive_srp_credentials(password, srp_attrs) ─►│
  │                       │◄──────── (login_key, kek) ───────────────────│
  │                       │                        │                     │
- │                       │ [SRP client] public_a(login_key, srp_attrs)   │
+ │                       │ SrpSession::new(...).public_a()              │
  │                       │ create_srp_session(a_pub) ──►│               │
  │                       │◄─── session_id, srp_b ─│                     │
  │                       │                        │                     │
- │                       │ [SRP client] compute_m1(srp_b, login_key)     │
+ │                       │ SrpSession::compute_m1(srp_b)                 │
  │                       │ verify_srp_session(m1) ►│                     │
  │                       │◄── auth_response ──────│                     │
  │                       │                        │                     │
@@ -140,6 +143,21 @@ pub struct SrpCredentials {
 }
 ```
 
+#### `SrpSession`
+Client-side SRP helper (requires the `srp` feature). It pads public values to
+the 4096-bit group length and derives proofs as:
+
+- `M1 = H(A | B | S)`
+- `K = H(S)`
+- `M2 = H(A | M1 | K)`
+
+```rust
+let mut session = auth::SrpSession::new(srp_user_id, &srp_salt, &login_key)?;
+let a_pub = session.public_a();
+let m1 = session.compute_m1(&srp_b)?;
+session.verify_m2(&srp_m2)?; // optional
+```
+
 #### `DecryptedSecrets`
 Result of successful decryption.
 
@@ -163,8 +181,8 @@ pub fn derive_srp_credentials(
 ) -> Result<SrpCredentials>
 ```
 
-Use `login_key` with your SRP client to compute srpA/srpM1. Keep `kek` for
-`decrypt_secrets`.
+Use `login_key` with `auth::SrpSession` to compute srpA/srpM1 (and optionally
+verify srpM2). Keep `kek` for `decrypt_secrets`.
 
 #### `derive_kek`
 Derive only the KEK (for email MFA flow).
@@ -230,7 +248,7 @@ The server specifies `mem_limit` and `ops_limit` in `SrpAttributes`.
 ## Example: Full Login Flow
 
 ```rust
-use ente_core::auth;
+use ente_core::{auth, crypto};
 
 async fn login(email: &str, password: &str, api: &ApiClient) -> Result<Secrets> {
     // 1. Get SRP attributes
@@ -262,10 +280,10 @@ async fn login(email: &str, password: &str, api: &ApiClient) -> Result<Secrets> 
         // SRP flow
         let creds = auth::derive_srp_credentials(password, &srp_attrs)?;
 
-        // Use login_key with your SRP client to compute srpA/srpM1.
-        let mut srp = SrpClient::new(
+        let srp_salt = crypto::decode_b64(&srp_attrs.srp_salt)?;
+        let mut srp = auth::SrpSession::new(
             &srp_attrs.srp_user_id,
-            &srp_attrs.srp_salt,
+            &srp_salt,
             &creds.login_key,
         )?;
         let a_pub = srp.public_a();
@@ -273,6 +291,7 @@ async fn login(email: &str, password: &str, api: &ApiClient) -> Result<Secrets> 
         let m1 = srp.compute_m1(&server_session.srp_b)?;
 
         let auth_resp = api.verify_srp_session(&server_session.id, &m1).await?;
+        // If the API returns srp_m2, call srp.verify_m2(&srp_m2).
 
         // Handle 2FA if required
         let auth_resp = handle_2fa_if_needed(auth_resp, api).await?;
