@@ -1,6 +1,9 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
+use crate::crypto::{
+    decrypt_file_data, decrypt_stream, init as crypto_init, sealed_box_open, secret_box_open,
+};
 use crate::models::{
     account::Account,
     export_metadata::{AlbumMetadata, DiskFileMetadata},
@@ -10,7 +13,6 @@ use crate::models::{
 use crate::storage::Storage;
 use crate::sync::SyncEngine;
 use base64::Engine;
-use ente_core::crypto;
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
@@ -99,7 +101,7 @@ async fn load_album_metadata(
 
 pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> Result<()> {
     // Initialize crypto
-    crypto::init()?;
+    crypto_init()?;
 
     // Open database
     let config_dir = crate::utils::get_cli_config_dir()?;
@@ -705,19 +707,18 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
             // Decrypt the file data using streaming XChaCha20-Poly1305
             // Use chunked decryption for large files
-            let decrypted =
-                match crypto::stream::decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
-                    Ok(data) => data,
-                    Err(e) => {
-                        log::error!("Failed to decrypt file {}: {}", file.id, e);
-                        log::debug!(
-                            "File size: {}, header length: {}",
-                            encrypted_data.len(),
-                            file_nonce.len()
-                        );
-                        continue;
-                    }
-                };
+            let decrypted = match decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
+                Ok(data) => data,
+                Err(e) => {
+                    log::error!("Failed to decrypt file {}: {}", file.id, e);
+                    log::debug!(
+                        "File size: {}, header length: {}",
+                        encrypted_data.len(),
+                        file_nonce.len()
+                    );
+                    continue;
+                }
+            };
 
             // Check if this is a live photo that needs extraction
             let is_live_photo = metadata
@@ -950,11 +951,7 @@ fn decrypt_collection_key(
     let nonce_bytes = BASE64.decode(nonce)?;
 
     // Collection keys are encrypted with secret_box (XSalsa20-Poly1305) using master key
-    Ok(crypto::secretbox::decrypt(
-        &encrypted_bytes,
-        &nonce_bytes,
-        master_key,
-    )?)
+    secret_box_open(&encrypted_bytes, &nonce_bytes, master_key)
 }
 
 /// Decrypt a shared collection key using public key cryptography (sealed box)
@@ -969,11 +966,7 @@ fn decrypt_shared_collection_key(
 
     // Shared collection keys are encrypted with sealed_box (crypto_box_seal)
     // which uses the recipient's public key and an ephemeral keypair
-    Ok(crypto::sealed::open(
-        &encrypted_bytes,
-        public_key,
-        secret_key,
-    )?)
+    sealed_box_open(&encrypted_bytes, public_key, secret_key)
 }
 
 /// Decrypt a collection name using the collection key
@@ -988,7 +981,7 @@ fn decrypt_collection_name(
     let nonce_bytes = BASE64.decode(nonce)?;
 
     // Collection names are encrypted with secret_box using the collection key
-    let decrypted = crypto::secretbox::decrypt(&encrypted_bytes, &nonce_bytes, collection_key)?;
+    let decrypted = secret_box_open(&encrypted_bytes, &nonce_bytes, collection_key)?;
 
     // Convert to string
     String::from_utf8(decrypted)
@@ -1003,11 +996,7 @@ fn decrypt_file_key(encrypted_key: &str, nonce: &str, collection_key: &[u8]) -> 
     let nonce_bytes = BASE64.decode(nonce)?;
 
     // File keys are encrypted with secret_box (XSalsa20-Poly1305) using collection key
-    Ok(crypto::secretbox::decrypt(
-        &encrypted_bytes,
-        &nonce_bytes,
-        collection_key,
-    )?)
+    secret_box_open(&encrypted_bytes, &nonce_bytes, collection_key)
 }
 
 // Removed generate_fallback_filename - Go CLI panics if no title, we return error instead
@@ -1056,7 +1045,7 @@ fn decrypt_file_metadata(
     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
 
     // Decrypt the metadata using streaming XChaCha20-Poly1305
-    let decrypted = crypto::stream::decrypt(&encrypted_bytes, &header_bytes, file_key)?;
+    let decrypted = decrypt_stream(&encrypted_bytes, &header_bytes, file_key)?;
 
     // Parse JSON metadata
     let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
@@ -1079,7 +1068,7 @@ fn decrypt_magic_metadata(
     let header_bytes = BASE64.decode(&magic_metadata.header)?;
 
     // Decrypt the metadata using streaming XChaCha20-Poly1305
-    let decrypted = crypto::stream::decrypt(&encrypted_bytes, &header_bytes, file_key)?;
+    let decrypted = decrypt_stream(&encrypted_bytes, &header_bytes, file_key)?;
 
     // Parse as generic JSON since magic metadata structure can vary
     let metadata: serde_json::Value = serde_json::from_slice(&decrypted)?;

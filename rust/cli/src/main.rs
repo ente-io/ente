@@ -1,24 +1,18 @@
 use clap::Parser;
 use ente_rs::{
+    Result,
     cli::{Cli, Commands},
     commands,
     storage::Storage,
 };
 
 #[tokio::main]
-async fn main() {
-    if let Err(e) = run().await {
-        eprintln!("\n{}", e.user_message());
-        std::process::exit(1);
-    }
-}
-
-async fn run() -> ente_rs::Result<()> {
+async fn main() -> Result<()> {
     // Initialize logger
     env_logger::init();
 
-    // Initialize crypto
-    ente_core::crypto::init()?;
+    // Initialize libsodium
+    ente_rs::crypto::init()?;
 
     // Initialize storage
     let config_dir = ente_rs::utils::get_cli_config_dir()?;
