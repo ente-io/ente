@@ -45,10 +45,10 @@ If we are unable to decipher the creation time from these 3 sources, we will set
 
 ### How do I view EXIF data for a photo? {#view-exif}
 
-**On mobile and web:**
+**On mobile, web and desktop:**
 
 1. Open the photo
-2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web/desktop
 3. Scroll down to see basic metadata
 4. Tap "View all Exif data" to see complete EXIF information
 
@@ -83,10 +83,10 @@ To fix this:
 
 You can add descriptions (captions) to your photos in Ente:
 
-**On mobile and web:**
+**On mobile, web and desktop:**
 
 1. Open the photo
-2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on web/desktop
 3. Tap/click "Add description" or the description field
 4. Type your description
 5. Save
@@ -123,7 +123,7 @@ Yes! You can bulk-edit location coordinates:
 3. Choose the correct location on the map
 4. Tap Save
 
-**On web:**
+**On web/desktop:**
 
 1. Click to select photos (Ctrl/Cmd+click or Shift+click for multiple)
 2. Click the edit location icon in the selection bar
@@ -193,7 +193,7 @@ Yes! You can manually add location data to any photo:
 3. Select the location on the map
 4. Tap Save
 
-**On web:**
+**On web/desktop:**
 
 1. Open the photo and click the info button (i)
 2. In the Location section, click "Add"
