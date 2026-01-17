@@ -608,12 +608,14 @@ impl<R: Read> StreamingDecryptor<R> {
     }
 }
 
+type EncryptFileResult = Result<(Vec<u8>, Vec<u8>, Option<Vec<u8>>)>;
+
 fn encrypt_file_internal<R: Read, W: Write>(
     reader: &mut R,
     writer: &mut W,
     key: Option<&[u8]>,
     mut md5_state: Option<Md5>,
-) -> Result<(Vec<u8>, Vec<u8>, Option<Vec<u8>>)> {
+) -> EncryptFileResult {
     use crate::crypto::keys::generate_stream_key;
 
     let key = match key {
