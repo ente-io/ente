@@ -117,6 +117,10 @@ pub fn run_all() -> TestResult {
         "Multi-chunk interop" => test_multi_chunk_interop(),
         "Empty plaintext interop" => test_empty_interop(),
         "Large plaintext interop (64KB)" => test_large_interop(),
+        "File encryption exact chunk boundary" => test_file_encrypt_exact_chunk_boundary(),
+        "File encryption exact two chunks boundary" => test_file_encrypt_exact_two_chunks_boundary(),
+        "File decryption exact chunk boundary" => test_file_decrypt_exact_chunk_boundary(),
+        "File decryption exact two chunks boundary" => test_file_decrypt_exact_two_chunks_boundary(),
     }
 }
 
@@ -333,4 +337,105 @@ fn test_large_interop() -> bool {
     let (pt, tag) = core_dec.pull(&ct).unwrap();
 
     pt == plaintext && tag == TAG_FINAL
+}
+
+fn test_file_encrypt_exact_chunk_boundary() -> bool {
+    use std::io::Cursor;
+
+    let key = crate::random_bytes(KEY_BYTES);
+    let plaintext = crate::random_bytes(crypto::stream::ENCRYPTION_CHUNK_SIZE);
+
+    let mut ciphertext = Vec::new();
+    let mut reader = Cursor::new(&plaintext);
+    let (_returned_key, header) =
+        crypto::stream::encrypt_file(&mut reader, &mut ciphertext, Some(&key)).unwrap();
+
+    if ciphertext.len() != crypto::stream::DECRYPTION_CHUNK_SIZE {
+        return false;
+    }
+
+    if ciphertext.len() != crypto::stream::estimate_encrypted_size(plaintext.len()) {
+        return false;
+    }
+
+    let mut decryptor = LibsodiumDecryptor::new(&key, &header).unwrap();
+    let (decrypted, tag) = decryptor.pull(&ciphertext).unwrap();
+
+    decrypted == plaintext && tag == TAG_FINAL
+}
+
+fn test_file_encrypt_exact_two_chunks_boundary() -> bool {
+    use std::io::Cursor;
+
+    let key = crate::random_bytes(KEY_BYTES);
+    let plaintext = crate::random_bytes(crypto::stream::ENCRYPTION_CHUNK_SIZE * 2);
+
+    let mut ciphertext = Vec::new();
+    let mut reader = Cursor::new(&plaintext);
+    let (_returned_key, header) =
+        crypto::stream::encrypt_file(&mut reader, &mut ciphertext, Some(&key)).unwrap();
+
+    let expected_len = 2 * crypto::stream::DECRYPTION_CHUNK_SIZE;
+    if ciphertext.len() != expected_len {
+        return false;
+    }
+
+    if ciphertext.len() != crypto::stream::estimate_encrypted_size(plaintext.len()) {
+        return false;
+    }
+
+    let mut decryptor = LibsodiumDecryptor::new(&key, &header).unwrap();
+
+    let (pt1, tag1) = decryptor
+        .pull(&ciphertext[..crypto::stream::DECRYPTION_CHUNK_SIZE])
+        .unwrap();
+    let (pt2, tag2) = decryptor
+        .pull(&ciphertext[crypto::stream::DECRYPTION_CHUNK_SIZE..])
+        .unwrap();
+
+    if tag1 != TAG_MESSAGE || tag2 != TAG_FINAL {
+        return false;
+    }
+
+    let mut combined = Vec::with_capacity(pt1.len() + pt2.len());
+    combined.extend_from_slice(&pt1);
+    combined.extend_from_slice(&pt2);
+
+    combined == plaintext
+}
+
+fn test_file_decrypt_exact_chunk_boundary() -> bool {
+    use std::io::Cursor;
+
+    let key = crate::random_bytes(KEY_BYTES);
+    let plaintext = crate::random_bytes(crypto::stream::ENCRYPTION_CHUNK_SIZE);
+
+    let mut encryptor = LibsodiumEncryptor::new(&key);
+    let ciphertext = encryptor.push(&plaintext, TAG_FINAL);
+
+    let mut reader = Cursor::new(ciphertext);
+    let mut decrypted = Vec::new();
+
+    crypto::stream::decrypt_file(&mut reader, &mut decrypted, &encryptor.header, &key).is_ok()
+        && decrypted == plaintext
+}
+
+fn test_file_decrypt_exact_two_chunks_boundary() -> bool {
+    use std::io::Cursor;
+
+    let key = crate::random_bytes(KEY_BYTES);
+    let plaintext = crate::random_bytes(crypto::stream::ENCRYPTION_CHUNK_SIZE * 2);
+
+    let chunk_size = crypto::stream::ENCRYPTION_CHUNK_SIZE;
+
+    let mut encryptor = LibsodiumEncryptor::new(&key);
+    let mut ciphertext = Vec::new();
+    ciphertext.extend_from_slice(&encryptor.push(&plaintext[..chunk_size], TAG_MESSAGE));
+    ciphertext.extend_from_slice(&encryptor.push(&plaintext[chunk_size..], TAG_FINAL));
+
+    let mut reader = Cursor::new(ciphertext);
+    let mut decrypted = Vec::new();
+
+    crypto::stream::decrypt_file(&mut reader, &mut decrypted, &encryptor.header, &key).is_ok()
+        && decrypted == plaintext
 }
