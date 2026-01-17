@@ -5,7 +5,6 @@ Validation and benchmarks for `ente-core` against libsodium.
 ## Validation suite
 
 ```bash
-cargo run -p ente-validation --bin ente-validation
 cargo run -p ente-validation --bin ente-validation --release
 ```
 
@@ -15,7 +14,6 @@ Argon2id, and full auth flow.
 ## Benchmarks
 
 ```bash
-cargo run -p ente-validation --bin bench
 cargo run -p ente-validation --bin bench --release
 ```
 
