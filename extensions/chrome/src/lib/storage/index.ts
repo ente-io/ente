@@ -21,6 +21,7 @@ const LOCAL_KEYS = {
   KEY_ATTRIBUTES: "keyAttributes",
   ENCRYPTED_MASTER_KEY: "encryptedMasterKey",
   LAST_SYNC_TIME: "lastSyncTime",
+  LAST_ACTIVITY_TIME: "lastActivityTime",
   // Preferences (plaintext)
   AUTO_LOCK_TIMEOUT: "autoLockTimeout",
   SHOW_PHISHING_WARNINGS: "showPhishingWarnings",
@@ -159,6 +160,14 @@ export const localStorage = {
 
   async setLastSyncTime(time: number): Promise<void> {
     await this.set(LOCAL_KEYS.LAST_SYNC_TIME, time);
+  },
+
+  async getLastActivityTime(): Promise<number | undefined> {
+    return this.get<number>(LOCAL_KEYS.LAST_ACTIVITY_TIME);
+  },
+
+  async setLastActivityTime(time: number): Promise<void> {
+    await this.set(LOCAL_KEYS.LAST_ACTIVITY_TIME, time);
   },
 
   // Preferences

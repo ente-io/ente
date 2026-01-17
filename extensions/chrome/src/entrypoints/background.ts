@@ -14,6 +14,7 @@ import type { KeyAttributes, LocalUser } from "@/lib/types/auth";
 export default defineBackground(() => {
   // Auto-lock timer
   let lockTimer: ReturnType<typeof setTimeout> | null = null;
+  const AUTO_LOCK_ALARM = "autoLock";
 
   // Pending login helpers (persist to session storage to survive service worker restarts)
   const PENDING_LOGIN_KEY = "pendingLogin";
@@ -53,8 +54,8 @@ export default defineBackground(() => {
     await initCrypto();
     console.log("Ente Auth extension initialized");
 
-    // Reset auto-lock timer on startup
-    await resetLockTimer();
+    // Enforce auto-lock on startup to cover service worker restarts
+    await enforceAutoLockOnStartup();
   };
 
   /**
@@ -77,24 +78,72 @@ export default defineBackground(() => {
    * Reset the auto-lock timer.
    */
   const resetLockTimer = async () => {
+    const { localStorage } = await import("@/lib/storage");
+    const timeout = await localStorage.getAutoLockTimeout();
+
     if (lockTimer) {
       clearTimeout(lockTimer);
       lockTimer = null;
     }
+    await chrome.alarms.clear(AUTO_LOCK_ALARM);
 
+    if (timeout > 0) {
+      const timeoutMs = timeout * 60 * 1000;
+      lockTimer = setTimeout(lock, timeoutMs);
+      await chrome.alarms.create(AUTO_LOCK_ALARM, { delayInMinutes: timeout });
+      await localStorage.setLastActivityTime(Date.now());
+    }
+  };
+
+  /**
+   * Ensure we lock if last activity was older than auto-lock timeout.
+   * This is called on service worker startup to avoid leaving the vault unlocked
+   * after a suspend/resume cycle.
+   */
+  const enforceAutoLockOnStartup = async () => {
     const { localStorage } = await import("@/lib/storage");
     const timeout = await localStorage.getAutoLockTimeout();
-    if (timeout > 0) {
-      lockTimer = setTimeout(lock, timeout * 60 * 1000);
+    if (timeout <= 0) {
+      await chrome.alarms.clear(AUTO_LOCK_ALARM);
+      return;
     }
+
+    const lastActivity = await localStorage.getLastActivityTime();
+    const timeoutMs = timeout * 60 * 1000;
+    const now = Date.now();
+
+    if (lastActivity && now - lastActivity >= timeoutMs) {
+      await lock();
+      return;
+    }
+
+    const remainingMs = lastActivity
+      ? timeoutMs - (now - lastActivity)
+      : timeoutMs;
+
+    if (lockTimer) {
+      clearTimeout(lockTimer);
+      lockTimer = null;
+    }
+    await chrome.alarms.clear(AUTO_LOCK_ALARM);
+    lockTimer = setTimeout(lock, remainingMs);
+    await chrome.alarms.create(AUTO_LOCK_ALARM, {
+      delayInMinutes: remainingMs / (60 * 1000),
+    });
   };
 
   /**
    * Lock the extension.
    */
   const lock = async (): Promise<void> => {
-    const { sessionStorage } = await import("@/lib/storage");
+    const { sessionStorage, localStorage } = await import("@/lib/storage");
     await sessionStorage.clear();
+    await localStorage.setLastActivityTime(Date.now());
+    await chrome.alarms.clear(AUTO_LOCK_ALARM);
+    if (lockTimer) {
+      clearTimeout(lockTimer);
+      lockTimer = null;
+    }
     console.log("Extension locked");
   };
 
@@ -290,6 +339,7 @@ export default defineBackground(() => {
       await clearAllData();
       await setPendingLogin(null);
 
+      await chrome.alarms.clear(AUTO_LOCK_ALARM);
       if (lockTimer) {
         clearTimeout(lockTimer);
         lockTimer = null;
@@ -452,4 +502,11 @@ export default defineBackground(() => {
   init();
 
   console.log("Ente Auth background script loaded");
+
+  // Auto-lock via alarms for when the service worker wakes up later
+  chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === AUTO_LOCK_ALARM) {
+      await lock();
+    }
+  });
 });

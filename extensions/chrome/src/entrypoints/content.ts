@@ -237,17 +237,6 @@ export default defineContentScript({
       return div.innerHTML;
     };
 
-    // Format OTP for display
-    const formatOtp = (otp: string): string => {
-      if (otp.length === 6) {
-        return `${otp.slice(0, 3)} ${otp.slice(3)}`;
-      }
-      if (otp.length === 8) {
-        return `${otp.slice(0, 4)} ${otp.slice(4)}`;
-      }
-      return otp;
-    };
-
     // Fill OTP into input
     const fillOTP = (input: HTMLInputElement, otp: string) => {
       input.value = otp;
@@ -277,34 +266,29 @@ export default defineContentScript({
       const list = autofillContainer.querySelector(".ente-auth-autofill-list");
       if (!list) return;
 
-      const otps = await Promise.all(
-        matches.map(async (match) => {
-          const otp = await generateOTP(match.code.id);
-          return { match, otp };
-        })
-      );
-
-      list.innerHTML = otps
+      list.innerHTML = matches
         .map(
-          ({ match, otp }) => `
-        <div class="ente-auth-autofill-item" data-code-id="${match.code.id}" data-otp="${otp}">
+          (match) => `
+        <div class="ente-auth-autofill-item" data-code-id="${match.code.id}">
           <div>
             <div class="ente-auth-autofill-issuer">${escapeHtml(match.code.issuer)}</div>
             ${match.code.account ? `<div class="ente-auth-autofill-account">${escapeHtml(match.code.account)}</div>` : ""}
           </div>
-          <div class="ente-auth-autofill-otp">${formatOtp(otp)}</div>
+          <div class="ente-auth-autofill-otp">Tap to fill</div>
         </div>
       `
         )
         .join("");
 
       list.querySelectorAll<HTMLDivElement>(".ente-auth-autofill-item").forEach((item) => {
-        item.addEventListener("click", () => {
-          const otp = item.dataset.otp;
-          if (otp && currentInput) {
+        item.addEventListener("click", async () => {
+          const codeId = item.dataset.codeId;
+          if (!codeId || !currentInput) return;
+          const otp = await generateOTP(codeId);
+          if (otp) {
             fillOTP(currentInput, otp);
-            hideAutofill();
           }
+          hideAutofill();
         });
       });
     };

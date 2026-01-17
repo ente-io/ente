@@ -75,42 +75,10 @@ const extractBaseDomain = (hostname: string): string => {
 };
 
 /**
- * Calculate Levenshtein distance between two strings.
- */
-const levenshtein = (a: string, b: string): number => {
-  const m = a.length;
-  const n = b.length;
-
-  if (m === 0) return n;
-  if (n === 0) return m;
-
-  const dp: number[][] = Array(m + 1)
-    .fill(null)
-    .map(() => Array(n + 1).fill(0));
-
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost,
-      );
-    }
-  }
-
-  return dp[m][n];
-};
-
-/**
- * Match codes to the current site URL.
+ * Strict domain matching to reduce phishing/typo-squatting.
  *
- * @param codes - All available codes
- * @param url - Current page URL
- * @returns Matched codes sorted by relevance
+ * We only match when the current eTLD+1 matches the issuer's domain or a vetted
+ * alias. Fuzzy/substring matches are intentionally avoided.
  */
 export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
   let hostname: string;
@@ -121,45 +89,29 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
   }
 
   const baseDomain = extractBaseDomain(hostname);
-
   const matches: SiteMatch[] = [];
+
+  const isAliasMatch = (issuerKey: string): boolean => {
+    const aliases = ISSUER_ALIASES[issuerKey];
+    return (
+      !!aliases &&
+      aliases.some(
+        (alias) => hostname === alias || hostname.endsWith("." + alias),
+      )
+    );
+  };
 
   for (const code of codes) {
     const issuer = code.issuer.toLowerCase();
-    const issuerClean = issuer.replace(/[^a-z0-9]/g, "");
+    const issuerClean = issuer.replace(/[^a-z0-9.]/g, "");
 
-    // Exact match: hostname contains issuer or issuer contains base domain
-    if (
-      hostname.includes(issuerClean) ||
-      issuerClean.includes(baseDomain.replace(/\./g, ""))
-    ) {
-      matches.push({ code, score: 100, matchType: "exact" });
-      continue;
-    }
-
-    // Alias match: check known aliases
-    const aliases = ISSUER_ALIASES[issuerClean];
-    if (aliases?.some((alias) => hostname.includes(alias.split(".")[0]))) {
+    // Exact domain or subdomain match for known aliases
+    if (isAliasMatch(issuerClean)) {
       matches.push({ code, score: 90, matchType: "alias" });
       continue;
     }
 
-    // Check if any alias domain matches the current hostname
-    for (const [key, domainAliases] of Object.entries(ISSUER_ALIASES)) {
-      if (domainAliases.some((d) => hostname.endsWith(d))) {
-        if (issuerClean.includes(key) || key.includes(issuerClean)) {
-          matches.push({ code, score: 85, matchType: "alias" });
-          break;
-        }
-      }
-    }
-
-    // Skip if already added
-    if (matches.some((m) => m.code.id === code.id)) {
-      continue;
-    }
-
-    // Domain match: check if issuer looks like a domain
+    // Domain match when issuer itself is a domain-like string
     if (issuer.includes(".")) {
       const issuerDomain = extractBaseDomain(issuer);
       if (baseDomain === issuerDomain) {
@@ -168,23 +120,16 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
       }
     }
 
-    // Fuzzy match: Levenshtein distance
-    const distance = levenshtein(issuerClean, baseDomain.replace(/\./g, ""));
-    if (distance <= 3 && distance < issuerClean.length / 2) {
-      matches.push({
-        code,
-        score: 70 - distance * 10,
-        matchType: "fuzzy",
-      });
+    // Strict issuer-to-hostname equality (handles simple issuers like "github")
+    if (issuerClean && issuerClean === baseDomain.replace(/\./g, "")) {
+      matches.push({ code, score: 70, matchType: "exact" });
+      continue;
     }
   }
 
-  // Sort by pinned first, then by score
   return matches.sort((a, b) => {
-    // Pinned codes first
     if (a.code.codeDisplay?.pinned && !b.code.codeDisplay?.pinned) return -1;
     if (!a.code.codeDisplay?.pinned && b.code.codeDisplay?.pinned) return 1;
-    // Then by score
     return b.score - a.score;
   });
 };
