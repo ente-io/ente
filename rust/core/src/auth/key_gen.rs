@@ -142,9 +142,7 @@ pub fn generate_key_attributes_for_new_password_with_strength(
         recovery_key_encrypted_with_master_key: existing_attributes
             .recovery_key_encrypted_with_master_key
             .clone(),
-        recovery_key_decryption_nonce: existing_attributes
-            .recovery_key_decryption_nonce
-            .clone(),
+        recovery_key_decryption_nonce: existing_attributes.recovery_key_decryption_nonce.clone(),
     };
 
     Ok((key_attributes, login_key))
