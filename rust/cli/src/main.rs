@@ -1,5 +1,6 @@
 use clap::Parser;
 use ente_rs::{
+    Result,
     cli::{Cli, Commands},
     commands,
     storage::Storage,
@@ -8,27 +9,22 @@ use ente_rs::{
 #[tokio::main]
 async fn main() {
     if let Err(e) = run().await {
-        eprintln!("\n{}", e.user_message());
+        eprintln!("{e}");
         std::process::exit(1);
     }
 }
 
-async fn run() -> ente_rs::Result<()> {
-    // Initialize logger
+async fn run() -> Result<()> {
     env_logger::init();
 
-    // Initialize crypto
     ente_core::crypto::init()?;
 
-    // Initialize storage
     let config_dir = ente_rs::utils::get_cli_config_dir()?;
     let db_path = config_dir.join("ente.db");
     let storage = Storage::new(&db_path)?;
 
-    // Parse CLI arguments
     let cli = Cli::parse();
 
-    // Handle commands
     match cli.command {
         Commands::Version => {
             println!("ente-rs version {}", ente_rs::cli::version::VERSION);

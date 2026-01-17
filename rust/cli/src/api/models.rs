@@ -3,9 +3,6 @@ use uuid::Uuid;
 
 // ========== Authentication Models ==========
 
-/// Default to true for security - if field is missing, use email OTP flow.
-///
-/// Matches mobile/web behavior: absence falls back to email verification.
 fn default_email_mfa_enabled() -> bool {
     true
 }
@@ -79,19 +76,17 @@ pub struct AuthResponse {
     pub key_attributes: Option<KeyAttributes>,
     pub encrypted_token: Option<String>,
     pub token: Option<String>,
-    #[serde(default, rename = "twoFactorSessionID")]
+    #[serde(rename = "twoFactorSessionID")]
     pub two_factor_session_id: Option<String>,
-    /// V2 TOTP session ID (used during migration period)
-    #[serde(default, rename = "twoFactorSessionIDV2")]
+    #[serde(rename = "twoFactorSessionIDV2")]
     pub two_factor_session_id_v2: Option<String>,
-    #[serde(default, rename = "passkeySessionID")]
+    #[serde(rename = "passkeySessionID")]
     pub passkey_session_id: Option<String>,
     pub srp_m2: Option<String>,
     pub accounts_url: Option<String>,
 }
 
 impl AuthResponse {
-    /// Get the TOTP session ID (checks both V1 and V2 fields, filters empty strings)
     pub fn get_two_factor_session_id(&self) -> Option<&String> {
         self.two_factor_session_id
             .as_ref()
@@ -108,7 +103,9 @@ impl AuthResponse {
     }
 
     pub fn is_passkey_required(&self) -> bool {
-        self.passkey_session_id.is_some()
+        self.passkey_session_id
+            .as_ref()
+            .is_some_and(|s| !s.is_empty())
     }
 }
 
