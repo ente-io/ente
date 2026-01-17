@@ -305,9 +305,15 @@ mod serialization {
         };
 
         let json = serde_json::to_string(&attrs).unwrap();
-        let parsed: SrpAttributes = serde_json::from_str(&json).unwrap();
+        assert!(json.contains("\"srpUserID\""));
+        assert!(json.contains("\"isEmailMFAEnabled\""));
 
+        let parsed: SrpAttributes = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.srp_user_id, attrs.srp_user_id);
         assert_eq!(parsed.mem_limit, attrs.mem_limit);
+
+        let json_missing_flag = r#"{"srpUserID":"user123","srpSalt":"c2FsdA==","memLimit":67108864,"opsLimit":2,"kekSalt":"a2VrU2FsdA=="}"#;
+        let parsed_missing: SrpAttributes = serde_json::from_str(json_missing_flag).unwrap();
+        assert!(parsed_missing.is_email_mfa_enabled);
     }
 }

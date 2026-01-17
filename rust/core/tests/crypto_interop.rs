@@ -819,10 +819,10 @@ mod public_api_coverage {
         // Small data: single FINAL chunk
         assert_eq!(crypto::stream::estimate_encrypted_size(100), 100 + abytes);
 
-        // Exact chunk size: one MESSAGE chunk + empty FINAL chunk
+        // Exact chunk size: one FINAL chunk
         assert_eq!(
             crypto::stream::estimate_encrypted_size(chunk_size),
-            dec_chunk_size + abytes
+            dec_chunk_size
         );
 
         // Chunk size + extra: one MESSAGE chunk + non-empty FINAL chunk
@@ -847,15 +847,15 @@ mod public_api_coverage {
         // Valid cases
         assert!(crypto::stream::validate_sizes(0, abytes)); // empty plaintext
         assert!(crypto::stream::validate_sizes(100, 117)); // small data
-        assert!(crypto::stream::validate_sizes(
-            chunk_size,
-            dec_chunk_size + abytes
-        )); // exact multiple
+        assert!(crypto::stream::validate_sizes(chunk_size, dec_chunk_size)); // exact chunk
 
         // Invalid cases
         assert!(!crypto::stream::validate_sizes(100, 100)); // missing ABYTES
         assert!(!crypto::stream::validate_sizes(0, 0)); // ciphertext can't be 0
-        assert!(!crypto::stream::validate_sizes(chunk_size, dec_chunk_size)); // missing final ABYTES
+        assert!(!crypto::stream::validate_sizes(
+            chunk_size,
+            dec_chunk_size + abytes
+        )); // extra empty chunk
     }
 
     #[test]

@@ -73,11 +73,16 @@ pub struct LoginResult {
     pub key_encryption_key: Vec<u8>,
 }
 
+fn default_email_mfa_enabled() -> bool {
+    true
+}
+
 /// SRP attributes received from server.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SrpAttributes {
     /// SRP user ID (UUID)
+    #[serde(rename = "srpUserID")]
     pub srp_user_id: String,
     /// SRP salt (base64)
     pub srp_salt: String,
@@ -88,6 +93,7 @@ pub struct SrpAttributes {
     /// KEK salt (base64) - same as in KeyAttributes
     pub kek_salt: String,
     /// Whether email MFA is enabled (use email OTT instead of SRP)
+    #[serde(rename = "isEmailMFAEnabled", default = "default_email_mfa_enabled")]
     pub is_email_mfa_enabled: bool,
 }
 

@@ -7,6 +7,7 @@
 use sha2::Sha256;
 use srp::client::{SrpClient as SrpClientInner, SrpClientVerifier};
 use srp::groups::G_4096;
+use zeroize::Zeroize;
 
 use super::{AuthError, Result};
 
@@ -93,6 +94,10 @@ impl SrpSession {
         let proof = verifier.proof().to_vec();
         self.verifier = Some(verifier);
 
+        // No longer needed after we have a verifier
+        self.login_key.zeroize();
+        self.a_private.zeroize();
+
         Ok(proof)
     }
 
@@ -109,6 +114,13 @@ impl SrpSession {
         verifier
             .verify_server(server_m2)
             .map_err(|_| AuthError::Srp("Server proof verification failed".to_string()))
+    }
+}
+
+impl Drop for SrpSession {
+    fn drop(&mut self) {
+        self.login_key.zeroize();
+        self.a_private.zeroize();
     }
 }
 
@@ -131,6 +143,32 @@ mod tests {
         let a = session.public_a();
         assert!(!a.is_empty());
         assert!(a.len() > 100); // 4096-bit group produces large values
+    }
+
+    #[test]
+    fn test_sensitive_buffers_zeroized_after_compute_m1() {
+        crypto::init().unwrap();
+
+        use rand_core::RngCore;
+        use srp::server::SrpServer;
+
+        let srp_user_id = "test-user-id";
+        let srp_salt = [0u8; 16];
+        let login_key = [0x11u8; 16];
+
+        let client = SrpClientInner::<Sha256>::new(&G_4096);
+        let verifier = client.compute_verifier(srp_user_id.as_bytes(), &login_key, &srp_salt);
+
+        let server = SrpServer::<Sha256>::new(&G_4096);
+        let mut b = [0u8; 64];
+        rand_core::OsRng.fill_bytes(&mut b);
+        let b_pub = server.compute_public_ephemeral(&b, &verifier);
+
+        let mut session = SrpSession::new(srp_user_id, &srp_salt, &login_key).unwrap();
+        session.compute_m1(&b_pub).unwrap();
+
+        assert!(session.login_key.iter().all(|&b| b == 0));
+        assert!(session.a_private.iter().all(|&b| b == 0));
     }
 
     #[test]
