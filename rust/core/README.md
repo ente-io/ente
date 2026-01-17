@@ -6,9 +6,21 @@ Common Rust code for Ente apps.
 
 | Module | Description |
 |--------|-------------|
+| `auth` | Authentication helpers (signup/login/recovery, SRP credentials) |
 | `crypto` | Cryptographic utilities (pure Rust, libsodium-wire-compatible) |
 | `http` | HTTP client for Ente API |
 | `urls` | URL construction utilities |
+
+## Auth
+
+High-level authentication helpers for Ente clients:
+
+- Derive KEK/login key from password (SRP)
+- Decrypt master key, secret key and token after authentication
+- Signup key generation
+- Account recovery
+
+📖 **[Full Auth Docs](docs/auth.md)**
 
 ## Crypto
 

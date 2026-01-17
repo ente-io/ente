@@ -6,12 +6,13 @@ This directory hosts Rust crates used across Ente clients.
 
 ### `rust/core/` (ente-core)
 
-Pure Rust shared logic (primarily cryptography) that is wire-compatible with the existing
-JS/Dart implementations.
+Pure Rust shared logic (crypto + auth) that is wire-compatible with the existing JS/Dart
+implementations.
 
 - Source: `rust/core/src/`
 - Docs:
   - `rust/core/docs/crypto.md`
+  - `rust/core/docs/auth.md`
 
 ## Development
 
