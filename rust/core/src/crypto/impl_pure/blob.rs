@@ -59,6 +59,10 @@ pub fn encrypt(plaintext: &[u8], key: &[u8]) -> Result<EncryptedBlob> {
 ///
 /// # Returns
 /// The decrypted plaintext.
+///
+/// # Errors
+/// Returns `CryptoError::StreamTruncated` when the `blob-require-final-tag`
+/// feature is enabled and the ciphertext does not carry `TAG_FINAL`.
 pub fn decrypt(ciphertext: &[u8], header: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     if key.len() != KEY_BYTES {
         return Err(CryptoError::InvalidKeyLength {
@@ -85,7 +89,10 @@ pub fn decrypt(ciphertext: &[u8], header: &[u8], key: &[u8]) -> Result<Vec<u8>> 
     let mut decryptor = StreamDecryptor::new(header, key)?;
 
     // Decrypt
-    let (plaintext, _tag) = decryptor.pull(ciphertext)?;
+    let (plaintext, tag) = decryptor.pull(ciphertext)?;
+    if cfg!(feature = "blob-require-final-tag") && tag != TAG_FINAL {
+        return Err(CryptoError::StreamTruncated);
+    }
 
     Ok(plaintext)
 }
@@ -162,6 +169,21 @@ mod tests {
 
         let decrypted = decrypt_blob(&encrypted, &key).unwrap();
         assert_eq!(decrypted, plaintext);
+    }
+
+    #[test]
+    fn test_decrypt_non_final_tag_behavior() {
+        let key = keys::generate_stream_key();
+        let mut encryptor = StreamEncryptor::new(&key).unwrap();
+        let header = encryptor.header.clone();
+        let ciphertext = encryptor.push(b"partial", false).unwrap();
+
+        let result = decrypt(&ciphertext, &header, &key);
+        if cfg!(feature = "blob-require-final-tag") {
+            assert!(matches!(result, Err(CryptoError::StreamTruncated)));
+        } else {
+            assert!(result.is_ok());
+        }
     }
 
     #[test]

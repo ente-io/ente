@@ -46,7 +46,7 @@ sha2 = "0.10"
 getrandom = "0.2"
 
 [features]
-default = []
+default = ["blob-require-final-tag"]
 
 # Enable SRP (Secure Remote Password) client for password-based authentication.
 #
@@ -56,6 +56,9 @@ default = []
 # Example:
 # ente-core = { version = "0.0.1", features = ["srp"] }
 srp = ["dep:srp", "dep:sha2"]
+
+# Enforce TAG_FINAL on blob decrypt (reject non-final chunks).
+blob-require-final-tag = []
 
 # No features needed - pure Rust is always enabled
 
