@@ -1,18 +1,60 @@
 # Rust in Ente
 
-This directory hosts Rust crates used across Ente clients.
+```
+                         ┌───────────────────────────────────────┐
+                         │            rust/core/                 │
+                         │        (ente-core crate)              │
+                         │                                       │
+                         │   Pure Rust - NO FFI annotations      │
+                         │   Stateless business logic            │
+                         │   Fully testable with cargo test      │
+                         └───────────────────────────────────────┘
+                                           │
+              ┌────────────────────────────┼────────────────────────────┐
+              │                            │                            │
+              ▼                            ▼                            ▼
+┌───────────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
+│  mobile/packages/rust/    │ │   web/packages/wasm/      │ │      rust/cli/         │
+│    (ente_rust crate)      │ │    (ente-wasm crate)      │ │                        │
+│                           │ │                           │ │  CLI binary, depends   │
+│  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │  on ente-core          │
+│  for all mobile apps      │ │  for all web apps         │ │                        │
+└───────────────────────────┘ └───────────────────────────┘ └────────────────────────┘
+         │    │                            │
+         │    └──────────────┐             │
+         ▼                   ▼             ▼
+┌─────────────────┐   ┌────────────┐   ┌───────────────────────────┐
+│   Photos App    │   │ Other apps │   │        Web Apps           │
+│                 │   │ (Auth ...) │   │   (Photos, Auth, etc.)    │
+└─────────────────┘   └────────────┘   └───────────────────────────┘
+         ▲
+         │
+┌───────────────────────────┐
+│ mobile/apps/photos/rust/  │
+│  (ente_photos_rust crate) │
+│                           │
+│  App-specific #[frb]:     │
+│  usearch, ML, etc.        │
+└───────────────────────────┘
+```
 
-## Crates
+## Contents (this repo)
 
-### `rust/core/` (ente-core)
+- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
+- `rust/cli/` - Rust CLI (work-in-progress).
 
-Pure Rust shared logic (crypto + auth) that is wire-compatible with the existing JS/Dart
-implementations.
+## Directory Structure
 
-- Source: `rust/core/src/`
-- Docs:
-  - `rust/core/docs/crypto.md`
-  - `rust/core/docs/auth.md`
+```
+rust/
+├── cli/                    # CLI package
+│   ├── src/
+│   └── Cargo.toml
+└── core/                   # Pure Rust business logic
+    ├── src/
+    ├── docs/
+    └── Cargo.toml          # crate name: ente-core
+```
 
 ## Development
 
@@ -25,17 +67,4 @@ cargo build
 cargo test
 ```
 
-## Integrations
-
-- Web (wasm-bindgen): `web/packages/wasm/` wraps `ente-core` for web apps.
-- Mobile (FRB): `mobile/packages/rust/` wraps `ente-core` for Flutter apps.
-
-## CLI (added in a follow-up PR)
-
-A Rust CLI lives in `rust/cli/` and will depend on `ente-core`.
-
-## Validation + Fuzzing (added in a follow-up PR)
-
-Validation suite + benchmarks (vs libsodium) and fuzz targets will live under:
-- `rust/validation/`
-- `rust/core/fuzz/`
+See `rust/core/README.md` for module docs.
