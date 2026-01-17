@@ -60,9 +60,6 @@ srp = ["dep:srp", "dep:sha2"]
 # Enforce TAG_FINAL on blob decrypt (reject non-final chunks).
 blob-require-final-tag = []
 
-# Enforce TAG_FINAL on blob decrypt (reject non-final chunks).
-blob-require-final-tag = []
-
 # No features needed - pure Rust is always enabled
 
 [lints.rust]
