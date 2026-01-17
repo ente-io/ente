@@ -7,7 +7,7 @@ use crate::crypto::{self, argon, kdf, sealed, secretbox};
 
 use super::{AuthError, KeyAttributes, Result, SrpAttributes};
 
-#[cfg(any(test, feature = "srp"))]
+#[cfg(feature = "srp")]
 use super::srp::SrpSession;
 
 /// Credentials derived from password for SRP authentication.
@@ -152,7 +152,7 @@ pub fn decrypt_secrets(
 ///
 /// # Returns
 /// * Tuple of (SrpSession, kek) - use session for SRP, keep kek for later decryption
-#[cfg(any(test, feature = "srp"))]
+#[cfg(feature = "srp")]
 #[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn start_srp_session(
     password: &str,
@@ -261,6 +261,7 @@ mod tests {
         assert!(matches!(result, Err(AuthError::IncorrectPassword)));
     }
 
+    #[cfg(feature = "srp")]
     #[test]
     fn test_start_srp_session() {
         crate::crypto::init().unwrap();

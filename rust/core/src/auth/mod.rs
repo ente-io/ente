@@ -1,57 +1,17 @@
-//! Authentication and account management module.
+//! Authentication helpers (key derivation, login decryption, recovery).
 //!
-//! Provides cryptographic key management for:
-//! - Key generation (signup)
-//! - Key decryption (login)
-//! - Account recovery
-//! - SRP credentials (password-based authentication)
-//!
-//! ## Quick Start
-//!
-//! For SRP login flow:
-//! ```ignore
-//! // 1. Derive SRP credentials from password
-//! let creds = auth::derive_srp_credentials(password, &srp_attrs)?;
-//!
-//! // 2. Use creds.login_key with your SRP client to complete the SRP exchange
-//! //    (create session with srpA, then verify with srpM1)
-//!
-//! // 3. Decrypt secrets
-//! let secrets = auth::decrypt_secrets(&creds.kek, &key_attrs, &encrypted_token)?;
-//! ```
-//!
-//! For email MFA flow (no SRP):
-//! ```ignore
-//! // 1. Derive KEK from password
-//! let kek = auth::derive_kek(password, &kek_salt, mem_limit, ops_limit)?;
-//!
-//! // 2. Do email OTP + TOTP verification via API
-//!
-//! // 3. Decrypt secrets
-//! let secrets = auth::decrypt_secrets(&kek, &key_attrs, &encrypted_token)?;
-//! ```
-//!
-//! ## Feature Flags
-//!
-//! - `srp`: Enables the SRP client implementation ([`SrpSession`]) for
-//!   password-based authentication handshakes.
-//!   Without this feature you can still derive KEK/login keys and decrypt
-//!   secrets, but you cannot perform the SRP handshake.
-//!
-//! ```toml
-//! ente-core = { version = "0.0.1", features = ["srp"] }
-//! ```
+//! Enable the `srp` feature to use [`SrpSession`] for SRP handshakes.
 
 mod api;
 mod key_gen;
 mod login;
 mod recovery;
-#[cfg(any(test, feature = "srp"))]
+#[cfg(feature = "srp")]
 mod srp;
 mod types;
 
 // SRP session type (behind the `srp` feature)
-#[cfg(any(test, feature = "srp"))]
+#[cfg(feature = "srp")]
 pub use srp::SrpSession;
 
 /// Stub type when the `srp` feature is disabled.
@@ -59,12 +19,12 @@ pub use srp::SrpSession;
 /// This allows downstream crates to reference [`SrpSession`] in signatures and
 /// get a runtime error if they accidentally call it without enabling the
 /// feature.
-#[cfg(not(any(test, feature = "srp")))]
+#[cfg(not(feature = "srp"))]
 pub struct SrpSession {
     _private: (),
 }
 
-#[cfg(not(any(test, feature = "srp")))]
+#[cfg(not(feature = "srp"))]
 impl SrpSession {
     fn feature_disabled() -> types::AuthError {
         types::AuthError::Srp(

@@ -6,59 +6,19 @@ Common Rust code for Ente apps.
 
 | Module | Description |
 |--------|-------------|
-| `auth` | Authentication (login, signup, recovery, SRP credentials) |
-| `crypto` | Cryptographic utilities (pure Rust) |
+| `auth` | Authentication helpers (signup/login/recovery, SRP credentials) |
+| `crypto` | Cryptographic utilities (pure Rust, libsodium-wire-compatible) |
 | `http` | HTTP client for Ente API |
 | `urls` | URL construction utilities |
 
 ## Auth
 
-High-level authentication API for Ente clients.
+High-level authentication helpers for Ente clients:
 
-| Function | Description |
-|----------|-------------|
-| `derive_srp_credentials()` | Derive KEK and login key from password |
-| `derive_kek()` | Derive key-encryption-key only (for email MFA flow) |
-| `decrypt_secrets()` | Decrypt master key, secret key, and token |
-| `generate_keys()` | Generate keys for new account signup |
-| `recover_with_key()` | Recover account with recovery key |
-
-### Quick Start - SRP Login
-
-```rust
-use ente_core::auth;
-
-// 1. Derive SRP credentials (KEK + login key)
-let creds = auth::derive_srp_credentials(password, &srp_attrs)?;
-
-// 2. Use login_key with your SRP client to compute srpA/srpM1
-let mut srp = SrpClient::new(&srp_attrs.srp_user_id, &srp_attrs.srp_salt, &creds.login_key)?;
-let a_pub = srp.public_a();
-let session = api.create_srp_session(&a_pub).await?;
-let m1 = srp.compute_m1(&session.srp_b)?;
-
-// 3. Verify with server, get key attributes
-let auth_response = api.verify_srp_session(&m1).await?;
-
-// 4. Decrypt secrets
-let secrets = auth::decrypt_secrets(&creds.kek, &key_attrs, &encrypted_token)?;
-// secrets.master_key, secrets.secret_key, secrets.token
-```
-
-### Quick Start - Email MFA Login
-
-```rust
-use ente_core::auth;
-
-// 1. Derive KEK from password (no SRP needed)
-let kek = auth::derive_kek(password, &kek_salt, mem_limit, ops_limit)?;
-
-// 2. Do email OTP + TOTP verification via API
-// ...
-
-// 3. Decrypt secrets
-let secrets = auth::decrypt_secrets(&kek, &key_attrs, &encrypted_token)?;
-```
+- Derive KEK/login key from password (SRP)
+- Decrypt master key, secret key and token after authentication
+- Signup key generation
+- Account recovery
 
 📖 **[Full Auth Docs](docs/auth.md)**
 
@@ -95,7 +55,7 @@ let decrypted = crypto::secretbox::decrypt_box(&encrypted, &key).unwrap();
 
 ```bash
 cargo fmt      # format
-cargo clippy   # lint  
+cargo clippy   # lint
 cargo build    # build
 cargo test     # test
 ```
@@ -121,6 +81,7 @@ Other targets: `sealed_box`, `stream`, `argon`.
 tests/
 ├── auth_integration.rs          # Auth workflow tests
 ├── comprehensive_crypto_tests.rs # Stress tests (up to 50MB files)
+├── crypto_interop.rs            # Cross-platform vectors (JS/Dart)
 └── libsodium_vectors.rs         # Libsodium compatibility
 
 src/
@@ -147,7 +108,7 @@ cargo test
 # Auth tests only
 cargo test auth
 
-# Crypto tests only  
+# Crypto tests only
 cargo test crypto
 
 # With output
