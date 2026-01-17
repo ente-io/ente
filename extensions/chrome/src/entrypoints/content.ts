@@ -12,6 +12,12 @@ export default defineContentScript({
   matches: ["<all_urls>"],
   runAt: "document_idle",
   main() {
+    // Skip iframes and non-HTTPS pages (except localhost for dev)
+    if (window.top !== window) return;
+    if (location.protocol !== "https:" && location.hostname !== "localhost") {
+      return;
+    }
+
     // CSS for autofill UI
     const AUTOFILL_STYLES = `
 .ente-auth-autofill-container {

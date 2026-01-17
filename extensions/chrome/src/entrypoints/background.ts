@@ -15,6 +15,8 @@ export default defineBackground(() => {
   // Auto-lock timer
   let lockTimer: ReturnType<typeof setTimeout> | null = null;
   const AUTO_LOCK_ALARM = "autoLock";
+  // Master key is kept in-memory only to avoid persistence risks
+  let inMemoryMasterKey: string | null = null;
 
   // Pending login helpers (persist to session storage to survive service worker restarts)
   const PENDING_LOGIN_KEY = "pendingLogin";
@@ -64,7 +66,7 @@ export default defineBackground(() => {
   const getState = async (): Promise<ExtensionState> => {
     const { isLoggedIn, localStorage, sessionStorage } = await import("@/lib/storage");
     const loggedIn = await isLoggedIn();
-    const unlocked = await sessionStorage.isUnlocked();
+    const unlocked = (await sessionStorage.isUnlocked()) && !!inMemoryMasterKey;
     const user = await localStorage.getUser();
 
     return {
@@ -101,11 +103,16 @@ export default defineBackground(() => {
    * after a suspend/resume cycle.
    */
   const enforceAutoLockOnStartup = async () => {
-    const { localStorage } = await import("@/lib/storage");
+    const { localStorage, sessionStorage } = await import("@/lib/storage");
     const timeout = await localStorage.getAutoLockTimeout();
     if (timeout <= 0) {
       await chrome.alarms.clear(AUTO_LOCK_ALARM);
       return;
+    }
+
+    // If we don't have the master key in-memory, treat as locked
+    if (!inMemoryMasterKey) {
+      await sessionStorage.setUnlocked(false);
     }
 
     const lastActivity = await localStorage.getLastActivityTime();
@@ -139,6 +146,7 @@ export default defineBackground(() => {
     const { sessionStorage, localStorage } = await import("@/lib/storage");
     await sessionStorage.clear();
     await localStorage.setLastActivityTime(Date.now());
+    inMemoryMasterKey = null;
     await chrome.alarms.clear(AUTO_LOCK_ALARM);
     if (lockTimer) {
       clearTimeout(lockTimer);
@@ -164,8 +172,8 @@ export default defineBackground(() => {
       // Derive master key from password
       const masterKey = await decryptMasterKey(password, keyAttributes);
 
-      // Store master key in session
-      await sessionStorage.setMasterKey(masterKey);
+      // Keep master key in-memory only
+      inMemoryMasterKey = masterKey;
       await sessionStorage.setUnlocked(true);
 
       // Sync codes
@@ -297,7 +305,7 @@ export default defineBackground(() => {
       await localStorage.setKeyAttributes(keyAttributes);
 
       // Store master key in session
-      await sessionStorage.setMasterKey(masterKey);
+      inMemoryMasterKey = masterKey;
       await sessionStorage.setUnlocked(true);
 
       // Only clear pending login on SUCCESS
@@ -344,6 +352,7 @@ export default defineBackground(() => {
         clearTimeout(lockTimer);
         lockTimer = null;
       }
+      inMemoryMasterKey = null;
 
       return { success: true };
     } catch (e) {
@@ -401,7 +410,7 @@ export default defineBackground(() => {
       const { sessionStorage } = await import("@/lib/storage");
       const { syncCodes } = await import("@/lib/services/sync");
 
-      const masterKey = await sessionStorage.getMasterKey();
+      const masterKey = inMemoryMasterKey;
       if (!masterKey) {
         return { success: false, error: "Not unlocked" };
       }
@@ -430,7 +439,12 @@ export default defineBackground(() => {
   /**
    * Handle messages from popup and content scripts.
    */
-  chrome.runtime.onMessage.addListener((message: BackgroundMessage, _sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((message: BackgroundMessage, sender, sendResponse) => {
+    if (sender?.id && sender.id !== chrome.runtime.id) {
+      console.warn("Blocked message from non-extension sender", sender.id);
+      return;
+    }
+
     // Reset auto-lock timer on any activity
     if (message.type !== "GET_STATE") {
       resetLockTimer();

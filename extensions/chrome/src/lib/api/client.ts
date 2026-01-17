@@ -4,13 +4,41 @@
 import { localStorage } from "../storage";
 
 const DEFAULT_API_ENDPOINT = "https://api.ente.io";
+const ALLOWED_API_HOSTS = new Set(["api.ente.io", "localhost"]);
+
+const isAllowedCustomEndpoint = (url: string | undefined): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    const isHttps = parsed.protocol === "https:";
+    const isLocalhost = parsed.hostname === "localhost";
+    const isHttpLocal = parsed.protocol === "http:" && isLocalhost;
+    const portOk =
+      !parsed.port ||
+      parsed.port === "8080" ||
+      parsed.port === "80" ||
+      parsed.port === "443";
+    if (!ALLOWED_API_HOSTS.has(parsed.hostname)) return false;
+    if (isHttps && portOk) return true;
+    if (isHttpLocal && portOk) return true;
+    return false;
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Get the API endpoint to use.
  */
 export const getApiEndpoint = async (): Promise<string> => {
   const custom = await localStorage.getCustomApiEndpoint();
-  return custom || DEFAULT_API_ENDPOINT;
+  if (isAllowedCustomEndpoint(custom)) {
+    return custom!;
+  }
+  if (custom) {
+    console.warn("Ignoring disallowed custom API endpoint", custom);
+  }
+  return DEFAULT_API_ENDPOINT;
 };
 
 /**
