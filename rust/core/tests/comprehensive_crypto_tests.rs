@@ -341,7 +341,7 @@ fn test_hash_default() {
     let data = b"Data to hash";
 
     let hash = crypto::hash::hash_default(data).unwrap();
-    assert_eq!(hash.len(), 64); // Default is 64 bytes (BLAKE2b-512)
+    assert_eq!(hash.len(), 32); // Default is 32 bytes (libsodium-compatible)
 }
 
 // ============================================================================

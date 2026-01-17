@@ -276,6 +276,7 @@ fn test_password_change() -> bool {
     let (new_attrs, new_login_key) =
         ente_core::auth::generate_key_attributes_for_new_password_with_strength(
             &master_key,
+            &gen_result.key_attributes,
             new_password,
             KeyDerivationStrength::Interactive,
         )

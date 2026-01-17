@@ -95,8 +95,8 @@ mod rust_to_js {
         println!("Data: {:?}", String::from_utf8_lossy(data));
         println!("Hash (b64): {}", hash_b64);
 
-        // Verify hash is correct length (64 bytes for BLAKE2b-512)
-        assert_eq!(hash.len(), 64);
+        // Verify hash is correct length (32 bytes default)
+        assert_eq!(hash.len(), 32);
 
         // Verify hash is deterministic
         let hash2 = crypto::hash::hash_default(data).unwrap();
@@ -251,7 +251,7 @@ mod js_to_rust {
         assert_eq!(hash1, hash2);
 
         // Verify correct length
-        assert_eq!(hash1.len(), 64);
+        assert_eq!(hash1.len(), 32);
 
         // Different data = different hash
         let hash3 = crypto::hash::hash_default(b"Different data").unwrap();
@@ -972,7 +972,7 @@ mod public_api_coverage {
     fn test_hash_hash_default() {
         setup();
         let hash = crypto::hash::hash_default(b"test").unwrap();
-        assert_eq!(hash.len(), 64);
+        assert_eq!(hash.len(), 32);
     }
 
     #[test]
@@ -980,7 +980,7 @@ mod public_api_coverage {
         setup();
         let mut reader = Cursor::new(b"test data".to_vec());
         let hash = crypto::hash::hash_reader(&mut reader, None).unwrap();
-        assert_eq!(hash.len(), 64);
+        assert_eq!(hash.len(), 32);
     }
 
     #[test]
@@ -1291,8 +1291,8 @@ mod dart_compatibility {
 
         assert_eq!(
             hash.len(),
-            64,
-            "Default hash should be 64 bytes (BLAKE2b-512)"
+            32,
+            "Default hash should be 32 bytes"
         );
     }
 
