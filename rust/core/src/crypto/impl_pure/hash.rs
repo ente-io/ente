@@ -29,13 +29,13 @@ pub const KEY_BYTES_MAX: usize = 64;
 ///
 /// # Arguments
 /// * `data` - Data to hash.
-/// * `out_len` - Optional output length (16-64 bytes). Defaults to 64.
+/// * `out_len` - Optional output length (16-64 bytes). Defaults to 32.
 /// * `key` - Optional key for keyed hashing (0 or 16-64 bytes).
 ///
 /// # Returns
 /// Hash output of the specified length.
 pub fn hash(data: &[u8], out_len: Option<usize>, key: Option<&[u8]>) -> Result<Vec<u8>> {
-    let out_len = out_len.unwrap_or(HASH_BYTES_MAX);
+    let out_len = out_len.unwrap_or(HASH_BYTES);
 
     if !(HASH_BYTES_MIN..=HASH_BYTES_MAX).contains(&out_len) {
         return Err(CryptoError::InvalidKeyLength {
@@ -64,15 +64,15 @@ pub fn hash(data: &[u8], out_len: Option<usize>, key: Option<&[u8]>) -> Result<V
     Ok(hash.as_bytes()[..out_len].to_vec())
 }
 
-/// Compute BLAKE2b hash with default parameters (64-byte output, no key).
+/// Compute BLAKE2b hash with default parameters (32-byte output, no key).
 ///
 /// # Arguments
 /// * `data` - Data to hash.
 ///
 /// # Returns
-/// 64-byte hash output.
+/// 32-byte hash output.
 pub fn hash_default(data: &[u8]) -> Result<Vec<u8>> {
-    hash(data, Some(HASH_BYTES_MAX), None)
+    hash(data, Some(HASH_BYTES), None)
 }
 
 /// Streaming hash state for incremental hashing.
@@ -88,13 +88,13 @@ impl HashState {
     /// Create a new hash state.
     ///
     /// # Arguments
-    /// * `out_len` - Optional output length (16-64 bytes). Defaults to 64.
+    /// * `out_len` - Optional output length (16-64 bytes). Defaults to 32.
     /// * `key` - Optional key for keyed hashing (0 or 16-64 bytes).
     ///
     /// # Returns
     /// A new hash state ready for incremental updates.
     pub fn new(out_len: Option<usize>, key: Option<&[u8]>) -> Result<Self> {
-        let out_len = out_len.unwrap_or(HASH_BYTES_MAX);
+        let out_len = out_len.unwrap_or(HASH_BYTES);
 
         if !(HASH_BYTES_MIN..=HASH_BYTES_MAX).contains(&out_len) {
             return Err(CryptoError::InvalidKeyLength {
@@ -143,9 +143,9 @@ impl HashState {
     }
 }
 
-/// Create a new hash state with default parameters (64-byte output, no key).
+/// Create a new hash state with default parameters (32-byte output, no key).
 pub fn hash_state_new() -> Result<HashState> {
-    HashState::new(Some(HASH_BYTES_MAX), None)
+    HashState::new(Some(HASH_BYTES), None)
 }
 
 /// Hash data from a reader.
@@ -154,7 +154,7 @@ pub fn hash_state_new() -> Result<HashState> {
 ///
 /// # Arguments
 /// * `reader` - Source to read data from.
-/// * `out_len` - Optional output length (16-64 bytes). Defaults to 64.
+/// * `out_len` - Optional output length (16-64 bytes). Defaults to 32.
 ///
 /// # Returns
 /// Hash output of the specified length.
@@ -181,7 +181,7 @@ mod tests {
     fn test_hash_default() {
         let data = b"Hello, World!";
         let hash = hash_default(data).unwrap();
-        assert_eq!(hash.len(), HASH_BYTES_MAX);
+        assert_eq!(hash.len(), HASH_BYTES);
     }
 
     #[test]
@@ -276,14 +276,14 @@ mod tests {
     fn test_empty_data() {
         let data = b"";
         let hash = hash_default(data).unwrap();
-        assert_eq!(hash.len(), HASH_BYTES_MAX);
+        assert_eq!(hash.len(), HASH_BYTES);
     }
 
     #[test]
     fn test_large_data() {
         let data = vec![0x42u8; 1024 * 1024]; // 1 MB
         let hash = hash_default(&data).unwrap();
-        assert_eq!(hash.len(), HASH_BYTES_MAX);
+        assert_eq!(hash.len(), HASH_BYTES);
     }
 
     #[test]
@@ -302,6 +302,6 @@ mod tests {
             .count();
 
         // Should have significant differences (avalanche effect)
-        assert!(diff_count > 30); // Expect ~50% different
+        assert!(diff_count > 15); // Expect ~50% different
     }
 }
