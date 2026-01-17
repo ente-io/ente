@@ -159,7 +159,9 @@ impl SrpSession {
         let expected = m2_hasher.finalize().to_vec();
 
         if expected.ct_eq(server_m2).unwrap_u8() != 1 {
-            return Err(AuthError::Srp("Server proof verification failed".to_string()));
+            return Err(AuthError::Srp(
+                "Server proof verification failed".to_string(),
+            ));
         }
 
         Ok(())
@@ -214,7 +216,11 @@ mod tests {
         let padded = session.public_a();
 
         assert_eq!(padded.len(), SRP_N_BYTES);
-        assert!(padded[..SRP_N_BYTES - a_public.len()].iter().all(|&b| b == 0));
+        assert!(
+            padded[..SRP_N_BYTES - a_public.len()]
+                .iter()
+                .all(|&b| b == 0)
+        );
         assert_eq!(&padded[SRP_N_BYTES - a_public.len()..], a_public.as_slice());
     }
 
