@@ -38,6 +38,11 @@
 └───────────────────────────┘
 ```
 
+## Contents (this repo)
+
+- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto primitives, plus small HTTP/URL helpers).
+- `rust/cli/` - Rust CLI (work-in-progress).
+
 ## Directory Structure
 
 ```
