@@ -2,19 +2,18 @@ import "dart:async";
 import "dart:io" show File;
 import "dart:math" show pow;
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/standalone/task_queue.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("FaceCropUtils");

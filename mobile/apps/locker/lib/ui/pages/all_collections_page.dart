@@ -12,6 +12,7 @@ import 'package:locker/models/ui_section_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
@@ -178,29 +179,26 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       );
     }
 
-    //TODO: Fix issue when this is true
     if (_error != null) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _error!,
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadCollections,
-              child: Text(context.l10n.retry),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              EmptyStateWidget(
+                assetPath: 'assets/empty_state.png',
+                title: context.l10n.somethingWentWrong,
+                subtitle: _error!,
+                showBorder: false,
+              ),
+              const SizedBox(height: 20),
+              GradientButton(
+                onTap: _loadCollections,
+                text: context.l10n.retry,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -208,9 +206,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     if (_sortedCollections.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               EmptyStateWidget(
                 assetPath: 'assets/empty_state.png',

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:ente_icons/ente_icons.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -11,7 +12,6 @@ import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import "package:photos/utils/standalone/data.dart";
 
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({super.key});

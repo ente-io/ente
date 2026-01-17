@@ -1,8 +1,8 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/search_section_all_page.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class SectionHeader extends StatelessWidget {
   final SectionType sectionType;

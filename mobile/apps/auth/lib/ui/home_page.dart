@@ -1010,15 +1010,53 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
+    if (!mounted) return false;
+
+    // Always keep our pressed key state in sync.
     if (event is KeyDownEvent) {
       _pressedKeys.add(event.logicalKey);
-      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
-          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
-              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
-          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.control) ||
-              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+
+    // This handler is registered globally via ServicesBinding, so make sure we
+    // only act on shortcuts when HomePage is actually the active surface.
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      return false;
+    }
+
+    // Avoid hijacking keystrokes while the settings drawer (or any other
+    // non-home surface within HomePage) is active.
+    if (_isSettingsOpen) {
+      return false;
+    }
+
+    // If the user is typing into a text field (e.g. password fields in settings),
+    // don't treat typed characters as global shortcuts.
+    final primaryFocus = FocusManager.instance.primaryFocus;
+    final bool isEditableTextFocused =
+        primaryFocus?.context?.widget is EditableText;
+    final bool isHomeSearchFocused = searchBoxFocusNode.hasFocus;
+    if (isEditableTextFocused && !isHomeSearchFocused) {
+      return false;
+    }
+
+    if (event is KeyDownEvent) {
+      final pressed = HardwareKeyboard.instance.logicalKeysPressed;
+
+      final bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (pressed.contains(LogicalKeyboardKey.metaLeft) ||
+              pressed.contains(LogicalKeyboardKey.meta) ||
+              pressed.contains(LogicalKeyboardKey.metaRight))
+          : (pressed.contains(LogicalKeyboardKey.controlLeft) ||
+              pressed.contains(LogicalKeyboardKey.control) ||
+              pressed.contains(LogicalKeyboardKey.controlRight));
+
+      final bool isShiftPressed =
+          pressed.contains(LogicalKeyboardKey.shiftLeft) ||
+              pressed.contains(LogicalKeyboardKey.shiftRight) ||
+              pressed.contains(LogicalKeyboardKey.shift);
 
       if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyW) {
         if (PlatformDetector.isDesktop()) {
@@ -1027,15 +1065,20 @@ class _HomePageState extends State<HomePage> {
         }
       }
 
+      // '/' opens search. Don't trigger this on '?' (Shift + '/').
       if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) ||
-          event.logicalKey == LogicalKeyboardKey.slash) {
+          (!isHomeSearchFocused &&
+              event.logicalKey == LogicalKeyboardKey.slash &&
+              !isShiftPressed)) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
         });
         return true;
       }
-      if (event.logicalKey == LogicalKeyboardKey.escape) {
+
+      // Only use Escape for the HomePage search UI.
+      if (event.logicalKey == LogicalKeyboardKey.escape && _showSearchBox) {
         setState(() {
           _textController.clear();
           _searchText = "";
@@ -1044,8 +1087,6 @@ class _HomePageState extends State<HomePage> {
         });
         return true;
       }
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(event.logicalKey);
     }
     return false;
   }

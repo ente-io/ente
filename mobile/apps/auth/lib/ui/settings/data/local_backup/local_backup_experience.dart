@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dir_utils/dir_utils.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
@@ -13,6 +12,7 @@ import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:scoped_dir_access/scoped_dir_access.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef LocalBackupVariantBuilder = Widget Function(

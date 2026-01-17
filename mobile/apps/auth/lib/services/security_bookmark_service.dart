@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dir_utils/dir_utils.dart';
+import 'package:scoped_dir_access/scoped_dir_access.dart';
 
 /// Service for managing iOS security-scoped bookmarks.
 ///

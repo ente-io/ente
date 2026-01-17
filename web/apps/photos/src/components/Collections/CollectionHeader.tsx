@@ -1,3 +1,5 @@
+import { CleanIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -36,6 +38,7 @@ import {
 import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
+    cleanUncategorized,
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
     findDefaultHiddenCollectionIDs,
@@ -156,7 +159,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onSelectPerson,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+    const { showLoadingBar, hideLoadingBar, showNotification } =
+        usePhotosAppContext();
     const { mapEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
@@ -285,6 +289,26 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const doEmptyTrash = wrap(async () => {
         await emptyTrash();
         setActiveCollectionID(PseudoCollectionID.all);
+    });
+
+    const confirmCleanUncategorized = () =>
+        showMiniDialog({
+            title: t("clean_uncategorized"),
+            message: t("clean_uncategorized_message"),
+            continue: {
+                text: t("clean_uncategorized"),
+                color: "primary",
+                action: doCleanUncategorized,
+            },
+        });
+
+    const doCleanUncategorized = wrap(async () => {
+        if (!activeCollection) return;
+        const count = await cleanUncategorized(activeCollection);
+        showNotification({
+            color: "secondary",
+            title: t("clean_uncategorized_success", { count }),
+        });
     });
 
     const _downloadCollection = async () => {
@@ -464,13 +488,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             break;
 
         case "uncategorized":
-            menuOptions = [
-                fileCount && (
-                    <DownloadOption key="download" onClick={downloadCollection}>
-                        {t("download_uncategorized")}
-                    </DownloadOption>
-                ),
-            ];
+            // Quick options (download + clean) are shown instead of a menu
             break;
 
         case "hiddenItems":
@@ -655,6 +673,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
                 onShareClick={onCollectionShare}
+                onCleanUncategorizedClick={confirmCleanUncategorized}
             />
             {validMenuOptions.length > 0 && (
                 <OverflowMenu
@@ -712,12 +731,14 @@ interface QuickOptionsProps {
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
     onShareClick: () => void;
+    onCleanUncategorizedClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
+    onCleanUncategorizedClick,
     collectionSummary,
     isDownloadInProgress,
 }) => (
@@ -735,6 +756,11 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                     onClick={onDownloadClick}
                 />
             ))}
+        {showCleanUncategorizedQuickOption(collectionSummary) && (
+            <CleanUncategorizedQuickOption
+                onClick={onCleanUncategorizedClick}
+            />
+        )}
         {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
                 collectionSummary={collectionSummary}
@@ -751,6 +777,19 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("empty_trash")}>
         <IconButton onClick={onClick}>
             <DeleteOutlinedIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const showCleanUncategorizedQuickOption = ({
+    type,
+    fileCount,
+}: CollectionSummary) => type == "uncategorized" && fileCount > 0;
+
+const CleanUncategorizedQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("clean_uncategorized")}>
+        <IconButton onClick={onClick}>
+            <HugeiconsIcon icon={CleanIcon} size={22} strokeWidth={1.5} />
         </IconButton>
     </Tooltip>
 );

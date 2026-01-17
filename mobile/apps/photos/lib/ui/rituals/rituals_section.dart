@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
@@ -8,7 +9,6 @@ import "package:photos/ui/rituals/all_rituals_screen.dart";
 import "package:photos/ui/rituals/delete_ritual_confirmation_sheet.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class RitualsSection extends StatelessWidget {
   const RitualsSection({

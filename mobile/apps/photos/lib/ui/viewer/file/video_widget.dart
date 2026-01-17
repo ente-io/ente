@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
@@ -19,12 +20,12 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
-import "package:photos/utils/standalone/data.dart";
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final FullScreenRequestCallback? playbackCallback;
+  final Function(bool)? shouldDisableScroll;
   final Function({required int memoryDuration})? onFinalFileLoad;
   final bool isFromMemories;
 
@@ -32,6 +33,7 @@ class VideoWidget extends StatefulWidget {
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.shouldDisableScroll,
     this.onFinalFileLoad,
     this.isFromMemories = false,
     super.key,
@@ -164,6 +166,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         key: nativePlayerKey,
         tagPrefix: widget.tagPrefix,
         playbackCallback: widget.playbackCallback,
+        shouldDisableScroll: widget.shouldDisableScroll,
         playlistData: playlistData,
         selectedPreview: playPreview,
         isFromMemories: widget.isFromMemories,
@@ -188,6 +191,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       key: mediaKitKey,
       tagPrefix: widget.tagPrefix,
       playbackCallback: widget.playbackCallback,
+      shouldDisableScroll: widget.shouldDisableScroll,
       preview: playlistData?.preview,
       selectedPreview: playPreview,
       isFromMemories: widget.isFromMemories,

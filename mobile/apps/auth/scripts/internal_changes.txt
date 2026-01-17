@@ -1,1 +1,2 @@
 - Prateek: Fix app icon state and dark icon gradient in iOS
+- Prateek: Scope global keyboard shortcuts so typing '?' (Shift+/) works in password fields on desktop

@@ -136,7 +136,7 @@ export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
                     <TitleSection>
                         <Title>{t("say_something_nice")}</Title>
                         {enableJoin && (
-                            <Subtitle>{t("public_reaction_subtitle")}</Subtitle>
+                            <Subtitle>{t("public_comment_subtitle")}</Subtitle>
                         )}
                     </TitleSection>
 

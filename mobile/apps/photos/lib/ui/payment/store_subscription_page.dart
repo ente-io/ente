@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -29,7 +30,6 @@ import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
 import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/standalone/data.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 
 class StoreSubscriptionPage extends StatefulWidget {

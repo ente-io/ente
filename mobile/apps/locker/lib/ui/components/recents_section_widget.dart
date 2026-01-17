@@ -11,6 +11,7 @@ import "package:locker/models/selected_files.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import 'package:locker/ui/components/collection_chip.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
@@ -147,8 +148,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
                     key: 'c_${collection.id}',
                     label: _collectionLabel(collection),
                     isSelected: _selectedCollections.contains(collection),
-                    onTap: () {
-                      _onCollectionSelected(collection);
+                    onTap: () async {
+                      await _onCollectionSelected(collection);
                       setBottomSheetState(() {});
                     },
                   ),
@@ -168,8 +169,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
                   ),
                 );
               },
-              onClearAllFilters: () {
-                _clearAllFilters();
+              onClearAllFilters: () async {
+                await _clearAllFilters();
                 setBottomSheetState(() {});
               },
               onClose: () => Navigator.pop(context),
@@ -208,8 +209,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     );
   }
 
-  void _onCollectionSelected(Collection collection) {
-    HapticFeedback.lightImpact();
+  Future<void> _onCollectionSelected(Collection collection) async {
+    await HapticFeedback.lightImpact();
 
     setState(() {
       if (_selectedCollections.contains(collection)) {
@@ -221,18 +222,18 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       }
     });
 
-    _updateFilteredFiles();
+    await _updateFilteredFiles();
   }
 
-  void _clearAllFilters() {
-    HapticFeedback.lightImpact();
+  Future<void> _clearAllFilters() async {
+    await HapticFeedback.lightImpact();
 
     setState(() {
       _selectedCollections.clear();
       _selectionOrder.clear();
     });
 
-    _updateFilteredFiles();
+    await _updateFilteredFiles();
   }
 
   void _handleCollectionUpdates() {
@@ -512,27 +513,30 @@ class _FilterChipsRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: ListView.builder(
-                key: ValueKey(listKey),
-                scrollDirection: Axis.horizontal,
-                itemCount: chips.length,
-                itemBuilder: (context, index) {
-                  final chip = chips[index];
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.only(right: 8),
-                    child: _FilterChip(
-                      label: chip.label,
-                      isSelected: chip.isSelected,
-                      onTap: chip.onTap,
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                      backgroundColor: colorScheme.backdropBase,
-                    ),
-                  );
-                },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: ListView.builder(
+                  key: ValueKey(listKey),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: chips.length,
+                  itemBuilder: (context, index) {
+                    final chip = chips[index];
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.only(right: 8),
+                      child: CollectionChip(
+                        label: chip.label,
+                        isSelected: chip.isSelected,
+                        onTap: chip.onTap,
+                        colorScheme: colorScheme,
+                        textTheme: textTheme,
+                        backgroundColor: colorScheme.backdropBase,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -600,77 +604,6 @@ class _FilterIconButton extends StatelessWidget {
             Icons.filter_list,
             color: colorScheme.textMuted,
             size: 24,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    required this.colorScheme,
-    required this.textTheme,
-    required this.backgroundColor,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final EnteColorScheme colorScheme;
-  final EnteTextTheme textTheme;
-  final Color backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-      alignment: Alignment.centerLeft,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 44),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          decoration: BoxDecoration(
-            color: isSelected ? colorScheme.primary700 : backgroundColor,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: textTheme.small.copyWith(
-                  color: isSelected ? Colors.white : colorScheme.textMuted,
-                ),
-              ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOut,
-                      ),
-                    ),
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                },
-              ),
-            ],
           ),
         ),
       ),
@@ -764,7 +697,6 @@ class _FilterBottomSheet extends StatelessWidget {
               _ActionPillButton(
                 label: context.l10n.clearAllFilters,
                 onTap: onClearAllFilters,
-                showCloseIcon: true,
                 colorScheme: colorScheme,
                 textTheme: textTheme,
               ),
@@ -801,22 +733,26 @@ class _FilterBottomSheet extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 200),
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: chips.map((chip) {
-                          return _FilterChip(
-                            label: chip.label,
-                            isSelected: chip.isSelected,
-                            onTap: chip.onTap,
-                            colorScheme: colorScheme,
-                            textTheme: textTheme,
-                            backgroundColor: colorScheme.backgroundElevated2,
-                          );
-                        }).toList(),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: chips.map((chip) {
+                            return CollectionChip(
+                              label: chip.label,
+                              isSelected: chip.isSelected,
+                              onTap: chip.onTap,
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
+                              backgroundColor: colorScheme.backgroundElevated2,
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -836,14 +772,12 @@ class _ActionPillButton extends StatelessWidget {
     required this.onTap,
     required this.colorScheme,
     required this.textTheme,
-    this.showCloseIcon = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
-  final bool showCloseIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -853,27 +787,18 @@ class _ActionPillButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: colorScheme.strokeFaint,
+            width: 1,
+          ),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: 12.0,
-          vertical: 10.0,
+          vertical: 8.0,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: textTheme.small,
-            ),
-            if (showCloseIcon) ...[
-              const SizedBox(width: 6),
-              Icon(
-                Icons.close,
-                color: colorScheme.textBase,
-                size: 20,
-              ),
-            ],
-          ],
+        child: Text(
+          label,
+          style: textTheme.small,
         ),
       ),
     );

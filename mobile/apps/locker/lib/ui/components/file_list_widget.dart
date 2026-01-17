@@ -1,6 +1,5 @@
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
-import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -9,7 +8,6 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/sharing/album_share_info_widget.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
@@ -140,23 +138,35 @@ class FileListWidget extends StatelessWidget {
                 fileRowWidget,
                 Padding(
                   padding: const EdgeInsets.only(right: 12.0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: isSelected
-                        ? IconButtonWidget(
-                            key: const ValueKey("selected"),
-                            icon: Icons.check_circle_rounded,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.primary700,
-                          )
-                        : (showSharingIndicator && hasSharees)
-                            ? _buildShareesAvatars(sharees)
-                            : const SizedBox(
-                                key: ValueKey("unselected"),
-                                width: 12,
-                              ),
+                  child: SizedBox(
+                    width: 44,
+                    height: 24,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          alignment: Alignment.centerRight,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        );
+                      },
+                      child: isSelected
+                          ? Icon(
+                              key: const ValueKey("selected"),
+                              Icons.check_circle_rounded,
+                              color: colorScheme.primary700,
+                              size: 24,
+                            )
+                          : isIncoming
+                              ? _buildOwnerAvatar(collection.owner)
+                              : const SizedBox(
+                                  key: ValueKey("unselected"),
+                                ),
+                    ),
                   ),
                 ),
               ],
@@ -182,29 +192,17 @@ class FileListWidget extends StatelessWidget {
     return FileIconUtils.getFileIcon(file.displayName, showBackground: true);
   }
 
-  Widget _buildShareesAvatars(List<User> sharees) {
-    if (sharees.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    const int limitCountTo = 1;
+  Widget _buildOwnerAvatar(User owner) {
     const double avatarSize = 24.0;
-    const double overlapPadding = 20.0;
-
-    final hasMore = sharees.length > limitCountTo;
-
-    final double totalWidth =
-        hasMore ? avatarSize + overlapPadding : avatarSize;
 
     return SizedBox(
       height: avatarSize,
-      width: totalWidth,
-      child: AlbumSharesIcons(
-        sharees: sharees,
-        padding: EdgeInsets.zero,
-        limitCountTo: limitCountTo,
+      width: avatarSize,
+      child: UserAvatarWidget(
+        owner,
         type: AvatarType.mini,
-        removeBorder: true,
+        thumbnailView: true,
+        config: Configuration.instance,
       ),
     );
   }

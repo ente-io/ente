@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -27,9 +28,7 @@ import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
-import 'package:photos/utils/standalone/date_time.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -185,10 +184,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               ? AppLocalizations.of(context).expiredLinkInfo
                               : AppLocalizations.of(context).linkExpiresOn(
                                   expiryTime: getFormattedTime(
-                                    context,
                                     DateTime.fromMicrosecondsSinceEpoch(
                                       url.validTill,
                                     ),
+                                    context: context,
                                   ),
                                 ),
                         )

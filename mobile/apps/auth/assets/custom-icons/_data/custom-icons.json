@@ -312,6 +312,10 @@
       "slug": "caltrain"
     },
     {
+      "title": "Canada Life",
+      "slug": "canada_life"
+    },
+    {
       "title": "Canva"
     },
     {
@@ -1048,6 +1052,10 @@
       ]
     },
     {
+      "title": "Medeo",
+      "slug": "medeo"
+    },
+    {
       "title": "Memed"
     },
     {
@@ -1455,6 +1463,10 @@
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"
+    },
+    {
+      "title": "RedFlagDeals",
+      "slug": "redflagdeals"
     },
     {
       "title": "RedotPay",

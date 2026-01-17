@@ -1,10 +1,10 @@
 import "dart:developer";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/duplicate_files.dart';
@@ -16,11 +16,8 @@ import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
-import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/standalone/data.dart';
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
