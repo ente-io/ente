@@ -92,20 +92,27 @@ pub fn generate_keys_with_strength(
 }
 
 /// Generate new key attributes when user changes password.
+///
+/// Preserves existing key material and recovery fields.
 pub fn generate_key_attributes_for_new_password(
     master_key: &[u8],
+    existing_attributes: &KeyAttributes,
     password: &str,
 ) -> Result<(KeyAttributes, Vec<u8>)> {
     generate_key_attributes_for_new_password_with_strength(
         master_key,
+        existing_attributes,
         password,
         KeyDerivationStrength::Sensitive,
     )
 }
 
 /// Generate new key attributes with specified derivation strength.
+///
+/// Preserves existing key material and recovery fields.
 pub fn generate_key_attributes_for_new_password_with_strength(
     master_key: &[u8],
+    existing_attributes: &KeyAttributes,
     password: &str,
     strength: KeyDerivationStrength,
 ) -> Result<(KeyAttributes, Vec<u8>)> {
@@ -125,14 +132,19 @@ pub fn generate_key_attributes_for_new_password_with_strength(
         key_decryption_nonce: key_nonce,
         mem_limit: Some(derived.mem_limit),
         ops_limit: Some(derived.ops_limit),
-        // These fields need to be filled from existing attributes
-        public_key: String::new(),
-        encrypted_secret_key: String::new(),
-        secret_key_decryption_nonce: String::new(),
-        master_key_encrypted_with_recovery_key: None,
-        master_key_decryption_nonce: None,
-        recovery_key_encrypted_with_master_key: None,
-        recovery_key_decryption_nonce: None,
+        public_key: existing_attributes.public_key.clone(),
+        encrypted_secret_key: existing_attributes.encrypted_secret_key.clone(),
+        secret_key_decryption_nonce: existing_attributes.secret_key_decryption_nonce.clone(),
+        master_key_encrypted_with_recovery_key: existing_attributes
+            .master_key_encrypted_with_recovery_key
+            .clone(),
+        master_key_decryption_nonce: existing_attributes.master_key_decryption_nonce.clone(),
+        recovery_key_encrypted_with_master_key: existing_attributes
+            .recovery_key_encrypted_with_master_key
+            .clone(),
+        recovery_key_decryption_nonce: existing_attributes
+            .recovery_key_decryption_nonce
+            .clone(),
     };
 
     Ok((key_attributes, login_key))
@@ -289,6 +301,7 @@ mod tests {
 
         let (new_attrs, new_login_key) = generate_key_attributes_for_new_password_with_strength(
             &master_key,
+            &initial.key_attributes,
             "new_password",
             KeyDerivationStrength::Interactive,
         )
