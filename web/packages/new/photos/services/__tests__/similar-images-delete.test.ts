@@ -27,7 +27,7 @@ describe("similar-images-delete", () => {
         vi.clearAllMocks();
     });
 
-    const createMockFile = (id: number, size: number = 1000): EnteFile =>
+    const createMockFile = (id: number, size = 1000): EnteFile =>
         ({
             id,
             info: { fileSize: size },
@@ -45,7 +45,7 @@ describe("similar-images-delete", () => {
     const createMockGroup = (
         id: string,
         fileIds: number[],
-        isSelected: boolean = true,
+        isSelected = true,
     ): SimilarImageGroup => ({
         id,
         items: fileIds.map((fileId, index) => ({

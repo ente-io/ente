@@ -99,8 +99,6 @@ export interface SimilarImagesOptions {
     onProgress?: (progress: number) => void;
 }
 
-
-
 /**
  * Result of the similar images analysis.
  */

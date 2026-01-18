@@ -83,8 +83,6 @@ describe("similar-images", () => {
         });
     });
 
-
-
     describe("calculateDeletionStats", () => {
         const createMockGroup = (
             selected: boolean,
@@ -312,7 +310,6 @@ describe("Edge Cases", () => {
             expect(cosineDistance(v1, v2)).toBeCloseTo(0, 6);
         });
     });
-
 });
 
 describe("filterGroupsByCategory edge cases", () => {
@@ -437,10 +434,7 @@ describe("sortSimilarImageGroups edge cases", () => {
         const sorted = sortSimilarImageGroups(groups, "size");
         expect(sorted.length).toBe(2);
         // Both have same size, order may vary but both present
-        expect(sorted.map((g) => g.id).sort()).toEqual([
-            "group1",
-            "group2",
-        ]);
+        expect(sorted.map((g) => g.id).sort()).toEqual(["group1", "group2"]);
     });
 });
 
@@ -503,20 +497,14 @@ describe("calculateDeletionStats edge cases", () => {
                 id: "test1",
                 items: [
                     {
-                        file: {
-                            id: 1,
-                            info: { fileSize: 1000 },
-                        } as EnteFile,
+                        file: { id: 1, info: { fileSize: 1000 } } as EnteFile,
                         distance: 0,
                         similarityScore: 100,
                         collectionIDs: new Set([1]),
                         collectionName: "Test",
                     },
                     {
-                        file: {
-                            id: 2,
-                            info: { fileSize: 1000 },
-                        } as EnteFile,
+                        file: { id: 2, info: { fileSize: 1000 } } as EnteFile,
                         distance: 0.01,
                         similarityScore: 99,
                         collectionIDs: new Set([1]),

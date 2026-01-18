@@ -1,6 +1,6 @@
+import log from "ente-base/log";
 import type { HierarchicalNSW } from "hnswlib-wasm";
 import { loadHnswlib, syncFileSystem } from "hnswlib-wasm";
-import log from "ente-base/log";
 
 /**
  * HNSW Index wrapper for efficient vector similarity search.
@@ -288,9 +288,7 @@ export class HNSWIndex {
         // Write index to Emscripten virtual FS
         await this.index.writeIndex(filename);
 
-        log.info(
-            `[HNSW] writeIndex completed, verifying file was written...`,
-        );
+        log.info(`[HNSW] writeIndex completed, verifying file was written...`);
 
         // Verify file was written to virtual FS
         const fileExistsBeforeSync =
@@ -358,9 +356,7 @@ export class HNSWIndex {
         // Check if file exists in the virtual filesystem
         const fileExists =
             this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
-        log.info(
-            `[HNSW] File exists check for '${filename}': ${fileExists}`,
-        );
+        log.info(`[HNSW] File exists check for '${filename}': ${fileExists}`);
 
         if (!fileExists) {
             throw new Error(
@@ -433,9 +429,7 @@ export class HNSWIndex {
         this.fileIDToLabel = new Map(mappings.fileIDToLabel);
         this.labelToFileID = new Map(mappings.labelToFileID);
 
-        log.info(
-            `[HNSW] Index loaded successfully (${this.size()} vectors)`,
-        );
+        log.info(`[HNSW] Index loaded successfully (${this.size()} vectors)`);
     }
 
     /**
@@ -455,7 +449,9 @@ export class HNSWIndex {
             await syncFileSystem("read");
             // Check specific filename
             const filename = "clip_hnsw.bin";
-            return this.lib.EmscriptenFileSystemManager.checkFileExists(filename);
+            return this.lib.EmscriptenFileSystemManager.checkFileExists(
+                filename,
+            );
         } catch (e) {
             log.warn("[HNSW] Failed to check for saved index:", e);
             return false;

@@ -57,14 +57,12 @@ import {
     getSimilarImages,
 } from "../services/similar-images";
 import {
-    CATEGORY_THRESHOLD_RELATED,
-} from "../services/similar-images-types";
-import {
     calculateDeletedFileCount,
     calculateFreedSpace,
     removeSelectedSimilarImageGroups,
 } from "../services/similar-images-delete";
 import type { SimilarImageGroup } from "../services/similar-images-types";
+import { CATEGORY_THRESHOLD_RELATED } from "../services/similar-images-types";
 
 const Page: React.FC = () => {
     const { onGenericError } = useBaseContext();
@@ -84,10 +82,7 @@ const Page: React.FC = () => {
                 dispatch({ type: "setAnalysisProgress", progress }),
         })
             .then(({ groups }) =>
-                dispatch({
-                    type: "analysisCompleted",
-                    groups,
-                }),
+                dispatch({ type: "analysisCompleted", groups }),
             )
             .catch((e: unknown) => {
                 log.error("Failed to detect similar images", e);
@@ -219,10 +214,7 @@ type SimilarImagesAction =
     | { type: "analyze" }
     | { type: "setAnalysisProgress"; progress: number }
     | { type: "analysisFailed" }
-    | {
-        type: "analysisCompleted";
-        groups: SimilarImageGroup[];
-    }
+    | { type: "analysisCompleted"; groups: SimilarImageGroup[] }
     | { type: "changeSortOrder"; sortOrder: SortOrder }
     | { type: "changeCategoryFilter"; categoryFilter: CategoryFilter }
     | { type: "toggleSelection"; index: number }
@@ -233,10 +225,10 @@ type SimilarImagesAction =
     | { type: "setRemoveProgress"; progress: number }
     | { type: "removeFailed" }
     | {
-        type: "removeCompleted";
-        deletedFileIDs: Set<number>;
-        fullyRemovedGroupIDs: Set<string>;
-    };
+          type: "removeCompleted";
+          deletedFileIDs: Set<number>;
+          fullyRemovedGroupIDs: Set<string>;
+      };
 
 const initialSimilarImagesState: SimilarImagesState = {
     analysisStatus: undefined,
@@ -248,8 +240,6 @@ const initialSimilarImagesState: SimilarImagesState = {
     deletableSize: 0,
     removeProgress: undefined,
 };
-
-
 
 const similarImagesReducer: React.Reducer<
     SimilarImagesState,
@@ -375,8 +365,8 @@ const similarImagesReducer: React.Reducer<
             // Since we don't know the index in allSimilarImageGroups easily without searching,
             // we can fallback to mapping. Or since we know filteredGroups is a subset,
             // we can find the group by ID.
-            const updatedAllGroups = allSimilarImageGroups.map(g =>
-                g.id === group.id ? group : g
+            const updatedAllGroups = allSimilarImageGroups.map((g) =>
+                g.id === group.id ? group : g,
             );
 
             // Update group selection state (checked if all deletable items are selected)
@@ -391,8 +381,9 @@ const similarImagesReducer: React.Reducer<
                 updatedAllGroups,
                 state.categoryFilter,
             );
-            const { deletableCount, deletableSize } =
-                calculateDeletableStats(updatedFilteredGroups);
+            const { deletableCount, deletableSize } = calculateDeletableStats(
+                updatedFilteredGroups,
+            );
             return {
                 ...state,
                 allSimilarImageGroups: updatedAllGroups,
@@ -647,7 +638,9 @@ const NoSimilarImagesFound: React.FC<NoSimilarImagesFoundProps> = ({
     return (
         <CenteredFill>
             <Typography color="text.secondary" sx={{ textAlign: "center" }}>
-                {t("no_category_images_found", { category: categoryDisplayName })}
+                {t("no_category_images_found", {
+                    category: categoryDisplayName,
+                })}
             </Typography>
             <Typography
                 color="text.secondary"
@@ -929,8 +922,15 @@ const GroupHeader: React.FC<GroupHeaderProps> = ({
 
     return (
         <SpacedRow sx={{ padding: 1 }}>
-            <Stack direction="row" spacing={2} alignItems="baseline" sx={{ flex: 1 }}>
-                <Typography color={isSelected ? "text.primary" : "text.secondary"}>
+            <Stack
+                direction="row"
+                spacing={2}
+                alignItems="baseline"
+                sx={{ flex: 1 }}
+            >
+                <Typography
+                    color={isSelected ? "text.primary" : "text.secondary"}
+                >
                     {items.length} {t("photos")}
                 </Typography>
                 <Typography variant="body" color="text.secondary">
@@ -1013,9 +1013,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
                                 : "none",
                             transition:
                                 "opacity 0.2s ease-in-out, outline 0.2s ease-in-out",
-                            "&:hover": {
-                                opacity: item.isSelected ? 0.4 : 0.9,
-                            },
+                            "&:hover": { opacity: item.isSelected ? 0.4 : 0.9 },
                         })}
                     >
                         <Box
@@ -1061,31 +1059,28 @@ const GroupContent: React.FC<GroupContentProps> = ({
                         </TileBottomTextOverlay>
                     </ItemCard>
                 </Box>
-            ))
-            }
-            {
-                remainingCount > 0 && !isExpanded && (
-                    <Box
-                        sx={{
-                            position: "relative",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "rgba(128, 128, 128, 0.2)",
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            "&:hover": {
-                                backgroundColor: "rgba(128, 128, 128, 0.3)",
-                            },
-                        }}
-                        onClick={onToggleExpanded}
-                    >
-                        <Typography variant="h6" color="text.secondary">
-                            +{remainingCount} {t("more")}
-                        </Typography>
-                    </Box>
-                )
-            }
+            ))}
+            {remainingCount > 0 && !isExpanded && (
+                <Box
+                    sx={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(128, 128, 128, 0.2)",
+                        borderRadius: 1,
+                        cursor: "pointer",
+                        "&:hover": {
+                            backgroundColor: "rgba(128, 128, 128, 0.3)",
+                        },
+                    }}
+                    onClick={onToggleExpanded}
+                >
+                    <Typography variant="h6" color="text.secondary">
+                        +{remainingCount} {t("more")}
+                    </Typography>
+                </Box>
+            )}
         </ItemGrid>
     );
 };

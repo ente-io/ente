@@ -195,11 +195,9 @@ export const saveIndexes = async (
 
     // Invalidate caches since embedding changed
     await Promise.all([
-        tx.objectStore("file-status").put({
-            fileID,
-            status: "indexed",
-            failureCount: 0,
-        }),
+        tx
+            .objectStore("file-status")
+            .put({ fileID, status: "indexed", failureCount: 0 }),
         tx.objectStore("face-index").put(faceIndex),
         tx.objectStore("clip-index").put(clipIndex),
         tx.objectStore("similar-images-cache").clear(),
@@ -217,7 +215,6 @@ const newFileStatus = (fileID: number): FileStatus => ({
     status: "indexable",
     failureCount: 0,
 });
-
 
 export const savedFaceIndex = async (fileID: number) => {
     const db = await mlDB();

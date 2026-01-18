@@ -245,7 +245,7 @@ const similarImageGroupItemToRetain = async (
             `[Similar Images] Invalid state: All items in group ${group.id} selected for deletion. Must retain at least one item.`,
         );
     }
-    
+
     const candidateItems = unselectedItems;
 
     const itemsWithFavorites: SimilarImageGroup["items"] = [];

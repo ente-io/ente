@@ -96,9 +96,7 @@ export const getSimilarImages = async (
     // Step 1: Get all CLIP embeddings
     onProgress?.(10);
     const clipIndexes = await getCLIPIndexes();
-    log.info(
-        `[Similar Images] Loaded ${clipIndexes.length} CLIP embeddings`,
-    );
+    log.info(`[Similar Images] Loaded ${clipIndexes.length} CLIP embeddings`);
     const embeddingsByFileID = new Map<number, Float32Array>();
     for (const index of clipIndexes) {
         embeddingsByFileID.set(index.fileID, index.embedding);
@@ -426,9 +424,7 @@ const groupSimilarImagesHNSW = async (
                     fileIDToLabel: cachedMetadata.fileIDToLabel,
                     labelToFileID: cachedMetadata.labelToFileID,
                 });
-                log.info(
-                    `[Similar Images] Successfully loaded cached index`,
-                );
+                log.info(`[Similar Images] Successfully loaded cached index`);
 
                 // Apply incremental updates
                 if (removedFileIDs.length > 0 || addedFileIDs.length > 0) {
@@ -445,9 +441,7 @@ const groupSimilarImagesHNSW = async (
                         }
                     }
 
-                    log.info(
-                        `[Similar Images] Incremental update completed`,
-                    );
+                    log.info(`[Similar Images] Incremental update completed`);
 
                     // Save updated index
                     log.info(`[Similar Images] Saving updated index...`);
@@ -860,5 +854,3 @@ const sortGroupItemsByQuality = (
         return bSize - aSize;
     });
 };
-
-
