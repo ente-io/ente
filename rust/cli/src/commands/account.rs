@@ -38,6 +38,9 @@ fn decrypt_secrets_with_plain_token(
 ) -> auth::Result<DecryptedSecrets> {
     let (master_key, secret_key) = auth::decrypt_keys_only(kek, key_attrs)?;
 
+    // AuthResponse.token from server is a URL-safe base64 string even in the
+    // "plain token" flow (JWTs are returned via dedicated endpoints). Decode
+    // it before persisting so callers always get raw token bytes.
     let token = base64::engine::general_purpose::URL_SAFE
         .decode(token)
         .or_else(|_| base64::engine::general_purpose::STANDARD.decode(token))
