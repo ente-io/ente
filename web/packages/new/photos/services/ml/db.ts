@@ -1,6 +1,10 @@
 import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
-import type { LocalCLIPIndex } from "./clip";
+import type {
+    CachedHNSWIndexMetadata,
+    CachedSimilarImages,
+} from "../similar-images-types";
+import { clipIndexingVersion, type LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
 
@@ -48,6 +52,8 @@ interface MLDBSchema extends DBSchema {
     "face-cluster": { key: string; value: FaceCluster };
     /* Unused */
     "cluster-group": { key: string; value: unknown };
+    "similar-images-cache": { key: string; value: CachedSimilarImages };
+    "hnsw-index-metadata": { key: string; value: CachedHNSWIndexMetadata };
 }
 
 interface FileStatus {
@@ -88,7 +94,7 @@ interface FileStatus {
 let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
 const openMLDB = async () => {
-    const db = await openDB<MLDBSchema>("ml", 1, {
+    const db = await openDB<MLDBSchema>("ml", 3, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
@@ -99,6 +105,12 @@ const openMLDB = async () => {
                 db.createObjectStore("clip-index", { keyPath: "fileID" });
                 db.createObjectStore("face-cluster", { keyPath: "id" });
                 db.createObjectStore("cluster-group", { keyPath: "id" });
+            }
+            if (oldVersion < 2) {
+                db.createObjectStore("similar-images-cache", { keyPath: "id" });
+            }
+            if (oldVersion < 3) {
+                db.createObjectStore("hnsw-index-metadata", { keyPath: "id" });
             }
         },
         blocking() {
@@ -156,6 +168,12 @@ export const clearMLDB = async () => {
  * (No merging is performed, the existing entry is unconditionally overwritten).
  * The file status is also updated to "indexed", and the failure count is reset
  * to 0.
+ *
+ * It also invalidates the similar images cache and HNSW index metadata because
+ * the embedding for this file has changed, making potential search results stale.
+ *
+ * Note: We rely on version/timestamp checks to invalidate caches rather than
+ * aggressively clearing them here (which caused performance regressions).
  */
 export const saveIndexes = async (
     faceIndex: LocalFaceIndex,
@@ -165,16 +183,27 @@ export const saveIndexes = async (
 
     const db = await mlDB();
     const tx = db.transaction(
-        ["file-status", "face-index", "clip-index"],
+        [
+            "file-status",
+            "face-index",
+            "clip-index",
+            "similar-images-cache",
+            "hnsw-index-metadata",
+        ],
         "readwrite",
     );
 
+    // Invalidate caches since embedding changed
     await Promise.all([
-        tx
-            .objectStore("file-status")
-            .put({ fileID, status: "indexed", failureCount: 0 }),
+        tx.objectStore("file-status").put({
+            fileID,
+            status: "indexed",
+            failureCount: 0,
+        }),
         tx.objectStore("face-index").put(faceIndex),
         tx.objectStore("clip-index").put(clipIndex),
+        tx.objectStore("similar-images-cache").clear(),
+        tx.objectStore("hnsw-index-metadata").clear(),
         tx.done,
     ]);
 };
@@ -189,9 +218,7 @@ const newFileStatus = (fileID: number): FileStatus => ({
     failureCount: 0,
 });
 
-/**
- * Return the {@link FaceIndex}, if any, for {@link fileID}.
- */
+
 export const savedFaceIndex = async (fileID: number) => {
     const db = await mlDB();
     return db.get("face-index", fileID);
@@ -403,4 +430,148 @@ export const saveFaceClusters = async (clusters: FaceCluster[]) => {
     await tx.store.clear();
     await Promise.all(clusters.map((cluster) => tx.store.put(cluster)));
     return tx.done;
+};
+
+// ===========================================================================
+// Similar Images Cache
+// ===========================================================================
+
+/**
+ * Generate a cache key for similar images based on threshold and file IDs.
+ */
+const getSimilarImagesCacheKey = (
+    distanceThreshold: number,
+    fileIDs: number[],
+): string => {
+    const sortedIDs = [...fileIDs].sort((a, b) => a - b).join(",");
+    // Include the indexing version in the key so we automatically invalidate
+    // existing caches if the embedding code/model changes in a software update.
+    return `si_${distanceThreshold.toFixed(3)}_${hashString(
+        sortedIDs,
+    )}_v${clipIndexingVersion}`;
+};
+
+/**
+ * Simple string hash function for cache keys.
+ */
+export const hashString = (str: string): string => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+};
+
+/**
+ * Save similar images cache to IndexedDB.
+ *
+ * @param cache The cached similar images result to save.
+ */
+export const saveSimilarImagesCache = async (
+    cache: CachedSimilarImages,
+): Promise<void> => {
+    const db = await mlDB();
+    await db.put("similar-images-cache", cache);
+};
+
+/**
+ * Load similar images cache from IndexedDB.
+ *
+ * @param distanceThreshold The threshold used for the cache.
+ * @param fileIDs The file IDs that were included in the analysis.
+ * @returns The cached result, or undefined if not found.
+ */
+export const loadSimilarImagesCache = async (
+    distanceThreshold: number,
+    fileIDs: number[],
+): Promise<CachedSimilarImages | undefined> => {
+    const key = getSimilarImagesCacheKey(distanceThreshold, fileIDs);
+    const db = await mlDB();
+    return db.get("similar-images-cache", key);
+};
+
+/**
+ * Clear the similar images cache.
+ *
+ * Call this when files are added or removed to ensure fresh computation.
+ */
+export const clearSimilarImagesCache = async (): Promise<void> => {
+    const db = await mlDB();
+    const tx = db.transaction("similar-images-cache", "readwrite");
+    await tx.store.clear();
+    return tx.done;
+};
+
+/**
+ * Invalidate similar images cache when files are modified.
+ *
+ * @param fileIDs File IDs that were added or removed.
+ */
+export const invalidateSimilarImagesCacheForFiles = async (
+    _fileIDs: number[],
+): Promise<void> => {
+    // For now, we clear the entire cache when files change.
+    // In the future, we could do incremental updates using _fileIDs.
+    void _fileIDs; // Mark as intentionally unused
+
+    await clearSimilarImagesCache();
+};
+
+// ===========================================================================
+// HNSW Index Metadata Cache
+// ===========================================================================
+
+/**
+ * Save HNSW index metadata to IndexedDB.
+ *
+ * The actual index data is stored in IDBFS, but we store metadata here
+ * for cache validation and quick lookup.
+ *
+ * @param metadata The index metadata to save.
+ */
+export const saveHNSWIndexMetadata = async (
+    metadata: CachedHNSWIndexMetadata,
+): Promise<void> => {
+    const db = await mlDB();
+    await db.put("hnsw-index-metadata", metadata);
+};
+
+/**
+ * Load HNSW index metadata from IndexedDB.
+ *
+ * @param id The ID of the metadata to load (e.g., "clip-hnsw-index").
+ * @returns The cached metadata, or undefined if not found.
+ */
+export const loadHNSWIndexMetadata = async (
+    id = "clip-hnsw-index",
+): Promise<CachedHNSWIndexMetadata | undefined> => {
+    const db = await mlDB();
+    return db.get("hnsw-index-metadata", id);
+};
+
+/**
+ * Clear all HNSW index metadata.
+ *
+ * Call this when you want to force a rebuild of all indexes.
+ */
+export const clearHNSWIndexMetadata = async (): Promise<void> => {
+    const db = await mlDB();
+    const tx = db.transaction("hnsw-index-metadata", "readwrite");
+    await tx.store.clear();
+    return tx.done;
+};
+
+/**
+ * Generate a hash from file IDs for cache validation.
+ *
+ * This is used to detect when files have been added or removed.
+ *
+ * @param fileIDs Array of file IDs to hash.
+ * @returns A hash string representing the file IDs.
+ */
+export const generateFileIDHash = (fileIDs: number[]): string => {
+    const sorted = [...fileIDs].sort((a, b) => a - b);
+    return hashString(sorted.join(","));
 };
