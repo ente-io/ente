@@ -37,6 +37,7 @@ export type SidebarActionID =
     | "utility.logout"
     | "freeUpSpace.deduplicate"
     | "freeUpSpace.largeFiles"
+    | "freeUpSpace.similarImages"
     | "account.subscription"
     | "account.recoveryKey"
     | "account.twoFactor"
