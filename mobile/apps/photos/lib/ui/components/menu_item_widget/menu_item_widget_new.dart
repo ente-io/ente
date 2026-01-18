@@ -179,7 +179,6 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
             trailingIconIsMuted: widget.trailingIconIsMuted,
             trailingExtraMargin: widget.trailingExtraMargin,
             showExecutionStates: widget.surfaceExecutionStates,
-            key: ValueKey(widget.trailingIcon.hashCode),
           ),
         ],
       ),
@@ -255,9 +254,13 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     }
     Future.delayed(
       const Duration(milliseconds: 100),
-      () => setState(() {
-        menuItemColor = widget.menuItemColor;
-      }),
+      () {
+        if (mounted) {
+          setState(() {
+            menuItemColor = widget.menuItemColor;
+          });
+        }
+      },
     );
   }
 

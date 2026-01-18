@@ -27,25 +27,38 @@ class TrailingWidget extends StatefulWidget {
 
 class _TrailingWidgetState extends State<TrailingWidget> {
   Widget? trailingWidget;
+  bool _listenerAdded = false;
+
   @override
   void initState() {
-    widget.showExecutionStates
-        ? widget.executionStateNotifier.addListener(_executionStateListener)
-        : null;
     super.initState();
+    if (widget.showExecutionStates) {
+      widget.executionStateNotifier.addListener(_executionStateListener);
+      _listenerAdded = true;
+    }
+    _setTrailingIcon();
+  }
+
+  @override
+  void didUpdateWidget(covariant TrailingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update the trailing icon if not showing execution states
+    // (when showing execution states, the icon is managed by the listener)
+    if (!widget.showExecutionStates) {
+      _setTrailingIcon();
+    }
   }
 
   @override
   void dispose() {
-    widget.executionStateNotifier.removeListener(_executionStateListener);
+    if (_listenerAdded) {
+      widget.executionStateNotifier.removeListener(_executionStateListener);
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (trailingWidget == null || !widget.showExecutionStates) {
-      _setTrailingIcon();
-    }
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 175),
       switchInCurve: Curves.easeInExpo,
@@ -55,6 +68,7 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   }
 
   void _executionStateListener() {
+    if (!mounted) return;
     final colorScheme = getEnteColorScheme(context);
     setState(() {
       if (widget.executionStateNotifier.value == ExecutionState.idle) {
@@ -62,17 +76,19 @@ class _TrailingWidgetState extends State<TrailingWidget> {
       } else if (widget.executionStateNotifier.value ==
           ExecutionState.inProgress) {
         trailingWidget = EnteLoadingWidget(
+          key: const ValueKey('loading'),
           color: colorScheme.strokeMuted,
         );
       } else if (widget.executionStateNotifier.value ==
           ExecutionState.successful) {
         trailingWidget = Icon(
           Icons.check_outlined,
+          key: const ValueKey('success'),
           size: 22,
           color: colorScheme.primary500,
         );
       } else {
-        trailingWidget = const SizedBox.shrink();
+        trailingWidget = const SizedBox.shrink(key: ValueKey('empty'));
       }
     });
   }
@@ -80,6 +96,7 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   void _setTrailingIcon() {
     if (widget.trailingIcon != null) {
       trailingWidget = Padding(
+        key: const ValueKey('icon'),
         padding: EdgeInsets.only(
           right: widget.trailingExtraMargin,
         ),
@@ -91,7 +108,8 @@ class _TrailingWidgetState extends State<TrailingWidget> {
         ),
       );
     } else {
-      trailingWidget = widget.trailingWidget ?? const SizedBox.shrink();
+      trailingWidget = widget.trailingWidget ??
+          const SizedBox.shrink(key: ValueKey('empty'));
     }
   }
 }
