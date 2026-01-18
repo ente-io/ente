@@ -1,6 +1,7 @@
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { newID } from "ente-base/id";
+import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { metadataHash } from "ente-media/file-metadata";
 import {
@@ -272,14 +273,22 @@ export const removeSelectedDuplicateGroups = async (
     }
 
     let np = 0;
-    const ntotal = filesToAdd.size + filesToTrash.length ? 1 : 0 + /* sync */ 1;
+    const ntotal =
+        filesToAdd.size + (filesToTrash.length ? 1 : 0) + /* sync */ 1;
     const tickProgress = () => onProgress((np++ / ntotal) * 100);
 
     // Process the adds.
     const collections = await savedNormalCollections();
     const collectionsByID = new Map(collections.map((c) => [c.id, c]));
     for (const [collectionID, files] of filesToAdd.entries()) {
-        await addToCollection(collectionsByID.get(collectionID)!, files);
+        const collection = collectionsByID.get(collectionID);
+        if (collection) {
+            await addToCollection(collection, files);
+        } else {
+            log.warn(
+                `[Dedup] Collection ${collectionID} not found, skipping addToCollection`,
+            );
+        }
         tickProgress();
     }
 
