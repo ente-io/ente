@@ -123,6 +123,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     return widget.isGestureDetectorDisabled || !hasPassedGestureCallbacks()
         ? _buildMenuItemContainer(context)
         : GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: widget.onTap == null ? null : _onTap,
             onDoubleTap: widget.onDoubleTap,
             onLongPress: widget.onLongPress,
