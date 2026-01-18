@@ -42,9 +42,20 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   @override
   void didUpdateWidget(covariant TrailingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Only update the trailing icon if not showing execution states
-    // (when showing execution states, the icon is managed by the listener)
-    if (!widget.showExecutionStates) {
+    // Handle showExecutionStates flag changes
+    if (oldWidget.showExecutionStates && !widget.showExecutionStates) {
+      // Was true, now false: remove listener and reset to icon
+      if (_listenerAdded) {
+        oldWidget.executionStateNotifier.removeListener(_executionStateListener);
+        _listenerAdded = false;
+      }
+      _setTrailingIcon();
+    } else if (!oldWidget.showExecutionStates && widget.showExecutionStates) {
+      // Was false, now true: add listener
+      widget.executionStateNotifier.addListener(_executionStateListener);
+      _listenerAdded = true;
+    } else if (!widget.showExecutionStates) {
+      // Still false: update the trailing icon if props changed
       _setTrailingIcon();
     }
   }
