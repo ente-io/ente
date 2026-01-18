@@ -1289,11 +1289,7 @@ mod dart_compatibility {
 
         let hash = crypto::hash::hash_reader(&mut reader, None).unwrap();
 
-        assert_eq!(
-            hash.len(),
-            32,
-            "Default hash should be 32 bytes"
-        );
+        assert_eq!(hash.len(), 32, "Default hash should be 32 bytes");
     }
 
     #[test]
