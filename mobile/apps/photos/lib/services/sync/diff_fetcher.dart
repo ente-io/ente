@@ -50,6 +50,10 @@ class DiffFetcher {
           file.ownerID = item["ownerID"];
           file.encryptedKey = item["encryptedKey"];
           file.keyDecryptionNonce = item["keyDecryptionNonce"];
+          final collectionAddedAt = item["collectionAddedAt"];
+          if (collectionAddedAt != null) {
+            file.addedTime = collectionAddedAt as int;
+          }
           file.fileDecryptionHeader = item["file"]["decryptionHeader"];
           file.thumbnailDecryptionHeader =
               item["thumbnail"]["decryptionHeader"];
@@ -147,6 +151,10 @@ class DiffFetcher {
         file.ownerID = item["ownerID"];
         file.encryptedKey = item["encryptedKey"];
         file.keyDecryptionNonce = item["keyDecryptionNonce"];
+        final collectionAddedAt = item["collectionAddedAt"];
+        if (collectionAddedAt != null) {
+          file.addedTime = collectionAddedAt as int;
+        }
         file.fileDecryptionHeader = item["file"]["decryptionHeader"];
         file.thumbnailDecryptionHeader = item["thumbnail"]["decryptionHeader"];
         file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
