@@ -198,18 +198,15 @@ const Navbar: React.FC<NavbarProps> = ({ filter, onChangeFilter }) => {
     const router = useRouter();
 
     return (
-        <Stack
-            sx={(theme) => ({
-                borderBottom: `1px solid ${theme.vars.palette.divider}`,
-            })}
-        >
+        <Stack>
             <Stack
                 direction="row"
-                sx={{
+                sx={(theme) => ({
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "8px 4px",
-                }}
+                    borderBottom: `1px solid ${theme.vars.palette.divider}`,
+                })}
             >
                 <Box sx={{ minWidth: "100px" }}>
                     <IconButton onClick={router.back}>
@@ -242,7 +239,10 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     filter,
     onChangeFilter,
 }) => (
-    <Stack direction="row" sx={{ gap: 1, px: 2, pb: 1.5, flexWrap: "wrap" }}>
+    <Stack
+        direction="row"
+        sx={{ gap: 1, pl: 3, pr: 2, py: 4, flexWrap: "wrap" }}
+    >
         <Chip
             label={t("all")}
             variant={filter === "all" ? "filled" : "outlined"}
@@ -622,8 +622,6 @@ const BottomBar: React.FC<BottomBarProps> = ({
                 gap: 1,
                 alignItems: "center",
                 justifyContent: "center",
-                background:
-                    "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)",
                 paddingBottom: 1,
             }}
         >
@@ -666,7 +664,7 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
 
     return (
         <FocusVisibleButton
-            sx={{
+            sx={(theme) => ({
                 px: { xs: 2, sm: 3 },
                 width: { xs: 220, sm: 260 },
                 minHeight: { xs: 42, sm: 44 },
@@ -678,10 +676,16 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({
                           color: "critical.contrastText",
                       }
                     : {
-                          backgroundColor: "rgba(255, 255, 255, 0.12)",
-                          color: "rgba(255, 255, 255, 0.5)",
+                          // Light mode default
+                          backgroundColor: "rgba(0, 0, 0, 0.3)",
+                          color: "rgba(0, 0, 0, 0.5)",
+                          // Dark mode override
+                          ...theme.applyStyles("dark", {
+                              backgroundColor: "rgba(255, 255, 255, 0.3)",
+                              color: "rgba(255, 255, 255, 0.5)",
+                          }),
                       },
-            }}
+            })}
             disabled={selectedCount === 0 || isDeleting}
             color="critical"
             onClick={onDeleteFiles}

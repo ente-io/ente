@@ -9,7 +9,6 @@ import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/download/models/task.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import 'package:locker/services/files/sync/models/file.dart';
-import 'package:locker/utils/data_util.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger("FileDownloader");

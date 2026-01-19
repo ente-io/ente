@@ -40,10 +40,12 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
           if (snapshot.hasData) {
             return Padding(
               padding: const EdgeInsets.all(20),
-              child: Text(
-                AppLocalizations.of(context)
-                    .appVersion(versionValue: snapshot.data!),
-                style: Theme.of(context).textTheme.bodySmall,
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)
+                      .appVersion(versionValue: snapshot.data!),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             );
           }

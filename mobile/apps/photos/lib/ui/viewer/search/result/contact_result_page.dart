@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:email_validator/email_validator.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -30,7 +31,6 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class ContactResultPage extends StatefulWidget {
   final SearchResult searchResult;

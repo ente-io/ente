@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
@@ -16,7 +17,6 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
-import "package:photos/utils/navigation_util.dart";
 
 ///Not using StreamBuilder in this widget for rebuilding on every new event as
 ///StreamBuilder is not lossless. It misses some events if the stream fires too

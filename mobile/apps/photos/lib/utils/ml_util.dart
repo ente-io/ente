@@ -1,12 +1,12 @@
 import "dart:io" show File, Platform;
 import "dart:math" as math show sqrt, min, max;
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
-import "package:photos/extensions/list.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";

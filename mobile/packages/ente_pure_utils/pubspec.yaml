@@ -1,5 +1,5 @@
 name: ente_pure_utils
-description: A Flutter package containing pure utility functions with minimal dependencies
+description: The depencies should be maintained by pub.dev/flutter.dev
 version: 1.0.0
 publish_to: none
 
@@ -8,9 +8,10 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  collection: ^1.18.0
+  convert: ^3.1.1
+  crypto: ^3.0.5
   email_validator: ^3.0.0
-  ente_logging:
-    path: ../logging
   flutter:
     sdk: flutter
   intl: ^0.20.2

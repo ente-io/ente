@@ -125,6 +125,7 @@ class UnCategorizedPage extends StatelessWidget {
                   FileSelectionOverlayBar(
                     overlayType,
                     _selectedFiles,
+                    collection: collection,
                   ),
                 ],
               ),

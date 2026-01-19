@@ -1582,6 +1582,12 @@ const createCollectionSummaries = (
         }
 
         const collectionFiles = filesByCollection.get(collection.id);
+
+        // Hide empty favorites from collection bar
+        if (type == "userFavorites" && !collectionFiles?.length) {
+            attributes.add("hideFromCollectionBar");
+        }
+
         collectionSummaries.set(collection.id, {
             id: collection.id,
             type,

@@ -17,7 +17,6 @@ import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
 import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
 
-
 /// A bottom sheet widget for advanced sharing options.
 ///
 /// This widget provides advanced configuration options for:
@@ -118,13 +117,13 @@ class _AdvancedSharingBottomSheetState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Sharing",
+                        context.l10n.sharingSection,
                         style: textTheme.largeBold,
                       ),
                       const SizedBox(height: 8),
                       MenuItemWidget(
-                        captionedTextWidget: const CaptionedTextWidget(
-                          title: "Sharing enabled",
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: context.l10n.sharingEnabledToggle,
                         ),
                         menuItemColor: colorScheme.backgroundElevated2,
                         trailingWidget: ToggleSwitchWidget(
@@ -135,8 +134,8 @@ class _AdvancedSharingBottomSheetState
                       ),
                       const SizedBox(height: 8),
                       MenuItemWidget(
-                        captionedTextWidget: const CaptionedTextWidget(
-                          title: "Allow downloads",
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: context.l10n.allowDownloads,
                         ),
                         menuItemColor: colorScheme.backgroundElevated2,
                         trailingWidget: ToggleSwitchWidget(
@@ -151,8 +150,8 @@ class _AdvancedSharingBottomSheetState
                               // ignore: unawaited_futures
                               showErrorDialog(
                                 context,
-                                "Please note",
-                                "Viewers can still take screenshots or save a copy of your photos using external tools",
+                                context.l10n.disableDownloadWarningTitle,
+                                context.l10n.disableDownloadWarningBody,
                               );
                             }
                           },
@@ -161,15 +160,15 @@ class _AdvancedSharingBottomSheetState
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        "Public Link",
+                        context.l10n.publicLinkSection,
                         style: textTheme.h3Bold.copyWith(
                           fontSize: 18.0,
                         ),
                       ),
                       const SizedBox(height: 8),
                       MenuItemWidget(
-                        captionedTextWidget: const CaptionedTextWidget(
-                          title: "Link enabled",
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: context.l10n.linkEnabledToggle,
                         ),
                         menuItemColor: colorScheme.backgroundElevated2,
                         trailingWidget: ToggleSwitchWidget(
@@ -187,8 +186,8 @@ class _AdvancedSharingBottomSheetState
                       if (_hasPublicLink && _publicUrl != null) ...[
                         const SizedBox(height: 8),
                         MenuItemWidget(
-                          captionedTextWidget: const CaptionedTextWidget(
-                            title: "Allow uploads",
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: context.l10n.allowUploads,
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
                           trailingWidget: ToggleSwitchWidget(
@@ -203,8 +202,8 @@ class _AdvancedSharingBottomSheetState
                         ),
                         const SizedBox(height: 8),
                         MenuItemWidget(
-                          captionedTextWidget: const CaptionedTextWidget(
-                            title: "Password lock",
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: context.l10n.passwordLock,
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
                           trailingWidget: ToggleSwitchWidget(
@@ -224,9 +223,9 @@ class _AdvancedSharingBottomSheetState
                         const SizedBox(height: 8),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: "Device limit",
+                            title: context.l10n.linkDeviceLimit,
                             subTitle: _publicUrl!.deviceLimit == 0
-                                ? "None"
+                                ? context.l10n.noDeviceLimit
                                 : "${_publicUrl!.deviceLimit}",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
@@ -247,12 +246,12 @@ class _AdvancedSharingBottomSheetState
                         const SizedBox(height: 8),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: "Link Expiry",
+                            title: context.l10n.linkExpiry,
                             subTitle: _publicUrl!.hasExpiry
                                 ? (_publicUrl!.isExpired
-                                    ? "Expired"
-                                    : "Enabled")
-                                : "Never",
+                                    ? context.l10n.linkExpired
+                                    : context.l10n.linkEnabled)
+                                : context.l10n.never,
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
                           trailingWidget: Icon(
@@ -280,30 +279,6 @@ class _AdvancedSharingBottomSheetState
         ),
       ),
     );
-  }
-
-  Future<void> _updateUrlSettings(
-    BuildContext context,
-    Map<String, dynamic> prop, {
-    bool showProgressDialog = true,
-  }) async {
-    final dialog = showProgressDialog
-        ? createProgressDialog(context, context.l10n.pleaseWait)
-        : null;
-    await dialog?.show();
-    try {
-      await CollectionApiClient.instance
-          .updateShareUrl(widget.collection!, prop);
-      await dialog?.hide();
-      showShortToast(context, "Collection updated");
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
-      rethrow;
-    }
   }
 
   Future<void> _createPublicLink() async {
@@ -337,7 +312,7 @@ class _AdvancedSharingBottomSheetState
     bool showProgressDialog = true,
   }) async {
     final dialog = showProgressDialog
-        ? createProgressDialog(context, "Please wait...")
+        ? createProgressDialog(context, context.l10n.pleaseWait)
         : null;
     await dialog?.show();
     try {
@@ -346,7 +321,7 @@ class _AdvancedSharingBottomSheetState
         updates,
       );
       await dialog?.hide();
-      showShortToast(context, "Collection updated");
+      showShortToast(context, context.l10n.collectionUpdated);
       if (mounted) {
         setState(() {});
       }

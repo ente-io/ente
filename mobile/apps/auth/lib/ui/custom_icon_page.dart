@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/all_icon_data.dart';
 import 'package:ente_auth/services/preference_service.dart';
@@ -52,12 +54,44 @@ class _CustomIconPageState extends State<CustomIconPage> {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
+    if (!mounted) return false;
+
+    // Always keep our pressed key state in sync.
     if (event is KeyDownEvent) {
       _pressedKeys.add(event.logicalKey);
-      if ((_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.control) ||
-              _pressedKeys.contains(LogicalKeyboardKey.controlRight)) &&
-          event.logicalKey == LogicalKeyboardKey.keyF) {
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+
+    // This handler is registered globally via ServicesBinding; only act when
+    // this page is the current route.
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      return false;
+    }
+
+    // Don't hijack keystrokes while the user is typing into some other text
+    // field (e.g. if a dialog is open).
+    final primaryFocus = FocusManager.instance.primaryFocus;
+    final bool isEditableTextFocused =
+        primaryFocus?.context?.widget is EditableText;
+    final bool isSearchFocused = searchBoxFocusNode.hasFocus;
+    if (isEditableTextFocused && !isSearchFocused) {
+      return false;
+    }
+
+    if (event is KeyDownEvent) {
+      final pressed = HardwareKeyboard.instance.logicalKeysPressed;
+
+      final bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (pressed.contains(LogicalKeyboardKey.metaLeft) ||
+              pressed.contains(LogicalKeyboardKey.meta) ||
+              pressed.contains(LogicalKeyboardKey.metaRight))
+          : (pressed.contains(LogicalKeyboardKey.controlLeft) ||
+              pressed.contains(LogicalKeyboardKey.control) ||
+              pressed.contains(LogicalKeyboardKey.controlRight));
+
+      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
@@ -66,7 +100,9 @@ class _CustomIconPageState extends State<CustomIconPage> {
         });
         return true;
       }
-      if (event.logicalKey == LogicalKeyboardKey.escape) {
+
+      // Only use Escape for the page search UI.
+      if (event.logicalKey == LogicalKeyboardKey.escape && _showSearchBox) {
         setState(() {
           _textController.clear();
           _searchText = "";
@@ -75,9 +111,8 @@ class _CustomIconPageState extends State<CustomIconPage> {
         });
         return true;
       }
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(event.logicalKey);
     }
+
     return false;
   }
 

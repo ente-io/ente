@@ -9,9 +9,8 @@ import "package:locker/events/user_details_refresh_event.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
-import "package:locker/ui/drawer/app_version_widget.dart";
 import "package:locker/ui/drawer/drawer_title_bar_widget.dart";
-import "package:locker/ui/drawer/settings_widgets.dart";
+import "package:locker/ui/settings/settings_page.dart";
 
 class DrawerPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
@@ -84,17 +83,16 @@ class DrawerPage extends StatelessWidget {
         ),
       );
       contents.addAll([
-        const SizedBox(height: 12),
+        sectionSpacing,
         const UsageCardWidget(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         const LegacyCollectionsTrashWidget(),
         sectionSpacing,
       ]);
     }
 
     contents.addAll([
-      SettingsWidgets(hasLoggedIn: hasLoggedIn),
-      const AppVersionWidget(),
+      SettingsWidget(hasLoggedIn: hasLoggedIn),
       const Padding(
         padding: EdgeInsets.only(bottom: 60),
       ),

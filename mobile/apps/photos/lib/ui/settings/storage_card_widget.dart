@@ -1,17 +1,15 @@
-import 'dart:math';
-
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
-import 'package:photos/utils/standalone/data.dart';
 
 class StorageCardWidget extends StatefulWidget {
   const StorageCardWidget({super.key});
@@ -21,34 +19,9 @@ class StorageCardWidget extends StatefulWidget {
 }
 
 class _StorageCardWidgetState extends State<StorageCardWidget> {
-  late Image _background;
   final _logger = Logger((_StorageCardWidgetState).toString());
-  final ValueNotifier<bool> _isStorageCardPressed = ValueNotifier(false);
   int? familyMemberStorageLimit;
   bool showFamilyBreakup = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _background = const Image(
-      image: AssetImage("assets/storage_card_background.png"),
-      fit: BoxFit.fill,
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // precache background image to avoid flicker
-    // https://stackoverflow.com/questions/51343735/flutter-image-preload
-    precacheImage(_background.image, context);
-  }
-
-  @override
-  void dispose() {
-    _isStorageCardPressed.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +46,6 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
             ),
           );
         },
-        onTapDown: (details) => _isStorageCardPressed.value = true,
-        onTapCancel: () => _isStorageCardPressed.value = false,
-        onTapUp: (details) => _isStorageCardPressed.value = false,
         child: containerForUserDetails(userDetails),
       );
     }
@@ -84,37 +54,24 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   Widget containerForUserDetails(
     UserDetails? userDetails,
   ) {
-    return Stack(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: _background,
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        gradient: const LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            Color(0xFF212121),
+            Color(0xFF434343),
+          ],
         ),
-        Positioned.fill(
-          child: userDetails is UserDetails
-              ? _userDetails(userDetails)
-              : const EnteLoadingWidget(
-                  color: strokeBaseDark,
-                ),
-        ),
-        Positioned.fill(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: ValueListenableBuilder<bool>(
-                builder: (BuildContext context, bool value, Widget? child) {
-                  return Icon(
-                    Icons.chevron_right_outlined,
-                    color: value ? strokeMutedDark : strokeBaseDark,
-                  );
-                },
-                valueListenable: _isStorageCardPressed,
-              ),
+      ),
+      child: userDetails is UserDetails
+          ? _userDetails(userDetails)
+          : const EnteLoadingWidget(
+              color: strokeBaseDark,
             ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -137,8 +94,6 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
     final isMobileScreenSmall =
         MediaQuery.of(context).size.width <= mobileSmallThreshold;
-    final shouldShowFreeSpaceInMBs = freeStorageInBytes < hundredMBinBytes;
-    final shouldShowFreeSpaceInTBs = freeStorageInBytes >= oneTBinBytes;
     final shouldShowUsedStorageInTBs = usedStorageInBytes >= oneTBinBytes;
     final shouldShowTotalStorageInTBs = totalStorageInBytes >= oneTBinBytes;
     final shouldShowUsedStorageInMBs = usedStorageInBytes < hundredMBinBytes;
@@ -151,173 +106,133 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
     final usedStorageInTB = roundGBsToTBs(usedStorageInGB);
     final totalStorageInTB = roundGBsToTBs(totalStorageInGB);
-    late String freeSpace, freeSpaceUnit;
-
-// Determine the appropriate free space and units
-    if (shouldShowFreeSpaceInTBs) {
-      freeSpace =
-          _roundedFreeSpace(totalStorageInTB, usedStorageInTB).toString();
-      freeSpaceUnit = "TB";
-    } else if (shouldShowFreeSpaceInMBs) {
-      freeSpace = max(0, convertBytesToMBs(freeStorageInBytes)).toString();
-      freeSpaceUnit = "MB";
-    } else {
-      freeSpace =
-          _roundedFreeSpace(totalStorageInGB, usedStorageInGB).toString();
-      freeSpaceUnit = "GB";
-    }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        20,
-        16,
-        isMobileScreenSmall ? 12 : 20,
-      ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isMobileScreenSmall
-                      ? AppLocalizations.of(context).usedSpace
-                      : AppLocalizations.of(context).storage,
-                  style: getEnteTextTheme(context)
-                      .small
-                      .copyWith(color: textMutedDark),
-                ),
-                const SizedBox(height: 2),
-                RichText(
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  text: TextSpan(
-                    style: getEnteTextTheme(context)
-                        .h3Bold
-                        .copyWith(color: textBaseDark),
-                    children: _usedStorageDetails(
-                      isMobileScreenSmall: isMobileScreenSmall,
-                      shouldShowTotalStorageInTBs: shouldShowTotalStorageInTBs,
-                      shouldShowUsedStorageInTBs: shouldShowUsedStorageInTBs,
-                      shouldShowUsedStorageInMBs: shouldShowUsedStorageInMBs,
-                      usedStorageInBytes: usedStorageInBytes,
-                      usedStorageInGB: usedStorageInGB,
-                      totalStorageInTB: totalStorageInTB,
-                      usedStorageInTB: usedStorageInTB,
-                      totalStorageInGB: totalStorageInGB,
-                    ),
-                  ),
-                ),
-              ],
+          Text(
+            isMobileScreenSmall
+                ? AppLocalizations.of(context).usedSpace
+                : AppLocalizations.of(context).storage,
+            style: const TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: textMutedDark,
             ),
           ),
-          Column(
-            children: [
-              Stack(
-                children: <Widget>[
-                  const StorageProgressWidget(
-                    color:
-                        Color.fromRGBO(255, 255, 255, 0.2), //hardcoded in figma
-                    fractionOfStorage: 1,
-                  ),
-                  showFamilyBreakup
-                      ? StorageProgressWidget(
-                          color: strokeBaseDark,
-                          fractionOfStorage:
-                              ((usedStorageInBytes) / totalStorageInBytes),
-                        )
-                      : const SizedBox.shrink(),
-                  StorageProgressWidget(
-                    color: showFamilyBreakup
-                        ? getEnteColorScheme(context).primary300
-                        : strokeBaseDark,
-                    fractionOfStorage:
-                        (userDetails.usage / totalStorageInBytes),
-                  ),
-                ],
+          const SizedBox(height: 2),
+          RichText(
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            text: TextSpan(
+              style: const TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textBaseDark,
+                letterSpacing: -1,
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  showFamilyBreakup
-                      ? Row(
-                          children: [
-                            Container(
-                              width: 8.71,
-                              height: 8.99,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: getEnteColorScheme(context).primary300,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              AppLocalizations.of(context).storageBreakupYou,
-                              style: getEnteTextTheme(context)
-                                  .miniBold
-                                  .copyWith(color: textBaseDark),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              width: 8.71,
-                              height: 8.99,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: textBaseDark,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              AppLocalizations.of(context).storageBreakupFamily,
-                              style: getEnteTextTheme(context)
-                                  .miniBold
-                                  .copyWith(color: textBaseDark),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  Text(
-                    AppLocalizations.of(context).availableStorageSpace(
-                      freeAmount: freeSpace,
-                      storageUnit: freeSpaceUnit,
-                    ),
-                    style: getEnteTextTheme(context)
-                        .mini
-                        .copyWith(color: textFaintDark),
-                  ),
-                ],
+              children: _usedStorageDetails(
+                isMobileScreenSmall: isMobileScreenSmall,
+                shouldShowTotalStorageInTBs: shouldShowTotalStorageInTBs,
+                shouldShowUsedStorageInTBs: shouldShowUsedStorageInTBs,
+                shouldShowUsedStorageInMBs: shouldShowUsedStorageInMBs,
+                usedStorageInBytes: usedStorageInBytes,
+                usedStorageInGB: usedStorageInGB,
+                totalStorageInTB: totalStorageInTB,
+                usedStorageInTB: usedStorageInTB,
+                totalStorageInGB: totalStorageInGB,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Stack(
+            children: <Widget>[
+              const StorageProgressWidget(
+                color: Color.fromRGBO(193, 193, 193, 0.11),
+                fractionOfStorage: 1,
+              ),
+              showFamilyBreakup
+                  ? StorageProgressWidget(
+                      color: const Color(0xFFF4D93B), // Family: yellow
+                      fractionOfStorage:
+                          ((usedStorageInBytes) / totalStorageInBytes),
+                    )
+                  : const SizedBox.shrink(),
+              StorageProgressWidget(
+                color: const Color(0xFF08C225),
+                fractionOfStorage: (userDetails.usage / totalStorageInBytes),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              showFamilyBreakup
+                  ? Row(
+                      children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF08C225),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          AppLocalizations.of(context).storageBreakupYou,
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: textBaseDark,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFFF4D93B),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          AppLocalizations.of(context).storageBreakupFamily,
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: textBaseDark,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+              Text(
+                AppLocalizations.of(context).memoryCount(
+                  count: userDetails.fileCount,
+                  formattedCount: NumberFormat().format(userDetails.fileCount),
+                ),
+                style: const TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color.fromRGBO(165, 165, 165, 0.79),
+                ),
               ),
             ],
           ),
         ],
       ),
     );
-  }
-
-  num _roundedFreeSpace(num totalStorageInGB, num usedStorageInGB) {
-    int fractionDigits;
-    //subtracting usedSpace from totalStorage in GB instead of converting from bytes so that free space and used space adds up in the UI
-    final freeStorage = totalStorageInGB - usedStorageInGB;
-
-    if (freeStorage >= 1000) {
-      return roundGBsToTBs(freeStorage);
-    }
-    //show one decimal place if free space is less than 10GB
-    if (freeStorage < 10) {
-      fractionDigits = 1;
-    } else {
-      fractionDigits = 0;
-    }
-    //omit decimal if decimal is 0
-    if (fractionDigits == 1 && freeStorage.remainder(1) == 0) {
-      fractionDigits = 0;
-    }
-    return num.parse(freeStorage.toStringAsFixed(fractionDigits));
   }
 
   List<TextSpan> _usedStorageDetails({
@@ -339,7 +254,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     late num currentUsage, totalStorage;
     late String currentUsageUnit, totalStorageUnit;
 
-// Determine the appropriate usage and units
+    // Determine the appropriate usage and units
     if (shouldShowUsedStorageInTBs) {
       currentUsage = usedStorageInTB;
       currentUsageUnit = "TB";
@@ -351,7 +266,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
       currentUsageUnit = "GB";
     }
 
-// Determine the appropriate total storage and units
+    // Determine the appropriate total storage and units
     if (shouldShowTotalStorageInTBs) {
       totalStorage = totalStorageInTB;
       totalStorageUnit = "TB";
@@ -361,14 +276,12 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     }
 
     return [
-      TextSpan(
-        text: AppLocalizations.of(context).storageUsageInfo(
-          usedAmount: currentUsage,
-          usedStorageUnit: currentUsageUnit,
-          totalAmount: totalStorage,
-          totalStorageUnit: totalStorageUnit,
-        ),
+      TextSpan(text: '$currentUsage $currentUsageUnit  '),
+      const TextSpan(
+        text: 'of',
+        style: TextStyle(color: textMutedDark),
       ),
+      TextSpan(text: '  $totalStorage $totalStorageUnit used'),
     ];
   }
 }

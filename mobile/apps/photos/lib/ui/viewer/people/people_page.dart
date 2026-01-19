@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
@@ -33,7 +34,6 @@ import "package:photos/ui/viewer/people/memory_lane_debug_panel.dart";
 import "package:photos/ui/viewer/people/memory_lane_page.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;

@@ -297,7 +297,6 @@
   "failedToApplyCode": "Falhou ao aplicar código",
   "enterReferralCode": "Inserir código de referência",
   "codeAppliedPageTitle": "Código aplicado",
-  "changeYourReferralCode": "Alterar código de referência",
   "change": "Alterar",
   "unavailableReferralCode": "Desculpe, este código está indisponível.",
   "codeChangeLimitReached": "Desculpe, você atingiu o limite de mudanças de código.",
@@ -315,11 +314,9 @@
   "claimFreeStorage": "Reivindique armaz. grátis",
   "inviteYourFriends": "Convide seus amigos",
   "failedToFetchReferralDetails": "Não foi possível buscar os detalhes de referência. Tente novamente mais tarde.",
-  "referralStep1": "1. Envie este código aos seus amigos",
   "referralStep2": "2. Eles então se inscrevem num plano pago",
   "referralStep3": "3. Ambos ganham {storageInGB} GB* grátis",
   "referralsAreCurrentlyPaused": "As referências estão atualmente pausadas",
-  "youCanAtMaxDoubleYourStorage": "* Você pode duplicar seu armazenamento ao máximo",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Sua família reinvidicou {storageAmountInGb} GB até então}false {Você reinvindicou {storageAmountInGb} GB até então}other {Você reinvindicou {storageAmountInGb} GB até então!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1117,7 +1114,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} livre",
-  "appVersion": "Versão: {versionValue}",
   "verifyIDLabel": "Verificar",
   "fileInfoAddDescHint": "Adicionar descrição...",
   "editLocationTagTitle": "Editar localização",

@@ -2,6 +2,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DevicesIcon from "@mui/icons-material/Devices";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import {
+    Box,
     CircularProgress,
     Divider,
     IconButton,
@@ -117,9 +118,13 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
 
             showMiniDialog({
                 title: t("terminate_session"),
-                message: isCurrentDevice
-                    ? t("terminate_session_confirm_message_self")
-                    : `${t("terminate_session_confirm_message")}: ${session.prettyUA}`,
+                message: isCurrentDevice ? (
+                    t("terminate_session_confirm_message_self")
+                ) : (
+                    <Box sx={{ whiteSpace: "pre-line" }}>
+                        {`${t("terminate_session_confirm_message")}:\n\n${session.prettyUA}\n${session.ip}`}
+                    </Box>
+                ),
                 continue: {
                     text: t("terminate"),
                     color: "critical",
@@ -257,7 +262,9 @@ const SessionRow: React.FC<SessionRowProps> = ({
                                 variant="small"
                                 sx={{ color: "text.muted" }}
                             >
-                                {session.ip}
+                                {session.ip.length > 28
+                                    ? `${session.ip.slice(0, 28)}…`
+                                    : session.ip}
                             </Typography>
                         )}
                         <Typography

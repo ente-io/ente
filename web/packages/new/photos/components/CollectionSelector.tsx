@@ -13,9 +13,12 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
     LargeTileButton,
@@ -25,9 +28,12 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
+    collectionsSortBy,
+    type CollectionsSortBy,
     type CollectionSummaries,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
+import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -53,6 +59,13 @@ export interface CollectionSelectorAttributes {
      * {@link sourceCollectionID} to omit showing it in the list again.
      */
     sourceCollectionSummaryID?: number;
+    /**
+     * If set, this collection will be shown first in the list.
+     *
+     * This is useful for the "upload" action, where the user is viewing a
+     * specific collection and might want to upload to it.
+     */
+    activeCollectionID?: number;
     /**
      * Callback invoked when the user selects the option to create a new
      * collection.
@@ -121,6 +134,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useCollectionSelectorSortByLocalState("name");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -135,26 +149,55 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             return;
         }
 
+        const activeCollectionID = attributes.activeCollectionID;
         const collections = [...collectionSummaries.values()]
             .filter((cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(cs);
+                    return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else if (attributes.action == "restore") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else {
-                    return canMoveToCollection(cs);
+                    // "move" and "unhide"
+                    return (
+                        canMoveToCollection(cs) && cs.type != "userFavorites"
+                    );
                 }
             })
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .sort((a, b) => b.sortPriority - a.sortPriority);
+            .sort((a, b) => {
+                switch (sortBy) {
+                    case "name":
+                        return a.name.localeCompare(b.name);
+                    case "creation-time-asc":
+                        return (
+                            -1 *
+                            compareCollectionsLatestFile(
+                                b.latestFile,
+                                a.latestFile,
+                            )
+                        );
+                    case "updation-time-desc":
+                        return (b.updationTime ?? 0) - (a.updationTime ?? 0);
+                }
+            })
+            .sort((a, b) => b.sortPriority - a.sortPriority)
+            .sort((a, b) => {
+                // Prioritize the active collection (if any) to appear first.
+                if (a.id === activeCollectionID) return -1;
+                if (b.id === activeCollectionID) return 1;
+                return 0;
+            });
 
         if (collections.length === 0) {
             onClose();
@@ -162,7 +205,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         setFilteredCollections(collections);
-    }, [collectionSummaries, attributes, open, onClose]);
+    }, [collectionSummaries, attributes, open, onClose, sortBy]);
 
     const searchFilteredCollections = useMemo(() => {
         if (!searchTerm.trim()) {
@@ -243,9 +286,14 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                                 </Typography>
                             </Box>
                         </Stack>
-                        <Box sx={{ margin: "-10px" }}>
-                            <DialogCloseIconButton onClose={handleClose} />
-                        </Box>
+                        <CollectionsSortOptions
+                            activeSortBy={sortBy}
+                            onChangeSortBy={setSortBy}
+                            nestedInDialog
+                        />
+                        <FilledIconButton onClick={handleClose}>
+                            <CloseIcon />
+                        </FilledIconButton>
                     </Stack>
                     <SearchField value={searchTerm} onChange={setSearchTerm} />
                 </Stack>
@@ -412,4 +460,46 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
             }}
         />
     );
+};
+
+/**
+ * A hook that maintains the collection selector sort order both as in-memory
+ * and local storage state.
+ */
+const useCollectionSelectorSortByLocalState = (
+    initialValue: CollectionsSortBy,
+) => {
+    const key = "collectionSelectorSortBy";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const value = localStorage.getItem(key);
+        if (value && includes(collectionsSortBy, value)) setValue(value);
+    }, []);
+
+    const setter = (value: CollectionsSortBy) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter] as const;
+};
+
+const compareCollectionsLatestFile = (
+    first: EnteFile | undefined,
+    second: EnteFile | undefined,
+) => {
+    if (!first) {
+        return 1;
+    } else if (!second) {
+        return -1;
+    } else {
+        const sortedFiles = sortFiles([first, second]);
+        if (sortedFiles[0]?.id !== first.id) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
 };

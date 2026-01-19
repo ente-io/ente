@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -13,7 +14,6 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/utils/navigation_util.dart";
 
 /// Screen that displays the user's activity feed.
 ///

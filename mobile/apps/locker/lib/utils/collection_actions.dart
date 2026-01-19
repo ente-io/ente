@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
@@ -10,7 +11,6 @@ import 'package:ente_ui/components/buttons/models/button_type.dart';
 import "package:ente_ui/components/progress_dialog.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
 import 'package:locker/l10n/l10n.dart';
@@ -21,8 +21,8 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/components/input_dialog_sheet.dart";
-import "package:locker/ui/components/subscription_required_dialog.dart";
+import "package:locker/ui/components/input_sheet.dart";
+import "package:locker/ui/components/subscription_required_sheet.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -211,13 +211,13 @@ class CollectionActions {
 
       showToast(
         context,
-        "${collections.length} collections deleted successfully",
+        context.l10n.collectionsDeletedSuccessfully(collections.length),
       );
 
       if (isFavoriteCollection) {
         showToast(
           context,
-          "Action not supported on Favourites album",
+          context.l10n.actionNotSupportedOnFavouritesAlbum,
         );
       }
 
@@ -356,7 +356,7 @@ class CollectionActions {
           onSuccess?.call();
           showToast(
             context,
-            "Leave collection successfully",
+            context.l10n.leaveCollectionSuccessfully,
           );
         }
       } catch (e) {
@@ -399,7 +399,7 @@ class CollectionActions {
           onSuccess?.call();
           showToast(
             context,
-            "Left ${collections.length} collection${collections.length > 1 ? 's' : ''} successfully",
+            context.l10n.leftCollectionsSuccessfully(collections.length),
           );
         }
       } catch (e) {
@@ -449,7 +449,7 @@ class CollectionActions {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: "Yes, remove",
+          labelText: context.l10n.yesRemove,
           onTap: () async {
             await CollectionApiClient.instance.disableShareUrl(collection);
           },
@@ -462,9 +462,9 @@ class CollectionActions {
           labelText: context.l10n.cancel,
         ),
       ],
-      title: "Remove public link",
-      body:
-          "This will remove the public link for accessing \"${collection.name}\".",
+      title: context.l10n.removePublicLink,
+      body: context.l10n
+          .removePublicLinkConfirmation(collection.name ?? "this collection"),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

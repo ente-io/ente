@@ -1,10 +1,10 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/landmark.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/utils/standalone/parse.dart";
 
 // FileInfo contains the image width and height of the image the face was detected in.
 class FileInfo {
