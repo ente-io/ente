@@ -33,7 +33,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   void initState() {
     super.initState();
     hideAppContent = _lockscreenSetting.getShouldHideAppContent();
-    appLock = _configuration.shouldShowSystemLockScreen();
+    appLock = true; // Will be corrected by _initializeSettings()
     _initializeSettings();
   }
 
@@ -201,36 +201,41 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                         ),
                       ),
                       if (appLock) ...[
-                        const SizedBox(height: 24),
-                        Text(
-                          AppLocalizations.of(context).lockScreenType,
-                          style: textTheme.small.copyWith(
-                            fontWeight: FontWeight.w600,
+                        const SizedBox(height: 16),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MenuItemWidgetNew(
+                                title: AppLocalizations.of(context).deviceLock,
+                                borderRadius: 0,
+                                trailingIcon:
+                                    _currentLockType == LockType.device
+                                        ? Icons.check
+                                        : null,
+                                onTap: () async => _onSelectDeviceLock(),
+                              ),
+                              MenuItemWidgetNew(
+                                title: AppLocalizations.of(context).pinLock,
+                                borderRadius: 0,
+                                trailingIcon: _currentLockType == LockType.pin
+                                    ? Icons.check
+                                    : null,
+                                onTap: () async => _onSelectPinLock(),
+                              ),
+                              MenuItemWidgetNew(
+                                title:
+                                    AppLocalizations.of(context).passwordLock,
+                                borderRadius: 0,
+                                trailingIcon:
+                                    _currentLockType == LockType.password
+                                        ? Icons.check
+                                        : null,
+                                onTap: () async => _onSelectPasswordLock(),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).deviceLock,
-                          trailingIcon: _currentLockType == LockType.device
-                              ? Icons.check
-                              : null,
-                          onTap: () async => _onSelectDeviceLock(),
-                        ),
-                        const SizedBox(height: 8),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).pinLock,
-                          trailingIcon: _currentLockType == LockType.pin
-                              ? Icons.check
-                              : null,
-                          onTap: () async => _onSelectPinLock(),
-                        ),
-                        const SizedBox(height: 8),
-                        MenuItemWidgetNew(
-                          title: AppLocalizations.of(context).passwordLock,
-                          trailingIcon: _currentLockType == LockType.password
-                              ? Icons.check
-                              : null,
-                          onTap: () async => _onSelectPasswordLock(),
                         ),
                         const SizedBox(height: 16),
                         MenuItemWidgetNew(
