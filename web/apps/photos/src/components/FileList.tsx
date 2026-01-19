@@ -648,8 +648,7 @@ export const FileList: React.FC<FileListProps> = ({
             isInSearchMode: modePlus === "search",
             collectionSummary,
             showAddPerson: !!showAddPersonAction,
-            showEditLocation:
-                !!showEditLocationAction && selected.ownCount > 0,
+            showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
         });
     }, [
         onContextMenuAction,
