@@ -251,8 +251,8 @@ func (t *TrashRepository) Delete(ctx context.Context, userID int64, fileIDs []in
 // GetFilesInTrashState for a given userID and fileIDs, return the list of fileIDs which are actually present in
 // trash and is not deleted or restored yet.
 func (t *TrashRepository) GetFilesInTrashState(ctx context.Context, userID int64, fileIDs []int64) ([]int64, bool, error) {
-	rows, err := t.DB.Query(`SELECT file_id FROM trash 
-			WHERE user_id = $1 AND file_id = ANY ($2) 
+	rows, err := t.DB.Query(`SELECT file_id FROM trash
+			WHERE user_id = $1 AND file_id = ANY ($2)
 			AND is_deleted = FALSE AND is_restored = FALSE`, userID, pq.Array(fileIDs))
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
@@ -271,6 +271,25 @@ func (t *TrashRepository) GetFilesInTrashState(ctx context.Context, userID int64
 		}).Warn("mismatch in input fileIds and fileIDs present in trash")
 	}
 	return fileIDsInTrash, canRestoreOrDeleteAllFiles, nil
+}
+
+// GetFilesInTrashOrDeleted returns the subset of fileIDs that are either in trash (not restored)
+// or have been permanently deleted. This is useful for validation checks to prevent operations
+// on files that are no longer in an active state.
+// Unlike GetFilesInTrashState, this method does not log warnings when files are not found,
+// making it suitable for validation checks where files are expected to NOT be in trash.
+func (t *TrashRepository) GetFilesInTrashOrDeleted(ctx context.Context, userID int64, fileIDs []int64) ([]int64, error) {
+	rows, err := t.DB.QueryContext(ctx, `SELECT file_id FROM trash
+			WHERE user_id = $1 AND file_id = ANY ($2)
+			AND is_restored = FALSE`, userID, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	fileIDsInTrash, err := convertRowsToFileId(rows)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return fileIDsInTrash, nil
 }
 
 // verifyFilesAreDeleted for a given userID and fileIDs, this method verifies that given files are actually deleted
