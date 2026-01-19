@@ -12,6 +12,7 @@ import {
 export type FileContextAction =
     | "download"
     | "fixTime"
+    | "editLocation"
     | "favorite"
     | "archive"
     | "unarchive"
@@ -45,6 +46,12 @@ export interface FileActionContext {
      * This depends on ML being enabled and having named people.
      */
     showAddPerson: boolean;
+    /**
+     * Whether to show the "Edit Location" action.
+     *
+     * This depends on the selection containing owned files.
+     */
+    showEditLocation: boolean;
 }
 
 /**
@@ -56,10 +63,20 @@ export interface FileActionContext {
 export function getAvailableFileActions(
     context: FileActionContext,
 ): FileContextAction[] {
-    const { barMode, isInSearchMode, collectionSummary, showAddPerson } =
-        context;
+    const {
+        barMode,
+        isInSearchMode,
+        collectionSummary,
+        showAddPerson,
+        showEditLocation,
+    } = context;
 
-    const actions = getBaseActions(barMode, isInSearchMode, collectionSummary);
+    const actions = getBaseActions(
+        barMode,
+        isInSearchMode,
+        collectionSummary,
+        showEditLocation,
+    );
 
     // Insert "addPerson" before modification actions if enabled
     // (not applicable for trash since you can't add people to trashed files)
@@ -77,18 +94,16 @@ function getBaseActions(
     barMode: GalleryBarMode | undefined,
     isInSearchMode: boolean,
     collectionSummary: CollectionSummary | undefined,
+    showEditLocation: boolean,
 ): FileContextAction[] {
     // Search mode actions
     if (isInSearchMode) {
-        return [
-            "favorite",
-            "fixTime",
-            "download",
-            "addToAlbum",
-            "archive",
-            "hide",
-            "trash",
-        ];
+        const actions: FileContextAction[] = ["favorite", "fixTime"];
+        if (showEditLocation) {
+            actions.push("editLocation");
+        }
+        actions.push("download", "addToAlbum", "archive", "hide", "trash");
+        return actions;
     }
 
     // People mode actions
@@ -136,7 +151,11 @@ function getBaseActions(
         actions.push("favorite");
     }
 
-    actions.push("fixTime", "download", "addToAlbum");
+    actions.push("fixTime");
+    if (showEditLocation) {
+        actions.push("editLocation");
+    }
+    actions.push("download", "addToAlbum");
 
     if (collectionSummary?.id === PseudoCollectionID.all) {
         actions.push("archive");
@@ -152,7 +171,7 @@ function getBaseActions(
 }
 
 /**
- * Actions that modify file visibility or location.
+ * Actions that modify file visibility or collection membership.
  * "addPerson" is inserted before the first of these actions.
  */
 const modificationActions: FileContextAction[] = [

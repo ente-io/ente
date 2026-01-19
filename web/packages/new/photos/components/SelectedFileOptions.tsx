@@ -148,7 +148,6 @@ interface SelectedFileOptionsProps {
      */
     onShowAssignPersonDialog?: () => void;
 
-    onAddPersonToSelectedFiles?: (personID: string) => Promise<void>;
     /**
      * Called when the user wants to edit the location of the selected files.
      *
@@ -183,7 +182,6 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     createOnSelectForCollectionOp,
     createFileOpHandler,
     onShowAssignPersonDialog,
-    onAddPersonToSelectedFiles,
     onEditLocation,
     onSelectAll,
     isAllSelected,
@@ -510,7 +508,7 @@ const UnhideButton: React.FC<ButtonishProps> = ({ onClick }) => (
 
 const DeleteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete")}>
-        <IconButton {...{ onClick }}>
+        <IconButton {...{ onClick }} sx={{ color: "critical.main" }}>
             <DeleteIcon />
         </IconButton>
     </Tooltip>
@@ -526,7 +524,7 @@ const RestoreButton: React.FC<ButtonishProps> = ({ onClick }) => (
 
 const DeletePermanentlyButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete_permanently")}>
-        <IconButton {...{ onClick }}>
+        <IconButton {...{ onClick }} sx={{ color: "critical.main" }}>
             <DeleteIcon />
         </IconButton>
     </Tooltip>

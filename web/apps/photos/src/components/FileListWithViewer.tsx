@@ -110,6 +110,7 @@ export type FileListWithViewerProps = {
     | "listBorderRadius"
     | "onContextMenuAction"
     | "showAddPersonAction"
+    | "showEditLocationAction"
 > &
     Pick<
         FileViewerProps,
@@ -161,6 +162,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     listBorderRadius,
     onContextMenuAction,
     showAddPersonAction,
+    showEditLocationAction,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -357,6 +359,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             collectionSummary: activeCollectionSummary,
                             onContextMenuAction,
                             showAddPersonAction,
+                            showEditLocationAction,
                         }}
                         onItemClick={handleThumbnailClick}
                     />

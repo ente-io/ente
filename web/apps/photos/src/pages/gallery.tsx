@@ -107,13 +107,13 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import {
-    addManualFileAssignmentsToPerson,
-    isMLEnabled,
-} from "ente-new/photos/services/ml";
-import {
     updateFilesLocation,
     updateFilesVisibility,
 } from "ente-new/photos/services/file";
+import {
+    addManualFileAssignmentsToPerson,
+    isMLEnabled,
+} from "ente-new/photos/services/ml";
 
 import {
     savedCollectionFiles,
@@ -1359,6 +1359,9 @@ const Page: React.FC = () => {
                 case "addPerson":
                     showContextMenuAssignPerson();
                     break;
+                case "editLocation":
+                    showEditLocation();
+                    break;
             }
         },
         [
@@ -1369,6 +1372,7 @@ const Page: React.FC = () => {
             handleRemoveFilesFromCollection,
             showMiniDialog,
             showContextMenuAssignPerson,
+            showEditLocation,
             activeCollectionSummary,
             activeCollection,
         ],
@@ -1678,6 +1682,7 @@ const Page: React.FC = () => {
                     isInHiddenSection={barMode == "hidden-albums"}
                     onContextMenuAction={handleContextMenuAction}
                     showAddPersonAction={showAddPersonAction}
+                    showEditLocationAction={selected.ownCount > 0}
                     {...{
                         favoriteFileIDs,
                         collectionNameByID,

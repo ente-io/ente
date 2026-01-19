@@ -4,6 +4,7 @@ import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
 import MoveIcon from "@mui/icons-material/ArrowForward";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -58,6 +59,7 @@ interface ActionConfig {
 const actionConfigs: Record<FileContextAction, ActionConfig> = {
     download: { label: "download", Icon: DownloadIcon },
     fixTime: { label: "fix_creation_time", Icon: ClockIcon },
+    editLocation: { label: "edit_location", Icon: EditLocationAltIcon },
     favorite: { label: "favorite", Icon: StarBorderIcon },
     archive: { label: "archive", Icon: ArchiveIcon },
     unarchive: { label: "unarchive", Icon: UnArchiveIcon },
@@ -138,6 +140,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                 {destructiveActions.length > 0 && primaryActions.length > 0 && (
                     <Divider />
                 )}
+
                 {destructiveActions.map((action) => {
                     const { label, Icon } = actionConfigs[action];
                     return (

@@ -272,6 +272,10 @@ export interface FileListProps {
      * Whether to show the "Add Person" action in the context menu.
      */
     showAddPersonAction?: boolean;
+    /**
+     * Whether to show the "Edit Location" action in the context menu.
+     */
+    showEditLocationAction?: boolean;
 }
 
 /**
@@ -301,6 +305,7 @@ export const FileList: React.FC<FileListProps> = ({
     collectionSummary,
     onContextMenuAction,
     showAddPersonAction,
+    showEditLocationAction,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -643,6 +648,8 @@ export const FileList: React.FC<FileListProps> = ({
             isInSearchMode: modePlus === "search",
             collectionSummary,
             showAddPerson: !!showAddPersonAction,
+            showEditLocation:
+                !!showEditLocationAction && selected.ownCount > 0,
         });
     }, [
         onContextMenuAction,
@@ -650,6 +657,8 @@ export const FileList: React.FC<FileListProps> = ({
         modePlus,
         collectionSummary,
         showAddPersonAction,
+        showEditLocationAction,
+        selected.ownCount,
     ]);
 
     // Handle context menu open
