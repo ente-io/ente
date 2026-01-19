@@ -165,5 +165,8 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		(reqMethod == http.MethodPost || reqMethod == http.MethodPut || reqMethod == http.MethodDelete) {
 		return r.limit200ReqPerMin
 	}
+	if strings.HasPrefix(reqPath, "/llmchat/chat/") {
+		return r.limit200ReqPerMin
+	}
 	return nil
 }

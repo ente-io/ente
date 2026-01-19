@@ -36,6 +36,24 @@ var ErrFileLimitReached = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLlmChatMessageLimitReached = ApiError{
+	Code:           LlmChatMessageLimitReached,
+	Message:        "Message limit reached",
+	HttpStatusCode: http.StatusForbidden,
+}
+
+var ErrLlmChatAttachmentLimitReached = ApiError{
+	Code:           LlmChatAttachmentLimitReached,
+	Message:        "Attachment limit reached",
+	HttpStatusCode: http.StatusForbidden,
+}
+
+var ErrLlmChatPayloadTooLarge = ApiError{
+	Code:           LlmChatPayloadTooLarge,
+	Message:        "Payload too large",
+	HttpStatusCode: http.StatusRequestEntityTooLarge,
+}
+
 // ErrBadRequest is returned when a bad request is encountered
 var ErrBadRequest = errors.New("bad request")
 
@@ -284,6 +302,10 @@ const (
 
 	// FileLimitReached indicates the user hit the maximum number of files allowed
 	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"
+
+	LlmChatMessageLimitReached    ErrorCode = "LLMCHAT_MESSAGE_LIMIT_REACHED"
+	LlmChatAttachmentLimitReached ErrorCode = "LLMCHAT_ATTACHMENT_LIMIT_REACHED"
+	LlmChatPayloadTooLarge        ErrorCode = "LLMCHAT_PAYLOAD_TOO_LARGE"
 
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
 
