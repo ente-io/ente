@@ -12,7 +12,7 @@ import {
 import Menu, { type MenuProps } from "@mui/material/Menu";
 import type { CollectionsSortBy } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 interface CollectionsSortOptionsProps {
     /**
@@ -67,20 +67,24 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
     transparentTriggerButtonBackground,
 }) => {
     const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
+    // Apply sort changes after the menu closes to avoid flicker.
+    const pendingSortByRef = useRef<CollectionsSortBy | undefined>(undefined);
     const ariaID = "collection-sort";
 
     const activeCategory = getSortCategory(activeSortBy);
     const activeAscending = isAscending(activeSortBy);
 
     const handleCategoryClick = (category: SortCategory) => {
+        let nextSortBy: CollectionsSortBy;
         if (category === activeCategory) {
             // Toggle direction if same category
-            onChangeSortBy(getSortBy(category, !activeAscending));
+            nextSortBy = getSortBy(category, !activeAscending);
         } else {
             // Select new category with default direction
             const defaultAscending = category === "name"; // Name defaults to A-Z (asc), dates to newest (desc)
-            onChangeSortBy(getSortBy(category, defaultAscending));
+            nextSortBy = getSortBy(category, defaultAscending);
         }
+        pendingSortByRef.current = nextSortBy;
         setAnchorEl(undefined);
     };
 
@@ -114,6 +118,15 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                 slotProps={{
                     paper: { sx: menuPaperSxProps },
                     list: { disablePadding: true, "aria-labelledby": ariaID },
+                    transition: {
+                        onExited: () => {
+                            const nextSortBy = pendingSortByRef.current;
+                            if (nextSortBy) {
+                                pendingSortByRef.current = undefined;
+                                onChangeSortBy(nextSortBy);
+                            }
+                        },
+                    },
                 }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
@@ -134,8 +147,8 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                     activeAscending={activeAscending}
                     onClick={handleCategoryClick}
                     label={t("created")}
-                    ascLabel={t("sort_oldest")}
-                    descLabel={t("sort_newest")}
+                    ascLabel={t("oldest")}
+                    descLabel={t("newest")}
                     showBorder
                 />
                 <SortCategoryOption
@@ -144,8 +157,8 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                     activeAscending={activeAscending}
                     onClick={handleCategoryClick}
                     label={t("updated")}
-                    ascLabel={t("sort_oldest")}
-                    descLabel={t("sort_newest")}
+                    ascLabel={t("oldest")}
+                    descLabel={t("newest")}
                 />
             </Menu>
         </>

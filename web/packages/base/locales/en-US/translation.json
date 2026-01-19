@@ -450,8 +450,6 @@
     "updated": "Updated",
     "sort_asc_indicator": "A-Z",
     "sort_desc_indicator": "Z-A",
-    "sort_oldest": "Oldest",
-    "sort_newest": "Newest",
     "fix_creation_time": "Fix time",
     "fix_creation_time_in_progress": "Fixing time",
     "fix_creation_time_file_updated": "File time updated",
