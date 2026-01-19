@@ -33,6 +33,7 @@ class FilesDB with SqlDbBase {
 
   static const filesTable = 'files';
   static const tempTable = 'temp_files';
+  static const localAttributesTable = 'local_file_attributes';
 
   static const columnGeneratedID = '_id';
   static const columnUploadedFileID = 'uploaded_file_id';
@@ -67,6 +68,8 @@ class FilesDB with SqlDbBase {
 
   static const columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
   static const columnPubMMdVersion = 'pub_mmd_ver';
+  static const columnLocalAttributesLocalID = 'local_id';
+  static const columnLocalAttributesJson = 'attributes_json';
 
   // part of magic metadata
   // Only parse & store selected fields from JSON in separate columns if
@@ -90,6 +93,7 @@ class FilesDB with SqlDbBase {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...createLocalAttributesTable(),
   ];
 
   static const List<String> _columnNames = [
@@ -416,12 +420,24 @@ class FilesDB with SqlDbBase {
     ];
   }
 
+  static List<String> createLocalAttributesTable() {
+    return [
+      '''
+        CREATE TABLE IF NOT EXISTS $localAttributesTable (
+          $columnLocalAttributesLocalID TEXT PRIMARY KEY NOT NULL,
+          $columnLocalAttributesJson TEXT NOT NULL DEFAULT '{}'
+        );
+      ''',
+    ];
+  }
+
   Future<void> clearTable() async {
     final db = await instance.sqliteAsyncDB;
     await db.execute('DELETE FROM $filesTable');
     await db.execute('DELETE FROM device_files');
     await db.execute('DELETE FROM device_collections');
     await db.execute('DELETE FROM entities');
+    await db.execute('DELETE FROM $localAttributesTable');
   }
 
   Future<void> deleteDB() async {
@@ -541,7 +557,7 @@ class FilesDB with SqlDbBase {
     if (results.isEmpty) {
       return null;
     }
-    return convertToFiles(results)[0];
+    return (convertToFiles(results))[0];
   }
 
   Future<EnteFile?> getUploadedFile(int uploadedID, int collectionID) async {
@@ -556,7 +572,7 @@ class FilesDB with SqlDbBase {
     if (results.isEmpty) {
       return null;
     }
-    return convertToFiles(results)[0];
+    return (convertToFiles(results))[0];
   }
 
   Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
@@ -568,7 +584,7 @@ class FilesDB with SqlDbBase {
     if (results.isEmpty) {
       return null;
     }
-    return convertToFiles(results)[0];
+    return (convertToFiles(results))[0];
   }
 
   Future<Set<int>> getUploadedFileIDs(int collectionID) async {
@@ -1340,6 +1356,7 @@ class FilesDB with SqlDbBase {
           [file.localID],
         ),
       );
+      unawaited(deleteLocalAttributesForLocalIDs([file.localID!]));
     } else {
       unawaited(
         db.execute(
@@ -1360,6 +1377,7 @@ class FilesDB with SqlDbBase {
       WHERE $columnLocalID IN ($inParam);
     ''',
     );
+    await deleteLocalAttributesForLocalIDs(localIDs);
   }
 
   Future<List<EnteFile>> getLocalFiles(
@@ -1572,7 +1590,7 @@ class FilesDB with SqlDbBase {
     if (rows.isEmpty) {
       return null;
     }
-    return convertToFiles(rows).first;
+    return (convertToFiles(rows)).first;
   }
 
   Future<bool> doesFileExistInCollection(
@@ -1707,6 +1725,62 @@ class FilesDB with SqlDbBase {
       files.add(_getFileFromRow(result));
     }
     return files;
+  }
+
+  Future<void> upsertLocalAttributes(
+    String localID,
+    String attributesJson,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    await db.execute(
+      '''
+      INSERT OR REPLACE INTO $localAttributesTable
+      ($columnLocalAttributesLocalID, $columnLocalAttributesJson)
+      VALUES (?, ?);
+    ''',
+      [localID, attributesJson],
+    );
+  }
+
+  Future<void> deleteLocalAttributesForLocalIDs(
+    Iterable<String> localIDs,
+  ) async {
+    final ids = localIDs.where((id) => id.isNotEmpty).toList();
+    if (ids.isEmpty) {
+      return;
+    }
+    final inParam = ids.map((id) => "'$id'").join(',');
+    final db = await instance.sqliteAsyncDB;
+    await db.execute(
+      '''
+      DELETE FROM $localAttributesTable
+      WHERE $columnLocalAttributesLocalID IN ($inParam);
+    ''',
+    );
+  }
+
+  Future<Map<String, String>> getLocalAttributesForLocalIDs(
+    Set<String> localIDs,
+  ) async {
+    if (localIDs.isEmpty) {
+      return {};
+    }
+    final inParam = localIDs.map((id) => "'$id'").join(',');
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT $columnLocalAttributesLocalID, $columnLocalAttributesJson
+      FROM $localAttributesTable
+      WHERE $columnLocalAttributesLocalID IN ($inParam);
+    ''',
+    );
+    final result = <String, String>{};
+    for (final row in rows) {
+      final localID = row[columnLocalAttributesLocalID] as String;
+      final attributesJson = row[columnLocalAttributesJson] as String;
+      result[localID] = attributesJson;
+    }
+    return result;
   }
 
   // For a given userID, return unique uploadedFileId for the given userID

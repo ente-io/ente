@@ -22,6 +22,7 @@ import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
+import 'package:photos/services/local_file_attributes_service.dart';
 import "package:photos/services/sync/import/diff.dart";
 import "package:photos/services/sync/import/local_assets.dart";
 import "package:photos/services/sync/import/model.dart";
@@ -205,6 +206,9 @@ class LocalSyncService {
         localDiffResult.uniqueLocalFiles!,
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
+      LocalFileAttributesService.instance.enqueueLocalIDs(
+        localDiffResult.uniqueLocalFiles!.map((file) => file.localID),
+      );
       _logger.info(
         "Inserted ${localDiffResult.uniqueLocalFiles?.length} "
         "un-synced files",
@@ -315,6 +319,9 @@ class LocalSyncService {
       await _db.insertMultiple(
         files,
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
+      );
+      LocalFileAttributesService.instance.enqueueLocalIDs(
+        files.map((file) => file.localID),
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
       _checkAndFireLocalAssetUpdateEvent(allFiles, files);

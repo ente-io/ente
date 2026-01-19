@@ -7,7 +7,9 @@ import "package:photos/services/collections_service.dart";
 extension FilePropsExtn on EnteFile {
   bool get isLivePhoto => fileType == FileType.livePhoto;
 
-  bool get isMotionPhoto => (pubMagicMetadata?.mvi ?? 0) > 0;
+  bool get isMotionPhoto =>
+      (pubMagicMetadata?.mvi ?? localAttributes?.motionPhotoStartIndex ?? 0) >
+      0;
 
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
 
@@ -25,6 +27,9 @@ extension FilePropsExtn on EnteFile {
     }
     if (pubMagicMetadata?.mediaType != null) {
       return (pubMagicMetadata!.mediaType! & 1) == 1;
+    }
+    if (localAttributes?.isPanorama != null) {
+      return localAttributes?.isPanorama;
     }
     return null;
   }
@@ -49,9 +54,11 @@ extension FilePropsExtn on EnteFile {
 
   String? get uploaderName => pubMagicMetadata?.uploaderName;
 
-  String? get cameraMake => pubMagicMetadata?.cameraMake;
+  String? get cameraMake =>
+      pubMagicMetadata?.cameraMake ?? localAttributes?.cameraMake;
 
-  String? get cameraModel => pubMagicMetadata?.cameraModel;
+  String? get cameraModel =>
+      pubMagicMetadata?.cameraModel ?? localAttributes?.cameraModel;
 
   String? get cameraLabel {
     final make = cameraMake?.trim();

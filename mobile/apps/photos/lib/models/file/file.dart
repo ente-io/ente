@@ -7,6 +7,7 @@ import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import 'package:photos/models/file/local_attributes.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
@@ -55,6 +56,9 @@ class EnteFile {
   String? pubMmdEncodedJson;
   int pubMmdVersion = 0;
   PubMagicMetadata? _pubMmd;
+
+  String? localAttributesJson;
+  LocalFileAttributes? localAttributes;
 
   PubMagicMetadata? get pubMagicMetadata =>
       _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
@@ -107,6 +111,7 @@ class EnteFile {
     );
     file.fileSubType = asset.subtype;
     file.metadataVersion = -1;
+    file.localAttributesJson = '{}';
     return file;
   }
 
@@ -198,6 +203,19 @@ class EnteFile {
     MediaUploadData mediaUploadData,
     ParsedExifDateTime? exifTime,
   ) async {
+    await applyDerivedAttributes(
+      mediaUploadData,
+      exifTime,
+      includeHash: true,
+    );
+    return metadata;
+  }
+
+  Future<void> applyDerivedAttributes(
+    MediaUploadData mediaUploadData,
+    ParsedExifDateTime? exifTime, {
+    bool includeHash = true,
+  }) async {
     final asset = await getAsset;
     // asset can be null for files shared to app
     if (asset != null) {
@@ -245,8 +263,9 @@ class EnteFile {
         }
       }
     }
-    hash = mediaUploadData.hashData?.fileHash;
-    return metadata;
+    if (includeHash) {
+      hash = mediaUploadData.hashData?.fileHash;
+    }
   }
 
   Map<String, dynamic> get metadata {
@@ -297,11 +316,11 @@ class EnteFile {
 
   // return 0 if the height is not available
   int get height {
-    return pubMagicMetadata?.h ?? 0;
+    return pubMagicMetadata?.h ?? localAttributes?.height ?? 0;
   }
 
   int get width {
-    return pubMagicMetadata?.w ?? 0;
+    return pubMagicMetadata?.w ?? localAttributes?.width ?? 0;
   }
 
   bool get hasDimensions {
@@ -393,6 +412,8 @@ class EnteFile {
     String? pubMmdEncodedJson,
     int? pubMmdVersion,
     PubMagicMetadata? pubMagicMetadata,
+    String? localAttributesJson,
+    LocalFileAttributes? localAttributes,
   }) {
     return EnteFile()
       ..generatedID = generatedID ?? this.generatedID
@@ -426,6 +447,8 @@ class EnteFile {
       ..magicMetadata = magicMetadata ?? this.magicMetadata
       ..pubMmdEncodedJson = pubMmdEncodedJson ?? this.pubMmdEncodedJson
       ..pubMmdVersion = pubMmdVersion ?? this.pubMmdVersion
-      ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata;
+      ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata
+      ..localAttributesJson = localAttributesJson ?? this.localAttributesJson
+      ..localAttributes = localAttributes ?? this.localAttributes;
   }
 }
