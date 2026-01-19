@@ -600,8 +600,8 @@ class RitualsService {
         lowerBound,
       );
       for (final file in files) {
-        final addedTime = file.addedTime;
-        if (addedTime == null || addedTime < start || addedTime >= end) {
+        final createdTime = file.creationTime;
+        if (createdTime == null || createdTime < start || createdTime >= end) {
           continue;
         }
         final ownerMatches =
