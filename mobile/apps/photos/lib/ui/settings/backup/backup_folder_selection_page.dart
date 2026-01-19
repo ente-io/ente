@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -21,7 +22,6 @@ import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
   final bool isFirstBackup;
@@ -262,9 +262,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     final result = await showChoiceDialog(
       context,
       title: AppLocalizations.of(context).warning,
-      body:
-          "You are currently backing up photos from $formattedDate. Please update your settings to backup all photos.",
-      firstButtonLabel: "Update settings",
+      body: AppLocalizations.of(context)
+          .backupOnlyNewPhotosWarningBody(formattedDate: formattedDate),
+      firstButtonLabel: AppLocalizations.of(context).updateSettings,
       firstButtonOnTap: () async {
         await routeToPage(
           context,

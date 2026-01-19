@@ -1,5 +1,6 @@
 import "dart:math";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
@@ -7,10 +8,6 @@ import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/utils/standalone/data.dart";
 
 class StorageDetailsScreen extends StatefulWidget {
   final ReferralView referralView;
@@ -23,208 +20,221 @@ class StorageDetailsScreen extends StatefulWidget {
 }
 
 class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
-  bool canApplyCode = true;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final pageBackgroundColor =
+        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+    final cardColor =
+        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).claimFreeStorage,
-            ),
-            flexibleSpaceCaption: AppLocalizations.of(context).details,
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
-                onTap: () {
-                  Navigator.of(context)
-                    ..pop()
-                    ..pop()
-                    ..pop();
-                },
-              ),
-            ],
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (delegateBuildContext, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    // wrap the child inside a FutureBuilder to get the
-                    // current state of the TextField
-                    child: FutureBuilder<BonusDetails>(
-                      future: storageBonusService.getBonusDetails(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 48.0),
-                              child: EnteLoadingWidget(),
-                            ),
-                          );
-                        }
-                        if (snapshot.hasError) {
-                          debugPrint(snapshot.error.toString());
-                          return Text(
-                            AppLocalizations.of(context).oopsSomethingWentWrong,
-                          );
-                        } else {
-                          final BonusDetails data = snapshot.data!;
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                BonusInfoSection(
-                                  sectionName: AppLocalizations.of(context)
-                                      .peopleUsingYourCode,
-                                  leftValue: data.refUpgradeCount,
-                                  leftUnitName:
-                                      AppLocalizations.of(context).eligible,
-                                  rightValue: data.refUpgradeCount >= 0
-                                      ? data.refCount
-                                      : null,
-                                  rightUnitName:
-                                      AppLocalizations.of(context).total,
-                                  showUnit: data.refCount > 0,
-                                ),
-                                data.hasAppliedCode
-                                    ? BonusInfoSection(
-                                        sectionName:
-                                            AppLocalizations.of(context)
-                                                .codeUsedByYou,
-                                        leftValue: 1,
-                                        showUnit: false,
-                                      )
-                                    : const SizedBox.shrink(),
-                                BonusInfoSection(
-                                  sectionName: AppLocalizations.of(context)
-                                      .freeStorageClaimed,
-                                  leftValue: convertBytesToAbsoluteGBs(
-                                    widget.referralView.claimedStorage,
-                                  ),
-                                  leftUnitName: "GB",
-                                  rightValue: null,
-                                ),
-                                BonusInfoSection(
-                                  sectionName: AppLocalizations.of(context)
-                                      .freeStorageUsable,
-                                  leftValue: convertBytesToAbsoluteGBs(
-                                    min(
-                                      widget.referralView.claimedStorage,
-                                      widget.userDetails
-                                          .getPlanPlusAddonStorage(),
-                                    ),
-                                  ),
-                                  leftUnitName: "GB",
-                                  rightValue: convertBytesToAbsoluteGBs(
-                                    widget.userDetails
-                                        .getPlanPlusAddonStorage(),
-                                  ),
-                                  rightUnitName: "GB",
-                                ),
-                                const SizedBox(
-                                  height: 24,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)
-                                      .usableReferralStorageInfo,
-                                  style: textStyle.small
-                                      .copyWith(color: colorScheme.textMuted),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
+      backgroundColor: pageBackgroundColor,
+      body: SafeArea(
+        child: FutureBuilder<BonusDetails>(
+          future: storageBonusService.getBonusDetails(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: colorScheme.strokeBase,
+                        size: 24,
+                      ),
                     ),
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
-          ),
-        ],
+                    const Expanded(
+                      child: Center(child: EnteLoadingWidget()),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: colorScheme.strokeBase,
+                        size: 24,
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          AppLocalizations.of(context).oopsSomethingWentWrong,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final BonusDetails data = snapshot.data!;
+
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    // Back arrow
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: colorScheme.strokeBase,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // Title
+                    Text(
+                      AppLocalizations.of(context).referralStats,
+                      style: textTheme.largeBold,
+                    ),
+                    const SizedBox(height: 24),
+                    // Stats cards
+                    Column(
+                      children: [
+                        // Row 1: Used your code + Eligible
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _StatCard(
+                                value: data.refCount.toString(),
+                                label: AppLocalizations.of(context)
+                                    .usedYourCode,
+                                cardColor: cardColor,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _StatCard(
+                                value: data.refUpgradeCount.toString(),
+                                label:
+                                    AppLocalizations.of(context).eligible,
+                                cardColor: cardColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Row 2: Claimed by you (only if has applied code)
+                        if (data.hasAppliedCode) ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatCard(
+                                  value: "1",
+                                  label: AppLocalizations.of(context)
+                                      .claimedByYou,
+                                  cardColor: cardColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        // Row 3: Earned + Usable
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _StatCard(
+                                value:
+                                    "${convertBytesToAbsoluteGBs(widget.referralView.claimedStorage)} GB",
+                                label: AppLocalizations.of(context).earned,
+                                cardColor: cardColor,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _StatCard(
+                                value:
+                                    "${convertBytesToAbsoluteGBs(min(widget.referralView.claimedStorage, widget.userDetails.getPlanPlusAddonStorage()))} GB",
+                                label: AppLocalizations.of(context).usable,
+                                cardColor: cardColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // Info text
+                    Text(
+                      AppLocalizations.of(context).referralStorageInfo,
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 60),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class BonusInfoSection extends StatelessWidget {
-  final String sectionName;
-  final bool showUnit;
-  final String leftUnitName;
-  final String rightUnitName;
-  final int leftValue;
-  final int? rightValue;
+class _StatCard extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color cardColor;
 
-  const BonusInfoSection({
-    super.key,
-    required this.sectionName,
-    required this.leftValue,
-    this.leftUnitName = "GB",
-    this.rightValue,
-    this.rightUnitName = "GB",
-    this.showUnit = true,
+  const _StatCard({
+    required this.value,
+    required this.label,
+    required this.cardColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          sectionName,
-          style: textStyle.body.copyWith(
-            color: colorScheme.textMuted,
+    final textTheme = getEnteTextTheme(context);
+    const greenColor = Color(0xFF08C225);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: textTheme.h3Bold.copyWith(color: greenColor),
           ),
-        ),
-        const SizedBox(height: 2),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: leftValue.toString(),
-                style: textStyle.h3,
-              ),
-              TextSpan(
-                text: showUnit ? " $leftUnitName" : "",
-                style: textStyle.large,
-              ),
-              TextSpan(
-                text: (rightValue != null && rightValue! > 0)
-                    ? " / ${rightValue.toString()}"
-                    : "",
-                style: textStyle.h3,
-              ),
-              TextSpan(
-                text: showUnit && (rightValue != null && rightValue! > 0)
-                    ? " $rightUnitName"
-                    : "",
-                style: textStyle.large,
-              ),
-            ],
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: textTheme.smallMuted,
           ),
-        ),
-        const SizedBox(height: 24),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -27,7 +27,6 @@ import type {
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import React, {
     memo,
@@ -540,9 +539,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
         {attributes.has("userFavorites") && <StarIcon fontSize="small" />}
-        {(attributes.has("pinned") ||
-            (attributes.has("shareePinned") &&
-                settingsSnapshot().isShareePinEnabled)) && (
+        {(attributes.has("pinned") || attributes.has("shareePinned")) && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}

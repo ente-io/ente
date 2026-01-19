@@ -1,4 +1,5 @@
 import 'package:ente_base/typedefs.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/components/buttons/models/button_result.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/buttons/models/custom_button_style.dart';
@@ -8,7 +9,6 @@ import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/theme/text_style.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
-import 'package:ente_utils/debouncer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -60,8 +61,6 @@ import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
-import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/standalone/data.dart';
 import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {

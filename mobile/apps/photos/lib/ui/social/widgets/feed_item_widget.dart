@@ -203,8 +203,8 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
               color: getEnteColorScheme(context).textMuted,
             ),
             const Positioned(
-              right: -4,
-              bottom: -4,
+              right: -2,
+              bottom: -2,
               child: Icon(
                 EnteIcons.likeFilled,
                 size: 10,
@@ -223,8 +223,8 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
               color: getEnteColorScheme(context).textMuted,
             ),
             const Positioned(
-              right: -4,
-              bottom: -4,
+              right: -2,
+              bottom: -2,
               child: Icon(
                 EnteIcons.likeFilled,
                 size: 10,

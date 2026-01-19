@@ -1,13 +1,14 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/date_time.dart";
 
 class CreationTimeItem extends StatefulWidget {
   final EnteFile file;
@@ -28,6 +29,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
+        Bus.instance.fire(PauseVideoEvent());
         routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
       },
       child: InfoItemWidget(

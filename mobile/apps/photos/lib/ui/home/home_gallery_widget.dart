@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -21,7 +22,6 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class HomeGalleryWidget extends StatefulWidget {
   final Widget? header;
@@ -132,6 +132,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       footer: widget.footer,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
+      priorityReloadDebounceTime: const Duration(milliseconds: 200),
       galleryType: GalleryType.homepage,
       groupType: widget.groupType,
       showGallerySettingsCTA: true,

@@ -1,5 +1,5 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_utils/ente_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
@@ -13,21 +13,20 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        children: [
-          _LegacyItem(),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: _CollectionsItem()),
-              SizedBox(width: 8),
-              Expanded(child: _TrashItem()),
-            ],
-          ),
-        ],
-      ),
+    const sectionSpacing = SizedBox(height: 8);
+
+    return const Column(
+      children: [
+        _LegacyItem(),
+        sectionSpacing,
+        Row(
+          children: [
+            Expanded(child: _CollectionsItem()),
+            SizedBox(width: 8),
+            Expanded(child: _TrashItem()),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -41,41 +40,36 @@ class _CollectionsItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => _openCollections(context),
-      borderRadius: borderRadius,
       child: Container(
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          border: Border.all(
-            color: colorScheme.backdropBase,
-            width: 1.5,
-          ),
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
-            Container(
-              height: 40,
+            SizedBox(
               width: 40,
-              decoration: BoxDecoration(
-                color: colorScheme.backgroundElevated,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(8.0),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedWallet05,
-                color: colorScheme.textBase,
+              height: 40,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedWallet05,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.l10n.collections,
-                style: textTheme.small,
+                style: textTheme.body,
                 overflow: TextOverflow.ellipsis,
-                maxLines: 2,
+                maxLines: 1,
               ),
             ),
           ],
@@ -98,41 +92,36 @@ class _TrashItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => _openTrash(context),
-      borderRadius: borderRadius,
       child: Container(
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          border: Border.all(
-            color: colorScheme.backdropBase,
-            width: 1.5,
-          ),
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
-            Container(
-              height: 40,
+            SizedBox(
               width: 40,
-              decoration: BoxDecoration(
-                color: colorScheme.backgroundElevated,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(8.0),
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedDelete02,
-                color: colorScheme.textBase,
+              height: 40,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.l10n.trash,
-                style: textTheme.small,
+                style: textTheme.body,
                 overflow: TextOverflow.ellipsis,
-                maxLines: 2,
+                maxLines: 1,
               ),
             ),
           ],
@@ -157,51 +146,39 @@ class _LegacyItem extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => openLegacyPage(context),
-      borderRadius: borderRadius,
       child: Container(
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          border: Border.all(
-            color: colorScheme.backdropBase,
-            width: 1.5,
-          ),
           borderRadius: borderRadius,
         ),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
             SizedBox(
-              height: 60,
-              width: 60,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary700.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: colorScheme.primary700,
-                  ),
+              width: 40,
+              height: 40,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFavourite,
+                  color: colorScheme.primary700,
+                  size: 24,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 context.l10n.legacy,
-                style: textTheme.small,
+                style: textTheme.body,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: Icon(
-                Icons.chevron_right,
-                color: colorScheme.textMuted,
-              ),
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.textMuted,
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:flutter/services.dart";
@@ -82,7 +83,6 @@ import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 class HomeWidget extends StatefulWidget {
@@ -750,13 +750,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
           body: Stack(
             children: [
-              SafeArea(
-                bottom: false,
-                child: Builder(
-                  builder: (context) {
-                    return _getBody(context);
-                  },
-                ),
+              Builder(
+                builder: (context) {
+                  return _getBody(context);
+                },
               ),
               if (isChristmasPeriod())
                 ValueListenableBuilder<double>(

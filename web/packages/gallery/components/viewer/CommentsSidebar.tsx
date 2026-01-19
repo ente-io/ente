@@ -2355,7 +2355,7 @@ const CommentBubbleWrapper = styled(Box, {
     justifyContent: isOwn ? "flex-end" : "flex-start",
     width: "100%",
     marginTop: isFirstOwn ? 64 : 0,
-    marginBottom: isOwn ? 12 : isLastOwn ? 48 : 12,
+    marginBottom: isLastOwn ? 48 : 12,
     paddingRight: isOwn ? 52 : 0,
     paddingLeft: isOwn ? 0 : 28,
     position: "relative",

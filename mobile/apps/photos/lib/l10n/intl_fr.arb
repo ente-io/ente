@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Autoriser l'adhésion à l'album",
   "allowAddPhotosDescription": "Autorisez les personnes ayant le lien à ajouter des photos dans l'album partagé.",
+  "enableComment": "Commentaires et réactions",
   "passwordLock": "Verrouillage par mot de passe",
   "canNotOpenTitle": "Impossible d'ouvrir cet album",
   "canNotOpenBody": "Désolé, cet album ne peut pas être ouvert dans l'application.",
@@ -305,10 +306,13 @@
   "enterCodeDescription": "Entrez le code fourni par votre ami·e pour débloquer l'espace de stockage gratuit",
   "apply": "Appliquer",
   "failedToApplyCode": "Impossible d'appliquer le code",
+  "invalidReferralCode": "Code invalide",
   "enterReferralCode": "Code de parrainage",
   "codeAppliedPageTitle": "Code appliqué",
-  "changeYourReferralCode": "Modifier votre code de parrainage",
+  "changeYourReferralCode": "Modifier votre code",
   "change": "Modifier",
+  "saveCode": "Enregistrer le code",
+  "referralCodeHint": "Vous pouvez personnaliser ce code jusqu'à 3 fois",
   "unavailableReferralCode": "Désolé, ce code n'est pas disponible.",
   "codeChangeLimitReached": "Désolé, vous avez atteint la limite de changements de code.",
   "onlyFamilyAdminCanChangeCode": "Veuillez contacter {familyAdminEmail} pour modifier votre code.",
@@ -324,12 +328,16 @@
   "shareTextReferralCode": "Code de parrainage Ente : {referralCode} \n\nValidez-le dans Paramètres → Général → Références pour obtenir {referralStorageInGB} Go gratuitement après votre inscription à un plan payant\n\nhttps://ente.io",
   "claimFreeStorage": "Obtenez du stockage gratuit",
   "inviteYourFriends": "Parrainez vos ami·e·s",
+  "earnFreeStorage": "Obtenez du stockage gratuit",
+  "shareCodeEarnStorage": "Partagez votre code, gagnez du stockage.",
+  "youBothGet": "Vous obtenez les deux",
+  "free": "gratuit",
   "failedToFetchReferralDetails": "Impossible de récupérer les détails du parrainage. Veuillez réessayer plus tard.",
-  "referralStep1": "1. Donnez ce code à vos ami·e·s",
+  "referralStep1": "1. Personnalisez et partagez votre code avec vos amis.",
   "referralStep2": "2. Ils souscrivent à une offre payante",
   "referralStep3": "3. Vous recevez tous les deux {storageInGB} Go* gratuits",
   "referralsAreCurrentlyPaused": "Les recommandations sont actuellement en pause",
-  "youCanAtMaxDoubleYourStorage": "* Vous pouvez au maximum doubler votre espace de stockage",
+  "youCanAtMaxDoubleYourStorage": "Vous pouvez au maximum doubler votre espace de stockage",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Votre famille a obtenu {storageAmountInGb} Go jusqu'à présent} false {Vous avez obtenu {storageAmountInGb} Go jusqu'à présent} other {Vous avez obtenu {storageAmountInGb} Go jusqu'à présent !}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -353,6 +361,12 @@
   "freeStorageClaimed": "Stockage gratuit obtenu",
   "freeStorageUsable": "Stockage gratuit disponible",
   "usableReferralStorageInfo": "Le stockage gratuit possible est limité par votre offre actuelle. Vous pouvez au maximum doubler votre espace de stockage gratuitement, le stockage supplémentaire deviendra donc automatiquement utilisable lorsque vous mettrez à niveau votre offre.",
+  "referralStats": "Statistiques de parrainage",
+  "usedYourCode": "a utilisé votre code",
+  "claimedByYou": "demandé par vous",
+  "earned": "gagné",
+  "usable": "utilisable",
+  "referralStorageInfo": "Parrainer un abonné payant permet de gagner de l'espace de stockage bonus.\n\nVous pouvez utiliser votre espace de stockage jusqu'à la limite de votre forfait. Passez à un forfait supérieur pour utiliser le reste de votre espace de stockage gagné.",
   "removeFromAlbumTitle": "Retirer de l'album ?",
   "removeFromAlbum": "Retirer de l'album",
   "itemsWillBeRemovedFromAlbum": "Les éléments sélectionnés seront supprimés de cet album",
@@ -484,10 +498,29 @@
   "pendingItems": "Éléments en attente",
   "clearIndexes": "Effacer les index",
   "selectFoldersForBackup": "Dossiers à sauvegarder",
+  "selectFolders": "Sélectionnez les dossiers",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Les dossiers sélectionnés seront chiffrés et sauvegardés",
   "unselectAll": "Désélectionner tout",
   "selectAll": "Tout sélectionner",
   "skip": "Ignorer",
+  "chooseBackupModeHeader": "<i>Choisissez comment </i>Enter sauvegarde vos photos",
+  "startWithLatestPhotos": "Commencer par les dernières photos",
+  "backingUpLastSevenDaysPhotos": "Sauvegarde des photos des 7 derniers jours",
+  "backupOnlyNewPhotos": "Sauvegarder uniquement les nouvelles photos",
+  "backupOnlyNewPhotosAllFoldersSelected": "Tous les dossiers sont actuellement sélectionnés pour la sauvegarde.\n\nVous pouvez continuer pour l'instant, ou mettre à jour les dossiers sélectionnés.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Aucun dossier n'est actuellement sélectionné pour la sauvegarde.\n\nVous pouvez continuer pour l'instant, ou mettre à jour les dossiers sélectionnés.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Aucun dossier n'est actuellement sélectionné pour la sauvegarde.\n\nVeuillez sélectionner des dossiers pour continuer.",
+  "backupOnlyNewPhotosWarningBody": "Vous sauvegardez actuellement des photos depuis le {formattedDate}. Veuillez mettre à jour vos paramètres pour sauvegarder toutes les photos.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Paramètres de mise à jour",
   "updatingFolderSelection": "Mise à jour de la sélection du dossier...",
   "itemCount": "{count, plural, one{{count} objet} other{{count} objets}}",
   "deleteItemCount": "{count, plural, =1 {Supprimer le fichier} other {Supprimer {count} fichiers}}",
@@ -555,6 +588,11 @@
   "removeDuplicatesDesc": "Examinez et supprimez les fichiers étant des doublons exacts.",
   "viewLargeFiles": "Fichiers volumineux",
   "viewLargeFilesDesc": "Affichez les fichiers qui consomment le plus de stockage.",
+  "deleteSuggestions": "Supprimer les suggestions",
+  "deleteSuggestionsDesc": "Examiner les fichiers qui ont été suggérés pour suppression.",
+  "rejectSuggestions": "Rejeter les suggestions",
+  "noDeleteSuggestion": "Aucune suggestion de suppression",
+  "youHaveNoFileSuggestedForDeletion": "Vous n'avez pas de fichiers qui ont été suggérés pour la suppression",
   "noDuplicates": "✨ Aucun doublon",
   "youveNoDuplicateFilesThatCanBeCleared": "Vous n'avez aucun fichier dupliqué pouvant être nettoyé",
   "success": "Succès",
@@ -621,6 +659,7 @@
   "reportBug": "Signaler un bogue",
   "suggestFeatures": "Suggérer une fonctionnalité",
   "support": "Support",
+  "appearance": "Apparence",
   "theme": "Thème",
   "lightTheme": "Clair",
   "darkTheme": "Sombre",
@@ -1130,7 +1169,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} libre",
-  "appVersion": "Version : {versionValue}",
+  "appVersion": "Version {versionValue}",
   "verifyIDLabel": "Vérifier",
   "fileInfoAddDescHint": "Ajouter une description...",
   "editLocationTagTitle": "Modifier le lieu",
@@ -1412,6 +1451,7 @@
   "localSyncErrorMessage": "Il semble que quelque chose s'est mal passé car la synchronisation des photos locales prend plus de temps que prévu. Veuillez contacter notre équipe d'assistance",
   "showPerson": "Montrer la personne",
   "sort": "Trier",
+  "recent": "Récent",
   "mostRecent": "Les plus récents",
   "mostRelevant": "Les plus pertinents",
   "loadingYourPhotos": "Chargement de vos photos...",
@@ -1512,6 +1552,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Aucun admins d'ajouté} =1 {1 admin ajouté} other {{count} photos}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, one {}=0 {Ajouter un admin} =1 {Ajouter un admin} other {Ajouter des admins}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Les admins peuvent gérer les photos et les participants.",
+  "suggestDeletion": "Suggérer la suppression",
+  "suggestDeletionDescription": "Les photos sélectionnées seront retirées de cet album. Les propriétaires de photos recevront également une suggestion de révision et de supprimer les photos.",
+  "deleteSuggestionSent": "Suggestion de suppression envoyée",
   "accountIsAlreadyConfigured": "Le compte est déjà configuré.",
   "sessionIdMismatch": "Incompatibilité de l'ID de session",
   "@sessionIdMismatch": {
@@ -1871,6 +1935,10 @@
   "thisMonth": "Ce mois",
   "thisYear": "Cette année",
   "groupBy": "Grouper par",
+  "groupByDay": "Jour",
+  "groupByWeek": "Semaine",
+  "groupByMonth": "Mois",
+  "groupByYear": "Année",
   "faceThumbnailGenerationFailed": "Impossible de créer des miniatures de visage",
   "fileAnalysisFailed": "Impossible d'analyser le fichier",
   "editAutoAddPeople": "Modifier les personnes auto-ajoutées",
@@ -2033,9 +2101,9 @@
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
   "cLTitle1": "Commentaires et réactions",
-  "cLDesc1": "Nous introduisons les commentaires et les réactions sur les photos partagées. Vous pouvez réagir ou commenter une photo en l'ouvrant et en utilisant les actions en bas. Tous les commentaires et réactions entrants seront visibles dans l'onglet Partagé.",
-  "cLTitle2": "Administrateur d'albums",
-  "cLDesc2": "Vous pouvez maintenant désigner un autre utilisateur Ente comme administrateur de votre album. Avec cela, il pourra ajouter d'autres spectateurs et collaborateurs, supprimer des photos des albums et même suggérer aux participants de supprimer leurs photos.",
+  "cLDesc1": "Nous ajoutons les commentaires et réactions sur les photos partagées. Vous pouvez réagir ou commenter une photo en l'ouvrant et en utilisant les actions en bas de page. Tous les commentaires et réactions entrants seront visibles dans l’onglet Partagé.",
+  "cLTitle2": "Administrateur pour les albums",
+  "cLDesc2": "Vous pouvez maintenant assigner un autre utilisateur Ente en tant qu'administrateur de votre album. Avec cela, ils seront en mesure d'ajouter d'autres spectateurs et collaborateurs, de supprimer des photos des albums, et même de suggérer aux participants de supprimer leurs photos.",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2229,5 +2297,137 @@
   "ritualCustomKeyboardLabel": "Personnalisé (clavier)",
   "ritualEmojiKeyboardHint": "Appuyez pour ouvrir le clavier emoji",
   "ritualEmojiUseAction": "Utiliser",
-  "ritualSearchEmpty": "Construisez un rituel pour garder votre habitude de photographie."
+  "ritualSearchEmpty": "Construisez un rituel pour garder votre habitude de photographie.",
+  "feed": "Fil d'actualité",
+  "likedYourPhoto": "Aimé une photo",
+  "commentedOnYourPhoto": "Commenté sur une photo",
+  "repliedToYourComment": "A répondu à un commentaire",
+  "likedYourComment": "A aimé un commentaire",
+  "likedYourReply": "A aimé une réponse",
+  "and1Other": "et 1 autre",
+  "andXOthers": "et {count} autres",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Aucune activité pour le moment",
+  "like": "J'aime",
+  "comments": "Commentaires",
+  "commentHint": "Dites quelque chose de gentil !",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Répondre",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Êtes-vous sûr ?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Supprimer le commentaire",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Votre commentaire \"{comment}\" sera supprimé définitivement",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, one {}=1{1 j'aime} other{{count} j'aime}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Pas encore de j'aime",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Impossible de charger les j'aime",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Échec de la mise à jour du j'aime",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, one {}=1{J'aime impossible sur 1 album} other{J'aime impossible sur {count} albums}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Impossible de charger les albums",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, one {}=1{1 album} other{{count} albums}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Aimer tout",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Sélectionnez l'album pour aimer la photo",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Sélectionnez l'album pour aimer la photo",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Impossible d'aimer le commentaire",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Impossible de supprimer le commentaire",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(supprimé)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Vous répond",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Répond à {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, one {} =0{0 commentaires} =1{1 commentaire} other{{count} commentaires}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

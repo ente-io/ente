@@ -202,6 +202,7 @@ type AccountAction = Extract<
     | "account.changePassword"
     | "account.changeEmail"
     | "account.deleteAccount"
+    | "account.sessions"
 >;
 
 type PreferencesAction = Extract<
@@ -227,6 +228,11 @@ type HelpAction = Extract<
     | "help.testUpload"
 >;
 
+type FreeUpSpaceAction = Extract<
+    SidebarActionID,
+    "freeUpSpace.deduplicate" | "freeUpSpace.largeFiles"
+>;
+
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
@@ -239,11 +245,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onShowExport,
     onAuthenticateUser,
 }) => {
-    const router = useRouter();
     const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
     const { show: showPreferences, props: preferencesVisibilityProps } =
+        useModalVisibility();
+    const { show: showFreeUpSpace, props: freeUpSpaceVisibilityProps } =
         useModalVisibility();
     const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
     const { showMiniDialog, logout } = useBaseContext();
@@ -253,6 +260,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [pendingPreferencesAction, setPendingPreferencesAction] =
         useState<PreferencesAction>();
     const [pendingHelpAction, setPendingHelpAction] = useState<HelpAction>();
+    const [pendingFreeUpSpaceAction, setPendingFreeUpSpaceAction] =
+        useState<FreeUpSpaceAction>();
 
     const handleLogout = useCallback(
         () =>
@@ -287,9 +296,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 showAccount,
                 showPreferences,
                 showHelp,
+                showFreeUpSpace,
                 onShowExport,
                 onLogout: handleLogout,
-                onRouteToDeduplicate: () => router.push("/duplicates"),
                 onShowWatchFolder: handleOpenWatchFolder,
                 pseudoIDs: {
                     uncategorized: uncategorizedCollectionSummaryID,
@@ -305,6 +314,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ),
                 setPendingHelpAction: (a) =>
                     setPendingHelpAction(a as HelpAction | undefined),
+                setPendingFreeUpSpaceAction: (a) =>
+                    setPendingFreeUpSpaceAction(
+                        a as FreeUpSpaceAction | undefined,
+                    ),
             } as SidebarActionContext),
         [
             handleLogout,
@@ -313,8 +326,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onShowCollectionSummary,
             onShowPlanSelector,
             onShowExport,
-            router,
             showAccount,
+            showFreeUpSpace,
             showHelp,
             showPreferences,
             uncategorizedCollectionSummaryID,
@@ -368,6 +381,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         preferencesVisibilityProps,
                         showHelp,
                         helpVisibilityProps,
+                        showFreeUpSpace,
+                        freeUpSpaceVisibilityProps,
                         watchFolderView,
                         onShowWatchFolder: handleOpenWatchFolder,
                         onCloseWatchFolder: handleCloseWatchFolder,
@@ -377,9 +392,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onPreferencesActionHandled: setPendingPreferencesAction,
                         pendingHelpAction,
                         onHelpActionHandled: setPendingHelpAction,
-                        onRouteToDeduplicate: () => {
-                            void router.push("/duplicates");
-                        },
+                        pendingFreeUpSpaceAction,
+                        onFreeUpSpaceActionHandled: setPendingFreeUpSpaceAction,
                     }}
                 />
                 <Divider sx={{ my: "2px" }} />
@@ -758,6 +772,8 @@ type UtilitySectionProps = SectionProps &
         preferencesVisibilityProps: ModalVisibilityProps;
         showHelp: () => void;
         helpVisibilityProps: ModalVisibilityProps;
+        showFreeUpSpace: () => void;
+        freeUpSpaceVisibilityProps: ModalVisibilityProps;
         watchFolderView: boolean;
         onShowWatchFolder: () => void;
         onCloseWatchFolder: () => void;
@@ -767,7 +783,8 @@ type UtilitySectionProps = SectionProps &
         onPreferencesActionHandled: (action?: PreferencesAction) => void;
         pendingHelpAction?: HelpAction;
         onHelpActionHandled: (action?: HelpAction) => void;
-        onRouteToDeduplicate: () => void;
+        pendingFreeUpSpaceAction?: FreeUpSpaceAction;
+        onFreeUpSpaceActionHandled: (action?: FreeUpSpaceAction) => void;
     };
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({
@@ -780,6 +797,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     preferencesVisibilityProps,
     showHelp,
     helpVisibilityProps,
+    showFreeUpSpace,
+    freeUpSpaceVisibilityProps,
     watchFolderView,
     onShowWatchFolder,
     onCloseWatchFolder,
@@ -789,7 +808,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     onPreferencesActionHandled,
     pendingHelpAction,
     onHelpActionHandled,
-    onRouteToDeduplicate,
+    pendingFreeUpSpaceAction,
+    onFreeUpSpaceActionHandled,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -814,8 +834,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
             )}
             <RowButton
                 variant="secondary"
-                label={t("deduplicate_files")}
-                onClick={onRouteToDeduplicate}
+                label={t("free_up_space")}
+                onClick={showFreeUpSpace}
             />
             <RowButton
                 variant="secondary"
@@ -861,6 +881,12 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 onRootClose={onCloseSidebar}
                 pendingAction={pendingPreferencesAction}
                 onActionHandled={onPreferencesActionHandled}
+            />
+            <FreeUpSpace
+                {...freeUpSpaceVisibilityProps}
+                onRootClose={onCloseSidebar}
+                pendingAction={pendingFreeUpSpaceAction}
+                onActionHandled={onFreeUpSpaceActionHandled}
             />
         </>
     );
@@ -948,6 +974,11 @@ const Account: React.FC<AccountProps> = ({
         await openAccountsManagePasskeysPage();
     }, [onRootClose]);
 
+    const handleActiveSessions = useCallback(async () => {
+        await onAuthenticateUser();
+        showSessions();
+    }, [onAuthenticateUser, showSessions]);
+
     useEffect(() => {
         if (!open || !pendingAction) return;
         switch (pendingAction) {
@@ -970,9 +1001,13 @@ const Account: React.FC<AccountProps> = ({
             case "account.deleteAccount":
                 showDeleteAccount();
                 break;
+            case "account.sessions":
+                void handleActiveSessions();
+                break;
         }
         onActionHandled?.();
     }, [
+        handleActiveSessions,
         handleChangeEmail,
         handleChangePassword,
         handlePasskeys,
@@ -983,11 +1018,6 @@ const Account: React.FC<AccountProps> = ({
         showRecoveryKey,
         showTwoFactor,
     ]);
-
-    const handleActiveSessions = async () => {
-        await onAuthenticateUser();
-        showSessions();
-    };
 
     return (
         <TitledNestedSidebarDrawer
@@ -1715,6 +1745,77 @@ const Help: React.FC<HelpProps> = ({
                         onClick={testUpload}
                     />
                 )}
+            </Stack>
+        </TitledNestedSidebarDrawer>
+    );
+};
+
+type FreeUpSpaceProps = NestedSidebarDrawerVisibilityProps & {
+    pendingAction?: FreeUpSpaceAction;
+    onActionHandled?: (action?: FreeUpSpaceAction) => void;
+};
+
+const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
+    open,
+    onClose,
+    onRootClose,
+    pendingAction,
+    onActionHandled,
+}) => {
+    const router = useRouter();
+
+    const handleRootClose = useCallback(() => {
+        onClose();
+        onRootClose();
+    }, [onClose, onRootClose]);
+
+    const handleDeduplicate = useCallback(() => {
+        onRootClose();
+        void router.push("/duplicates");
+    }, [onRootClose, router]);
+
+    const handleLargeFiles = useCallback(() => {
+        onRootClose();
+        void router.push("/large-files");
+    }, [onRootClose, router]);
+
+    useEffect(() => {
+        if (!open || !pendingAction) return;
+        switch (pendingAction) {
+            case "freeUpSpace.deduplicate":
+                handleDeduplicate();
+                break;
+            case "freeUpSpace.largeFiles":
+                handleLargeFiles();
+                break;
+        }
+        onActionHandled?.();
+    }, [
+        handleDeduplicate,
+        handleLargeFiles,
+        open,
+        onActionHandled,
+        pendingAction,
+    ]);
+
+    return (
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("free_up_space")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <RowButtonGroup>
+                    <RowButton
+                        label={t("deduplicate_files")}
+                        onClick={handleDeduplicate}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        label={t("large_files_title")}
+                        onClick={handleLargeFiles}
+                    />
+                </RowButtonGroup>
             </Stack>
         </TitledNestedSidebarDrawer>
     );

@@ -1,29 +1,23 @@
 import "dart:io";
 
-import 'package:flutter/material.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
+import "package:flutter/material.dart";
 import "package:photo_manager/photo_manager.dart";
-import 'package:photos/core/configuration.dart';
-import 'package:photos/generated/l10n.dart';
-import 'package:photos/l10n/l10n.dart';
-import 'package:photos/service_locator.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
-import 'package:photos/services/sync/sync_service.dart';
-import 'package:photos/services/wake_lock_service.dart';
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/backup_flow_helper.dart';
-import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import 'package:photos/ui/components/captioned_text_widget.dart';
-import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/components/menu_section_description_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/components/title_bar_title_widget.dart';
-import 'package:photos/ui/components/title_bar_widget.dart';
-import 'package:photos/ui/components/toggle_switch_widget.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/standalone/debouncer.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/services/sync/sync_service.dart";
+import "package:photos/services/wake_lock_service.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/backup_flow_helper.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
+import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
@@ -36,162 +30,125 @@ class BackupSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final pageBackgroundColor =
+        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).backupSettings,
-            ),
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
+      backgroundColor: pageBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context).backupSettings,
+                style: textTheme.h3Bold,
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MenuItemWidgetNew(
+                        title:
+                            AppLocalizations.of(context).backupOverMobileData,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => Configuration.instance
+                              .shouldBackupOverMobileData(),
+                          onChanged: () async {
+                            await Configuration.instance
+                                .setBackupOverMobileData(
+                              !Configuration.instance
+                                  .shouldBackupOverMobileData(),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).backupVideos,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () =>
+                              Configuration.instance.shouldBackupVideos(),
+                          onChanged: () =>
+                              Configuration.instance.setShouldBackupVideos(
+                            !Configuration.instance.shouldBackupVideos(),
+                          ),
+                        ),
+                      ),
+                      if (_shouldShowOnlyNewToggle()) ...[
+                        const SizedBox(height: 8),
+                        _BackupOnlyNewPhotosToggle(
+                          debouncer: _onlyNewToggleDebouncer,
+                        ),
+                      ],
+                      if (flagService.enableMobMultiPart) ...[
+                        const SizedBox(height: 8),
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).resumableUploads,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => localSettings.userEnabledMultiplePart,
+                            onChanged: () async {
+                              await localSettings.setUserEnabledMultiplePart(
+                                !localSettings.userEnabledMultiplePart,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                      if (Platform.isIOS) ...[
+                        const SizedBox(height: 24),
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).disableAutoLock,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => EnteWakeLockService
+                                .instance.shouldKeepAppAwakeAcrossSessions,
+                            onChanged: () async {
+                              EnteWakeLockService.instance.updateWakeLock(
+                                enable: !EnteWakeLockService
+                                    .instance.shouldKeepAppAwakeAcrossSessions,
+                                wakeLockFor: WakeLockFor
+                                    .fasterBackupsOniOSByKeepingScreenAwake,
+                              );
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            top: 8,
+                            bottom: 16,
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context).deviceLockExplanation,
+                            style: textTheme.mini
+                                .copyWith(color: colorScheme.textMuted),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Column(
-                          children: [
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: AppLocalizations.of(context)
-                                    .backupOverMobileData,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => Configuration.instance
-                                    .shouldBackupOverMobileData(),
-                                onChanged: () async {
-                                  await Configuration.instance
-                                      .setBackupOverMobileData(
-                                    !Configuration.instance
-                                        .shouldBackupOverMobileData(),
-                                  );
-                                },
-                              ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              isBottomBorderRadiusRemoved: true,
-                              isGestureDetectorDisabled: true,
-                            ),
-                            DividerWidget(
-                              dividerType: DividerType.menuNoIcon,
-                              bgColor: colorScheme.fillFaint,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title:
-                                    AppLocalizations.of(context).backupVideos,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () =>
-                                    Configuration.instance.shouldBackupVideos(),
-                                onChanged: () => Configuration.instance
-                                    .setShouldBackupVideos(
-                                  !Configuration.instance.shouldBackupVideos(),
-                                ),
-                              ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              isTopBorderRadiusRemoved: true,
-                              isGestureDetectorDisabled: true,
-                              isBottomBorderRadiusRemoved:
-                                  flagService.enableMobMultiPart ||
-                                      _shouldShowOnlyNewToggle(),
-                            ),
-                            if (_shouldShowOnlyNewToggle())
-                              ..._buildOnlyNewToggleSection(
-                                context,
-                                colorScheme,
-                              ),
-                            if (flagService.enableMobMultiPart)
-                              DividerWidget(
-                                dividerType: DividerType.menuNoIcon,
-                                bgColor: colorScheme.fillFaint,
-                              ),
-                            if (flagService.enableMobMultiPart)
-                              MenuItemWidget(
-                                captionedTextWidget: CaptionedTextWidget(
-                                  title: AppLocalizations.of(context)
-                                      .resumableUploads,
-                                ),
-                                menuItemColor: colorScheme.fillFaint,
-                                singleBorderRadius: 8,
-                                trailingWidget: ToggleSwitchWidget(
-                                  value: () =>
-                                      localSettings.userEnabledMultiplePart,
-                                  onChanged: () async {
-                                    await localSettings
-                                        .setUserEnabledMultiplePart(
-                                      !localSettings.userEnabledMultiplePart,
-                                    );
-                                  },
-                                ),
-                                alignCaptionedTextToLeft: true,
-                                isTopBorderRadiusRemoved: true,
-                                isGestureDetectorDisabled: true,
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        Platform.isIOS
-                            ? Column(
-                                children: [
-                                  MenuItemWidget(
-                                    captionedTextWidget: CaptionedTextWidget(
-                                      title: AppLocalizations.of(context)
-                                          .disableAutoLock,
-                                    ),
-                                    menuItemColor: colorScheme.fillFaint,
-                                    trailingWidget: ToggleSwitchWidget(
-                                      value: () => EnteWakeLockService.instance
-                                          .shouldKeepAppAwakeAcrossSessions,
-                                      onChanged: () async {
-                                        EnteWakeLockService.instance
-                                            .updateWakeLock(
-                                          enable: !EnteWakeLockService.instance
-                                              .shouldKeepAppAwakeAcrossSessions,
-                                          wakeLockFor: WakeLockFor
-                                              .fasterBackupsOniOSByKeepingScreenAwake,
-                                        );
-                                      },
-                                    ),
-                                    singleBorderRadius: 8,
-                                    alignCaptionedTextToLeft: true,
-                                    isGestureDetectorDisabled: true,
-                                  ),
-                                  MenuSectionDescriptionWidget(
-                                    content: AppLocalizations.of(context)
-                                        .deviceLockExplanation,
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -199,57 +156,47 @@ class BackupSettingsScreen extends StatelessWidget {
   bool _shouldShowOnlyNewToggle() {
     return flagService.enableOnlyBackupFuturePhotos;
   }
+}
 
-  List<Widget> _buildOnlyNewToggleSection(
-    BuildContext context,
-    dynamic colorScheme,
-  ) {
-    return [
-      DividerWidget(
-        dividerType: DividerType.menuNoIcon,
-        bgColor: colorScheme.fillFaint,
-      ),
-      MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Backup only new photos",
-        ),
-        menuItemColor: colorScheme.fillFaint,
-        trailingWidget: ToggleSwitchWidget(
-          value: () => backupPreferenceService.isOnlyNewBackupEnabled,
-          onChanged: () async {
-            final hasPermission = await _ensurePhotoPermissions(context);
-            if (!hasPermission) {
-              return;
-            }
-            final shouldProceed = await _maybeHandleFolderSelection(
-              context: context,
+class _BackupOnlyNewPhotosToggle extends StatelessWidget {
+  final Debouncer debouncer;
+
+  const _BackupOnlyNewPhotosToggle({required this.debouncer});
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuItemWidgetNew(
+      title: context.l10n.backupOnlyNewPhotos,
+      trailingWidget: ToggleSwitchWidget(
+        value: () => backupPreferenceService.isOnlyNewBackupEnabled,
+        onChanged: () async {
+          final hasPermission = await _ensurePhotoPermissions(context);
+          if (!hasPermission) {
+            return;
+          }
+          final shouldProceed = await _maybeHandleFolderSelection(
+            context: context,
+          );
+          if (!shouldProceed) {
+            return;
+          }
+          final isEnabled = backupPreferenceService.isOnlyNewBackupEnabled;
+          if (!isEnabled) {
+            await backupPreferenceService.setOnlyNewSinceNow();
+          } else {
+            await backupPreferenceService.clearOnlyNewSinceEpoch();
+          }
+          debouncer.run(() async {
+            await SyncService.instance.sync();
+          });
+          if (backupPreferenceService.hasSkippedOnboardingPermission) {
+            await backupPreferenceService.setOnboardingPermissionSkipped(
+              false,
             );
-            if (!shouldProceed) {
-              return;
-            }
-            final isEnabled = backupPreferenceService.isOnlyNewBackupEnabled;
-            if (!isEnabled) {
-              await backupPreferenceService.setOnlyNewSinceNow();
-            } else {
-              await backupPreferenceService.clearOnlyNewSinceEpoch();
-            }
-            _onlyNewToggleDebouncer.run(() async {
-              await SyncService.instance.sync();
-            });
-            if (backupPreferenceService.hasSkippedOnboardingPermission) {
-              await backupPreferenceService.setOnboardingPermissionSkipped(
-                false,
-              );
-            }
-          },
-        ),
-        singleBorderRadius: 8,
-        alignCaptionedTextToLeft: true,
-        isTopBorderRadiusRemoved: true,
-        isBottomBorderRadiusRemoved: flagService.enableMobMultiPart,
-        isGestureDetectorDisabled: true,
+          }
+        },
       ),
-    ];
+    );
   }
 
   Future<bool> _ensurePhotoPermissions(BuildContext context) async {
@@ -298,8 +245,8 @@ class BackupSettingsScreen extends StatelessWidget {
     final result = await showActionSheet(
       context: context,
       buttons: [
-        const ButtonWidget(
-          labelText: "Select folders",
+        ButtonWidget(
+          labelText: context.l10n.selectFolders,
           buttonType: ButtonType.primary,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: false,
@@ -324,12 +271,12 @@ class BackupSettingsScreen extends StatelessWidget {
           isInAlert: true,
         ),
       ],
-      title: "Backup only new photos",
+      title: context.l10n.backupOnlyNewPhotos,
       body: hasAllFoldersSelected
-          ? "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
+          ? context.l10n.backupOnlyNewPhotosAllFoldersSelected
           : allowContinueAnyway
-              ? "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
-              : "No folders are currently selected for backup.\n\nPlease select folders to continue.",
+              ? context.l10n.backupOnlyNewPhotosNoFoldersSelectedContinue
+              : context.l10n.backupOnlyNewPhotosNoFoldersSelectedRequire,
     );
 
     if (result?.action == null || result!.action == ButtonAction.cancel) {

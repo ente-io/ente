@@ -277,7 +277,6 @@
   "failedToApplyCode": "コードを適用できませんでした",
   "enterReferralCode": "紹介コードを入力してください",
   "codeAppliedPageTitle": "コードが適用されました。",
-  "changeYourReferralCode": "自分自身の紹介コードを変更する",
   "change": "変更",
   "unavailableReferralCode": "このコードは利用できません",
   "codeChangeLimitReached": "コード変更の回数上限に達しました。",
@@ -295,11 +294,9 @@
   "claimFreeStorage": "無料のストレージを受け取る",
   "inviteYourFriends": "友達を招待",
   "failedToFetchReferralDetails": "紹介の詳細を取得できません。後でもう一度お試しください。",
-  "referralStep1": "1. このコードを友達に贈りましょう",
   "referralStep2": "2. 友達が有料プランに登録",
   "referralStep3": "3. お二人とも {storageInGB} GB*を無料で手に入ります。",
   "referralsAreCurrentlyPaused": "リフェラルは現在一時停止しています",
-  "youCanAtMaxDoubleYourStorage": "* 最大2倍のストレージまで",
   "claimedStorageSoFar": "{isFamilyMember, select, true {家族は {storageAmountInGb} GB 受け取っています} false {あなたは {storageAmountInGb} GB 受け取っています} other {あなたは {storageAmountInGb} GB受け取っています}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1059,7 +1056,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} 無料",
-  "appVersion": "バージョン: {versionValue}",
   "verifyIDLabel": "確認",
   "fileInfoAddDescHint": "説明を追加...",
   "editLocationTagTitle": "位置情報を編集",
@@ -1660,9 +1656,5 @@
   "moon": "月明かりの中",
   "onTheRoad": "再び道で",
   "food": "料理を楽しむ",
-  "pets": "毛むくじゃらな仲間たち",
-  "cLTitle1": "コメントとリアクション",
-  "cLDesc1": "共有された写真にコメントとリアクションを追加できるようになりました。写真を開いて下部のアクションを使用することで、リアクションやコメントができます。すべての受信コメントとリアクションは「共有」タブに表示されます。",
-  "cLTitle2": "アルバムの管理者",
-  "cLDesc2": "他のEnteユーザーをアルバムの管理者として指定できるようになりました。これにより、他の閲覧者や共同編集者を追加したり、アルバムから写真を削除したり、参加者に写真の削除を提案したりすることができます。"
+  "pets": "毛むくじゃらな仲間たち"
 }

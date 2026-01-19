@@ -1,5 +1,5 @@
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -11,7 +11,7 @@ void showToast(
   iOSDismissOnTap = true,
 }) async {
   // If on mobile render toast above the keyboard using FToast.
-  final bool isMobile = PlatformUtil.isMobile();
+  final bool isMobile = PlatformDetector.isMobile();
 
   if (isMobile) {
     final baseToast = Container(

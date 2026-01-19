@@ -301,7 +301,6 @@
   "failedToApplyCode": "Не удалось применить код",
   "enterReferralCode": "Введите реферальный код",
   "codeAppliedPageTitle": "Код применён",
-  "changeYourReferralCode": "Изменить ваш реферальный код",
   "change": "Изменить",
   "unavailableReferralCode": "Извините, этот код недоступен.",
   "codeChangeLimitReached": "Извините, вы достигли лимита изменений кода.",
@@ -319,11 +318,9 @@
   "claimFreeStorage": "Получить бесплатное хранилище",
   "inviteYourFriends": "Пригласите своих друзей",
   "failedToFetchReferralDetails": "Не удалось получить данные о рефералах. Пожалуйста, попробуйте позже.",
-  "referralStep1": "1. Даёте этот код своим друзьям",
   "referralStep2": "2. Они подписываются на платный тариф",
   "referralStep3": "3. Вы оба получаете {storageInGB} ГБ* бесплатно",
   "referralsAreCurrentlyPaused": "Реферальная программа временно приостановлена",
-  "youCanAtMaxDoubleYourStorage": "* Вы можете увеличить хранилище максимум в два раза",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша семья получила {storageAmountInGb} ГБ на данный момент} false {Вы получили {storageAmountInGb} ГБ на данный момент} other {Вы получили {storageAmountInGb} ГБ на данный момент!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1121,7 +1118,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "Свободно {freeAmount} {storageUnit}",
-  "appVersion": "Версия: {versionValue}",
   "verifyIDLabel": "Подтвердить",
   "fileInfoAddDescHint": "Добавить описание...",
   "editLocationTagTitle": "Изменить местоположение",
@@ -2071,9 +2067,5 @@
     "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Игра детей",
-  "coastalCliffs": "Скалы у моря",
-  "cLTitle1": "Комментарии и реакции",
-  "cLDesc1": "Мы представляем комментарии и реакции к общим фотографиям. Вы можете отреагировать или прокомментировать фотографию, открыв её и используя действия внизу. Все входящие комментарии и реакции будут видны во вкладке «Общие».",
-  "cLTitle2": "Администратор альбомов",
-  "cLDesc2": "Теперь вы можете назначить другого пользователя Ente администратором вашего альбома. С этим он сможет добавлять других зрителей и соавторов, удалять фотографии из альбомов и даже предлагать участникам удалить их фотографии."
+  "coastalCliffs": "Скалы у моря"
 }

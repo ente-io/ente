@@ -124,6 +124,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionCannotBeDeleted => 'This collection cannot be deleted';
 
   @override
+  String get collectionCannotBeEdited => 'This collection cannot be edited';
+
+  @override
+  String get collectionCannotBeShared => 'This collection cannot be shared';
+
+  @override
   String get deleteCollection => 'Delete collection';
 
   @override
@@ -217,6 +223,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
+  String get download => 'Download';
+
+  @override
   String get deleteFile => 'Delete item';
 
   @override
@@ -233,6 +242,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createCollection => 'Create collection';
+
+  @override
+  String get enterCollectionName => 'Enter collection name';
 
   @override
   String get nothingYet => 'Nothing yet';
@@ -344,6 +356,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uncategorized => 'Uncategorized';
+
+  @override
+  String get syncing => 'Syncing...';
 
   @override
   String get syncingTrash => 'Syncing trash...';
@@ -494,6 +509,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'Theme';
 
   @override
+  String get appearance => 'Appearance';
+
+  @override
   String get lightTheme => 'Light';
 
   @override
@@ -509,6 +527,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
+  String get aboutUs => 'About us';
+
+  @override
   String get weAreOpenSource => 'We are open source!';
 
   @override
@@ -522,6 +543,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get support => 'Support';
+
+  @override
+  String get helpAndSupport => 'Help and Support';
 
   @override
   String get contactSupport => 'Contact support';
@@ -1553,11 +1577,191 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseLoginAgain => 'Please login again';
 
   @override
-  String get language => 'Language';
+  String get filters => 'Filters';
+
+  @override
+  String get seeAllCollections => 'All collections';
+
+  @override
+  String get clearAllFilters => 'Clear all';
 
   @override
   String get selectLanguage => 'Select language';
 
   @override
   String get general => 'General';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String selectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String actionNotSupportedForSharedFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Action is not supported for $count shared files',
+      one: 'Action is not supported for 1 shared file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addTo => 'Add to';
+
+  @override
+  String get shareNotSupportedForSharedFiles =>
+      'Share is not supported for shared files';
+
+  @override
+  String get editNotSupportedForSharedFiles =>
+      'Edit is not supported for shared files';
+
+  @override
+  String get deleteNotSupportedForSharedFiles =>
+      'Delete is not supported for shared files';
+
+  @override
+  String get importantNotSupportedForSharedFiles =>
+      'Important is not supported for shared files';
+
+  @override
+  String get sharingSection => 'Sharing';
+
+  @override
+  String get sharingEnabledToggle => 'Sharing enabled';
+
+  @override
+  String get publicLinkSection => 'Public Link';
+
+  @override
+  String get linkEnabledToggle => 'Link enabled';
+
+  @override
+  String get allowUploads => 'Allow uploads';
+
+  @override
+  String get collectionUpdated => 'Collection updated';
+
+  @override
+  String get actionNotSupportedOnFavouritesAlbum =>
+      'Action not supported on Favourites album';
+
+  @override
+  String get leaveCollectionSuccessfully => 'Left collection successfully';
+
+  @override
+  String leftCollectionsSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Left $count collections successfully',
+      one: 'Left 1 collection successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removePublicLink => 'Remove public link';
+
+  @override
+  String removePublicLinkConfirmation(String collectionName) {
+    return 'This will remove the public link for accessing \"$collectionName\".';
+  }
+
+  @override
+  String collectionsDeletedSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections deleted successfully',
+      one: '1 collection deleted successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get restoreToCollection => 'Restore to collection';
+
+  @override
+  String get restoringFiles => 'Restoring...';
+
+  @override
+  String filesRestoredSuccessfully(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items restored successfully',
+      one: '1 item restored successfully',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedToRestoreFiles => 'Failed to restore items';
+
+  @override
+  String get permanentlyDelete => 'Permanently delete';
+
+  @override
+  String permanentlyDeleteFilesBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'These $count items',
+      one: 'This item',
+    );
+    return '$_temp0 will be permanently deleted and cannot be recovered.';
+  }
+
+  @override
+  String get yesDelete => 'Yes, delete';
+
+  @override
+  String get deletingFiles => 'Deleting...';
+
+  @override
+  String filesDeletedPermanently(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items deleted permanently',
+      one: '1 item deleted permanently',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get failedToDeleteFiles => 'Failed to delete items';
+
+  @override
+  String get itemsStored => 'Items stored';
+
+  @override
+  String get of_ => 'of';
+
+  @override
+  String get usageYou => 'You';
+
+  @override
+  String get usageFamily => 'Family';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get noResultsFound => 'No results found';
 }

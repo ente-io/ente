@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:extended_image/extended_image.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -30,7 +31,6 @@ import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/thumbnail_util.dart";
 
 enum DetailPageMode {
@@ -86,11 +86,13 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
   final _isInSharedCollectionNotifier = ValueNotifier(false);
+  final _showingThumbnailFallbackNotifier = ValueNotifier<int?>(null);
 
   @override
   void dispose() {
     _enableFullScreenNotifier.dispose();
     _isInSharedCollectionNotifier.dispose();
+    _showingThumbnailFallbackNotifier.dispose();
     super.dispose();
   }
 
@@ -102,6 +104,7 @@ class _DetailPageState extends State<DetailPage> {
     return InheritedDetailPageState(
       enableFullScreenNotifier: _enableFullScreenNotifier,
       isInSharedCollectionNotifier: _isInSharedCollectionNotifier,
+      showingThumbnailFallbackNotifier: _showingThumbnailFallbackNotifier,
       child: _Body(widget.config),
     );
   }

@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -11,7 +12,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/people/person_face_widget.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
 enum AvatarType { xl, lg, md, sm, xs }
@@ -98,6 +98,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
+    final int cachedPixelWidth =
+        (size * MediaQuery.devicePixelRatioOf(context)).toInt();
     return _personID != null
         ? Container(
             padding:
@@ -127,6 +129,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                           ? PersonFaceWidget(
                               key: ValueKey('$personID-$lastSyncTimeForKey'),
                               personId: personID,
+                              cachedPixelWidth: cachedPixelWidth,
                               onErrorCallback: () {
                                 if (mounted) {
                                   setState(() {

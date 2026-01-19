@@ -525,6 +525,7 @@
   "dropReviewAndroid": "Zanechat recenzi na Play Store",
   "supportEnte": "Podpořte <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Dejte nám hvězdu na Githubu",
+  "free10GB": "10GB zdarma na <bold-green>ente</bold-green> Fotografie",
   "loginWithAuthAccount": "Přihlásit se pomocí účtu Auth",
   "freeStorageOffer": "10% sleva na <bold-green>ente</bold-green> photos",
   "freeStorageOfferDescription": "Použijte kód \"AUTH\" pro získání 10% slevy na první rok",
@@ -624,5 +625,6 @@
   "appIcon": "Ikona aplikace",
   "importAndOTPGuide": "Exportujte svou zálohu z andOTP pomocí možnosti \"Záloha\" v nastavení.\n\nPokud je vaše záloha zašifrována, budete muset zadat heslo pro zálohu, abyste ji dešifrovali.",
   "enterPasswordToDecryptAndOTP": "Zadejte heslo pro dešifrování zálohy andOTP",
-  "failedToDecryptAndOTPBackup": "Nepodařilo se dešifrovat zálohu andOTP"
+  "failedToDecryptAndOTPBackup": "Nepodařilo se dešifrovat zálohu andOTP",
+  "notSupportedForHOTP": "Není podporováno pro HOTP"
 }

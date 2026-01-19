@@ -515,7 +515,7 @@
   "duplicateCodes": "Дублікати кодів",
   "noDuplicates": "✨ Немає дублікатів",
   "youveNoDuplicateCodesThatCanBeCleared": "У вас немає дублікатів кодів, які можна очистити",
-  "deduplicateCodes": "Дедуплікувати коди",
+  "deduplicateCodes": "Усунути дублікати кодів",
   "deselectAll": "Зняти виділення",
   "selectAll": "Обрати все",
   "deleteDuplicates": "Видалити дублікати",

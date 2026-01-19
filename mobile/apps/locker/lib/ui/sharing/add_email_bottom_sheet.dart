@@ -9,14 +9,12 @@ import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:intl/intl.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/gradient_button.dart";
-import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/viewer/date/date_time_picker.dart";
 import "package:locker/utils/collection_actions.dart";
 
@@ -52,12 +50,13 @@ class AddEmailSheet extends StatefulWidget {
 }
 
 class _AddEmailSheetState extends State<AddEmailSheet> {
-  bool _shareLater = false;
+  final bool _shareLater = false;
   String _email = "";
   bool _emailIsValid = false;
   DateTime? _scheduledDate;
   TimeOfDay? _scheduledTime;
-  CollectionParticipantRole _selectedRole = CollectionParticipantRole.viewer;
+  final CollectionParticipantRole _selectedRole =
+      CollectionParticipantRole.viewer;
 
   final _textController = TextEditingController();
   final _textFieldFocusNode = FocusNode();
@@ -151,71 +150,6 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
           // ),
         ],
       ),
-    );
-  }
-
-  Widget _buildRoleDropdown(colorScheme, textTheme) {
-    return PopupMenuButton<CollectionParticipantRole>(
-      onSelected: (role) {
-        setState(() {
-          _selectedRole = role;
-        });
-      },
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.strokeFaint),
-      ),
-      padding: EdgeInsets.zero,
-      menuPadding: EdgeInsets.zero,
-      color: colorScheme.backdropBase,
-      surfaceTintColor: Colors.transparent,
-      elevation: 15,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
-      constraints: const BoxConstraints(minWidth: 120),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.backdropBase,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HugeIcon(
-              icon: _selectedRole == CollectionParticipantRole.viewer
-                  ? HugeIcons.strokeRoundedView
-                  : HugeIcons.strokeRoundedUserMultiple,
-              color: colorScheme.textBase,
-              size: 20,
-            ),
-            const SizedBox(width: 4),
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowDown01,
-              color: colorScheme.textBase,
-              size: 24,
-            ),
-          ],
-        ),
-      ),
-      // TODO: Re-enable collaborator option when ready
-      // For now, only viewer role is available in Locker
-      itemBuilder: (context) => [
-        PopupMenuItem<CollectionParticipantRole>(
-          value: CollectionParticipantRole.viewer,
-          height: 0,
-          padding: EdgeInsets.zero,
-          child: PopupMenuItemWidget(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedView,
-              color: colorScheme.textBase,
-              size: 20,
-            ),
-            label: context.l10n.viewer,
-            isFirst: true,
-            isLast: true,
-          ),
-        ),
-      ],
     );
   }
 
@@ -371,57 +305,6 @@ class _AddEmailSheetState extends State<AddEmailSheet> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildShareLaterCheckbox(colorScheme, textTheme) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _shareLater = !_shareLater;
-          if (!_shareLater) {
-            _scheduledDate = null;
-            _scheduledTime = null;
-          }
-        });
-      },
-      child: SizedBox(
-        width: double.infinity,
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 12,
-          runSpacing: 8,
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: _shareLater
-                      ? colorScheme.primary700
-                      : colorScheme.strokeMuted,
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(6),
-                color:
-                    _shareLater ? colorScheme.primary700 : Colors.transparent,
-              ),
-              alignment: Alignment.center,
-              child: _shareLater
-                  ? const Icon(
-                      Icons.check,
-                      size: 12,
-                      color: Colors.white,
-                    )
-                  : null,
-            ),
-            Text(
-              context.l10n.shareLater,
-              style: textTheme.small,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

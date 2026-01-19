@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import 'package:logging/logging.dart';
@@ -58,8 +59,6 @@ import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
-import 'package:photos/utils/standalone/date_time.dart';
 
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;

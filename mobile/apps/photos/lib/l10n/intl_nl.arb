@@ -296,7 +296,6 @@
   "failedToApplyCode": "Code toepassen mislukt",
   "enterReferralCode": "Voer verwijzingscode in",
   "codeAppliedPageTitle": "Code toegepast",
-  "changeYourReferralCode": "Wijzig uw verwijzingscode",
   "change": "Wijzigen",
   "unavailableReferralCode": "Deze code is helaas niet beschikbaar.",
   "codeChangeLimitReached": "Sorry, u heeft de limiet van het aantal codewijzigingen bereikt.",
@@ -314,11 +313,9 @@
   "claimFreeStorage": "Claim gratis opslag",
   "inviteYourFriends": "Vrienden uitnodigen",
   "failedToFetchReferralDetails": "Kan geen verwijzingsgegevens ophalen. Probeer het later nog eens.",
-  "referralStep1": "1. Geef deze code aan je vrienden",
   "referralStep2": "2. Ze registreren voor een betaald plan",
   "referralStep3": "Jullie krijgen allebei {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Verwijzingen zijn momenteel gepauzeerd",
-  "youCanAtMaxDoubleYourStorage": "* Je kunt maximaal je opslag verdubbelen",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jouw familie heeft {storageAmountInGb} GB geclaimd tot nu toe} false {Je hebt {storageAmountInGb} GB geclaimd tot nu toe} other {Je hebt {storageAmountInGb} GB geclaimd tot nu toe!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1116,7 +1113,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} vrij",
-  "appVersion": "Versie: {versionValue}",
   "verifyIDLabel": "Verifiëren",
   "fileInfoAddDescHint": "Voeg een beschrijving toe...",
   "editLocationTagTitle": "Locatie bewerken",
@@ -1931,10 +1927,6 @@
   "hoorayyyy": "Hoeraaaa!",
   "nothingToTidyUpHere": "Niks op te schonen hier",
   "deletingDash": "Verwijderen - ",
-  "cLTitle1": "Opmerkingen en reacties",
-  "cLDesc1": "We introduceren opmerkingen en reacties op gedeelde foto's. Je kunt reageren of een opmerking plaatsen op een foto door deze te openen en de acties onderaan te gebruiken. Alle inkomende opmerkingen en reacties zijn zichtbaar op het tabblad Gedeeld.",
-  "cLTitle2": "Beheerder voor albums",
-  "cLDesc2": "Je kunt nu een andere Ente-gebruiker aanwijzen als beheerder van je album. Hiermee kan deze andere kijkers en medewerkers toevoegen, foto's uit albums verwijderen en zelfs deelnemers suggereren hun foto's te verwijderen.",
   "closeBy": "Nauw verwant",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

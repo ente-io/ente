@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/generated/l10n.dart";
@@ -6,7 +7,6 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/utils/standalone/data.dart";
 
 class AddOnPage extends StatelessWidget {
   final BonusData bonusData;

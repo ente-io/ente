@@ -306,10 +306,13 @@
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
   "apply": "Apply",
   "failedToApplyCode": "Failed to apply code",
+  "invalidReferralCode": "Invalid code",
   "enterReferralCode": "Enter referral code",
   "codeAppliedPageTitle": "Code applied",
-  "changeYourReferralCode": "Change your referral code",
+  "changeYourReferralCode": "Change your code",
   "change": "Change",
+  "saveCode": "Save code",
+  "referralCodeHint": "You can customise this code up to 3 times",
   "unavailableReferralCode": "Sorry, this code is unavailable.",
   "codeChangeLimitReached": "Sorry, you've reached the limit of code changes.",
   "onlyFamilyAdminCanChangeCode": "Please contact {familyAdminEmail} to change your code.",
@@ -325,12 +328,16 @@
   "shareTextReferralCode": "Ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
   "claimFreeStorage": "Claim free storage",
   "inviteYourFriends": "Invite your friends",
+  "earnFreeStorage": "Earn free storage",
+  "shareCodeEarnStorage": "Share your code, earn storage.",
+  "youBothGet": "You both get",
+  "free": "free",
   "failedToFetchReferralDetails": "Unable to fetch referral details. Please try again later.",
-  "referralStep1": "1. Give this code to your friends",
+  "referralStep1": "1. Customise and share your code with your friends.",
   "referralStep2": "2. They sign up for a paid plan",
   "referralStep3": "3. Both of you get {storageInGB} GB* free",
   "referralsAreCurrentlyPaused": "Referrals are currently paused",
-  "youCanAtMaxDoubleYourStorage": "* You can at max double your storage",
+  "youCanAtMaxDoubleYourStorage": "You can max double your storage",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} GB so far} false {You have claimed {storageAmountInGb} GB so far} other {You have claimed {storageAmountInGb} GB so far!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -354,6 +361,12 @@
   "freeStorageClaimed": "Free storage claimed",
   "freeStorageUsable": "Free storage usable",
   "usableReferralStorageInfo": "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.",
+  "referralStats": "Referral stats",
+  "usedYourCode": "used your code",
+  "claimedByYou": "claimed by you",
+  "earned": "earned",
+  "usable": "usable",
+  "referralStorageInfo": "Referrals from paid subscribers earn bonus storage.\n\nYou can use storage up to your plan limit. Upgrade to use the rest of your earned storage.",
   "removeFromAlbumTitle": "Remove from album?",
   "removeFromAlbum": "Remove from album",
   "itemsWillBeRemovedFromAlbum": "Selected items will be removed from this album",
@@ -485,10 +498,29 @@
   "pendingItems": "Pending items",
   "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
+  "selectFolders": "Select folders",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",
   "selectAll": "Select all",
   "skip": "Skip",
+  "chooseBackupModeHeader": "<i>Choose how </i>Ente backs up your photos",
+  "startWithLatestPhotos": "Start with latest photos",
+  "backingUpLastSevenDaysPhotos": "Backing up last 7 days' photos",
+  "backupOnlyNewPhotos": "Backup only new photos",
+  "backupOnlyNewPhotosAllFoldersSelected": "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "No folders are currently selected for backup.\n\nPlease select folders to continue.",
+  "backupOnlyNewPhotosWarningBody": "You are currently backing up photos from {formattedDate}. Please update your settings to backup all photos.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Update settings",
   "updatingFolderSelection": "Updating folder selection...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
   "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
@@ -627,6 +659,7 @@
   "reportBug": "Report bug",
   "suggestFeatures": "Suggest features",
   "support": "Support",
+  "appearance": "Appearance",
   "theme": "Theme",
   "lightTheme": "Light",
   "darkTheme": "Dark",
@@ -1136,7 +1169,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} free",
-  "appVersion": "Version: {versionValue}",
+  "appVersion": "Version {versionValue}",
   "verifyIDLabel": "Verify",
   "fileInfoAddDescHint": "Add a description...",
   "editLocationTagTitle": "Edit location",
@@ -2282,5 +2315,119 @@
   },
   "noActivityYet": "No activity yet",
   "like": "Like",
-  "comments": "Comments"
+  "comments": "Comments",
+  "commentHint": "Say something nice!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Reply",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Are you sure?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Delete comment",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Your comment \"{comment}\" will be deleted permanently",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 like} other{{count} likes}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "No likes yet",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Could not load likes",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Failed to update like",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{Failed to like 1 album} other{Failed to like {count} albums}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Could not load albums",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Like all",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Select the album to like this video",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Select the album to like this photo",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Failed to like comment",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Failed to delete comment",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(deleted)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Replying to you",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Replying to {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, =0{No comments} =1{1 comment} other{{count} comments}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

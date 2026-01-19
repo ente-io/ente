@@ -278,7 +278,6 @@
   "failedToApplyCode": "Falha ao aplicar código",
   "enterReferralCode": "Insira o código de referência",
   "codeAppliedPageTitle": "Código aplicado",
-  "changeYourReferralCode": "Alterar o código de referência",
   "change": "Alterar",
   "unavailableReferralCode": "Desculpe, este código não está disponível.",
   "codeChangeLimitReached": "Desculpe, você atingiu o limite de alterações de código.",
@@ -296,11 +295,9 @@
   "claimFreeStorage": "Solicitar armazenamento gratuito",
   "inviteYourFriends": "Convide os seus amigos",
   "failedToFetchReferralDetails": "Não foi possível obter detalhes de indicação. Por favor, tente novamente mais tarde.",
-  "referralStep1": "1. Envie este código aos seus amigos",
   "referralStep2": "2. Eles se inscrevem em um plano pago",
   "referralStep3": "3. Ambos ganham {storageInGB} GB* grátis",
   "referralsAreCurrentlyPaused": "As referências estão atualmente em pausa",
-  "youCanAtMaxDoubleYourStorage": "* Você pode duplicar seu armazenamento no máximo",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Sua família reinvidicou {storageAmountInGb} GB até então}false {Você reinvindicou {storageAmountInGb} GB até então}other {Você reinvindicou {storageAmountInGb} GB até então!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1098,7 +1095,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} grátis",
-  "appVersion": "Versão: {versionValue}",
   "verifyIDLabel": "Verificar",
   "fileInfoAddDescHint": "Acrescente uma descrição...",
   "editLocationTagTitle": "Editar localização",
@@ -1813,9 +1809,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Comentários e reações",
-  "cLDesc1": "Estamos a introduzir comentários e reações em fotografias partilhadas. Pode reagir ou comentar uma fotografia abrindo-a e usando as ações na parte inferior. Todos os comentários e reações recebidos serão visíveis no separador Partilhado.",
-  "cLTitle2": "Administrador de álbuns",
-  "cLDesc2": "Agora pode atribuir outro utilizador Ente como administrador do seu álbum. Com isto, ele poderá adicionar outros visualizadores e colaboradores, remover fotografias dos álbuns e até sugerir aos participantes que eliminem as suas fotografias."
+  }
 }

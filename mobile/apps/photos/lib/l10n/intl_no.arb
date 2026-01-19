@@ -278,7 +278,6 @@
   "failedToApplyCode": "Kunne ikke bruke koden",
   "enterReferralCode": "Angi vervekode",
   "codeAppliedPageTitle": "Kode brukt",
-  "changeYourReferralCode": "Endre din vervekode",
   "change": "Endre",
   "unavailableReferralCode": "Beklager, denne koden er utilgjengelig.",
   "codeChangeLimitReached": "Beklager, du har nådd grensen for kodeendringer.",
@@ -296,11 +295,9 @@
   "claimFreeStorage": "Få gratis lagring",
   "inviteYourFriends": "Inviter vennene dine",
   "failedToFetchReferralDetails": "Kan ikke hente vervedetaljer. Prøv igjen senere.",
-  "referralStep1": "1. Gi denne koden til vennene dine",
   "referralStep2": "De registrerer seg for en betalt plan",
   "referralStep3": "3. Begge dere får {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Vervinger er for øyeblikket satt på pause",
-  "youCanAtMaxDoubleYourStorage": "* Du kan maksimalt doble lagringsplassen din",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Familien din har gjort krav på {storageAmountInGb} GB så langt} false {Du har gjort krav på {storageAmountInGb} GB så langt} other {Du har gjort krav på {storageAmountInGb} GB så langt!}}\n",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1098,7 +1095,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} ledig",
-  "appVersion": "Versjon: {versionValue}",
   "verifyIDLabel": "Bekreft",
   "fileInfoAddDescHint": "Legg til en beskrivelse...",
   "editLocationTagTitle": "Rediger plassering",
@@ -1731,9 +1727,5 @@
   "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
-  "pastYearsMemories": "Tidligere års minner",
-  "cLTitle1": "Kommentarer og reaksjoner",
-  "cLDesc1": "Vi introduserer kommentarer og reaksjoner på delte bilder. Du kan reagere eller kommentere et bilde ved å åpne det og bruke handlingene nederst. Alle innkommende kommentarer og reaksjoner vil være synlige i Delt-fanen.",
-  "cLTitle2": "Administrator for album",
-  "cLDesc2": "Du kan nå tildele en annen Ente-bruker som administrator av albumet ditt. Med dette kan de legge til andre seere og samarbeidspartnere, fjerne bilder fra album, og til og med foreslå at deltakere sletter bildene sine."
+  "pastYearsMemories": "Tidligere års minner"
 }

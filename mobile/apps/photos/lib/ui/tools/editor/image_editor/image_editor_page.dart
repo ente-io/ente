@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 import 'dart:ui' as ui show Image;
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
@@ -33,7 +34,6 @@ import "package:photos/ui/tools/editor/image_editor/image_editor_text_bar.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_tune_bar.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class ImageEditorPage extends StatefulWidget {

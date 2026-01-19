@@ -34,6 +34,12 @@
   "password": "Password",
   "confirmPassword": "Conferma password",
   "activeSessions": "Sessioni attive",
+  "ocrProcessingOverlayMessage": "Rilevamento testo...",
+  "ocrLoadingIndicatorLabel": "Rilevamento Testo",
+  "ocrSelectionHint": "Scorri o doppio tocco per selezionare solo ciò che ti serve",
+  "ocrNoTextDetected": "Nessun testo rilevato",
+  "ocrRetryButtonLabel": "Riprova",
+  "ocrModelsNetworkRequiredError": "Connessione di rete necessaria per scaricare i modelli OCR al primo utilizzo",
   "oops": "Ooops",
   "somethingWentWrongPleaseTryAgain": "Qualcosa è andato storto, per favore riprova",
   "thisWillLogYouOutOfThisDevice": "Verrai disconnesso dal tuo dispositivo!",
@@ -279,7 +285,6 @@
   "failedToApplyCode": "Impossibile applicare il codice",
   "enterReferralCode": "Inserisci il codice di invito",
   "codeAppliedPageTitle": "Codice applicato",
-  "changeYourReferralCode": "Cambia il tuo codice invito",
   "change": "Cambia",
   "unavailableReferralCode": "Siamo spiacenti, questo codice non è disponibile.",
   "codeChangeLimitReached": "Siamo spiacenti, hai raggiunto il limite di modifiche del codice.",
@@ -297,11 +302,9 @@
   "claimFreeStorage": "Richiedi spazio gratuito",
   "inviteYourFriends": "Invita i tuoi amici",
   "failedToFetchReferralDetails": "Impossibile recuperare i dettagli. Per favore, riprova più tardi.",
-  "referralStep1": "1. Condividi questo codice con i tuoi amici",
   "referralStep2": "2. Si iscrivono per un piano a pagamento",
   "referralStep3": "3. Ottenete entrambi {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "I referral code sono attualmente in pausa",
-  "youCanAtMaxDoubleYourStorage": "* Puoi al massimo raddoppiare il tuo spazio",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Il tuo piano famiglia ha già richiesto {storageAmountInGb} GB finora} false {Hai già richiesto {storageAmountInGb} GB finora} other {Hai già richiesto {storageAmountInGb} GB finora!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1090,7 +1093,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} liberi",
-  "appVersion": "Versione: {versionValue}",
   "verifyIDLabel": "Verifica",
   "fileInfoAddDescHint": "Aggiungi descrizione...",
   "editLocationTagTitle": "Modifica luogo",
@@ -1881,8 +1883,5 @@
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   },
-  "cLTitle1": "Commenti e reazioni",
-  "cLDesc1": "Stiamo introducendo commenti e reazioni sulle foto condivise. Puoi reagire o commentare una foto aprendola e usando le azioni in basso. Tutti i commenti e le reazioni in arrivo saranno visibili nella scheda Condiviso.",
-  "cLTitle2": "Amministratore per album",
-  "cLDesc2": "Ora puoi assegnare un altro utente Ente come amministratore del tuo album. Con questo, potrà aggiungere altri visualizzatori e collaboratori, rimuovere foto dagli album e persino suggerire ai partecipanti di eliminare le loro foto."
+  "snowAdventures": "Avventure invernali"
 }
