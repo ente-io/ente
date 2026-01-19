@@ -245,10 +245,10 @@ export const sortCollectionSummaries = (
             case "name-desc":
                 return b.name.localeCompare(a.name);
             case "creation-time-asc":
-                // Oldest first: lower ID = created earlier
+                // Oldest first: lower ID = created earlier.
                 return a.id - b.id;
             case "creation-time-desc":
-                // Newest first: higher ID = created later
+                // Newest first: higher ID = created later.
                 return b.id - a.id;
             case "updation-time-asc":
                 return (a.updationTime ?? 0) - (b.updationTime ?? 0);
