@@ -949,20 +949,29 @@ const Page: React.FC = () => {
 
     const handleAddPersonToSelectedFiles = useCallback(
         async (personID: string) => {
-            const selectedFiles = getSelectedFiles(selected, filteredFiles);
-            await addManualFileAssignmentsToPerson(
-                personID,
-                selectedFiles.map((f) => f.id),
-            );
-            clearSelection();
-            const personName = namedPeople.find((p) => p.id === personID)?.name;
-            showNotification({
-                color: "secondary",
-                startIcon: <CheckCircleIcon />,
-                title: t("added_to_person"),
-                caption: personName,
-                autoHideDuration: 3000,
-            });
+            showLoadingBar();
+            try {
+                const selectedFiles = getSelectedFiles(selected, filteredFiles);
+                await addManualFileAssignmentsToPerson(
+                    personID,
+                    selectedFiles.map((f) => f.id),
+                );
+                clearSelection();
+                const personName = namedPeople.find(
+                    (p) => p.id === personID,
+                )?.name;
+                showNotification({
+                    color: "secondary",
+                    startIcon: <CheckCircleIcon />,
+                    title: t("added_to_person"),
+                    caption: personName,
+                    autoHideDuration: 3000,
+                });
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                hideLoadingBar();
+            }
         },
         [
             selected,
@@ -970,6 +979,9 @@ const Page: React.FC = () => {
             clearSelection,
             showNotification,
             namedPeople,
+            showLoadingBar,
+            hideLoadingBar,
+            onGenericError,
         ],
     );
 
