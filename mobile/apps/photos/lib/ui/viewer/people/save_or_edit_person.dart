@@ -482,7 +482,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
             return LayoutBuilder(
               builder: (context, constraints) {
-                const horizontalEdgePadding = 20.0;
+                const horizontalEdgePadding = 0.0;
                 const gridPadding = 16.0;
                 final textTheme = getEnteTextTheme(context);
                 final colorScheme = getEnteColorScheme(context);
@@ -515,7 +515,12 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                      padding: const EdgeInsets.fromLTRB(
+                        horizontalEdgePadding,
+                        12,
+                        horizontalEdgePadding,
+                        16,
+                      ),
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         switchInCurve: Curves.easeOut,
@@ -536,9 +541,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                     if (filteredResults.isNotEmpty)
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                          20,
+                          horizontalEdgePadding,
                           0,
-                          20,
+                          horizontalEdgePadding,
                           16 + extraBottomPadding,
                         ),
                         child: GridView.builder(
@@ -579,9 +584,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                     else
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                          20,
+                          horizontalEdgePadding,
                           0,
-                          20,
+                          horizontalEdgePadding,
                           16 + extraBottomPadding,
                         ),
                         child: Text(
