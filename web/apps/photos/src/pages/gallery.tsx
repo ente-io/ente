@@ -43,6 +43,7 @@ import {
     masterKeyFromSession,
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
+import type { Location } from "ente-base/types";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
@@ -59,6 +60,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
+import { EditLocationDialog } from "ente-new/photos/components/EditLocationDialog";
 import { Export } from "ente-new/photos/components/Export";
 import { PlanSelector } from "ente-new/photos/components/PlanSelector";
 import {
@@ -104,11 +106,15 @@ import {
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
-import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
     addManualFileAssignmentsToPerson,
     isMLEnabled,
 } from "ente-new/photos/services/ml";
+import {
+    updateFilesLocation,
+    updateFilesVisibility,
+} from "ente-new/photos/services/file";
+
 import {
     savedCollectionFiles,
     savedCollections,
@@ -287,6 +293,8 @@ const Page: React.FC = () => {
     } = useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
+    const { show: showEditLocation, props: editLocationVisibilityProps } =
+        useModalVisibility();
 
     // Progress UI state for single-file add-to-album from the FileViewer
     const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
@@ -368,6 +376,13 @@ const Page: React.FC = () => {
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
+    const selectedFilesInView = useMemo(
+        () => getSelectedFiles(selected, filteredFiles),
+        [selected, filteredFiles],
+    );
+    const isAllSelectedInView =
+        filteredFiles.length > 0 &&
+        selectedFilesInView.length === filteredFiles.length;
 
     // TODO: Move into reducer
     const barCollectionSummaries = useMemo(
@@ -613,6 +628,33 @@ const Page: React.FC = () => {
         }
 
         // Create a selection with everything based on the current context.
+        const selected = {
+            ownCount: 0,
+            count: 0,
+            collectionID: activeCollectionID,
+            context:
+                barMode == "people" && activePersonID
+                    ? { mode: "people" as const, personID: activePersonID }
+                    : {
+                          mode: barMode as "albums" | "hidden-albums",
+                          collectionID: activeCollectionID!,
+                      },
+        };
+
+        filteredFiles.forEach((item) => {
+            if (item.ownerID === user.id) {
+                selected.ownCount++;
+            }
+            selected.count++;
+            // @ts-expect-error Selection code needs type fixing
+            selected[item.id] = true;
+        });
+        setSelected(selected);
+    };
+
+    const handleSelectAll = () => {
+        if (!user || !filteredFiles.length) return;
+
         const selected = {
             ownCount: 0,
             count: 0,
@@ -980,6 +1022,24 @@ const Page: React.FC = () => {
             void handleAddPersonToSelectedFiles(personID);
         },
         [contextMenuAssignPersonProps, handleAddPersonToSelectedFiles],
+    );
+
+    const handleEditLocationConfirm = useCallback(
+        async (location: Location) => {
+            // Only update files owned by the user
+            const userFiles = selectedFilesInView.filter(
+                (f) => f.ownerID == user!.id,
+            );
+            if (userFiles.length > 0) {
+                await updateFilesLocation(
+                    userFiles,
+                    location.latitude,
+                    location.longitude,
+                );
+            }
+            void remotePull({ silent: true });
+        },
+        [selectedFilesInView, user, remotePull],
     );
 
     const handleSelectSearchOption = (
@@ -1454,6 +1514,8 @@ const Page: React.FC = () => {
                             handleRemoveFilesFromCollection
                         }
                         onOpenCollectionSelector={handleOpenCollectionSelector}
+                        onSelectAll={handleSelectAll}
+                        isAllSelected={isAllSelectedInView}
                         {...{
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
@@ -1462,6 +1524,7 @@ const Page: React.FC = () => {
                                 ? showContextMenuAssignPerson
                                 : undefined,
                         }}
+                        onEditLocation={showEditLocation}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
@@ -1660,6 +1723,11 @@ const Page: React.FC = () => {
                 }
                 phase={addToAlbumProgress.phase}
                 albumName={addToAlbumProgress.albumName}
+            />
+            <EditLocationDialog
+                {...editLocationVisibilityProps}
+                files={selectedFilesInView}
+                onConfirm={handleEditLocationConfirm}
             />
         </FullScreenDropZone>
     );

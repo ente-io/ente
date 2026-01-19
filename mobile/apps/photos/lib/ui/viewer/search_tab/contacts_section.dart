@@ -164,6 +164,16 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
   }
 
   @override
+  void didUpdateWidget(covariant ContactRecommendation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newPersonID = widget.contactSearchResult.params[kPersonParamID];
+    if (newPersonID != _personID) {
+      _personID = newPersonID;
+      _canUsePersonFaceWidget = newPersonID != null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(

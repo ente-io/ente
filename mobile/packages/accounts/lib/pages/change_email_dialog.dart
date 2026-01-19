@@ -41,54 +41,57 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextFormField(
-          controller: _emailController,
-          decoration: InputDecoration(
-            fillColor: _emailIsValid
-                ? colorScheme.primary700.withValues(alpha: 0.2)
-                : colorScheme.backdropBase,
-            filled: true,
-            hintText: context.strings.enterNewEmailHint,
-            hintStyle: TextStyle(color: colorScheme.textMuted),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              fillColor: _emailIsValid
+                  ? colorScheme.primary700.withValues(alpha: 0.2)
+                  : colorScheme.backdropBase,
+              filled: true,
+              hintText: context.strings.enterNewEmailHint,
+              hintStyle: TextStyle(color: colorScheme.textMuted),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              suffixIcon: _emailIsValid
+                  ? Icon(
+                      Icons.check,
+                      size: 20,
+                      color: colorScheme.primary700,
+                    )
+                  : null,
             ),
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(8),
+            style: textTheme.body.copyWith(
+              color: colorScheme.textBase,
             ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            suffixIcon: _emailIsValid
-                ? Icon(
-                    Icons.check,
-                    size: 20,
-                    color: colorScheme.primary700,
-                  )
-                : null,
+            autocorrect: false,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.done,
+            autofocus: true,
+            onFieldSubmitted: (_) => _handleSubmit(),
           ),
-          style: textTheme.body.copyWith(
-            color: colorScheme.textBase,
+          const SizedBox(height: 24),
+          GradientButton(
+            text: context.strings.verify,
+            onTap: _emailIsValid ? _handleSubmit : null,
           ),
-          autocorrect: false,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          autofocus: true,
-          onFieldSubmitted: (_) => _handleSubmit(),
-        ),
-        const SizedBox(height: 24),
-        GradientButton(
-          text: context.strings.verify,
-          onTap: _emailIsValid ? _handleSubmit : null,
-        ),
-      ],
+        ],
+      ),
     );
   }
 

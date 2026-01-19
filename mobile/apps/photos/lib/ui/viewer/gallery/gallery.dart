@@ -19,7 +19,7 @@ import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_groups.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart";
+import "package:photos/service_locator.dart" show localSettings;
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
@@ -317,8 +317,7 @@ class GalleryState extends State<Gallery> {
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
 
-    if (localSettings.isSwipeToSelectEnabled &&
-        widget.galleryType == GalleryType.homepage) {
+    if (widget.galleryType == GalleryType.homepage) {
       _swipeActiveNotifier.addListener(() {
         Bus.instance.fire(
           HomepageSwipeToSelectInProgressEvent(
@@ -506,9 +505,7 @@ class GalleryState extends State<Gallery> {
   }
 
   void _updateSwipeHelper() {
-    if (localSettings.isSwipeToSelectEnabled &&
-        widget.selectedFiles != null &&
-        _allFilesWithDummies.isNotEmpty) {
+    if (widget.selectedFiles != null && _allFilesWithDummies.isNotEmpty) {
       // Dispose existing helper if present
       _swipeHelper?.dispose();
       // Use allFilesWithDummies to match the rendered grid structure.
@@ -626,8 +623,7 @@ class GalleryState extends State<Gallery> {
     }
 
     final widthAvailable = MediaQuery.sizeOf(context).width;
-    final shouldEnableSwipeSelection = localSettings.isSwipeToSelectEnabled &&
-        widget.limitSelectionToOne == false;
+    final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;
 
     if (groupHeaderExtent == null) {
       final photoGridSize = localSettings.getPhotoGridSize();

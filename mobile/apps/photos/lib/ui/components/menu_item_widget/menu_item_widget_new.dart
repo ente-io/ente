@@ -191,6 +191,8 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
+    final shouldSurfaceExecutionStates =
+        widget.surfaceExecutionStates || widget.alwaysShowSuccessState;
     _debouncer.run(
       () => Future(() {
         executionStateNotifier.value = ExecutionState.inProgress;
@@ -215,7 +217,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
       return;
     }
     if (executionStateNotifier.value == ExecutionState.inProgress) {
-      if (widget.showOnlyLoadingState) {
+      if (widget.showOnlyLoadingState || !shouldSurfaceExecutionStates) {
         executionStateNotifier.value = ExecutionState.idle;
       } else {
         executionStateNotifier.value = ExecutionState.successful;
