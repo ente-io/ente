@@ -183,8 +183,8 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
             onClick={() => onClick(category)}
             sx={{
                 minWidth: 220,
-                minHeight: 56,
-                py: 2,
+                minHeight: 64,
+                py: 2.5,
                 px: 2.5,
                 display: "flex",
                 alignItems: "center",
@@ -211,12 +211,12 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
                         }}
                     >
                         <Typography>•</Typography>
-                        <Typography sx={{ fontSize: "0.875rem" }}>
+                        <Typography sx={{ fontSize: "0.9rem" }}>
                             {directionLabel}
                         </Typography>
                         <HugeiconsIcon
                             icon={arrowIcon}
-                            size={18}
+                            size={19}
                             color="currentColor"
                         />
                     </Stack>
