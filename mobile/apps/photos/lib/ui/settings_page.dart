@@ -455,9 +455,6 @@ class _SettingsBody extends StatelessWidget {
     BuildContext context,
     EnteColorScheme colorScheme,
   ) {
-    final result = updateService.getRateDetails();
-    final String rateUrl = result.item2;
-
     return SettingsGroupedCard(
       children: [
         MenuItemWidgetNew(
@@ -486,6 +483,7 @@ class _SettingsBody extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
+            final rateUrl = updateService.getRateDetails().item2;
             await launchUrlString(rateUrl);
           },
         ),
