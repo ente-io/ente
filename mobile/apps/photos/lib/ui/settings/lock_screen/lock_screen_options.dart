@@ -28,6 +28,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   late bool appLock;
   late bool hideAppContent;
   LockType _currentLockType = LockType.device;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       appLock = pinEnabled ||
           passwordEnabled ||
           _configuration.shouldShowSystemLockScreen();
+      _isInitialized = true;
     });
   }
 
@@ -200,7 +202,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                           ),
                         ),
                       ),
-                      if (appLock) ...[
+                      if (appLock && _isInitialized) ...[
                         const SizedBox(height: 16),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
