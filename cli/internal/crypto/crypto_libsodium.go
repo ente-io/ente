@@ -2,13 +2,16 @@ package crypto
 
 import (
 	"bufio"
+	"encoding/base64"
 	"errors"
-	"github.com/ente-io/cli/utils/encoding"
-	"golang.org/x/crypto/nacl/box"
-	"golang.org/x/crypto/nacl/secretbox"
 	"io"
 	"log"
 	"os"
+
+	"github.com/ente-io/cli/utils/encoding"
+	"github.com/minio/blake2b-simd"
+	"golang.org/x/crypto/nacl/box"
+	"golang.org/x/crypto/nacl/secretbox"
 )
 
 //func EncryptChaCha20poly1305LibSodium(data []byte, key []byte) ([]byte, []byte, error) {
@@ -41,6 +44,73 @@ func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 	return encoded, header, nil
+}
+
+// streamEncryptionChunkSize matches the web client's chunk size (4MB)
+// This MUST match the value in web/packages/base/crypto/types.ts
+const streamEncryptionChunkSize = 4 * 1024 * 1024
+
+// EncryptChaCha20poly1305Chunked encrypts data in chunks to match web client expectations.
+// For small files (< 4MB), this behaves like EncryptChaCha20poly1305.
+// For large files, data is broken into 4MB chunks with TagMessage, and final chunk uses TagFinal.
+func EncryptChaCha20poly1305Chunked(data []byte, key []byte) ([]byte, []byte, error) {
+	encryptor, header, err := NewEncryptor(key)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	dataLen := len(data)
+	if dataLen == 0 {
+		// Handle empty data case
+		encoded, err := encryptor.Push(data, TagFinal)
+		if err != nil {
+			return nil, nil, err
+		}
+		return encoded, header, nil
+	}
+
+	var encryptedChunks [][]byte
+	bytesProcessed := 0
+
+	for bytesProcessed < dataLen {
+		chunkSize := streamEncryptionChunkSize
+		remaining := dataLen - bytesProcessed
+		if remaining < chunkSize {
+			chunkSize = remaining
+		}
+
+		chunk := data[bytesProcessed : bytesProcessed+chunkSize]
+		bytesProcessed += chunkSize
+
+		// Use TagFinal for the last chunk, TagMessage for others
+		var tag byte
+		if bytesProcessed >= dataLen {
+			tag = TagFinal
+		} else {
+			tag = TagMessage
+		}
+
+		encryptedChunk, err := encryptor.Push(chunk, tag)
+		if err != nil {
+			return nil, nil, err
+		}
+		encryptedChunks = append(encryptedChunks, encryptedChunk)
+	}
+
+	// Calculate total size and merge chunks
+	totalSize := 0
+	for _, chunk := range encryptedChunks {
+		totalSize += len(chunk)
+	}
+
+	result := make([]byte, totalSize)
+	offset := 0
+	for _, chunk := range encryptedChunks {
+		copy(result[offset:], chunk)
+		offset += len(chunk)
+	}
+
+	return result, header, nil
 }
 
 // decryptChaCha20poly1305 decrypts the given data using the ChaCha20-Poly1305 algorithm.
@@ -222,6 +292,28 @@ func DecryptFile(encryptedFilePath string, decryptedFilePath string, key, nonce 
 		return err
 	}
 	return nil
+}
+
+// ComputeFileHash computes a BLAKE2b hash of file content, matching web client behavior.
+// It returns the hash as a base64 encoded string.
+func ComputeFileHash(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Ente uses 32-byte BLAKE2b hashes for file content
+	hasher, err := blake2b.New(&blake2b.Config{Size: 32})
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := io.Copy(hasher, file); err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(hasher.Sum(nil)), nil
 }
 
 //func DecryptFileLib(encryptedFilePath string, decryptedFilePath string, key, nonce []byte) error {
