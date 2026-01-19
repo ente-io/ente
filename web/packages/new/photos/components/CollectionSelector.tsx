@@ -134,7 +134,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortBy, setSortBy] = useCollectionSelectorSortByLocalState("name");
+    const [sortBy, setSortBy] =
+        useCollectionSelectorSortByLocalState("name-asc");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -177,16 +178,24 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             })
             .sort((a, b) => {
                 switch (sortBy) {
-                    case "name":
+                    case "name-asc":
                         return a.name.localeCompare(b.name);
+                    case "name-desc":
+                        return b.name.localeCompare(a.name);
                     case "creation-time-asc":
-                        return (
-                            -1 *
-                            compareCollectionsLatestFile(
-                                b.latestFile,
-                                a.latestFile,
-                            )
+                        return compareCollectionsLatestFile(
+                            a.latestFile,
+                            b.latestFile,
+                            true,
                         );
+                    case "creation-time-desc":
+                        return compareCollectionsLatestFile(
+                            a.latestFile,
+                            b.latestFile,
+                            false,
+                        );
+                    case "updation-time-asc":
+                        return (a.updationTime ?? 0) - (b.updationTime ?? 0);
                     case "updation-time-desc":
                         return (b.updationTime ?? 0) - (a.updationTime ?? 0);
                 }
@@ -489,13 +498,14 @@ const useCollectionSelectorSortByLocalState = (
 const compareCollectionsLatestFile = (
     first: EnteFile | undefined,
     second: EnteFile | undefined,
+    sortAsc: boolean,
 ) => {
     if (!first) {
         return 1;
     } else if (!second) {
         return -1;
     } else {
-        const sortedFiles = sortFiles([first, second]);
+        const sortedFiles = sortFiles([first, second], sortAsc);
         if (sortedFiles[0]?.id !== first.id) {
             return 1;
         } else {
