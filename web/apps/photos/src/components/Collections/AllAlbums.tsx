@@ -1,7 +1,6 @@
 // TODO: Audit this file.
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -24,6 +23,7 @@ import { FilledIconButton } from "ente-base/components/mui";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import {
     ItemCard,
@@ -617,7 +617,7 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
                     }}
                 >
                     {isFavorite && (
-                        <FavoriteIcon sx={{ fontSize: 20, color: "white" }} />
+                        <StarIcon sx={{ fontSize: 20, color: "white" }} />
                     )}
                     {isPinned && (
                         <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
