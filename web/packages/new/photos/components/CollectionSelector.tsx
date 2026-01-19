@@ -1,4 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
@@ -10,6 +12,7 @@ import {
     Stack,
     styled,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
@@ -358,17 +361,53 @@ interface CollectionSummaryButtonProps {
 const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     collectionSummary,
     onClick,
-}) => (
-    <ItemCard
-        TileComponent={LargeTileButton}
-        coverFile={collectionSummary.coverFile}
-        onClick={() => onClick(collectionSummary.id)}
-    >
-        <LargeTileTextOverlay>
-            <Typography>{collectionSummary.name}</Typography>
-        </LargeTileTextOverlay>
-    </ItemCard>
-);
+}) => {
+    const isFavorite = collectionSummary.type === "userFavorites";
+    const isPinned = collectionSummary.attributes.has("pinned");
+
+    return (
+        <ItemCard
+            TileComponent={LargeTileButton}
+            coverFile={collectionSummary.coverFile}
+            onClick={() => onClick(collectionSummary.id)}
+        >
+            <LargeTileTextOverlay>
+                <Tooltip title={collectionSummary.name} arrow>
+                    <Typography
+                        sx={{
+                            maxWidth: "240px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                </Tooltip>
+            </LargeTileTextOverlay>
+            {(isFavorite || isPinned) && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        right: 8,
+                        display: "flex",
+                        gap: 0.5,
+                    }}
+                >
+                    {isFavorite && (
+                        <FavoriteIcon
+                            sx={{ fontSize: 20, color: "white" }}
+                        />
+                    )}
+                    {isPinned && (
+                        <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                </Box>
+            )}
+        </ItemCard>
+    );
+};
 
 interface SearchFieldProps {
     value: string;
