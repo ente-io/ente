@@ -1,3 +1,5 @@
+import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import SortIcon from "@mui/icons-material/Sort";
 import {
     IconButton,
@@ -9,8 +11,6 @@ import {
 } from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
 import type { CollectionsSortBy } from "ente-new/photos/services/collection-summary";
-import { ArrowDown02Icon, ArrowUp02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { t } from "i18next";
 import React, { useState } from "react";
 
@@ -175,7 +175,7 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
 }) => {
     const isSelected = category === activeCategory;
     const directionLabel = activeAscending ? ascLabel : descLabel;
-    const ArrowIcon = activeAscending ? ArrowUp02Icon : ArrowDown02Icon;
+    const arrowIcon = activeAscending ? ArrowUp02Icon : ArrowDown02Icon;
 
     return (
         <MenuItem
@@ -214,7 +214,11 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
                         <Typography sx={{ fontSize: "0.875rem" }}>
                             {directionLabel}
                         </Typography>
-                        <ArrowIcon size={18} color="currentColor" />
+                        <HugeiconsIcon
+                            icon={arrowIcon}
+                            size={18}
+                            color="currentColor"
+                        />
                     </Stack>
                 )}
             </Stack>
