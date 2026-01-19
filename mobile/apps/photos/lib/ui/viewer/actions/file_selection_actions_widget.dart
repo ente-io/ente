@@ -744,14 +744,20 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
-    final hasPersons =
-        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
-    if (!mounted || !hasPersons) {
+    final namedPersons =
+        await AddFilesToPersonPage.prefetchNamedPersons(context);
+    if (!mounted) {
+      return;
+    }
+    if (namedPersons != null && namedPersons.isEmpty) {
       return;
     }
     final result = await routeToPage(
       context,
-      AddFilesToPersonPage(files: filesWithIds),
+      AddFilesToPersonPage(
+        files: filesWithIds,
+        initialPersons: namedPersons,
+      ),
       forceCustomPageRoute: true,
     );
     if (result is! ManualPersonAssignmentResult) {

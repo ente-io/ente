@@ -817,6 +817,7 @@
   "name": "Name",
   "newest": "Newest",
   "lastUpdated": "Last updated",
+  "updated": "Updated",
   "deleteEmptyAlbums": "Delete empty albums",
   "deleteEmptyAlbumsWithQuestionMark": "Delete empty albums?",
   "deleteAlbumsDialogBody": "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
@@ -1259,6 +1260,7 @@
   "visibility": "Visibility",
   "hideFromMemories": "Hide from memories",
   "showInMemories": "Show in memories",
+  "showIgnored": "Show ignored",
   "create": "Create",
   "viewAll": "View all",
   "nothingSharedWithYouYet": "Nothing shared with you yet",
@@ -2084,6 +2086,7 @@
     }
   },
   "size": "Size",
+  "closest": "Closest",
   "similarity": "Similarity",
   "analyzingPhotosLocally": "Analyzing your photos locally...",
   "lookingForVisualSimilarities": "Looking for visual similarities...",

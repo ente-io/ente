@@ -2,15 +2,14 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_sort_order_change_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
-import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -18,78 +17,52 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
-import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
-import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/people_sort_util.dart";
 
-class AddFilesToPersonPage extends StatefulWidget {
-  final List<EnteFile> files;
-  final List<GenericSearchResult>? initialPersons;
-
-  static final Logger _logger = Logger("AddFilesToPersonPage");
-
-  const AddFilesToPersonPage({
-    required this.files,
-    this.initialPersons,
-    super.key,
-  });
-
-  static Future<List<GenericSearchResult>> loadNamedPersons() async {
-    final results = await SearchService.instance
-        .getAllFace(null, minClusterSize: kMinimumClusterSizeAllFaces);
-    final named = results
-        .where(
-          (result) =>
-              (result.params[kPersonParamID] as String?)?.isNotEmpty ?? false,
-        )
-        .toList();
-    return named;
-  }
-
-  static Future<List<GenericSearchResult>?> prefetchNamedPersons(
-    BuildContext context,
-  ) async {
-    try {
-      final persons = await loadNamedPersons();
-      if (!context.mounted) {
-        return null;
-      }
-      if (persons.isEmpty) {
-        showShortToast(
-          context,
-          AppLocalizations.of(context).pleaseNamePersonInPeopleSectionFirst,
-        );
-      }
-      return persons;
-    } catch (error, stackTrace) {
-      _logger.severe(
-        "Failed to load persons for manual tagging pre-check",
-        error,
-        stackTrace,
+Future<String?> showMergeClustersToPersonSheet(
+  BuildContext context, {
+  List<GenericSearchResult>? initialPersons,
+}) {
+  return showBarModalBottomSheet<String>(
+    context: context,
+    builder: (context) {
+      return MergeClustersToPersonSheet(
+        initialPersons: initialPersons,
       );
-      return null;
-    }
-  }
-
-  static Future<bool> ensureNamedPersonsExist(BuildContext context) async {
-    final persons = await prefetchNamedPersons(context);
-    if (!context.mounted) {
-      return false;
-    }
-    if (persons == null) {
-      return true;
-    }
-    return persons.isNotEmpty;
-  }
-
-  @override
-  State<AddFilesToPersonPage> createState() => _AddFilesToPersonPageState();
+    },
+    shape: const RoundedRectangleBorder(
+      side: BorderSide(width: 0),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(5),
+      ),
+    ),
+    topControl: const SizedBox.shrink(),
+    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    barrierColor: backdropFaintDark,
+    enableDrag: true,
+  );
 }
 
-class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
+class MergeClustersToPersonSheet extends StatefulWidget {
+  final List<GenericSearchResult>? initialPersons;
+
+  const MergeClustersToPersonSheet({
+    super.key,
+    this.initialPersons,
+  });
+
+  @override
+  State<MergeClustersToPersonSheet> createState() =>
+      _MergeClustersToPersonSheetState();
+}
+
+class _MergeClustersToPersonSheetState
+    extends State<MergeClustersToPersonSheet> {
+  static final Logger _logger = Logger("MergeClustersToPersonSheet");
+
   late Future<List<GenericSearchResult>> _personsFuture;
   String _searchQuery = "";
   late PeopleSortKey _sortKey;
@@ -103,7 +76,6 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
   @override
   void initState() {
     super.initState();
-    assert(widget.files.isNotEmpty);
     final settings = localSettings;
     _sortKey = settings.peopleSortKey();
     _nameSortAscending = settings.peopleNameSortAscending;
@@ -111,7 +83,20 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
     _photosSortAscending = settings.peoplePhotosSortAscending;
     _personsFuture = widget.initialPersons != null
         ? Future.value(widget.initialPersons!)
-        : AddFilesToPersonPage.loadNamedPersons();
+        : _loadNamedPersons();
+  }
+
+  static Future<List<GenericSearchResult>> _loadNamedPersons() async {
+    final results = await SearchService.instance.getAllFace(
+      null,
+      minClusterSize: kMinimumClusterSizeAllFaces,
+    );
+    return results
+        .where(
+          (result) =>
+              (result.params[kPersonParamID] as String?)?.isNotEmpty ?? false,
+        )
+        .toList();
   }
 
   List<GenericSearchResult> _filterPersons(
@@ -203,12 +188,13 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
     const gridPadding = 16.0;
 
     return Scaffold(
+      backgroundColor: colorScheme.backgroundElevated,
       body: FutureBuilder<List<GenericSearchResult>>(
         future: _personsFuture,
         builder: (context, snapshot) {
           final slivers = <Widget>[
             SearchableAppBar(
-              title: Text(AppLocalizations.of(context).addPerson),
+              title: Text(AppLocalizations.of(context).addToPerson),
               onSearch: _updateSearchQuery,
               onSearchClosed: _clearSearchQuery,
               centerTitle: false,
@@ -234,8 +220,8 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
             );
             return CustomScrollView(slivers: slivers);
           } else if (snapshot.hasError) {
-            AddFilesToPersonPage._logger.severe(
-              "Failed to load persons for manual tagging",
+            _logger.severe(
+              "Failed to load persons for merge",
               snapshot.error,
               snapshot.stackTrace,
             );
@@ -471,47 +457,12 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
     );
   }
 
-  Future<void> _onPersonSelected(GenericSearchResult result) async {
+  void _onPersonSelected(GenericSearchResult result) {
     final personId = result.params[kPersonParamID] as String?;
     if (personId == null || personId.isEmpty) {
       return;
     }
-    final uploadIds = widget.files
-        .map((file) => file.uploadedFileID)
-        .whereType<int>()
-        .toSet();
-    if (uploadIds.isEmpty) {
-      showShortToast(
-        context,
-        AppLocalizations.of(context).onlyUploadedFilesCanBeAddedToPerson,
-      );
-      return;
-    }
-
-    final dialog = createProgressDialog(
-      context,
-      AppLocalizations.of(context).saving,
-    );
-    await dialog.show();
-    try {
-      final result = await PersonService.instance.addManualFileAssignments(
-        personID: personId,
-        fileIDs: uploadIds,
-      );
-      await dialog.hide();
-      if (!mounted) {
-        return;
-      }
-      Navigator.of(context).pop(result);
-    } catch (e, s) {
-      await dialog.hide();
-      AddFilesToPersonPage._logger
-          .severe("Failed to add files to person", e, s);
-      if (!mounted) {
-        return;
-      }
-      await showGenericErrorDialog(context: context, error: e);
-    }
+    Navigator.of(context).pop(personId);
   }
 }
 

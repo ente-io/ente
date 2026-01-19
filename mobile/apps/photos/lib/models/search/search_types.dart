@@ -290,6 +290,8 @@ extension SectionTypeExtensions on SectionType {
         return [Bus.instance.on<CollectionUpdatedEvent>()];
       case SectionType.face:
         return [Bus.instance.on<PeopleChangedEvent>()];
+      case SectionType.contacts:
+        return [Bus.instance.on<PeopleChangedEvent>()];
       default:
         return [];
     }
