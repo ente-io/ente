@@ -14,7 +14,6 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import type { SvgIconProps } from "@mui/material";
 import {
     Box,
-    Divider,
     ListItemIcon,
     ListItemText,
     Menu,
@@ -137,9 +136,6 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                         </StyledMenuItem>
                     );
                 })}
-                {destructiveActions.length > 0 && primaryActions.length > 0 && (
-                    <Divider />
-                )}
 
                 {destructiveActions.map((action) => {
                     const { label, Icon } = actionConfigs[action];
