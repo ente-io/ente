@@ -396,9 +396,7 @@ const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
                     }}
                 >
                     {isFavorite && (
-                        <FavoriteIcon
-                            sx={{ fontSize: 20, color: "white" }}
-                        />
+                        <FavoriteIcon sx={{ fontSize: 20, color: "white" }} />
                     )}
                     {isPinned && (
                         <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
