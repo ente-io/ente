@@ -59,3 +59,58 @@ cargo clippy   # lint
 cargo build    # build
 cargo test     # test
 ```
+
+## Fuzzing
+
+Fuzzing is an automated technique that feeds randomized and malformed inputs into
+functions to uncover panics, edge cases, and security bugs that unit tests may miss.
+
+Fuzz targets live in `rust/core/fuzz` (cargo-fuzz). Requires a nightly toolchain.
+
+```bash
+cargo +nightly install cargo-fuzz
+cd rust/core
+cargo +nightly fuzz run secretbox -- -max_total_time=60
+```
+
+Other targets: `sealed_box`, `stream`, `argon`.
+
+## Tests
+
+```
+tests/
+├── auth_integration.rs          # Auth workflow tests
+├── comprehensive_crypto_tests.rs # Stress tests (up to 50MB files)
+├── crypto_interop.rs            # Cross-platform vectors (JS/Dart)
+└── libsodium_vectors.rs         # Libsodium compatibility
+
+src/
+├── auth/*.rs                    # Auth unit tests
+└── crypto/*.rs                  # Crypto unit tests
+```
+
+**Total: 186+ tests**
+
+| Test Suite | What it tests |
+|------------|---------------|
+| Auth unit tests | Login, signup, recovery, SRP |
+| Auth integration | Full auth workflows |
+| Crypto unit tests | Individual crypto operations |
+| Libsodium vectors | Cross-platform compatibility |
+| Comprehensive | Large files, edge cases |
+
+### Running Tests
+
+```bash
+# All tests
+cargo test
+
+# Auth tests only
+cargo test auth
+
+# Crypto tests only
+cargo test crypto
+
+# With output
+cargo test -- --nocapture
+```

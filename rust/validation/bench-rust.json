@@ -1,0 +1,116 @@
+{
+  "results": [
+    {
+      "case": "secretbox",
+      "duration_ms": 90.398708,
+      "implementation": "rust-core",
+      "iterations": 50,
+      "operation": "encrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "secretbox",
+      "duration_ms": 75.490792,
+      "implementation": "rust-core",
+      "iterations": 50,
+      "operation": "decrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "secretbox",
+      "duration_ms": 67.488792,
+      "implementation": "libsodium",
+      "iterations": 50,
+      "operation": "encrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "secretbox",
+      "duration_ms": 65.976792,
+      "implementation": "libsodium",
+      "iterations": 50,
+      "operation": "decrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "stream",
+      "duration_ms": 36.419124999999994,
+      "implementation": "rust-core",
+      "iterations": 10,
+      "operation": "encrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "stream",
+      "duration_ms": 36.364625,
+      "implementation": "rust-core",
+      "iterations": 10,
+      "operation": "decrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "stream",
+      "duration_ms": 13.629458000000001,
+      "implementation": "libsodium",
+      "iterations": 10,
+      "operation": "encrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "stream",
+      "duration_ms": 13.573958000000001,
+      "implementation": "libsodium",
+      "iterations": 10,
+      "operation": "decrypt",
+      "size_bytes": 1048576
+    },
+    {
+      "case": "stream",
+      "duration_ms": 548.742125,
+      "implementation": "rust-core",
+      "iterations": 3,
+      "operation": "encrypt",
+      "size_bytes": 52428800
+    },
+    {
+      "case": "stream",
+      "duration_ms": 546.3390420000001,
+      "implementation": "rust-core",
+      "iterations": 3,
+      "operation": "decrypt",
+      "size_bytes": 52428800
+    },
+    {
+      "case": "stream",
+      "duration_ms": 200.684208,
+      "implementation": "libsodium",
+      "iterations": 3,
+      "operation": "encrypt",
+      "size_bytes": 52428800
+    },
+    {
+      "case": "stream",
+      "duration_ms": 205.101208,
+      "implementation": "libsodium",
+      "iterations": 3,
+      "operation": "decrypt",
+      "size_bytes": 52428800
+    },
+    {
+      "case": "argon2id",
+      "duration_ms": 154.535417,
+      "implementation": "rust-core",
+      "iterations": 3,
+      "operation": "derive",
+      "size_bytes": 0
+    },
+    {
+      "case": "argon2id",
+      "duration_ms": 158.949125,
+      "implementation": "libsodium",
+      "iterations": 3,
+      "operation": "derive",
+      "size_bytes": 0
+    }
+  ]
+}

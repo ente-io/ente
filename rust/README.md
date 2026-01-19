@@ -41,6 +41,7 @@
 ## Contents (this repo)
 
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
+- `rust/validation/` - crypto validation + benchmarks vs libsodium.
 - `rust/cli/` - Rust CLI (work-in-progress).
 
 ## Directory Structure
@@ -53,15 +54,30 @@ rust/
 │   ├── Cargo.toml
 │   └── Cargo.lock
 │
-└── core/                   # Pure Rust shared logic
+├── core/                   # Pure Rust shared logic
+│   ├── src/
+│   │   ├── lib.rs
+│   │   ├── crypto/
+│   │   └── auth/
+│   ├── docs/
+│   │   ├── crypto.md
+│   │   └── auth.md
+│   └── Cargo.toml          # crate name: ente-core
+│
+└── validation/             # Crypto validation + benchmarks vs libsodium
     ├── src/
-    │   ├── lib.rs
-    │   ├── crypto/
-    │   └── auth/
-    ├── docs/
-    │   ├── crypto.md
-    │   └── auth.md
-    └── Cargo.toml          # crate name: ente-core
+    │   ├── main.rs
+    │   └── bin/
+    │       └── bench.rs
+    ├── wasm/               # WASM bench bindings
+    │   ├── src/
+    │   │   └── lib.rs
+    │   └── Cargo.toml      # crate name: ente-validation-wasm
+    ├── js/                 # JS + WASM benchmarks
+    │   ├── bench-wasm.mjs
+    │   ├── bench-wasm-browser.mjs
+    │   └── bench-wasm-browser.html
+    └── Cargo.toml          # crate name: ente-validation
 
 web/packages/wasm/          # WASM bindings (lives in web workspace)
 ├── src/
@@ -90,6 +106,8 @@ mobile/apps/photos/rust/    # Photos app-specific FRB bindings
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
+- `ente-validation` - validation + benchmarks vs libsodium
+  - `ente-validation-wasm` - wasm bench bindings
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
 - `ente_photos_rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)
@@ -134,6 +152,39 @@ cargo fmt        # format
 cargo clippy     # lint
 cargo build      # build
 cargo test       # test
+```
+
+**ente-validation (rust/validation/):**
+
+```sh
+cargo run -p ente-validation --bin ente-validation    # validation suite
+cargo run -p ente-validation --bin bench              # benchmarks (debug)
+cargo run -p ente-validation --bin bench --release    # benchmarks (release)
+```
+
+**ente-validation wasm benchmarks (rust/validation/):**
+
+Node (rust-core wasm vs libsodium-wrappers-sumo wasm):
+
+```sh
+wasm-pack build --target nodejs rust/validation/wasm  # wasm bench build
+cd rust/validation/js
+npm install
+node bench-wasm.mjs                                   # wasm benchmarks
+```
+
+Browser (Chrome):
+
+```sh
+wasm-pack build --target web rust/validation/wasm
+cd rust/validation
+python3 -m http.server 8000
+```
+
+Open:
+
+```text
+http://localhost:8000/js/bench-wasm-browser.html
 ```
 
 **ente-wasm (web/packages/wasm/):**
