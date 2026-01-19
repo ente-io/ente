@@ -697,7 +697,6 @@ class _FilterBottomSheet extends StatelessWidget {
               _ActionPillButton(
                 label: context.l10n.clearAllFilters,
                 onTap: onClearAllFilters,
-                showCloseIcon: true,
                 colorScheme: colorScheme,
                 textTheme: textTheme,
               ),
@@ -773,14 +772,12 @@ class _ActionPillButton extends StatelessWidget {
     required this.onTap,
     required this.colorScheme,
     required this.textTheme,
-    this.showCloseIcon = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
-  final bool showCloseIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -790,27 +787,18 @@ class _ActionPillButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: colorScheme.strokeFaint,
+            width: 1,
+          ),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: 12.0,
-          vertical: 10.0,
+          vertical: 8.0,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: textTheme.small,
-            ),
-            if (showCloseIcon) ...[
-              const SizedBox(width: 6),
-              Icon(
-                Icons.close,
-                color: colorScheme.textBase,
-                size: 20,
-              ),
-            ],
-          ],
+        child: Text(
+          label,
+          style: textTheme.small,
         ),
       ),
     );

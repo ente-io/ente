@@ -278,7 +278,6 @@
   "failedToApplyCode": "فشل تطبيق الرمز",
   "enterReferralCode": "أدخل رمز الإحالة",
   "codeAppliedPageTitle": "تم تطبيق الرمز",
-  "changeYourReferralCode": "تغيير رمز الإحالة الخاص بك",
   "change": "تغيير",
   "unavailableReferralCode": "عذرًا، هذا الرمز غير متوفر.",
   "codeChangeLimitReached": "عذرًا، لقد تجاوزت الحد المسموح به لتعديلات الرمز.",
@@ -296,11 +295,9 @@
   "claimFreeStorage": "المطالبة بمساحة تخزين مجانية",
   "inviteYourFriends": "ادعُ أصدقاءك",
   "failedToFetchReferralDetails": "تعذر جلب تفاصيل الإحالة. يرجى المحاولة مرة أخرى لاحقًا.",
-  "referralStep1": "1. أعطِ هذا الرمز لأصدقائك",
   "referralStep2": "2. يشتركون في خطة مدفوعة",
   "referralStep3": "3. تحصلون كلاكما على {storageInGB} جيجابايت* مجانًا",
   "referralsAreCurrentlyPaused": "الإحالات متوقفة مؤقتًا",
-  "youCanAtMaxDoubleYourStorage": "* يمكنك مضاعفة مساحة التخزين الخاصة بك بحد أقصى",
   "claimedStorageSoFar": "{isFamilyMember, select, true {عائلتك حصلت على {storageAmountInGb} جيجابايت حتى الآن} false {لقد حصلت على {storageAmountInGb} جيجابايت حتى الآن} other {لقد حصلت على {storageAmountInGb} جيجابايت حتى الآن!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1098,7 +1095,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} متوفرة",
-  "appVersion": "الإصدار: {versionValue}",
   "verifyIDLabel": "تحقق",
   "fileInfoAddDescHint": "إضافة وصف...",
   "editLocationTagTitle": "تعديل الموقع",

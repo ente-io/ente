@@ -349,7 +349,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         hugeIcon: const HugeIcon(
           icon: HugeIcons.strokeRoundedDownload01,
         ),
-        label: context.l10n.save,
+        label: context.l10n.download,
         onTap: () => isSingleSelection
             ? _downloadFile(context, file!)
             : _downloadMultipleFiles(context, files),

@@ -223,6 +223,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
+  String get download => 'Download';
+
+  @override
   String get deleteFile => 'Delete item';
 
   @override
@@ -1577,10 +1580,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filters => 'Filters';
 
   @override
-  String get seeAllCollections => 'See all collections';
+  String get seeAllCollections => 'All collections';
 
   @override
-  String get clearAllFilters => 'Clear all filters';
+  String get clearAllFilters => 'Clear all';
 
   @override
   String get selectLanguage => 'Select language';

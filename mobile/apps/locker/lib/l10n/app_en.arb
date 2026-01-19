@@ -198,6 +198,7 @@
   "create": "Create",
   "renameCollection": "Rename collection",
   "save": "Save",
+  "download": "Download",
   "deleteFile": "Delete item",
   "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
   "@deleteFileConfirmation": {
@@ -910,8 +911,8 @@
   "sessionExpired": "Session expired",
   "pleaseLoginAgain": "Please login again",
   "filters": "Filters",
-  "seeAllCollections": "See all collections",
-  "clearAllFilters": "Clear all filters",
+  "seeAllCollections": "All collections",
+  "clearAllFilters": "Clear all",
   "selectLanguage": "Select language",
   "general": "General",
   "language": "Language",
