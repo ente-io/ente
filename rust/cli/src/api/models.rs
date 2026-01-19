@@ -3,6 +3,10 @@ use uuid::Uuid;
 
 // ========== Authentication Models ==========
 
+fn default_email_mfa_enabled() -> bool {
+    true
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SrpAttributes {
     #[serde(rename = "srpUserID")]
@@ -15,7 +19,7 @@ pub struct SrpAttributes {
     pub ops_limit: i32,
     #[serde(rename = "kekSalt")]
     pub kek_salt: String,
-    #[serde(rename = "isEmailMFAEnabled")]
+    #[serde(rename = "isEmailMFAEnabled", default = "default_email_mfa_enabled")]
     pub is_email_mfa_enabled: bool,
 }
 
@@ -72,19 +76,36 @@ pub struct AuthResponse {
     pub key_attributes: Option<KeyAttributes>,
     pub encrypted_token: Option<String>,
     pub token: Option<String>,
+    #[serde(rename = "twoFactorSessionID")]
     pub two_factor_session_id: Option<String>,
+    #[serde(rename = "twoFactorSessionIDV2")]
+    pub two_factor_session_id_v2: Option<String>,
+    #[serde(rename = "passkeySessionID")]
     pub passkey_session_id: Option<String>,
     pub srp_m2: Option<String>,
     pub accounts_url: Option<String>,
 }
 
 impl AuthResponse {
+    pub fn get_two_factor_session_id(&self) -> Option<&String> {
+        self.two_factor_session_id
+            .as_ref()
+            .filter(|s| !s.is_empty())
+            .or_else(|| {
+                self.two_factor_session_id_v2
+                    .as_ref()
+                    .filter(|s| !s.is_empty())
+            })
+    }
+
     pub fn is_mfa_required(&self) -> bool {
-        self.two_factor_session_id.is_some()
+        self.get_two_factor_session_id().is_some()
     }
 
     pub fn is_passkey_required(&self) -> bool {
-        self.passkey_session_id.is_some()
+        self.passkey_session_id
+            .as_ref()
+            .is_some_and(|s| !s.is_empty())
     }
 }
 

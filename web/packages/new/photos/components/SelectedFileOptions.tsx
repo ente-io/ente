@@ -2,16 +2,19 @@ import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
 import MoveIcon from "@mui/icons-material/ArrowForward";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useModalVisibility } from "ente-base/components/utils/modal";
@@ -145,6 +148,20 @@ interface SelectedFileOptionsProps {
      * person will be shown (when ML is enabled and there are named people).
      */
     onAddPersonToSelectedFiles?: (personID: string) => Promise<void>;
+    /**
+     * Called when the user wants to edit the location of the selected files.
+     *
+     * Only shown when at least one owned file is selected.
+     */
+    onEditLocation?: () => void;
+    /**
+     * Called when the user wants to select all files.
+     */
+    onSelectAll: () => void;
+    /**
+     * If true, all files in the current view are selected.
+     */
+    isAllSelected: boolean;
 }
 
 /**
@@ -165,6 +182,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     createOnSelectForCollectionOp,
     createFileOpHandler,
     onAddPersonToSelectedFiles,
+    onEditLocation,
+    onSelectAll,
+    isAllSelected,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -319,7 +339,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={onClearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Typography sx={{ mr: "auto" }}>
+                <Typography>
                     {selectedFileCount == selectedOwnFileCount
                         ? t("selected_count", { selected: selectedFileCount })
                         : t("selected_and_yours_count", {
@@ -327,11 +347,20 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                               yours: selectedOwnFileCount,
                           })}
                 </Typography>
+                <SelectAllToggleButton
+                    isAllSelected={isAllSelected}
+                    onClick={isAllSelected ? onClearSelection : onSelectAll}
+                />
+
+                <Box sx={{ mr: "auto" }} />
 
                 {isInSearchMode ? (
                     <>
                         <FavoriteButton onClick={handleFavorite} />
                         <FixTimeButton onClick={handleFixTime} />
+                        {onEditLocation && selectedOwnFileCount > 0 && (
+                            <EditLocationButton onClick={onEditLocation} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
@@ -402,6 +431,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                 <FavoriteButton onClick={handleFavorite} />
                             )}
                         <FixTimeButton onClick={handleFixTime} />
+                        {onEditLocation && selectedOwnFileCount > 0 && (
+                            <EditLocationButton onClick={onEditLocation} />
+                        )}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
@@ -524,6 +556,14 @@ const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
     </Tooltip>
 );
 
+const EditLocationButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("edit_location")}>
+        <IconButton {...{ onClick }}>
+            <EditLocationAltIcon />
+        </IconButton>
+    </Tooltip>
+);
+
 const AddToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("add")}>
         <IconButton {...{ onClick }}>
@@ -553,5 +593,42 @@ const RemoveFromCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
         <IconButton {...{ onClick }}>
             <RemoveIcon />
         </IconButton>
+    </Tooltip>
+);
+
+interface SelectAllToggleButtonProps {
+    isAllSelected: boolean;
+    onClick: () => void;
+}
+
+const SelectAllToggleButton: React.FC<SelectAllToggleButtonProps> = ({
+    isAllSelected,
+    onClick,
+}) => (
+    <Tooltip title={isAllSelected ? t("deselect_all") : t("select_all")}>
+        <Button
+            onClick={onClick}
+            size="small"
+            color="secondary"
+            sx={{
+                textTransform: "none",
+                minWidth: "auto",
+                px: 2,
+                ml: 2,
+                borderRadius: 9999,
+            }}
+            endIcon={
+                isAllSelected ? (
+                    <CheckCircleIcon fontSize="small" />
+                ) : (
+                    <CheckCircleOutlineIcon
+                        fontSize="small"
+                        sx={{ color: "text.muted" }}
+                    />
+                )
+            }
+        >
+            {t("all")}
+        </Button>
     </Tooltip>
 );

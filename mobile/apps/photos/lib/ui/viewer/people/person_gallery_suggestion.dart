@@ -3,7 +3,9 @@ import "dart:typed_data";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -230,28 +232,20 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     setState(() {
       isProcessing = true;
     });
-    unawaited(_animateOut());
 
     try {
       final currentSuggestion = allSuggestions[currentSuggestionIndex];
+      final feedbackFuture = accepted
+          ? ClusterFeedbackService.instance.addClusterToExistingPerson(
+              person: relevantPerson,
+              clusterID: currentSuggestion.clusterIDToMerge,
+            )
+          : _captureNotPersonFeedback(currentSuggestion);
 
-      if (accepted) {
-        unawaited(
-          ClusterFeedbackService.instance.addClusterToExistingPerson(
-            person: relevantPerson,
-            clusterID: currentSuggestion.clusterIDToMerge,
-          ),
-        );
-      } else {
-        unawaited(
-          MLDataDB.instance.captureNotPersonFeedback(
-            personID: relevantPerson.remoteID,
-            clusterID: currentSuggestion.clusterIDToMerge,
-          ),
-        );
-      }
-      // Wait for animation to complete before hiding widget
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.wait([
+        _animateOut(),
+        feedbackFuture,
+      ]);
       if (mounted) {
         setState(() {
           hasCurrentSuggestion = false;
@@ -266,6 +260,21 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         });
       }
     }
+  }
+
+  Future<void> _captureNotPersonFeedback(
+    ClusterSuggestion suggestion,
+  ) async {
+    await MLDataDB.instance.captureNotPersonFeedback(
+      personID: relevantPerson.remoteID,
+      clusterID: suggestion.clusterIDToMerge,
+    );
+    Bus.instance.fire(
+      PeopleChangedEvent(
+        person: relevantPerson,
+        source: suggestion.clusterIDToMerge,
+      ),
+    );
   }
 
   Future<void> _saveAsAnotherPerson() async {

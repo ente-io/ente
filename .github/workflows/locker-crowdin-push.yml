@@ -6,8 +6,12 @@ on:
         paths:
             # Run workflow when locker's app_en.arb is changed
             - "mobile/apps/locker/lib/l10n/app_en.arb"
+            # Run workflow when any translated ARB is changed
+            - "mobile/apps/locker/lib/l10n/app_*.arb"
             # Or the workflow itself is changed
             - ".github/workflows/locker-crowdin-push.yml"
+    # Allow manual runs from any branch (useful to push translations from a feature branch)
+    workflow_dispatch:
 
 permissions:
     contents: write
@@ -27,7 +31,8 @@ jobs:
                   base_path: "mobile/apps/locker/"
                   config: "mobile/apps/locker/crowdin.yml"
                   upload_sources: true
-                  upload_translations: false
+                  # Enable pushing local translations (e.g., app_fr.arb) to Crowdin
+                  upload_translations: true
                   download_translations: false
                   project_id: 860056
               env:

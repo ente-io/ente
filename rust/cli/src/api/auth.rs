@@ -3,13 +3,23 @@ use crate::api::models::{
     AuthResponse, CreateSrpSessionRequest, CreateSrpSessionResponse, GetSrpAttributesResponse,
     SendOtpRequest, SrpAttributes, VerifyEmailRequest, VerifySrpSessionRequest, VerifyTotpRequest,
 };
-use crate::crypto::{derive_argon_key, derive_login_key};
 use crate::models::error::Result;
 use base64::{Engine, engine::general_purpose::STANDARD};
-use sha2::Sha256;
-use srp::client::SrpClient;
-use srp::groups::G_4096;
 use uuid::Uuid;
+
+use ente_core::auth::{SrpAttributes as CoreSrpAttributes, SrpSession};
+
+const SRP_A_LEN: usize = 512; // 4096-bit group
+
+fn pad_left(data: &[u8], len: usize) -> Vec<u8> {
+    if data.len() >= len {
+        return data.to_vec();
+    }
+
+    let mut padded = vec![0u8; len - data.len()];
+    padded.extend_from_slice(data);
+    padded
+}
 
 /// SRP authentication implementation for Ente API
 pub struct AuthClient<'a> {
@@ -73,38 +83,28 @@ impl<'a> AuthClient<'a> {
         email: &str,
         password: &str,
     ) -> Result<(AuthResponse, Vec<u8>)> {
-        use rand::RngCore;
-
         // Step 1: Get SRP attributes
         let srp_attrs = self.get_srp_attributes(email).await?;
 
-        // Step 2: Derive key encryption key from password
-        let key_enc_key = derive_argon_key(
-            password,
-            &srp_attrs.kek_salt,
-            srp_attrs.mem_limit as u32,
-            srp_attrs.ops_limit as u32,
-        )?;
+        let core_attrs = CoreSrpAttributes {
+            srp_user_id: srp_attrs.srp_user_id.to_string(),
+            srp_salt: srp_attrs.srp_salt.clone(),
+            mem_limit: srp_attrs.mem_limit as u32,
+            ops_limit: srp_attrs.ops_limit as u32,
+            kek_salt: srp_attrs.kek_salt.clone(),
+            is_email_mfa_enabled: srp_attrs.is_email_mfa_enabled,
+        };
 
-        // Step 3: Derive login key
-        let login_key = derive_login_key(&key_enc_key)?;
+        // Step 2: Derive SRP credentials
+        let creds = ente_core::auth::derive_srp_credentials(password, &core_attrs)?;
 
-        // Step 4: Initialize SRP client
+        // Step 3: Start SRP session
         let srp_salt = STANDARD.decode(&srp_attrs.srp_salt)?;
-        // Use the UUID string directly as bytes (matching TypeScript's Buffer.from(srpUserID))
-        let identity = srp_attrs.srp_user_id.to_string().into_bytes();
+        let mut srp_session =
+            SrpSession::new(&core_attrs.srp_user_id, &srp_salt, &creds.login_key)?;
+        let a_pub = pad_left(&srp_session.public_a(), SRP_A_LEN);
 
-        // Create SRP client with 4096-bit group (matching Go's srp.GetParams(4096))
-        let client = SrpClient::<Sha256>::new(&G_4096);
-
-        // Generate random ephemeral private key
-        let mut a = vec![0u8; 64];
-        rand::thread_rng().fill_bytes(&mut a);
-
-        // Compute public ephemeral
-        let a_pub = client.compute_public_ephemeral(&a);
-
-        // Step 5: Create SRP session
+        // Step 4: Create SRP session
         log::debug!("Creating SRP session...");
         let session = self
             .create_srp_session(&srp_attrs.srp_user_id, &a_pub)
@@ -114,38 +114,24 @@ impl<'a> AuthClient<'a> {
         // Add a small delay to avoid potential rate limiting
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 
-        // Step 6: Process server's public key and generate proof
-        let server_public = STANDARD.decode(&session.srp_b)?;
-
-        // Process the server's response and generate client proof
-        // The srp crate expects: a, username, password, salt, b_pub
-        // But Ente uses the login_key (derived from password) as the password for SRP
-        let verifier = client
-            .process_reply(&a, &identity, &login_key, &srp_salt, &server_public)
-            .map_err(|e| {
-                crate::models::error::Error::AuthenticationFailed(format!(
-                    "SRP client process failed: {e:?}"
-                ))
-            })?;
-
-        // Step 7: Verify session with proof
-        let proof = verifier.proof();
+        // Step 5: Compute and send proof
+        let server_b = STANDARD.decode(&session.srp_b)?;
+        let proof = srp_session.compute_m1(&server_b)?;
 
         let auth_response = self
-            .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, proof)
+            .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, &proof)
             .await?;
 
-        // TODO: Verify server proof if provided
-        // if let Some(srp_m2) = &auth_response.srp_m2 {
-        //     let server_proof = STANDARD.decode(srp_m2)?;
-        //     verifier.verify_server(&server_proof).map_err(|_| {
-        //         crate::models::error::Error::AuthenticationFailed(
-        //             "Server proof verification failed".to_string()
-        //         )
-        //     })?;
-        // }
+        if let Some(srp_m2) = &auth_response.srp_m2 {
+            let server_proof = STANDARD.decode(srp_m2)?;
+            srp_session.verify_m2(&server_proof).map_err(|_| {
+                crate::models::error::Error::AuthenticationFailed(
+                    "Server proof verification failed".to_string(),
+                )
+            })?;
+        }
 
-        Ok((auth_response, key_enc_key))
+        Ok((auth_response, creds.kek))
     }
 
     /// Send OTP for email verification
@@ -155,8 +141,7 @@ impl<'a> AuthClient<'a> {
             purpose: "login".to_string(),
         };
 
-        let _: serde_json::Value = self.api.post("/users/ott", &request, None).await?;
-        Ok(())
+        self.api.post_empty("/users/ott", &request, None).await
     }
 
     /// Verify email with OTP
@@ -191,18 +176,28 @@ impl<'a> AuthClient<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::crypto::{derive_argon_key, derive_login_key};
 
     #[test]
-    fn test_login_key_derivation() {
-        // Test that login key derivation matches expected output
+    fn test_derive_srp_credentials() {
+        ente_core::crypto::init().unwrap();
+
         let password = "test_password";
-        let salt = b"test_salt_16bytes";
 
-        let key = derive_argon_key(password, &STANDARD.encode(salt), 4, 3).unwrap();
-        assert_eq!(key.len(), 32);
+        let srp_attrs = CoreSrpAttributes {
+            srp_user_id: "test-user".to_string(),
+            srp_salt: STANDARD.encode([0u8; 16]),
+            mem_limit: 67108864, // Interactive
+            ops_limit: 2,
+            kek_salt: STANDARD.encode(b"test_salt_16byte"),
+            is_email_mfa_enabled: false,
+        };
 
-        let login_key = derive_login_key(&key).unwrap();
-        assert_eq!(login_key.len(), 32);
+        let creds = ente_core::auth::derive_srp_credentials(password, &srp_attrs).unwrap();
+        let srp_salt = STANDARD.decode(&srp_attrs.srp_salt).unwrap();
+        let session = SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &creds.login_key).unwrap();
+
+        assert_eq!(creds.kek.len(), 32);
+        assert_eq!(creds.login_key.len(), 16);
+        assert!(!session.public_a().is_empty());
     }
 }

@@ -84,6 +84,20 @@ class _ContactSearchThumbnailWidgetState
   }
 
   @override
+  void didUpdateWidget(covariant ContactSearchThumbnailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newPersonID = widget.searchResult.params[kPersonParamID];
+    final newEmail = widget.searchResult.params[kContactEmail];
+    if (newPersonID != _personID) {
+      _personID = newPersonID;
+      _canUsePersonFaceWidget = newPersonID != null;
+    }
+    if (newEmail != _email) {
+      _email = newEmail;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 60,

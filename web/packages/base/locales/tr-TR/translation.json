@@ -106,6 +106,8 @@
     "exit_fullscreen": "Tam ekrandan çık",
     "go_fullscreen": "Tam ekrana geç",
     "zoom": "Yakınlaştır",
+    "zoom_in": "",
+    "zoom_out": "",
     "play": "Oynat",
     "pause": "Duraklat",
     "previous": "Önceki",
@@ -127,7 +129,7 @@
     "delete_files_title": "Hemen silinsin mi?",
     "delete_files_message": "Seçilen dosyalar Ente hesabınızdan kalıcı olarak silinecek.",
     "selected_count": "{{selected, number}} dosya seçildi",
-    "selected_and_yours_count": "{{selected, number}} dosya seçildi, {{yours, number}} tanesi size ait",
+    "selected_and_yours_count": "",
     "delete": "Sil",
     "like": "",
     "unlike": "",
@@ -799,5 +801,10 @@
     "continuous": "",
     "trip": "",
     "album_layout": "",
-    "maps_privacy_notice": ""
+    "maps_privacy_notice": "",
+    "edit_location": "",
+    "add_location": "",
+    "add_location_button": "",
+    "save_location": "",
+    "search_location": ""
 }

@@ -277,7 +277,6 @@
   "failedToApplyCode": "Nem sikerült alkalmazni a kódot",
   "enterReferralCode": "Adja meg az ajánló kódot",
   "codeAppliedPageTitle": "Kód alkalmazva",
-  "changeYourReferralCode": "Módosítsa ajánló kódját",
   "change": "Módosítás",
   "unavailableReferralCode": "Sajnáljuk, ez a kód nem érhető el.",
   "codeChangeLimitReached": "Sajnáljuk, elérted a kódmódosítások maximális számát.",
@@ -295,11 +294,9 @@
   "claimFreeStorage": "Igényeljen ingyenes tárhelyet",
   "inviteYourFriends": "Hívd meg a barátaidat",
   "failedToFetchReferralDetails": "Nem sikerült lekérni a hivatkozási adatokat. Kérjük, próbálja meg később.",
-  "referralStep1": "1. Add meg ezt a kódot a barátaidnak",
   "referralStep2": "2. Fizetős csomagra fizetnek elő",
   "referralStep3": "3. Mindketten {storageInGB} GB* ingyenes tárhelyet kaptok",
   "referralsAreCurrentlyPaused": "Az ajánlások jelenleg szünetelnek",
-  "youCanAtMaxDoubleYourStorage": "* Maximum megduplázhatod a tárhelyed",
   "claimedStorageSoFar": "{isFamilyMember, select, true {A családod eddig {storageAmountInGb} GB tárhelyet igényelt} false {Eddig {storageAmountInGb} GB tárhelyet igényelt} other {Eddig {storageAmountInGb} GB tárhelyet igényelt!}}",
   "@claimedStorageSoFar": {
     "placeholders": {

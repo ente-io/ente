@@ -106,6 +106,8 @@
     "exit_fullscreen": "",
     "go_fullscreen": "",
     "zoom": "",
+    "zoom_in": "",
+    "zoom_out": "",
     "play": "",
     "pause": "",
     "previous": "前へ",
@@ -127,7 +129,7 @@
     "delete_files_title": "すぐに削除しますか？",
     "delete_files_message": "選択したファイルは、Enteアカウントから完全に削除されます。",
     "selected_count": "{{selected, number}} 個を選択",
-    "selected_and_yours_count": "{{yours, number}}個のうち{{selected, number}} 個 選択中",
+    "selected_and_yours_count": "",
     "delete": "削除",
     "like": "",
     "unlike": "",
@@ -799,5 +801,10 @@
     "continuous": "",
     "trip": "",
     "album_layout": "",
-    "maps_privacy_notice": ""
+    "maps_privacy_notice": "",
+    "edit_location": "",
+    "add_location": "",
+    "add_location_button": "",
+    "save_location": "",
+    "search_location": ""
 }

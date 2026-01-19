@@ -136,6 +136,16 @@ cargo build      # build
 cargo test       # test
 ```
 
+**ente-cli (rust/cli/):**
+
+```sh
+cargo fmt        # format
+cargo clippy     # lint
+cargo build      # build
+cargo test       # test
+cargo run -- --help
+```
+
 **ente-wasm (web/packages/wasm/):**
 
 ```sh
