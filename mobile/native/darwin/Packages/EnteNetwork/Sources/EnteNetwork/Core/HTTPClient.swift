@@ -2,6 +2,19 @@ import Foundation
 import EnteCore
 import Logging
 
+extension URL {
+    /// A log-safe representation of the URL that strips query parameters.
+    ///
+    /// Query parameters can contain user identifiers (e.g. email) or tokens in some flows.
+    var enteRedactedForLogging: String {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
+            return absoluteString
+        }
+        components.query = nil
+        return components.url?.absoluteString ?? absoluteString
+    }
+}
+
 // MARK: - HTTP Method
 
 public enum HTTPMethod: String {
@@ -109,7 +122,6 @@ public class HTTPClient {
             components.queryItems = queryItems
             components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
             finalURL = components.url!
-            print("🌐 Final URL with encoded parameters: \(finalURL)")
         }
         
         var request = URLRequest(url: finalURL)
@@ -129,7 +141,7 @@ public class HTTPClient {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
         }
         
-        logger.debug("Making \(method.rawValue) request to \(finalURL)")
+        logger.debug("Making \(method.rawValue) request to \(finalURL.enteRedactedForLogging)")
         
         let (data, response) = try await session.data(for: request)
         
@@ -179,7 +191,7 @@ public class HTTPClient {
             }
         }
         
-        logger.debug("Uploading data to \(url)")
+        logger.debug("Uploading data to \(url.enteRedactedForLogging)")
         
         let (responseData, response) = try await session.data(for: request)
         
@@ -208,7 +220,7 @@ public class HTTPClient {
             }
         }
         
-        logger.debug("Downloading from \(url)")
+        logger.debug("Downloading from \(url.enteRedactedForLogging)")
         
         let (data, response) = try await session.data(for: request)
         

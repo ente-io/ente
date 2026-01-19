@@ -30,6 +30,9 @@ final class KeychainStore {
         // Insert.
         var insertQuery = query
         insertQuery[kSecValueData as String] = data
+        #if os(iOS)
+        insertQuery[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        #endif
         let addStatus = SecItemAdd(insertQuery as CFDictionary, nil)
         if addStatus != errSecSuccess {
             throw KeychainStoreError.unexpectedStatus(addStatus)
@@ -58,6 +61,19 @@ final class KeychainStore {
             throw KeychainStoreError.invalidItemFormat
         }
         return data
+    }
+
+    static func exists(service: String, account: String) -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: false,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+
+        let status = SecItemCopyMatching(query as CFDictionary, nil)
+        return status == errSecSuccess
     }
 
     static func delete(service: String, account: String) throws {

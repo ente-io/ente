@@ -29,7 +29,7 @@ public class APIClient {
         let url = endpointResolver.resolveURL(for: endpoint)
         let headers = await buildHeaders(for: endpoint)
         
-        logger.debug("Making request to \(url)")
+        logger.debug("Making request to \(url.enteRedactedForLogging)")
         
         return try await httpClient.request(
             url: url,

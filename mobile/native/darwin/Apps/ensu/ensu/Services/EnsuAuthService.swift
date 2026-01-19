@@ -183,7 +183,7 @@ final class EnsuAuthService {
         encryptedToken: String?,
         token: String?
     ) async throws {
-        let kek = try await Task.detached(priority: .userInitiated) {
+        var kek = try await Task.detached(priority: .userInitiated) {
             try deriveKekForLogin(
                 password: password,
                 kekSalt: srpAttributes.kekSalt,
@@ -191,6 +191,10 @@ final class EnsuAuthService {
                 opsLimit: srpAttributes.opsLimit
             )
         }.value
+        defer {
+            // Best-effort zeroing of sensitive material.
+            for i in kek.indices { kek[i] = 0 }
+        }
 
         let secrets = try await Task.detached(priority: .userInitiated) {
             try decryptSecretsWithKek(
@@ -207,9 +211,19 @@ final class EnsuAuthService {
     // MARK: - Storage
 
     private func storeSecrets(email: String, userId: Int64, secrets: AuthSecrets) throws {
-        let masterKey = Data(secrets.masterKey)
-        let secretKey = Data(secrets.secretKey)
-        let token = Data(secrets.token).base64URLEncodedString()
+        // Best-effort: avoid leaving key material in temporary buffers longer than necessary.
+        var masterKeyBytes = secrets.masterKey
+        var secretKeyBytes = secrets.secretKey
+        var tokenBytes = secrets.token
+        defer {
+            for i in masterKeyBytes.indices { masterKeyBytes[i] = 0 }
+            for i in secretKeyBytes.indices { secretKeyBytes[i] = 0 }
+            for i in tokenBytes.indices { tokenBytes[i] = 0 }
+        }
+
+        let masterKey = Data(masterKeyBytes)
+        let secretKey = Data(secretKeyBytes)
+        let token = Data(tokenBytes).base64URLPaddedEncodedString()
 
         try CredentialStore.shared.save(
             email: email,

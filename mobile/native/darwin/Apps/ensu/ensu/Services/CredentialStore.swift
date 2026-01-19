@@ -31,11 +31,24 @@ final class CredentialStore {
         guard let data = try? KeychainStore.get(service: keychainService, account: KeychainAccount.token) else {
             return nil
         }
-        return String(data: data, encoding: .utf8)
+        guard let token = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+
+        // Normalize to the padded base64url form (Go's `base64.URLEncoding`).
+        // Older Ensu builds stored the token without padding, which breaks server lookups.
+        let remainder = token.count % 4
+        if remainder == 0 {
+            return token
+        }
+        return token + String(repeating: "=", count: 4 - remainder)
     }
 
     var hasConfiguredAccount: Bool {
-        token?.isEmpty == false && email?.isEmpty == false
+        token?.isEmpty == false &&
+            email?.isEmpty == false &&
+            KeychainStore.exists(service: keychainService, account: KeychainAccount.masterKey) &&
+            KeychainStore.exists(service: keychainService, account: KeychainAccount.secretKey)
     }
 
     func save(email: String, userId: Int64, masterKey: Data, secretKey: Data, token: String) throws {
