@@ -1,5 +1,5 @@
 {
-  "extends": "./.wxt/tsconfig.json",
+  "extends": "wxt/tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -16,8 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["wxt/client", "chrome"]
   },
-  "include": ["src/**/*", ".wxt/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", ".wxt", "dist", ".output"]
 }
