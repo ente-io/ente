@@ -1552,6 +1552,11 @@
     loupe "^3.1.4"
     tinyrainbow "^2.0.0"
 
+"@wllama/wllama@^2.3.7":
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/@wllama/wllama/-/wllama-2.3.7.tgz#696594bbfb6fda65e808988328dedf7210bd3ac4"
+  integrity sha512-T273gBEqEZCHAoyNZDg+X6boQWktaq+efNF6bJo5aHToJr7jS1kCYImKXDdBi2/CccRuBUcMBHHLHiQN4+OfKQ==
+
 "@xmldom/xmldom@^0.9.4":
   version "0.9.6"
   resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.9.6.tgz#3eaefb585c1f920e06fb35e6dcb8d505445621c0"

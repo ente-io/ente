@@ -2,6 +2,7 @@ import log from "ente-base/log";
 import { decryptChatPayload, encryptChatPayload } from "./crypto";
 
 const STORAGE_KEY = "ensu.chat.store.v1";
+const BRANCH_SELECTIONS_KEY = "ensu.chat.branchSelections.v1";
 
 interface StoredSession {
     sessionUuid: string;
@@ -69,6 +70,46 @@ const loadStore = (): ChatStoreData => {
 
 const saveStore = (store: ChatStoreData) =>
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+type BranchSelectionsStore = Record<string, Record<string, string>>;
+
+const loadBranchSelections = (): BranchSelectionsStore => {
+    const json = localStorage.getItem(BRANCH_SELECTIONS_KEY);
+    if (!json) return {};
+    try {
+        const parsed = JSON.parse(json) as BranchSelectionsStore;
+        return parsed ?? {};
+    } catch (error) {
+        log.error("Failed to parse branch selections", error);
+        return {};
+    }
+};
+
+const saveBranchSelections = (store: BranchSelectionsStore) =>
+    localStorage.setItem(BRANCH_SELECTIONS_KEY, JSON.stringify(store));
+
+export const getBranchSelections = (rootSessionUuid: string) => {
+    const store = loadBranchSelections();
+    return store[rootSessionUuid] ?? {};
+};
+
+export const setBranchSelection = (
+    rootSessionUuid: string,
+    selectionKey: string,
+    selectedMessageUuid: string,
+) => {
+    const store = loadBranchSelections();
+    const selections = store[rootSessionUuid] ?? {};
+    selections[selectionKey] = selectedMessageUuid;
+    store[rootSessionUuid] = selections;
+    saveBranchSelections(store);
+};
+
+export const deleteBranchSelections = (rootSessionUuid: string) => {
+    const store = loadBranchSelections();
+    delete store[rootSessionUuid];
+    saveBranchSelections(store);
+};
 
 const safeTitle = (value: unknown) =>
     typeof value === "string" && value.trim().length
@@ -193,6 +234,7 @@ export const addMessage = async (
     sender: "self" | "assistant",
     text: string,
     chatKey: string,
+    parentMessageUuid?: string,
 ) => {
     const store = loadStore();
     const now = nowMicros();
@@ -203,6 +245,7 @@ export const addMessage = async (
     const message: StoredMessage = {
         messageUuid,
         sessionUuid,
+        parentMessageUuid,
         sender,
         createdAt: now,
         encryptedData: encrypted.encryptedData,
@@ -261,11 +304,17 @@ export const updateMessage = async (
 
 export const deleteSession = (sessionUuid: string) => {
     const store = loadStore();
+    const session = store.sessions.find(
+        (item) => item.sessionUuid === sessionUuid,
+    );
+    const rootSessionUuid = session?.rootSessionUuid ?? sessionUuid;
+
     store.sessions = store.sessions.filter(
-        (session) => session.sessionUuid !== sessionUuid,
+        (item) => item.sessionUuid !== sessionUuid,
     );
     store.messages = store.messages.filter(
         (message) => message.sessionUuid !== sessionUuid,
     );
     saveStore(store);
+    deleteBranchSelections(rootSessionUuid);
 };

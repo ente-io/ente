@@ -1,22 +1,23 @@
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-    AddRounded,
-    AttachFileOutlined,
-    BugReportOutlined,
-    ChevronLeftRounded,
-    ChevronRightRounded,
-    CloseRounded,
-    CodeOutlined,
-    ContentCopyOutlined,
-    DeleteOutline,
-    EditOutlined,
-    MenuRounded,
-    ReplayRounded,
-    SendRounded,
-    SettingsOutlined,
-    StopCircleOutlined,
-    SyncRounded,
-    TuneRounded,
-} from "@mui/icons-material";
+    PlusSignIcon,
+    ArrowLeft01Icon,
+    ArrowRight01Icon,
+    ArrowRight02Icon,
+    Attachment01Icon,
+    Bug01Icon,
+    Cancel01Icon,
+    Copy01Icon,
+    Delete01Icon,
+    Edit01Icon,
+    Menu01Icon,
+    RefreshIcon,
+    RepeatIcon,
+    Search01Icon,
+    Settings01Icon,
+    SlidersHorizontalIcon,
+    StopCircleIcon,
+} from "@hugeicons/core-free-icons";
 import {
     Box,
     Button,
@@ -28,19 +29,20 @@ import {
     Drawer,
     IconButton,
     InputBase,
+    LinearProgress,
     List,
     ListItemButton,
     Menu,
     MenuItem,
     Stack,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { AccountsPageTitle } from "ente-accounts/components/layouts/centered-paper";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
-import { LinkButton } from "ente-base/components/LinkButton";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
@@ -48,6 +50,7 @@ import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
 import { saveStringAsFile } from "ente-base/utils/web";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
+import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import { useRouter } from "next/router";
 import React, {
     useCallback,
@@ -64,12 +67,26 @@ import {
     addMessage,
     createSession,
     deleteSession,
+    getBranchSelections,
     listMessages,
     listSessions,
-    updateMessage,
+    setBranchSelection,
     type ChatMessage,
     type ChatSession,
 } from "services/chat/store";
+import {
+    buildSelectedPath,
+    ROOT_SELECTION_KEY,
+    STREAMING_SELECTION_KEY,
+    type BranchSwitcher,
+} from "services/chat/branching";
+import { DEFAULT_MODEL, LlmProvider } from "services/llm/provider";
+import type {
+    DownloadProgress,
+    GenerateEvent,
+    LlmMessage,
+    ModelSettings,
+} from "services/llm/types";
 import { masterKeyFromSession } from "services/session";
 
 const formatTime = (timestamp: number) => {
@@ -79,6 +96,79 @@ const formatTime = (timestamp: number) => {
     const period = hour >= 12 ? "PM" : "AM";
     const hour12 = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${hour12}:${minute} ${period}`;
+};
+
+type DocumentAttachment = {
+    id: string;
+    name: string;
+    text: string;
+    size: number;
+};
+
+const createDocumentBlockRegex = () =>
+    /----- BEGIN DOCUMENT: ([^\n]+) -----\n([\s\S]*?)\n----- END DOCUMENT: \1 -----/g;
+
+const createDocumentId = () => {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+        return crypto.randomUUID();
+    }
+    return `doc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+};
+
+const parseDocumentBlocks = (text: string) => {
+    const normalized = text.replace(/\r\n/g, "\n");
+    const regex = createDocumentBlockRegex();
+    const documents: DocumentAttachment[] = [];
+    let match: RegExpExecArray | null = null;
+    while ((match = regex.exec(normalized)) !== null) {
+        const name = match[1]?.trim() || "Document";
+        const content = match[2] ?? "";
+        const size = new TextEncoder().encode(content).length;
+        documents.push({
+            id: createDocumentId(),
+            name,
+            text: content,
+            size,
+        });
+    }
+
+    const stripped = normalized
+        .replace(createDocumentBlockRegex(), "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+    return { text: stripped, documents };
+};
+
+const buildDocumentBlocks = (documents: DocumentAttachment[]) => {
+    if (!documents.length) return "";
+    return documents
+        .map((doc, index) => {
+            const name = doc.name || `Document ${index + 1}`;
+            const content = doc.text.trim();
+            return `----- BEGIN DOCUMENT: ${name} -----\n${content}\n----- END DOCUMENT: ${name} -----`;
+        })
+        .join("\n\n");
+};
+
+const buildPromptWithDocuments = (
+    promptText: string,
+    documents: DocumentAttachment[],
+) => {
+    const blocks = buildDocumentBlocks(documents);
+    if (!blocks) return promptText;
+    return promptText ? `${promptText}\n\n${blocks}` : blocks;
+};
+
+const formatBytes = (bytes: number) => {
+    if (!bytes || bytes <= 0) return "0 B";
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    const idx = Math.min(
+        units.length - 1,
+        Math.floor(Math.log(bytes) / Math.log(1024)),
+    );
+    const value = bytes / Math.pow(1024, idx);
+    return `${value.toFixed(value >= 10 ? 0 : 1)} ${units[idx]}`;
 };
 
 type SessionGroupLabel =
@@ -144,16 +234,16 @@ const groupSessionsByDate = (sessions: ChatSession[]) => {
     ).filter(([, group]) => group.length > 0);
 };
 
+const detectTauriRuntime = () =>
+    typeof window !== "undefined" &&
+    ("__TAURI__" in window || "__TAURI_IPC__" in window);
+
 const Page: React.FC = () => {
     const router = useRouter();
     const { logout, showMiniDialog } = useBaseContext();
     const theme = useTheme();
     const isSmall = useMediaQuery(theme.breakpoints.down("md"));
     const sentColor = "text.base";
-    const drawerGradient =
-        theme.palette.mode === "dark"
-            ? "linear-gradient(180deg, rgba(255 215 0 / 0.12) 0%, rgba(20 20 20 / 0) 100%)"
-            : "linear-gradient(180deg, rgba(154 126 10 / 0.18) 0%, rgba(248 245 240 / 0) 100%)";
     const actionButtonSx = {
         width: 36,
         height: 36,
@@ -169,17 +259,33 @@ const Page: React.FC = () => {
         color: "text.base",
         "&:hover": { bgcolor: "fill.faint" },
     } as const;
+    const smallIconProps = { size: 24, strokeWidth: 2 } as const;
+    const actionIconProps = { size: 24, strokeWidth: 2 } as const;
+    const compactIconProps = { size: 18, strokeWidth: 2 } as const;
 
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [chatKey, setChatKey] = useState<string | undefined>();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
+    const [branchSelections, setBranchSelections] = useState<
+        Record<string, string>
+    >({});
+    const [streamingParentId, setStreamingParentId] = useState<string | null>(
+        null,
+    );
+    const [streamingText, setStreamingText] = useState("");
     const [currentSessionId, setCurrentSessionId] = useState<
         string | undefined
     >();
     const [input, setInput] = useState("");
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [drawerCollapsed, setDrawerCollapsed] = useState(false);
+    const [drawerView, setDrawerView] = useState<"sessions" | "settings">(
+        "sessions",
+    );
+    const [sessionSearch, setSessionSearch] = useState("");
+    const [settingsSearch, setSettingsSearch] = useState("");
     const [showDevSettings, setShowDevSettings] = useState(false);
     const [showModelSettings, setShowModelSettings] = useState(false);
     const [useCustomModel, setUseCustomModel] = useState(false);
@@ -195,15 +301,25 @@ const Page: React.FC = () => {
     const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
         null,
     );
+    const [pendingDocuments, setPendingDocuments] = useState<
+        DocumentAttachment[]
+    >([]);
     const [attachmentAnchor, setAttachmentAnchor] =
         useState<HTMLElement | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadStatus, setDownloadStatus] = useState<
+        DownloadProgress | null
+    >(null);
+    const [loadedModelName, setLoadedModelName] = useState<string | null>(null);
+    const [isTauriRuntime, setIsTauriRuntime] = useState(false);
+
+    const providerRef = useRef<LlmProvider | null>(null);
+    const currentJobIdRef = useRef<number | null>(null);
+    const pendingCancelRef = useRef(false);
 
     const authRefreshCancelledRef = useRef(false);
     const authRetryCancelledRef = useRef(false);
-
-    const [isGenerating] = useState(false);
-    const [isDownloading] = useState(false);
-    const branchInfo = { current: 1, total: 2 };
 
     const sessionFromQuery = useMemo(() => {
         if (!router.isReady) return undefined;
@@ -335,6 +451,10 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        setIsTauriRuntime(detectTauriRuntime());
+    }, []);
+
+    useEffect(() => {
         if (typeof window === "undefined") return;
         const raw = window.localStorage.getItem("ensu.modelSettings");
         if (!raw) return;
@@ -355,6 +475,33 @@ const Page: React.FC = () => {
             log.error("Failed to read model settings", error);
         }
     }, []);
+
+    const handleDownloadProgress = useCallback((progress: DownloadProgress) => {
+        setDownloadStatus(progress);
+        const status = progress.status?.toLowerCase() ?? "";
+        if (progress.percent < 0) {
+            setIsDownloading(false);
+            return;
+        }
+        if (progress.percent >= 100 || status.includes("ready")) {
+            setIsDownloading(false);
+            return;
+        }
+        setIsDownloading(true);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (!providerRef.current) {
+            providerRef.current = new LlmProvider();
+        }
+        const unsubscribe = providerRef.current.onDownloadProgress(
+            handleDownloadProgress,
+        );
+        return () => {
+            unsubscribe();
+        };
+    }, [handleDownloadProgress]);
 
     const refreshSessions = useCallback(async () => {
         if (!chatKey) return;
@@ -387,11 +534,11 @@ const Page: React.FC = () => {
 
     const refreshMessages = useCallback(async () => {
         if (!chatKey || !currentSessionId) {
-            setMessages([]);
+            setAllMessages([]);
             return;
         }
         const loaded = await listMessages(currentSessionId, chatKey);
-        setMessages(loaded);
+        setAllMessages(loaded);
     }, [chatKey, currentSessionId]);
 
     useEffect(() => {
@@ -412,23 +559,233 @@ const Page: React.FC = () => {
         }
     }, [currentSessionId, sessionFromQuery, sessions]);
 
+    useEffect(() => {
+        setStreamingParentId(null);
+        setStreamingText("");
+        setIsGenerating(false);
+        setPendingDocuments([]);
+        currentJobIdRef.current = null;
+        pendingCancelRef.current = false;
+    }, [currentSessionId]);
+
     const currentSession = useMemo(
         () => sessions.find((s) => s.sessionUuid === currentSessionId),
         [sessions, currentSessionId],
     );
 
+    useEffect(() => {
+        if (!currentSession) {
+            setBranchSelections({});
+            return;
+        }
+        setBranchSelections(
+            getBranchSelections(currentSession.rootSessionUuid),
+        );
+    }, [currentSession?.rootSessionUuid]);
+
+    useEffect(() => {
+        if (isTauriRuntime) return;
+        if (mmprojUrl) {
+            setMmprojUrl("");
+            setMmprojError(null);
+        }
+    }, [isTauriRuntime, mmprojUrl]);
+
+    const filteredSessions = useMemo(() => {
+        const query = sessionSearch.trim().toLowerCase();
+        if (!query) return sessions;
+        return sessions.filter((session) => {
+            const title = session.title?.toLowerCase() ?? "";
+            const preview = session.lastMessagePreview?.toLowerCase() ?? "";
+            return title.includes(query) || preview.includes(query);
+        });
+    }, [sessionSearch, sessions]);
+
     const groupedSessions = useMemo(
-        () => groupSessionsByDate(sessions),
-        [sessions],
+        () => groupSessionsByDate(filteredSessions),
+        [filteredSessions],
     );
+
+    const rootSessionUuid = currentSession?.rootSessionUuid ?? currentSessionId;
+
+    const messageState = useMemo(
+        () =>
+            buildSelectedPath(
+                allMessages,
+                branchSelections,
+                streamingParentId
+                    ? { parentMessageUuid: streamingParentId }
+                    : undefined,
+            ),
+        [allMessages, branchSelections, streamingParentId],
+    );
+
+    const displayMessages = useMemo(() => {
+        const base = messageState.path ?? [];
+        if (
+            messageState.streamingSelectedParent &&
+            streamingParentId === messageState.streamingSelectedParent
+        ) {
+            const streamingMessage: ChatMessage = {
+                messageUuid: STREAMING_SELECTION_KEY,
+                sessionUuid: currentSessionId ?? "",
+                parentMessageUuid: messageState.streamingSelectedParent,
+                sender: "assistant",
+                text: streamingText,
+                createdAt: Date.now() * 1000,
+            };
+            return [...base, streamingMessage];
+        }
+        return base;
+    }, [
+        messageState.path,
+        messageState.streamingSelectedParent,
+        streamingParentId,
+        streamingText,
+        currentSessionId,
+    ]);
+
+    const branchSwitchers = messageState.switchers;
+
+    const isDrawerVisible = isSmall ? drawerOpen : !drawerCollapsed;
+    const showDrawerToggle = isSmall || drawerCollapsed;
+    const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
 
     const appBarTitle =
         currentSession?.title && currentSession.title !== "New chat"
             ? currentSession.title
-            : isSmall && !drawerOpen
+            : !isDrawerVisible
               ? "ensu"
               : "";
     const isEnsuTitle = appBarTitle.trim().toLowerCase() === "ensu";
+
+    const ensureProvider = useCallback(async () => {
+        if (!providerRef.current) {
+            providerRef.current = new LlmProvider();
+        }
+        await providerRef.current.initialize();
+        return providerRef.current;
+    }, []);
+
+    const getModelSettings = useCallback((): ModelSettings => {
+        return {
+            useCustomModel,
+            modelUrl: modelUrl.trim() ? modelUrl.trim() : undefined,
+            mmprojUrl:
+                isTauriRuntime && mmprojUrl.trim()
+                    ? mmprojUrl.trim()
+                    : undefined,
+            contextLength: contextLength ? Number(contextLength) : undefined,
+            maxTokens: maxTokens ? Number(maxTokens) : undefined,
+        };
+    }, [useCustomModel, modelUrl, mmprojUrl, contextLength, maxTokens, isTauriRuntime]);
+
+    const updateBranchSelectionState = useCallback(
+        (selectionKey: string, selectedMessageUuid: string, persist = true) => {
+            setBranchSelections((prev) => ({
+                ...prev,
+                [selectionKey]: selectedMessageUuid,
+            }));
+
+            if (
+                !persist ||
+                !rootSessionUuid ||
+                selectedMessageUuid === STREAMING_SELECTION_KEY
+            ) {
+                return;
+            }
+
+            setBranchSelection(
+                rootSessionUuid,
+                selectionKey,
+                selectedMessageUuid,
+            );
+        },
+        [rootSessionUuid],
+    );
+
+    const slicePathUntil = useCallback(
+        (path: ChatMessage[], messageUuid?: string | null) => {
+            if (!messageUuid) return path;
+            const index = path.findIndex(
+                (message) => message.messageUuid === messageUuid,
+            );
+            if (index === -1) return path;
+            return path.slice(0, index + 1);
+        },
+        [],
+    );
+
+    const stripHiddenParts = useCallback((text: string) => {
+        return text
+            .replace(/<think>[\s\S]*?<\/think>/g, "")
+            .replace(/<todo_list>[\s\S]*?<\/todo_list>/g, "")
+            .trim();
+    }, []);
+
+    const approxTokens = useCallback((text: string) => {
+        if (!text) return 0;
+        return Math.ceil(text.length / 4);
+    }, []);
+
+    const buildHistory = useCallback(
+        (
+            path: ChatMessage[],
+            promptText: string,
+            contextSize: number,
+            maxTokensCount: number,
+            stopAtMessageUuid?: string | null,
+        ): LlmMessage[] => {
+            const candidates = slicePathUntil(path, stopAtMessageUuid);
+            const lastCandidate = candidates[candidates.length - 1];
+            const trimmedCandidates =
+                stopAtMessageUuid &&
+                lastCandidate &&
+                lastCandidate.messageUuid === stopAtMessageUuid
+                    ? candidates.slice(0, -1)
+                    : candidates;
+
+            const safetyMargin = 256;
+            let budget = contextSize - maxTokensCount - safetyMargin;
+            budget -= approxTokens(promptText);
+
+            if (budget <= 0) return [];
+
+            const selected: LlmMessage[] = [];
+            let used = 0;
+
+            for (let idx = trimmedCandidates.length - 1; idx >= 0; idx -= 1) {
+                const message = trimmedCandidates[idx];
+                if (!message) continue;
+                const isUser = message.sender === "self";
+                const text = isUser
+                    ? message.text
+                    : stripHiddenParts(message.text);
+                const cost = approxTokens(text);
+
+                if (used + cost > budget) {
+                    if (selected.length === 0 && budget > 0) {
+                        const charBudget = Math.max(1, budget * 4);
+                        const truncated = text.slice(-charBudget);
+                        selected.push({
+                            role: isUser ? "user" : "assistant",
+                            content: truncated,
+                        });
+                    }
+                    break;
+                }
+
+                selected.push({
+                    role: isUser ? "user" : "assistant",
+                    content: text,
+                });
+                used += cost;
+            }
+
+            return selected.reverse();
+        },
+        [approxTokens, slicePathUntil, stripHiddenParts],
+    );
 
     const handleNewChat = useCallback(async () => {
         if (!chatKey) return;
@@ -470,13 +827,16 @@ const Page: React.FC = () => {
     );
 
     const handleEditMessage = useCallback((message: ChatMessage) => {
+        const parsed = parseDocumentBlocks(message.text);
         setEditingMessage(message);
-        setInput(message.text);
+        setInput(parsed.text);
+        setPendingDocuments(parsed.documents);
     }, []);
 
     const handleCancelEdit = useCallback(() => {
         setEditingMessage(null);
         setInput("");
+        setPendingDocuments([]);
     }, []);
 
     const handleCopyMessage = useCallback(async (text: string) => {
@@ -487,21 +847,277 @@ const Page: React.FC = () => {
         }
     }, []);
 
-    const handleRawMessage = useCallback(() => {
-        log.info("Raw message view is not available yet.");
+    const handleStopGeneration = useCallback(() => {
+        const provider = providerRef.current;
+        const jobId = currentJobIdRef.current;
+        if (provider && jobId) {
+            provider.cancelGeneration(jobId);
+        } else {
+            pendingCancelRef.current = true;
+        }
     }, []);
 
-    const handleRetryMessage = useCallback(() => {
-        log.info("Retry is not available yet.");
-    }, []);
+    const startGeneration = useCallback(
+        async ({
+            promptText,
+            parentMessageUuid,
+            historyPath,
+            stopAtMessageUuid,
+            resetContext = false,
+        }: {
+            promptText: string;
+            parentMessageUuid: string;
+            historyPath: ChatMessage[];
+            stopAtMessageUuid?: string | null;
+            resetContext?: boolean;
+        }) => {
+            if (!chatKey || !currentSessionId) return;
 
-    const handlePrevBranch = useCallback(() => {
-        log.info("Branch switching is not available yet.");
-    }, []);
+            const provider = await ensureProvider();
+            const settings = getModelSettings();
+            const { contextSize, maxTokens } =
+                provider.resolveRuntimeSettings(settings);
 
-    const handleNextBranch = useCallback(() => {
-        log.info("Branch switching is not available yet.");
-    }, []);
+            const previousSelection = branchSelections[parentMessageUuid];
+
+            updateBranchSelectionState(
+                parentMessageUuid,
+                STREAMING_SELECTION_KEY,
+                false,
+            );
+            setStreamingParentId(parentMessageUuid);
+            setStreamingText("");
+            setIsGenerating(true);
+            currentJobIdRef.current = null;
+            pendingCancelRef.current = false;
+
+            let buffer = "";
+            let errorMessage: string | null = null;
+
+            try {
+                await provider.ensureModelReady(settings);
+                setLoadedModelName(provider.getCurrentModel()?.name ?? null);
+                setIsDownloading(false);
+                setDownloadStatus({ percent: 100, status: "Ready" });
+
+                if (resetContext) {
+                    await provider.resetContext(contextSize);
+                }
+
+                const history =
+                    buildHistory(
+                        historyPath,
+                        promptText,
+                        contextSize,
+                        maxTokens,
+                        stopAtMessageUuid,
+                    ) ?? [];
+
+                const messages: LlmMessage[] = [
+                    ...history,
+                    { role: "user", content: promptText },
+                ];
+
+                await provider.generateChatStream(
+                    {
+                        messages,
+                        maxTokens,
+                        temperature: 0.7,
+                        topP: 0.9,
+                    },
+                    (event: GenerateEvent) => {
+                        if (event.type === "text") {
+                            if (!currentJobIdRef.current) {
+                                currentJobIdRef.current = event.job_id;
+                                if (pendingCancelRef.current) {
+                                    provider.cancelGeneration(event.job_id);
+                                }
+                            }
+                            buffer += event.text;
+                            setStreamingText(buffer);
+                        } else if (event.type === "error") {
+                            errorMessage = event.message;
+                        } else if (event.type === "done") {
+                            currentJobIdRef.current = event.summary.job_id;
+                        }
+                    },
+                );
+
+                if (!buffer.trim()) {
+                    if (errorMessage) {
+                        showMiniDialog({
+                            title: "Generation failed",
+                            message: errorMessage,
+                        });
+                    }
+                    if (previousSelection) {
+                        updateBranchSelectionState(
+                            parentMessageUuid,
+                            previousSelection,
+                        );
+                    }
+                    return;
+                }
+
+                const assistantUuid = await addMessage(
+                    currentSessionId,
+                    "assistant",
+                    buffer,
+                    chatKey,
+                    parentMessageUuid,
+                );
+
+                updateBranchSelectionState(parentMessageUuid, assistantUuid);
+
+                await refreshSessions();
+                await refreshMessages();
+            } catch (error) {
+                const message =
+                    error instanceof Error ? error.message : String(error);
+                showMiniDialog({
+                    title: "Model error",
+                    message,
+                });
+                if (previousSelection) {
+                    updateBranchSelectionState(
+                        parentMessageUuid,
+                        previousSelection,
+                    );
+                }
+            } finally {
+                setIsGenerating(false);
+                setIsDownloading(false);
+                setStreamingParentId(null);
+                setStreamingText("");
+                currentJobIdRef.current = null;
+                pendingCancelRef.current = false;
+            }
+        },
+        [
+            chatKey,
+            currentSessionId,
+            ensureProvider,
+            getModelSettings,
+            buildHistory,
+            branchSelections,
+            updateBranchSelectionState,
+            refreshMessages,
+            refreshSessions,
+            showMiniDialog,
+        ],
+    );
+
+    const handleRetryMessage = useCallback(
+        async (message: ChatMessage) => {
+            if (message.sender !== "assistant") return;
+            if (!chatKey || !currentSessionId) return;
+            if (isDownloading) {
+                showMiniDialog({
+                    title: "Model download in progress",
+                    message: "Please wait for the model to finish downloading.",
+                });
+                return;
+            }
+            if (isGenerating) {
+                showMiniDialog({
+                    title: "Already generating",
+                    message: "Please wait for the current response to finish.",
+                });
+                return;
+            }
+            const parentUuid = message.parentMessageUuid;
+            if (!parentUuid) {
+                showMiniDialog({
+                    title: "Retry failed",
+                    message: "No parent message found for retry.",
+                });
+                return;
+            }
+            const parentMessage = allMessages.find(
+                (item) => item.messageUuid === parentUuid,
+            );
+            if (!parentMessage) {
+                showMiniDialog({
+                    title: "Retry failed",
+                    message: "Parent message is missing.",
+                });
+                return;
+            }
+            const historyPath = slicePathUntil(messageState.path, parentUuid);
+            await startGeneration({
+                promptText: parentMessage.text,
+                parentMessageUuid: parentUuid,
+                historyPath,
+                stopAtMessageUuid: parentUuid,
+                resetContext: true,
+            });
+        },
+        [
+            allMessages,
+            chatKey,
+            currentSessionId,
+            isDownloading,
+            isGenerating,
+            messageState.path,
+            slicePathUntil,
+            startGeneration,
+            showMiniDialog,
+        ],
+    );
+
+    const handlePrevBranch = useCallback(
+        (switcher: BranchSwitcher) => {
+            if (!switcher || switcher.total <= 1) return;
+            const nextIndex =
+                (switcher.currentIndex - 1 + switcher.total) %
+                switcher.total;
+            const target = switcher.targets[nextIndex];
+            if (!target) return;
+            updateBranchSelectionState(switcher.selectionKey, target);
+        },
+        [updateBranchSelectionState],
+    );
+
+    const handleNextBranch = useCallback(
+        (switcher: BranchSwitcher) => {
+            if (!switcher || switcher.total <= 1) return;
+            const nextIndex = (switcher.currentIndex + 1) % switcher.total;
+            const target = switcher.targets[nextIndex];
+            if (!target) return;
+            updateBranchSelectionState(switcher.selectionKey, target);
+        },
+        [updateBranchSelectionState],
+    );
+
+    const openSettingsPage = useCallback(
+        () => setDrawerView("settings"),
+        [],
+    );
+    const closeSettingsPage = useCallback(
+        () => setDrawerView("sessions"),
+        [],
+    );
+
+    const handleOpenDrawer = useCallback(() => {
+        if (isSmall) {
+            setDrawerOpen(true);
+            return;
+        }
+        setDrawerCollapsed(false);
+    }, [isSmall]);
+
+    const handleCloseDrawer = useCallback(() => {
+        if (isSmall) {
+            setDrawerOpen(false);
+        } else {
+            setDrawerCollapsed(true);
+        }
+        setDrawerView("sessions");
+    }, [isSmall]);
+
+    const handleCollapseDrawer = useCallback(() => {
+        handleCloseDrawer();
+    }, [handleCloseDrawer]);
 
     const openDevSettings = useCallback(() => setShowDevSettings(true), []);
     const closeDevSettings = useCallback(() => setShowDevSettings(false), []);
@@ -536,22 +1152,22 @@ const Page: React.FC = () => {
     const suggestedModels = useMemo(
         () => [
             {
-                name: "Qwen3-VL 2B Instruct (Q4_K_M)",
-                url: "https://huggingface.co/ensu/placeholder/Qwen3-VL-2B-Instruct.Q4_K_M.gguf",
-                mmproj: "https://huggingface.co/ensu/placeholder/Qwen3-VL-2B-Instruct.mmproj.gguf",
+                name: "LFM 2.5 VL 1.6B (Q4_0)",
+                url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+                mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
             },
             {
                 name: "LFM 2.5 1.2B Instruct (Q4_0)",
-                url: "https://huggingface.co/ensu/placeholder/LFM-2.5-1.2B-Instruct.Q4_0.gguf",
+                url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF/resolve/main/LFM2.5-1.2B-Instruct-Q4_0.gguf",
             },
             {
-                name: "LFM 2.5 VL 1.6B (Q4_0)",
-                url: "https://huggingface.co/ensu/placeholder/LFM-2.5-VL-1.6B.Q4_0.gguf",
-                mmproj: "https://huggingface.co/ensu/placeholder/LFM-2.5-VL-1.6B.mmproj.gguf",
+                name: "Qwen3-VL 2B Instruct (Q4_K_M)",
+                url: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3VL-2B-Instruct-Q4_K_M.gguf",
+                mmproj: "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf",
             },
             {
                 name: "Llama 3.2 1B Instruct (Q4_K_M)",
-                url: "https://huggingface.co/ensu/placeholder/Llama-3.2-1B-Instruct.Q4_K_M.gguf",
+                url: "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
             },
         ],
         [],
@@ -575,7 +1191,7 @@ const Page: React.FC = () => {
         };
 
         const modelError = modelUrl ? validateUrl(modelUrl) : "Required";
-        const mmprojError = validateUrl(mmprojUrl);
+        const mmprojError = isTauriRuntime ? validateUrl(mmprojUrl) : undefined;
 
         const contextErrorValue =
             contextLength && !/^\d+$/.test(contextLength)
@@ -606,7 +1222,7 @@ const Page: React.FC = () => {
             maxTokensErrorValue ||
             maxTokensLimitError
         );
-    }, [contextLength, maxTokens, mmprojUrl, modelUrl]);
+    }, [contextLength, maxTokens, mmprojUrl, modelUrl, isTauriRuntime]);
 
     const handleSaveModel = useCallback(() => {
         if (!validateModelSettings()) return;
@@ -614,7 +1230,7 @@ const Page: React.FC = () => {
         const payload = {
             useCustomModel: true,
             modelUrl,
-            mmprojUrl,
+            mmprojUrl: isTauriRuntime ? mmprojUrl : "",
             contextLength,
             maxTokens,
         };
@@ -625,9 +1241,17 @@ const Page: React.FC = () => {
             );
         }
         setUseCustomModel(true);
+        setLoadedModelName(null);
         setIsSavingModel(false);
         setShowModelSettings(false);
-    }, [contextLength, maxTokens, mmprojUrl, modelUrl, validateModelSettings]);
+    }, [
+        contextLength,
+        maxTokens,
+        mmprojUrl,
+        modelUrl,
+        validateModelSettings,
+        isTauriRuntime,
+    ]);
 
     const handleUseDefaultModel = useCallback(() => {
         if (typeof window !== "undefined") {
@@ -642,15 +1266,19 @@ const Page: React.FC = () => {
         setMmprojError(null);
         setContextError(null);
         setMaxTokensError(null);
+        setLoadedModelName(null);
         setShowModelSettings(false);
     }, []);
 
-    const handleFillSuggestion = useCallback((url: string, mmproj?: string) => {
-        setModelUrl(url);
-        setMmprojUrl(mmproj ?? "");
-        setModelUrlError(null);
-        setMmprojError(null);
-    }, []);
+    const handleFillSuggestion = useCallback(
+        (url: string, mmproj?: string) => {
+            setModelUrl(url);
+            setMmprojUrl(isTauriRuntime ? mmproj ?? "" : "");
+            setModelUrlError(null);
+            setMmprojError(null);
+        },
+        [isTauriRuntime],
+    );
 
     const openAttachmentMenu = useCallback(
         (event: React.MouseEvent<HTMLElement>) => {
@@ -663,267 +1291,621 @@ const Page: React.FC = () => {
         setAttachmentAnchor(null);
     }, []);
 
+    const handleDocumentSelect = useCallback(
+        (files: File[]) => {
+            closeAttachmentMenu();
+            void (async () => {
+                const results = await Promise.allSettled(
+                    files.map(async (file) => ({
+                        id: createDocumentId(),
+                        name: file.name,
+                        text: await file.text(),
+                        size: file.size,
+                    })),
+                );
+
+                const successful = results
+                    .filter(
+                        (result): result is PromiseFulfilledResult<DocumentAttachment> =>
+                            result.status === "fulfilled",
+                    )
+                    .map((result) => result.value);
+
+                if (successful.length) {
+                    setPendingDocuments((prev) => [...prev, ...successful]);
+                }
+
+                const failed = results.length - successful.length;
+                if (failed > 0) {
+                    showMiniDialog({
+                        title: "Some documents failed",
+                        message:
+                            "We could not read some documents. Please try again.",
+                    });
+                }
+            })();
+        },
+        [closeAttachmentMenu, showMiniDialog],
+    );
+
+    const handleDocumentCancel = useCallback(() => {
+        closeAttachmentMenu();
+    }, [closeAttachmentMenu]);
+
+    const {
+        getInputProps: getDocumentInputProps,
+        openSelector: openDocumentSelector,
+    } = useFileInput({
+        directory: false,
+        onSelect: handleDocumentSelect,
+        onCancel: handleDocumentCancel,
+    });
+
     const handleAttachmentChoice = useCallback(
         (choice: "image" | "document") => {
-            log.info("Attachment choice", choice);
-            closeAttachmentMenu();
+            if (choice === "image") {
+                showMiniDialog({
+                    title: "Images not supported",
+                    message:
+                        "Image attachments are not supported in Ensu web yet.",
+                });
+            } else {
+                closeAttachmentMenu();
+                openDocumentSelector();
+            }
         },
-        [closeAttachmentMenu],
+        [closeAttachmentMenu, openDocumentSelector, showMiniDialog],
+    );
+
+    const removePendingDocument = useCallback((id: string) => {
+        setPendingDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    }, []);
+
+    const handleLogout = useCallback(
+        () =>
+            showMiniDialog({
+                title: "Sign out",
+                message: "Are you sure you want to sign out?",
+                continue: {
+                    text: "Sign out",
+                    color: "critical",
+                    action: logout,
+                },
+                buttonDirection: "row",
+            }),
+        [logout, showMiniDialog],
     );
 
     const openLoginFromChat = useCallback(() => {
-        if (typeof window !== "undefined") {
-            window.sessionStorage.setItem("ensu.openLogin", "1");
-        }
-        void router.push("/");
+        void router.push("/login");
     }, [router]);
 
     const handleSend = useCallback(async () => {
         const trimmed = input.trim();
-        if (!trimmed || !chatKey || !currentSessionId) return;
+        const hasDocuments = pendingDocuments.length > 0;
+        if ((!trimmed && !hasDocuments) || !chatKey || !currentSessionId) {
+            return;
+        }
+        if (isDownloading) {
+            showMiniDialog({
+                title: "Model download in progress",
+                message: "Please wait for the model to finish downloading.",
+            });
+            return;
+        }
+        if (isGenerating) {
+            showMiniDialog({
+                title: "Already generating",
+                message: "Please wait for the current response to finish.",
+            });
+            return;
+        }
+
+        const messageText = buildPromptWithDocuments(
+            trimmed,
+            pendingDocuments,
+        );
 
         setInput("");
 
         try {
             if (editingMessage) {
-                await updateMessage(
-                    editingMessage.messageUuid,
-                    trimmed,
-                    chatKey,
-                );
-                setEditingMessage(null);
-            } else {
-                await addMessage(currentSessionId, "self", trimmed, chatKey);
-                await addMessage(
+                const parentUuid = editingMessage.parentMessageUuid;
+                const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
+                const historyPath = parentUuid
+                    ? slicePathUntil(messageState.path, parentUuid)
+                    : [];
+
+                const newUserUuid = await addMessage(
                     currentSessionId,
-                    "assistant",
-                    "Assistant responses are not available on web yet.",
+                    "self",
+                    messageText,
                     chatKey,
+                    parentUuid,
                 );
+
+                updateBranchSelectionState(selectionKey, newUserUuid);
+                setEditingMessage(null);
+                setPendingDocuments([]);
+
+                await refreshMessages();
+
+                await startGeneration({
+                    promptText: messageText,
+                    parentMessageUuid: newUserUuid,
+                    historyPath,
+                });
+                return;
             }
+
+            const basePath = messageState.path;
+            const leaf = basePath[basePath.length - 1];
+            const parentUuid = leaf?.messageUuid;
+            const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
+
+            const userUuid = await addMessage(
+                currentSessionId,
+                "self",
+                messageText,
+                chatKey,
+                parentUuid,
+            );
+
+            updateBranchSelectionState(selectionKey, userUuid);
+            setPendingDocuments([]);
+
+            await refreshMessages();
+
+            await startGeneration({
+                promptText: messageText,
+                parentMessageUuid: userUuid,
+                historyPath: basePath,
+            });
         } catch (error) {
             log.error("Failed to store chat message", error);
         }
 
         await refreshSessions();
-        await refreshMessages();
     }, [
         input,
         chatKey,
         currentSessionId,
         editingMessage,
+        isDownloading,
+        isGenerating,
+        messageState.path,
+        pendingDocuments,
         refreshMessages,
         refreshSessions,
+        showMiniDialog,
+        slicePathUntil,
+        startGeneration,
+        updateBranchSelectionState,
     ]);
+
+    const settingsItems = useMemo(
+        () => [
+            {
+                key: "model",
+                label: "Model settings",
+                icon: Settings01Icon,
+                onClick: openModelSettings,
+            },
+            {
+                key: "developer",
+                label: "Developer settings",
+                icon: SlidersHorizontalIcon,
+                onClick: openDevSettings,
+            },
+            {
+                key: "logs",
+                label: "Log viewer",
+                icon: Bug01Icon,
+                onClick: confirmViewLogs,
+            },
+        ],
+        [confirmViewLogs, openDevSettings, openModelSettings],
+    );
+
+    const filteredSettingsItems = useMemo(() => {
+        const query = settingsSearch.trim().toLowerCase();
+        if (!query) return settingsItems;
+        return settingsItems.filter((item) =>
+            item.label.toLowerCase().includes(query),
+        );
+    }, [settingsItems, settingsSearch]);
 
     const sidebar = (
         <Stack
             sx={{ width: "100%", height: "100%", bgcolor: "background.paper" }}
         >
-            <Box sx={{ px: 2.5, py: 3, background: drawerGradient }}>
-                <Typography
-                    variant="h2"
-                    sx={{
-                        fontFamily: '"Cormorant Garamond", serif',
-                        fontWeight: 600,
-                        letterSpacing: "1px",
-                        textTransform: "lowercase",
-                    }}
-                >
-                    ensu
-                </Typography>
-                <Stack
-                    direction="row"
-                    sx={{ gap: 1, mt: 1, alignItems: "center" }}
-                >
-                    <Stack direction="row" sx={{ gap: 1 }}>
-                        <IconButton
-                            aria-label="Logs"
-                            sx={drawerIconButtonSx}
-                            onClick={confirmViewLogs}
+            <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
+                <Stack direction="row" sx={{ gap: 1, alignItems: "flex-start" }}>
+                    <Stack sx={{ flex: 1, gap: 1 }}>
+                        <Typography
+                            variant="h2"
+                            sx={{
+                                fontFamily: '"Cormorant Garamond", serif',
+                                fontWeight: 600,
+                                letterSpacing: "1px",
+                                textTransform: "lowercase",
+                            }}
                         >
-                            <BugReportOutlined fontSize="small" />
+                            ensu
+                        </Typography>
+                        {isLoggedIn && (
+                            <Box
+                                sx={{
+                                    px: 1.5,
+                                    py: 0.75,
+                                    borderRadius: 1,
+                                    bgcolor: "fill.faint",
+                                }}
+                            >
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    {savedLocalUser()?.email ?? ""}
+                                </Typography>
+                            </Box>
+                        )}
+                    </Stack>
+                    <Stack direction="row" sx={{ gap: 0.5 }}>
+                        <IconButton
+                            aria-label={
+                                drawerView === "settings"
+                                    ? "Close settings"
+                                    : "Open settings"
+                            }
+                            sx={drawerIconButtonSx}
+                            onClick={
+                                drawerView === "settings"
+                                    ? closeSettingsPage
+                                    : openSettingsPage
+                            }
+                        >
+                            <HugeiconsIcon
+                                icon={
+                                    drawerView === "settings"
+                                        ? Cancel01Icon
+                                        : Settings01Icon
+                                }
+                                {...compactIconProps}
+                            />
                         </IconButton>
                         <IconButton
-                            aria-label="Developer settings"
+                            aria-label={
+                                drawerCollapsed
+                                    ? "Expand drawer"
+                                    : "Collapse drawer"
+                            }
                             sx={drawerIconButtonSx}
-                            onClick={openDevSettings}
+                            onClick={
+                                drawerCollapsed
+                                    ? handleOpenDrawer
+                                    : handleCollapseDrawer
+                            }
                         >
-                            <TuneRounded fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                            aria-label="Model settings"
-                            sx={drawerIconButtonSx}
-                            onClick={openModelSettings}
-                        >
-                            <SettingsOutlined fontSize="small" />
+                            <HugeiconsIcon
+                                icon={
+                                    drawerCollapsed
+                                        ? ArrowRight01Icon
+                                        : ArrowLeft01Icon
+                                }
+                                {...smallIconProps}
+                            />
                         </IconButton>
                     </Stack>
-                    <Box sx={{ flex: 1 }} />
-                    <Button
-                        variant="text"
-                        color="inherit"
-                        onClick={() =>
-                            isLoggedIn
-                                ? void refreshSessions()
-                                : openLoginFromChat()
-                        }
-                        sx={{
-                            minWidth: "auto",
-                            px: 1,
-                            py: 0.25,
-                            textTransform: "none",
-                            gap: 0.5,
-                            color: "text.muted",
-                            bgcolor: "transparent",
-                            borderRadius: 2,
-                            "&:hover": { bgcolor: "fill.faint" },
-                        }}
-                        startIcon={<SyncRounded fontSize="small" />}
-                    >
-                        Sync
-                    </Button>
                 </Stack>
-                {isLoggedIn && (
-                    <Box
-                        sx={{
-                            mt: 1.5,
-                            px: 1.5,
-                            py: 0.75,
-                            borderRadius: 2,
-                            bgcolor: "fill.faint",
-                        }}
-                    >
-                        <Typography variant="mini" sx={{ color: "text.muted" }}>
-                            {savedLocalUser()?.email ?? ""}
-                        </Typography>
-                    </Box>
-                )}
             </Box>
 
             <Divider />
 
-            <List
-                sx={{
-                    flex: 1,
-                    overflowY: "auto",
-                    px: 1,
-                    overscrollBehaviorY: "contain",
-                }}
-            >
-                <ListItemButton
-                    onClick={handleNewChat}
+            {drawerView === "settings" ? (
+                <List
                     sx={{
-                        alignItems: "center",
-                        gap: 1,
-                        py: 1.25,
-                        borderRadius: 2,
-                        my: 1,
-                        "&:hover": { backgroundColor: "fill.faintHover" },
+                        flex: 1,
+                        overflowY: "auto",
+                        px: 1,
+                        overscrollBehaviorY: "contain",
                     }}
                 >
-                    <AddRounded fontSize="small" />
-                    <Typography variant="small">New Chat</Typography>
-                </ListItemButton>
-
-                {groupedSessions.map(([label, group]) => (
-                    <Box key={label} sx={{ pb: 1 }}>
-                        <Typography
-                            variant="mini"
+                    <Box sx={{ pt: 1 }}>
+                        <Box
                             sx={{
-                                px: 1,
-                                pt: 2,
-                                pb: 0.5,
-                                letterSpacing: "0.12em",
-                                color: "text.muted",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                px: 1.5,
+                                py: 1,
+                                borderRadius: 2,
+                                bgcolor: "fill.faint",
                             }}
                         >
-                            {label}
-                        </Typography>
-                        {group.map((session) => (
-                            <ListItemButton
-                                key={session.sessionUuid}
-                                selected={
-                                    session.sessionUuid === currentSessionId
-                                }
-                                onClick={() =>
-                                    handleSelectSession(session.sessionUuid)
+                            <HugeiconsIcon
+                                icon={Search01Icon}
+                                {...compactIconProps}
+                            />
+                            <InputBase
+                                placeholder="Search settings"
+                                value={settingsSearch}
+                                onChange={(event) =>
+                                    setSettingsSearch(event.target.value)
                                 }
                                 sx={{
-                                    alignItems: "flex-start",
-                                    py: 1.5,
+                                    flex: 1,
+                                    color: "text.base",
+                                    fontFamily:
+                                        '"Source Serif 4", serif',
+                                    fontSize: "14px",
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                    <Typography
+                        variant="mini"
+                        sx={{
+                            px: 1,
+                            pt: 2,
+                            pb: 1,
+                            letterSpacing: "0.12em",
+                            color: "text.muted",
+                        }}
+                    >
+                        SETTINGS
+                    </Typography>
+                    {filteredSettingsItems.map((item) => (
+                        <ListItemButton
+                            key={item.key}
+                            onClick={item.onClick}
+                            sx={{
+                                alignItems: "center",
+                                gap: 1,
+                                py: 1.25,
+                                borderRadius: 2,
+                                my: 0.5,
+                                "&:hover": {
+                                    backgroundColor: "fill.faintHover",
+                                },
+                            }}
+                        >
+                            <HugeiconsIcon
+                                icon={item.icon}
+                                {...compactIconProps}
+                            />
+                            <Typography variant="small">
+                                {item.label}
+                            </Typography>
+                        </ListItemButton>
+                    ))}
+                </List>
+            ) : (
+                <>
+                    <List
+                        sx={{
+                            flex: 1,
+                            overflowY: "auto",
+                            px: 1,
+                            overscrollBehaviorY: "contain",
+                        }}
+                    >
+                        <Box sx={{ pt: 1 }}>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    px: 1.5,
+                                    py: 1,
                                     borderRadius: 2,
-                                    my: 0.5,
+                                    bgcolor: "fill.faint",
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={Search01Icon}
+                                    {...compactIconProps}
+                                />
+                                <InputBase
+                                    placeholder="Search chats"
+                                    value={sessionSearch}
+                                    onChange={(event) =>
+                                        setSessionSearch(event.target.value)
+                                    }
+                                    sx={{
+                                        flex: 1,
+                                        color: "text.base",
+                                        fontFamily:
+                                            '"Source Serif 4", serif',
+                                        fontSize: "14px",
+                                    }}
+                                />
+                            </Box>
+                        </Box>
+                        <Stack
+                            direction="row"
+                            sx={{ alignItems: "center", gap: 1, my: 1 }}
+                        >
+                            <ListItemButton
+                                onClick={handleNewChat}
+                                sx={{
+                                    flex: 1,
+                                    alignItems: "center",
+                                    gap: 1,
+                                    py: 1.25,
+                                    borderRadius: 2,
                                     "&:hover": {
-                                        backgroundColor: "fill.faintHover",
-                                    },
-                                    "&.Mui-selected": {
-                                        backgroundColor: "fill.faint",
-                                    },
-                                    "&.Mui-selected:hover": {
                                         backgroundColor: "fill.faintHover",
                                     },
                                 }}
                             >
-                                <Stack
-                                    direction="row"
+                                <HugeiconsIcon
+                                    icon={PlusSignIcon}
+                                    {...compactIconProps}
+                                />
+                                <Typography variant="small">New Chat</Typography>
+                            </ListItemButton>
+                            <Tooltip title="Sync">
+                                <IconButton
+                                    aria-label="Sync"
+                                    onClick={() => {
+                                        if (isLoggedIn) {
+                                            void refreshSessions();
+                                        } else {
+                                            openLoginFromChat();
+                                        }
+                                    }}
+                                    sx={actionButtonSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={RefreshIcon}
+                                        {...actionIconProps}
+                                    />
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
+
+                        {groupedSessions.map(([label, group]) => (
+                            <Box key={label} sx={{ pb: 1 }}>
+                                <Typography
+                                    variant="mini"
                                     sx={{
-                                        width: "100%",
-                                        alignItems: "flex-start",
-                                        gap: 1,
+                                        px: 1,
+                                        pt: 2,
+                                        pb: 0.5,
+                                        letterSpacing: "0.12em",
+                                        color: "text.muted",
                                     }}
                                 >
-                                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                                        <Typography
-                                            variant="small"
-                                            sx={{
-                                                fontWeight: 600,
-                                                fontFamily:
-                                                    '"Source Serif 4", serif',
-                                            }}
-                                        >
-                                            {session.title}
-                                        </Typography>
-                                        <Typography
-                                            variant="mini"
-                                            sx={{
-                                                color: "text.muted",
-                                                fontFamily:
-                                                    '"Source Serif 4", serif',
-                                                display: "-webkit-box",
-                                                WebkitLineClamp: 1,
-                                                WebkitBoxOrient: "vertical",
-                                                overflow: "hidden",
-                                            }}
-                                        >
-                                            {session.lastMessagePreview ?? ""}
-                                        </Typography>
-                                    </Box>
-                                    <IconButton
-                                        aria-label="Delete chat"
-                                        sx={actionButtonSx}
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            void handleDeleteSession(
+                                    {label}
+                                </Typography>
+                                {group.map((session) => (
+                                    <ListItemButton
+                                        key={session.sessionUuid}
+                                        selected={
+                                            session.sessionUuid ===
+                                            currentSessionId
+                                        }
+                                        onClick={() =>
+                                            handleSelectSession(
                                                 session.sessionUuid,
-                                            );
+                                            )
+                                        }
+                                        sx={{
+                                            alignItems: "flex-start",
+                                            py: 1.5,
+                                            borderRadius: 2,
+                                            my: 0.5,
+                                            "&:hover": {
+                                                backgroundColor:
+                                                    "fill.faintHover",
+                                            },
+                                            "&.Mui-selected": {
+                                                backgroundColor: "fill.faint",
+                                            },
+                                            "&.Mui-selected:hover": {
+                                                backgroundColor:
+                                                    "fill.faintHover",
+                                            },
                                         }}
                                     >
-                                        <DeleteOutline fontSize="small" />
-                                    </IconButton>
-                                </Stack>
-                            </ListItemButton>
+                                        <Stack
+                                            direction="row"
+                                            sx={{
+                                                width: "100%",
+                                                alignItems: "flex-start",
+                                                gap: 1,
+                                            }}
+                                        >
+                                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                <Typography
+                                                    variant="small"
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                        fontFamily:
+                                                            '"Source Serif 4", serif',
+                                                    }}
+                                                >
+                                                    {session.title}
+                                                </Typography>
+                                                <Typography
+                                                    variant="mini"
+                                                    sx={{
+                                                        color: "text.muted",
+                                                        fontFamily:
+                                                            '"Source Serif 4", serif',
+                                                        display: "-webkit-box",
+                                                        WebkitLineClamp: 1,
+                                                        WebkitBoxOrient:
+                                                            "vertical",
+                                                        overflow: "hidden",
+                                                    }}
+                                                >
+                                                    {session.lastMessagePreview ??
+                                                        ""}
+                                                </Typography>
+                                            </Box>
+                                            <IconButton
+                                                aria-label="Delete chat"
+                                                sx={actionButtonSx}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    void handleDeleteSession(
+                                                        session.sessionUuid,
+                                                    );
+                                                }}
+                                            >
+                                                <HugeiconsIcon
+                                                    icon={Delete01Icon}
+                                                    {...actionIconProps}
+                                                />
+                                            </IconButton>
+                                        </Stack>
+                                    </ListItemButton>
+                                ))}
+                            </Box>
                         ))}
-                    </Box>
-                ))}
-            </List>
+                    </List>
 
-            {isLoggedIn && (
-                <>
-                    <Divider />
-                    <Stack sx={{ p: 2 }}>
-                        <LinkButton onClick={logout}>Sign out</LinkButton>
-                    </Stack>
+                    {!drawerCollapsed && (
+                        <>
+                            <Divider />
+                            <Stack sx={{ p: 1 }}>
+                                <ListItemButton
+                                    onClick={
+                                        isLoggedIn
+                                            ? handleLogout
+                                            : openLoginFromChat
+                                    }
+                                    sx={{
+                                        alignItems: "center",
+                                        gap: 1,
+                                        px: 1.5,
+                                        py: 1,
+                                        width: "100%",
+                                        borderRadius: 2,
+                                        "&:hover": {
+                                            backgroundColor:
+                                                "fill.faintHover",
+                                        },
+                                    }}
+                                >
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        {isLoggedIn
+                                            ? "Sign out"
+                                            : "Sign in to backup"}
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+                            </Stack>
+                        </>
+                    )}
                 </>
             )}
         </Stack>
@@ -943,21 +1925,26 @@ const Page: React.FC = () => {
                 <Drawer
                     variant={isSmall ? "temporary" : "permanent"}
                     open={isSmall ? drawerOpen : true}
-                    onClose={() => setDrawerOpen(false)}
+                    onClose={handleCloseDrawer}
                     ModalProps={isSmall ? { keepMounted: true } : undefined}
                     sx={{
                         flexShrink: 0,
                         "& .MuiDrawer-paper": {
-                            width: { xs: 300, md: 320 },
+                            width: drawerWidth,
                             boxSizing: "border-box",
                             position: isSmall ? "fixed" : "relative",
+                            overflowX: "hidden",
+                            pointerEvents:
+                                isSmall || !drawerCollapsed ? "auto" : "none",
                         },
                     }}
                     slotProps={{
                         paper: {
                             sx: {
                                 backgroundColor: "background.paper",
-                                borderRightColor: "divider",
+                                borderRightColor: drawerCollapsed
+                                    ? "transparent"
+                                    : "divider",
                             },
                         },
                     }}
@@ -984,19 +1971,19 @@ const Page: React.FC = () => {
                             direction="row"
                             sx={{ gap: 1.5, alignItems: "center" }}
                         >
-                            {isSmall && (
+                            {showDrawerToggle && (
                                 <IconButton
                                     aria-label="Open menu"
-                                    onClick={() => setDrawerOpen(true)}
+                                    onClick={handleOpenDrawer}
                                     sx={drawerIconButtonSx}
                                 >
-                                    <MenuRounded fontSize="small" />
+                                    <HugeiconsIcon icon={Menu01Icon} {...smallIconProps} />
                                 </IconButton>
                             )}
                             <Stack
-                                sx={{ gap: isSmall && !drawerOpen ? 0.25 : 0 }}
+                                sx={{ gap: !isDrawerVisible ? 0.25 : 0 }}
                             >
-                                {isSmall && !drawerOpen && !isEnsuTitle && (
+                                {!isDrawerVisible && !isEnsuTitle && (
                                     <Typography
                                         variant="mini"
                                         sx={{
@@ -1015,12 +2002,16 @@ const Page: React.FC = () => {
                                 )}
                             </Stack>
                         </Stack>
-                        {!isLoggedIn && (
+                        {!isLoggedIn && !isDrawerVisible && (
                             <Button
                                 onClick={openLoginFromChat}
-                                color="accent"
+                                color="inherit"
                                 variant="text"
-                                sx={{ textTransform: "none", fontWeight: 600 }}
+                                sx={{
+                                    textTransform: "none",
+                                    fontWeight: 600,
+                                    color: "text.base",
+                                }}
                             >
                                 Sign In
                             </Button>
@@ -1037,7 +2028,7 @@ const Page: React.FC = () => {
                             overscrollBehaviorY: "contain",
                         }}
                     >
-                        {messages.length === 0 ? (
+                        {displayMessages.length === 0 ? (
                             <Stack
                                 sx={{
                                     gap: 2,
@@ -1056,11 +2047,32 @@ const Page: React.FC = () => {
                             </Stack>
                         ) : (
                             <Stack sx={{ gap: 3 }}>
-                                {messages.map((message) => {
+                                {displayMessages.map((message) => {
                                     const isSelf = message.sender === "self";
+                                    const isStreaming =
+                                        message.messageUuid ===
+                                        STREAMING_SELECTION_KEY;
+                                    const switcher =
+                                        branchSwitchers[message.messageUuid];
+                                    const showSwitcher =
+                                        !!switcher && switcher.total > 1;
                                     const timestamp = formatTime(
                                         message.createdAt,
                                     );
+                                    const parsedDocuments = isSelf
+                                        ? parseDocumentBlocks(message.text)
+                                        : { text: message.text, documents: [] };
+                                    const documentCount =
+                                        parsedDocuments.documents.length;
+                                    const displayText = isSelf
+                                        ? parsedDocuments.text ||
+                                          (documentCount > 0
+                                              ? "Attached documents"
+                                              : "")
+                                        : message.text;
+                                    const copyText = isSelf
+                                        ? displayText
+                                        : stripHiddenParts(message.text);
                                     return (
                                         <Box
                                             key={message.messageUuid}
@@ -1097,8 +2109,23 @@ const Page: React.FC = () => {
                                                         whiteSpace: "pre-wrap",
                                                     }}
                                                 >
-                                                    {message.text}
+                                                    {displayText}
                                                 </Typography>
+
+                                                {isSelf && documentCount > 0 && (
+                                                    <Typography
+                                                        variant="mini"
+                                                        sx={{
+                                                            mt: 0.5,
+                                                            color: "text.muted",
+                                                        }}
+                                                    >
+                                                        {documentCount} document
+                                                        {documentCount === 1
+                                                            ? ""
+                                                            : "s"} attached
+                                                    </Typography>
+                                                )}
 
                                                 <Stack
                                                     direction="row"
@@ -1110,7 +2137,7 @@ const Page: React.FC = () => {
                                                             : "flex-start",
                                                     }}
                                                 >
-                                                    {isSelf ? (
+                                                    {isStreaming ? null : isSelf ? (
                                                         <>
                                                             <IconButton
                                                                 aria-label="Edit"
@@ -1123,7 +2150,7 @@ const Page: React.FC = () => {
                                                                     )
                                                                 }
                                                             >
-                                                                <EditOutlined fontSize="small" />
+                                                                <HugeiconsIcon icon={Edit01Icon} {...actionIconProps} />
                                                             </IconButton>
                                                             <IconButton
                                                                 aria-label="Copy"
@@ -1132,11 +2159,11 @@ const Page: React.FC = () => {
                                                                 }
                                                                 onClick={() =>
                                                                     void handleCopyMessage(
-                                                                        message.text,
+                                                                        copyText,
                                                                     )
                                                                 }
                                                             >
-                                                                <ContentCopyOutlined fontSize="small" />
+                                                                <HugeiconsIcon icon={Copy01Icon} {...actionIconProps} />
                                                             </IconButton>
                                                         </>
                                                     ) : (
@@ -1148,33 +2175,24 @@ const Page: React.FC = () => {
                                                                 }
                                                                 onClick={() =>
                                                                     void handleCopyMessage(
-                                                                        message.text,
+                                                                        copyText,
                                                                     )
                                                                 }
                                                             >
-                                                                <ContentCopyOutlined fontSize="small" />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                aria-label="Raw"
-                                                                sx={
-                                                                    actionButtonSx
-                                                                }
-                                                                onClick={
-                                                                    handleRawMessage
-                                                                }
-                                                            >
-                                                                <CodeOutlined fontSize="small" />
+                                                                <HugeiconsIcon icon={Copy01Icon} {...actionIconProps} />
                                                             </IconButton>
                                                             <IconButton
                                                                 aria-label="Retry"
                                                                 sx={
                                                                     actionButtonSx
                                                                 }
-                                                                onClick={
-                                                                    handleRetryMessage
+                                                                onClick={() =>
+                                                                    handleRetryMessage(
+                                                                        message,
+                                                                    )
                                                                 }
                                                             >
-                                                                <ReplayRounded fontSize="small" />
+                                                                <HugeiconsIcon icon={RepeatIcon} {...actionIconProps} />
                                                             </IconButton>
                                                         </>
                                                     )}
@@ -1194,56 +2212,65 @@ const Page: React.FC = () => {
                                                             <Box
                                                                 sx={{ flex: 1 }}
                                                             />
-                                                            <Stack
-                                                                direction="row"
-                                                                sx={{
-                                                                    alignItems:
-                                                                        "center",
-                                                                    gap: 0.25,
-                                                                }}
-                                                            >
-                                                                <IconButton
-                                                                    aria-label="Previous branch"
-                                                                    sx={
-                                                                        actionButtonSx
-                                                                    }
-                                                                    onClick={
-                                                                        handlePrevBranch
-                                                                    }
-                                                                >
-                                                                    <ChevronLeftRounded fontSize="small" />
-                                                                </IconButton>
-                                                                <Typography
-                                                                    variant="small"
+                                                            {showSwitcher && (
+                                                                <Stack
+                                                                    direction="row"
                                                                     sx={{
-                                                                        color: "text.muted",
-                                                                        fontVariantNumeric:
-                                                                            "tabular-nums",
-                                                                        minWidth: 40,
-                                                                        textAlign:
+                                                                        alignItems:
                                                                             "center",
+                                                                        gap: 0.25,
                                                                     }}
                                                                 >
-                                                                    {
-                                                                        branchInfo.current
-                                                                    }
-                                                                    /
-                                                                    {
-                                                                        branchInfo.total
-                                                                    }
-                                                                </Typography>
-                                                                <IconButton
-                                                                    aria-label="Next branch"
-                                                                    sx={
-                                                                        actionButtonSx
-                                                                    }
-                                                                    onClick={
-                                                                        handleNextBranch
-                                                                    }
-                                                                >
-                                                                    <ChevronRightRounded fontSize="small" />
-                                                                </IconButton>
-                                                            </Stack>
+                                                                    <IconButton
+                                                                        aria-label="Previous branch"
+                                                                        sx={
+                                                                            actionButtonSx
+                                                                        }
+                                                                        onClick={() =>
+                                                                            switcher &&
+                                                                            handlePrevBranch(
+                                                                                switcher,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <HugeiconsIcon icon={ArrowLeft01Icon} {...smallIconProps} />
+                                                                    </IconButton>
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        sx={{
+                                                                            color: "text.muted",
+                                                                            fontVariantNumeric:
+                                                                                "tabular-nums",
+                                                                            minWidth: 40,
+                                                                            textAlign:
+                                                                                "center",
+                                                                        }}
+                                                                    >
+                                                                        {switcher
+                                                                            ? switcher.currentIndex +
+                                                                              1
+                                                                            : 1}
+                                                                        /
+                                                                        {switcher
+                                                                            ? switcher.total
+                                                                            : 1}
+                                                                    </Typography>
+                                                                    <IconButton
+                                                                        aria-label="Next branch"
+                                                                        sx={
+                                                                            actionButtonSx
+                                                                        }
+                                                                        onClick={() =>
+                                                                            switcher &&
+                                                                            handleNextBranch(
+                                                                                switcher,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <HugeiconsIcon icon={ArrowRight01Icon} {...smallIconProps} />
+                                                                    </IconButton>
+                                                                </Stack>
+                                                            )}
                                                             <Typography
                                                                 variant="mini"
                                                                 sx={{
@@ -1267,57 +2294,66 @@ const Page: React.FC = () => {
                                                             >
                                                                 {timestamp}
                                                             </Typography>
-                                                            <Stack
-                                                                direction="row"
-                                                                sx={{
-                                                                    alignItems:
-                                                                        "center",
-                                                                    gap: 0.25,
-                                                                    ml: 0.75,
-                                                                }}
-                                                            >
-                                                                <IconButton
-                                                                    aria-label="Previous branch"
-                                                                    sx={
-                                                                        actionButtonSx
-                                                                    }
-                                                                    onClick={
-                                                                        handlePrevBranch
-                                                                    }
-                                                                >
-                                                                    <ChevronLeftRounded fontSize="small" />
-                                                                </IconButton>
-                                                                <Typography
-                                                                    variant="small"
+                                                            {showSwitcher && (
+                                                                <Stack
+                                                                    direction="row"
                                                                     sx={{
-                                                                        color: "text.muted",
-                                                                        fontVariantNumeric:
-                                                                            "tabular-nums",
-                                                                        minWidth: 40,
-                                                                        textAlign:
+                                                                        alignItems:
                                                                             "center",
+                                                                        gap: 0.25,
+                                                                        ml: 0.75,
                                                                     }}
                                                                 >
-                                                                    {
-                                                                        branchInfo.current
-                                                                    }
-                                                                    /
-                                                                    {
-                                                                        branchInfo.total
-                                                                    }
-                                                                </Typography>
-                                                                <IconButton
-                                                                    aria-label="Next branch"
-                                                                    sx={
-                                                                        actionButtonSx
-                                                                    }
-                                                                    onClick={
-                                                                        handleNextBranch
-                                                                    }
-                                                                >
-                                                                    <ChevronRightRounded fontSize="small" />
-                                                                </IconButton>
-                                                            </Stack>
+                                                                    <IconButton
+                                                                        aria-label="Previous branch"
+                                                                        sx={
+                                                                            actionButtonSx
+                                                                        }
+                                                                        onClick={() =>
+                                                                            switcher &&
+                                                                            handlePrevBranch(
+                                                                                switcher,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <HugeiconsIcon icon={ArrowLeft01Icon} {...smallIconProps} />
+                                                                    </IconButton>
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        sx={{
+                                                                            color: "text.muted",
+                                                                            fontVariantNumeric:
+                                                                                "tabular-nums",
+                                                                            minWidth: 40,
+                                                                            textAlign:
+                                                                                "center",
+                                                                        }}
+                                                                    >
+                                                                        {switcher
+                                                                            ? switcher.currentIndex +
+                                                                              1
+                                                                            : 1}
+                                                                        /
+                                                                        {switcher
+                                                                            ? switcher.total
+                                                                            : 1}
+                                                                    </Typography>
+                                                                    <IconButton
+                                                                        aria-label="Next branch"
+                                                                        sx={
+                                                                            actionButtonSx
+                                                                        }
+                                                                        onClick={() =>
+                                                                            switcher &&
+                                                                            handleNextBranch(
+                                                                                switcher,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <HugeiconsIcon icon={ArrowRight01Icon} {...smallIconProps} />
+                                                                    </IconButton>
+                                                                </Stack>
+                                                            )}
                                                             <Box
                                                                 sx={{ flex: 1 }}
                                                             />
@@ -1347,14 +2383,14 @@ const Page: React.FC = () => {
                                         alignItems: "center",
                                         gap: 1,
                                         px: 1.5,
-                                        py: 1,
+                                        py: 0.5,
                                         borderRadius: 2,
                                         bgcolor: "fill.faint",
                                         borderLeft: "3px solid",
                                         borderLeftColor: "accent.main",
                                     }}
                                 >
-                                    <EditOutlined fontSize="small" />
+                                    <HugeiconsIcon icon={Edit01Icon} {...compactIconProps} />
                                     <Typography
                                         variant="mini"
                                         sx={{ color: "text.muted" }}
@@ -1378,9 +2414,97 @@ const Page: React.FC = () => {
                                         sx={actionButtonSx}
                                         onClick={handleCancelEdit}
                                     >
-                                        <CloseRounded fontSize="small" />
+                                        <HugeiconsIcon icon={Cancel01Icon} {...smallIconProps} />
                                     </IconButton>
                                 </Box>
+                            )}
+
+                            {downloadStatus?.status &&
+                                downloadStatus.status !== "Ready" && (
+                                    <Stack sx={{ gap: 0.5 }}>
+                                        <Typography
+                                            variant="mini"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            {downloadStatus.status}
+                                        </Typography>
+                                        {downloadStatus.percent >= 0 &&
+                                            downloadStatus.percent < 100 && (
+                                                <LinearProgress
+                                                    variant={
+                                                        downloadStatus.totalBytes
+                                                            ? "determinate"
+                                                            : "indeterminate"
+                                                    }
+                                                    value={
+                                                        downloadStatus.totalBytes
+                                                            ? downloadStatus.percent
+                                                            : undefined
+                                                    }
+                                                />
+                                            )}
+                                    </Stack>
+                                )}
+
+                            {pendingDocuments.length > 0 && (
+                                <Stack sx={{ gap: 0.5 }}>
+                                    <Typography
+                                        variant="mini"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Documents
+                                    </Typography>
+                                    <Stack sx={{ gap: 0.5 }}>
+                                        {pendingDocuments.map((doc) => (
+                                            <Box
+                                                key={doc.id}
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 1,
+                                                    px: 1.5,
+                                                    py: 0.75,
+                                                    borderRadius: 1.5,
+                                                    bgcolor: "fill.faint",
+                                                }}
+                                            >
+                                                <Typography
+                                                    variant="mini"
+                                                    sx={{
+                                                        flex: 1,
+                                                        color: "text.base",
+                                                        overflow: "hidden",
+                                                        textOverflow:
+                                                            "ellipsis",
+                                                        whiteSpace: "nowrap",
+                                                    }}
+                                                >
+                                                    {doc.name}
+                                                </Typography>
+                                                <Typography
+                                                    variant="mini"
+                                                    sx={{ color: "text.muted" }}
+                                                >
+                                                    {formatBytes(doc.size)}
+                                                </Typography>
+                                                <IconButton
+                                                    aria-label="Remove document"
+                                                    sx={actionButtonSx}
+                                                    onClick={() =>
+                                                        removePendingDocument(
+                                                            doc.id,
+                                                        )
+                                                    }
+                                                >
+                                                    <HugeiconsIcon
+                                                        icon={Cancel01Icon}
+                                                        {...smallIconProps}
+                                                    />
+                                                </IconButton>
+                                            </Box>
+                                        ))}
+                                    </Stack>
+                                </Stack>
                             )}
 
                             <Stack
@@ -1392,7 +2516,7 @@ const Page: React.FC = () => {
                                     maxRows={5}
                                     placeholder={
                                         isDownloading
-                                            ? "Downloading model... (queue messages)"
+                                            ? "Downloading model..."
                                             : "Compose your message..."
                                     }
                                     value={input}
@@ -1430,20 +2554,31 @@ const Page: React.FC = () => {
                                     disabled={isGenerating || isDownloading}
                                     onClick={openAttachmentMenu}
                                 >
-                                    <AttachFileOutlined fontSize="small" />
+                                    <HugeiconsIcon icon={Attachment01Icon} {...actionIconProps} />
                                 </IconButton>
                                 <IconButton
                                     aria-label={
                                         isGenerating ? "Stop" : "Send message"
                                     }
-                                    onClick={() => void handleSend()}
-                                    disabled={isDownloading || !input.trim()}
+                                    onClick={
+                                        isGenerating
+                                            ? handleStopGeneration
+                                            : () => void handleSend()
+                                    }
+                                    disabled={
+                                        isDownloading ||
+                                        (!isGenerating &&
+                                            !input.trim() &&
+                                            pendingDocuments.length === 0)
+                                    }
                                     sx={{
                                         width: 44,
                                         height: 44,
                                         borderRadius: 2,
                                         bgcolor: "fill.faint",
-                                        color: "text.muted",
+                                        color: isGenerating
+                                            ? "critical.main"
+                                            : "text.muted",
                                         "&:hover": {
                                             bgcolor: "fill.faintHover",
                                         },
@@ -1453,12 +2588,9 @@ const Page: React.FC = () => {
                                     }}
                                 >
                                     {isGenerating ? (
-                                        <StopCircleOutlined
-                                            fontSize="small"
-                                            sx={{ color: "critical.main" }}
-                                        />
+                                        <HugeiconsIcon icon={StopCircleIcon} {...actionIconProps} />
                                     ) : (
-                                        <SendRounded fontSize="small" />
+                                        <HugeiconsIcon icon={ArrowRight02Icon} {...actionIconProps} />
                                     )}
                                 </IconButton>
                             </Stack>
@@ -1487,17 +2619,19 @@ const Page: React.FC = () => {
                             <Typography variant="body">
                                 {useCustomModel
                                     ? "Custom model"
-                                    : "Default model"}
+                                    : DEFAULT_MODEL.name}
                             </Typography>
                             <Typography
                                 variant="mini"
                                 sx={{
-                                    color: useCustomModel
+                                    color: loadedModelName
                                         ? "success.main"
                                         : "text.muted",
                                 }}
                             >
-                                {useCustomModel ? "Loaded" : "Not loaded"}
+                                {loadedModelName
+                                    ? `Loaded: ${loadedModelName}`
+                                    : "Not loaded"}
                             </Typography>
                         </Stack>
 
@@ -1518,17 +2652,19 @@ const Page: React.FC = () => {
                                 error={!!modelUrlError}
                                 helperText={modelUrlError ?? " "}
                             />
-                            <TextField
-                                fullWidth
-                                label="mmproj .gguf file URL"
-                                placeholder="(optional for multimodal)"
-                                value={mmprojUrl}
-                                onChange={(event) =>
-                                    setMmprojUrl(event.target.value)
-                                }
-                                error={!!mmprojError}
-                                helperText={mmprojError ?? " "}
-                            />
+                            {isTauriRuntime && (
+                                <TextField
+                                    fullWidth
+                                    label="mmproj .gguf file URL"
+                                    placeholder="(optional for multimodal)"
+                                    value={mmprojUrl}
+                                    onChange={(event) =>
+                                        setMmprojUrl(event.target.value)
+                                    }
+                                    error={!!mmprojError}
+                                    helperText={mmprojError ?? " "}
+                                />
+                            )}
                             <Typography
                                 variant="mini"
                                 sx={{ color: "text.muted" }}
@@ -1561,7 +2697,8 @@ const Page: React.FC = () => {
                                                     variant="mini"
                                                     sx={{ color: "text.muted" }}
                                                 >
-                                                    {model.mmproj
+                                                    {isTauriRuntime &&
+                                                    model.mmproj
                                                         ? "+ mmproj"
                                                         : ""}
                                                 </Typography>
@@ -1647,6 +2784,8 @@ const Page: React.FC = () => {
                     </Stack>
                 </DialogActions>
             </Dialog>
+
+            <input {...getDocumentInputProps()} />
 
             <Menu
                 anchorEl={attachmentAnchor}

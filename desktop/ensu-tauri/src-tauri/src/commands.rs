@@ -2,13 +2,21 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use ente_core::{auth as core_auth, crypto as core_crypto};
+use inference_rs as llm;
 use serde::{Deserialize, Serialize};
-use tauri::State;
+use tauri::async_runtime;
+use tauri::{State, Window};
 use uuid::Uuid;
 
 #[derive(Default)]
 pub struct SrpState {
     sessions: Mutex<HashMap<String, core_auth::SrpSession>>,
+}
+
+#[derive(Default)]
+pub struct LlmState {
+    model: Mutex<Option<llm::ModelHandleRef>>,
+    context: Mutex<Option<llm::ContextHandleRef>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -24,6 +32,10 @@ impl ApiError {
             message: message.into(),
         }
     }
+}
+
+fn llm_error(message: impl Into<String>) -> ApiError {
+    ApiError::new("llm", message)
 }
 
 impl From<core_auth::AuthError> for ApiError {
@@ -357,4 +369,152 @@ pub fn srp_session_verify_m2(
     session.verify_m2(&srp_m2)?;
     sessions.remove(&input.session_id);
     Ok(())
+}
+
+#[derive(Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+enum LlmEvent {
+    Text {
+        job_id: llm::JobId,
+        text: String,
+        token_id: Option<i32>,
+    },
+    Done { summary: llm::GenerateSummary },
+    Error {
+        job_id: llm::JobId,
+        message: String,
+    },
+}
+
+impl From<llm::GenerateEvent> for LlmEvent {
+    fn from(value: llm::GenerateEvent) -> Self {
+        match value {
+            llm::GenerateEvent::Text {
+                job_id,
+                text,
+                token_id,
+            } => Self::Text {
+                job_id,
+                text,
+                token_id,
+            },
+            llm::GenerateEvent::Done { summary } => Self::Done { summary },
+            llm::GenerateEvent::Error { job_id, message } => Self::Error {
+                job_id,
+                message,
+            },
+        }
+    }
+}
+
+struct LlmEventSink {
+    window: Window,
+}
+
+impl llm::EventSink for LlmEventSink {
+    fn add(&mut self, event: llm::GenerateEvent) {
+        let payload = LlmEvent::from(event);
+        let _ = self.window.emit("llm-event", payload);
+    }
+}
+
+#[tauri::command]
+pub fn llm_init_backend() -> Result<(), ApiError> {
+    llm::init_backend().map_err(llm_error)
+}
+
+#[tauri::command]
+pub fn llm_load_model(
+    state: State<LlmState>,
+    params: llm::ModelLoadParams,
+) -> Result<(), ApiError> {
+    let model = llm::load_model(params).map_err(llm_error)?;
+    let mut model_guard = state
+        .model
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
+    let mut context_guard = state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+
+    *model_guard = Some(model);
+    *context_guard = None;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn llm_create_context(
+    state: State<LlmState>,
+    params: llm::ContextParams,
+) -> Result<(), ApiError> {
+    let model = state
+        .model
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?
+        .clone()
+        .ok_or_else(|| ApiError::new("llm_not_loaded", "Model not loaded"))?;
+
+    let context = llm::create_context(model, params).map_err(llm_error)?;
+
+    let mut context_guard = state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+    *context_guard = Some(context);
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn llm_free_context(state: State<LlmState>) -> Result<(), ApiError> {
+    let mut context_guard = state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+    *context_guard = None;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn llm_free_model(state: State<LlmState>) -> Result<(), ApiError> {
+    let mut context_guard = state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?;
+    let mut model_guard = state
+        .model
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM model store"))?;
+
+    *context_guard = None;
+    *model_guard = None;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn llm_generate_chat_stream(
+    state: State<LlmState>,
+    window: Window,
+    request: llm::GenerateChatRequest,
+) -> Result<(), ApiError> {
+    let context = state
+        .context
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock LLM context store"))?
+        .clone()
+        .ok_or_else(|| ApiError::new("llm_not_ready", "Model context not loaded"))?;
+
+    async_runtime::spawn_blocking(move || {
+        let mut sink = LlmEventSink { window };
+        let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn llm_cancel(job_id: i64) -> Result<(), ApiError> {
+    llm::cancel(job_id).map_err(llm_error)
 }

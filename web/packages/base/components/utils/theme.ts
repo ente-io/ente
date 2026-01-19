@@ -13,7 +13,7 @@ const getTheme = (appName: AppName): Theme => {
         cssVariables: { colorSchemeSelector: "class" },
         colorSchemes,
         typography: getTypography(appName),
-        components,
+        components: getComponents(appName),
         shape: {
             // Increase the default border radius multiplier from 4 to 8.
             borderRadius: 8,
@@ -143,6 +143,10 @@ const getColors = (appName: AppName) => ({
                     : _colors.accentPhotos,
     },
     ...{
+        accentContrastText:
+            appName == "ensu" ? _colors.fixed.black : _colors.fixed.white,
+    },
+    ...{
         light:
             appName == "share"
                 ? _colors.lightShare
@@ -171,8 +175,8 @@ const _colors = {
     accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
     accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
     accentShare: { dark: "#0056CC", main: "#1071FF", light: "#1071FF" },
-    accentEnsu: { dark: "#7C6408", main: "#9A7E0A", light: "#B89A1F" },
-    accentEnsuDark: { dark: "#FFD700", main: "#FFD700", light: "#FFD700" },
+    accentEnsu: { dark: "#f5d93a", main: "#f5d93a", light: "#f5d93a" },
+    accentEnsuDark: { dark: "#f5d93a", main: "#f5d93a", light: "#f5d93a" },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -432,7 +436,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 main: colors.accent.main,
                 dark: colors.accent.dark,
                 light: colors.accent.light,
-                contrastText: colors.fixed.white,
+                contrastText: colors.accentContrastText,
             },
             critical: {
                 main: colors.fixed.danger.main,
@@ -517,7 +521,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
                 main: colors.accentDark.main,
                 dark: colors.accentDark.dark,
                 light: colors.accentDark.light,
-                contrastText: colors.fixed.white,
+                contrastText: colors.accentContrastText,
             },
             critical: {
                 main: colors.fixed.danger.main,
@@ -969,6 +973,24 @@ const components: Components = {
             variant: "outlined",
         },
     },
+};
+
+const getComponents = (appName: AppName): Components => {
+    if (appName !== "ensu") return components;
+
+    return {
+        ...components,
+        MuiButton: {
+            ...components.MuiButton,
+            styleOverrides: {
+                ...components.MuiButton?.styleOverrides,
+                root: {
+                    ...((components.MuiButton?.styleOverrides as Components["MuiButton"]["styleOverrides"])?.root ?? {}),
+                    borderRadius: "16px",
+                },
+            },
+        },
+    };
 };
 
 // Exports ---
