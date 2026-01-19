@@ -1,4 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
@@ -10,14 +12,13 @@ import {
     Stack,
     styled,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
 import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
-import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
-import type { EnteFile } from "ente-media/file";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
@@ -29,6 +30,7 @@ import {
     canAddToCollection,
     canMoveToCollection,
     collectionsSortBy,
+    sortCollectionSummaries,
     type CollectionsSortBy,
     type CollectionSummaries,
     type CollectionSummary,
@@ -134,7 +136,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortBy, setSortBy] = useCollectionSelectorSortByLocalState("name");
+    const [sortBy, setSortBy] =
+        useCollectionSelectorSortByLocalState("name-asc");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -150,8 +153,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         const activeCollectionID = attributes.activeCollectionID;
-        const collections = [...collectionSummaries.values()]
-            .filter((cs) => {
+        const filteredCollections = [...collectionSummaries.values()].filter(
+            (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
@@ -174,23 +177,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         canMoveToCollection(cs) && cs.type != "userFavorites"
                     );
                 }
-            })
-            .sort((a, b) => {
-                switch (sortBy) {
-                    case "name":
-                        return a.name.localeCompare(b.name);
-                    case "creation-time-asc":
-                        return (
-                            -1 *
-                            compareCollectionsLatestFile(
-                                b.latestFile,
-                                a.latestFile,
-                            )
-                        );
-                    case "updation-time-desc":
-                        return (b.updationTime ?? 0) - (a.updationTime ?? 0);
-                }
-            })
+            },
+        );
+
+        const collections = sortCollectionSummaries(filteredCollections, sortBy)
             .sort((a, b) => b.sortPriority - a.sortPriority)
             .sort((a, b) => {
                 // Prioritize the active collection (if any) to appear first.
@@ -371,17 +361,53 @@ interface CollectionSummaryButtonProps {
 const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     collectionSummary,
     onClick,
-}) => (
-    <ItemCard
-        TileComponent={LargeTileButton}
-        coverFile={collectionSummary.coverFile}
-        onClick={() => onClick(collectionSummary.id)}
-    >
-        <LargeTileTextOverlay>
-            <Typography>{collectionSummary.name}</Typography>
-        </LargeTileTextOverlay>
-    </ItemCard>
-);
+}) => {
+    const isFavorite = collectionSummary.type === "userFavorites";
+    const isPinned = collectionSummary.attributes.has("pinned");
+
+    return (
+        <ItemCard
+            TileComponent={LargeTileButton}
+            coverFile={collectionSummary.coverFile}
+            onClick={() => onClick(collectionSummary.id)}
+        >
+            <LargeTileTextOverlay>
+                <Tooltip title={collectionSummary.name} arrow>
+                    <Typography
+                        sx={{
+                            maxWidth: "240px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                        }}
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                </Tooltip>
+            </LargeTileTextOverlay>
+            {(isFavorite || isPinned) && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        right: 8,
+                        display: "flex",
+                        gap: 0.5,
+                    }}
+                >
+                    {isFavorite && (
+                        <FavoriteIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                    {isPinned && (
+                        <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                </Box>
+            )}
+        </ItemCard>
+    );
+};
 
 interface SearchFieldProps {
     value: string;
@@ -484,22 +510,4 @@ const useCollectionSelectorSortByLocalState = (
     };
 
     return [value, setter] as const;
-};
-
-const compareCollectionsLatestFile = (
-    first: EnteFile | undefined,
-    second: EnteFile | undefined,
-) => {
-    if (!first) {
-        return 1;
-    } else if (!second) {
-        return -1;
-    } else {
-        const sortedFiles = sortFiles([first, second]);
-        if (sortedFiles[0]?.id !== first.id) {
-            return 1;
-        } else {
-            return -1;
-        }
-    }
 };
