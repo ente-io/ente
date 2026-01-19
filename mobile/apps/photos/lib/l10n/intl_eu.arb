@@ -277,7 +277,6 @@
   "failedToApplyCode": "Akatsa kodea aplikatzean",
   "enterReferralCode": "Sartu erreferentzia kodea",
   "codeAppliedPageTitle": "Kodea aplikatuta",
-  "changeYourReferralCode": "Aldatu zure erreferentzia kodea",
   "change": "Aldatu",
   "unavailableReferralCode": "Sentitzen dugu, kode hau ezin da erabili.",
   "codeChangeLimitReached": "Sentitzen dugu, zure kode aldaketa muga gainditu duzu.",
@@ -295,11 +294,9 @@
   "claimFreeStorage": "Eskatu debaldeko biltegiratzea",
   "inviteYourFriends": "Gonbidatu zure lagunak",
   "failedToFetchReferralDetails": "Ezin dugu zure erreferentziaren detailerik lortu. Mesedez, saiatu berriro geroago.",
-  "referralStep1": "1. Eman kode hau zure lagunei",
   "referralStep2": "2. Haiek ordainpeko plan batean sinatu behar dute",
   "referralStep3": "3. Bai zuk bai haiek {storageInGB} GB* dohainik izango duzue",
   "referralsAreCurrentlyPaused": "Erreferentziak momentuz geldituta daude",
-  "youCanAtMaxDoubleYourStorage": "* Gehienez zure biltegiratzea bikoiztu ahal duzu",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Zure familiak {storageAmountInGb} GB eskatu du dagoeneko} false {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko} other {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
