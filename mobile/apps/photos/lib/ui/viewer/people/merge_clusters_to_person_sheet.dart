@@ -1,11 +1,14 @@
 import "dart:async";
 
+import "package:dotted_border/dotted_border.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
-import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_sort_order_change_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/service_locator.dart";
@@ -19,48 +22,52 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/people_sort_util.dart";
 
-Future<String?> showMergeClustersToPersonSheet(
+class MergePersonSelectionResult {
+  final String personId;
+  final PersonEntity? person;
+  final String? seedClusterId;
+
+  const MergePersonSelectionResult({
+    required this.personId,
+    this.person,
+    this.seedClusterId,
+  });
+}
+
+Future<MergePersonSelectionResult?> showMergeClustersToPersonPage(
   BuildContext context, {
   List<GenericSearchResult>? initialPersons,
+  String? seedClusterId,
 }) {
-  return showBarModalBottomSheet<String>(
-    context: context,
-    builder: (context) {
-      return MergeClustersToPersonSheet(
-        initialPersons: initialPersons,
-      );
-    },
-    shape: const RoundedRectangleBorder(
-      side: BorderSide(width: 0),
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
+  return routeToPage(
+    context,
+    MergeClustersToPersonPage(
+      initialPersons: initialPersons,
+      seedClusterId: seedClusterId,
     ),
-    topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
-    barrierColor: backdropFaintDark,
-    enableDrag: true,
   );
 }
 
-class MergeClustersToPersonSheet extends StatefulWidget {
+class MergeClustersToPersonPage extends StatefulWidget {
   final List<GenericSearchResult>? initialPersons;
+  final String? seedClusterId;
 
-  const MergeClustersToPersonSheet({
+  const MergeClustersToPersonPage({
     super.key,
     this.initialPersons,
+    this.seedClusterId,
   });
 
   @override
-  State<MergeClustersToPersonSheet> createState() =>
-      _MergeClustersToPersonSheetState();
+  State<MergeClustersToPersonPage> createState() =>
+      _MergeClustersToPersonPageState();
 }
 
-class _MergeClustersToPersonSheetState
-    extends State<MergeClustersToPersonSheet> {
+class _MergeClustersToPersonPageState extends State<MergeClustersToPersonPage> {
   static final Logger _logger = Logger("MergeClustersToPersonSheet");
 
   late Future<List<GenericSearchResult>> _personsFuture;
@@ -72,6 +79,9 @@ class _MergeClustersToPersonSheetState
 
   static const double _sortMenuItemHeight = 52;
   static const double _sortMenuCornerRadius = 12;
+
+  bool get _showNewPersonTile =>
+      widget.seedClusterId != null && widget.seedClusterId!.isNotEmpty;
 
   @override
   void initState() {
@@ -122,6 +132,29 @@ class _MergeClustersToPersonSheetState
       setState(() {
         _searchQuery = "";
       });
+    }
+  }
+
+  Future<void> _onAddNewPersonSelected() async {
+    final seedClusterId = widget.seedClusterId;
+    if (seedClusterId == null || seedClusterId.isEmpty) {
+      return;
+    }
+    final result = await routeToPage(
+      context,
+      SaveOrEditPerson(seedClusterId),
+    );
+    if (!mounted) {
+      return;
+    }
+    if (result is PersonEntity) {
+      Navigator.of(context).pop(
+        MergePersonSelectionResult(
+          personId: result.remoteID,
+          person: result,
+          seedClusterId: seedClusterId,
+        ),
+      );
     }
   }
 
@@ -188,7 +221,6 @@ class _MergeClustersToPersonSheetState
     const gridPadding = 16.0;
 
     return Scaffold(
-      backgroundColor: colorScheme.backgroundElevated,
       body: FutureBuilder<List<GenericSearchResult>>(
         future: _personsFuture,
         builder: (context, snapshot) {
@@ -237,7 +269,7 @@ class _MergeClustersToPersonSheetState
           final sortedPersons = [...persons];
           _sortFaces(sortedPersons);
           final results = _filterPersons(sortedPersons);
-          if (results.isEmpty) {
+          if (results.isEmpty && !_showNewPersonTile) {
             slivers.add(
               SliverFillRemaining(
                 child: Center(
@@ -272,9 +304,17 @@ class _MergeClustersToPersonSheetState
                   childAspectRatio: itemSize / (itemSize + textHeight),
                 ),
                 delegate: SliverChildBuilderDelegate(
-                  childCount: results.length,
+                  childCount: results.length + (_showNewPersonTile ? 1 : 0),
                   (context, index) {
-                    final person = results[index];
+                    if (_showNewPersonTile && index == 0) {
+                      return _AddNewPersonGridTile(
+                        size: itemSize,
+                        labelHeight: textHeight,
+                        onTap: _onAddNewPersonSelected,
+                      );
+                    }
+                    final person =
+                        results[_showNewPersonTile ? index - 1 : index];
                     final personId = person.params[kPersonParamID] as String?;
                     final personKey = personId != null && personId.isNotEmpty
                         ? personId
@@ -462,7 +502,60 @@ class _MergeClustersToPersonSheetState
     if (personId == null || personId.isEmpty) {
       return;
     }
-    Navigator.of(context).pop(personId);
+    Navigator.of(context).pop(
+      MergePersonSelectionResult(
+        personId: personId,
+      ),
+    );
+  }
+}
+
+class _AddNewPersonGridTile extends StatelessWidget {
+  final double size;
+  final double labelHeight;
+  final VoidCallback onTap;
+
+  const _AddNewPersonGridTile({
+    required this.size,
+    required this.labelHeight,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    const strokeWidth = 1.0;
+    final innerSize = size - strokeWidth * 2;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          DottedBorder(
+            color: colorScheme.strokeMuted,
+            strokeWidth: strokeWidth,
+            dashPattern: const [4, 4],
+            padding: EdgeInsets.zero,
+            customPath: faceThumbnailSquircleOuterPath,
+            child: SizedBox(
+              height: innerSize,
+              width: innerSize,
+              child: Center(
+                child: HugeIcon(
+                  icon: HugeIcons.strokeRoundedUserAdd02,
+                  color: colorScheme.strokeMuted,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: labelHeight),
+        ],
+      ),
+    );
   }
 }
 

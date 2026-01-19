@@ -254,7 +254,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                             height: 110,
                             width: 110,
                             child: FaceThumbnailSquircleClip(
-                              child: widget.file != null
+                              child: widget.clusterID != null
                                   ? PersonFaceWidget(
                                       clusterID: widget.clusterID,
                                     )

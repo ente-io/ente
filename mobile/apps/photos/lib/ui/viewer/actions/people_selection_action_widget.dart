@@ -6,13 +6,15 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
-import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import "package:photos/ui/viewer/people/merge_clusters_to_person_sheet.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -421,28 +423,43 @@ class _PeopleSelectionActionWidgetState
         _getNamedSelectedPersonIds(selectedPersonIds, personMap);
 
     String? targetPersonId;
+    PersonEntity? targetPerson;
+    String? seedClusterId;
     if (namedSelectedPersonIds.length == 1) {
       targetPersonId = namedSelectedPersonIds.first;
+      targetPerson = personMap[targetPersonId];
     } else {
-      final initialPersons =
-          await AddFilesToPersonPage.prefetchNamedPersons(context);
-      if (!mounted) return;
-      if (initialPersons == null || initialPersons.isEmpty) {
-        return;
-      }
-      targetPersonId = await showMergeClustersToPersonSheet(
-        context,
-        initialPersons: initialPersons,
+      final initialPersons = await SearchService.instance.getAllFace(
+        null,
+        minClusterSize: kMinimumClusterSizeAllFaces,
       );
       if (!mounted) return;
+      final namedPersons = initialPersons
+          .where(
+            (result) =>
+                (result.params[kPersonParamID] as String?)?.isNotEmpty ?? false,
+          )
+          .toList();
+      final selection = await showMergeClustersToPersonPage(
+        context,
+        initialPersons: namedPersons,
+        seedClusterId: selectedClusterIds.first,
+      );
+      if (!mounted) return;
+      targetPersonId = selection?.personId;
+      seedClusterId = selection?.seedClusterId;
+      targetPerson = selection?.person;
     }
 
     if (targetPersonId == null || targetPersonId.isEmpty) return;
 
-    final person = personMap[targetPersonId];
+    final person = targetPerson ?? personMap[targetPersonId];
     if (person == null) return;
     try {
       for (final clusterID in selectedClusterIds) {
+        if (seedClusterId != null && clusterID == seedClusterId) {
+          continue;
+        }
         await ClusterFeedbackService.instance.addClusterToExistingPerson(
           clusterID: clusterID,
           person: person,
