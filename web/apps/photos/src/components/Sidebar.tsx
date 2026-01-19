@@ -230,7 +230,9 @@ type HelpAction = Extract<
 
 type FreeUpSpaceAction = Extract<
     SidebarActionID,
-    "freeUpSpace.deduplicate" | "freeUpSpace.largeFiles"
+    | "freeUpSpace.deduplicate"
+    | "freeUpSpace.largeFiles"
+    | "freeUpSpace.similarImages"
 >;
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -1779,6 +1781,11 @@ const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
         void router.push("/large-files");
     }, [onRootClose, router]);
 
+    const handleSimilarImages = useCallback(() => {
+        onRootClose();
+        void router.push("/similar-images");
+    }, [onRootClose, router]);
+
     useEffect(() => {
         if (!open || !pendingAction) return;
         switch (pendingAction) {
@@ -1788,11 +1795,15 @@ const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
             case "freeUpSpace.largeFiles":
                 handleLargeFiles();
                 break;
+            case "freeUpSpace.similarImages":
+                handleSimilarImages();
+                break;
         }
         onActionHandled?.();
     }, [
         handleDeduplicate,
         handleLargeFiles,
+        handleSimilarImages,
         open,
         onActionHandled,
         pendingAction,
@@ -1814,6 +1825,11 @@ const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
                     <RowButton
                         label={t("large_files_title")}
                         onClick={handleLargeFiles}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        label={t("similar_images")}
+                        onClick={handleSimilarImages}
                     />
                 </RowButtonGroup>
             </Stack>

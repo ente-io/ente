@@ -799,5 +799,17 @@
     "continuous": "Continuous",
     "trip": "Trip",
     "album_layout": "Album layout",
-    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location."
+    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
+    "similar_images": "Similar images",
+    "similarity": "Similarity",
+    "close_by": "Close by",
+    "related": "Related",
+    "deselect_all_groups": "Deselect all groups",
+    "select_all_in_groups": "Select all in groups",
+    "analyzing_photos_locally": "Analyzing photos locally...",
+    "no_similar_images_found": "No similar images found",
+    "no_category_images_found": "No {{category}} images found",
+    "try_checking_other_categories": "Try checking other categories",
+    "deleting_similar_images": "Deleting similar images...",
+    "remove_similar_images_count": "Remove {{count}} photos"
 }
