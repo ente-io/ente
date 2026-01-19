@@ -176,7 +176,7 @@
   "admins": "Správci",
   "addAdmin": "Přidat správce",
   "addMoreAdmins": "Přidat více správců",
-  "adminsAndCollaboratorsCanAddPhotosDescription": "Správci a spolupracovníci můžou přidávat fotky. Správci můžou navíc spravovat fotky a spolupracovníky.",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Správci a spolupracovníci můžou přidávat fotografie. Správci můžou navíc spravovat fotografie a účastníky.",
   "addANewEmail": "Přidejte nový email",
   "orPickAnExistingOne": "Nebo vyberte existující",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Spolupracovníci mohou do sdíleného alba přidávat fotografie a videa.",
@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Povolit připojení k albu",
   "allowAddPhotosDescription": "Umožnit lidem s odkazem přidávat fotky do sdíleného alba.",
+  "enableComment": "Komentáře a reakce",
   "passwordLock": "Zámek heslem",
   "canNotOpenTitle": "Nelze otevřít toto album",
   "canNotOpenBody": "Omlouváme se, ale toto album nelze otevřít v aplikaci.",
@@ -305,10 +306,13 @@
   "enterCodeDescription": "Zadejte kód, který Vám poskytl Váš přítel, a získejte bezplatné úložiště pro Vás oba",
   "apply": "Použít",
   "failedToApplyCode": "Nepodařilo se použít kód",
+  "invalidReferralCode": "Neplatný kód",
   "enterReferralCode": "Zadejte kód doporučení",
   "codeAppliedPageTitle": "Kód byl použit",
-  "changeYourReferralCode": "Změňte svůj kód doporučení",
+  "changeYourReferralCode": "Změnit svůj kód",
   "change": "Změnit",
+  "saveCode": "Uložit kód",
+  "referralCodeHint": "Tento kód můžete upravit až 3 krát",
   "unavailableReferralCode": "Omlouváme se, tento kód je nedostupný.",
   "codeChangeLimitReached": "Omlouváme se, dosáhli jste limitu změn kódu.",
   "onlyFamilyAdminCanChangeCode": "Pro změnu kódu prosím kontaktujte {familyAdminEmail}.",
@@ -324,12 +328,16 @@
   "shareTextReferralCode": "Kód pro doporučení Ente: {referralCode} \n\nPoužijte jej v Nastavení → Obecné → Doporučení a získejte {referralStorageInGB} GB zdarma po registraci k placenému plánu.\n\nhttps://ente.io",
   "claimFreeStorage": "Získat úložiště zdarma",
   "inviteYourFriends": "Pozvěte své přátele",
+  "earnFreeStorage": "Získat úložiště zdarma",
+  "shareCodeEarnStorage": "Sdílejte svůj kód, získejte úložiště.",
+  "youBothGet": "Oba získáte",
+  "free": "zdarma",
   "failedToFetchReferralDetails": "Nelze načíst podrobnosti o doporučení. Zkuste to prosím znovu později.",
-  "referralStep1": "1. Dejte tento kód svým přátelům",
+  "referralStep1": "1. Přizpůsobte a sdílejte svůj kód se svými přáteli.",
   "referralStep2": "2. Zaregistrují se k placenému plánu",
   "referralStep3": "3. Oba získáte {storageInGB} GB* zdarma",
   "referralsAreCurrentlyPaused": "Doporučení jsou momentálně pozastavena",
-  "youCanAtMaxDoubleYourStorage": "* Můžete maximálně zdvojnásobit své úložiště",
+  "youCanAtMaxDoubleYourStorage": "Maximálně můžete zdvojnásobit své úložiště",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Vaše rodina dosud získala {storageAmountInGb} GB} false {Dosud jste získali {storageAmountInGb} GB} other {Dosud jste získali {storageAmountInGb} GB!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -350,9 +358,15 @@
   "eligible": "způsobilí",
   "total": "celkem",
   "codeUsedByYou": "Kód použitý Vámi",
-  "freeStorageClaimed": "Bezplatné úložiště získáno",
+  "freeStorageClaimed": "Získané bezplatné úložiště",
   "freeStorageUsable": "Použitelné bezplatné úložiště",
   "usableReferralStorageInfo": "Použitelné úložiště je omezeno Vaším aktuálním plánem Překročená úložná kapacita se automaticky stane použitelnou, jakmile si plán vylepšíte.",
+  "referralStats": "Statistiky doporučení",
+  "usedYourCode": "použil Váš kód",
+  "claimedByYou": "Vámi nárokovaný",
+  "earned": "získáno",
+  "usable": "použitelné",
+  "referralStorageInfo": "Doporučení od placených uživatelů získávají bonusové úložiště.\n\nÚložiště můžete použít až do limitu svého plánu. Navyšte svůj plán pro použití zbytku svého získaného úložiště.",
   "removeFromAlbumTitle": "Odstranit z alba?",
   "removeFromAlbum": "Odstranit z alba",
   "itemsWillBeRemovedFromAlbum": "Vybrané položky budou odstraněny z tohoto alba",
@@ -484,10 +498,29 @@
   "pendingItems": "Čekající položky",
   "clearIndexes": "Smazat indexy",
   "selectFoldersForBackup": "Vyberte složky pro zálohování",
+  "selectFolders": "Vybrat složky",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Vybrané složky budou šifrovány a zálohovány",
   "unselectAll": "Zrušit výběr",
   "selectAll": "Vybrat vše",
   "skip": "Přeskočit",
+  "chooseBackupModeHeader": "<i>Vyberte, jak </i>Ente zálohuje Vaše fotky",
+  "startWithLatestPhotos": "Začít s nejnovějšími fotografiemi",
+  "backingUpLastSevenDaysPhotos": "Zálohování fotografií za posledních 7 dní",
+  "backupOnlyNewPhotos": "Zálohovat pouze nové fotografie",
+  "backupOnlyNewPhotosAllFoldersSelected": "Všechny složky jsou momentálně vybrány pro zálohu.\n\nNyní můžete pokračovat, nebo aktualizovat vybrané složky.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Pro zálohování momentálně nejsou vybrány žádné složky.\n\nNyní můžete pokračovat, nebo aktualizovat vybrané složky.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Pro zálohování momentálně nejsou vybrány žádné složky.\n\nPro pokračování prosím vyberte složky.",
+  "backupOnlyNewPhotosWarningBody": "Momentálně zálohujete fotografie z {formattedDate}. Aktualizujte prosím své nastavení pro zálohování všech fotografií.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Aktualizovat nastavení",
   "updatingFolderSelection": "Aktualizuji výběr složek...",
   "itemCount": "{count, plural, one{{count} položka} few{{count} položky} other{{count} položek}}",
   "deleteItemCount": "{count, plural, =1 {Smazat {count} položku} few{Smazat {count} položky} other {Smazat {count} položek}}",
@@ -546,7 +579,7 @@
   "theDownloadCouldNotBeCompleted": "Stahování nebylo možné dokončit",
   "retry": "Opakovat",
   "backedUpFolders": "Zálohované složky",
-  "backup": "Zálohovat",
+  "backup": "Zálohování",
   "freeUpDeviceSpace": "Uvolnit místo na zařízení",
   "freeUpDeviceSpaceDesc": "Uvolněte místo ve svém zařízení vymazáním souborů, které již byly zálohovány.",
   "allClear": "✨ Vše v pořádku",
@@ -555,6 +588,11 @@
   "removeDuplicatesDesc": "Zkontrolujte a odstraňte soubory, které jsou přesnými duplikáty.",
   "viewLargeFiles": "Velké soubory",
   "viewLargeFilesDesc": "Zobrazit soubory, které zabírají nejvíce místa v úložišti.",
+  "deleteSuggestions": "Odstranit návrhy",
+  "deleteSuggestionsDesc": "Zkontrolovat soubory, které byly navrženy pro odstranění.",
+  "rejectSuggestions": "Odmítnout návrhy",
+  "noDeleteSuggestion": "Žádné návrhy na odstranění",
+  "youHaveNoFileSuggestedForDeletion": "Nemáte žádné soubory navržené k odstranění",
   "noDuplicates": "✨ Žádné duplikáty",
   "youveNoDuplicateFilesThatCanBeCleared": "Nemáte žádné duplicitní soubory, které by mohly být odstraněny",
   "success": "Úspěch",
@@ -621,6 +659,7 @@
   "reportBug": "Nahlásit chybu",
   "suggestFeatures": "Navrhnout funkce",
   "support": "Podpora",
+  "appearance": "Vzhled",
   "theme": "Motiv",
   "lightTheme": "Světlý",
   "darkTheme": "Tmavý",
@@ -1130,7 +1169,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} volných",
-  "appVersion": "Verze: {versionValue}",
+  "appVersion": "Verze {versionValue}",
   "verifyIDLabel": "Ověřit",
   "fileInfoAddDescHint": "Přidat popis...",
   "editLocationTagTitle": "Upravit polohu",
@@ -1513,6 +1552,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, one {} few {{count} správci byli úspěšně přidáni} many {{count} správci byli úspěšně přidáni}=0 {Žádní správci nebyli přidáni} =1 {1 správce byl úspěšně přidán} other {{count} správců bylo úspěšně přidáno}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, one {} few {Přidat správce} many {Přidat správce}=0 {Přidat správce} =1 {Přidat správce} other {Přidat správce}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Správci mohou spravovat fotografie a účastníky.",
+  "suggestDeletion": "Navrhnout odstranění",
+  "suggestDeletionDescription": "Vybrané fotografie budou z tohoto alba odebrány. Vlastníci fotografií také obdrží návrh na kontrolu a odstranění fotografií.",
+  "deleteSuggestionSent": "Návrh k odstranění odeslán",
   "accountIsAlreadyConfigured": "Účet je již nastaven.",
   "sessionIdMismatch": "Neshoda ID relace",
   "@sessionIdMismatch": {
@@ -1871,6 +1934,10 @@
   "thisMonth": "Tento měsíc",
   "thisYear": "Tento rok",
   "groupBy": "Seskupit podle",
+  "groupByDay": "Den",
+  "groupByWeek": "Týden",
+  "groupByMonth": "Měsíc",
+  "groupByYear": "Rok",
   "faceThumbnailGenerationFailed": "Nelze vygenerovat miniatury obličejů",
   "fileAnalysisFailed": "Nelze analyzovat soubor",
   "editAutoAddPeople": "Upravit automatické přidávání osob",
@@ -2032,6 +2099,10 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
+  "cLTitle1": "Komentáře a reakce",
+  "cLDesc1": "Představujeme komentáře a reakce na sdílené fotografie. Můžete reagovat nebo komentovat fotografii tím, že ji otevřete a použijete akce v dolní části. Všechny příchozí komentáře a reakce budou viditelné na záložce Sdílené.",
+  "cLTitle2": "Správce alb",
+  "cLDesc2": "Nyní můžete přiřadit jiného uživatele Ente jako správce Vašeho alba. Tímto budou moci přidat další diváky a spolupracovníky, odstranit fotografie z alba, a dokonce navrhovat účastníkům odstranit jejich fotografie.",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2196,7 +2267,7 @@
   "ritualEdit": "Upravit rituál",
   "ritualEnterPrompt": "Zadejte svůj rituál",
   "ritualEnterDescription": "Zadejte prosím popis",
-  "ritualChooseDaysLabel": "Zvolte dny rituálu",
+  "ritualChooseDaysLabel": "Vybrat dny pro rituál",
   "ritualDayLabel": "Den",
   "ritualNotificationsOffHint": "Upozornění jsou vypnuta. Klepnutím na den je zapněte.",
   "ritualTimeLabel": "Čas",
@@ -2205,7 +2276,7 @@
   "ritualCreateAction": "Vytvořit rituál",
   "ritualUpdate": "Aktualizovat rituál",
   "ritualSelectAlbumTitle": "Vybrat album",
-  "ritualChooseAlbumLabel": "Vyberte album",
+  "ritualChooseAlbumLabel": "Vybrat album",
   "ritualSendReminderLabel": "Poslat upomínku",
   "ritualSearchOrCreate": "Vyhledat nebo vytvořit nový",
   "ritualNoAlbumsYet": "Zatím žádná alba",
@@ -2225,5 +2296,137 @@
   "ritualCustomKeyboardLabel": "Vlastní (klávesnice)",
   "ritualEmojiKeyboardHint": "Stisknutím otevřete emoji klávesnici",
   "ritualEmojiUseAction": "Použít",
-  "ritualSearchEmpty": "Vytvořte rituál, abyste udrželi svůj návyk s fotografiemi v chodu."
+  "ritualSearchEmpty": "Vytvořte rituál, abyste udrželi svůj návyk s fotografiemi v chodu.",
+  "feed": "Kanál",
+  "likedYourPhoto": "Líbí se fotografie",
+  "commentedOnYourPhoto": "Okomentoval(a) fotografii",
+  "repliedToYourComment": "Odpověděl(a) na komentář",
+  "likedYourComment": "Líbí se komentář",
+  "likedYourReply": "Líbí se odpověď",
+  "and1Other": "a 1 další",
+  "andXOthers": "a {count} další",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Zatím žádná aktivita",
+  "like": "Líbí se",
+  "comments": "Komentáře",
+  "commentHint": "Řekněte něco hezkého!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Odpověď",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Opravdu?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Odstranit komentář",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "Váš komentář \"{comment}\" bude trvale odstraněn",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, one {} few {{count} se líbí} many {{count} se líbí}=1{1 se líbí} other{{count} se líbí}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Zatím žádné líbí se",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Nelze načíst líbí se",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Nepodařilo se aktualizovat líbí se",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, one {} few {Nepodařilo se líbit {count} alba} many {Nepodařilo se líbit {count} alba}=1{Nepodařilo se líbit 1 album} other{Nepodařilo se líbit {count} alb}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "Nepodařilo se načíst alba",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, one {} few {{count} alba} many {{count} alba}=1{1 album} other{{count} alb}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Dát líbí se všem",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Vyberte album pro označení videa jako líbí se",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Vyberte album pro označení fotografie jako líbí se",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "Nepodařilo se dát líbí se komentáři",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Komentář se nepodařilo smazat",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(odstraněno)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Odpovídá Vám",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Odpovídáte {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, one {} few {{count} komentáře} many {{count} komentáře}=0{Žádné komentáře} =1{1 komentář} other{{count} komentářů}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

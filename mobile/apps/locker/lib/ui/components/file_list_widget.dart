@@ -8,7 +8,6 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/sharing/album_share_info_widget.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
@@ -162,14 +161,8 @@ class FileListWidget extends StatelessWidget {
                               color: colorScheme.primary700,
                               size: 24,
                             )
-                          : showSharingIndicator
-                              ? (isIncoming
-                                  ? _buildOwnerAvatar(collection.owner)
-                                  : (hasSharees
-                                      ? _buildShareesAvatars(sharees)
-                                      : const SizedBox(
-                                          key: ValueKey("unselected"),
-                                        )))
+                          : isIncoming
+                              ? _buildOwnerAvatar(collection.owner)
                               : const SizedBox(
                                   key: ValueKey("unselected"),
                                 ),
@@ -210,33 +203,6 @@ class FileListWidget extends StatelessWidget {
         type: AvatarType.mini,
         thumbnailView: true,
         config: Configuration.instance,
-      ),
-    );
-  }
-
-  Widget _buildShareesAvatars(List<User> sharees) {
-    if (sharees.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    const int limitCountTo = 1;
-    const double avatarSize = 24.0;
-    const double overlapPadding = 20.0;
-
-    final hasMore = sharees.length > limitCountTo;
-
-    final double totalWidth =
-        hasMore ? avatarSize + overlapPadding : avatarSize;
-
-    return SizedBox(
-      height: avatarSize,
-      width: totalWidth,
-      child: AlbumSharesIcons(
-        sharees: sharees,
-        padding: EdgeInsets.zero,
-        limitCountTo: limitCountTo,
-        type: AvatarType.mini,
-        removeBorder: true,
       ),
     );
   }

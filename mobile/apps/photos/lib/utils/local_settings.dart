@@ -21,6 +21,12 @@ enum AlbumViewType {
   list,
 }
 
+enum PeopleSortKey {
+  mostPhotos,
+  name,
+  lastUpdated,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kGalleryGroupType = "gallery_group_type";
@@ -43,6 +49,12 @@ class LocalSettings {
       "hide_shared_items_from_home_gallery";
   static const kCollectionViewType = "collection_view_type";
   static const kCollectionSortDirection = "collection_sort_direction";
+  static const kPeopleSortKey = "people_sort_key";
+  static const kPeopleSortNameAscending = "people_sort_name_ascending";
+  static const kPeopleSortUpdatedAscending = "people_sort_updated_ascending";
+  static const kPeopleSortPhotosAscending = "people_sort_photos_ascending";
+  static const kPeopleSortSimilaritySelected =
+      "people_sort_similarity_selected";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
@@ -79,6 +91,46 @@ class LocalSettings {
 
   Future<bool> setAlbumSortDirection(AlbumSortDirection direction) {
     return _prefs.setInt(kCollectionSortDirection, direction.index);
+  }
+
+  PeopleSortKey peopleSortKey() {
+    final index = _prefs.getInt(kPeopleSortKey);
+    if (index == null || index < 0 || index >= PeopleSortKey.values.length) {
+      return PeopleSortKey.mostPhotos;
+    }
+    return PeopleSortKey.values[index];
+  }
+
+  Future<bool> setPeopleSortKey(PeopleSortKey key) {
+    return _prefs.setInt(kPeopleSortKey, key.index);
+  }
+
+  bool get peopleNameSortAscending =>
+      _prefs.getBool(kPeopleSortNameAscending) ?? true;
+
+  Future<void> setPeopleNameSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortNameAscending, value);
+  }
+
+  bool get peopleUpdatedSortAscending =>
+      _prefs.getBool(kPeopleSortUpdatedAscending) ?? false;
+
+  Future<void> setPeopleUpdatedSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortUpdatedAscending, value);
+  }
+
+  bool get peoplePhotosSortAscending =>
+      _prefs.getBool(kPeopleSortPhotosAscending) ?? false;
+
+  Future<void> setPeoplePhotosSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortPhotosAscending, value);
+  }
+
+  bool get peopleSimilaritySortSelected =>
+      _prefs.getBool(kPeopleSortSimilaritySelected) ?? true;
+
+  Future<void> setPeopleSimilaritySortSelected(bool value) async {
+    await _prefs.setBool(kPeopleSortSimilaritySelected, value);
   }
 
   GroupType getGalleryGroupType() {

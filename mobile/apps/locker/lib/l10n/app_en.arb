@@ -198,6 +198,7 @@
   "create": "Create",
   "renameCollection": "Rename collection",
   "save": "Save",
+  "download": "Download",
   "deleteFile": "Delete item",
   "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
   "@deleteFileConfirmation": {
@@ -348,16 +349,19 @@
   "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
   "authToViewPasskey": "Please authenticate to view passkey",
   "theme": "Theme",
+  "appearance": "Appearance",
   "lightTheme": "Light",
   "darkTheme": "Dark",
   "systemTheme": "System",
   "settings": "Settings",
   "about": "About",
+  "aboutUs": "About us",
   "weAreOpenSource": "We are open source!",
   "privacy": "Privacy",
   "terms": "Terms",
   "termsOfServicesTitle": "Terms",
   "support": "Support",
+  "helpAndSupport": "Help and Support",
   "contactSupport": "Contact support",
   "help": "Help",
   "suggestFeatures": "Suggest features",
@@ -907,8 +911,8 @@
   "sessionExpired": "Session expired",
   "pleaseLoginAgain": "Please login again",
   "filters": "Filters",
-  "seeAllCollections": "See all collections",
-  "clearAllFilters": "Clear all filters",
+  "seeAllCollections": "All collections",
+  "clearAllFilters": "Clear all",
   "selectLanguage": "Select language",
   "general": "General",
   "language": "Language",
@@ -1012,5 +1016,12 @@
       }
     }
   },
-  "failedToDeleteFiles": "Failed to delete items"
+  "failedToDeleteFiles": "Failed to delete items",
+  "itemsStored": "Items stored",
+  "of_": "of",
+  "usageYou": "You",
+  "usageFamily": "Family",
+  "searchSettings": "Search settings",
+  "suggestions": "Suggestions",
+  "noResultsFound": "No results found"
 }

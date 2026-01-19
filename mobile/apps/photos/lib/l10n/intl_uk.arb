@@ -295,7 +295,6 @@
   "failedToApplyCode": "Не вдалося застосувати код",
   "enterReferralCode": "Введіть реферальний код",
   "codeAppliedPageTitle": "Код застосовано",
-  "changeYourReferralCode": "Змінити ваш реферальний код",
   "change": "Змінити",
   "unavailableReferralCode": "На жаль, цей код недоступний.",
   "codeChangeLimitReached": "На жаль, ви досягли ліміту змін коду.",
@@ -313,11 +312,9 @@
   "claimFreeStorage": "Отримайте безплатне сховище",
   "inviteYourFriends": "Запросити своїх друзів",
   "failedToFetchReferralDetails": "Не вдається отримати відомості про реферала. Спробуйте ще раз пізніше.",
-  "referralStep1": "1. Дайте цей код друзям",
   "referralStep2": "2. Вони оформлюють передплату",
   "referralStep3": "3. Ви обоє отримуєте {storageInGB} ГБ* безплатно",
   "referralsAreCurrentlyPaused": "Реферали зараз призупинені",
-  "youCanAtMaxDoubleYourStorage": "* Ви можете максимально подвоїти своє сховище",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сім'я отримала {storageAmountInGb} ГБ} false {Ви отримали {storageAmountInGb} ГБ} other {Ви отримали {storageAmountInGb} ГБ!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -792,6 +789,14 @@
   "share": "Поділитися",
   "unhideToAlbum": "Показати в альбомі",
   "restoreToAlbum": "Відновити в альбомі",
+  "moveItem": "{count, plural, =1 {Переміщення елемента} other {Переміщення елементів}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Додавання елемента} other {Додавання елементів}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Створити або вибрати альбом",
   "selectAlbum": "Обрати альбом",
   "searchByAlbumNameHint": "Назва альбому",
@@ -1075,7 +1080,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} вільно",
-  "appVersion": "Версія: {versionValue}",
+  "appVersion": "Версія {versionValue}",
   "verifyIDLabel": "Підтвердження",
   "fileInfoAddDescHint": "Додати опис...",
   "editLocationTagTitle": "Змінити розташування",
@@ -1354,6 +1359,14 @@
   "loadingYourPhotos": "Завантажуємо фотографії...",
   "processingImport": "Оброблюємо «{folderName}»...",
   "personName": "Ім'я особи",
+  "addPerson": "Додати особу",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "addToPerson": "Додати до особи",
+  "@addToPerson": {
+    "description": "Action label to add selected files to an existing person."
+  },
   "addNewPerson": "Додати нову особу",
   "addNameOrMerge": "Додати назву або об'єднати",
   "mergeWithExisting": "Об'єднати з наявним",
@@ -1616,6 +1629,7 @@
   "happyBirthday": "З днем народження! 🥳",
   "birthdays": "Дні народження",
   "otherDetectedFaces": "Інші виявлені обличчя",
+  "areThey": "Вони ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Зберегти як іншу особу",
   "showLessFaces": "Показати менше облич",
@@ -1637,8 +1651,13 @@
   "faceThumbnailGenerationFailed": "Не вдалося створити мініатюри облич",
   "autoAddPeople": "Автододавання людей",
   "autoAddToAlbum": "Автододавання до альбому",
+  "addingPhotos": "Додавання фото",
+  "addSomePhotosDesc2": "знайомі обличчя",
+  "ignorePerson": "Ігнорувати особу",
   "layout": "Макет",
   "day": "День",
+  "font": "Шрифт",
+  "background": "Тло",
   "createStream": "Створити потік",
   "addedToQueue": "Додано до черги",
   "creatingStream": "Створення потоку",
@@ -1670,11 +1689,13 @@
   "all": "Усі",
   "similar": "Схожі",
   "identical": "Ідентичні",
+  "hoorayyyy": "Ураааа!",
   "deletingDash": "Видалення - ",
   "closeBy": "Закрити",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   },
+  "stargazing": "Під зорями",
   "facesTimelinePlaybackPlay": "Відтворити",
   "@facesTimelinePlaybackPlay": {
     "description": "Tooltip or semantics label for the play button"
@@ -1730,5 +1751,35 @@
   },
   "ritualCreateNew": "Створити новий",
   "ritualAlbumSelectionPlaceholder": "Вибрати альбом",
-  "ritualEmojiUseAction": "Використати"
+  "ritualEmojiUseAction": "Використати",
+  "couldNotLoadAlbums": "Не вдалося завантажити альбоми",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 альбом} one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToDeleteComment": "Не вдалося видалити коментар",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(видалено)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "commentsCount": "{count, plural, =0{Немає коментарів} =1{1 коментар} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

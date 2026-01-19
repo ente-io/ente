@@ -223,6 +223,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
+  String get download => 'Download';
+
+  @override
   String get deleteFile => 'Delete item';
 
   @override
@@ -506,6 +509,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'Theme';
 
   @override
+  String get appearance => 'Appearance';
+
+  @override
   String get lightTheme => 'Light';
 
   @override
@@ -521,6 +527,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
+  String get aboutUs => 'About us';
+
+  @override
   String get weAreOpenSource => 'We are open source!';
 
   @override
@@ -534,6 +543,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get support => 'Support';
+
+  @override
+  String get helpAndSupport => 'Help and Support';
 
   @override
   String get contactSupport => 'Contact support';
@@ -1568,10 +1580,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filters => 'Filters';
 
   @override
-  String get seeAllCollections => 'See all collections';
+  String get seeAllCollections => 'All collections';
 
   @override
-  String get clearAllFilters => 'Clear all filters';
+  String get clearAllFilters => 'Clear all';
 
   @override
   String get selectLanguage => 'Select language';
@@ -1731,4 +1743,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToDeleteFiles => 'Failed to delete items';
+
+  @override
+  String get itemsStored => 'Items stored';
+
+  @override
+  String get of_ => 'of';
+
+  @override
+  String get usageYou => 'You';
+
+  @override
+  String get usageFamily => 'Family';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get noResultsFound => 'No results found';
 }

@@ -307,7 +307,6 @@
   "failedToApplyCode": "无法使用此代码",
   "enterReferralCode": "输入推荐代码",
   "codeAppliedPageTitle": "代码已应用",
-  "changeYourReferralCode": "更改您的推荐代码",
   "change": "更改",
   "unavailableReferralCode": "抱歉，此代码不可用。",
   "codeChangeLimitReached": "抱歉，您已达到代码更改的限制。",
@@ -325,11 +324,9 @@
   "claimFreeStorage": "领取免费存储",
   "inviteYourFriends": "邀请您的朋友",
   "failedToFetchReferralDetails": "无法获取引荐详细信息。 请稍后再试。",
-  "referralStep1": "1. 将此代码提供给您的朋友",
   "referralStep2": "2. 他们注册一个付费计划",
   "referralStep3": "3. 你和朋友都将免费获得 {storageInGB} GB*",
   "referralsAreCurrentlyPaused": "推荐已暂停",
-  "youCanAtMaxDoubleYourStorage": "* 您最多可以将您的存储空间增加一倍",
   "claimedStorageSoFar": "{isFamilyMember, select, true {到目前为止，您的家庭已经领取了 {storageAmountInGb} GB} false {到目前为止，您已经领取了 {storageAmountInGb} GB} other {到目前为止，您已经领取了{storageAmountInGb} GB}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1130,7 +1127,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} 空闲",
-  "appVersion": "版本: {versionValue}",
   "verifyIDLabel": "验证",
   "fileInfoAddDescHint": "添加说明...",
   "editLocationTagTitle": "编辑位置",

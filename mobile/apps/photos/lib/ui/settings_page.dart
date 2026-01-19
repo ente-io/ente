@@ -280,6 +280,7 @@ class _SettingsBody extends StatelessWidget {
       children: [
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).legacy,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedFavourite,
             colorScheme,
@@ -307,6 +308,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).memories,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedSparkles,
             colorScheme,
@@ -319,6 +321,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).notifications,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedNotification01,
             colorScheme,
@@ -331,6 +334,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).widgets,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedAlignBoxBottomRight,
             colorScheme,
@@ -353,6 +357,7 @@ class _SettingsBody extends StatelessWidget {
       children: [
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).machineLearning,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedMagicWand01,
             colorScheme,
@@ -365,6 +370,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).videoStreaming,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedVideoCameraAi,
             colorScheme,
@@ -377,6 +383,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).freeUpSpace,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedRocket01,
             colorScheme,
@@ -390,6 +397,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).referrals,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedTicketStar,
             colorScheme,
@@ -402,6 +410,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).familyPlans,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedUserMultiple,
             colorScheme,
@@ -417,6 +426,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).maps,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedMaping,
             colorScheme,
@@ -452,6 +462,7 @@ class _SettingsBody extends StatelessWidget {
       children: [
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).merchandise,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedTShirt,
             colorScheme,
@@ -467,6 +478,7 @@ class _SettingsBody extends StatelessWidget {
         ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).rateUs,
+          borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
             HugeIcons.strokeRoundedStar,
             colorScheme,
