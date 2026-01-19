@@ -19,11 +19,12 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/expandable_menu_item_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
@@ -255,54 +256,42 @@ class _MachineLearningSettingsPageState
     }
     return Column(
       children: [
-        ExpandableMenuItemWidget(
-          title: AppLocalizations.of(context).configuration,
-          selectionOptionsWidget: Column(
-            children: [
-              sectionOptionSpacing,
-              MenuItemWidget(
-                captionedTextWidget: CaptionedTextWidget(
-                  title: AppLocalizations.of(context).enabled,
-                ),
-                trailingWidget: ToggleSwitchWidget(
-                  value: () => hasEnabled,
-                  onChanged: () async {
-                    await toggleMlConsent();
-                  },
-                ),
-                singleBorderRadius: 8,
-                isGestureDetectorDisabled: true,
+        MenuSectionTitle(title: AppLocalizations.of(context).configuration),
+        const SizedBox(height: 8),
+        SettingsGroupedCard(
+          children: [
+            MenuItemWidgetNew(
+              title: AppLocalizations.of(context).enabled,
+              trailingWidget: ToggleSwitchWidget(
+                value: () => hasEnabled,
+                onChanged: () async {
+                  await toggleMlConsent();
+                },
               ),
-              sectionOptionSpacing,
-              MenuItemWidget(
-                captionedTextWidget: CaptionedTextWidget(
-                  title: AppLocalizations.of(context).localIndexing,
-                ),
-                trailingWidget: ToggleSwitchWidget(
-                  value: () => localSettings.isMLLocalIndexingEnabled,
-                  onChanged: () async {
-                    final localIndexing =
-                        await localSettings.toggleLocalMLIndexing();
-                    if (localIndexing) {
-                      unawaited(MLService.instance.runAllML(force: true));
-                    } else {
-                      MLService.instance.pauseIndexingAndClustering();
-                      unawaited(
-                        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
-                      );
-                    }
+            ),
+            MenuItemWidgetNew(
+              title: AppLocalizations.of(context).localIndexing,
+              trailingWidget: ToggleSwitchWidget(
+                value: () => localSettings.isMLLocalIndexingEnabled,
+                onChanged: () async {
+                  final localIndexing =
+                      await localSettings.toggleLocalMLIndexing();
+                  if (localIndexing) {
+                    unawaited(MLService.instance.runAllML(force: true));
+                  } else {
+                    MLService.instance.pauseIndexingAndClustering();
+                    unawaited(
+                      MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+                    );
+                  }
 
-                    if (mounted) {
-                      setState(() {});
-                    }
-                  },
-                ),
-                singleBorderRadius: 8,
-                isGestureDetectorDisabled: true,
+                  if (mounted) {
+                    setState(() {});
+                  }
+                },
               ),
-            ],
-          ),
-          leadingIcon: Icons.settings_outlined,
+            ),
+          ],
         ),
         const SizedBox(
           height: 12,
