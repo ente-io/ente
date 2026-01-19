@@ -378,7 +378,9 @@ const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
                             maxWidth: "240px",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
                         }}
                     >
                         {collectionSummary.name}

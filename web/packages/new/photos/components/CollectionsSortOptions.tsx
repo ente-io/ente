@@ -183,8 +183,8 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
             onClick={() => onClick(category)}
             sx={{
                 minWidth: 220,
-                minHeight: 64,
-                py: 2.5,
+                minHeight: 56,
+                py: 2,
                 px: 2.5,
                 display: "flex",
                 alignItems: "center",

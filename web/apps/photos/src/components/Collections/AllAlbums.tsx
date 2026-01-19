@@ -594,7 +594,9 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
                             maxWidth: "130px",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
                         }}
                     >
                         {collectionSummary.name}
