@@ -46,7 +46,8 @@ class _TrailingWidgetState extends State<TrailingWidget> {
     if (oldWidget.showExecutionStates && !widget.showExecutionStates) {
       // Was true, now false: remove listener and reset to icon
       if (_listenerAdded) {
-        oldWidget.executionStateNotifier.removeListener(_executionStateListener);
+        oldWidget.executionStateNotifier
+            .removeListener(_executionStateListener);
         _listenerAdded = false;
       }
       _setTrailingIcon();

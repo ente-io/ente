@@ -162,7 +162,8 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
         Text(
           _errorMessage ?? AppLocalizations.of(context).enterCodeDescription,
           style: textTheme.mini.copyWith(
-            color: _errorMessage != null ? warningRedColor : colorScheme.textMuted,
+            color:
+                _errorMessage != null ? warningRedColor : colorScheme.textMuted,
           ),
         ),
         const SizedBox(height: 20),

@@ -8,8 +8,6 @@ import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import "package:photos/db/files_db.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -136,6 +134,17 @@ Future<ShareResult> shareText(
   }
 }
 
+/// Shares URL first with description below
+Future<ShareResult> shareLinkWithDescription(
+  String url, {
+  String? description,
+  BuildContext? context,
+  GlobalKey? key,
+}) async {
+  final text = description != null ? '$url\n$description' : url;
+  return shareText(text, context: context, key: key);
+}
+
 Future<List<EnteFile>> convertIncomingSharedMediaToFile(
   List<SharedMediaFile> sharedMedia,
   int collectionID,
@@ -252,40 +261,21 @@ void shareSelected(
   );
 }
 
-Future<void> shareAlbumLinkWithPlaceholder(
+Future<void> shareAlbumLink(
   BuildContext context,
   Collection collection,
   String url,
   GlobalKey key,
 ) async {
-  final List<EnteFile> filesInCollection =
-      (await FilesDB.instance.getFilesInCollection(
-    collection.id,
-    galleryLoadStartTime,
-    galleryLoadEndTime,
-  ))
-          .files;
+  final description =
+      'Check out, comment and react on photos from ${collection.displayName} privately with Ente\'s end to end encryption';
 
-  final dialog = createProgressDialog(
-    context,
-    AppLocalizations.of(context).creatingLink,
-    isDismissible: true,
+  await shareLinkWithDescription(
+    url,
+    description: description,
+    context: context,
+    key: key,
   );
-  await dialog.show();
-
-  if (filesInCollection.isEmpty) {
-    await dialog.hide();
-    await shareText(url);
-    return;
-  } else {
-    await dialog.hide();
-
-    await shareText(
-      url,
-      context: context,
-      key: key,
-    );
-  }
 }
 
 /// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383

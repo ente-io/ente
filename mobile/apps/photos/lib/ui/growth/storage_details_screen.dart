@@ -121,8 +121,8 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                             Expanded(
                               child: _StatCard(
                                 value: data.refCount.toString(),
-                                label: AppLocalizations.of(context)
-                                    .usedYourCode,
+                                label:
+                                    AppLocalizations.of(context).usedYourCode,
                                 cardColor: cardColor,
                               ),
                             ),
@@ -130,8 +130,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                             Expanded(
                               child: _StatCard(
                                 value: data.refUpgradeCount.toString(),
-                                label:
-                                    AppLocalizations.of(context).eligible,
+                                label: AppLocalizations.of(context).eligible,
                                 cardColor: cardColor,
                               ),
                             ),
@@ -145,8 +144,8 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                               Expanded(
                                 child: _StatCard(
                                   value: "1",
-                                  label: AppLocalizations.of(context)
-                                      .claimedByYou,
+                                  label:
+                                      AppLocalizations.of(context).claimedByYou,
                                   cardColor: cardColor,
                                 ),
                               ),
