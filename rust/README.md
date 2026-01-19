@@ -40,7 +40,7 @@
 
 ## Contents (this repo)
 
-- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto primitives, plus small HTTP/URL helpers).
+- `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/cli/` - Rust CLI (work-in-progress).
 
 ## Directory Structure
@@ -53,10 +53,14 @@ rust/
 │   ├── Cargo.toml
 │   └── Cargo.lock
 │
-└── core/                   # Pure Rust business logic
+└── core/                   # Pure Rust shared logic
     ├── src/
     │   ├── lib.rs
-    │   └── urls.rs
+    │   ├── crypto/
+    │   └── auth/
+    ├── docs/
+    │   ├── crypto.md
+    │   └── auth.md
     └── Cargo.toml          # crate name: ente-core
 
 web/packages/wasm/          # WASM bindings (lives in web workspace)
@@ -85,6 +89,7 @@ mobile/apps/photos/rust/    # Photos app-specific FRB bindings
 **Crates:**
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
+  - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
 - `ente_photos_rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)
@@ -98,8 +103,6 @@ A Rust library that provides the `#[wasm_bindgen]` attribute macro. When you ann
 1. Marks the function for export to JavaScript
 2. Handles type conversions between Rust and JS (e.g., `String` ↔ JS string, `i64` ↔ `BigInt`)
 3. Generates metadata that the wasm-bindgen CLI uses to create JS/TS glue code
-
-The library itself is lightweight - just macros and runtime types.
 
 ### [wasm-pack](https://github.com/drager/wasm-pack)
 
