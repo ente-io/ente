@@ -173,8 +173,11 @@ export type CollectionSummaries = Map<number, CollectionSummary>;
  * the type.
  */
 export const collectionsSortBy = [
-    "name",
+    "name-asc",
+    "name-desc",
     "creation-time-asc",
+    "creation-time-desc",
+    "updation-time-asc",
     "updation-time-desc",
 ] as const;
 
@@ -223,3 +226,34 @@ export const canAddToCollection = ({ attributes }: CollectionSummary) =>
 
 export const canMoveToCollection = ({ attributes }: CollectionSummary) =>
     !attributes.has("system") && !attributes.has("sharedIncoming");
+
+/**
+ * Sort an array of collection summaries by the specified sort order.
+ *
+ * @param collectionSummaries The array of collection summaries to sort
+ * @param by The sort order to apply
+ * @returns A new sorted array of collection summaries
+ */
+export const sortCollectionSummaries = (
+    collectionSummaries: CollectionSummary[],
+    by: CollectionsSortBy,
+): CollectionSummary[] => {
+    return [...collectionSummaries].sort((a, b) => {
+        switch (by) {
+            case "name-asc":
+                return a.name.localeCompare(b.name);
+            case "name-desc":
+                return b.name.localeCompare(a.name);
+            case "creation-time-asc":
+                // Oldest first: lower ID = created earlier.
+                return a.id - b.id;
+            case "creation-time-desc":
+                // Newest first: higher ID = created later.
+                return b.id - a.id;
+            case "updation-time-asc":
+                return (a.updationTime ?? 0) - (b.updationTime ?? 0);
+            case "updation-time-desc":
+                return (b.updationTime ?? 0) - (a.updationTime ?? 0);
+        }
+    });
+};
