@@ -103,6 +103,8 @@ class LocalFileAttributesService {
         hash: mediaUploadData.hashData?.fileHash,
         latitude: location?.latitude,
         longitude: location?.longitude,
+        creationTime: file.creationTime,
+        modificationTime: file.modificationTime,
         cameraMake: mediaUploadData.cameraMake,
         cameraModel: mediaUploadData.cameraModel,
         motionPhotoStartIndex: mediaUploadData.motionPhotoStartIndex,

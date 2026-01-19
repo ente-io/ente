@@ -7,6 +7,8 @@ class LocalFileAttributes {
   final String? hash;
   final double? latitude;
   final double? longitude;
+  final int? creationTime;
+  final int? modificationTime;
   final String? cameraMake;
   final String? cameraModel;
   final int? motionPhotoStartIndex;
@@ -22,6 +24,8 @@ class LocalFileAttributes {
     this.hash,
     this.latitude,
     this.longitude,
+    this.creationTime,
+    this.modificationTime,
     this.cameraMake,
     this.cameraModel,
     this.motionPhotoStartIndex,
@@ -41,6 +45,8 @@ class LocalFileAttributes {
       'hash': hash,
       'latitude': latitude,
       'longitude': longitude,
+      'creationTime': creationTime,
+      'modificationTime': modificationTime,
       'cameraMake': cameraMake,
       'cameraModel': cameraModel,
       'motionPhotoStartIndex': motionPhotoStartIndex,
@@ -73,6 +79,8 @@ class LocalFileAttributes {
       hash: json['hash'],
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      creationTime: json['creationTime'],
+      modificationTime: json['modificationTime'],
       cameraMake: json['cameraMake'],
       cameraModel: json['cameraModel'],
       motionPhotoStartIndex: json['motionPhotoStartIndex'],
