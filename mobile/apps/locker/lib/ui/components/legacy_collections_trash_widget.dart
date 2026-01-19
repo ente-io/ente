@@ -44,7 +44,7 @@ class _CollectionsItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => _openCollections(context),
       child: Container(
-        height: 56,
+        height: 60,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
@@ -96,7 +96,7 @@ class _TrashItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => _openTrash(context),
       child: Container(
-        height: 56,
+        height: 60,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
@@ -150,7 +150,7 @@ class _LegacyItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => openLegacyPage(context),
       child: Container(
-        height: 56,
+        height: 60,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
