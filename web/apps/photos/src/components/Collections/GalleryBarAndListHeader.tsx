@@ -21,11 +21,11 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
-import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
     collectionsSortBy,
     haveOnlySystemCollections,
     PseudoCollectionID,
+    sortCollectionSummaries,
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
@@ -142,7 +142,7 @@ export const GalleryBarAndListHeader: React.FC<
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
                 collectionsSortBy,
-            ),
+            ).sort((a, b) => b.sortPriority - a.sortPriority),
         [collectionsSortBy, toShowCollectionSummaries],
     );
 
@@ -307,28 +307,3 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
 
     return [value, setter] as const;
 };
-
-const sortCollectionSummaries = (
-    collectionSummaries: CollectionSummary[],
-    by: CollectionsSortBy,
-) =>
-    collectionSummaries
-        .sort((a, b) => {
-            switch (by) {
-                case "name-asc":
-                    return a.name.localeCompare(b.name);
-                case "name-desc":
-                    return b.name.localeCompare(a.name);
-                case "creation-time-asc":
-                    // Oldest first: lower ID = created earlier
-                    return a.id - b.id;
-                case "creation-time-desc":
-                    // Newest first: higher ID = created later
-                    return b.id - a.id;
-                case "updation-time-asc":
-                    return (a.updationTime ?? 0) - (b.updationTime ?? 0);
-                case "updation-time-desc":
-                    return (b.updationTime ?? 0) - (a.updationTime ?? 0);
-            }
-        })
-        .sort((a, b) => b.sortPriority - a.sortPriority);

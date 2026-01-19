@@ -15,9 +15,7 @@ import {
 } from "@mui/material";
 import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
-import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
-import type { EnteFile } from "ente-media/file";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
@@ -29,6 +27,7 @@ import {
     canAddToCollection,
     canMoveToCollection,
     collectionsSortBy,
+    sortCollectionSummaries,
     type CollectionsSortBy,
     type CollectionSummaries,
     type CollectionSummary,
@@ -151,8 +150,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         const activeCollectionID = attributes.activeCollectionID;
-        const collections = [...collectionSummaries.values()]
-            .filter((cs) => {
+        const filteredCollections = [...collectionSummaries.values()].filter(
+            (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
@@ -175,31 +174,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         canMoveToCollection(cs) && cs.type != "userFavorites"
                     );
                 }
-            })
-            .sort((a, b) => {
-                switch (sortBy) {
-                    case "name-asc":
-                        return a.name.localeCompare(b.name);
-                    case "name-desc":
-                        return b.name.localeCompare(a.name);
-                    case "creation-time-asc":
-                        return compareCollectionsLatestFile(
-                            a.latestFile,
-                            b.latestFile,
-                            true,
-                        );
-                    case "creation-time-desc":
-                        return compareCollectionsLatestFile(
-                            a.latestFile,
-                            b.latestFile,
-                            false,
-                        );
-                    case "updation-time-asc":
-                        return (a.updationTime ?? 0) - (b.updationTime ?? 0);
-                    case "updation-time-desc":
-                        return (b.updationTime ?? 0) - (a.updationTime ?? 0);
-                }
-            })
+            },
+        );
+
+        const collections = sortCollectionSummaries(filteredCollections, sortBy)
             .sort((a, b) => b.sortPriority - a.sortPriority)
             .sort((a, b) => {
                 // Prioritize the active collection (if any) to appear first.
@@ -493,23 +471,4 @@ const useCollectionSelectorSortByLocalState = (
     };
 
     return [value, setter] as const;
-};
-
-const compareCollectionsLatestFile = (
-    first: EnteFile | undefined,
-    second: EnteFile | undefined,
-    sortAsc: boolean,
-) => {
-    if (!first) {
-        return 1;
-    } else if (!second) {
-        return -1;
-    } else {
-        const sortedFiles = sortFiles([first, second], sortAsc);
-        if (sortedFiles[0]?.id !== first.id) {
-            return 1;
-        } else {
-            return -1;
-        }
-    }
 };
