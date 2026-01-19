@@ -106,6 +106,8 @@
     "exit_fullscreen": "Έξοδος από πλήρη οθόνη",
     "go_fullscreen": "Πλήρης οθόνη",
     "zoom": "Ζουμ",
+    "zoom_in": "",
+    "zoom_out": "",
     "play": "Αναπαραγωγή",
     "pause": "Παύση",
     "previous": "Προηγούμενο",
@@ -127,7 +129,7 @@
     "delete_files_title": "Διαγραφή άμεσα;",
     "delete_files_message": "Τα επιλεγμένα αρχεία θα διαγραφούν οριστικά από τον Ente λογαριασμό σας.",
     "selected_count": "{{selected, number}} επιλέχθηκαν",
-    "selected_and_yours_count": "{selected, number} επιλέχθηκαν, {yours, number} δικά σας",
+    "selected_and_yours_count": "",
     "delete": "Διαγραφή",
     "like": "",
     "unlike": "",
@@ -799,5 +801,10 @@
     "continuous": "Συνεχόμενο",
     "trip": "Ταξίδι",
     "album_layout": "Διάταξη άλμπουμ",
-    "maps_privacy_notice": "Οι κατά προσέγγιση συντεταγμένες θα σταλούν σε τρίτους φορείς που σέβονται το απόρρητο, όπως το OpenStreetMap, για να δείξουν τον χάρτη και την τοποθεσία."
+    "maps_privacy_notice": "Οι κατά προσέγγιση συντεταγμένες θα σταλούν σε τρίτους φορείς που σέβονται το απόρρητο, όπως το OpenStreetMap, για να δείξουν τον χάρτη και την τοποθεσία.",
+    "edit_location": "",
+    "add_location": "",
+    "add_location_button": "",
+    "save_location": "",
+    "search_location": ""
 }

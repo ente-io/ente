@@ -14,6 +14,7 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -82,6 +83,7 @@ class _PeopleSectionState extends State<PeopleSection> {
     debugPrint("Building section for ${widget.sectionType.name}");
     final shouldShowMore = _examples.length >= widget.limit - 1;
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -106,16 +108,33 @@ class _PeopleSectionState extends State<PeopleSection> {
                         style: textTheme.largeBold,
                       ),
                     ),
-                    shouldShowMore
-                        ? Padding(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (shouldShowMore)
+                          IconButtonWidget(
+                            icon: Icons.search,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                            onTap: () {
+                              routeToPage(
+                                context,
+                                const PeopleSectionAllPage(
+                                  startInSearchMode: true,
+                                ),
+                              );
+                            },
+                          ),
+                        if (shouldShowMore)
+                          Padding(
                             padding: const EdgeInsets.all(12),
                             child: Icon(
                               Icons.chevron_right_outlined,
-                              color:
-                                  getEnteColorScheme(context).blurStrokePressed,
+                              color: colorScheme.blurStrokePressed,
                             ),
-                          )
-                        : const SizedBox.shrink(),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 2),
