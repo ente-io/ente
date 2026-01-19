@@ -18,17 +18,13 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/settings/common_settings.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/ui/settings/ml/ml_user_dev_screen.dart";
 import "package:photos/utils/ml_util.dart";
@@ -83,7 +79,12 @@ class _MachineLearningSettingsPageState
   @override
   Widget build(BuildContext context) {
     final hasEnabled = flagService.hasGrantedMLConsent;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final pageBackgroundColor =
+        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+
     return Scaffold(
+      backgroundColor: pageBackgroundColor,
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
@@ -256,42 +257,36 @@ class _MachineLearningSettingsPageState
     }
     return Column(
       children: [
-        MenuSectionTitle(title: AppLocalizations.of(context).configuration),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).enabled,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => hasEnabled,
+            onChanged: () async {
+              await toggleMlConsent();
+            },
+          ),
+        ),
         const SizedBox(height: 8),
-        SettingsGroupedCard(
-          children: [
-            MenuItemWidgetNew(
-              title: AppLocalizations.of(context).enabled,
-              trailingWidget: ToggleSwitchWidget(
-                value: () => hasEnabled,
-                onChanged: () async {
-                  await toggleMlConsent();
-                },
-              ),
-            ),
-            MenuItemWidgetNew(
-              title: AppLocalizations.of(context).localIndexing,
-              trailingWidget: ToggleSwitchWidget(
-                value: () => localSettings.isMLLocalIndexingEnabled,
-                onChanged: () async {
-                  final localIndexing =
-                      await localSettings.toggleLocalMLIndexing();
-                  if (localIndexing) {
-                    unawaited(MLService.instance.runAllML(force: true));
-                  } else {
-                    MLService.instance.pauseIndexingAndClustering();
-                    unawaited(
-                      MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
-                    );
-                  }
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).localIndexing,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.isMLLocalIndexingEnabled,
+            onChanged: () async {
+              final localIndexing = await localSettings.toggleLocalMLIndexing();
+              if (localIndexing) {
+                unawaited(MLService.instance.runAllML(force: true));
+              } else {
+                MLService.instance.pauseIndexingAndClustering();
+                unawaited(
+                  MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+                );
+              }
 
-                  if (mounted) {
-                    setState(() {});
-                  }
-                },
-              ),
-            ),
-          ],
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
         ),
         const SizedBox(
           height: 12,
@@ -354,52 +349,47 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Column(
       children: [
         MenuSectionTitle(title: AppLocalizations.of(context).status),
-        MenuItemWidget(
-          captionedTextWidget: FutureBuilder(
-            future: canUseHighBandwidth(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data!) {
-                  MLIndexingIsolate.instance.triggerModelsDownload();
-                  return CaptionedTextWidget(
-                    title: AppLocalizations.of(context).checkingModels,
-                    key: const ValueKey("checking_model"),
-                  );
-                } else {
-                  return CaptionedTextWidget(
-                    title: AppLocalizations.of(context).waitingForWifi,
-                    key: const ValueKey("waiting_for_wifi"),
-                  );
-                }
+        const SizedBox(height: 8),
+        FutureBuilder(
+          future: canUseHighBandwidth(),
+          builder: (context, snapshot) {
+            String title = "";
+            if (snapshot.hasData) {
+              if (snapshot.data!) {
+                MLIndexingIsolate.instance.triggerModelsDownload();
+                title = AppLocalizations.of(context).checkingModels;
+              } else {
+                title = AppLocalizations.of(context).waitingForWifi;
               }
-              return const CaptionedTextWidget(title: "");
-            },
-          ),
-          trailingWidget: EnteLoadingWidget(
-            size: 12,
-            color: getEnteColorScheme(context).fillMuted,
-          ),
-          singleBorderRadius: 8,
-          alignCaptionedTextToLeft: true,
-          isGestureDetectorDisabled: true,
+            }
+            return MenuItemWidgetNew(
+              title: title,
+              trailingWidget: EnteLoadingWidget(
+                size: 12,
+                color: colorScheme.fillMuted,
+              ),
+              isGestureDetectorDisabled: true,
+            );
+          },
         ),
         // show the progress map if in debug mode
         ..._progressMap.entries.map((entry) {
-          return MenuItemWidget(
-            key: ValueKey(entry.value),
-            captionedTextWidget: CaptionedTextWidget(
+          return Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: MenuItemWidgetNew(
+              key: ValueKey(entry.value),
               title: entry.key,
+              trailingWidget: Text(
+                '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
+                style: textTheme.small.copyWith(color: colorScheme.textMuted),
+              ),
+              isGestureDetectorDisabled: true,
             ),
-            trailingWidget: Text(
-              '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            singleBorderRadius: 8,
-            alignCaptionedTextToLeft: true,
-            isGestureDetectorDisabled: true,
           );
         }),
       ],
@@ -444,15 +434,13 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            MenuSectionTitle(title: AppLocalizations.of(context).status),
-            Expanded(child: Container()),
-          ],
-        ),
+        MenuSectionTitle(title: AppLocalizations.of(context).status),
+        const SizedBox(height: 8),
         FutureBuilder(
           future: _getIndexStatus(),
           builder: (context, snapshot) {
+            final colorScheme = getEnteColorScheme(context);
+            final textTheme = getEnteTextTheme(context);
             if (snapshot.hasData) {
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
@@ -468,48 +456,43 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
 
               return Column(
                 children: [
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: AppLocalizations.of(context).processed,
-                    ),
+                  MenuItemWidgetNew(
+                    key: ValueKey("pending_items_$pendingFiles"),
+                    title: AppLocalizations.of(context).processed,
                     trailingWidget: Text(
                       total < 1
                           ? 'NA'
                           : pendingFiles == 0
                               ? '100%'
                               : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                      ),
                     ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
-                    key: ValueKey("pending_items_" + pendingFiles.toString()),
                   ),
-                  MLService.instance.showClusteringIsHappening
-                      ? MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title:
-                                AppLocalizations.of(context).clusteringProgress,
+                  if (MLService.instance.showClusteringIsHappening)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).clusteringProgress,
+                        trailingWidget: Text(
+                          AppLocalizations.of(context).currentlyRunning,
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textMuted,
                           ),
-                          trailingWidget: Text(
-                            AppLocalizations.of(context).currentlyRunning,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          singleBorderRadius: 8,
-                          alignCaptionedTextToLeft: true,
-                          isGestureDetectorDisabled: true,
-                        )
-                      : (!hasWifi && pendingFiles > 0)
-                          ? MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title:
-                                    AppLocalizations.of(context).waitingForWifi,
-                              ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              isGestureDetectorDisabled: true,
-                            )
-                          : const SizedBox.shrink(),
+                        ),
+                        isGestureDetectorDisabled: true,
+                      ),
+                    )
+                  else if (!hasWifi && pendingFiles > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).waitingForWifi,
+                        isGestureDetectorDisabled: true,
+                      ),
+                    ),
                 ],
               );
             }
