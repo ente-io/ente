@@ -5,32 +5,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Add more language to the list only when at least 90% of the strings are
 // translated in the corresponding language.
 const List<Locale> appSupportedLocales = <Locale>[
-  Locale('ar'),
   Locale('cs'),
-  Locale('da'),
   Locale('de'),
-  Locale('el'),
   Locale('en'),
   Locale('es'),
-  Locale('fi'),
   Locale('fr'),
-  Locale('hi'),
-  Locale('hu'),
   Locale('it'),
   Locale('ja'),
-  Locale('ko'),
   Locale('nl'),
   Locale('pl'),
   Locale('pt'),
   Locale('ro'),
   Locale('ru'),
-  Locale('sv'),
   Locale('tr'),
   Locale('uk'),
   Locale('vi'),
-  Locale('zh'),
-  Locale('zh', 'CN'),
-  Locale('zh', 'TW'),
 ];
 
 Locale? autoDetectedLocale;
