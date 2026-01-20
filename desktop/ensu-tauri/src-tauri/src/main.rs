@@ -6,6 +6,7 @@ fn main() {
     tauri::Builder::default()
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
+        .manage(commands::ChatDbState::default())
         .invoke_handler(tauri::generate_handler![
             commands::crypto_init,
             commands::crypto_generate_key,
@@ -20,6 +21,14 @@ fn main() {
             commands::srp_session_public_a,
             commands::srp_session_compute_m1,
             commands::srp_session_verify_m2,
+            commands::chat_db_list_sessions,
+            commands::chat_db_get_session,
+            commands::chat_db_create_session,
+            commands::chat_db_update_session_title,
+            commands::chat_db_delete_session,
+            commands::chat_db_get_messages,
+            commands::chat_db_insert_message,
+            commands::chat_db_update_message_text,
             commands::llm_init_backend,
             commands::llm_load_model,
             commands::llm_create_context,

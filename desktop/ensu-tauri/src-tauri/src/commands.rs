@@ -1,11 +1,14 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
+use llmchat_db::{ChatDb, Error as DbError};
+use llmchat_db::backend::sqlite::SqliteBackend;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
-use tauri::{State, Window};
+use tauri::{AppHandle, State, Window};
 use uuid::Uuid;
 
 #[derive(Default)]
@@ -17,6 +20,16 @@ pub struct SrpState {
 pub struct LlmState {
     model: Mutex<Option<llm::ModelHandleRef>>,
     context: Mutex<Option<llm::ContextHandleRef>>,
+}
+
+#[derive(Default)]
+pub struct ChatDbState {
+    inner: Mutex<Option<ChatDbHolder>>,
+}
+
+struct ChatDbHolder {
+    key_b64: String,
+    db: ChatDb<SqliteBackend>,
 }
 
 #[derive(Debug, Serialize)]
@@ -84,6 +97,33 @@ impl From<core_crypto::CryptoError> for ApiError {
             E::Aead => "aead",
             E::ArrayConversion => "array_conversion",
             E::Io(_) => "io",
+        };
+
+        ApiError::new(code, e.to_string())
+    }
+}
+
+impl From<DbError> for ApiError {
+    fn from(e: DbError) -> Self {
+        use llmchat_db::Error as E;
+
+        let code = match &e {
+            E::InvalidKeyLength { .. } => "db_invalid_key_length",
+            E::InvalidBlobLength { .. } => "db_invalid_blob_length",
+            E::InvalidEncryptedField => "db_invalid_encrypted_field",
+            E::UnsupportedValueType(_) => "db_unsupported_value_type",
+            E::Row(_) => "db_row",
+            E::InvalidSender(_) => "db_invalid_sender",
+            E::NotFound { .. } => "db_not_found",
+            E::AttachmentNotFound(_) => "db_attachment_not_found",
+            E::Crypto(_) => "db_crypto",
+            E::SerdeJson(_) => "db_serde_json",
+            E::Uuid(_) => "db_uuid",
+            E::Utf8(_) => "db_utf8",
+            E::Io(_) => "db_io",
+            E::Sqlite(_) => "db_sqlite",
+            E::UnsupportedOperation(_) => "db_unsupported_operation",
+            E::Migration(_) => "db_migration",
         };
 
         ApiError::new(code, e.to_string())
@@ -372,6 +412,196 @@ pub fn srp_session_verify_m2(
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatSessionDto {
+    session_uuid: String,
+    title: String,
+    created_at: i64,
+    updated_at: i64,
+    remote_id: Option<String>,
+    needs_sync: bool,
+    deleted_at: Option<i64>,
+}
+
+impl From<llmchat_db::Session> for ChatSessionDto {
+    fn from(session: llmchat_db::Session) -> Self {
+        Self {
+            session_uuid: session.uuid.to_string(),
+            title: session.title,
+            created_at: session.created_at,
+            updated_at: session.updated_at,
+            remote_id: session.remote_id,
+            needs_sync: session.needs_sync,
+            deleted_at: session.deleted_at,
+        }
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatMessageDto {
+    message_uuid: String,
+    session_uuid: String,
+    parent_message_uuid: Option<String>,
+    sender: String,
+    text: String,
+    created_at: i64,
+    deleted_at: Option<i64>,
+}
+
+impl From<llmchat_db::Message> for ChatMessageDto {
+    fn from(message: llmchat_db::Message) -> Self {
+        let sender = match message.sender {
+            llmchat_db::Sender::SelfUser => "self",
+            llmchat_db::Sender::Other => "assistant",
+        };
+
+        Self {
+            message_uuid: message.uuid.to_string(),
+            session_uuid: message.session_uuid.to_string(),
+            parent_message_uuid: message.parent_message_uuid.map(|value| value.to_string()),
+            sender: sender.to_string(),
+            text: message.text,
+            created_at: message.created_at,
+            deleted_at: message.deleted_at,
+        }
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatMessageInsertInput {
+    session_uuid: String,
+    sender: String,
+    text: String,
+    parent_message_uuid: Option<String>,
+}
+
+#[tauri::command]
+pub fn chat_db_list_sessions(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+) -> Result<Vec<ChatSessionDto>, ApiError> {
+    with_chat_db(&state, &app, &key_b64, |db| {
+        Ok(db
+            .list_sessions()?
+            .into_iter()
+            .map(ChatSessionDto::from)
+            .collect())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_get_session(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+) -> Result<Option<ChatSessionDto>, ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        Ok(db.get_session(uuid)?.map(ChatSessionDto::from))
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_create_session(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    title: String,
+) -> Result<ChatSessionDto, ApiError> {
+    with_chat_db(&state, &app, &key_b64, |db| {
+        let session = db.create_session(&title)?;
+        Ok(ChatSessionDto::from(session))
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_update_session_title(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+    title: String,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.update_session_title(uuid, &title)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_delete_session(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.delete_session(uuid)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_get_messages(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+) -> Result<Vec<ChatMessageDto>, ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        Ok(db
+            .get_messages(uuid)?
+            .into_iter()
+            .map(ChatMessageDto::from)
+            .collect())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_insert_message(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    input: ChatMessageInsertInput,
+) -> Result<ChatMessageDto, ApiError> {
+    let session_uuid = parse_uuid(&input.session_uuid)?;
+    let parent = input
+        .parent_message_uuid
+        .as_deref()
+        .map(parse_uuid)
+        .transpose()?;
+    let sender = normalize_sender(&input.sender)?;
+    let text = input.text;
+
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        let message = db.insert_message(session_uuid, sender, &text, parent, Vec::new())?;
+        Ok(ChatMessageDto::from(message))
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_update_message_text(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    message_uuid: String,
+    text: String,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&message_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.update_message_text(uuid, &text)?;
+        Ok(())
+    })
+}
+
+#[derive(Serialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
 enum LlmEvent {
     Text {
@@ -517,4 +747,61 @@ pub fn llm_generate_chat_stream(
 #[tauri::command]
 pub fn llm_cancel(job_id: i64) -> Result<(), ApiError> {
     llm::cancel(job_id).map_err(llm_error)
+}
+
+fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
+    match sender {
+        "self" => Ok("self"),
+        "assistant" | "other" => Ok("other"),
+        _ => Err(ApiError::new(
+            "db_invalid_sender",
+            format!("Unsupported sender: {sender}"),
+        )),
+    }
+}
+
+fn parse_uuid(value: &str) -> Result<Uuid, ApiError> {
+    Uuid::parse_str(value).map_err(|err| ApiError::new("uuid", err.to_string()))
+}
+
+fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    let resolver = app.path_resolver();
+    let dir = resolver
+        .app_data_dir()
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
+    std::fs::create_dir_all(&dir)
+        .map_err(|err| ApiError::new("io", err.to_string()))?;
+    Ok(dir.join("ensu_llmchat.db"))
+}
+
+fn with_chat_db<T>(
+    state: &ChatDbState,
+    app: &AppHandle,
+    key_b64: &str,
+    f: impl FnOnce(&ChatDb<SqliteBackend>) -> Result<T, DbError>,
+) -> Result<T, ApiError> {
+    let mut guard = state
+        .inner
+        .lock()
+        .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
+
+    let needs_open = guard
+        .as_ref()
+        .map(|holder| holder.key_b64 != key_b64)
+        .unwrap_or(true);
+
+    if needs_open {
+        let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
+        let path = chat_db_path(app)?;
+        let db = ChatDb::open_sqlite_with_defaults(path, key).map_err(ApiError::from)?;
+        *guard = Some(ChatDbHolder {
+            key_b64: key_b64.to_string(),
+            db,
+        });
+    }
+
+    let db = guard
+        .as_ref()
+        .ok_or_else(|| ApiError::new("db", "Chat DB not initialized"))?;
+    f(&db.db).map_err(ApiError::from)
 }

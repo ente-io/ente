@@ -32,6 +32,10 @@
         "open": true
       },
       "fs": {
+        "all": true,
+        "scope": ["$APPDATA", "$APPDATA/*", "$APPDATA/**"]
+      },
+      "path": {
         "all": true
       }
     },
