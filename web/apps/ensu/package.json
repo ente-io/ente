@@ -13,7 +13,8 @@
         "ente-accounts": "*",
         "ente-base": "*",
         "ente-new": "*",
-        "ente-wasm": "*"
+        "ente-wasm": "*",
+        "idb": "^8.0.3"
     },
     "devDependencies": {
         "ente-build-config": "*"

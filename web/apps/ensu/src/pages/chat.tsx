@@ -313,6 +313,7 @@ const Page: React.FC = () => {
     >(null);
     const [loadedModelName, setLoadedModelName] = useState<string | null>(null);
     const [isTauriRuntime, setIsTauriRuntime] = useState(false);
+    const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
 
     const providerRef = useRef<LlmProvider | null>(null);
     const currentJobIdRef = useRef<number | null>(null);
@@ -328,9 +329,32 @@ const Page: React.FC = () => {
         return typeof value === "string" ? value : undefined;
     }, [router.isReady, router.query.session]);
 
+    const lastRouteUpdateRef = useRef<{
+        sessionId?: string;
+        at: number;
+    }>({ sessionId: undefined, at: 0 });
+    const routeInitializedRef = useRef(false);
+    const sessionSeededRef = useRef(false);
+
     const updateRouteSession = useCallback(
         (sessionId: string | undefined, replace = false) => {
             if (!router.isReady) return;
+
+            const current = Array.isArray(router.query.session)
+                ? router.query.session[0]
+                : typeof router.query.session === "string"
+                  ? router.query.session
+                  : undefined;
+
+            if (current === sessionId) return;
+
+            const now = Date.now();
+            const last = lastRouteUpdateRef.current;
+            if (last.sessionId === sessionId && now - last.at < 1000) {
+                return;
+            }
+            lastRouteUpdateRef.current = { sessionId, at: now };
+
             const query = sessionId ? { session: sessionId } : {};
             const method = replace ? router.replace : router.push;
             void method({ pathname: "/chat", query }, undefined, {
@@ -367,6 +391,11 @@ const Page: React.FC = () => {
             authRefreshCancelledRef.current = true;
         };
     }, [refreshAuthState]);
+
+    useEffect(() => {
+        routeInitializedRef.current = false;
+        sessionSeededRef.current = false;
+    }, [chatKey]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -507,14 +536,22 @@ const Page: React.FC = () => {
         if (!chatKey) return;
         const loaded = await listSessions(chatKey);
         if (loaded.length === 0) {
+            if (sessionSeededRef.current) {
+                return;
+            }
+            sessionSeededRef.current = true;
             const sessionId = await createSession(chatKey);
             const refreshed = await listSessions(chatKey);
             setSessions(refreshed);
             setCurrentSessionId(sessionId);
-            updateRouteSession(sessionId, true);
+            if (!routeInitializedRef.current) {
+                updateRouteSession(sessionId, true);
+                routeInitializedRef.current = true;
+            }
             return;
         }
 
+        sessionSeededRef.current = false;
         setSessions(loaded);
 
         const hasQuerySession =
@@ -527,7 +564,12 @@ const Page: React.FC = () => {
         if (nextSessionId) {
             setCurrentSessionId(nextSessionId);
             if (nextSessionId !== sessionFromQuery) {
-                updateRouteSession(nextSessionId, true);
+                if (!routeInitializedRef.current) {
+                    updateRouteSession(nextSessionId, true);
+                    routeInitializedRef.current = true;
+                }
+            } else {
+                routeInitializedRef.current = true;
             }
         }
     }, [chatKey, currentSessionId, sessionFromQuery, updateRouteSession]);
@@ -540,6 +582,24 @@ const Page: React.FC = () => {
         const loaded = await listMessages(currentSessionId, chatKey);
         setAllMessages(loaded);
     }, [chatKey, currentSessionId]);
+
+    const deleteSessionTarget = useMemo(
+        () =>
+            deleteSessionId
+                ? sessions.find(
+                      (session) => session.sessionUuid === deleteSessionId,
+                  )
+                : undefined,
+        [deleteSessionId, sessions],
+    );
+
+    const deleteSessionLabel = useMemo(() => {
+        const title = deleteSessionTarget?.title?.trim();
+        if (title && title !== "New chat") {
+            return `"${title}"`;
+        }
+        return "this chat";
+    }, [deleteSessionTarget]);
 
     useEffect(() => {
         void refreshSessions();
@@ -808,7 +868,7 @@ const Page: React.FC = () => {
     const handleDeleteSession = useCallback(
         async (sessionId: string) => {
             if (!chatKey) return;
-            deleteSession(sessionId);
+            await deleteSession(sessionId, chatKey);
             await refreshSessions();
             if (sessionId === currentSessionId) {
                 const refreshed = await listSessions(chatKey);
@@ -825,6 +885,20 @@ const Page: React.FC = () => {
         },
         [chatKey, currentSessionId, refreshSessions, updateRouteSession],
     );
+
+    const requestDeleteSession = useCallback((sessionId: string) => {
+        setDeleteSessionId(sessionId);
+    }, []);
+
+    const handleConfirmDeleteSession = useCallback(async () => {
+        if (!deleteSessionId) return;
+        await handleDeleteSession(deleteSessionId);
+        setDeleteSessionId(null);
+    }, [deleteSessionId, handleDeleteSession]);
+
+    const handleCancelDeleteSession = useCallback(() => {
+        setDeleteSessionId(null);
+    }, []);
 
     const handleEditMessage = useCallback((message: ChatMessage) => {
         const parsed = parseDocumentBlocks(message.text);
@@ -1850,7 +1924,7 @@ const Page: React.FC = () => {
                                                 sx={actionButtonSx}
                                                 onClick={(event) => {
                                                     event.stopPropagation();
-                                                    void handleDeleteSession(
+                                                    requestDeleteSession(
                                                         session.sessionUuid,
                                                     );
                                                 }}
@@ -2598,6 +2672,33 @@ const Page: React.FC = () => {
                     </Box>
                 </Box>
             </Box>
+
+            <Dialog
+                open={Boolean(deleteSessionId)}
+                onClose={handleCancelDeleteSession}
+                fullScreen={isSmall}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Delete chat?</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body" sx={{ color: "text.muted" }}>
+                        Delete {deleteSessionLabel}? This cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
+                    <Button onClick={handleCancelDeleteSession} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleConfirmDeleteSession}
+                    >
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog
                 open={showModelSettings}

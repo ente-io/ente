@@ -37,6 +37,7 @@ export class LlmProvider {
 
     private downloadAbort?: AbortController;
     private progressListeners = new Set<(progress: DownloadProgress) => void>();
+    private modelReady = false;
 
     public async initialize() {
         if (this.initialized) return;
@@ -95,9 +96,12 @@ export class LlmProvider {
             this.currentContextKey === contextKey &&
             this.currentMmprojPath === mmprojPath
         ) {
+            this.modelReady = true;
+            this.emitProgress({ percent: 100, status: "Ready" });
             return;
         }
 
+        this.modelReady = false;
         await this.backend.freeContext();
         await this.backend.freeModel();
         this.currentModel = undefined;
@@ -148,6 +152,7 @@ export class LlmProvider {
         this.currentModelPath = modelPath;
         this.currentMmprojPath = mmprojPath;
         this.currentContextKey = contextKey;
+        this.modelReady = true;
         this.emitProgress({ percent: 100, status: "Ready" });
     }
 
@@ -196,6 +201,9 @@ export class LlmProvider {
         total?: number;
         status?: string;
     }) {
+        if (this.modelReady) {
+            return;
+        }
         const total = event.total ?? 0;
         const loaded = event.loaded ?? 0;
         const percent = total
