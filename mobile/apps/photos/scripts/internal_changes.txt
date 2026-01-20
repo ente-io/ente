@@ -1,3 +1,4 @@
+- Ashil: QOL: Support for hiding incoming shared albums
 - Ashil: QOL: Enalbe swipe to select on Samsung S series devices after fixing issue introduced by it. 
 - Laurens: QOL: Fix issies with contact list
 - Laurens: QOL: Improve search tab loading speed (especially for big libraries)
