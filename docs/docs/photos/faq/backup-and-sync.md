@@ -313,7 +313,7 @@ On Android, the app can run background processes more freely than iOS. However, 
 
 ### How do watch folders work? {#how-watch-folders-work}
 
-Watch folders allow the Ente desktop app to automatically monitor specific directories on your computer and sync any changes to Ente. When you add or modify files in a watched folder, they're automatically uploaded.
+Watch folders allow the Ente desktop app to automatically monitor specific directories on your computer and sync new files and deletions to Ente. When you add new files in a watched folder, they're automatically uploaded.
 
 **Key features:**
 
@@ -330,7 +330,7 @@ Learn more in the [Watch folders feature guide](/photos/features/backup-and-sync
 Watch folders is a desktop app feature that automatically syncs specific folders on your computer to Ente. Once you add a folder to watch, the app will:
 
 - Immediately upload all existing files in that folder
-- Continuously monitor the folder for changes
+- Continuously monitor the folder for new files and deletions
 - Automatically upload any new files added to the folder
 - Move files to Uncategorized if you delete them locally
 
@@ -344,7 +344,7 @@ This creates a one-way background sync from your computer to Ente, automating yo
 4. If the folder has nested subfolders, choose between:
     - **Single album**: All files go into one Ente album
     - **Separate albums**: Each subfolder becomes its own album
-5. The folder will be initially synced and then monitored for changes
+5. The folder will be initially synced and then monitored for new files and deletions
 
 The sync happens in the background even when the app is minimized. You can see progress in the bottom right corner.
 

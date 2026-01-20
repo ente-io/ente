@@ -21,7 +21,7 @@ The first time you open Ente Photos on a mobile device, you'll be prompted to se
 You can change backed up albums later in **Settings > Backup > Backed up folders**.
 
 **On desktop:**
-Desktop works differently - instead of albums, you set up [watch folders](/photos/features/backup-and-sync/watch-folders) that automatically sync whenever files are added or changed.
+Desktop works differently - instead of albums, you set up [watch folders](/photos/features/backup-and-sync/watch-folders) that automatically sync whenever files are added or deleted.
 
 ## Understanding automatic backup
 

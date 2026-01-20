@@ -496,16 +496,25 @@ class _HomePageState extends UploaderPageState<HomePage>
         });
       }
 
-      final collections = await CollectionService.instance.getCollections();
+      var collections = await CollectionService.instance.getCollections();
       await _loadRecentFiles(collections);
+
+      // If collections are empty and first sync is complete, ensure default
+      // collections are created. This handles the case where default collections
+      // setup was skipped during initialization due to the master key not being
+      // available yet.
+      final hasCompletedFirstSync =
+          CollectionService.instance.hasCompletedFirstSync();
+      if (collections.isEmpty && hasCompletedFirstSync) {
+        _logger.info("No collections found after sync, setting up defaults");
+        await CollectionService.instance.setupDefaultCollections();
+        // Reload collections after setup
+        collections = await CollectionService.instance.getCollections();
+        await _loadRecentFiles(collections);
+      }
 
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
-
-      // Only mark initial load complete when first sync has finished
-      // This prevents empty state while sync is in progress
-      final hasCompletedFirstSync =
-          CollectionService.instance.hasCompletedFirstSync();
 
       if (mounted) {
         setState(() {

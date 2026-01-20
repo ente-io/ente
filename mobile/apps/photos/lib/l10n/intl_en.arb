@@ -321,9 +321,12 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB claimed!",
   "details": "Details",
   "claimMore": "Claim more!",
+  "earnMoreSpace": "Earn more space!",
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB for them + {storageAmountInGB} GB for you when they upgrade.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
   "shareTextReferralCode": "Ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
   "claimFreeStorage": "Claim free storage",
@@ -1425,6 +1428,7 @@
   "enterPin": "Enter PIN",
   "setNewPin": "Set new PIN",
   "appLock": "App lock",
+  "lockScreenType": "Lock type",
   "noSystemLockFound": "No system lock found",
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",

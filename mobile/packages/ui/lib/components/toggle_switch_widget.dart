@@ -35,6 +35,17 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant ToggleSwitchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newValue = widget.value.call();
+    if (toggleValue != newValue) {
+      setState(() {
+        toggleValue = newValue;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final Widget stateIcon = _stateIcon(enteColorScheme);

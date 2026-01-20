@@ -278,12 +278,12 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
                         controller: _searchController,
                         focusNode: _focusNode,
                         onChanged: _onSearchChanged,
-                        style: textTheme.body.copyWith(
+                        style: textTheme.small.copyWith(
                           color: colorScheme.textBase,
                         ),
                         decoration: InputDecoration(
                           hintText: l10n.searchSettings,
-                          hintStyle: textTheme.body.copyWith(
+                          hintStyle: textTheme.small.copyWith(
                             color: colorScheme.textMuted,
                           ),
                           border: InputBorder.none,
@@ -329,7 +329,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
         children: [
           Text(
             l10n.suggestions,
-            style: textTheme.body.copyWith(
+            style: textTheme.small.copyWith(
               color: colorScheme.textBase,
             ),
           ),
@@ -359,7 +359,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       return Center(
         child: Text(
           context.l10n.noResultsFound,
-          style: textTheme.body.copyWith(
+          style: textTheme.small.copyWith(
             color: colorScheme.textMuted,
           ),
         ),
@@ -376,7 +376,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           behavior: HitTestBehavior.opaque,
           onTap: () => _onSettingTapped(setting),
           child: Container(
-            height: 60,
+            height: 56,
             decoration: BoxDecoration(
               color: colorScheme.backdropBase,
               borderRadius: BorderRadius.circular(20),
@@ -391,7 +391,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
                     children: [
                       Text(
                         setting.title,
-                        style: textTheme.body.copyWith(
+                        style: textTheme.small.copyWith(
                           color: colorScheme.textBase,
                         ),
                       ),
