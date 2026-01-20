@@ -1,5 +1,7 @@
 package llmchat
 
+const ZeroUUID = "00000000-0000-0000-0000-000000000000"
+
 type Key struct {
 	UserID       int64  `json:"-"`
 	EncryptedKey string `json:"encrypted_key"`
@@ -12,6 +14,16 @@ type AttachmentMeta struct {
 	ID            string `json:"id"`
 	Size          int64  `json:"size"`
 	EncryptedName string `json:"encrypted_name"`
+}
+
+type GetAttachmentUploadURLRequest struct {
+	ContentLength int64  `json:"content_length" binding:"required"`
+	ContentMD5    string `json:"content_md5" binding:"required"`
+}
+
+type AttachmentUploadURLResponse struct {
+	ObjectKey string `json:"object_key"`
+	URL       string `json:"url"`
 }
 
 type Session struct {
@@ -47,7 +59,7 @@ type UpsertKeyRequest struct {
 
 type UpsertSessionRequest struct {
 	SessionUUID           string  `json:"session_uuid" binding:"required"`
-	RootSessionUUID       string  `json:"root_session_uuid" binding:"required"`
+	RootSessionUUID       string  `json:"root_session_uuid"`
 	BranchFromMessageUUID *string `json:"branch_from_message_uuid"`
 	CreatedAt             *int64  `json:"created_at"`
 	EncryptedData         string  `json:"encrypted_data" binding:"required"`
@@ -107,16 +119,20 @@ type DeleteMessageResponse struct {
 }
 
 type GetDiffRequest struct {
-	SinceTime *int64  `form:"sinceTime" binding:"required"`
-	SinceType *string `form:"sinceType"`
-	SinceID   *string `form:"sinceId"`
-	Limit     int16   `form:"limit"`
+	SinceTime     *int64  `form:"sinceTime" binding:"required"`
+	BaseSinceTime *int64  `form:"baseSinceTime"`
+	MaxTime       *int64  `form:"maxTime"`
+	SinceType     *string `form:"sinceType"`
+	SinceID       *string `form:"sinceId"`
+	Limit         int16   `form:"limit"`
 }
 
 type DiffCursor struct {
-	SinceTime int64  `json:"since_time"`
-	SinceType string `json:"since_type"`
-	SinceID   string `json:"since_id"`
+	BaseSinceTime int64  `json:"base_since_time"`
+	SinceTime     int64  `json:"since_time"`
+	MaxTime       int64  `json:"max_time"`
+	SinceType     string `json:"since_type"`
+	SinceID       string `json:"since_id"`
 }
 
 type SessionDiffEntry struct {

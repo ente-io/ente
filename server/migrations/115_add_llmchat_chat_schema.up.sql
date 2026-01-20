@@ -1,5 +1,3 @@
--- LLMChat schema
-
 CREATE TABLE IF NOT EXISTS llmchat_key (
     user_id       BIGINT PRIMARY KEY NOT NULL,
     encrypted_key TEXT   NOT NULL,
@@ -31,7 +29,7 @@ CREATE TABLE IF NOT EXISTS llmchat_messages (
     user_id             BIGINT NOT NULL,
     session_uuid        uuid   NOT NULL,
     parent_message_uuid uuid,
-    sender              TEXT   NOT NULL DEFAULT '',
+    sender              TEXT   NOT NULL,
     attachments         JSONB  NOT NULL DEFAULT '[]'::jsonb,
     encrypted_data      TEXT,
     header              TEXT,
@@ -42,7 +40,8 @@ CREATE TABLE IF NOT EXISTS llmchat_messages (
     CONSTRAINT llmchat_messages_state_constraint CHECK (
         (is_deleted IS TRUE AND encrypted_data IS NULL AND header IS NULL) OR
         (is_deleted IS FALSE AND encrypted_data IS NOT NULL AND header IS NOT NULL)
-    )
+    ),
+    CONSTRAINT llmchat_messages_sender_constraint CHECK (sender IN ('self', 'other'))
 );
 
 CREATE INDEX IF NOT EXISTS llmchat_sessions_state_updated_at_index
@@ -66,7 +65,6 @@ CREATE TRIGGER update_llmchat_messages_updated_at
     FOR EACH ROW
 EXECUTE PROCEDURE trigger_updated_at_microseconds_column();
 
--- Update llmchat_key.updated_at whenever a chat entry changes
 CREATE OR REPLACE FUNCTION fn_update_llmchat_key_updated_at_via_updated_at() RETURNS TRIGGER AS
 $$
 BEGIN

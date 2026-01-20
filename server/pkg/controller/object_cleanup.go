@@ -618,6 +618,14 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 		"last_modified": lastModified,
 	})
 
+	// llmchat attachments are not tracked in object_keys.
+	// If orphan cleanup is configured with a broad prefix, it can accidentally delete
+	// active chat attachments. We rely on llmchat's own policies (temp_objects for
+	// uncommitted uploads and optional in-app cleanup for referenced attachments).
+	if strings.HasPrefix(objectKey, "llmchat/attachments/") {
+		return
+	}
+
 	exists, err := c.ObjectRepo.DoesObjectOrTempObjectExist(objectKey)
 	if err != nil {
 		logger.Error(stacktrace.Propagate(err, "Failed to determine if object already exists in DB"))

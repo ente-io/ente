@@ -41,7 +41,7 @@ func shouldSkipBodyLog(method string, path string) bool {
 	if path == "/admin/user/terminate-session" {
 		return true
 	}
-	if strings.HasPrefix(path, "/llmchat/chat/attachment/") && method == http.MethodPut {
+	if strings.HasPrefix(path, "/llmchat/chat/attachment/") && method == http.MethodPost {
 		return true
 	}
 	if path == "/llmchat/chat/message" && method == http.MethodPost {

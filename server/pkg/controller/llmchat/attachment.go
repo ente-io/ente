@@ -1,22 +1,32 @@
 package llmchat
 
 import (
+	"context"
+	"crypto/md5"
+	"database/sql"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
-	"io"
+	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/ente-io/museum/ente"
+	model "github.com/ente-io/museum/ente/llmchat"
 	llmchatRepo "github.com/ente-io/museum/pkg/repo/llmchat"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/s3config"
+	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 
-const llmChatAttachmentPrefix = "llmchat/attachments"
+const (
+	llmChatAttachmentPrefix                 = "llmchat/attachments"
+	llmChatPresignedRequestValidityDuration = 7 * 24 * time.Hour
+)
 
 type AttachmentController struct {
 	S3Config            *s3config.S3Config
@@ -25,100 +35,172 @@ type AttachmentController struct {
 }
 
 func (c *AttachmentController) maxAttachmentSize(userID int64) int64 {
-	if c.SubscriptionChecker != nil && c.SubscriptionChecker.HasActiveSelfOrFamilySubscription(userID, false) == nil {
-		return llmChatMaxAttachmentPaid
-	}
-	return llmChatMaxAttachmentFree
+	return maxAttachmentSizeForUser(c.SubscriptionChecker, userID)
 }
 
-func (c *AttachmentController) Upload(ctx *gin.Context, attachmentID string) error {
+func (c *AttachmentController) maxAttachmentStorage(userID int64) int64 {
+	return maxAttachmentStorageForUser(c.SubscriptionChecker, userID)
+}
+
+func (c *AttachmentController) GetUploadURL(
+	ctx *gin.Context,
+	attachmentID string,
+	req model.GetAttachmentUploadURLRequest,
+) (model.AttachmentUploadURLResponse, error) {
+	if attachmentID == "" {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
+	}
+	if c.S3Config == nil {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
+	}
+	if c.Repo == nil {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrNotImplemented, "attachments repo not configured")
+	}
+	if req.ContentLength <= 0 {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "content_length must be > 0")
+	}
+
+	userID := auth.GetUserID(ctx.Request.Header)
+	maxSize := c.maxAttachmentSize(userID)
+	if req.ContentLength > maxSize {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
+	}
+	referenced, err := c.Repo.HasActiveAttachmentReference(ctx, userID, attachmentID)
+	if err != nil {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to check attachment reference")
+	}
+	if referenced {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.NewConflictError("attachment is already committed"), "")
+	}
+
+	maxStorage := c.maxAttachmentStorage(userID)
+	if maxStorage > 0 {
+		usage, err := c.Repo.GetActiveAttachmentUsage(ctx, userID)
+		if err != nil {
+			return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to fetch llmchat attachment usage")
+		}
+		if usage+req.ContentLength > maxStorage {
+			return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
+		}
+	}
+
+	checksum, err := normalizeMD5String(req.ContentMD5)
+	if err != nil {
+		return model.AttachmentUploadURLResponse{}, err
+	}
+
+	objectKey := buildAttachmentObjectKey(userID, attachmentID)
+	s3Client := c.S3Config.GetHotS3Client()
+	dc := c.S3Config.GetHotDataCenter()
+	bucket := c.S3Config.GetHotBucket()
+
+	length := req.ContentLength
+	checksumCopy := checksum
+	putInput := &s3.PutObjectInput{
+		Bucket:        bucket,
+		Key:           aws.String(objectKey),
+		ContentLength: &length,
+		ContentMD5:    &checksumCopy,
+	}
+	putReq, _ := s3Client.PutObjectRequest(putInput)
+	url, err := putReq.Presign(llmChatPresignedRequestValidityDuration)
+	if err != nil {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to presign attachment upload url")
+	}
+
+	expiry := timeUtil.Microseconds() + (2 * llmChatPresignedRequestValidityDuration.Microseconds())
+	_, err = c.Repo.DB.ExecContext(
+		ctx,
+		`INSERT INTO temp_objects(object_key, expiration_time, bucket_id, is_multipart, upload_id)
+		VALUES($1, $2, $3, FALSE, NULL)
+		ON CONFLICT (object_key) DO UPDATE
+			SET expiration_time = EXCLUDED.expiration_time,
+				bucket_id = EXCLUDED.bucket_id,
+				is_multipart = FALSE,
+				upload_id = NULL`,
+		objectKey,
+		expiry,
+		dc,
+	)
+	if err != nil {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to persist llmchat temp object")
+	}
+
+	return model.AttachmentUploadURLResponse{
+		ObjectKey: objectKey,
+		URL:       url,
+	}, nil
+}
+
+func (c *AttachmentController) VerifyUploaded(
+	ctx *gin.Context,
+	userID int64,
+	attachmentID string,
+	expectedSize int64,
+) error {
 	if attachmentID == "" {
 		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 	}
 	if c.S3Config == nil {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
-	if ctx.Request.ContentLength <= 0 {
-		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment size")
-	}
-
-	userID := auth.GetUserID(ctx.Request.Header)
-	maxSize := c.maxAttachmentSize(userID)
-	if ctx.Request.ContentLength > maxSize {
-		return stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
-	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
 	bucket := c.S3Config.GetHotBucket()
 	s3Client := c.S3Config.GetHotS3Client()
 
-	// Skip upload if attachment already exists with same size.
-	headOutput, err := s3Client.HeadObjectWithContext(ctx.Request.Context(), &s3.HeadObjectInput{
-		Bucket: bucket,
-		Key:    aws.String(objectKey),
-	})
-	if err == nil && headOutput.ContentLength != nil && *headOutput.ContentLength == ctx.Request.ContentLength {
-		_, _ = io.Copy(io.Discard, ctx.Request.Body)
-		return nil
-	}
-
-	uploader := s3manager.NewUploaderWithClient(s3Client)
-	_, err = uploader.UploadWithContext(ctx.Request.Context(), &s3manager.UploadInput{
-		Bucket:      bucket,
-		Key:         aws.String(objectKey),
-		Body:        ctx.Request.Body,
-		ContentType: aws.String("application/octet-stream"),
-	})
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to upload attachment")
-	}
-
-	return nil
-}
-
-func (c *AttachmentController) Download(ctx *gin.Context, attachmentID string) (io.ReadCloser, int64, error) {
-	if attachmentID == "" {
-		return nil, 0, stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
-	}
-	if c.S3Config == nil {
-		return nil, 0, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
-	}
-
-	userID := auth.GetUserID(ctx.Request.Header)
-	if c.Repo != nil {
-		referenced, err := c.Repo.HasActiveAttachmentReference(ctx, userID, attachmentID)
-		if err != nil {
-			return nil, 0, stacktrace.Propagate(err, "failed to verify attachment access")
-		}
-		if !referenced {
-			return nil, 0, stacktrace.Propagate(ente.ErrNotFound, "attachment not found")
-		}
-	}
-
-	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetHotBucket()
-	s3Client := c.S3Config.GetHotS3Client()
-
-	output, err := s3Client.GetObjectWithContext(ctx.Request.Context(), &s3.GetObjectInput{
+	out, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
 		Key:    aws.String(objectKey),
 	})
 	if err != nil {
 		if isAttachmentNotFound(err) {
-			return nil, 0, stacktrace.Propagate(ente.ErrNotFound, "attachment not found")
+			return stacktrace.Propagate(ente.ErrBadRequest, "attachment not uploaded")
 		}
-		return nil, 0, stacktrace.Propagate(err, "failed to download attachment")
+		return stacktrace.Propagate(err, "failed to verify attachment")
 	}
-
-	contentLength := int64(0)
-	if output.ContentLength != nil {
-		contentLength = *output.ContentLength
+	if out.ContentLength != nil && *out.ContentLength != expectedSize {
+		return stacktrace.Propagate(ente.ErrBadRequest, "attachment size mismatch")
 	}
-
-	return output.Body, contentLength, nil
+	return nil
 }
 
-func (c *AttachmentController) Delete(ctx *gin.Context, userID int64, attachmentID string) error {
+func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID string) (string, error) {
+	if attachmentID == "" {
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
+	}
+	if c.S3Config == nil {
+		return "", stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
+	}
+	if c.Repo == nil {
+		return "", stacktrace.Propagate(ente.ErrNotImplemented, "attachments repo not configured")
+	}
+
+	userID := auth.GetUserID(ctx.Request.Header)
+	referenced, err := c.Repo.HasActiveAttachmentReference(ctx, userID, attachmentID)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to verify attachment access")
+	}
+	if !referenced {
+		return "", stacktrace.Propagate(ente.ErrNotFound, "attachment not found")
+	}
+
+	objectKey := buildAttachmentObjectKey(userID, attachmentID)
+	s3Client := c.S3Config.GetHotS3Client()
+	bucket := c.S3Config.GetHotBucket()
+
+	getReq, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: bucket,
+		Key:    aws.String(objectKey),
+	})
+	url, err := getReq.Presign(llmChatPresignedRequestValidityDuration)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to presign attachment download url")
+	}
+	return url, nil
+}
+
+func (c *AttachmentController) Delete(ctx context.Context, userID int64, attachmentID string) error {
 	if attachmentID == "" {
 		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 	}
@@ -130,7 +212,7 @@ func (c *AttachmentController) Delete(ctx *gin.Context, userID int64, attachment
 	bucket := c.S3Config.GetHotBucket()
 	s3Client := c.S3Config.GetHotS3Client()
 
-	_, err := s3Client.DeleteObjectWithContext(ctx.Request.Context(), &s3.DeleteObjectInput{
+	_, err := s3Client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
 		Bucket: bucket,
 		Key:    aws.String(objectKey),
 	})
@@ -143,8 +225,135 @@ func (c *AttachmentController) Delete(ctx *gin.Context, userID int64, attachment
 	return nil
 }
 
+func (c *AttachmentController) CleanupExpiredTempUploads(ctx context.Context, limit int) (int, error) {
+	if c.S3Config == nil || c.Repo == nil {
+		return 0, nil
+	}
+	if limit <= 0 {
+		limit = 1000
+	}
+
+	now := timeUtil.Microseconds()
+
+	tx, err := c.Repo.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to begin transaction")
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	rows, err := tx.QueryContext(ctx, `SELECT object_key, bucket_id
+		FROM temp_objects
+		WHERE expiration_time <= $1 AND object_key LIKE 'llmchat/attachments/%'
+		LIMIT $2
+		FOR UPDATE SKIP LOCKED`,
+		now,
+		limit,
+	)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to query expired llmchat temp objects")
+	}
+	defer rows.Close()
+
+	type tempObj struct {
+		ObjectKey string
+		BucketID  sql.NullString
+	}
+
+	objs := make([]tempObj, 0)
+	for rows.Next() {
+		var o tempObj
+		if err := rows.Scan(&o.ObjectKey, &o.BucketID); err != nil {
+			return 0, stacktrace.Propagate(err, "failed to scan expired llmchat temp objects")
+		}
+		objs = append(objs, o)
+	}
+	if err := rows.Err(); err != nil {
+		return 0, stacktrace.Propagate(err, "failed to iterate expired llmchat temp objects")
+	}
+
+	deleted := 0
+	for _, o := range objs {
+		dc := c.S3Config.GetHotDataCenter()
+		if o.BucketID.Valid && o.BucketID.String != "" {
+			dc = o.BucketID.String
+		}
+		bucket := c.S3Config.GetBucket(dc)
+		client := c.S3Config.GetS3Client(dc)
+
+		_, err := client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
+			Bucket: bucket,
+			Key:    aws.String(o.ObjectKey),
+		})
+		if err != nil && !isAttachmentNotFound(err) {
+			// Extend expiry by 1 day to avoid tight loops on transient errors.
+			newExpiry := timeUtil.MicrosecondsAfterDays(1)
+			_, _ = tx.ExecContext(ctx, `UPDATE temp_objects SET expiration_time = $1 WHERE object_key = $2`, newExpiry, o.ObjectKey)
+			continue
+		}
+
+		if _, err := tx.ExecContext(ctx, `DELETE FROM temp_objects WHERE object_key = $1`, o.ObjectKey); err != nil {
+			return 0, stacktrace.Propagate(err, "failed to delete llmchat temp object")
+		}
+		deleted++
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, stacktrace.Propagate(err, "failed to commit transaction")
+	}
+	return deleted, nil
+}
+
+func (c *AttachmentController) CleanupDeletedAttachments(ctx context.Context, limit int) (int, error) {
+	if c.S3Config == nil || c.Repo == nil {
+		return 0, nil
+	}
+	refs, err := c.Repo.GetDeletedAttachmentCandidates(ctx, limit)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to fetch deleted llmchat attachments")
+	}
+
+	deleted := 0
+	for _, ref := range refs {
+		referenced, err := c.Repo.HasActiveAttachmentReference(ctx, ref.UserID, ref.AttachmentID)
+		if err != nil {
+			return deleted, stacktrace.Propagate(err, "failed to check llmchat attachment reference")
+		}
+		if referenced {
+			continue
+		}
+		if err := c.Delete(ctx, ref.UserID, ref.AttachmentID); err != nil {
+			continue
+		}
+		if err := c.Repo.DeleteAttachmentRecords(ctx, ref.UserID, ref.AttachmentID); err != nil {
+			return deleted, stacktrace.Propagate(err, "failed to delete llmchat attachment records")
+		}
+		deleted++
+	}
+	return deleted, nil
+}
+
 func buildAttachmentObjectKey(userID int64, attachmentID string) string {
 	return fmt.Sprintf("%s/%d/%s", llmChatAttachmentPrefix, userID, attachmentID)
+}
+
+func normalizeMD5String(value string) (string, error) {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "content_md5 must not be empty")
+	}
+	decoded, err := base64.StdEncoding.DecodeString(trimmed)
+	if err != nil {
+		decoded, err = hex.DecodeString(trimmed)
+		if err != nil {
+			return "", stacktrace.Propagate(ente.ErrBadRequest, "content_md5 must be base64 or hex encoded")
+		}
+	}
+	if len(decoded) != md5.Size {
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "content_md5 must be exactly 16 bytes")
+	}
+	return base64.StdEncoding.EncodeToString(decoded), nil
 }
 
 func isAttachmentNotFound(err error) bool {

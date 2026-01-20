@@ -3,6 +3,7 @@ package llmchat
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,7 +42,33 @@ func TestMain(m *testing.M) {
 }
 
 func setupDatabase() (*sql.DB, error) {
-	db, err := sql.Open("postgres", "user=test_user password=test_pass host=localhost dbname=ente_test_db sslmode=disable")
+	user := os.Getenv("ENTE_TEST_DB_USER")
+	if user == "" {
+		user = "test_user"
+	}
+	password := os.Getenv("ENTE_TEST_DB_PASSWORD")
+	if password == "" {
+		password = "test_pass"
+	}
+	host := os.Getenv("ENTE_TEST_DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("ENTE_TEST_DB_PORT")
+	if port == "" {
+		port = "5432"
+	}
+	name := os.Getenv("ENTE_TEST_DB_NAME")
+	if name == "" {
+		name = "ente_test_db"
+	}
+	sslMode := os.Getenv("ENTE_TEST_DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "disable"
+	}
+	dsn := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s", user, password, host, port, name, sslMode)
+
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +113,9 @@ func createTestUser(t *testing.T) int64 {
 func cleanupUser(t *testing.T, userID int64) {
 	t.Helper()
 
+	if _, err := testDB.Exec(`DELETE FROM llmchat_attachments WHERE user_id = $1`, userID); err != nil {
+		t.Fatalf("failed to cleanup llmchat attachments: %v", err)
+	}
 	if _, err := testDB.Exec(`DELETE FROM llmchat_messages WHERE user_id = $1`, userID); err != nil {
 		t.Fatalf("failed to cleanup llmchat messages: %v", err)
 	}
@@ -877,5 +907,65 @@ func TestUpsertAndDeleteIdempotency(t *testing.T) {
 	}
 	if messageTombstone.DeletedAt != messageTombstoneRepeat.DeletedAt {
 		t.Fatalf("expected delete message to be idempotent")
+	}
+}
+
+func TestUpsertMessageCommitsTempObjects(t *testing.T) {
+	ctx := context.Background()
+	repo := &Repository{DB: testDB}
+
+	userID := createTestUser(t)
+	t.Cleanup(func() {
+		cleanupUser(t, userID)
+	})
+	ensureKey(t, repo, userID)
+
+	sessionUUID := uuid.NewString()
+	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
+		SessionUUID:     sessionUUID,
+		RootSessionUUID: sessionUUID,
+		EncryptedData:   "enc-session",
+		Header:          "hdr-session",
+	}); err != nil {
+		t.Fatalf("failed to upsert session: %v", err)
+	}
+
+	attachmentID := uuid.NewString()
+	objectKey := fmt.Sprintf("llmchat/attachments/%d/%s", userID, attachmentID)
+
+	expiration := time.Now().Add(24 * time.Hour).UnixMicro()
+	if _, err := testDB.Exec(
+		`INSERT INTO temp_objects(object_key, expiration_time) VALUES ($1, $2)`,
+		objectKey,
+		expiration,
+	); err != nil {
+		t.Fatalf("failed to insert temp object: %v", err)
+	}
+
+	messageUUID := uuid.NewString()
+	if _, err := repo.UpsertMessage(ctx, userID, model.UpsertMessageRequest{
+		MessageUUID: messageUUID,
+		SessionUUID: sessionUUID,
+		Sender:      "self",
+		Attachments: []model.AttachmentMeta{{
+			ID:            attachmentID,
+			Size:          123,
+			EncryptedName: "enc-name",
+		}},
+		EncryptedData: "enc-msg",
+		Header:        "hdr-msg",
+	}); err != nil {
+		t.Fatalf("failed to upsert message: %v", err)
+	}
+
+	var remaining int
+	if err := testDB.QueryRow(
+		`SELECT COUNT(*) FROM temp_objects WHERE object_key = $1`,
+		objectKey,
+	).Scan(&remaining); err != nil {
+		t.Fatalf("failed to count temp objects: %v", err)
+	}
+	if remaining != 0 {
+		t.Fatalf("expected temp object to be removed, got %d", remaining)
 	}
 }

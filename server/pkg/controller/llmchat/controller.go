@@ -23,19 +23,19 @@ type SubscriptionChecker interface {
 }
 
 const (
-	llmChatMaxAttachmentsFree       = 4
-	llmChatMaxAttachmentsPaid       = 10
-	llmChatMaxAttachmentFree        = int64(25 * 1024 * 1024)  // 25MB
-	llmChatMaxAttachmentPaid        = int64(100 * 1024 * 1024) // 100MB
-	llmChatMaxMessagesFree    int64 = 2000
-	llmChatMaxMessagesPaid    int64 = 50000
+	llmChatMaxAttachmentsFree             = 4
+	llmChatMaxAttachmentsPaid             = 10
+	llmChatMaxAttachmentFree              = int64(25 * 1024 * 1024)  // 25MB
+	llmChatMaxAttachmentPaid              = int64(100 * 1024 * 1024) // 100MB
+	llmChatMaxAttachmentStorageFree       = int64(1 * 1024 * 1024 * 1024)
+	llmChatMaxAttachmentStoragePaid       = int64(10 * 1024 * 1024 * 1024)
+	llmChatMaxMessagesFree          int64 = 2000
+	llmChatMaxMessagesPaid          int64 = 50000
 
 	llmChatDiffTypeSessions          = "sessions"
 	llmChatDiffTypeMessages          = "messages"
 	llmChatDiffTypeSessionTombstones = "session_tombstones"
 	llmChatDiffTypeMessageTombstones = "message_tombstones"
-
-	zeroUUID = "00000000-0000-0000-0000-000000000000"
 )
 
 // Controller exposes business logic for llmchat.
@@ -44,6 +44,7 @@ type Controller struct {
 	KeyCache            *cache.Cache
 	SubscriptionChecker SubscriptionChecker
 	AttachmentCtrl      *AttachmentController
+	CleanupAttachments  bool
 }
 
 func (c *Controller) UpsertKey(ctx *gin.Context, req model.UpsertKeyRequest) (*model.Key, error) {
@@ -71,6 +72,23 @@ func (c *Controller) UpsertSession(ctx *gin.Context, req model.UpsertSessionRequ
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
+	if _, err := uuid.Parse(req.SessionUUID); err != nil {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid session_uuid")
+	}
+	if req.RootSessionUUID == "" {
+		req.RootSessionUUID = req.SessionUUID
+	}
+	if _, err := uuid.Parse(req.RootSessionUUID); err != nil {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid root_session_uuid")
+	}
+	if req.BranchFromMessageUUID != nil {
+		if *req.BranchFromMessageUUID == "" {
+			req.BranchFromMessageUUID = nil
+		} else if _, err := uuid.Parse(*req.BranchFromMessageUUID); err != nil {
+			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid branch_from_message_uuid")
+		}
+	}
+
 	res, err := c.Repo.UpsertSession(ctx, userID, req)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to upsert llmchat session")
@@ -83,12 +101,41 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
+	if _, err := uuid.Parse(req.MessageUUID); err != nil {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid message_uuid")
+	}
+	if _, err := uuid.Parse(req.SessionUUID); err != nil {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid session_uuid")
+	}
+	if err := c.ensureSessionActive(ctx, userID, req.SessionUUID); err != nil {
+		return nil, err
+	}
+	if req.ParentMessageUUID != nil {
+		if *req.ParentMessageUUID == "" {
+			req.ParentMessageUUID = nil
+		} else if _, err := uuid.Parse(*req.ParentMessageUUID); err != nil {
+			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid parent_message_uuid")
+		}
+	}
+	if req.Sender != "self" && req.Sender != "other" {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sender")
+	}
 
 	if err := c.validateAttachments(userID, req.Attachments); err != nil {
 		return nil, err
 	}
 	if err := c.enforceMessageLimit(ctx, userID, req.MessageUUID); err != nil {
 		return nil, err
+	}
+	if err := c.enforceAttachmentStorageLimit(ctx, userID, req.MessageUUID, req.Attachments); err != nil {
+		return nil, err
+	}
+	if c.AttachmentCtrl != nil {
+		for _, attachment := range req.Attachments {
+			if err := c.AttachmentCtrl.VerifyUploaded(ctx, userID, attachment.ID, attachment.Size); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	res, err := c.Repo.UpsertMessage(ctx, userID, req)
@@ -104,11 +151,15 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
 
-	attachments, err := c.Repo.GetActiveSessionMessageAttachments(ctx, userID, sessionUUID)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to fetch llmchat session messages")
+	var attachments []model.AttachmentMeta
+	if c.CleanupAttachments && c.AttachmentCtrl != nil {
+		var err error
+		attachments, err = c.Repo.GetActiveSessionMessageAttachments(ctx, userID, sessionUUID)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to fetch llmchat session messages")
+		}
 	}
-	_, err = c.Repo.SoftDeleteMessagesForSession(ctx, userID, sessionUUID)
+	_, err := c.Repo.SoftDeleteMessagesForSession(ctx, userID, sessionUUID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat session messages")
 	}
@@ -118,14 +169,8 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat session")
 	}
 
-	if c.AttachmentCtrl != nil {
+	if c.CleanupAttachments && c.AttachmentCtrl != nil {
 		for _, attachment := range attachments {
-			if attachment.ID == "" {
-				continue
-			}
-			if _, parseErr := uuid.Parse(attachment.ID); parseErr != nil {
-				continue
-			}
 			referenced, refErr := c.Repo.HasActiveAttachmentReference(ctx, userID, attachment.ID)
 			if refErr != nil {
 				logrus.WithError(refErr).WithField("user_id", userID).Warn("Failed to check llmchat attachment reference")
@@ -134,8 +179,12 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 			if referenced {
 				continue
 			}
-			if delErr := c.AttachmentCtrl.Delete(ctx, userID, attachment.ID); delErr != nil {
+			if delErr := c.AttachmentCtrl.Delete(ctx.Request.Context(), userID, attachment.ID); delErr != nil {
 				logrus.WithError(delErr).WithField("user_id", userID).WithField("attachment_id", attachment.ID).Warn("Failed to delete llmchat attachment")
+				continue
+			}
+			if cleanupErr := c.Repo.DeleteAttachmentRecords(ctx, userID, attachment.ID); cleanupErr != nil {
+				logrus.WithError(cleanupErr).WithField("user_id", userID).WithField("attachment_id", attachment.ID).Warn("Failed to delete llmchat attachment records")
 			}
 		}
 	}
@@ -149,9 +198,13 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
 
-	meta, err := c.Repo.GetMessageMeta(ctx, userID, messageUUID)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to fetch llmchat message")
+	var meta llmchat.MessageMeta
+	if c.CleanupAttachments && c.AttachmentCtrl != nil {
+		var err error
+		meta, err = c.Repo.GetMessageMeta(ctx, userID, messageUUID)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to fetch llmchat message")
+		}
 	}
 
 	res, err := c.Repo.DeleteMessage(ctx, userID, messageUUID)
@@ -159,14 +212,8 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat message")
 	}
 
-	if !meta.IsDeleted && c.AttachmentCtrl != nil {
+	if c.CleanupAttachments && !meta.IsDeleted && c.AttachmentCtrl != nil {
 		for _, attachment := range meta.Attachments {
-			if attachment.ID == "" {
-				continue
-			}
-			if _, parseErr := uuid.Parse(attachment.ID); parseErr != nil {
-				continue
-			}
 			referenced, refErr := c.Repo.HasActiveAttachmentReference(ctx, userID, attachment.ID)
 			if refErr != nil {
 				logrus.WithError(refErr).WithField("user_id", userID).Warn("Failed to check llmchat attachment reference")
@@ -175,8 +222,12 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 			if referenced {
 				continue
 			}
-			if delErr := c.AttachmentCtrl.Delete(ctx, userID, attachment.ID); delErr != nil {
+			if delErr := c.AttachmentCtrl.Delete(ctx.Request.Context(), userID, attachment.ID); delErr != nil {
 				logrus.WithError(delErr).WithField("user_id", userID).WithField("attachment_id", attachment.ID).Warn("Failed to delete llmchat attachment")
+				continue
+			}
+			if cleanupErr := c.Repo.DeleteAttachmentRecords(ctx, userID, attachment.ID); cleanupErr != nil {
+				logrus.WithError(cleanupErr).WithField("user_id", userID).WithField("attachment_id", attachment.ID).Warn("Failed to delete llmchat attachment records")
 			}
 		}
 	}
@@ -191,6 +242,17 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 	userID := auth.GetUserID(ctx.Request.Header)
 
 	baseSinceTime := *req.SinceTime
+	if req.BaseSinceTime != nil && *req.BaseSinceTime > 0 {
+		baseSinceTime = *req.BaseSinceTime
+	}
+	maxTime := baseSinceTime
+	if req.MaxTime != nil && *req.MaxTime > 0 {
+		maxTime = *req.MaxTime
+	}
+	if maxTime < baseSinceTime {
+		maxTime = baseSinceTime
+	}
+
 	sinceType := llmChatDiffTypeSessions
 	if req.SinceType != nil && *req.SinceType != "" {
 		sinceType = *req.SinceType
@@ -199,12 +261,12 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sinceType")
 	}
 
-	sinceID := zeroUUID
+	sinceID := model.ZeroUUID
 	if req.SinceID != nil && *req.SinceID != "" {
 		sinceID = *req.SinceID
 	}
 	if _, err := uuid.Parse(sinceID); err != nil {
-		sinceID = zeroUUID
+		sinceID = model.ZeroUUID
 	}
 
 	remaining := int(req.Limit)
@@ -213,8 +275,13 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 	sessionTombstones := make([]model.SessionTombstone, 0)
 	messageTombstones := make([]model.MessageTombstone, 0)
 
-	maxTimestamp := baseSinceTime
-	cursor := model.DiffCursor{SinceTime: baseSinceTime, SinceType: sinceType, SinceID: sinceID}
+	cursor := model.DiffCursor{
+		BaseSinceTime: baseSinceTime,
+		SinceTime:     *req.SinceTime,
+		MaxTime:       maxTime,
+		SinceType:     sinceType,
+		SinceID:       sinceID,
+	}
 
 	for remaining > 0 {
 		switch cursor.SinceType {
@@ -226,8 +293,8 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 			sessions = append(sessions, entries...)
 			if len(entries) > 0 {
 				last := entries[len(entries)-1]
-				if last.UpdatedAt > maxTimestamp {
-					maxTimestamp = last.UpdatedAt
+				if last.UpdatedAt > cursor.MaxTime {
+					cursor.MaxTime = last.UpdatedAt
 				}
 				remaining -= len(entries)
 				if hasMore {
@@ -236,13 +303,15 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
 				if remaining == 0 {
-					cursor = model.DiffCursor{SinceTime: baseSinceTime, SinceType: llmChatDiffTypeMessages, SinceID: zeroUUID}
+					cursor.SinceTime = baseSinceTime
+					cursor.SinceType = llmChatDiffTypeMessages
+					cursor.SinceID = model.ZeroUUID
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
-			} else {
-				// exhausted
 			}
-			cursor = model.DiffCursor{SinceTime: baseSinceTime, SinceType: llmChatDiffTypeMessages, SinceID: zeroUUID}
+			cursor.SinceTime = baseSinceTime
+			cursor.SinceType = llmChatDiffTypeMessages
+			cursor.SinceID = model.ZeroUUID
 
 		case llmChatDiffTypeMessages:
 			entries, hasMore, err := c.Repo.GetMessageDiffPage(ctx, userID, cursor.SinceTime, cursor.SinceID, int16(remaining))
@@ -252,8 +321,8 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 			messages = append(messages, entries...)
 			if len(entries) > 0 {
 				last := entries[len(entries)-1]
-				if last.UpdatedAt > maxTimestamp {
-					maxTimestamp = last.UpdatedAt
+				if last.UpdatedAt > cursor.MaxTime {
+					cursor.MaxTime = last.UpdatedAt
 				}
 				remaining -= len(entries)
 				if hasMore {
@@ -262,11 +331,15 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
 				if remaining == 0 {
-					cursor = model.DiffCursor{SinceTime: baseSinceTime, SinceType: llmChatDiffTypeSessionTombstones, SinceID: zeroUUID}
+					cursor.SinceTime = baseSinceTime
+					cursor.SinceType = llmChatDiffTypeSessionTombstones
+					cursor.SinceID = model.ZeroUUID
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
 			}
-			cursor = model.DiffCursor{SinceTime: baseSinceTime, SinceType: llmChatDiffTypeSessionTombstones, SinceID: zeroUUID}
+			cursor.SinceTime = baseSinceTime
+			cursor.SinceType = llmChatDiffTypeSessionTombstones
+			cursor.SinceID = model.ZeroUUID
 
 		case llmChatDiffTypeSessionTombstones:
 			entries, hasMore, err := c.Repo.GetSessionTombstonesPage(ctx, userID, cursor.SinceTime, cursor.SinceID, int16(remaining))
@@ -276,8 +349,8 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 			sessionTombstones = append(sessionTombstones, entries...)
 			if len(entries) > 0 {
 				last := entries[len(entries)-1]
-				if last.DeletedAt > maxTimestamp {
-					maxTimestamp = last.DeletedAt
+				if last.DeletedAt > cursor.MaxTime {
+					cursor.MaxTime = last.DeletedAt
 				}
 				remaining -= len(entries)
 				if hasMore {
@@ -286,11 +359,15 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
 				if remaining == 0 {
-					cursor = model.DiffCursor{SinceTime: baseSinceTime, SinceType: llmChatDiffTypeMessageTombstones, SinceID: zeroUUID}
+					cursor.SinceTime = baseSinceTime
+					cursor.SinceType = llmChatDiffTypeMessageTombstones
+					cursor.SinceID = model.ZeroUUID
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
 			}
-			cursor = model.DiffCursor{SinceTime: baseSinceTime, SinceType: llmChatDiffTypeMessageTombstones, SinceID: zeroUUID}
+			cursor.SinceTime = baseSinceTime
+			cursor.SinceType = llmChatDiffTypeMessageTombstones
+			cursor.SinceID = model.ZeroUUID
 
 		case llmChatDiffTypeMessageTombstones:
 			entries, hasMore, err := c.Repo.GetMessageTombstonesPage(ctx, userID, cursor.SinceTime, cursor.SinceID, int16(remaining))
@@ -300,8 +377,8 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 			messageTombstones = append(messageTombstones, entries...)
 			if len(entries) > 0 {
 				last := entries[len(entries)-1]
-				if last.DeletedAt > maxTimestamp {
-					maxTimestamp = last.DeletedAt
+				if last.DeletedAt > cursor.MaxTime {
+					cursor.MaxTime = last.DeletedAt
 				}
 				remaining -= len(entries)
 				if hasMore {
@@ -309,12 +386,17 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 					cursor.SinceID = last.MessageUUID
 					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
 				}
-				if remaining == 0 {
-					cursor = model.DiffCursor{SinceTime: maxTimestamp, SinceType: llmChatDiffTypeSessions, SinceID: zeroUUID}
-					return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
-				}
 			}
-			cursor = model.DiffCursor{SinceTime: maxTimestamp, SinceType: llmChatDiffTypeSessions, SinceID: zeroUUID}
+
+			nextBase := cursor.MaxTime
+			nextCursor := model.DiffCursor{
+				BaseSinceTime: nextBase,
+				SinceTime:     nextBase,
+				MaxTime:       nextBase,
+				SinceType:     llmChatDiffTypeSessions,
+				SinceID:       model.ZeroUUID,
+			}
+			return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, nextCursor), nil
 
 		default:
 			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sinceType")
@@ -322,6 +404,10 @@ func (c *Controller) GetDiff(ctx *gin.Context, req model.GetDiffRequest) (*model
 	}
 
 	return buildDiffResponse(sessions, messages, sessionTombstones, messageTombstones, cursor), nil
+}
+
+func (c *Controller) ValidateKey(ctx *gin.Context) error {
+	return c.validateKey(ctx)
 }
 
 func (c *Controller) validateKey(ctx *gin.Context) error {
@@ -349,6 +435,17 @@ func (c *Controller) validateKey(ctx *gin.Context) error {
 	return err
 }
 
+func (c *Controller) ensureSessionActive(ctx *gin.Context, userID int64, sessionUUID string) error {
+	meta, err := c.Repo.GetSessionMeta(ctx, userID, sessionUUID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to fetch llmchat session")
+	}
+	if meta.IsDeleted {
+		return stacktrace.Propagate(&ente.ErrNotFoundError, "llmchat session not found")
+	}
+	return nil
+}
+
 func (c *Controller) keyCacheKey(userID int64) string {
 	return fmt.Sprintf("llmchat_key:%d", userID)
 }
@@ -361,17 +458,11 @@ func (c *Controller) setKeyCache(userID int64) {
 }
 
 func (c *Controller) isPaidUser(userID int64) bool {
-	if c.SubscriptionChecker == nil {
-		return false
-	}
-	return c.SubscriptionChecker.HasActiveSelfOrFamilySubscription(userID, false) == nil
+	return isPaidUser(c.SubscriptionChecker, userID)
 }
 
 func (c *Controller) maxAttachmentSize(userID int64) int64 {
-	if c.isPaidUser(userID) {
-		return llmChatMaxAttachmentPaid
-	}
-	return llmChatMaxAttachmentFree
+	return maxAttachmentSizeForUser(c.SubscriptionChecker, userID)
 }
 
 func (c *Controller) maxAttachments(userID int64) int {
@@ -388,10 +479,11 @@ func (c *Controller) maxMessages(userID int64) int64 {
 	return llmChatMaxMessagesFree
 }
 
+func (c *Controller) maxAttachmentStorage(userID int64) int64 {
+	return maxAttachmentStorageForUser(c.SubscriptionChecker, userID)
+}
+
 func (c *Controller) validateAttachments(userID int64, attachments []model.AttachmentMeta) error {
-	if attachments == nil {
-		attachments = []model.AttachmentMeta{}
-	}
 	if len(attachments) > c.maxAttachments(userID) {
 		return stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
 	}
@@ -409,6 +501,30 @@ func (c *Controller) validateAttachments(userID int64, attachments []model.Attac
 		if attachment.Size > maxSize {
 			return stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
 		}
+	}
+	return nil
+}
+
+func (c *Controller) enforceAttachmentStorageLimit(ctx *gin.Context, userID int64, messageUUID string, attachments []model.AttachmentMeta) error {
+	maxStorage := c.maxAttachmentStorage(userID)
+	if maxStorage <= 0 {
+		return nil
+	}
+	var newSize int64
+	for _, attachment := range attachments {
+		newSize += attachment.Size
+	}
+	currentUsage, err := c.Repo.GetActiveAttachmentUsage(ctx, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to fetch llmchat attachment usage")
+	}
+	existingUsage, err := c.Repo.GetActiveMessageAttachmentUsage(ctx, userID, messageUUID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to fetch llmchat message attachment usage")
+	}
+	projected := currentUsage - existingUsage + newSize
+	if projected > maxStorage {
+		return stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
 	}
 	return nil
 }
@@ -460,6 +576,6 @@ func buildDiffResponse(
 			Messages: messageTombstones,
 		},
 		Cursor:    cursor,
-		Timestamp: cursor.SinceTime,
+		Timestamp: cursor.MaxTime,
 	}
 }

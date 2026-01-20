@@ -83,6 +83,27 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 	return result, nil
 }
 
+type SessionMeta struct {
+	IsDeleted bool
+}
+
+func (r *Repository) GetSessionMeta(ctx context.Context, userID int64, sessionUUID string) (SessionMeta, error) {
+	row := r.DB.QueryRowContext(ctx, `SELECT is_deleted
+		FROM llmchat_sessions
+		WHERE session_uuid = $1 AND user_id = $2`,
+		sessionUUID,
+		userID,
+	)
+	var meta SessionMeta
+	if err := row.Scan(&meta.IsDeleted); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return meta, stacktrace.Propagate(&ente.ErrNotFoundError, "llmchat session not found")
+		}
+		return meta, stacktrace.Propagate(err, "failed to fetch llmchat session")
+	}
+	return meta, nil
+}
+
 func (r *Repository) DeleteSession(ctx context.Context, userID int64, sessionUUID string) (model.SessionTombstone, error) {
 	row := r.DB.QueryRowContext(ctx, `UPDATE llmchat_sessions
 		SET is_deleted = TRUE,
@@ -168,6 +189,7 @@ func (r *Repository) GetSessionTombstonesPage(ctx context.Context, userID int64,
 	return entries, hasMore, nil
 }
 
+// GetSessionDiff returns a non-paginated diff; retained for backwards compatibility.
 func (r *Repository) GetSessionDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.SessionDiffEntry, error) {
 	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, root_session_uuid, branch_from_message_uuid, encrypted_data, header, created_at, updated_at
 		FROM llmchat_sessions

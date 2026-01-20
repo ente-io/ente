@@ -109,6 +109,7 @@ func main() {
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
 	viper.SetDefault("features.llmchat", false)
+	viper.SetDefault("llmchat.attachments.cleanup", false)
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
@@ -117,6 +118,7 @@ func main() {
 	hashingKey := viper.GetString("key.hash")
 	jwtSecret := viper.GetString("jwt.secret")
 	llmChatEnabled := viper.GetBool("features.llmchat")
+	llmChatAttachmentsCleanup := viper.GetBool("llmchat.attachments.cleanup")
 
 	secretEncryptionKeyBytes, err := b64.StdEncoding.DecodeString(secretEncryptionKey)
 	if err != nil {
@@ -887,8 +889,9 @@ func main() {
 	privateAPI.DELETE("/authenticator/entity", authenticatorHandler.DeleteEntity)
 	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
 
+	var llmChatAttachmentController *llmchatCtrl.AttachmentController
 	if llmChatEnabled {
-		llmChatAttachmentController := &llmchatCtrl.AttachmentController{
+		llmChatAttachmentController = &llmchatCtrl.AttachmentController{
 			S3Config:            s3Config,
 			Repo:                llmChatRepository,
 			SubscriptionChecker: billingController,
@@ -898,6 +901,7 @@ func main() {
 			KeyCache:            llmChatKeyCache,
 			SubscriptionChecker: billingController,
 			AttachmentCtrl:      llmChatAttachmentController,
+			CleanupAttachments:  llmChatAttachmentsCleanup,
 		}
 		llmChatHandler := &api.LlmChatHandler{
 			Controller:           llmChatController,
@@ -910,7 +914,7 @@ func main() {
 		privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
 		privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
 		privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
-		privateAPI.PUT("/llmchat/chat/attachment/:attachmentId", llmChatHandler.UploadAttachment)
+		privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
 		privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
 		privateAPI.GET("/llmchat/chat/diff", llmChatHandler.GetDiff)
 	}
@@ -957,7 +961,7 @@ func main() {
 	setupAndStartCrons(
 		userAuthRepo, collectionLinkRepo, fileLinkRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
-		embeddingController, healthCheckHandler, castDb, llmChatRepository)
+		embeddingController, healthCheckHandler, castDb, llmChatRepository, llmChatAttachmentController, llmChatAttachmentsCleanup)
 
 	// Create a new collector, the name will be used as a label on the metrics
 	collector := sqlstats.NewStatsCollector("prod_db", db)
@@ -1104,7 +1108,9 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
 	castDb castRepo.Repository,
-	llmChatRepo *llmchatRepo.Repository) {
+	llmChatRepo *llmchatRepo.Repository,
+	llmChatAttachmentCtrl *llmchatCtrl.AttachmentController,
+	llmChatAttachmentsCleanup bool) {
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
 		log.Info("Skipping cron jobs")
@@ -1141,6 +1147,32 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 				}).Info("Cleaned up llmchat tombstones")
 			}
 		})
+	}
+
+	if llmChatAttachmentCtrl != nil {
+		schedule(c, "@every 24h", func() {
+			deleted, err := llmChatAttachmentCtrl.CleanupExpiredTempUploads(context.Background(), 1000)
+			if err != nil {
+				log.WithError(err).Warn("Failed to cleanup llmchat temp uploads")
+				return
+			}
+			if deleted > 0 {
+				log.WithField("count", deleted).Info("Cleaned up llmchat temp uploads")
+			}
+		})
+
+		if llmChatAttachmentsCleanup {
+			schedule(c, "@every 24h", func() {
+				deleted, err := llmChatAttachmentCtrl.CleanupDeletedAttachments(context.Background(), 1000)
+				if err != nil {
+					log.WithError(err).Warn("Failed to cleanup deleted llmchat attachments")
+					return
+				}
+				if deleted > 0 {
+					log.WithField("count", deleted).Info("Cleaned up deleted llmchat attachments")
+				}
+			})
+		}
 	}
 
 	schedule(c, "@every 1m", func() {

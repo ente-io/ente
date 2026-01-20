@@ -40,6 +40,8 @@ const (
 	llmChatEndpointDownloadAttachment = "download_attachment"
 
 	llmChatMaxJSONBodyBytes = int64(800 * 1024) // 800KB
+	llmChatDiffDefaultLimit = 500
+	llmChatDiffMaximumLimit = 2500
 )
 
 var (
@@ -92,16 +94,29 @@ func logLlmChatDiff(c *gin.Context, req model.GetDiffRequest, resp *model.GetDif
 	if req.SinceTime != nil {
 		sinceTime = *req.SinceTime
 	}
+	sinceType := ""
+	if req.SinceType != nil {
+		sinceType = *req.SinceType
+	}
+	sinceID := ""
+	if req.SinceID != nil {
+		sinceID = *req.SinceID
+	}
 	logrus.WithFields(logrus.Fields{
 		"req_id":             requestid.Get(c),
 		"user_id":            auth.GetUserID(c.Request.Header),
 		"since_time":         sinceTime,
+		"since_type":         sinceType,
+		"since_id":           sinceID,
 		"limit":              req.Limit,
 		"sessions":           sessions,
 		"messages":           messages,
 		"session_tombstones": sessionTombstones,
 		"message_tombstones": messageTombstones,
 		"total":              total,
+		"next_since_time":    resp.Cursor.SinceTime,
+		"next_since_type":    resp.Cursor.SinceType,
+		"next_since_id":      resp.Cursor.SinceID,
 		"timestamp":          resp.Timestamp,
 	}).Info("llm chat diff served")
 }
@@ -190,6 +205,10 @@ func (h *LlmChatHandler) DeleteSession(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing session id"))
 		return
 	}
+	if _, err := uuid.Parse(sessionUUID); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid session id"))
+		return
+	}
 	resp, err := h.Controller.DeleteSession(c, sessionUUID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to delete llm chat session"))
@@ -207,6 +226,10 @@ func (h *LlmChatHandler) DeleteMessage(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing message id"))
 		return
 	}
+	if _, err := uuid.Parse(messageUUID); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid message id"))
+		return
+	}
 	resp, err := h.Controller.DeleteMessage(c, messageUUID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to delete llm chat message"))
@@ -215,12 +238,12 @@ func (h *LlmChatHandler) DeleteMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func (h *LlmChatHandler) UploadAttachment(c *gin.Context) {
+func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 	startTime := time.Now()
 	defer observeLlmChatMetrics(c, llmChatEndpointUploadAttachment, startTime)
 
-	if h.AttachmentController == nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrNotImplemented, "Attachments not configured"))
+	if err := h.Controller.ValidateKey(c); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
 
@@ -234,21 +257,27 @@ func (h *LlmChatHandler) UploadAttachment(c *gin.Context) {
 		return
 	}
 
-	err := h.AttachmentController.Upload(c, attachmentID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to upload attachment"))
+	var req model.GetAttachmentUploadURLRequest
+	if err := bindJSONWithLimit(c, &req, llmChatMaxJSONBodyBytes); err != nil {
+		handler.Error(c, err)
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	resp, err := h.AttachmentController.GetUploadURL(c, attachmentID, req)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Failed to get attachment upload URL"))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func (h *LlmChatHandler) DownloadAttachment(c *gin.Context) {
 	startTime := time.Now()
 	defer observeLlmChatMetrics(c, llmChatEndpointDownloadAttachment, startTime)
 
-	if h.AttachmentController == nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrNotImplemented, "Attachments not configured"))
+	if err := h.Controller.ValidateKey(c); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
 
@@ -262,14 +291,13 @@ func (h *LlmChatHandler) DownloadAttachment(c *gin.Context) {
 		return
 	}
 
-	body, size, err := h.AttachmentController.Download(c, attachmentID)
+	url, err := h.AttachmentController.GetDownloadURL(c, attachmentID)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to download attachment"))
+		handler.Error(c, stacktrace.Propagate(err, "Failed to get attachment download URL"))
 		return
 	}
-	defer body.Close()
 
-	c.DataFromReader(http.StatusOK, size, "application/octet-stream", body, nil)
+	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 func (h *LlmChatHandler) GetDiff(c *gin.Context) {
@@ -283,7 +311,10 @@ func (h *LlmChatHandler) GetDiff(c *gin.Context) {
 		return
 	}
 	if request.Limit <= 0 {
-		request.Limit = 500
+		request.Limit = llmChatDiffDefaultLimit
+	}
+	if request.Limit > llmChatDiffMaximumLimit {
+		request.Limit = llmChatDiffMaximumLimit
 	}
 	resp, err := h.Controller.GetDiff(c, request)
 	if err != nil {

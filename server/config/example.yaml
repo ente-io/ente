@@ -74,3 +74,13 @@ key:
 jwt:
     secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
 
+# Feature flags
+features:
+    llmchat: false
+
+# LLM chat configuration
+llmchat:
+    attachments:
+        # Enable background cleanup of unreferenced attachments.
+        cleanup: false
+
