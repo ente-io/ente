@@ -44,30 +44,24 @@ class _CollectionsItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => _openCollections(context),
       child: Container(
-        height: 60,
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            SizedBox(
-              width: 40,
-              height: 40,
-              child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedWallet05,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedWallet05,
+              color: colorScheme.textMuted,
+              size: 20,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 context.l10n.collections,
-                style: textTheme.body,
+                style: textTheme.small,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -96,30 +90,24 @@ class _TrashItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => _openTrash(context),
       child: Container(
-        height: 60,
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            SizedBox(
-              width: 40,
-              height: 40,
-              child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: colorScheme.textMuted,
+              size: 20,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 context.l10n.trash,
-                style: textTheme.body,
+                style: textTheme.small,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -150,30 +138,24 @@ class _LegacyItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => openLegacyPage(context),
       child: Container(
-        height: 60,
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: borderRadius,
         ),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            SizedBox(
-              width: 40,
-              height: 40,
-              child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFavourite,
-                  color: colorScheme.primary700,
-                  size: 24,
-                ),
-              ),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedFavourite,
+              color: colorScheme.textMuted,
+              size: 20,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 context.l10n.legacy,
-                style: textTheme.body,
+                style: textTheme.small,
               ),
             ),
             Icon(
