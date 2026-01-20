@@ -68,6 +68,8 @@ class FlagService {
 
   bool get enableUploadV2 => _isServerFlagEnabled(_uploadV2Flag);
 
+  bool get queueSourceEnabled => internalUser;
+
   bool get enableVectorDb => hasGrantedMLConsent;
 
   String get castUrl => flags.castUrl;

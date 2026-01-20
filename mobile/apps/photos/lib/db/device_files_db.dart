@@ -279,6 +279,20 @@ extension DeviceFiles on FilesDB {
     return result;
   }
 
+  Future<Set<String>> getSelectedDevicePathIds() async {
+    final db = await sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT id FROM device_collections where should_backup = $_sqlBoolTrue;
+      ''',
+    );
+    final Set<String> result = <String>{};
+    for (final row in rows) {
+      result.add(row['id'] as String);
+    }
+    return result;
+  }
+
   Future<void> updateDevicePathSyncStatus(
     Map<String, bool> syncStatus,
   ) async {

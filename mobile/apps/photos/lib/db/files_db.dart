@@ -60,6 +60,7 @@ class FilesDB with SqlDbBase {
   static const columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static const columnMetadataDecryptionHeader = 'metadata_decryption_header';
   static const columnFileSize = 'file_size';
+  static const columnQueueSource = 'queue_source';
 
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
@@ -90,6 +91,7 @@ class FilesDB with SqlDbBase {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...addQueueSourceColumn(),
   ];
 
   static const List<String> _columnNames = [
@@ -98,6 +100,7 @@ class FilesDB with SqlDbBase {
     columnUploadedFileID,
     columnOwnerID,
     columnCollectionID,
+    columnQueueSource,
     columnTitle,
     columnDeviceFolder,
     columnLatitude,
@@ -413,6 +416,14 @@ class FilesDB with SqlDbBase {
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
       '''
+    ];
+  }
+
+  static List<String> addQueueSourceColumn() {
+    return [
+      '''
+        ALTER TABLE $filesTable ADD COLUMN $columnQueueSource TEXT;
+      ''',
     ];
   }
 
@@ -1123,18 +1134,73 @@ class FilesDB with SqlDbBase {
   // corresponding file entries are not already mapped to some other collection
   Future<void> setCollectionIDForUnMappedLocalFiles(
     int collectionID,
-    Set<String> localIDs,
+    Set<String> localIDs, {
+    String? queueSource,
+  }
   ) async {
+    if (localIDs.isEmpty) {
+      return;
+    }
     final db = await instance.sqliteAsyncDB;
-    final inParam = localIDs.map((id) => "'$id'").join(',');
+    final localIDList = localIDs.toList();
+    final placeholders = List.filled(localIDList.length, '?').join(',');
+    if (queueSource == null) {
+      await db.execute(
+        '''
+        UPDATE $filesTable
+        SET $columnCollectionID = $collectionID
+        WHERE $columnLocalID IN ($placeholders) AND ($columnCollectionID IS NULL OR 
+        $columnCollectionID = -1);
+      ''',
+        localIDList,
+      );
+      return;
+    }
     await db.execute(
       '''
       UPDATE $filesTable
-      SET $columnCollectionID = $collectionID
-      WHERE $columnLocalID IN ($inParam) AND ($columnCollectionID IS NULL OR 
+      SET $columnCollectionID = ?,
+          $columnQueueSource = ?
+      WHERE $columnLocalID IN ($placeholders) AND ($columnCollectionID IS NULL OR 
       $columnCollectionID = -1);
     ''',
+      [collectionID, queueSource, ...localIDList],
     );
+  }
+
+  Future<void> cleanupQueuedEntry({
+    required String localID,
+    required int collectionID,
+    required String queueSource,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    await db.writeTransaction((tx) async {
+      final hasUnmapped = await tx.getAll(
+        'SELECT 1 FROM $filesTable WHERE $columnLocalID = ? '
+        'AND ($columnCollectionID IS NULL OR $columnCollectionID = -1) '
+        'AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1) '
+        'LIMIT 1',
+        [localID],
+      );
+
+      if (hasUnmapped.isNotEmpty) {
+        await tx.execute(
+          'DELETE FROM $filesTable WHERE $columnLocalID = ? '
+          'AND $columnCollectionID = ? AND $columnQueueSource = ? '
+          'AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)',
+          [localID, collectionID, queueSource],
+        );
+      } else {
+        await tx.execute(
+          'UPDATE $filesTable SET $columnCollectionID = -1, '
+          '$columnQueueSource = NULL '
+          'WHERE $columnLocalID = ? AND $columnCollectionID = ? '
+          'AND $columnQueueSource = ? '
+          'AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)',
+          [localID, collectionID, queueSource],
+        );
+      }
+    });
   }
 
   Future<void> markFilesForReUpload(
@@ -1927,6 +1993,7 @@ class FilesDB with SqlDbBase {
       file.uploadedFileID ?? -1,
       file.ownerID,
       file.collectionID ?? -1,
+      file.queueSource,
       file.title,
       file.deviceFolder,
       latitude,
@@ -2010,6 +2077,7 @@ class FilesDB with SqlDbBase {
     file.hash = row[columnHash];
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
     file.fileSize = row[columnFileSize];
+    file.queueSource = row[columnQueueSource];
 
     file.mMdVersion = row[columnMMdVersion] ?? 0;
     file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';

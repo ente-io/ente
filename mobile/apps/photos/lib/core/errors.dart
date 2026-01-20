@@ -28,6 +28,8 @@ class InvalidFileError extends ArgumentError {
   }
 }
 
+class SkippedQueuedFileError extends Error {}
+
 class SubscriptionAlreadyClaimedError extends Error {}
 
 class WiFiUnavailableError extends Error {}

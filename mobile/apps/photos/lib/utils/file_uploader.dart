@@ -38,6 +38,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -141,6 +142,9 @@ class FileUploader {
       UploadLocksDB.instance,
       flagService,
     );
+    if (flagService.queueSourceEnabled) {
+      await RemoteSyncService.instance.ensureSelectedPathIdsCache();
+    }
     if (currentTime - (_prefs.getInt(_lastStaleFileCleanupTime) ?? 0) >
         tempDirCleanUpInterval) {
       await removeStaleFiles();
@@ -298,6 +302,12 @@ class FileUploader {
             ?.value;
       }
       if (pendingEntry != null) {
+        if (flagService.queueSourceEnabled &&
+            _shouldSkipQueuedItem(pendingEntry)) {
+          _handleSkippedQueuedItem(pendingEntry);
+          _pollQueue();
+          return;
+        }
         pendingEntry.status = UploadStatus.inProgress;
         _allBackups[pendingEntry.file.localID!] =
             _allBackups[pendingEntry.file.localID]!
@@ -309,6 +319,44 @@ class FileUploader {
         );
       }
     }
+  }
+
+  bool _shouldSkipQueuedItem(FileUploadItem item) {
+    final file = item.file;
+    final qs = file.queueSource;
+    if (qs == null || qs == 'manual') {
+      return false;
+    }
+
+    final bool isSelected = RemoteSyncService.instance.isDevicePathSelected(qs);
+    if (!isSelected) {
+      return true;
+    }
+
+    final int? onlyNewSince = backupPreferenceService.onlyNewSinceEpoch;
+    return onlyNewSince != null && (file.creationTime ?? 0) < onlyNewSince;
+  }
+
+  void _handleSkippedQueuedItem(FileUploadItem item) {
+    final file = item.file;
+    final qs = file.queueSource;
+    if (file.localID == null || qs == null) {
+      return;
+    }
+    unawaited(
+      FilesDB.instance.cleanupQueuedEntry(
+        localID: file.localID!,
+        collectionID: item.collectionID,
+        queueSource: qs,
+      ),
+    );
+    _queue.remove(file.localID!);
+    _allBackups.remove(file.localID!);
+    if (_totalCountInUploadSession > 0) {
+      _totalCountInUploadSession--;
+    }
+    item.completer.completeError(SkippedQueuedFileError());
+    Bus.instance.fire(BackupUpdatedEvent(_allBackups));
   }
 
   Future<EnteFile?> _encryptAndUploadFileToCollection(
