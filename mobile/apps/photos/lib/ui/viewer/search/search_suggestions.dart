@@ -112,8 +112,27 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final resultsBackground = EnteTheme.isDark(context)
+        ? const Color.fromRGBO(22, 22, 22, 1)
+        : colorScheme.backgroundElevated2;
+    final sectionWidgets = _buildSectionWidgets(context);
+    if (_resultsCount > 0) {
+      sectionWidgets.insert(
+        0,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+          child: Text(
+            AppLocalizations.of(context).searchResultCount(
+              count: _resultsCount,
+            ),
+            style: textTheme.smallBold.copyWith(color: colorScheme.textMuted),
+          ),
+        ),
+      );
+    }
     return Scaffold(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: resultsBackground,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: Column(
@@ -125,7 +144,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
                 padding: EdgeInsets.only(
                   bottom: (MediaQuery.sizeOf(context).height / 2) + 50,
                 ),
-                children: _buildSectionWidgets(context),
+                children: sectionWidgets,
               ),
             ),
           ],
@@ -337,14 +356,12 @@ class _SearchResultsSectionWidget extends StatelessWidget {
     final showTypeLabel = results.length > 1;
     final children = <Widget>[];
     for (int i = 0; i < results.length; i++) {
-      final radius = BorderRadius.vertical(
-        top: i == 0 ? const Radius.circular(20) : Radius.zero,
-        bottom:
-            i == results.length - 1 ? const Radius.circular(20) : Radius.zero,
-      );
+      final radius = BorderRadius.circular(20);
       children.add(
-        ClipRRect(
+        Material(
+          color: colorScheme.backgroundElevated,
           borderRadius: radius,
+          clipBehavior: Clip.antiAlias,
           child: SearchResultsWidgetGenerator(
             results[i],
             borderRadius: radius,
@@ -356,13 +373,7 @@ class _SearchResultsSectionWidget extends StatelessWidget {
         ),
       );
       if (i != results.length - 1) {
-        children.add(
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: colorScheme.strokeFainter,
-          ),
-        );
+        children.add(const SizedBox(height: 4));
       }
     }
 
@@ -375,7 +386,7 @@ class _SearchResultsSectionWidget extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.fillFaint,
+                  color: colorScheme.strokeFainter,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.all(6),
@@ -393,14 +404,7 @@ class _SearchResultsSectionWidget extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: colorScheme.backgroundElevated,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: colorScheme.strokeFainter),
-          ),
-          child: Column(children: children),
-        ),
+        Column(children: children),
       ],
     );
   }

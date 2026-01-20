@@ -34,6 +34,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
@@ -788,8 +789,26 @@ class _HomeWidgetState extends State<HomeWidget> {
           ///screens the have different appbar colours.
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(0),
-            child: AppBar(
-              backgroundColor: getEnteColorScheme(context).backgroundBase,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isOnSearchTabNotifier,
+              builder: (context, isOnSearchTab, _) {
+                return AnimatedBuilder(
+                  animation: IndexOfStackNotifier(),
+                  builder: (context, _) {
+                    final colorScheme = getEnteColorScheme(context);
+                    final resultsBackground = EnteTheme.isDark(context)
+                        ? const Color.fromRGBO(22, 22, 22, 1)
+                        : colorScheme.backgroundElevated2;
+                    final isSearchResults =
+                        isOnSearchTab && IndexOfStackNotifier().index == 1;
+                    return AppBar(
+                      backgroundColor: isSearchResults
+                          ? resultsBackground
+                          : colorScheme.backgroundBase,
+                    );
+                  },
+                );
+              },
             ),
           ),
           resizeToAvoidBottomInset: false,
