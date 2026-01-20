@@ -321,6 +321,7 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB claimed!",
   "details": "Details",
   "claimMore": "Claim more!",
   "earnMoreSpace": "Earn more space!",

@@ -30,173 +30,177 @@ class CodeSuccessScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: pageBackgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              // Back arrow
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: colorScheme.strokeBase,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Title
-              Text(
-                AppLocalizations.of(context).codeAppliedPageTitle,
-                style: textTheme.largeBold,
-              ),
-              const SizedBox(height: 42),
-              // Success icon and claimed text
-              Center(
-                child: Column(
-                  children: [
-                    // Green circle with checkmark
-                    Container(
-                      width: 69,
-                      height: 69,
-                      decoration: const BoxDecoration(
-                        color: greenColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // "10 GB claimed!" text
-                    Text(
-                      "${referralView.planInfo.storageInGB} GB ${AppLocalizations.of(context).claimed.toLowerCase()}!",
-                      style: textTheme.h3Bold,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 42),
-              // Details button
-              GestureDetector(
-                onTap: () {
-                  routeToPage(
-                    context,
-                    StorageDetailsScreen(referralView, userDetails),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(20),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
+                // Back arrow
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: colorScheme.strokeBase,
+                    size: 24,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                const SizedBox(height: 24),
+                // Title
+                Text(
+                  AppLocalizations.of(context).codeAppliedPageTitle,
+                  style: textTheme.largeBold,
+                ),
+                const SizedBox(height: 42),
+                // Success icon and claimed text
+                Center(
+                  child: Column(
                     children: [
-                      Text(
-                        AppLocalizations.of(context).details,
-                        style: textTheme.body,
+                      // Green circle with checkmark
+                      Container(
+                        width: 69,
+                        height: 69,
+                        decoration: const BoxDecoration(
+                          color: greenColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 40,
+                        ),
                       ),
-                      Icon(
-                        Icons.chevron_right,
-                        color: colorScheme.strokeMuted,
-                        size: 31,
+                      const SizedBox(height: 12),
+                      // "10 GB claimed!" text
+                      Text(
+                        AppLocalizations.of(context).storageClaimed(
+                          storageAmountInGB: referralView.planInfo.storageInGB,
+                        ),
+                        style: textTheme.h3Bold,
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              // Earn more space card
-              Stack(
-                children: [
-                  Container(
+                const SizedBox(height: 42),
+                // Details button
+                GestureDetector(
+                  onTap: () {
+                    routeToPage(
+                      context,
+                      StorageDetailsScreen(referralView, userDetails),
+                    );
+                  },
+                  child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 24,
-                    ),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Column(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          AppLocalizations.of(context).earnMoreSpace,
-                          style: textTheme.bodyBold,
+                          AppLocalizations.of(context).details,
+                          style: textTheme.body,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          AppLocalizations.of(context).referralStorageForBoth(
-                            storageAmountInGB:
-                                referralView.planInfo.storageInGB,
-                          ),
-                          style: textTheme.small.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 12),
-                        // Referral code with dotted border
-                        DottedBorder(
-                          color: greenColor,
-                          strokeWidth: 1,
-                          dashPattern: const [6, 6],
-                          borderType: BorderType.RRect,
-                          radius: const Radius.circular(16),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: cardColor,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 36,
-                              vertical: 20,
-                            ),
-                            child: Text(
-                              referralView.code,
-                              style:
-                                  textTheme.small.copyWith(color: greenColor),
-                            ),
-                          ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: colorScheme.strokeMuted,
+                          size: 31,
                         ),
                       ],
                     ),
                   ),
-                  // Share button positioned at top right
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        shareText(
-                          AppLocalizations.of(context).shareTextReferralCode(
-                            referralCode: referralView.code,
-                            referralStorageInGB:
-                                referralView.planInfo.storageInGB,
+                ),
+                const SizedBox(height: 8),
+                // Earn more space card
+                Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            AppLocalizations.of(context).earnMoreSpace,
+                            style: textTheme.bodyBold,
                           ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedShare08,
-                          color: colorScheme.strokeMuted,
-                          size: 18,
+                          const SizedBox(height: 12),
+                          Text(
+                            AppLocalizations.of(context).referralStorageForBoth(
+                              storageAmountInGB:
+                                  referralView.planInfo.storageInGB,
+                            ),
+                            style: textTheme.small.copyWith(
+                              color: colorScheme.textMuted,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          // Referral code with dotted border
+                          DottedBorder(
+                            color: greenColor,
+                            strokeWidth: 1,
+                            dashPattern: const [6, 6],
+                            borderType: BorderType.RRect,
+                            radius: const Radius.circular(16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: cardColor,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 36,
+                                vertical: 20,
+                              ),
+                              child: Text(
+                                referralView.code,
+                                style:
+                                    textTheme.small.copyWith(color: greenColor),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Share button positioned at top right
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          shareText(
+                            AppLocalizations.of(context).shareTextReferralCode(
+                              referralCode: referralView.code,
+                              referralStorageInGB:
+                                  referralView.planInfo.storageInGB,
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedShare08,
+                            color: colorScheme.strokeMuted,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
