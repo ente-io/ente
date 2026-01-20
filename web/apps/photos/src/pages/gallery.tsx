@@ -1262,6 +1262,9 @@ const Page: React.FC = () => {
         [],
     );
 
+    const selectedCount = selected.count;
+    const selectedOwnCount = selected.ownCount;
+
     /**
      * Handle a context menu action on a file.
      *
@@ -1342,11 +1345,68 @@ const Page: React.FC = () => {
                             createOnSelectForCollectionOp("move"),
                     });
                     break;
-                case "removeFromAlbum":
-                    if (activeCollection) {
+                case "removeFromAlbum": {
+                    if (!activeCollection) break;
+                    const isSharedIncoming =
+                        activeCollectionSummary?.attributes.has(
+                            "sharedIncoming",
+                        );
+                    const isSharedOutgoing =
+                        activeCollectionSummary?.attributes.has(
+                            "sharedOutgoing",
+                        );
+                    const isRemovingOthers =
+                        selectedCount != selectedOwnCount;
+                    const remove = () =>
                         handleRemoveFilesFromCollection(activeCollection);
+
+                    if (isSharedIncoming) {
+                        if (isRemovingOthers) {
+                            showMiniDialog({
+                                title: t("remove_from_album"),
+                                message: t(
+                                    "remove_from_album_others_message",
+                                ),
+                                continue: {
+                                    text: t("remove"),
+                                    color: "critical",
+                                    action: remove,
+                                },
+                                cancel: t("cancel"),
+                            });
+                        } else {
+                            remove();
+                        }
+                        break;
                     }
+
+                    if (isSharedOutgoing && isRemovingOthers) {
+                        showMiniDialog({
+                            title: t("remove_from_album"),
+                            message: t("remove_from_album_others_message"),
+                            continue: {
+                                text: t("remove"),
+                                color: "critical",
+                                action: remove,
+                            },
+                        });
+                        break;
+                    }
+
+                    const onlyUserFiles = !isRemovingOthers;
+                    showMiniDialog({
+                        title: t("remove_from_album"),
+                        message: onlyUserFiles
+                            ? t("confirm_remove_message")
+                            : t("confirm_remove_incl_others_message"),
+                        continue: {
+                            text: t("yes_remove"),
+                            color: onlyUserFiles ? "primary" : "critical",
+                            action: remove,
+                        },
+                    });
                     break;
+                }
                 case "unhide":
                     handleOpenCollectionSelector({
                         action: "unhide",
@@ -1375,6 +1435,8 @@ const Page: React.FC = () => {
             showEditLocation,
             activeCollectionSummary,
             activeCollection,
+            selectedCount,
+            selectedOwnCount,
         ],
     );
 

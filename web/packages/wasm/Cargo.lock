@@ -285,6 +285,7 @@ dependencies = [
  "base64",
  "blake2b_simd",
  "crypto_secretstream",
+ "getrandom 0.2.16",
  "hex",
  "md-5",
  "rand_core 0.6.4",
