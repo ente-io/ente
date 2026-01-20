@@ -97,7 +97,12 @@ class Collection {
   });
 
   bool isArchived() {
-    return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+    final userID = Configuration.instance.getUserID();
+    if (userID != null && isOwner(userID)) {
+      return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+    } else {
+      return hasShareeArchived();
+    }
   }
 
   bool hasShareeArchived() {

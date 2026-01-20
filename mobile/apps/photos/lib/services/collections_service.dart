@@ -350,9 +350,7 @@ class CollectionsService {
 
   Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .where(
-          (c) => c.hasShareeArchived() || c.isHidden() || c.isArchived(),
-        )
+        .where((c) => c.isArchived() || c.isHidden())
         .map((e) => e.id)
         .toSet();
   }
