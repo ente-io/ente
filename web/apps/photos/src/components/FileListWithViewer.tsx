@@ -109,6 +109,7 @@ export type FileListWithViewerProps = {
     | "emailByUserID"
     | "listBorderRadius"
     | "onContextMenuAction"
+    | "onContextMenuOpenChange"
     | "showAddPersonAction"
     | "showEditLocationAction"
 > &
@@ -161,6 +162,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     emailByUserID,
     listBorderRadius,
     onContextMenuAction,
+    onContextMenuOpenChange,
     showAddPersonAction,
     showEditLocationAction,
     isInIncomingSharedCollection,
@@ -358,6 +360,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             onVisibleDateChange,
                             collectionSummary: activeCollectionSummary,
                             onContextMenuAction,
+                            onContextMenuOpenChange,
                             showAddPersonAction,
                             showEditLocationAction,
                         }}

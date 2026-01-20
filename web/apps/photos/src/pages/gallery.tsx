@@ -193,6 +193,7 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     // Pending navigation from feed item click
     const [pendingFileNavigation, setPendingFileNavigation] = useState<{
@@ -1517,7 +1518,9 @@ const Page: React.FC = () => {
     );
 
     const showSelectionBar =
-        selected.count > 0 && selected.collectionID === activeCollectionID;
+        selected.count > 0 &&
+        selected.collectionID === activeCollectionID &&
+        !isContextMenuOpen;
 
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.
@@ -1740,6 +1743,7 @@ const Page: React.FC = () => {
                     )}
                     isInHiddenSection={barMode == "hidden-albums"}
                     onContextMenuAction={handleContextMenuAction}
+                    onContextMenuOpenChange={setIsContextMenuOpen}
                     showAddPersonAction={showAddPersonAction}
                     showEditLocationAction={selected.ownCount > 0}
                     {...{

@@ -13,12 +13,10 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import type { SvgIconProps } from "@mui/material";
 import {
-    Box,
     ListItemIcon,
     ListItemText,
     Menu,
     MenuItem,
-    Typography,
     styled,
 } from "@mui/material";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
@@ -46,7 +44,6 @@ interface FileContextMenuProps {
     /** Callback when an action is selected. */
     onAction: (action: FileContextAction) => void;
     /** Number of files currently selected. */
-    selectedCount: number;
 }
 
 interface ActionConfig {
@@ -86,7 +83,7 @@ const actionConfigs: Record<FileContextAction, ActionConfig> = {
  * thumbnail.
  */
 export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
-    ({ open, anchorPosition, onClose, actions, onAction, selectedCount }) => {
+    ({ open, anchorPosition, onClose, actions, onAction }) => {
         const handleActionClick = useCallback(
             (action: FileContextAction) => {
                 onClose();
@@ -152,20 +149,6 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                         </StyledMenuItem>
                     );
                 })}
-                {selectedCount > 1 && (
-                    <Box sx={{ px: 2, pt: 0, pb: 0.5 }}>
-                        <Typography
-                            variant="small"
-                            sx={{
-                                color: "text.faint",
-                                fontSize: "0.65rem",
-                                opacity: 0.7,
-                            }}
-                        >
-                            {t("selected_count", { selected: selectedCount })}
-                        </Typography>
-                    </Box>
-                )}
             </StyledMenu>
         );
     },

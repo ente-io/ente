@@ -276,6 +276,10 @@ export interface FileListProps {
      * Whether to show the "Edit Location" action in the context menu.
      */
     showEditLocationAction?: boolean;
+    /**
+     * Called when the context menu opens or closes.
+     */
+    onContextMenuOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -306,6 +310,7 @@ export const FileList: React.FC<FileListProps> = ({
     onContextMenuAction,
     showAddPersonAction,
     showEditLocationAction,
+    onContextMenuOpenChange,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -329,6 +334,7 @@ export const FileList: React.FC<FileListProps> = ({
         file: EnteFile;
         fileIndex: number;
     } | null>(null);
+    const isContextMenuOpen = contextMenu !== null;
 
     // Track selection state before right-click modified it.
     // If there are already 3 files explicitly selected via checkmarks,
@@ -703,9 +709,11 @@ export const FileList: React.FC<FileListProps> = ({
                 file,
                 fileIndex,
             });
+            onContextMenuOpenChange?.(true);
         },
         [
             onContextMenuAction,
+            onContextMenuOpenChange,
             selected,
             setSelected,
             user,
@@ -730,7 +738,8 @@ export const FileList: React.FC<FileListProps> = ({
         });
 
         setContextMenu(null);
-    }, [setSelected]);
+        onContextMenuOpenChange?.(false);
+    }, [onContextMenuOpenChange, setSelected]);
 
     const handleContextMenuActionWithTracking = useCallback(
         (action: FileContextAction) => {
@@ -743,13 +752,14 @@ export const FileList: React.FC<FileListProps> = ({
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
+            const showGroupCheckbox = haveSelection && !isContextMenuOpen;
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
                         item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
-                                {haveSelection && (
+                                {showGroupCheckbox && (
                                     <Checkbox
                                         key={date}
                                         name={date}
@@ -853,6 +863,7 @@ export const FileList: React.FC<FileListProps> = ({
             handleRangeSelect,
             handleSelect,
             hoverIndex,
+            isContextMenuOpen,
             isShiftKeyPressed,
             mode,
             onChangeSelectAllCheckBox,
@@ -982,7 +993,6 @@ export const FileList: React.FC<FileListProps> = ({
                     onClose={handleContextMenuClose}
                     actions={contextMenuActions}
                     onAction={handleContextMenuActionWithTracking}
-                    selectedCount={selected.count}
                 />
             )}
         </Box>
