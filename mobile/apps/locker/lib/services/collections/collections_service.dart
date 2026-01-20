@@ -890,9 +890,6 @@ class CollectionService {
         }
       }
     }
-
-    // TODO: Add contacts linked to people ?
-
     return relevantUsers;
   }
 
