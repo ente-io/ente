@@ -46,7 +46,7 @@ func (c *ReactionsController) UpsertReaction(ctx *gin.Context, collectionID int6
 	if err != nil {
 		return "", err
 	}
-	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+	if err := ensureAnonUserForCollection(ctx, c.AnonUsersRepo, collectionID, actor); err != nil {
 		return "", err
 	}
 	upsertReq := socialcontroller.UpsertReactionRequest{
@@ -70,7 +70,7 @@ func (c *ReactionsController) DeleteReaction(ctx *gin.Context, collectionID int6
 	if err != nil {
 		return err
 	}
-	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+	if err := ensureAnonUserForCollection(ctx, c.AnonUsersRepo, collectionID, actor); err != nil {
 		return err
 	}
 	deleteReq := socialcontroller.ReactionDeleteRequest{

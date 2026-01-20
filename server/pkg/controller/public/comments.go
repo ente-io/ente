@@ -75,7 +75,7 @@ func (c *CommentsController) CreateComment(ctx *gin.Context, collectionID int64,
 	if err != nil {
 		return "", err
 	}
-	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+	if err := ensureAnonUserForCollection(ctx, c.AnonUsersRepo, collectionID, actor); err != nil {
 		return "", err
 	}
 	createReq := socialcontroller.CreateCommentRequest{
@@ -108,7 +108,7 @@ func (c *CommentsController) UpdateComment(ctx *gin.Context, collectionID int64,
 	if err != nil {
 		return err
 	}
-	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+	if err := ensureAnonUserForCollection(ctx, c.AnonUsersRepo, collectionID, actor); err != nil {
 		return err
 	}
 	updateReq := socialcontroller.UpdateCommentRequest{
@@ -133,7 +133,7 @@ func (c *CommentsController) DeleteComment(ctx *gin.Context, collectionID int64,
 	if err != nil {
 		return err
 	}
-	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+	if err := ensureAnonUserForCollection(ctx, c.AnonUsersRepo, collectionID, actor); err != nil {
 		return err
 	}
 	return c.deleteCommentWithActor(ctx, commentID, actor, false)
@@ -192,7 +192,7 @@ func (c *CommentsController) ListAnonProfiles(ctx *gin.Context, collectionID int
 	if err := ensureCommentsFeatureEnabled(ctx); err != nil {
 		return nil, err
 	}
-	return c.AnonUsersRepo.ListByCollection(ctx.Request.Context(), collectionID)
+	return c.AnonUsersRepo.ListByCollection(ctx, collectionID)
 }
 
 func ensureCommentsFeatureEnabled(ctx *gin.Context) error {
