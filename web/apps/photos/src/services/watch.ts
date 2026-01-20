@@ -5,7 +5,7 @@
 
 import debounce from "debounce";
 import { ensureElectron } from "ente-base/electron";
-import { basename, dirname } from "ente-base/file-name";
+import { basename, dirname, lowercaseExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import type {
     CollectionMapping,
@@ -680,14 +680,16 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
 };
 
 /**
- * Filter out hidden files and previously synced or ignored paths from
- * {@link paths} to get the list of paths that need to be uploaded to the Ente
- * collection.
+ * Filter out hidden files, non-media files, and previously synced or ignored
+ * paths from {@link paths} to get the list of paths that need to be uploaded
+ * to the Ente collection.
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
         // Filter out files whose names begins with a dot.
         .filter((path) => !basename(path).startsWith("."))
+        // Filter out known non-media files.
+        .filter((path) => !shouldIgnoreForUpload(path))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
 
@@ -710,3 +712,42 @@ const collectionNameForPath = (path: string, watch: FolderWatch) =>
         : parentDirectoryName(path);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));
+
+/**
+ * Extensions of files that should not be uploaded from watch folders.
+ *
+ * These are common non-media file types that might be present in directories
+ * containing photos and videos, but are not themselves media files.
+ */
+const ignoredExtensions = new Set([
+    "zip",
+    "rar",
+    "7z",
+    "tar",
+    "gz",
+    "bz2",
+    "txt",
+    "ini",
+    "sfv",
+    "md5",
+    "sha1",
+    "sha256",
+    "sha512",
+    "sha",
+    "html",
+    "htm",
+    "xmp",
+    "db",
+]);
+
+/**
+ * Return `true` if the file at the given path should be ignored for uploads.
+ *
+ * This is used to filter out known non-media files from watch folders before
+ * attempting to upload them. This prevents spurious "Skipped" messages and
+ * error logs for files that we know beforehand are not photos or videos.
+ */
+const shouldIgnoreForUpload = (path: string): boolean => {
+    const extension = lowercaseExtension(path);
+    return extension !== undefined && ignoredExtensions.has(extension);
+};
