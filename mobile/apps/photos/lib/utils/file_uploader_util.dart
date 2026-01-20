@@ -66,6 +66,40 @@ class MediaUploadData {
   });
 }
 
+Map<String, dynamic> buildPublicMagicData(
+  MediaUploadData mediaUploadData,
+  ParsedExifDateTime? exifTime,
+) {
+  final Map<String, dynamic> pubMetadata = {};
+  if ((mediaUploadData.height ?? 0) != 0 &&
+      (mediaUploadData.width ?? 0) != 0) {
+    pubMetadata[heightKey] = mediaUploadData.height;
+    pubMetadata[widthKey] = mediaUploadData.width;
+    pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
+  }
+  if (mediaUploadData.motionPhotoStartIndex != null) {
+    pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+  }
+  if (mediaUploadData.thumbnail == null) {
+    pubMetadata[noThumbKey] = true;
+  }
+  if (exifTime != null) {
+    if (exifTime.dateTime != null) {
+      pubMetadata[dateTimeKey] = exifTime.dateTime;
+    }
+    if (exifTime.offsetTime != null) {
+      pubMetadata[offsetTimeKey] = exifTime.offsetTime;
+    }
+  }
+  if ((mediaUploadData.cameraMake ?? '').isNotEmpty) {
+    pubMetadata[cameraMakeKey] = mediaUploadData.cameraMake;
+  }
+  if ((mediaUploadData.cameraModel ?? '').isNotEmpty) {
+    pubMetadata[cameraModelKey] = mediaUploadData.cameraModel;
+  }
+  return pubMetadata;
+}
+
 class FileHashData {
   // For livePhotos, the fileHash value will be imageHash:videoHash
   final String? fileHash;
@@ -92,23 +126,36 @@ String? _extractPrintableExifValue(IfdTag? tag) {
 Future<MediaUploadData> getUploadDataFromEnteFile(
   EnteFile file, {
   bool parseExif = false,
+  bool includeHash = true,
+  bool prepareLivePhotoUpload = true,
 }) async {
   if (file.isSharedMediaToAppSandbox) {
-    return await _getMediaUploadDataFromAppCache(file, parseExif);
+    return await _getMediaUploadDataFromAppCache(
+      file,
+      parseExif,
+      includeHash,
+    );
   } else {
-    return await _getMediaUploadDataFromAssetFile(file, parseExif);
+    return await _getMediaUploadDataFromAssetFile(
+      file,
+      parseExif,
+      includeHash,
+      prepareLivePhotoUpload,
+    );
   }
 }
 
 Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   EnteFile file,
   bool parseExif,
+  bool includeHash,
+  bool prepareLivePhotoUpload,
 ) async {
   File? sourceFile;
   Uint8List? thumbnailData;
   bool isDeleted;
   String? zipHash;
-  String fileHash;
+  String? fileHash;
   Map<String, IfdTag>? exifData;
   String? cameraMake;
   String? cameraModel;
@@ -156,9 +203,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   await _decorateEnteFileData(file, asset, sourceFile, exifData);
-  fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+  if (includeHash) {
+    fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+  }
 
-  if (file.fileType == FileType.livePhoto && Platform.isIOS) {
+  if (includeHash && file.fileType == FileType.livePhoto && Platform.isIOS) {
     final File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
     if (videoUrl == null || !videoUrl.existsSync()) {
       final String errMsg =
@@ -170,23 +219,26 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
         CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
     // imgHash:vidHash
     fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
-    final tempPath = Configuration.instance.getTempDirectory();
-    // .elp -> ente live photo
-    final uniqueId = const Uuid().v4().toString();
-    final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
-    _logger.info("Creating zip for live photo from " + basename(livePhotoPath));
-    await zip(
-      zipPath: livePhotoPath,
-      imagePath: sourceFile.path,
-      videoPath: videoUrl.path,
-    );
-    // delete the temporary video and image copy (only in IOS)
-    if (Platform.isIOS) {
-      await sourceFile.delete();
+    if (prepareLivePhotoUpload) {
+      final tempPath = Configuration.instance.getTempDirectory();
+      // .elp -> ente live photo
+      final uniqueId = const Uuid().v4().toString();
+      final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
+      _logger
+          .info("Creating zip for live photo from " + basename(livePhotoPath));
+      await zip(
+        zipPath: livePhotoPath,
+        imagePath: sourceFile.path,
+        videoPath: videoUrl.path,
+      );
+      // delete the temporary video and image copy (only in IOS)
+      if (Platform.isIOS) {
+        await sourceFile.delete();
+      }
+      // new sourceFile which needs to be uploaded
+      sourceFile = File(livePhotoPath);
+      zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
     }
-    // new sourceFile which needs to be uploaded
-    sourceFile = File(livePhotoPath);
-    zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
   thumbnailData = await _getThumbnailForUpload(asset, file);
@@ -212,7 +264,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     sourceFile,
     thumbnailData,
     isDeleted,
-    FileHashData(fileHash, zipHash: zipHash),
+    fileHash == null ? null : FileHashData(fileHash, zipHash: zipHash),
     height: h,
     width: w,
     cameraMake: cameraMake,
@@ -383,6 +435,7 @@ Future<MetadataRequest> getPubMetadataRequest(
 Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   EnteFile file,
   bool parseExif,
+  bool includeHash,
 ) async {
   File sourceFile;
   Uint8List? thumbnailData;
@@ -401,8 +454,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
-    final fileHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+    final String? fileHash = includeHash
+        ? CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile))
+        : null;
     Map<String, int>? dimensions;
     if (file.fileType == FileType.image) {
       dimensions = await getImageHeightAndWith(imagePath: localPath);
@@ -426,7 +480,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       sourceFile,
       thumbnailData,
       isDeleted,
-      FileHashData(fileHash),
+      fileHash == null ? null : FileHashData(fileHash),
       height: dimensions?['height'],
       width: dimensions?['width'],
       cameraMake: cameraMake,
