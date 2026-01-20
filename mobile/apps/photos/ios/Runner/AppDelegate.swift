@@ -11,6 +11,17 @@ import workmanager_apple
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
+    // Prevent interrupting background audio from other apps on launch
+    do {
+      try AVAudioSession.sharedInstance().setCategory(
+        .ambient,
+        mode: .default,
+        options: [.mixWithOthers]
+      )
+    } catch {
+      print("Failed to configure initial audio session: \(error)")
+    }
+
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
