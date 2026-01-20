@@ -139,6 +139,8 @@ final class ChatViewModel: ObservableObject {
     @Published var downloadToast: DownloadToastState?
 
     private let provider: InferenceRsProvider
+    private let chatDb: LlmChatDb
+    private let attachmentsDir: URL
     private let modelSettings = ModelSettingsStore.shared
 
     private var messageStore: [UUID: [MessageNode]] = [:]
@@ -150,15 +152,79 @@ final class ChatViewModel: ObservableObject {
     private var activeGenerationSessionId: UUID?
 
     init() {
-        let session = ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())
-        self.sessions = [session]
-        self.currentSessionId = session.id
-        self.messages = []
-        self.messageStore[session.id] = []
-        self.branchSelections[session.id] = [:]
+        let baseDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
 
-        let baseDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
-        self.provider = InferenceRsProvider(modelDir: baseDir.appendingPathComponent("llm", isDirectory: true))
+        // LLM model files.
+        let llmDir = baseDir.appendingPathComponent("llm", isDirectory: true)
+        let provider = InferenceRsProvider(modelDir: llmDir)
+
+        // Chat DB + attachments.
+        let dbDir = baseDir.appendingPathComponent("llmchat", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dbDir, withIntermediateDirectories: true, attributes: nil)
+        let attachmentsDir = dbDir.appendingPathComponent("chat_attachments", isDirectory: true)
+        try? FileManager.default.createDirectory(at: attachmentsDir, withIntermediateDirectories: true, attributes: nil)
+
+        let key = CredentialStore.shared.getOrCreateChatDbKey()
+        let mainDbPath = dbDir.appendingPathComponent("llmchat.db").path
+        let attachmentsDbPath = dbDir.appendingPathComponent("llmchat_attachments.db").path
+
+        let chatDb: LlmChatDb
+        do {
+            chatDb = try LlmChatDb.open(mainDbPath: mainDbPath, attachmentsDbPath: attachmentsDbPath, key: key)
+        } catch {
+            fatalError("Failed to open chat DB: \(error)")
+        }
+
+        // Load sessions/messages.
+        let loaded = (try? chatDb.listSessions()) ?? []
+        var sessions: [ChatSession] = []
+
+        if loaded.isEmpty {
+            if let created = try? chatDb.createSession(title: "New chat"),
+               let id = UUID(uuidString: created.uuid) {
+                sessions = [ChatSession(
+                    id: id,
+                    title: created.title,
+                    lastMessage: "",
+                    updatedAt: Date(timeIntervalSince1970: Double(created.updatedAtUs) / 1_000_000.0)
+                )]
+            }
+        } else {
+            sessions = loaded.compactMap { session in
+                guard let id = UUID(uuidString: session.uuid) else { return nil }
+                let lastMessage = (try? chatDb.getMessages(sessionUuid: session.uuid))?.last?.text ?? ""
+                return ChatSession(
+                    id: id,
+                    title: session.title,
+                    lastMessage: lastMessage,
+                    updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
+                )
+            }
+        }
+
+        if sessions.isEmpty {
+            sessions = [ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())]
+        }
+
+        // Stored properties.
+        self.provider = provider
+        self.chatDb = chatDb
+        self.attachmentsDir = attachmentsDir
+
+        self.sessions = sessions
+        self.currentSessionId = sessions.first?.id
+        self.messages = []
+
+        for session in sessions {
+            self.messageStore[session.id] = []
+            self.branchSelections[session.id] = [:]
+        }
+
+        if let current = self.currentSessionId {
+            loadMessagesFromDb(for: current)
+            rebuildMessages(for: current)
+        }
     }
 
     var currentSession: ChatSession? {
@@ -181,7 +247,11 @@ final class ChatViewModel: ObservableObject {
         draftAttachments = []
         editingMessageId = nil
 
-        let session = ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())
+        let created = (try? chatDb.createSession(title: "New chat"))
+        let sessionId = created.flatMap { UUID(uuidString: $0.uuid) } ?? UUID()
+        let updatedAt = created.map { Date(timeIntervalSince1970: Double($0.updatedAtUs) / 1_000_000.0) } ?? Date()
+
+        let session = ChatSession(id: sessionId, title: created?.title ?? "New chat", lastMessage: "", updatedAt: updatedAt)
         sessions.insert(session, at: 0)
         currentSessionId = session.id
         messageStore[session.id] = []
@@ -201,6 +271,7 @@ final class ChatViewModel: ObservableObject {
         streamingParentId = nil
         downloadToast = nil
         currentSessionId = session.id
+        loadMessagesFromDb(for: session.id)
         rebuildMessages(for: session.id)
     }
 
@@ -217,12 +288,15 @@ final class ChatViewModel: ObservableObject {
             streamingParentId = nil
             downloadToast = nil
         }
+        try? chatDb.deleteSession(uuid: session.id.uuidString)
+
         sessions.removeAll { $0.id == session.id }
         messageStore[session.id] = nil
         branchSelections[session.id] = nil
         if currentSessionId == session.id {
             currentSessionId = sessions.first?.id
             if let next = currentSessionId {
+                loadMessagesFromDb(for: next)
                 rebuildMessages(for: next)
             } else {
                 messages = []
@@ -250,9 +324,11 @@ final class ChatViewModel: ObservableObject {
         Task.detached { [weak self] in
             guard let self else { return }
             do {
-                let url = try self.writeAttachment(data: data, fileName: fileName ?? "photo.jpg")
+                let id = UUID()
+                let url = try self.writeAttachment(data: data, attachmentId: id)
                 let attachment = ChatAttachment(
-                    name: url.lastPathComponent,
+                    id: id,
+                    name: fileName ?? "photo.jpg",
                     size: Int64(data.count),
                     kind: .image,
                     url: url,
@@ -275,10 +351,12 @@ final class ChatViewModel: ObservableObject {
         Task.detached { [weak self] in
             guard let self else { return }
             do {
-                let storedUrl = try self.copyAttachment(from: url)
+                let id = UUID()
+                let storedUrl = try self.copyAttachment(from: url, attachmentId: id)
                 let size = (try? FileManager.default.attributesOfItem(atPath: storedUrl.path)[.size] as? NSNumber)?.int64Value ?? 0
                 let attachment = ChatAttachment(
-                    name: storedUrl.lastPathComponent,
+                    id: id,
+                    name: url.lastPathComponent,
                     size: size,
                     kind: .document,
                     url: storedUrl,
@@ -304,7 +382,6 @@ final class ChatViewModel: ObservableObject {
         guard !trimmed.isEmpty || !attachments.isEmpty else { return }
 
         let sessionId = currentSessionId ?? createSessionForDraft()
-        let timestamp = Date()
 
         let parentId: UUID? = {
             if let editingId = editingMessageId {
@@ -314,8 +391,29 @@ final class ChatViewModel: ObservableObject {
             return buildSelectedPath(for: sessionId).last?.id
         }()
 
+        let meta: [AttachmentMeta] = attachments.map { attachment in
+            AttachmentMeta(
+                id: attachment.id.uuidString,
+                kind: attachment.kind == .image ? .image : .document,
+                size: attachment.size,
+                name: attachment.name
+            )
+        }
+
+        guard let inserted = try? chatDb.insertMessage(
+            sessionUuid: sessionId.uuidString,
+            sender: .selfUser,
+            text: trimmed,
+            parentMessageUuid: parentId?.uuidString,
+            attachments: meta
+        ), let messageId = UUID(uuidString: inserted.uuid) else {
+            return
+        }
+
+        let timestamp = Date(timeIntervalSince1970: Double(inserted.createdAtUs) / 1_000_000.0)
+
         let userNode = MessageNode(
-            id: UUID(),
+            id: messageId,
             sessionId: sessionId,
             parentId: parentId,
             role: .user,
@@ -401,7 +499,11 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func createSessionForDraft() -> UUID {
-        let session = ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())
+        let created = (try? chatDb.createSession(title: "New chat"))
+        let sessionId = created.flatMap { UUID(uuidString: $0.uuid) } ?? UUID()
+        let updatedAt = created.map { Date(timeIntervalSince1970: Double($0.updatedAtUs) / 1_000_000.0) } ?? Date()
+
+        let session = ChatSession(id: sessionId, title: created?.title ?? "New chat", lastMessage: "", updatedAt: updatedAt)
         sessions.insert(session, at: 0)
         currentSessionId = session.id
         messageStore[session.id] = []
@@ -499,21 +601,31 @@ final class ChatViewModel: ObservableObject {
                 return Double(tokenCount) / (Double(totalTimeMs) / 1000.0)
             }()
 
-            let assistant = MessageNode(
-                id: UUID(),
-                sessionId: parent.sessionId,
-                parentId: parent.id,
-                role: .assistant,
+            let meta: [AttachmentMeta] = []
+            if let inserted = try? chatDb.insertMessage(
+                sessionUuid: parent.sessionId.uuidString,
+                sender: .other,
                 text: trimmed,
-                timestamp: Date(),
-                attachments: [],
-                isInterrupted: interrupted,
-                tokensPerSecond: tokensPerSecond
-            )
+                parentMessageUuid: parent.id.uuidString,
+                attachments: meta
+            ), let assistantId = UUID(uuidString: inserted.uuid) {
+                let timestamp = Date(timeIntervalSince1970: Double(inserted.createdAtUs) / 1_000_000.0)
+                let assistant = MessageNode(
+                    id: assistantId,
+                    sessionId: parent.sessionId,
+                    parentId: parent.id,
+                    role: .assistant,
+                    text: trimmed,
+                    timestamp: timestamp,
+                    attachments: [],
+                    isInterrupted: interrupted,
+                    tokensPerSecond: tokensPerSecond
+                )
 
-            messageStore[parent.sessionId, default: []].append(assistant)
-            updateSelection(for: parent.sessionId, parentId: parent.id, childId: assistant.id)
-            updateSessionPreview(sessionId: parent.sessionId, preview: trimmed, date: assistant.timestamp)
+                messageStore[parent.sessionId, default: []].append(assistant)
+                updateSelection(for: parent.sessionId, parentId: parent.id, childId: assistant.id)
+                updateSessionPreview(sessionId: parent.sessionId, preview: trimmed, date: assistant.timestamp)
+            }
         }
 
         if activeGenerationId == generationId {
@@ -561,6 +673,57 @@ final class ChatViewModel: ObservableObject {
 
         downloadToast = DownloadToastState(phase: .downloading, percent: progress.percent, status: progress.status, offerRetryDownload: false)
         isDownloading = progress.percent >= 0 && progress.percent < 100
+    }
+
+    private func loadMessagesFromDb(for sessionId: UUID) {
+        guard messageStore[sessionId] != nil else {
+            messageStore[sessionId] = []
+            branchSelections[sessionId] = [:]
+            return
+        }
+
+        guard let rawMessages = try? chatDb.getMessages(sessionUuid: sessionId.uuidString) else {
+            messageStore[sessionId] = []
+            branchSelections[sessionId] = [:]
+            return
+        }
+
+        let nodes: [MessageNode] = rawMessages.compactMap { msg in
+            guard let messageId = UUID(uuidString: msg.uuid) else { return nil }
+            let parentId = msg.parentMessageUuid.flatMap { UUID(uuidString: $0) }
+            let role: ChatMessage.Role = (msg.sender == .selfUser) ? .user : .assistant
+            let timestamp = Date(timeIntervalSince1970: Double(msg.createdAtUs) / 1_000_000.0)
+
+            let attachments: [ChatAttachment] = msg.attachments.compactMap { meta in
+                guard let attachmentId = UUID(uuidString: meta.id) else { return nil }
+                let kind: ChatAttachment.Kind = (meta.kind == .image) ? .image : .document
+                let url = attachmentsDir.appendingPathComponent(meta.id)
+                return ChatAttachment(
+                    id: attachmentId,
+                    name: meta.name,
+                    size: meta.size,
+                    kind: kind,
+                    url: url,
+                    isUploading: false
+                )
+            }
+
+            return MessageNode(
+                id: messageId,
+                sessionId: sessionId,
+                parentId: parentId,
+                role: role,
+                text: msg.text,
+                timestamp: timestamp,
+                attachments: attachments,
+                isInterrupted: false,
+                tokensPerSecond: nil
+            )
+        }
+
+        messageStore[sessionId] = nodes
+        // Branch selection is computed in-memory.
+        branchSelections[sessionId] = [:]
     }
 
     private func rebuildMessages(for sessionId: UUID) {
@@ -686,24 +849,22 @@ final class ChatViewModel: ObservableObject {
     private nonisolated func attachmentsDirectory() throws -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
-        let dir = base.appendingPathComponent("llm", isDirectory: true)
-            .appendingPathComponent("attachments", isDirectory: true)
+        let dir = base.appendingPathComponent("llmchat", isDirectory: true)
+            .appendingPathComponent("chat_attachments", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
         return dir
     }
 
-    private nonisolated func writeAttachment(data: Data, fileName: String) throws -> URL {
+    private nonisolated func writeAttachment(data: Data, attachmentId: UUID) throws -> URL {
         let dir = try attachmentsDirectory()
-        let safeName = fileName.replacingOccurrences(of: "/", with: "_")
-        let destination = dir.appendingPathComponent("\(UUID().uuidString)_\(safeName)")
+        let destination = dir.appendingPathComponent(attachmentId.uuidString)
         try data.write(to: destination, options: .atomic)
         return destination
     }
 
-    private nonisolated func copyAttachment(from url: URL) throws -> URL {
+    private nonisolated func copyAttachment(from url: URL, attachmentId: UUID) throws -> URL {
         let dir = try attachmentsDirectory()
-        let safeName = url.lastPathComponent.replacingOccurrences(of: "/", with: "_")
-        let destination = dir.appendingPathComponent("\(UUID().uuidString)_\(safeName)")
+        let destination = dir.appendingPathComponent(attachmentId.uuidString)
 
         let needsSecurity = url.startAccessingSecurityScopedResource()
         defer {

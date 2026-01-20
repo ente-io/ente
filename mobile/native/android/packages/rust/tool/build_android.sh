@@ -3,9 +3,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
-UNIFFI_RUST_DIR="$REPO_ROOT/rust/inference_rs_uniffi"
-CORE_ROOT="$REPO_ROOT/rust/inference_rs"
-PATCH_SCRIPT="$CORE_ROOT/tool/patch_llama_mtmd.sh"
+INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/inference_rs_uniffi"
+CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_db_uniffi"
+# Note: Older builds used to patch llama-cpp sources; this repo no longer ships that patch script.
+PATCH_SCRIPT=""
 OUT_DIR="$ROOT/src/main/jniLibs"
 NDK_VERSION="27.0.12077973"
 NDK_ROOT_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}/ndk/$NDK_VERSION"
@@ -20,7 +21,6 @@ if [[ ! -d "$NDK_ROOT_PATH" ]]; then
   exit 1
 fi
 
-"$PATCH_SCRIPT"
 
 export ANDROID_NDK="$NDK_ROOT_PATH"
 export ANDROID_NDK_ROOT="$NDK_ROOT_PATH"
@@ -29,13 +29,15 @@ export CARGO_CFG_TARGET_FEATURE="${CARGO_CFG_TARGET_FEATURE:-}"
 
 mkdir -p "$OUT_DIR"
 
-pushd "$UNIFFI_RUST_DIR" >/dev/null
-cargo ndk \
-  --platform 23 \
-  --link-libcxx-shared \
-  -t arm64-v8a \
-  -t armeabi-v7a \
-  -t x86_64 \
-  -o "$OUT_DIR" \
-  build --release
-popd >/dev/null
+for CRATE_DIR in "$INFERENCE_UNIFFI_RUST_DIR" "$CHATDB_UNIFFI_RUST_DIR"; do
+  pushd "$CRATE_DIR" >/dev/null
+  cargo ndk \
+    --platform 23 \
+    --link-libcxx-shared \
+    -t arm64-v8a \
+    -t armeabi-v7a \
+    -t x86_64 \
+    -o "$OUT_DIR" \
+    build --release
+  popd >/dev/null
+done

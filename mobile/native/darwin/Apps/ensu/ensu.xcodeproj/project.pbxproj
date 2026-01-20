@@ -303,6 +303,7 @@
 			name = "Build Rust (ensu_uniffi)";
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -318,6 +319,7 @@
 			name = "Build Rust (ensu_uniffi)";
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -523,11 +525,14 @@
 					"$(inherited)",
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 				);
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -577,11 +582,14 @@
 					"$(inherited)",
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 				);
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -630,11 +638,14 @@
 					"SystemConfiguration",
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 				);
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -684,11 +695,14 @@
 					"SystemConfiguration",
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 				);
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;

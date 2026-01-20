@@ -20,3 +20,4 @@ node_modules/
 # Build artifacts
 mobile/native/android/packages/rust/build/
 mobile/native/darwin/Packages/Rust/build/
+target/

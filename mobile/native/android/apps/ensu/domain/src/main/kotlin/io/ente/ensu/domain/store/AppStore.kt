@@ -21,13 +21,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.math.abs
 import kotlin.math.max
 
 class AppStore(
     private val sessionPreferences: SessionPreferences,
+    private val chatRepository: io.ente.ensu.domain.chat.ChatRepository,
     private val llmProvider: LlmProvider,
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val logRepository: LogRepository = NoOpLogRepository
@@ -47,7 +50,7 @@ class AppStore(
         logRepository.log(LogLevel.Info, "Ensū started")
 
         if (_state.value.chat.sessions.isEmpty()) {
-            seedSessions()
+            loadSessionsFromDb()
         }
 
         scope.launch {
@@ -60,6 +63,7 @@ class AppStore(
                             appState
                         }
                     }
+                    loadMessagesFromDb(storedId)
                     rebuildChatState(storedId)
                 }
             }
@@ -83,10 +87,7 @@ class AppStore(
             )
         }
 
-        val session = ChatSession(
-            title = "New Chat",
-            updatedAtMillis = clock()
-        )
+        val session = chatRepository.createSession("New Chat")
         messageStore[session.id] = mutableListOf()
         branchSelections[session.id] = mutableMapOf()
 
@@ -102,6 +103,7 @@ class AppStore(
                 )
             )
         }
+        // Session is empty, no DB load needed.
         rebuildChatState(session.id)
         logRepository.log(LogLevel.Info, "Created new session")
         return session.id
@@ -124,6 +126,7 @@ class AppStore(
                 )
             )
         }
+        loadMessagesFromDb(sessionId)
         rebuildChatState(sessionId)
         logRepository.log(LogLevel.Info, "Selected session", sessionId)
     }
@@ -263,12 +266,11 @@ class AppStore(
             buildSelectedPath(sessionId).lastOrNull()?.id
         }
 
-        val userMessage = ChatMessage(
+        val userMessage = chatRepository.insertMessage(
             sessionId = sessionId,
             parentId = parentId,
             author = MessageAuthor.User,
             text = text,
-            timestampMillis = timestamp,
             attachments = attachments
         )
 
@@ -426,12 +428,15 @@ class AppStore(
                 tokenCount.toDouble() / (totalTimeMs / 1000.0)
             } else null
 
-            val assistantMessage = ChatMessage(
+            val inserted = chatRepository.insertMessage(
                 sessionId = sessionId,
                 parentId = parentMessage.id,
                 author = MessageAuthor.Assistant,
                 text = finalText,
-                timestampMillis = clock(),
+                attachments = emptyList()
+            )
+
+            val assistantMessage = inserted.copy(
                 isInterrupted = interrupted,
                 tokensPerSecond = tokensPerSecond
             )
@@ -468,6 +473,13 @@ class AppStore(
             }
             appState.copy(chat = appState.chat.copy(sessions = updatedSessions))
         }
+    }
+
+    private fun loadMessagesFromDb(sessionId: String) {
+        val messages = chatRepository.getMessages(sessionId)
+        messageStore[sessionId] = messages.toMutableList()
+        // Reset branch selections for this session. (Branch selection is computed in-memory.)
+        branchSelections.getOrPut(sessionId) { mutableMapOf() }.clear()
     }
 
     private fun rebuildChatState(sessionId: String?) {
@@ -682,15 +694,28 @@ class AppStore(
         )
     }
 
-    private fun seedSessions() {
-        val now = clock()
-        val session = ChatSession(title = "New Chat", lastMessagePreview = null, updatedAtMillis = now)
-        messageStore[session.id] = mutableListOf()
-        branchSelections[session.id] = mutableMapOf()
-        _state.update { appState ->
-            appState.copy(chat = appState.chat.copy(sessions = listOf(session), currentSessionId = session.id))
+    private fun loadSessionsFromDb() {
+        val sessions = chatRepository.listSessions()
+        val initial = if (sessions.isEmpty()) {
+            listOf(chatRepository.createSession("New Chat"))
+        } else {
+            sessions
         }
-        rebuildChatState(session.id)
+
+        initial.forEach { session ->
+            messageStore.getOrPut(session.id) { mutableListOf() }
+            branchSelections.getOrPut(session.id) { mutableMapOf() }
+        }
+
+        val stored = runBlocking { sessionPreferences.selectedSessionId.first() }
+        val current = stored?.takeIf { id -> initial.any { it.id == id } } ?: initial.first().id
+
+        _state.update { appState ->
+            appState.copy(chat = appState.chat.copy(sessions = initial, currentSessionId = current))
+        }
+
+        loadMessagesFromDb(current)
+        rebuildChatState(current)
     }
 
     private data class PromptResult(

@@ -9,6 +9,7 @@ import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.InMemoryLogRepository
 import io.ente.ensu.data.storage.CredentialStore
 import io.ente.ensu.data.llm.InferenceRsProvider
+import io.ente.ensu.data.chat.RustChatRepository
 import io.ente.ensu.domain.store.AppStore
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -23,7 +24,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val llmProvider = InferenceRsProvider(
         modelDir = File(application.filesDir, "llm")
     )
-    val store = AppStore(sessionPreferences, llmProvider = llmProvider, logRepository = logRepository)
+    private val chatRepository = RustChatRepository(application, credentialStore)
+
+    val store = AppStore(
+        sessionPreferences = sessionPreferences,
+        chatRepository = chatRepository,
+        llmProvider = llmProvider,
+        logRepository = logRepository
+    )
     val authService = EnsuAuthService(
         context = application,
         endpointPreferences = endpointPreferences,

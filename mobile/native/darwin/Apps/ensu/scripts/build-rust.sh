@@ -1,10 +1,11 @@
 #!/bin/sh
 set -euo pipefail
 
-# Build the UniFFI Rust static library for the current Xcode build platform.
+# Build the UniFFI Rust static libraries for the current Xcode build platform.
 #
-# Outputs a universal static library at:
+# Outputs universal static libraries at:
 #   $TARGET_TEMP_DIR/ensu_rust/libensu_uniffi.a
+#   $TARGET_TEMP_DIR/ensu_rust/libllmchat_db_uniffi.a
 
 if [ -z "${SRCROOT:-}" ] || [ -z "${TARGET_TEMP_DIR:-}" ] || [ -z "${PLATFORM_NAME:-}" ] || [ -z "${ARCHS:-}" ]; then
   echo "Missing required Xcode environment variables (SRCROOT/TARGET_TEMP_DIR/PLATFORM_NAME/ARCHS)" >&2
@@ -12,7 +13,6 @@ if [ -z "${SRCROOT:-}" ] || [ -z "${TARGET_TEMP_DIR:-}" ] || [ -z "${PLATFORM_NA
 fi
 
 REPO_ROOT="$(cd "${SRCROOT}/../../../../.." && pwd)"
-CRATE_DIR="${REPO_ROOT}/rust/ensu_uniffi"
 OUT_DIR="${TARGET_TEMP_DIR}/ensu_rust"
 
 mkdir -p "${OUT_DIR}"
@@ -94,62 +94,69 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 # Ensure host builds (build scripts) use the macOS SDK.
 export SDKROOT="${HOST_SDKROOT}"
 
-# Build per-arch and then lipo into a universal static library for this platform.
-INPUT_LIBS=""
+build_crate_universal() {
+  crate_name="$1"           # e.g. ensu_uniffi
+  crate_dir="$2"            # absolute path
+  lib_name="$3"             # e.g. libensu_uniffi.a
 
-for arch in ${ARCHS}; do
-  target="$(rust_target_for "${PLATFORM_NAME}" "$arch")"
-  if [ -z "$target" ]; then
-    echo "Skipping unsupported arch/platform: ${PLATFORM_NAME} ${arch}" >&2
-    continue
-  fi
+  echo "🔧 Building ${crate_name} → ${lib_name}"
 
-  # Ensure target is installed.
-  if ! rustup target list --installed | grep -q "^${target}$"; then
-    echo "Installing Rust target ${target}..."
-    rustup target add "${target}"
-  fi
+  INPUT_LIBS=""
 
-  target_env="$(echo "${target}" | tr '[:lower:]-' '[:upper:]_')"
+  for arch in ${ARCHS}; do
+    target="$(rust_target_for "${PLATFORM_NAME}" "$arch")"
+    if [ -z "$target" ]; then
+      echo "Skipping unsupported arch/platform: ${PLATFORM_NAME} ${arch}" >&2
+      continue
+    fi
 
-  # Linker + sysroot for the target.
-  eval "export CARGO_TARGET_${target_env}_LINKER=\"${TARGET_CLANG}\""
-  eval "export CFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
-  eval "export CXXFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
+    if ! rustup target list --installed | grep -q "^${target}$"; then
+      echo "Installing Rust target ${target}..."
+      rustup target add "${target}"
+    fi
 
-  # Pass the SDK root to the linker explicitly (important when SDKROOT is macOS).
-  RUSTFLAGS_TARGET="${RUSTFLAGS:-} -C link-arg=-isysroot -C link-arg=${TARGET_SDKROOT}"
-  if [ "${PLATFORM_NAME}" = "iphonesimulator" ] && [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
-    RUSTFLAGS_TARGET="${RUSTFLAGS_TARGET} -C link-arg=-mios-simulator-version-min=${IPHONEOS_DEPLOYMENT_TARGET}"
-  elif [ "${PLATFORM_NAME}" = "iphoneos" ] && [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
-    RUSTFLAGS_TARGET="${RUSTFLAGS_TARGET} -C link-arg=-miphoneos-version-min=${IPHONEOS_DEPLOYMENT_TARGET}"
-  fi
+    target_env="$(echo "${target}" | tr '[:lower:]-' '[:upper:]_')"
 
-  echo "Building ensu_uniffi for ${PLATFORM_NAME} ${arch} (${target}) [${PROFILE}]"
-  (cd "${CRATE_DIR}" && RUSTFLAGS="${RUSTFLAGS_TARGET}" cargo build ${CARGO_FLAGS} --target "${target}")
+    eval "export CARGO_TARGET_${target_env}_LINKER=\"${TARGET_CLANG}\""
+    eval "export CFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
+    eval "export CXXFLAGS_${target_env}=\"-isysroot ${TARGET_SDKROOT}\""
 
-  lib_path="${CRATE_DIR}/target/${target}/${PROFILE}/libensu_uniffi.a"
-  if [ ! -f "${lib_path}" ]; then
-    echo "Expected library not found: ${lib_path}" >&2
+    RUSTFLAGS_TARGET="${RUSTFLAGS:-} -C link-arg=-isysroot -C link-arg=${TARGET_SDKROOT}"
+    if [ "${PLATFORM_NAME}" = "iphonesimulator" ] && [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
+      RUSTFLAGS_TARGET="${RUSTFLAGS_TARGET} -C link-arg=-mios-simulator-version-min=${IPHONEOS_DEPLOYMENT_TARGET}"
+    elif [ "${PLATFORM_NAME}" = "iphoneos" ] && [ -n "${IPHONEOS_DEPLOYMENT_TARGET:-}" ]; then
+      RUSTFLAGS_TARGET="${RUSTFLAGS_TARGET} -C link-arg=-miphoneos-version-min=${IPHONEOS_DEPLOYMENT_TARGET}"
+    fi
+
+    echo "Building ${crate_name} for ${PLATFORM_NAME} ${arch} (${target}) [${PROFILE}]"
+    (cd "${crate_dir}" && RUSTFLAGS="${RUSTFLAGS_TARGET}" cargo build ${CARGO_FLAGS} --target "${target}")
+
+    lib_path="${crate_dir}/target/${target}/${PROFILE}/${lib_name}"
+    if [ ! -f "${lib_path}" ]; then
+      echo "Expected library not found: ${lib_path}" >&2
+      exit 1
+    fi
+
+    arch_lib="${OUT_DIR}/${lib_name%.a}_${arch}.a"
+    cp "${lib_path}" "${arch_lib}"
+    INPUT_LIBS="${INPUT_LIBS} ${arch_lib}"
+  done
+
+  universal_lib="${OUT_DIR}/${lib_name}"
+  rm -f "${universal_lib}"
+
+  set -- ${INPUT_LIBS}
+  if [ "$#" -eq 0 ]; then
+    echo "No supported architectures found for ${crate_name} (${PLATFORM_NAME} ${ARCHS})" >&2
     exit 1
+  elif [ "$#" -eq 1 ]; then
+    cp "$1" "${universal_lib}"
+  else
+    lipo -create ${INPUT_LIBS} -output "${universal_lib}"
   fi
 
-  arch_lib="${OUT_DIR}/libensu_uniffi_${arch}.a"
-  cp "${lib_path}" "${arch_lib}"
-  INPUT_LIBS="${INPUT_LIBS} ${arch_lib}"
+  echo "✅ Built ${universal_lib}"
+}
 
-done
-
-# Create universal lib.
-UNIVERSAL_LIB="${OUT_DIR}/libensu_uniffi.a"
-rm -f "${UNIVERSAL_LIB}"
-
-# If we have only one arch, just copy.
-set -- ${INPUT_LIBS}
-if [ "$#" -eq 1 ]; then
-  cp "$1" "${UNIVERSAL_LIB}"
-else
-  lipo -create ${INPUT_LIBS} -output "${UNIVERSAL_LIB}"
-fi
-
-echo "✅ Built ${UNIVERSAL_LIB}"
+build_crate_universal "ensu_uniffi" "${REPO_ROOT}/rust/ensu_uniffi" "libensu_uniffi.a"
+build_crate_universal "llmchat_db_uniffi" "${REPO_ROOT}/rust/llmchat_db_uniffi" "libllmchat_db_uniffi.a"

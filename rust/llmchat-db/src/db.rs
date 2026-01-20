@@ -6,7 +6,7 @@ use zeroize::Zeroizing;
 use crate::backend::{Backend, BackendTx, RowExt, Value};
 use crate::crypto;
 use crate::migrations;
-use crate::models::{Attachment, EntityType, Message, Sender, Session, StoredAttachment};
+use crate::models::{AttachmentMeta, EntityType, Message, Sender, Session, StoredAttachment};
 use crate::traits::{Clock, RandomUuidGen, SystemClock, UuidGen};
 use crate::{Error, Result};
 
@@ -141,7 +141,7 @@ impl<B: Backend> ChatDb<B> {
         sender: &str,
         text: &str,
         parent: Option<Uuid>,
-        attachments: Vec<Attachment>,
+        attachments: Vec<AttachmentMeta>,
     ) -> Result<Message> {
         let sender: Sender = sender.parse()?;
         let now = self.clock.now_us();
@@ -238,69 +238,6 @@ impl<B: Backend> ChatDb<B> {
 
             self.touch_session(tx, session_uuid, now)
         })
-    }
-
-    pub fn mark_attachment_uploaded(&self, message_uuid: Uuid, attachment_id: &str) -> Result<()> {
-        let now = self.clock.now_us();
-        let row = self.backend.query_row(
-            "SELECT attachments FROM messages WHERE message_uuid = ? AND deleted_at IS NULL",
-            &[Value::Text(message_uuid.to_string())],
-        )?;
-        let row = row.ok_or(Error::NotFound {
-            entity: EntityType::Message,
-            id: message_uuid,
-        })?;
-
-        let attachments_json = row.get_optional_string(0)?;
-        let mut stored = parse_stored_attachments(attachments_json)?;
-        let mut found = false;
-        for attachment in &mut stored {
-            if attachment.id == attachment_id {
-                if attachment.uploaded_at.is_none() {
-                    attachment.uploaded_at = Some(now);
-                }
-                found = true;
-                break;
-            }
-        }
-
-        if !found {
-            return Err(Error::AttachmentNotFound(attachment_id.to_string()));
-        }
-
-        let updated_json = if stored.is_empty() {
-            None
-        } else {
-            Some(serde_json::to_string(&stored)?)
-        };
-
-        self.backend.execute(
-            "UPDATE messages SET attachments = ? WHERE message_uuid = ?",
-            &[
-                updated_json.map(Value::Text).unwrap_or(Value::Null),
-                Value::Text(message_uuid.to_string()),
-            ],
-        )?;
-
-        Ok(())
-    }
-
-    pub fn get_pending_uploads(&self, session_uuid: Uuid) -> Result<Vec<Attachment>> {
-        let rows = self.backend.query(
-            "SELECT attachments FROM messages WHERE session_uuid = ? AND deleted_at IS NULL",
-            &[Value::Text(session_uuid.to_string())],
-        )?;
-
-        let mut pending = Vec::new();
-        for row in rows {
-            let attachments_json = row.get_optional_string(0)?;
-            let stored = parse_stored_attachments(attachments_json)?;
-            for attachment in stored.into_iter().filter(|att| att.uploaded_at.is_none()) {
-                pending.push(self.stored_to_attachment(attachment)?);
-            }
-        }
-
-        Ok(pending)
     }
 
     pub fn mark_session_synced(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
@@ -410,7 +347,7 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
-    fn serialize_attachments(&self, attachments: &[Attachment]) -> Result<Option<String>> {
+    fn serialize_attachments(&self, attachments: &[AttachmentMeta]) -> Result<Option<String>> {
         if attachments.is_empty() {
             return Ok(None);
         }
@@ -421,7 +358,7 @@ impl<B: Backend> ChatDb<B> {
         Ok(Some(serde_json::to_string(&stored)?))
     }
 
-    fn deserialize_attachments(&self, raw: Option<String>) -> Result<Vec<Attachment>> {
+    fn deserialize_attachments(&self, raw: Option<String>) -> Result<Vec<AttachmentMeta>> {
         let stored = parse_stored_attachments(raw)?;
         stored
             .into_iter()
@@ -429,23 +366,21 @@ impl<B: Backend> ChatDb<B> {
             .collect()
     }
 
-    fn attachment_to_stored(&self, attachment: &Attachment) -> Result<StoredAttachment> {
+    fn attachment_to_stored(&self, attachment: &AttachmentMeta) -> Result<StoredAttachment> {
         Ok(StoredAttachment {
             id: attachment.id.clone(),
             kind: attachment.kind,
             size: attachment.size,
             encrypted_name: crypto::encrypt_json_field(&attachment.name, &self.key)?,
-            uploaded_at: attachment.uploaded_at,
         })
     }
 
-    fn stored_to_attachment(&self, attachment: StoredAttachment) -> Result<Attachment> {
-        Ok(Attachment {
+    fn stored_to_attachment(&self, attachment: StoredAttachment) -> Result<AttachmentMeta> {
+        Ok(AttachmentMeta {
             id: attachment.id,
             kind: attachment.kind,
             size: attachment.size,
             name: crypto::decrypt_json_field(&attachment.encrypted_name, &self.key)?,
-            uploaded_at: attachment.uploaded_at,
         })
     }
 
@@ -536,7 +471,7 @@ mod tests {
     use crate::backend::{BackendTx, RowExt, Value};
     use crate::backend::sqlite::SqliteBackend;
     use crate::crypto::KEY_BYTES;
-    use crate::models::{Attachment, AttachmentKind};
+    use crate::models::{AttachmentMeta, AttachmentKind};
 
     #[derive(Debug)]
     struct StepClock {
@@ -669,7 +604,7 @@ mod tests {
     }
 
     #[test]
-    fn attachment_upload_flow_does_not_touch_session() {
+    fn attachment_metadata_is_encrypted_in_json() {
         let session_id = Uuid::from_u128(6);
         let message_id = Uuid::from_u128(7);
         let clock = Arc::new(StepClock::new(50, 1));
@@ -678,36 +613,22 @@ mod tests {
         db.create_session("title").unwrap();
 
         let attachments = vec![
-            Attachment {
+            AttachmentMeta {
                 id: "att-1".to_string(),
                 kind: AttachmentKind::Image,
                 size: 123,
                 name: "photo.jpg".to_string(),
-                uploaded_at: None,
             },
-            Attachment {
+            AttachmentMeta {
                 id: "att-2".to_string(),
                 kind: AttachmentKind::Document,
                 size: 456,
                 name: "doc.pdf".to_string(),
-                uploaded_at: None,
             },
         ];
 
         db.insert_message(session_id, "self", "hello", None, attachments)
             .unwrap();
-
-        let updated_at_before = db.get_session(session_id).unwrap().unwrap().updated_at;
-
-        let pending = db.get_pending_uploads(session_id).unwrap();
-        assert_eq!(pending.len(), 2);
-
-        db.mark_attachment_uploaded(message_id, "att-1").unwrap();
-        let pending_after = db.get_pending_uploads(session_id).unwrap();
-        assert_eq!(pending_after.len(), 1);
-
-        let updated_at_after = db.get_session(session_id).unwrap().unwrap().updated_at;
-        assert_eq!(updated_at_before, updated_at_after);
 
         let row = db
             .backend
@@ -719,6 +640,7 @@ mod tests {
             .unwrap();
         let json = row.get_optional_string(0).unwrap().unwrap();
         let stored: Vec<StoredAttachment> = serde_json::from_str(&json).unwrap();
+        assert_eq!(stored.len(), 2);
         assert!(stored[0].encrypted_name.starts_with("enc:v1:"));
         assert!(!stored[0].encrypted_name.contains("photo.jpg"));
     }

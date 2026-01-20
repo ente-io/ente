@@ -326,7 +326,8 @@ private fun buildAttachmentFromUri(
         attachmentsDir.mkdirs()
     }
 
-    val destination = File(attachmentsDir, "${UUID.randomUUID()}_$safeName")
+    val attachmentId = UUID.randomUUID().toString()
+    val destination = File(attachmentsDir, attachmentId)
     return runCatching {
         val inputStream = resolver.openInputStream(uri) ?: return@runCatching null
 
@@ -339,7 +340,8 @@ private fun buildAttachmentFromUri(
         val finalSize = destination.length().takeIf { it > 0 } ?: size ?: 0L
 
         Attachment(
-            name = name ?: destination.name,
+            id = attachmentId,
+            name = name ?: safeName,
             sizeBytes = finalSize,
             type = type,
             localPath = destination.absolutePath,

@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 final class CredentialStore {
     static let shared = CredentialStore()
@@ -16,6 +17,7 @@ final class CredentialStore {
         static let token = "ensu.token"
         static let masterKey = "ensu.masterKey"
         static let secretKey = "ensu.secretKey"
+        static let chatDbKey = "ensu.chatDbKey"
     }
 
     var email: String? {
@@ -60,6 +62,33 @@ final class CredentialStore {
         try KeychainStore.set(secretKey, service: keychainService, account: KeychainAccount.secretKey)
     }
 
+    /// Returns a stable 32-byte key for encrypting the local chat DB.
+    ///
+    /// Rules:
+    /// - If already stored, reuse it.
+    /// - Else, if the account master key exists and is 32 bytes, pin it as the chat DB key.
+    /// - Else, generate a random 32-byte key and persist it.
+    func getOrCreateChatDbKey() -> Data {
+        if let existing = try? KeychainStore.get(service: keychainService, account: KeychainAccount.chatDbKey), existing.count == 32 {
+            return existing
+        }
+
+        if let master = try? KeychainStore.get(service: keychainService, account: KeychainAccount.masterKey), master.count == 32 {
+            try? KeychainStore.set(master, service: keychainService, account: KeychainAccount.chatDbKey)
+            return master
+        }
+
+        var bytes = [UInt8](repeating: 0, count: 32)
+        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        if status != errSecSuccess {
+            // Fallback to less ideal randomness if SecRandom fails (shouldn't happen on iOS).
+            bytes = (0..<32).map { _ in UInt8.random(in: UInt8.min...UInt8.max) }
+        }
+        let data = Data(bytes)
+        try? KeychainStore.set(data, service: keychainService, account: KeychainAccount.chatDbKey)
+        return data
+    }
+
     func clear() {
         UserDefaults.standard.removeObject(forKey: DefaultsKey.email)
         UserDefaults.standard.removeObject(forKey: DefaultsKey.userId)
@@ -67,5 +96,6 @@ final class CredentialStore {
         try? KeychainStore.delete(service: keychainService, account: KeychainAccount.token)
         try? KeychainStore.delete(service: keychainService, account: KeychainAccount.masterKey)
         try? KeychainStore.delete(service: keychainService, account: KeychainAccount.secretKey)
+        // Note: keep chatDbKey to preserve local chats across sign-out.
     }
 }
