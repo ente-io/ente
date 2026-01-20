@@ -1,54 +1,54 @@
 ---
-title: Comments and Reactions
-description: Engage with photos and videos in shared albums through comments and reactions
+title: Comments and Likes
+description: Engage with photos and videos in shared albums through comments and likes
 author: shanthy17
 author_email: shanthy@ente.io
 ---
 
-# Comments and Reactions
+# Comments and Likes
 
-Ente lets you comment on and react to shared photos and videos. Whether you're collaborating with family on a vacation album or collecting memories from a wedding, comments and reactions help you engage with shared content while maintaining end-to-end encryption.
+Ente lets you comment on and like shared photos and videos. Whether you're collaborating with family on a vacation album or collecting memories from a wedding, comments and likes help you engage with shared content while maintaining end-to-end encryption.
 
-## Where comments and reactions work
+## Where comments and likes work
 
-Comments and reactions are available on:
+Comments and likes are available on:
 
 - **Shared albums**: Albums you've shared with other Ente users or that have been shared with you
 - **Public links**: Albums shared via public links, including collect links
 - **Both authenticated and anonymous users**: Ente users can comment with their account, while public link visitors can comment anonymously
 
-Comments and reactions are **not available** on private albums that haven't been shared.
+Comments and likes are **not available** on private albums that haven't been shared.
 
 ## How it works
 
-All comments and reactions are end-to-end encrypted using the album's encryption key. Even though multiple people can interact with your photos, Ente's servers never have access to the unencrypted content of comments or reactions.
+All comments and likes are end-to-end encrypted using the album's encryption key. Even though multiple people can interact with your photos, Ente's servers never have access to the unencrypted content of comments or likes.
 
-When you comment on a photo or react to it, only people with access to that shared album can see your interactions. Anonymous commenters on public links are assigned a temporary identity that's encrypted and tied to the specific album.
+When you comment on a photo or like it, only people with access to that shared album can see your interactions. Anonymous commenters on public links are assigned a temporary identity that's encrypted and tied to the specific album.
 
-## Reacting to photos and videos
+## Liking photos and videos
 
-### Adding reactions
+### Adding likes
 
-You can react to any photo or video in a shared album:
+You can like any photo or video in a shared album:
 
 **On mobile:**
 1. Open a photo in a shared album
 2. Tap the heart icon in the bottom bar
-3. Your reaction is added instantly
+3. Your like is added instantly
 
 **On web/desktop:**
 1. Open a photo in a shared album
 2. Click the heart icon in the viewer
-3. Your reaction is added instantly
+3. Your like is added instantly
 
-The heart icon fills in to show you've reacted. Tap or click it again to remove your reaction.
+The heart icon fills in to show you've liked. Tap or click it again to remove your like.
 
 ### Viewing who liked
 
 To see who has liked a photo:
 
 - On mobile, long pressing the heart icon shows the likes and on web, right clicking does
-- You'll see names for Ente users and display names for anonymous reactors from public links
+- You'll see names for Ente users and display names for anonymous likers from public links
 
 ## Commenting on photos and videos
 
@@ -86,7 +86,7 @@ Replies show a quote from the parent comment to maintain context.
 
 ### Liking comments
 
-You can react to individual comments:
+You can like individual comments:
 
 **On mobile:**
 - **Double tap** a comment bubble to quickly like it, or
@@ -121,7 +121,7 @@ If a photo appears in multiple shared albums, you can choose which album's comme
 - Use the album selector dropdown at the top
 - Switch between albums to see different comment threads
 
-Each album maintains its own separate comments and reactions for the same photo.
+Each album maintains its own separate comments and likes for the same photo.
 
 ## Comments on public links
 
@@ -131,7 +131,7 @@ People viewing your album through a public link can comment without creating an 
 
 **First-time visitors are prompted to:**
 1. Enter a display name (used to identify their comments)
-2. Start commenting and reacting
+2. Start commenting and liking
 
 The display name is stored encrypted and associated with their browsing session for that specific album.
 
@@ -143,7 +143,7 @@ Album owners can control whether comments are allowed on public links:
 
 1. Open album settings
 2. Go to "Manage public link"
-3. Toggle "Enable comments and reactions"
+3. Toggle "Enable comments and likes"
 
 When disabled, comments and likes and their buttons are hidden from public link viewers.
 
@@ -158,7 +158,7 @@ This helps you moderate content collected through public links.
 The Feed feature provides a centralized view of all social activity across your shared albums:
 
 **What appears in your feed:**
-- New reactions on your photos
+- New likes on your photos
 - New comments on your photos
 - Replies to your comments
 - Activity from all shared albums you participate in
@@ -174,34 +174,34 @@ Feed is available on public albums.
 
 The feed updates in real-time as people interact with your shared content, making it easy to stay engaged with collaborative albums without checking each one individually.
 
-## Comment and reaction limits
+## Comment and like limits
 
 To maintain performance and prevent abuse:
 
 - **Comment length**: Maximum 500 characters per comment
 - **Anonymous display names**: Maximum 50 characters
 - **Multi-line support**: Comments can span multiple lines for better formatting
-- **One reaction per person**: Each user/anonymous visitor can add one reaction per photo
+- **One like per person**: Each user/anonymous visitor can add one like per photo
 
 ## Platform availability
 
 **Mobile apps (iOS and Android):**
-- Full support for comments and reactions
+- Full support for comments and likes
 - Can add, view, reply, like, and delete
 - Feed feature available
 - Interactive gestures (double-tap to like, swipe to reply)
 
 **Web and desktop:**
-- Full support for comments and reactions
+- Full support for comments and likes
 - Can add, view, reply, like, and delete
 
 ## Privacy and encryption
 
-Comments and reactions maintain Ente's strong privacy guarantees:
+Comments and likes maintain Ente's strong privacy guarantees:
 
-- **End-to-end encrypted**: All comment text and reaction data are encrypted using the album's encryption key
-- **Server-side privacy**: Ente's servers store only encrypted data and cannot read comments or reactions
-- **Reaction padding**: Reaction types are padded to a fixed size before encryption to prevent length-based analysis
+- **End-to-end encrypted**: All comment text and like data are encrypted using the album's encryption key
+- **Server-side privacy**: Ente's servers store only encrypted data and cannot read comments or likes
+- **Like padding**: Like types are padded to a fixed size before encryption to prevent length-based analysis
 - **Anonymous privacy**: Anonymous commenter identities are encrypted per-album and not linked across different public links
 
 Even in collaborative albums with many participants, your comments remain private and can only be read by people with legitimate access to the album.
