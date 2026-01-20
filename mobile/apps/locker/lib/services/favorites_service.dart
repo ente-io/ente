@@ -68,6 +68,8 @@ class FavoritesService {
 
   void clearCache() {
     _cachedFavoritesCollectionID = null;
+    _cachedFavUploadedIDs.clear();
+    _cachedFavFileHashes.clear();
   }
 
   bool isFavoriteCache(EnteFile file, {bool checkOnlyAlbum = false}) {
