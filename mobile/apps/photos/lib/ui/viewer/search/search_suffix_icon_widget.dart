@@ -40,6 +40,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon> {
               icon: Icon(
                 Icons.close,
                 color: colorScheme.strokeMuted,
+                size: 16,
               ),
             ),
     );

@@ -111,6 +111,9 @@ export const DownloadStatusNotifications: React.FC<
 
         // Determine if this is a ZIP download (web with multiple files or live photo)
         const isZipDownload = !group.downloadDirPath && group.total > 1;
+        const shouldShowZipPart =
+            isZipDownload &&
+            (group.includeZipNumber || (group.currentPart ?? 1) > 1);
         const isDesktopOrSingleFile =
             !!group.downloadDirPath || group.total === 1;
 
@@ -127,11 +130,15 @@ export const DownloadStatusNotifications: React.FC<
             }
         } else if (isComplete) {
             statusText = t("download_complete");
-        } else if (isZipDownload) {
+        } else if (shouldShowZipPart) {
             const part = group.currentPart ?? 1;
             statusText = group.isDownloadingZip
                 ? t("downloading_part", { part })
                 : t("preparing_part", { part });
+        } else if (isZipDownload) {
+            statusText = group.isDownloadingZip
+                ? t("downloading")
+                : t("preparing");
         } else if (isDesktopOrSingleFile) {
             statusText =
                 group.total === 1

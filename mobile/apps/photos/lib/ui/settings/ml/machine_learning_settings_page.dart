@@ -89,6 +89,7 @@ class _MachineLearningSettingsPageState
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
+            backgroundColor: pageBackgroundColor,
             flexibleSpaceTitle: GestureDetector(
               child: TitleBarTitleWidget(
                 title: AppLocalizations.of(context).machineLearning,

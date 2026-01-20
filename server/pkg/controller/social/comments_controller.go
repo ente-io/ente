@@ -85,7 +85,7 @@ func (c *CommentsController) Create(ctx *gin.Context, req CreateCommentRequest) 
 
 	var parentComment *socialentity.Comment
 	if req.ParentCommentID != nil {
-		parentComment, err = c.Repo.GetByID(ctx.Request.Context(), *req.ParentCommentID)
+		parentComment, err = c.Repo.GetByID(ctx, *req.ParentCommentID)
 		if err != nil {
 			return "", stacktrace.Propagate(err, "")
 		}
@@ -119,7 +119,7 @@ func (c *CommentsController) Create(ctx *gin.Context, req CreateCommentRequest) 
 	if len(req.Nonce) > 0 {
 		comment.Nonce = req.Nonce
 	}
-	if err := c.Repo.Insert(ctx.Request.Context(), comment); err != nil {
+	if err := c.Repo.Insert(ctx, comment); err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
 	return comment.ID, nil
@@ -139,7 +139,7 @@ func (c *CommentsController) Diff(ctx *gin.Context, req CommentDiffRequest) ([]s
 			return nil, false, stacktrace.Propagate(err, "")
 		}
 	}
-	return c.Repo.GetDiff(ctx.Request.Context(), req.CollectionID, req.Since, req.Limit, req.FileID)
+	return c.Repo.GetDiff(ctx, req.CollectionID, req.Since, req.Limit, req.FileID)
 }
 
 // UpdatePayload edits the encrypted payload of a comment.
@@ -148,7 +148,7 @@ func (c *CommentsController) UpdatePayload(ctx *gin.Context, req UpdateCommentRe
 		return ente.ErrBadRequest
 	}
 	userID, hasUserID := req.Actor.UserIDValue()
-	comment, err := c.Repo.GetByID(ctx.Request.Context(), req.CommentID)
+	comment, err := c.Repo.GetByID(ctx, req.CommentID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -162,13 +162,13 @@ func (c *CommentsController) UpdatePayload(ctx *gin.Context, req UpdateCommentRe
 	} else if !hasUserID || comment.UserID != userID {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	return c.Repo.UpdateCipher(ctx.Request.Context(), req.CommentID, req.Cipher, req.Nonce)
+	return c.Repo.UpdateCipher(ctx, req.CommentID, req.Cipher, req.Nonce)
 }
 
 // Delete removes a comment if the actor is allowed to do so.
 func (c *CommentsController) Delete(ctx *gin.Context, req DeleteCommentRequest) error {
 	userID, hasUserID := req.Actor.UserIDValue()
-	comment, err := c.Repo.GetByID(ctx.Request.Context(), req.CommentID)
+	comment, err := c.Repo.GetByID(ctx, req.CommentID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -205,7 +205,7 @@ func (c *CommentsController) Delete(ctx *gin.Context, req DeleteCommentRequest) 
 			}
 		}
 	}
-	return c.Repo.SoftDelete(ctx.Request.Context(), req.CommentID)
+	return c.Repo.SoftDelete(ctx, req.CommentID)
 }
 
 func validateReplyFileContext(parent *socialentity.Comment, requestedFileID *int64) error {

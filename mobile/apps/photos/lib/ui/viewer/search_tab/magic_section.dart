@@ -102,7 +102,6 @@ class _MagicSectionState extends State<MagicSection> {
             SectionHeader(
               SectionType.magic,
               hasMore: (_magicSearchResults.length >= kSearchSectionLimit - 1),
-              showSearch: true,
             ),
             const SizedBox(height: 2),
             SizedBox(

@@ -47,7 +47,7 @@ func (c *AnonIdentityController) Create(ctx *gin.Context, req CreateAnonIdentity
 		return AnonIdentityResponse{}, stacktrace.Propagate(err, "")
 	}
 	anonID := fmt.Sprintf("anon_%s", rawID)
-	if err := c.AnonUsersRepo.Insert(ctx.Request.Context(), socialentity.AnonUser{
+	if err := c.AnonUsersRepo.Insert(ctx, socialentity.AnonUser{
 		ID:           anonID,
 		CollectionID: req.CollectionID,
 		Cipher:       req.Cipher,
