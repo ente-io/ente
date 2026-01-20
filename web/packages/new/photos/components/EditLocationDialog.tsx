@@ -125,6 +125,14 @@ export const EditLocationDialog: React.FC<EditLocationDialogProps> = ({
         }
     };
 
+    useEffect(() => {
+        if (!open || !isSuccess) return;
+        const timeoutId = setTimeout(() => {
+            onClose();
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+    }, [open, isSuccess, onClose]);
+
     return (
         <Dialog
             {...{ open, onClose, fullScreen }}
