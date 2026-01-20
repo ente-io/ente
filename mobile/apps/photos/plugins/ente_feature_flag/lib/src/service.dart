@@ -99,7 +99,10 @@ class FlagService {
 
   bool get showSharedAlbumsInMoveSheet => internalUser;
 
-  bool get increasedButtonBorderRadius => internalUser;
+  bool get increasedButtonBorderRadius {
+    final isEnabled = _prefs.getBool("ls.increased_button_border_radius") ?? false;
+    return isEnabled || kDebugMode;
+  }
 
   bool get isSocialEnabled =>
       internalUser || _isServerFlagEnabled(_commentsFlag);

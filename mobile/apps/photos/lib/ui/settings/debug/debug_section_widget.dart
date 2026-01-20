@@ -59,6 +59,27 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Enable more rounding",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.increasedButtonBorderRadius,
+            onChanged: () async {
+              final newValue = !localSettings.increasedButtonBorderRadius;
+              await localSettings.setIncreasedButtonBorderRadius(newValue);
+              setState(() {});
+              showShortToast(
+                context,
+                newValue
+                    ? "More rounding enabled. Restart app."
+                    : "More rounding disabled. Restart app.",
+              );
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Enable database logging",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,

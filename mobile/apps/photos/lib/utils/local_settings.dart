@@ -52,6 +52,8 @@ class LocalSettings {
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
+  static const _kIncreasedButtonBorderRadius =
+      "ls.increased_button_border_radius";
 
   final SharedPreferences _prefs;
 
@@ -318,5 +320,12 @@ class LocalSettings {
 
   Future<void> setChristmasBannerEnabled(bool value) async {
     await _prefs.setBool(_kChristmasBannerEnabled, value);
+  }
+
+  bool get increasedButtonBorderRadius =>
+      _prefs.getBool(_kIncreasedButtonBorderRadius) ?? false;
+
+  Future<void> setIncreasedButtonBorderRadius(bool value) async {
+    await _prefs.setBool(_kIncreasedButtonBorderRadius, value);
   }
 }
