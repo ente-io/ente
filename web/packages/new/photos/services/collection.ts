@@ -1339,11 +1339,20 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
 /**
  * Return `true` if the given collection is hidden.
  *
- * Hidden collections are those that have their visibility set to hidden in the
- * collection's owner's private magic metadata.
+ * Hidden collections are those that have their visibility set to hidden for
+ * the current user (owner or sharee).
  */
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+export const isHiddenCollection = (collection: Collection) => {
+    const userID = ensureLocalUser().id;
+    if (collection.owner.id == userID) {
+        return (
+            collection.magicMetadata?.data.visibility == ItemVisibility.hidden
+        );
+    }
+    return (
+        collection.sharedMagicMetadata?.data.visibility == ItemVisibility.hidden
+    );
+};
 
 /**
  * Return `true` if the given collection is archived.

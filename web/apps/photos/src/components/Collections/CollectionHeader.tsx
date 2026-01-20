@@ -541,6 +541,25 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         {t("archive_album")}
                     </OverflowMenuOption>
                 ),
+                activeCollection ? (
+                    isHiddenCollection(activeCollection) ? (
+                        <OverflowMenuOption
+                            key="unhide"
+                            onClick={unhideAlbum}
+                            startIcon={<VisibilityOutlinedIcon />}
+                        >
+                            {t("unhide_collection")}
+                        </OverflowMenuOption>
+                    ) : (
+                        <OverflowMenuOption
+                            key="hide"
+                            onClick={hideAlbum}
+                            startIcon={<VisibilityOffOutlinedIcon />}
+                        >
+                            {t("hide_collection")}
+                        </OverflowMenuOption>
+                    )
+                ) : undefined,
                 <OverflowMenuOption
                     key="leave"
                     startIcon={<LogoutIcon />}
