@@ -43,7 +43,7 @@ class SettingsItem extends StatelessWidget {
               HugeIcon(
                 icon: icon,
                 color: iconColor ?? colorScheme.textMuted,
-                size: 20,
+                size: 24,
               ),
               const SizedBox(width: 12),
             ],

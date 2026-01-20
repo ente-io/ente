@@ -55,7 +55,7 @@ class _CollectionsItem extends StatelessWidget {
             HugeIcon(
               icon: HugeIcons.strokeRoundedWallet05,
               color: colorScheme.textMuted,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -101,7 +101,7 @@ class _TrashItem extends StatelessWidget {
             HugeIcon(
               icon: HugeIcons.strokeRoundedDelete02,
               color: colorScheme.textMuted,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -149,7 +149,7 @@ class _LegacyItem extends StatelessWidget {
             HugeIcon(
               icon: HugeIcons.strokeRoundedFavourite,
               color: colorScheme.textMuted,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
