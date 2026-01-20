@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class GradientButton extends StatelessWidget {
@@ -77,7 +78,9 @@ class GradientButton extends StatelessWidget {
                     getEnteColorScheme(context).fillMuted,
                   ],
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            flagService.increasedButtonBorderRadius ? 12 : 8,
+          ),
         ),
         child: Center(child: buttonContent),
       ),
