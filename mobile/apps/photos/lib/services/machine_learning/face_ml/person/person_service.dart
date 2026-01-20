@@ -18,6 +18,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
+import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 typedef ManualPersonAssignmentResult = ({
@@ -39,6 +40,8 @@ class PersonService {
   static PersonService? _instance;
   static const kPersonIDKey = "person_id";
   static const kNameKey = "name";
+  static const double kDefaultAutoMergeThreshold = 0.24;
+  static double autoMergeThreshold = kDefaultAutoMergeThreshold;
 
   Future<List<PersonEntity>>? _cachedPersonsFuture;
   int _lastCacheRefreshTime = 0;
@@ -60,6 +63,11 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
+    final settings = LocalSettings(prefs);
+    final savedAutoMerge = settings.autoMergeThresholdOverride;
+    if (savedAutoMerge != null) {
+      autoMergeThreshold = savedAutoMerge.clamp(0.0, 1.0);
+    }
     await _instance!.refreshPersonCache();
   }
 
