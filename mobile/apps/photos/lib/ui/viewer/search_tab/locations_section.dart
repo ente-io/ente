@@ -121,6 +121,7 @@ class _LocationsSectionState extends State<LocationsSection> {
               SectionType.location,
               hasMore:
                   (_locationsSearchResults.length >= kSearchSectionLimit - 1),
+              showSearch: true,
             ),
             const SizedBox(height: 2),
             SizedBox(

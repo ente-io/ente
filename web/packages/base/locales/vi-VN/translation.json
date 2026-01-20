@@ -106,6 +106,8 @@
     "exit_fullscreen": "Thoát toàn màn hình",
     "go_fullscreen": "Toàn màn hình",
     "zoom": "Thu phóng",
+    "zoom_in": "",
+    "zoom_out": "",
     "play": "Phát",
     "pause": "Dừng",
     "previous": "Trước",
@@ -127,7 +129,7 @@
     "delete_files_title": "Xóa ngay lập tức?",
     "delete_files_message": "Các tệp đã chọn sẽ bị xóa vĩnh viễn khỏi tài khoản Ente của bạn.",
     "selected_count": "Đã chọn {{selected, number}} mục",
-    "selected_and_yours_count": "{{selected, number}} mục đã chọn, trong đó {{yours, number}} là của bạn",
+    "selected_and_yours_count": "",
     "delete": "Xóa",
     "like": "Thích",
     "unlike": "Bỏ thích",
@@ -799,5 +801,10 @@
     "continuous": "Liên tục",
     "trip": "Chuyến đi",
     "album_layout": "Bố cục album",
-    "maps_privacy_notice": "Tọa độ gần đúng sẽ được gửi đến các bên thứ ba quan tâm đến quyền riêng tư như OpenStreetMap để hiển thị bản đồ và vị trí."
+    "maps_privacy_notice": "Tọa độ gần đúng sẽ được gửi đến các bên thứ ba quan tâm đến quyền riêng tư như OpenStreetMap để hiển thị bản đồ và vị trí.",
+    "edit_location": "",
+    "add_location": "",
+    "add_location_button": "",
+    "save_location": "",
+    "search_location": ""
 }

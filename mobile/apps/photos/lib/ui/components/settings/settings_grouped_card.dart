@@ -18,6 +18,8 @@ class SettingsGroupedCard extends StatelessWidget {
     final cardColor =
         isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
 
+    final childCount = children.length;
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
@@ -25,26 +27,18 @@ class SettingsGroupedCard extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: _buildChildren(),
+        children: [
+          for (int i = 0; i < childCount; i++)
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(
+                top: i == 0 ? const Radius.circular(20) : Radius.zero,
+                bottom:
+                    i == childCount - 1 ? const Radius.circular(20) : Radius.zero,
+              ),
+              child: children[i],
+            ),
+        ],
       ),
     );
-  }
-
-  List<Widget> _buildChildren() {
-    final List<Widget> result = [];
-    for (int i = 0; i < children.length; i++) {
-      result.add(
-        ClipRRect(
-          borderRadius: BorderRadius.vertical(
-            top: i == 0 ? const Radius.circular(20) : Radius.zero,
-            bottom: i == children.length - 1
-                ? const Radius.circular(20)
-                : Radius.zero,
-          ),
-          child: children[i],
-        ),
-      );
-    }
-    return result;
   }
 }

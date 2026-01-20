@@ -28,6 +28,7 @@ class TrailingWidget extends StatefulWidget {
 class _TrailingWidgetState extends State<TrailingWidget> {
   Widget? trailingWidget;
   bool _listenerAdded = false;
+  bool _didInitialize = false;
 
   @override
   void initState() {
@@ -36,7 +37,15 @@ class _TrailingWidgetState extends State<TrailingWidget> {
       widget.executionStateNotifier.addListener(_executionStateListener);
       _listenerAdded = true;
     }
-    _setTrailingIcon();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitialize) {
+      _didInitialize = true;
+      _setTrailingIcon();
+    }
   }
 
   @override

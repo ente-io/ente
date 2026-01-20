@@ -1,3 +1,4 @@
+use ente_core::{auth::AuthError, crypto::CryptoError};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -38,8 +39,40 @@ pub enum Error {
     #[error("ZIP error: {0}")]
     Zip(#[from] zip::result::ZipError),
 
+    #[error("API error ({status}): {message}")]
+    ApiError { status: u16, message: String },
+
     #[error("{0}")]
     Generic(String),
+}
+
+impl From<CryptoError> for Error {
+    fn from(err: CryptoError) -> Self {
+        match err {
+            CryptoError::Base64Decode(source) => Error::Base64Decode(source),
+            CryptoError::Io(source) => Error::Io(source),
+            other => Error::Crypto(other.to_string()),
+        }
+    }
+}
+
+impl From<AuthError> for Error {
+    fn from(err: AuthError) -> Self {
+        match err {
+            AuthError::IncorrectPassword => {
+                Error::AuthenticationFailed("Incorrect password".to_string())
+            }
+            AuthError::IncorrectRecoveryKey => {
+                Error::AuthenticationFailed("Incorrect recovery key".to_string())
+            }
+            AuthError::InvalidKeyAttributes => Error::Crypto(err.to_string()),
+            AuthError::MissingField(field) => Error::Crypto(format!("Missing field: {field}")),
+            AuthError::Crypto(source) => source.into(),
+            AuthError::Decode(msg) => Error::Crypto(msg),
+            AuthError::InvalidKey(msg) => Error::Crypto(msg),
+            AuthError::Srp(msg) => Error::Srp(msg),
+        }
+    }
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

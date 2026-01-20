@@ -56,6 +56,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   ) {
     return Container(
       width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 130),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         gradient: const LinearGradient(
@@ -69,8 +70,10 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
       ),
       child: userDetails is UserDetails
           ? _userDetails(userDetails)
-          : const EnteLoadingWidget(
-              color: strokeBaseDark,
+          : const Center(
+              child: EnteLoadingWidget(
+                color: strokeBaseDark,
+              ),
             ),
     );
   }
