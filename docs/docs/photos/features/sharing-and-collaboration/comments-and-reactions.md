@@ -47,7 +47,7 @@ The heart icon fills in to show you've reacted. Tap or click it again to remove 
 
 To see who has liked a photo:
 
-- On mobile, long pressing the heart icon shows the reactions and on web, right clicking does
+- On mobile, long pressing the heart icon shows the likes and on web, right clicking does
 - You'll see names for Ente users and display names for anonymous reactors from public links
 
 ## Commenting on photos and videos
