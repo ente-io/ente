@@ -689,6 +689,8 @@ class PersonService {
   }) async {
     final result = await entityService.addOrUpdate(type, jsonMap, id: id);
     _lastCacheRefreshTime = 0; // Invalidate cache
+    _cachedPersonsFuture =
+        null; // Force refresh even if last sync time unchanged
     return result;
   }
 
