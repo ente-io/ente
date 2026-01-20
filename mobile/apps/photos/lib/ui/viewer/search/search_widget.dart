@@ -35,6 +35,7 @@ class SearchWidgetState extends State<SearchWidget> {
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
   late FocusNode focusNode;
+  StreamSubscription<TabChangedEvent>? _tabChangedEvent;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   double _bottomPadding = 0.0;
   double _distanceOfWidgetFromBottom = 0;
@@ -48,6 +49,21 @@ class SearchWidgetState extends State<SearchWidget> {
   void initState() {
     super.initState();
     focusNode = FocusNode();
+    _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen((event) async {
+      if (!mounted) {
+        return;
+      }
+      if (event.selectedIndex == 3) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          focusNode.requestFocus();
+        });
+      } else {
+        focusNode.unfocus();
+      }
+    });
     _tabDoubleTapEvent =
         Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
       debugPrint("Firing now ${event.selectedIndex}");
@@ -102,6 +118,7 @@ class SearchWidgetState extends State<SearchWidget> {
   void dispose() {
     _debouncer.cancelDebounceTimer();
     focusNode.dispose();
+    _tabChangedEvent?.cancel();
     _tabDoubleTapEvent?.cancel();
     textController.removeListener(textControllerListener);
     textController.dispose();
