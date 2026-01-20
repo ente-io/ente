@@ -48,7 +48,7 @@ struct MessageListView: View {
 
                             if isGenerating, streamingParentId == message.id {
                                 StreamingBubbleView(text: streamingResponse)
-                                    .id("streaming")
+                                    .id("streaming-\(message.id.uuidString)")
                             }
                         }
 

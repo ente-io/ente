@@ -112,6 +112,24 @@ final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage]
     @Published var streamingResponse: String = ""
     @Published var streamingParentId: UUID? = nil
+
+    var displayedStreamingResponse: String {
+        guard let activeSession = activeGenerationSessionId,
+              activeSession == currentSessionId,
+              activeGenerationId != nil else {
+            return ""
+        }
+        return streamingResponse
+    }
+
+    var displayedStreamingParentId: UUID? {
+        guard let activeSession = activeGenerationSessionId,
+              activeSession == currentSessionId,
+              activeGenerationId != nil else {
+            return nil
+        }
+        return streamingParentId
+    }
     @Published var isGenerating: Bool = false
     @Published var isDownloading: Bool = false
     @Published var isProcessingAttachments: Bool = false

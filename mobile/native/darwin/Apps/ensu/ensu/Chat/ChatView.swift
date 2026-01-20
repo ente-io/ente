@@ -135,8 +135,8 @@ struct ChatView: View {
                 VStack(spacing: 0) {
                     MessageListView(
                         messages: viewModel.messages,
-                        streamingResponse: viewModel.streamingResponse,
-                        streamingParentId: viewModel.streamingParentId,
+                        streamingResponse: viewModel.displayedStreamingResponse,
+                        streamingParentId: viewModel.displayedStreamingParentId,
                         isGenerating: viewModel.isGenerating,
                         onEdit: { message in
                             viewModel.beginEditing(message: message)
