@@ -1,16 +1,11 @@
+import "package:dotted_border/dotted_border.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:flutter_animate/flutter_animate.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -23,154 +18,187 @@ class CodeSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final pageBackgroundColor =
+        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+    final cardColor =
+        isDarkMode ? const Color(0xFF212121) : const Color(0xFFFFFFFF);
+    const greenColor = Color(0xFF08C225);
+
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).codeAppliedPageTitle,
-            ),
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
-                onTap: () {
-                  Navigator.pop(context);
-                },
+      backgroundColor: pageBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 24),
+              // Back arrow
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
               ),
-            ],
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (delegateBuildContext, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+              const SizedBox(height: 24),
+              // Title
+              Text(
+                AppLocalizations.of(context).codeAppliedPageTitle,
+                style: textTheme.largeBold,
+              ),
+              const SizedBox(height: 42),
+              // Success icon and claimed text
+              Center(
+                child: Column(
+                  children: [
+                    // Green circle with checkmark
+                    Container(
+                      width: 69,
+                      height: 69,
+                      decoration: const BoxDecoration(
+                        color: greenColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // "10 GB claimed!" text
+                    Text(
+                      "${referralView.planInfo.storageInGB} GB ${AppLocalizations.of(context).claimed.toLowerCase()}!",
+                      style: textTheme.h3Bold,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 42),
+              // Details button
+              GestureDetector(
+                onTap: () {
+                  routeToPage(
+                    context,
+                    StorageDetailsScreen(referralView, userDetails),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).details,
+                        style: textTheme.body,
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: colorScheme.strokeMuted,
+                        size: 31,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Earn more space card
+              Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.check,
-                          color: colorScheme.primary500,
-                          size: 96,
-                        )
-                            .animate()
-                            .scaleXY(
-                              begin: 0.5,
-                              end: 1,
-                              duration: 750.ms,
-                              curve: Curves.easeInOutCubic,
-                              delay: 250.ms,
-                            )
-                            .fadeIn(
-                              duration: 500.ms,
-                              curve: Curves.easeInOutCubic,
-                            ),
                         Text(
-                          AppLocalizations.of(context).storageInGB(
+                          AppLocalizations.of(context).earnMoreSpace,
+                          style: textTheme.bodyBold,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          AppLocalizations.of(context).referralStorageForBoth(
                             storageAmountInGB:
                                 referralView.planInfo.storageInGB,
                           ),
-                          style: textStyle.h2Bold,
-                        ),
-                        Text(
-                          AppLocalizations.of(context).claimed,
-                          style: textStyle.bodyMuted,
-                        ),
-                        const SizedBox(height: 32),
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: AppLocalizations.of(context).details,
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textMuted,
                           ),
-                          menuItemColor: colorScheme.fillFaint,
-                          trailingWidget: Icon(
-                            Icons.chevron_right_outlined,
-                            color: colorScheme.strokeBase,
-                          ),
-                          singleBorderRadius: 8,
-                          alignCaptionedTextToLeft: true,
-                          onTap: () async {
-                            // ignore: unawaited_futures
-                            routeToPage(
-                              context,
-                              StorageDetailsScreen(referralView, userDetails),
-                            );
-                          },
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 32),
-                        InkWell(
-                          onTap: () {
-                            shareText(
-                              AppLocalizations.of(context)
-                                  .shareTextReferralCode(
-                                referralCode: referralView.code,
-                                referralStorageInGB:
-                                    referralView.planInfo.storageInGB,
-                              ),
-                            );
-                          },
+                        const SizedBox(height: 12),
+                        // Referral code with dotted border
+                        DottedBorder(
+                          color: greenColor,
+                          strokeWidth: 1,
+                          dashPattern: const [6, 6],
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(16),
                           child: Container(
-                            width: double.infinity,
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: colorScheme.strokeFaint,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 12,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(context).claimMore,
-                                    style: textStyle.body,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    AppLocalizations.of(context)
-                                        .freeStorageOnReferralSuccess(
-                                      storageAmountInGB:
-                                          referralView.planInfo.storageInGB,
-                                    ),
-                                    style: textStyle.smallMuted,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ReferralCodeWidget(referralView.code),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    AppLocalizations.of(context).theyAlsoGetXGb(
-                                      storageAmountInGB:
-                                          referralView.planInfo.storageInGB,
-                                    ),
-                                    style: textStyle.smallMuted,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 36,
+                              vertical: 20,
+                            ),
+                            child: Text(
+                              referralView.code,
+                              style:
+                                  textTheme.small.copyWith(color: greenColor),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                );
-              },
-              childCount: 1,
-            ),
+                  // Share button positioned at top right
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        shareText(
+                          AppLocalizations.of(context).shareTextReferralCode(
+                            referralCode: referralView.code,
+                            referralStorageInGB:
+                                referralView.planInfo.storageInGB,
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedShare08,
+                          color: colorScheme.strokeMuted,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
