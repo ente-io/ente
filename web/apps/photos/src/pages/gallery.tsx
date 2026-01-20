@@ -1355,8 +1355,7 @@ const Page: React.FC = () => {
                         activeCollectionSummary?.attributes.has(
                             "sharedOutgoing",
                         );
-                    const isRemovingOthers =
-                        selectedCount != selectedOwnCount;
+                    const isRemovingOthers = selectedCount != selectedOwnCount;
                     const remove = () =>
                         handleRemoveFilesFromCollection(activeCollection);
 
@@ -1364,9 +1363,7 @@ const Page: React.FC = () => {
                         if (isRemovingOthers) {
                             showMiniDialog({
                                 title: t("remove_from_album"),
-                                message: t(
-                                    "remove_from_album_others_message",
-                                ),
+                                message: t("remove_from_album_others_message"),
                                 continue: {
                                     text: t("remove"),
                                     color: "critical",
