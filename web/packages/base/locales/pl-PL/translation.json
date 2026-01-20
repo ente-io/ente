@@ -106,6 +106,8 @@
     "exit_fullscreen": "Zamknij tryb pełnoekranowy",
     "go_fullscreen": "Przejdź do trybu pełnoekranowego",
     "zoom": "Powiększenie",
+    "zoom_in": "",
+    "zoom_out": "",
     "play": "Odtwórz",
     "pause": "Wstrzymaj",
     "previous": "Poprzedni",
@@ -127,7 +129,7 @@
     "delete_files_title": "Usunąć natychmiast?",
     "delete_files_message": "Wybrane pliki zostaną trwale usunięte z Twojego konta Ente.",
     "selected_count": "{{selected, number}} wybrane",
-    "selected_and_yours_count": "{{selected, number}} wybrane {{yours, number}} twoje",
+    "selected_and_yours_count": "",
     "delete": "Usuń",
     "like": "",
     "unlike": "",
@@ -799,5 +801,10 @@
     "continuous": "",
     "trip": "",
     "album_layout": "Układ albumu",
-    "maps_privacy_notice": "Przybliżone współrzędne zostaną przesłane do stron trzecich dbających o prywatność, takich jak OpenStreetMap, w celu wyświetlenia mapy i lokalizacji."
+    "maps_privacy_notice": "Przybliżone współrzędne zostaną przesłane do stron trzecich dbających o prywatność, takich jak OpenStreetMap, w celu wyświetlenia mapy i lokalizacji.",
+    "edit_location": "",
+    "add_location": "",
+    "add_location_button": "",
+    "save_location": "",
+    "search_location": ""
 }

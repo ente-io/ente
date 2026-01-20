@@ -366,6 +366,7 @@ func main() {
 		CollectionLinkCtrl:    collectionLinkCtrl,
 		UserRepo:              userRepo,
 		FileRepo:              fileRepo,
+		TrashRepo:             trashRepo,
 		CastRepo:              &castDb,
 		BillingCtrl:           billingController,
 		QueueRepo:             queueRepo,

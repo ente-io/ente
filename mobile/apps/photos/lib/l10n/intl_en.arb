@@ -1469,6 +1469,7 @@
   "enterPin": "Enter PIN",
   "setNewPin": "Set new PIN",
   "appLock": "App lock",
+  "lockScreenType": "Lock type",
   "noSystemLockFound": "No system lock found",
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
