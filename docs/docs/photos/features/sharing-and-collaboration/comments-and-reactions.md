@@ -43,12 +43,11 @@ You can react to any photo or video in a shared album:
 
 The heart icon fills in to show you've reacted. Tap or click it again to remove your reaction.
 
-### Viewing who reacted
+### Viewing who liked
 
-To see who has reacted to a photo:
+To see who has liked a photo:
 
-- The reaction count appears next to the heart icon
-- Tap/click the heart icon to see a list of everyone who reacted
+- On mobile, long pressing the heart icon shows the reactions and on web, right clicking does
 - You'll see names for Ente users and display names for anonymous reactors from public links
 
 ## Commenting on photos and videos
@@ -80,7 +79,7 @@ You can reply directly to any comment to maintain conversation threads:
 - Type your reply and send
 
 **On web/desktop:**
-- Hover over a comment and click the reply icon
+- Right click a comment and click the reply icon
 - Type your reply and send
 
 Replies show a quote from the parent comment to maintain context.
@@ -96,8 +95,7 @@ You can react to individual comments:
 - Tap the like count to see who liked the comment
 
 **On web/desktop:**
-- Hover over a comment and click the heart icon
-- Click the like count to see all who reacted
+- Right click over a comment and click like
 
 ### Deleting comments
 
@@ -147,7 +145,7 @@ Album owners can control whether comments are allowed on public links:
 2. Go to "Manage public link"
 3. Toggle "Enable comments and reactions"
 
-When disabled, the comment and reaction buttons are hidden from public link viewers. Existing comments remain visible but no new comments can be added.
+When disabled, the comment and reactions and the buttons are hidden from public link viewers.
 
 **Who can delete public link comments:**
 - Anonymous commenters can delete their own comments
@@ -171,10 +169,8 @@ The Feed feature provides a centralized view of all social activity across your 
 - Go to the "Sharing" tab
 - Tap "Feed" at the top
 - Scroll through recent social activity
-- Tap any item to jump to that photo and see the full context
 
-**On web/desktop:**
-- The feed feature is coming soon to web and desktop
+Feed is available on public albums.
 
 The feed updates in real-time as people interact with your shared content, making it easy to stay engaged with collaborative albums without checking each one individually.
 
@@ -198,7 +194,6 @@ To maintain performance and prevent abuse:
 **Web and desktop:**
 - Full support for comments and reactions
 - Can add, view, reply, like, and delete
-- Feed feature coming soon
 
 ## Privacy and encryption
 
@@ -211,23 +206,8 @@ Comments and reactions maintain Ente's strong privacy guarantees:
 
 Even in collaborative albums with many participants, your comments remain private and can only be read by people with legitimate access to the album.
 
-## Limitations
-
-- Private albums that haven't been shared don't support comments or reactions
-- You cannot edit comments after posting (you can delete and repost if needed)
-- Comments cannot include attachments, formatting, or embedded media (text only)
-
 ## Related topics
 
 - [Collaboration](/photos/features/sharing-and-collaboration/collaboration) - Learn about collaborative albums and permissions
 - [Public links](/photos/features/sharing-and-collaboration/public-links) - Create shareable links with optional commenting
 - [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods explained
-
-## Related FAQs
-
-- [Can I comment on my private albums?](/photos/faq/sharing-and-collaboration#private-comments)
-- [Can anonymous users comment on my public links?](/photos/faq/sharing-and-collaboration#anonymous-comments)
-- [How do I disable comments on a public link?](/photos/faq/sharing-and-collaboration#disable-comments)
-- [Can I edit or format my comments?](/photos/faq/sharing-and-collaboration#edit-comments)
-- [Who can see my comments and reactions?](/photos/faq/sharing-and-collaboration#comment-visibility)
-- [Are comments and reactions encrypted?](/photos/faq/sharing-and-collaboration#comment-encryption)
