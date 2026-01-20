@@ -145,7 +145,7 @@ Album owners can control whether comments are allowed on public links:
 2. Go to "Manage public link"
 3. Toggle "Enable comments and reactions"
 
-When disabled, the comment and reactions and the buttons are hidden from public link viewers.
+When disabled, comments and likes and their buttons are hidden from public link viewers.
 
 **Who can delete public link comments:**
 - Anonymous commenters can delete their own comments
