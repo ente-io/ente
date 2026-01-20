@@ -8,7 +8,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:flutter/services.dart";
-import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
@@ -51,7 +50,6 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
 import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/common/web_page.dart";
@@ -79,7 +77,6 @@ import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
-import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -918,46 +915,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return Container(
-                decoration: value
-                    ? BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated,
-                        boxShadow: shadowFloatFaintLight,
-                      )
-                    : null,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    value
-                        ? const SearchWidget()
-                            .animate()
-                            .fadeIn(
-                              duration: const Duration(milliseconds: 225),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1, 1),
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .slide(
-                              begin: const Offset(0, 0.4),
-                              curve: Curves.easeInOutSine,
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                            )
-                        : const SizedBox.shrink(),
-                    HomeBottomNavigationBar(
-                      _selectedFiles,
-                      _selectedAlbums,
-                      selectedTabIndex: _selectedTabIndex,
-                    ),
-                  ],
-                ),
+              return HomeBottomNavigationBar(
+                _selectedFiles,
+                _selectedAlbums,
+                selectedTabIndex: _selectedTabIndex,
               );
             },
           ),

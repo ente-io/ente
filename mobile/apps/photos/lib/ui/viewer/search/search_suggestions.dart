@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -116,16 +114,8 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
-      appBar: AppBar(
-        backgroundColor: colorScheme.backgroundBase,
-        leading: BackButton(
-          onPressed: () {
-            Bus.instance.fire(ClearAndUnfocusSearchBar());
-          },
-        ),
-      ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
