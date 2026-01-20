@@ -90,7 +90,7 @@ Learn more about how [Duplicate detection](/photos/features/backup-and-sync/dupl
 ## Backup frequency
 
 - **Mobile**: Background sync happens automatically. The exact timing depends on your device's operating system.
-- **Desktop**: Watch folders continuously monitor for changes and upload new files as they appear.
+- **Desktop**: Watch folders continuously monitor for new files and deletions.
 
 ## Related FAQs
 

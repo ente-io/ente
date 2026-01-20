@@ -108,6 +108,10 @@ export type FileListWithViewerProps = {
     | "favoriteFileIDs"
     | "emailByUserID"
     | "listBorderRadius"
+    | "onContextMenuAction"
+    | "onContextMenuOpenChange"
+    | "showAddPersonAction"
+    | "showEditLocationAction"
 > &
     Pick<
         FileViewerProps,
@@ -157,6 +161,10 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     favoriteFileIDs,
     emailByUserID,
     listBorderRadius,
+    onContextMenuAction,
+    onContextMenuOpenChange,
+    showAddPersonAction,
+    showEditLocationAction,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -350,6 +358,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             listBorderRadius,
                             onScroll,
                             onVisibleDateChange,
+                            collectionSummary: activeCollectionSummary,
+                            onContextMenuAction,
+                            onContextMenuOpenChange,
+                            showAddPersonAction,
+                            showEditLocationAction,
                         }}
                         onItemClick={handleThumbnailClick}
                     />

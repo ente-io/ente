@@ -1,3 +1,12 @@
+- Laurens: Redesign search results page
+- Ashil: Fix background audio from other apps stopping when opening Ente on iOS
+- Ashil: QOL: Enalbe swipe to select on Samsung S series devices after fixing issue introduced by it. 
+- Laurens: QOL: Fix issies with contact list
+- Laurens: QOL: Improve search tab loading speed (especially for big libraries)
+- Laurens: QOL: Add overview of ignored persons
+- Laurens: QOL: Improve the merge persons flow
+- Laurens: QOL: Add search and custom sorts 
+- Laurens: QOL: Add search to all search tab section
 - Neeraj: Referral screen redesign
 - Neeraj: Settings screen redesign
 - Ashil: Fix app getting stuck in splash screen after backup restore or device migration

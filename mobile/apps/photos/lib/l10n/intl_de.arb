@@ -308,7 +308,6 @@
   "failedToApplyCode": "Der Code konnte nicht aktiviert werden",
   "enterReferralCode": "Gib den Weiterempfehlungs-Code ein",
   "codeAppliedPageTitle": "Code eingelöst",
-  "changeYourReferralCode": "Empfehlungscode ändern",
   "change": "Ändern",
   "unavailableReferralCode": "Entschuldigung, dieser Code ist nicht verfügbar.",
   "codeChangeLimitReached": "Entschuldigung, du hast das Limit der Code-Änderungen erreicht.",
@@ -326,11 +325,9 @@
   "claimFreeStorage": "Freien Speicher einlösen",
   "inviteYourFriends": "Lade deine Freunde ein",
   "failedToFetchReferralDetails": "Die Weiterempfehlungs-Details können nicht abgerufen werden. Bitte versuche es später erneut.",
-  "referralStep1": "1. Gib diesen Code an deine Freunde",
   "referralStep2": "2. Sie schließen ein bezahltes Abo ab",
   "referralStep3": "3. Ihr beide erhaltet {storageInGB} GB* kostenlos",
   "referralsAreCurrentlyPaused": "Einlösungen sind derzeit pausiert",
-  "youCanAtMaxDoubleYourStorage": "* Du kannst deinen Speicher maximal verdoppeln",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Deine Familiengruppe hat bereits {storageAmountInGb} GB erhalten} false {Du hast bereits {storageAmountInGb} GB erhalten} other {Du hast bereits {storageAmountInGb} GB erhalten!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -485,10 +482,29 @@
   "pendingItems": "Ausstehende Elemente",
   "clearIndexes": "Indexe löschen",
   "selectFoldersForBackup": "Ordner für Sicherung auswählen",
+  "selectFolders": "Ordner auswählen",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Ausgewählte Ordner werden verschlüsselt und gesichert",
   "unselectAll": "Alle demarkieren",
   "selectAll": "Alle markieren",
   "skip": "Überspringen",
+  "chooseBackupModeHeader": "<i>Wähle, wie </i>Ente deine Fotos sichern soll",
+  "startWithLatestPhotos": "Beginne mit den neuesten Fotos",
+  "backingUpLastSevenDaysPhotos": "Sichere die Fotos der letzten 7 Tage",
+  "backupOnlyNewPhotos": "Nur neue Fotos sichern",
+  "backupOnlyNewPhotosAllFoldersSelected": "Alle Ordner sind derzeit für die Sicherung ausgewählt. Du kannst jetzt fortfahren oder die ausgewählten Ordner aktualisieren.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Derzeit sind keine Ordner für die Sicherung ausgewählt. Du kannst jetzt fortfahren oder die ausgewählten Ordner aktualisieren.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Derzeit sind keine Ordner für die Sicherung ausgewählt. Bitte wähle Ordner, um fortzufahren.",
+  "backupOnlyNewPhotosWarningBody": "Du sicherst aktuell Fotos seit {formattedDate}. Bitte aktualisiere deine Einstellungen, um alle Fotos zu sichern.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Einstellungen aktualisieren",
   "updatingFolderSelection": "Ordnerauswahl wird aktualisiert...",
   "itemCount": "{count, plural, one{{count} Objekt} other{{count} Objekte}}",
   "deleteItemCount": "{count, plural, one {Lösche {count} Element} other {Lösche {count} Elemente}}",
@@ -1136,7 +1152,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} frei",
-  "appVersion": "Version: {versionValue}",
   "verifyIDLabel": "Überprüfen",
   "fileInfoAddDescHint": "Beschreibung hinzufügen …",
   "editLocationTagTitle": "Standort bearbeiten",
@@ -1709,7 +1724,6 @@
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
   "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
-  "swipeToSelect": "Zum Auswählen wischen",
   "gallery": "Galerie",
   "joinAlbum": "Album beitreten",
   "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",

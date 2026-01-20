@@ -17,6 +17,13 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
 
   int? _lastTap;
   int _consecutiveTaps = 0;
+  late final Future<String> _versionFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _versionFuture = _getAppVersion();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +42,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
         _lastTap = now;
       },
       child: FutureBuilder<String>(
-        future: _getAppVersion(),
+        future: _versionFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Padding(

@@ -278,7 +278,7 @@ func (h *PublicCommentsHandler) Participants(c *gin.Context) {
 	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	// ignore includeSharees flag for now
-	participants, err := h.CommentsCtrl.Participants(c.Request.Context(), collectionID)
+	participants, err := h.CommentsCtrl.Participants(c, collectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
