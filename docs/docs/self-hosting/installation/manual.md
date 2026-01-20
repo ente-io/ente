@@ -156,8 +156,6 @@ Values you used for `database name` and `username` correspond to the values you 
    you cloned the repository to `ente`:
 
    ```shell
-   # Change into the ente/server
-   cd ente/server
    # Generate secrets
    go run tools/gen-random-keys/main.go
    ```
