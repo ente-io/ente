@@ -3,7 +3,6 @@ import "dart:async";
 import "package:dotted_border/dotted_border.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_sort_order_change_event.dart";
@@ -523,9 +522,16 @@ class _AddNewPersonGridTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final textScaler = MediaQuery.textScalerOf(context);
     const strokeWidth = 1.0;
     final innerSize = size - strokeWidth * 2;
+    final fontSize = textTheme.small.fontSize ?? 14;
+    final lineHeight = textTheme.small.height ?? (17 / 14);
+    final textHeight = textScaler.scale(fontSize) * lineHeight;
+    final labelTopPadding =
+        6 + strokeWidth + ((labelHeight - 6 - textHeight) / 2);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -544,15 +550,27 @@ class _AddNewPersonGridTile extends StatelessWidget {
               height: innerSize,
               width: innerSize,
               child: Center(
-                child: HugeIcon(
-                  icon: HugeIcons.strokeRoundedUserAdd02,
+                child: Icon(
+                  Icons.add_rounded,
                   color: colorScheme.strokeMuted,
                   size: 24,
                 ),
               ),
             ),
           ),
-          SizedBox(height: labelHeight),
+          SizedBox(
+            height: labelHeight,
+            child: Padding(
+              padding: EdgeInsets.only(top: labelTopPadding),
+              child: Text(
+                AppLocalizations.of(context).addPerson,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.small,
+              ),
+            ),
+          ),
         ],
       ),
     );
