@@ -99,6 +99,8 @@ class FlagService {
 
   bool get showSharedAlbumsInMoveSheet => internalUser;
 
+  bool get increasedButtonBorderRadius => internalUser;
+
   bool get isSocialEnabled =>
       internalUser || _isServerFlagEnabled(_commentsFlag);
 

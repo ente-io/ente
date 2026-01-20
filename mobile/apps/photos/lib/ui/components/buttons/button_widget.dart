@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import "package:photos/models/button_result.dart";
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -235,7 +236,11 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       onTapCancel: _shouldRegisterGestures ? _onTapCancel : null,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(
+              flagService.increasedButtonBorderRadius ? 12 : 4,
+            ),
+          ),
           border: widget.buttonType == ButtonType.tertiaryCritical
               ? Border.all(color: borderColor)
               : null,
@@ -244,7 +249,11 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           duration: const Duration(milliseconds: 16),
           width: widget.buttonSize == ButtonSize.large ? double.infinity : null,
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            borderRadius: BorderRadius.all(
+              Radius.circular(
+                flagService.increasedButtonBorderRadius ? 12 : 4,
+              ),
+            ),
             color: buttonColor,
           ),
           child: Padding(

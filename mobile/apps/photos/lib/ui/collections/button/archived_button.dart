@@ -3,6 +3,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/metadata/common_keys.dart";
+import 'package:photos/service_locator.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -23,7 +24,9 @@ class ArchivedCollectionsButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            flagService.increasedButtonBorderRadius ? 12 : 8,
+          ),
         ),
         padding: const EdgeInsets.all(0),
         side: BorderSide(

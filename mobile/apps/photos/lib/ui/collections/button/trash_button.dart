@@ -5,6 +5,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/trash_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import 'package:photos/service_locator.dart';
 import "package:photos/services/local_authentication_service.dart";
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -47,7 +48,9 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            flagService.increasedButtonBorderRadius ? 12 : 8,
+          ),
         ),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
