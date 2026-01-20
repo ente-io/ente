@@ -13,6 +13,7 @@ import "package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:photos/utils/isolate/super_isolate.dart";
+import "package:photos/utils/local_settings.dart";
 
 class FaceInfo {
   final String faceID;
@@ -73,6 +74,10 @@ class FaceClusteringService extends SuperIsolate {
 
   static const kRecommendedDistanceThreshold = 0.24;
   static const kConservativeDistanceThreshold = 0.16;
+  static const kConservativeDistanceDelta =
+      kRecommendedDistanceThreshold - kConservativeDistanceThreshold;
+
+  static double defaultDistanceThreshold = kRecommendedDistanceThreshold;
 
   @override
   bool get isDartUiIsolate => false;
@@ -91,18 +96,31 @@ class FaceClusteringService extends SuperIsolate {
   static final instance = FaceClusteringService._privateConstructor();
   factory FaceClusteringService() => instance;
 
+  static void init(LocalSettings settings) {
+    final savedDistance = settings.defaultClusteringDistanceOverride;
+    if (savedDistance != null) {
+      defaultDistanceThreshold = savedDistance.clamp(0.0, 1.0);
+    }
+  }
+
   /// Runs the clustering algorithm [runLinearClustering] on the given [input], in an isolate.
   ///
   /// Returns the clustering result, which is a list of clusters, where each cluster is a list of indices of the dataset.
   Future<ClusteringResult?> predictLinearIsolate(
     Set<FaceDbInfoForClustering> input, {
     Map<int, int>? fileIDToCreationTime,
-    double distanceThreshold = kRecommendedDistanceThreshold,
-    double conservativeDistanceThreshold = kConservativeDistanceThreshold,
+    double? distanceThreshold,
+    double? conservativeDistanceThreshold,
     bool useDynamicThreshold = true,
     int? offset,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
   }) async {
+    final resolvedDistanceThreshold =
+        distanceThreshold ?? defaultDistanceThreshold;
+    final resolvedConservativeDistanceThreshold =
+        conservativeDistanceThreshold ??
+            (resolvedDistanceThreshold - kConservativeDistanceDelta)
+                .clamp(0.0, resolvedDistanceThreshold);
     if (input.isEmpty) {
       _logger.warning(
         "Clustering dataset of embeddings is empty, returning empty list.",
@@ -127,8 +145,8 @@ class FaceClusteringService extends SuperIsolate {
           await runInIsolate(IsolateOperation.linearIncrementalClustering, {
         'input': input,
         'fileIDToCreationTime': fileIDToCreationTime,
-        'distanceThreshold': distanceThreshold,
-        'conservativeDistanceThreshold': conservativeDistanceThreshold,
+        'distanceThreshold': resolvedDistanceThreshold,
+        'conservativeDistanceThreshold': resolvedConservativeDistanceThreshold,
         'useDynamicThreshold': useDynamicThreshold,
         'offset': offset,
         'oldClusterSummaries': oldClusterSummaries,
@@ -152,14 +170,16 @@ class FaceClusteringService extends SuperIsolate {
     Map<int, int>? fileIDToCreationTime,
     Map<String, (Uint8List, int)> oldClusterSummaries =
         const <String, (Uint8List, int)>{},
-    double distanceThreshold = kRecommendedDistanceThreshold,
+    double? distanceThreshold,
   }) async {
+    final resolvedDistanceThreshold =
+        distanceThreshold ?? defaultDistanceThreshold;
     _logger.info(
-      '`predictWithinClusterComputer` called with ${input.length} faces and distance threshold $distanceThreshold',
+      '`predictWithinClusterComputer` called with ${input.length} faces and distance threshold $resolvedDistanceThreshold',
     );
     try {
       if (input.length < 500) {
-        final mergeThreshold = distanceThreshold;
+        final mergeThreshold = resolvedDistanceThreshold;
         _logger.info(
           'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
         );
@@ -167,19 +187,21 @@ class FaceClusteringService extends SuperIsolate {
           input,
           fileIDToCreationTime: fileIDToCreationTime,
           oldClusterSummaries: oldClusterSummaries,
-          distanceThreshold: distanceThreshold - 0.08,
+          distanceThreshold:
+              (resolvedDistanceThreshold - kConservativeDistanceDelta)
+                  .clamp(0.0, resolvedDistanceThreshold),
           mergeThreshold: mergeThreshold,
         );
         return clusterResult;
       } else {
         _logger.info(
-          'Running linear clustering on ${input.length} faces with distance threshold $distanceThreshold',
+          'Running linear clustering on ${input.length} faces with distance threshold $resolvedDistanceThreshold',
         );
         final ClusteringResult clusterResult = await _predictLinearComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
           oldClusterSummaries: oldClusterSummaries,
-          distanceThreshold: distanceThreshold,
+          distanceThreshold: resolvedDistanceThreshold,
         );
         return clusterResult;
       }
@@ -194,8 +216,10 @@ class FaceClusteringService extends SuperIsolate {
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
-    double distanceThreshold = kRecommendedDistanceThreshold,
+    double? distanceThreshold,
   }) async {
+    final resolvedDistanceThreshold =
+        distanceThreshold ?? defaultDistanceThreshold;
     if (input.isEmpty) {
       _logger.warning(
         "Linear Clustering dataset of embeddings is empty, returning empty list.",
@@ -230,8 +254,10 @@ class FaceClusteringService extends SuperIsolate {
           "input": clusteringInput,
           "fileIDToCreationTime": fileIDToCreationTime,
           "oldClusterSummaries": oldClusterSummaries,
-          "distanceThreshold": distanceThreshold,
-          "conservativeDistanceThreshold": distanceThreshold - 0.08,
+          "distanceThreshold": resolvedDistanceThreshold,
+          "conservativeDistanceThreshold":
+              (resolvedDistanceThreshold - kConservativeDistanceDelta)
+                  .clamp(0.0, resolvedDistanceThreshold),
           "useDynamicThreshold": false,
         },
         taskName: "createImageEmbedding",
@@ -254,9 +280,11 @@ class FaceClusteringService extends SuperIsolate {
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
-    double distanceThreshold = kRecommendedDistanceThreshold,
+    double? distanceThreshold,
     double mergeThreshold = 0.30,
   }) async {
+    final resolvedDistanceThreshold =
+        distanceThreshold ?? defaultDistanceThreshold;
     if (input.isEmpty) {
       _logger.warning(
         "Complete Clustering dataset of embeddings is empty, returning empty list.",
@@ -277,7 +305,7 @@ class FaceClusteringService extends SuperIsolate {
           "input": input,
           "fileIDToCreationTime": fileIDToCreationTime,
           "oldClusterSummaries": oldClusterSummaries,
-          "distanceThreshold": distanceThreshold,
+          "distanceThreshold": resolvedDistanceThreshold,
           "mergeThreshold": mergeThreshold,
         },
         taskName: "createImageEmbedding",

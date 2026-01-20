@@ -63,6 +63,8 @@ class MLService {
     // Check if the device has enough RAM to run local indexing
     await checkDeviceTotalRAM();
 
+    FaceClusteringService.init(localSettings);
+
     // Get client name
     final packageInfo = ServiceLocator.instance.packageInfo;
     client = "${packageInfo.packageName}/${packageInfo.version}";
