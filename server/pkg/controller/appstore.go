@@ -124,7 +124,7 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 		return stacktrace.Propagate(err, "")
 	}
 
-	if err := c.validateSandboxRequest(ctx.Request.Context(), string(notification.Environment), subscription.UserID,
+	if err := c.validateSandboxRequest(ctx, string(notification.Environment), subscription.UserID,
 		fmt.Sprintf("notification (type: %s)", notification.NotificationType)); err != nil {
 		return err
 	}
