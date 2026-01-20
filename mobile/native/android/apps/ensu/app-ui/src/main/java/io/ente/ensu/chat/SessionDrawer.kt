@@ -36,8 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -119,19 +117,10 @@ private fun DrawerHeader(
     onOpenDeveloperSettings: () -> Unit,
     onOpenModelSettings: () -> Unit
 ) {
-    val backgroundBrush = Brush.linearGradient(
-        colors = listOf(
-            EnsuColor.accent().copy(alpha = 0.2f),
-            EnsuColor.backgroundBase()
-        ),
-        start = Offset(0f, 0f),
-        end = Offset(600f, 600f)
-    )
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(backgroundBrush)
+            .background(EnsuColor.backgroundBase())
             .padding(EnsuSpacing.lg.dp),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
     ) {

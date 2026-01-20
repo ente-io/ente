@@ -10,6 +10,7 @@ enum class MessageAuthor {
 data class ChatMessage(
     val id: String = UUID.randomUUID().toString(),
     val sessionId: String,
+    val parentId: String? = null,
     val author: MessageAuthor,
     val text: String,
     val timestampMillis: Long,
@@ -36,5 +37,6 @@ data class Attachment(
     val name: String,
     val sizeBytes: Long,
     val type: AttachmentType,
+    val localPath: String? = null,
     val isUploading: Boolean = false
 )

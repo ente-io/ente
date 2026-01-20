@@ -29,13 +29,47 @@ import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
+import io.ente.ensu.domain.state.ModelSettingsState
 
 @Composable
-fun ModelSettingsScreen() {
-    var modelUrl by remember { mutableStateOf("") }
-    var mmprojUrl by remember { mutableStateOf("") }
-    var contextLength by remember { mutableStateOf("") }
-    var maxTokens by remember { mutableStateOf("") }
+fun ModelSettingsScreen(
+    state: ModelSettingsState,
+    onSave: (ModelSettingsState) -> Unit,
+    onReset: () -> Unit
+) {
+    var modelUrl by remember(state) { mutableStateOf(state.modelUrl) }
+    var mmprojUrl by remember(state) { mutableStateOf(state.mmprojUrl) }
+    var contextLength by remember(state) { mutableStateOf(state.contextLength) }
+    var maxTokens by remember(state) { mutableStateOf(state.maxTokens) }
+
+    val suggestedModels = listOf(
+        SuggestedModel(
+            title = "Qwen3-VL 2B Instruct (Q4_K_M)",
+            subtitle = "Requires mmproj",
+            url = "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3-VL-2B-Instruct-Q4_K_M.gguf",
+            mmproj = "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-qwen3-vl-2b.gguf"
+        ),
+        SuggestedModel(
+            title = "LFM 2.5 1.2B Instruct (Q4_0)",
+            subtitle = "Smallest download",
+            url = "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf",
+            mmproj = null
+        ),
+        SuggestedModel(
+            title = "LFM 2.5 VL 1.6B (Q4_0)",
+            subtitle = "Requires mmproj",
+            url = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+            mmproj = "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
+        ),
+        SuggestedModel(
+            title = "Llama 3.2 1B Instruct (Q4_K_M)",
+            subtitle = "Fastest load",
+            url = "https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+            mmproj = null
+        )
+    )
+
+    val isCustomSelected = state.useCustomModel && modelUrl.isNotBlank()
 
     Column(
         modifier = Modifier
@@ -44,8 +78,14 @@ fun ModelSettingsScreen() {
             .padding(EnsuSpacing.pageHorizontal.dp)
     ) {
         SectionHeader("Selected model")
-        Text(text = "Qwen3-VL 2B Instruct", style = EnsuTypography.body)
-        Text(text = "Not loaded", style = EnsuTypography.small, color = EnsuColor.textMuted())
+        val selectedLabel = if (isCustomSelected) "Custom model" else "Default model"
+        Text(text = selectedLabel, style = EnsuTypography.body)
+        if (isCustomSelected) {
+            Text(text = modelUrl, style = EnsuTypography.small, color = EnsuColor.textMuted())
+        } else {
+            Text(text = DEFAULT_MODEL_NAME, style = EnsuTypography.small, color = EnsuColor.textMuted())
+            Text(text = DEFAULT_MODEL_URL, style = EnsuTypography.mini, color = EnsuColor.textMuted())
+        }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.xl.dp))
         SectionHeader("Custom Hugging Face model")
@@ -74,22 +114,16 @@ fun ModelSettingsScreen() {
         Spacer(modifier = Modifier.height(EnsuSpacing.lg.dp))
 
         Text(text = "Suggested models:", style = EnsuTypography.small, color = EnsuColor.textMuted())
-        SuggestedModelCard(
-            title = "Qwen3-VL 2B Instruct (Q4_K_M)",
-            subtitle = "Requires mmproj"
-        )
-        SuggestedModelCard(
-            title = "LFM 2.5 1.2B Instruct (Q4_0)",
-            subtitle = "Smallest download"
-        )
-        SuggestedModelCard(
-            title = "LFM 2.5 VL 1.6B (Q4_0)",
-            subtitle = "Requires mmproj"
-        )
-        SuggestedModelCard(
-            title = "Llama 3.2 1B Instruct (Q4_K_M)",
-            subtitle = "Fastest load"
-        )
+        suggestedModels.forEach { model ->
+            SuggestedModelCard(
+                title = model.title,
+                subtitle = model.subtitle,
+                onFill = {
+                    modelUrl = model.url
+                    mmprojUrl = model.mmproj.orEmpty()
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.xl.dp))
         SectionHeader("Custom limits (optional)")
@@ -129,7 +163,17 @@ fun ModelSettingsScreen() {
         Spacer(modifier = Modifier.height(EnsuSpacing.lg.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+                onSave(
+                    state.copy(
+                        useCustomModel = true,
+                        modelUrl = modelUrl,
+                        mmprojUrl = mmprojUrl,
+                        contextLength = contextLength,
+                        maxTokens = maxTokens
+                    )
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = EnsuColor.accent())
         ) {
@@ -138,7 +182,13 @@ fun ModelSettingsScreen() {
 
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
 
-        TextButton(onClick = {}) {
+        TextButton(onClick = {
+            onReset()
+            modelUrl = ""
+            mmprojUrl = ""
+            contextLength = ""
+            maxTokens = ""
+        }) {
             Text(text = "Use Default Model", style = EnsuTypography.body, color = EnsuColor.accent())
         }
 
@@ -157,7 +207,7 @@ private fun SectionHeader(title: String) {
 }
 
 @Composable
-private fun SuggestedModelCard(title: String, subtitle: String) {
+private fun SuggestedModelCard(title: String, subtitle: String, onFill: () -> Unit) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = EnsuSpacing.xs.dp)
@@ -165,9 +215,20 @@ private fun SuggestedModelCard(title: String, subtitle: String) {
         Column(modifier = Modifier.padding(EnsuSpacing.md.dp)) {
             Text(text = title, style = EnsuTypography.body)
             Text(text = subtitle, style = EnsuTypography.small, color = EnsuColor.textMuted())
-            TextButton(onClick = {}) {
+            TextButton(onClick = onFill) {
                 Text(text = "Fill", style = EnsuTypography.small, color = EnsuColor.accent())
             }
         }
     }
 }
+
+private data class SuggestedModel(
+    val title: String,
+    val subtitle: String,
+    val url: String,
+    val mmproj: String?
+)
+
+private const val DEFAULT_MODEL_NAME = "LFM 2.5 VL 1.6B (Q4_0)"
+private const val DEFAULT_MODEL_URL =
+    "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf"

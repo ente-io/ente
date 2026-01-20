@@ -136,6 +136,7 @@ struct ChatView: View {
                     MessageListView(
                         messages: viewModel.messages,
                         streamingResponse: viewModel.streamingResponse,
+                        streamingParentId: viewModel.streamingParentId,
                         isGenerating: viewModel.isGenerating,
                         onEdit: { message in
                             viewModel.beginEditing(message: message)
@@ -171,8 +172,11 @@ struct ChatView: View {
                         onCancelEdit: {
                             viewModel.cancelEditing()
                         },
-                        onAddAttachment: { kind in
-                            viewModel.addAttachment(kind: kind)
+                        onAddImage: { data, name in
+                            viewModel.addImageAttachment(data: data, fileName: name)
+                        },
+                        onAddDocument: { url in
+                            viewModel.addDocumentAttachment(url: url)
                         },
                         onRemoveAttachment: { attachment in
                             viewModel.removeAttachment(attachment)
@@ -184,7 +188,9 @@ struct ChatView: View {
                     DownloadToastView(state: downloadToast) {
                         viewModel.downloadToast = nil
                     } onRetry: {
-                        viewModel.simulateDownload()
+                        viewModel.retryDownload()
+                    } onCancel: {
+                        viewModel.cancelDownload()
                     }
                     .padding(.top, EnsuSpacing.lg)
                 }
@@ -212,7 +218,7 @@ struct ChatView: View {
                 deleteSession = session
             },
             onSync: {
-                viewModel.simulateDownload()
+                viewModel.retryDownload()
             },
             onShowLogs: {
                 showToast("Logs are not available yet.", duration: 2)

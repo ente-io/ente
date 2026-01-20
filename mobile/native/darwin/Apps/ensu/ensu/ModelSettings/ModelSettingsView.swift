@@ -3,7 +3,7 @@ import SwiftUI
 struct ModelSettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var useCustomModel = false
+    @ObservedObject private var settings = ModelSettingsStore.shared
     @State private var modelUrl: String = ""
     @State private var mmprojUrl: String = ""
     @State private var contextLength: String = ""
@@ -19,24 +19,24 @@ struct ModelSettingsView: View {
         SuggestedModel(
             name: "Qwen3-VL 2B Instruct (Q4_K_M)",
             details: "Multimodal • requires mmproj",
-            url: "https://huggingface.co/.../qwen3-vl-2b.Q4_K_M.gguf",
-            mmproj: "https://huggingface.co/.../mmproj-qwen3-vl-2b.gguf"
+            url: "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3-VL-2B-Instruct-Q4_K_M.gguf",
+            mmproj: "https://huggingface.co/LiquidAI/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-qwen3-vl-2b.gguf"
         ),
         SuggestedModel(
             name: "LFM 2.5 1.2B Instruct (Q4_0)",
             details: "Text only",
-            url: "https://huggingface.co/.../lfm-2.5-1.2b.Q4_0.gguf"
+            url: "https://huggingface.co/LiquidAI/LFM2.5-1.2B-GGUF/resolve/main/LFM2.5-1.2B-Q4_0.gguf"
         ),
         SuggestedModel(
             name: "LFM 2.5 VL 1.6B (Q4_0)",
             details: "Multimodal • requires mmproj",
-            url: "https://huggingface.co/.../lfm-2.5-vl-1.6b.Q4_0.gguf",
-            mmproj: "https://huggingface.co/.../mmproj-lfm-2.5-vl.gguf"
+            url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
+            mmproj: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
         ),
         SuggestedModel(
             name: "Llama 3.2 1B Instruct (Q4_K_M)",
             details: "Text only",
-            url: "https://huggingface.co/.../llama-3.2-1b.Q4_K_M.gguf"
+            url: "https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
         )
     ]
 
@@ -55,6 +55,12 @@ struct ModelSettingsView: View {
             #else
             content
             #endif
+        }
+        .onAppear {
+            modelUrl = settings.modelUrl
+            mmprojUrl = settings.mmprojUrl
+            contextLength = settings.contextLength
+            maxTokens = settings.maxTokens
         }
         #if os(macOS)
         .safeAreaInset(edge: .top) {
@@ -86,12 +92,24 @@ struct ModelSettingsView: View {
                 sectionHeader("Selected model")
 
                 VStack(alignment: .leading, spacing: EnsuSpacing.xs) {
-                    Text("Default model")
-                        .font(EnsuTypography.body)
-                        .foregroundStyle(EnsuColor.textPrimary)
-                    Text("Loaded")
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.success)
+                    if settings.useCustomModel && !settings.modelUrl.isEmpty {
+                        Text("Custom model")
+                            .font(EnsuTypography.body)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                        Text(settings.modelUrl)
+                            .font(EnsuTypography.small)
+                            .foregroundStyle(EnsuColor.textMuted)
+                    } else {
+                        Text("Default model")
+                            .font(EnsuTypography.body)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                        Text(ModelSettingsStore.defaultModelName)
+                            .font(EnsuTypography.small)
+                            .foregroundStyle(EnsuColor.textMuted)
+                        Text(ModelSettingsStore.defaultModelUrl)
+                            .font(EnsuTypography.mini)
+                            .foregroundStyle(EnsuColor.textMuted)
+                    }
                 }
 
                 Divider().background(EnsuColor.border)
@@ -248,14 +266,19 @@ struct ModelSettingsView: View {
         guard validate() else { return }
 
         isSaving = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            settings.saveCustomModel(
+                url: modelUrl,
+                mmproj: mmprojUrl,
+                contextLength: contextLength,
+                maxTokens: maxTokens
+            )
             isSaving = false
-            useCustomModel = true
         }
     }
 
     private func resetTapped() {
-        useCustomModel = false
+        settings.resetToDefault()
         modelUrl = ""
         mmprojUrl = ""
         contextLength = ""

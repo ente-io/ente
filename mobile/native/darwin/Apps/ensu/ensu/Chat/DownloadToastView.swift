@@ -4,6 +4,7 @@ struct DownloadToastView: View {
     let state: DownloadToastState
     let onDismiss: () -> Void
     let onRetry: () -> Void
+    let onCancel: () -> Void
 
     private var isComplete: Bool {
         state.phase == .complete
@@ -66,7 +67,7 @@ struct DownloadToastView: View {
                 Spacer()
 
                 if !isComplete && !hasError {
-                    Button(action: onDismiss) {
+                    Button(action: onCancel) {
                         Image(systemName: "xmark")
                             .font(.system(size: 12, weight: .semibold))
                     }

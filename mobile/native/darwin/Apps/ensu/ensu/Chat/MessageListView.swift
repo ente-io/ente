@@ -3,6 +3,7 @@ import SwiftUI
 struct MessageListView: View {
     let messages: [ChatMessage]
     let streamingResponse: String
+    let streamingParentId: UUID?
     let isGenerating: Bool
     let onEdit: (ChatMessage) -> Void
     let onCopy: (ChatMessage) -> Void
@@ -11,6 +12,7 @@ struct MessageListView: View {
     let onBranchChange: (ChatMessage, Int) -> Void
 
     @State private var isAtBottom = true
+    @State private var autoScrollEnabled = true
 
     var body: some View {
         GeometryReader { proxy in
@@ -43,9 +45,14 @@ struct MessageListView: View {
                                 )
                                 .id(message.id)
                             }
+
+                            if isGenerating, streamingParentId == message.id {
+                                StreamingBubbleView(text: streamingResponse)
+                                    .id("streaming")
+                            }
                         }
 
-                        if isGenerating {
+                        if isGenerating, streamingParentId == nil {
                             StreamingBubbleView(text: streamingResponse)
                                 .id("streaming")
                         }
@@ -64,6 +71,11 @@ struct MessageListView: View {
                     .padding(.vertical, EnsuSpacing.lg)
                 }
                 .coordinateSpace(name: "scroll")
+                .simultaneousGesture(
+                    DragGesture().onChanged { _ in
+                        autoScrollEnabled = false
+                    }
+                )
                 .onPreferenceChange(BottomOffsetKey.self) { value in
                     let threshold: CGFloat = 24
                     isAtBottom = value < proxy.size.height + threshold
@@ -74,18 +86,21 @@ struct MessageListView: View {
                 .onChange(of: streamingResponse) { _ in
                     scrollToBottom(scrollProxy)
                 }
-                .onChange(of: isGenerating) { _ in
-                    scrollToBottom(scrollProxy)
+                .onChange(of: isGenerating) { newValue in
+                    if newValue {
+                        autoScrollEnabled = true
+                        scrollToBottom(scrollProxy, force: true)
+                    }
                 }
                 .onAppear {
-                    scrollToBottom(scrollProxy)
+                    scrollToBottom(scrollProxy, force: true)
                 }
             }
         }
     }
 
-    private func scrollToBottom(_ proxy: ScrollViewProxy) {
-        guard isAtBottom else { return }
+    private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false) {
+        guard force || (autoScrollEnabled && isAtBottom) else { return }
         withAnimation(.easeOut(duration: 0.2)) {
             proxy.scrollTo("bottom", anchor: .bottom)
         }
@@ -188,7 +203,6 @@ private struct AssistantMessageBubbleView: View {
 
                 HStack(spacing: EnsuSpacing.sm) {
                     TimestampView(date: message.timestamp)
-                    Spacer()
                     if message.branchCount > 1 {
                         BranchSwitcherView(
                             currentIndex: message.branchIndex,
@@ -213,7 +227,7 @@ private struct StreamingBubbleView: View {
     var body: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                if text.isEmpty {
+                if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     LoadingDotsView()
                 } else {
                     HStack(alignment: .bottom, spacing: 4) {

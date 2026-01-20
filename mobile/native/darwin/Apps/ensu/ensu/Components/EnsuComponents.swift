@@ -114,7 +114,9 @@ struct AttachmentChip: View {
                 Text(size)
                     .font(EnsuTypography.mini)
                     .foregroundStyle(EnsuColor.textMuted)
+                    .lineLimit(1)
             }
+            .frame(maxWidth: 180, alignment: .leading)
 
             if isUploading {
                 ProgressView()

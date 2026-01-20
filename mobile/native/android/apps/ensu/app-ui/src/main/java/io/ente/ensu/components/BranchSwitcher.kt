@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
@@ -22,7 +23,7 @@ fun BranchSwitcher(
 ) {
     if (totalCount <= 1) return
 
-    Row {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         TextButton(
             onClick = onPrevious,
             enabled = currentIndex > 1,

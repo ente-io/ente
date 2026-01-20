@@ -10,13 +10,15 @@ struct ChatAttachment: Identifiable, Equatable {
     let name: String
     let size: Int64
     let kind: Kind
+    let url: URL?
     var isUploading: Bool
 
-    init(id: UUID = UUID(), name: String, size: Int64, kind: Kind, isUploading: Bool = false) {
+    init(id: UUID = UUID(), name: String, size: Int64, kind: Kind, url: URL? = nil, isUploading: Bool = false) {
         self.id = id
         self.name = name
         self.size = size
         self.kind = kind
+        self.url = url
         self.isUploading = isUploading
     }
 
@@ -109,6 +111,7 @@ final class ChatViewModel: ObservableObject {
     @Published var currentSessionId: UUID?
     @Published var messages: [ChatMessage]
     @Published var streamingResponse: String = ""
+    @Published var streamingParentId: UUID? = nil
     @Published var isGenerating: Bool = false
     @Published var isDownloading: Bool = false
     @Published var isProcessingAttachments: Bool = false
@@ -117,39 +120,27 @@ final class ChatViewModel: ObservableObject {
     @Published var editingMessageId: UUID?
     @Published var downloadToast: DownloadToastState?
 
-    private var streamingTask: Task<Void, Never>?
+    private let provider: InferenceRsProvider
+    private let modelSettings = ModelSettingsStore.shared
+
+    private var messageStore: [UUID: [MessageNode]] = [:]
+    private var branchSelections: [UUID: [String: UUID]] = [:]
+    private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+    private var generationTask: Task<Void, Never>?
+    private var stopRequested = false
+    private var activeGenerationId: UUID?
+    private var activeGenerationSessionId: UUID?
 
     init() {
-        let sampleSessions = [
-            ChatSession(title: "Daily brief", lastMessage: "Summarize today's highlights", updatedAt: Date()),
-            ChatSession(title: "Travel notes", lastMessage: "Itinerary draft", updatedAt: Date().addingTimeInterval(-3600 * 6)),
-            ChatSession(title: "Project outline", lastMessage: "Architecture review", updatedAt: Date().addingTimeInterval(-3600 * 30)),
-            ChatSession(title: "Weekend ideas", lastMessage: "Check local events", updatedAt: Date().addingTimeInterval(-3600 * 80))
-        ]
+        let session = ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())
+        self.sessions = [session]
+        self.currentSessionId = session.id
+        self.messages = []
+        self.messageStore[session.id] = []
+        self.branchSelections[session.id] = [:]
 
-        self.sessions = sampleSessions
-        self.currentSessionId = sampleSessions.first?.id
-
-        self.messages = [
-            ChatMessage(
-                role: .assistant,
-                text: "Welcome to ensu. Here's a snapshot of what this UI supports.\n\n<think>We should greet the user and highlight the key controls so they can explore the UI components.</think>\n\n<todo_list>{\"title\":\"Getting started\",\"status\":\"Optional\",\"items\":[\"Open the drawer to switch chats\",\"Try editing a user message\",\"Preview markdown and code blocks\"]}</todo_list>\n\n## Markdown preview\nYou can paste snippets here and we'll render headings, lists, and code blocks.\n\n```swift\nstruct HelloWorld: View {\n    var body: some View {\n        Text(\"Hello, Ensu\")\n    }\n}\n```"
-            ),
-            ChatMessage(
-                role: .user,
-                text: "Share the next steps for our onboarding flow.",
-                attachments: [
-                    ChatAttachment(name: "brief.pdf", size: 482_000, kind: .document),
-                    ChatAttachment(name: "flow.png", size: 221_000, kind: .image)
-                ],
-                branchCount: 3
-            ),
-            ChatMessage(
-                role: .assistant,
-                text: "Absolutely. I can draft a step-by-step onboarding doc or outline the key user journeys. Let me know which format you prefer.",
-                tokensPerSecond: 3.2
-            )
-        ]
+        let baseDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
+        self.provider = InferenceRsProvider(modelDir: baseDir.appendingPathComponent("llm", isDirectory: true))
     }
 
     var currentSession: ChatSession? {
@@ -158,33 +149,66 @@ final class ChatViewModel: ObservableObject {
     }
 
     func startNewSession() {
-        streamingTask?.cancel()
+        generationTask?.cancel()
+        provider.stopGeneration()
+        stopRequested = false
+        activeGenerationId = nil
+        activeGenerationSessionId = nil
         isGenerating = false
+        isDownloading = false
         streamingResponse = ""
+        streamingParentId = nil
+        downloadToast = nil
         draftText = ""
         draftAttachments = []
+        editingMessageId = nil
 
         let session = ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())
         sessions.insert(session, at: 0)
         currentSessionId = session.id
-        messages = []
+        messageStore[session.id] = []
+        branchSelections[session.id] = [:]
+        rebuildMessages(for: session.id)
     }
 
     func selectSession(_ session: ChatSession) {
-        streamingTask?.cancel()
+        generationTask?.cancel()
+        provider.stopGeneration()
+        stopRequested = false
+        activeGenerationId = nil
+        activeGenerationSessionId = nil
         isGenerating = false
+        isDownloading = false
         streamingResponse = ""
+        streamingParentId = nil
+        downloadToast = nil
         currentSessionId = session.id
-        messages = [
-            ChatMessage(role: .assistant, text: "Loading \(session.title)…")
-        ]
+        rebuildMessages(for: session.id)
     }
 
     func deleteSession(_ session: ChatSession) {
+        if currentSessionId == session.id {
+            generationTask?.cancel()
+            provider.stopGeneration()
+            stopRequested = false
+            activeGenerationId = nil
+            activeGenerationSessionId = nil
+            isGenerating = false
+            isDownloading = false
+            streamingResponse = ""
+            streamingParentId = nil
+            downloadToast = nil
+        }
         sessions.removeAll { $0.id == session.id }
+        messageStore[session.id] = nil
+        branchSelections[session.id] = nil
         if currentSessionId == session.id {
             currentSessionId = sessions.first?.id
-            messages = []
+            if let next = currentSessionId {
+                rebuildMessages(for: next)
+            } else {
+                messages = []
+            }
         }
     }
 
@@ -201,18 +225,54 @@ final class ChatViewModel: ObservableObject {
         draftAttachments = []
     }
 
-    func addAttachment(kind: ChatAttachment.Kind) {
+    func addImageAttachment(data: Data, fileName: String?) {
         guard !isGenerating && !isDownloading else { return }
         isProcessingAttachments = true
 
-        let name = kind == .image ? "photo.png" : "document.pdf"
-        let size = Int64.random(in: 120_000...980_000)
-        let attachment = ChatAttachment(name: name, size: size, kind: kind, isUploading: false)
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let url = try self.writeAttachment(data: data, fileName: fileName ?? "photo.jpg")
+                let attachment = ChatAttachment(
+                    name: url.lastPathComponent,
+                    size: Int64(data.count),
+                    kind: .image,
+                    url: url,
+                    isUploading: false
+                )
+                await MainActor.run {
+                    self.draftAttachments.append(attachment)
+                    self.isProcessingAttachments = false
+                }
+            } catch {
+                await MainActor.run { self.isProcessingAttachments = false }
+            }
+        }
+    }
 
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            draftAttachments.append(attachment)
-            isProcessingAttachments = false
+    func addDocumentAttachment(url: URL) {
+        guard !isGenerating && !isDownloading else { return }
+        isProcessingAttachments = true
+
+        Task.detached { [weak self] in
+            guard let self else { return }
+            do {
+                let storedUrl = try self.copyAttachment(from: url)
+                let size = (try? FileManager.default.attributesOfItem(atPath: storedUrl.path)[.size] as? NSNumber)?.int64Value ?? 0
+                let attachment = ChatAttachment(
+                    name: storedUrl.lastPathComponent,
+                    size: size,
+                    kind: .document,
+                    url: storedUrl,
+                    isUploading: false
+                )
+                await MainActor.run {
+                    self.draftAttachments.append(attachment)
+                    self.isProcessingAttachments = false
+                }
+            } catch {
+                await MainActor.run { self.isProcessingAttachments = false }
+            }
         }
     }
 
@@ -222,129 +282,515 @@ final class ChatViewModel: ObservableObject {
 
     func sendDraft() {
         let trimmed = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        let attachments = draftAttachments
+        guard !trimmed.isEmpty || !attachments.isEmpty else { return }
 
-        if let editingMessageId, let index = messages.firstIndex(where: { $0.id == editingMessageId }) {
-            messages[index].text = trimmed
-            messages[index].attachments = draftAttachments
-            self.editingMessageId = nil
-        } else {
-            messages.append(
-                ChatMessage(
-                    role: .user,
-                    text: trimmed,
-                    attachments: draftAttachments
-                )
-            )
-        }
+        let sessionId = currentSessionId ?? createSessionForDraft()
+        let timestamp = Date()
 
-        updateCurrentSession(lastMessage: trimmed)
+        let parentId: UUID? = {
+            if let editingId = editingMessageId {
+                let existing = messageStore[sessionId]?.first { $0.id == editingId }
+                return existing?.parentId
+            }
+            return buildSelectedPath(for: sessionId).last?.id
+        }()
+
+        let userNode = MessageNode(
+            id: UUID(),
+            sessionId: sessionId,
+            parentId: parentId,
+            role: .user,
+            text: trimmed,
+            timestamp: timestamp,
+            attachments: attachments,
+            isInterrupted: false,
+            tokensPerSecond: nil
+        )
+
+        messageStore[sessionId, default: []].append(userNode)
+        updateSelection(for: sessionId, parentId: parentId, childId: userNode.id)
+
         draftText = ""
         draftAttachments = []
-        startStreamingResponse(for: trimmed)
+        editingMessageId = nil
+
+        updateSessionPreview(sessionId: sessionId, preview: trimmed, date: timestamp)
+        rebuildMessages(for: sessionId)
+        startGeneration(for: userNode)
     }
 
     func stopGenerating() {
-        streamingTask?.cancel()
-        streamingTask = nil
+        stopRequested = true
+        provider.stopGeneration()
+    }
 
-        guard isGenerating else { return }
+    func cancelDownload() {
+        generationTask?.cancel()
+        provider.cancelDownload()
+        stopRequested = true
+        activeGenerationId = nil
+        activeGenerationSessionId = nil
         isGenerating = false
-
-        let responseText = streamingResponse.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !responseText.isEmpty {
-            messages.append(
-                ChatMessage(
-                    role: .assistant,
-                    text: responseText,
-                    isInterrupted: true
-                )
-            )
-        }
+        isDownloading = false
         streamingResponse = ""
+        streamingParentId = nil
+        downloadToast = nil
+    }
+
+    func retryDownload() {
+        let target = modelSettings.currentTarget()
+        Task {
+            do {
+                try await provider.ensureModelReady(target: target) { progress in
+                    Task { @MainActor in
+                        self.handleProgress(progress)
+                    }
+                }
+            } catch {
+                if isCancellation(error) {
+                    return
+                }
+                downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: error.localizedDescription, offerRetryDownload: true)
+            }
+        }
     }
 
     func retryAssistantResponse(_ message: ChatMessage) {
         guard message.role == .assistant else { return }
-        startStreamingResponse(for: message.text)
+        guard let sessionId = currentSessionId else { return }
+        guard let parent = messageStore[sessionId]?.first(where: { $0.id == message.id })?.parentId,
+              let userNode = messageStore[sessionId]?.first(where: { $0.id == parent }) else {
+            return
+        }
+        provider.resetContext()
+        startGeneration(for: userNode)
     }
 
     func changeBranch(for message: ChatMessage, delta: Int) {
-        guard let index = messages.firstIndex(where: { $0.id == message.id }) else { return }
-        let current = messages[index].branchIndex
-        let total = messages[index].branchCount
-        let next = max(1, min(total, current + delta))
-        messages[index].branchIndex = next
+        guard let sessionId = currentSessionId else { return }
+        guard let node = messageStore[sessionId]?.first(where: { $0.id == message.id }) else { return }
+        let parentKey = node.parentId?.uuidString ?? "__root__"
+        let parentId = node.parentId ?? rootId
+        let siblings = dedupeSiblings(childrenFor(sessionId: sessionId, parentId: parentId))
+        guard !siblings.isEmpty else { return }
+        let selectionMap = branchSelections[sessionId] ?? [:]
+        let currentId = selectionMap[parentKey] ?? siblings.last?.id
+        let currentIndex = siblings.firstIndex { $0.id == currentId } ?? (siblings.count - 1)
+        let nextIndex = max(0, min(siblings.count - 1, currentIndex + delta))
+        branchSelections[sessionId, default: [:]][parentKey] = siblings[nextIndex].id
+        rebuildMessages(for: sessionId)
     }
 
-    func simulateDownload() {
-        downloadToast = DownloadToastState(phase: .downloading, percent: 0, status: "Preparing…", offerRetryDownload: false)
-        isDownloading = true
-
-        Task { @MainActor in
-            for step in stride(from: 5, through: 100, by: 5) {
-                try? await Task.sleep(nanoseconds: 150_000_000)
-                downloadToast?.percent = step
-                if step < 100 {
-                    downloadToast?.phase = .downloading
-                    downloadToast?.status = "Downloading model…"
-                } else {
-                    downloadToast?.phase = .loading
-                    downloadToast?.status = "Loading model…"
-                }
-            }
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            downloadToast?.phase = .complete
-            downloadToast?.status = "Model ready"
-            isDownloading = false
-
-            try? await Task.sleep(nanoseconds: 800_000_000)
-            downloadToast = nil
-        }
+    private func createSessionForDraft() -> UUID {
+        let session = ChatSession(title: "New chat", lastMessage: "", updatedAt: Date())
+        sessions.insert(session, at: 0)
+        currentSessionId = session.id
+        messageStore[session.id] = []
+        branchSelections[session.id] = [:]
+        return session.id
     }
 
-    private func startStreamingResponse(for prompt: String) {
-        streamingTask?.cancel()
-        streamingResponse = ""
+    private func startGeneration(for userNode: MessageNode) {
+        generationTask?.cancel()
+        stopRequested = false
+        let generationId = UUID()
+        activeGenerationId = generationId
+        activeGenerationSessionId = userNode.sessionId
         isGenerating = true
+        isDownloading = false
+        streamingResponse = ""
+        streamingParentId = userNode.id
+        downloadToast = nil
+        rebuildMessages(for: userNode.sessionId)
 
-        let response = "Here is a draft response for: \(prompt).\n\n- Keep the tone warm\n- Highlight the next action\n- Offer a follow-up question"
-        let words = response.split(separator: " ")
+        let target = modelSettings.currentTarget()
 
-        streamingTask = Task { @MainActor in
-            for word in words {
-                if Task.isCancelled { return }
-                streamingResponse += (streamingResponse.isEmpty ? "" : " ") + word
-                try? await Task.sleep(nanoseconds: 120_000_000)
+        generationTask = Task {
+            do {
+                try await provider.ensureModelReady(target: target) { progress in
+                    Task { @MainActor in
+                        guard self.activeGenerationId == generationId else { return }
+                        self.handleProgress(progress)
+                    }
+                }
+            } catch {
+                if isCancellation(error) {
+                    if self.activeGenerationId == generationId {
+                        isGenerating = false
+                        isDownloading = false
+                        streamingParentId = nil
+                        downloadToast = nil
+                        activeGenerationId = nil
+                        activeGenerationSessionId = nil
+                    }
+                    return
+                }
+                if self.activeGenerationId == generationId {
+                    isGenerating = false
+                    isDownloading = false
+                    streamingParentId = nil
+                    downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: error.localizedDescription, offerRetryDownload: true)
+                    activeGenerationId = nil
+                    activeGenerationSessionId = nil
+                }
+                return
             }
 
-            finishStreamingResponse()
+            let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
+            let history = buildHistory(sessionId: userNode.sessionId, promptText: prompt.text, currentMessageId: userNode.id)
+            let messages = history + [InferenceMessage(text: prompt.text, isUser: true, hasAttachments: !userNode.attachments.isEmpty)]
+
+            let bufferLock = NSLock()
+            var buffer = ""
+            var tokenCount = 0
+
+            do {
+                let summary = try await provider.generateChat(
+                    target: target,
+                    messages: messages,
+                    imageFiles: prompt.imageFiles,
+                    temperature: 0.7,
+                    maxTokens: target.maxTokens ?? 1024
+                ) { token in
+                    bufferLock.lock()
+                    buffer.append(token)
+                    tokenCount += self.estimateTokens(token)
+                    let snapshot = buffer
+                    bufferLock.unlock()
+
+                    Task { @MainActor in
+                        guard self.activeGenerationId == generationId else { return }
+                        self.streamingResponse = snapshot
+                    }
+                }
+
+                finishGeneration(parent: userNode, response: buffer, tokenCount: tokenCount, totalTimeMs: summary.totalTimeMs, interrupted: false, generationId: generationId)
+            } catch {
+                let interrupted = stopRequested || error.localizedDescription.lowercased().contains("cancel")
+                finishGeneration(parent: userNode, response: buffer, tokenCount: tokenCount, totalTimeMs: nil, interrupted: interrupted, generationId: generationId)
+            }
         }
     }
 
-    private func finishStreamingResponse() {
-        streamingTask = nil
-        let finalText = streamingResponse.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !finalText.isEmpty else {
+    private func finishGeneration(parent: MessageNode, response: String, tokenCount: Int, totalTimeMs: Int64?, interrupted: Bool, generationId: UUID) {
+        let trimmed = response.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            let tokensPerSecond: Double? = {
+                guard let totalTimeMs, totalTimeMs > 0 else { return nil }
+                return Double(tokenCount) / (Double(totalTimeMs) / 1000.0)
+            }()
+
+            let assistant = MessageNode(
+                id: UUID(),
+                sessionId: parent.sessionId,
+                parentId: parent.id,
+                role: .assistant,
+                text: trimmed,
+                timestamp: Date(),
+                attachments: [],
+                isInterrupted: interrupted,
+                tokensPerSecond: tokensPerSecond
+            )
+
+            messageStore[parent.sessionId, default: []].append(assistant)
+            updateSelection(for: parent.sessionId, parentId: parent.id, childId: assistant.id)
+            updateSessionPreview(sessionId: parent.sessionId, preview: trimmed, date: assistant.timestamp)
+        }
+
+        if activeGenerationId == generationId {
             isGenerating = false
+            isDownloading = false
+            streamingResponse = ""
+            streamingParentId = nil
+            downloadToast = nil
+            activeGenerationId = nil
+            activeGenerationSessionId = nil
+        }
+
+        if currentSessionId == parent.sessionId {
+            rebuildMessages(for: parent.sessionId)
+        }
+    }
+
+    private func handleProgress(_ progress: InferenceDownloadProgress) {
+        if progress.percent == -1 {
+            downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: progress.status, offerRetryDownload: true)
+            isDownloading = false
             return
         }
 
-        messages.append(
-            ChatMessage(
-                role: .assistant,
-                text: finalText,
-                tokensPerSecond: Double.random(in: 2.6...3.8)
-            )
-        )
-        streamingResponse = ""
-        isGenerating = false
-        updateCurrentSession(lastMessage: finalText)
+        let isLoading = progress.status.localizedCaseInsensitiveContains("Loading")
+        let isReady = progress.status.localizedCaseInsensitiveContains("Ready")
+
+        if isLoading {
+            downloadToast = DownloadToastState(phase: .loading, percent: progress.percent, status: progress.status, offerRetryDownload: false)
+            isDownloading = true
+            return
+        }
+
+        if isReady {
+            downloadToast = DownloadToastState(phase: .complete, percent: 100, status: progress.status, offerRetryDownload: false)
+            isDownloading = false
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                if self.downloadToast?.phase == .complete {
+                    self.downloadToast = nil
+                }
+            }
+            return
+        }
+
+        downloadToast = DownloadToastState(phase: .downloading, percent: progress.percent, status: progress.status, offerRetryDownload: false)
+        isDownloading = progress.percent >= 0 && progress.percent < 100
     }
 
-    private func updateCurrentSession(lastMessage: String) {
-        guard let currentSessionId, let index = sessions.firstIndex(where: { $0.id == currentSessionId }) else { return }
-        sessions[index].lastMessage = lastMessage
-        sessions[index].updatedAt = Date()
+    private func rebuildMessages(for sessionId: UUID) {
+        let path = buildSelectedPath(for: sessionId)
+        let childrenMap = childrenByParent(sessionId: sessionId)
+        let selectionMap = branchSelections[sessionId, default: [:]]
+
+        messages = path.map { node in
+            let parentKey = node.parentId?.uuidString ?? "__root__"
+            let parentId = node.parentId ?? rootId
+            let siblings = dedupeSiblings(childrenMap[parentId] ?? [])
+            let selectedId = selectionMap[parentKey]
+            let index = siblings.firstIndex { $0.id == selectedId } ?? (siblings.count - 1)
+
+            return ChatMessage(
+                id: node.id,
+                role: node.role,
+                text: node.text,
+                timestamp: node.timestamp,
+                attachments: node.attachments,
+                isInterrupted: node.isInterrupted,
+                tokensPerSecond: node.tokensPerSecond,
+                branchIndex: max(1, index + 1),
+                branchCount: max(1, siblings.count)
+            )
+        }
+    }
+
+    private func buildSelectedPath(for sessionId: UUID) -> [MessageNode] {
+        guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return [] }
+        let byId = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
+        let childrenMap = childrenByParent(sessionId: sessionId)
+        let roots = dedupeSiblings(nodes.filter { node in
+            guard let parentId = node.parentId else { return true }
+            return byId[parentId] == nil
+        })
+        guard !roots.isEmpty else { return [] }
+
+        let selectionMap = branchSelections[sessionId, default: [:]]
+        var current = selectChild(selectionMap: selectionMap, selectionKey: "__root__", candidates: roots)
+        var path: [MessageNode] = []
+        var visited = Set<UUID>()
+
+        while let node = current, visited.insert(node.id).inserted {
+            path.append(node)
+            if node.id == streamingParentId { break }
+            let children = dedupeSiblings(childrenMap[node.id] ?? [])
+            if children.isEmpty { break }
+            current = selectChild(selectionMap: selectionMap, selectionKey: node.id.uuidString, candidates: children)
+        }
+        return path
+    }
+
+    private func selectChild(selectionMap: [String: UUID], selectionKey: String, candidates: [MessageNode]) -> MessageNode? {
+        guard !candidates.isEmpty else { return nil }
+        if let selectedId = selectionMap[selectionKey],
+           let selected = candidates.first(where: { $0.id == selectedId }) {
+            return selected
+        }
+        return candidates.last
+    }
+
+    private func childrenByParent(sessionId: UUID) -> [UUID: [MessageNode]] {
+        var map: [UUID: [MessageNode]] = [:]
+        guard let nodes = messageStore[sessionId] else { return map }
+        let byId = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
+        for node in nodes {
+            let parent = node.parentId.flatMap { byId[$0] != nil ? $0 : nil } ?? rootId
+            map[parent, default: []].append(node)
+        }
+        return map
+    }
+
+    private func childrenFor(sessionId: UUID, parentId: UUID) -> [MessageNode] {
+        let map = childrenByParent(sessionId: sessionId)
+        return map[parentId] ?? []
+    }
+
+    private func dedupeSiblings(_ nodes: [MessageNode]) -> [MessageNode] {
+        guard nodes.count > 1 else { return nodes.sorted(by: { $0.timestamp < $1.timestamp }) }
+        let sorted = nodes.sorted(by: { $0.timestamp < $1.timestamp })
+        var result: [MessageNode] = []
+        for node in sorted {
+            if let last = result.last, isDuplicate(last, node) {
+                continue
+            }
+            result.append(node)
+        }
+        return result
+    }
+
+    private func isDuplicate(_ lhs: MessageNode, _ rhs: MessageNode) -> Bool {
+        guard lhs.role == rhs.role else { return false }
+        guard lhs.text == rhs.text else { return false }
+        guard attachmentSignature(lhs.attachments) == attachmentSignature(rhs.attachments) else { return false }
+        return abs(lhs.timestamp.timeIntervalSince(rhs.timestamp)) <= 2
+    }
+
+    private func attachmentSignature(_ attachments: [ChatAttachment]) -> [String] {
+        attachments.map { "\($0.kind)-\($0.name)" }
+    }
+
+    private func updateSelection(for sessionId: UUID, parentId: UUID?, childId: UUID) {
+        let key = parentId?.uuidString ?? "__root__"
+        branchSelections[sessionId, default: [:]][key] = childId
+    }
+
+    private func updateSessionPreview(sessionId: UUID, preview: String, date: Date) {
+        sessions = sessions.map { session in
+            guard session.id == sessionId else { return session }
+            var updated = session
+            updated.lastMessage = preview
+            updated.updatedAt = date
+            return updated
+        }
+    }
+
+    private func isCancellation(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
+        return error.localizedDescription.localizedCaseInsensitiveContains("cancel")
+    }
+
+    private nonisolated func attachmentsDirectory() throws -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let dir = base.appendingPathComponent("llm", isDirectory: true)
+            .appendingPathComponent("attachments", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
+        return dir
+    }
+
+    private nonisolated func writeAttachment(data: Data, fileName: String) throws -> URL {
+        let dir = try attachmentsDirectory()
+        let safeName = fileName.replacingOccurrences(of: "/", with: "_")
+        let destination = dir.appendingPathComponent("\(UUID().uuidString)_\(safeName)")
+        try data.write(to: destination, options: .atomic)
+        return destination
+    }
+
+    private nonisolated func copyAttachment(from url: URL) throws -> URL {
+        let dir = try attachmentsDirectory()
+        let safeName = url.lastPathComponent.replacingOccurrences(of: "/", with: "_")
+        let destination = dir.appendingPathComponent("\(UUID().uuidString)_\(safeName)")
+
+        let needsSecurity = url.startAccessingSecurityScopedResource()
+        defer {
+            if needsSecurity {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        if FileManager.default.fileExists(atPath: destination.path) {
+            try FileManager.default.removeItem(at: destination)
+        }
+        try FileManager.default.copyItem(at: url, to: destination)
+        return destination
+    }
+
+    private func buildPrompt(text: String, attachments: [ChatAttachment]) -> PromptResult {
+        var prompt = text
+        let documents = attachments.filter { $0.kind == .document }
+        let images = attachments.filter { $0.kind == .image }
+
+        for (index, attachment) in documents.enumerated() {
+            prompt += "\n\n----- BEGIN DOCUMENT: Document \(index + 1) -----\n"
+            prompt += "Attached document: \(attachment.name)\n"
+            prompt += "----- END DOCUMENT: Document \(index + 1) -----"
+        }
+
+        let imageFiles = images.compactMap { $0.url }
+        if !imageFiles.isEmpty {
+            let mediaMarker = "<__media__>"
+            prompt += "\n\n[\(imageFiles.count) image attachment"
+            if imageFiles.count > 1 { prompt += "s" }
+            prompt += " provided]"
+            for _ in imageFiles {
+                prompt += "\n\(mediaMarker)"
+            }
+        }
+
+        return PromptResult(text: prompt, imageFiles: imageFiles)
+    }
+
+    private func buildHistory(sessionId: UUID, promptText: String, currentMessageId: UUID) -> [InferenceMessage] {
+        let path = buildSelectedPath(for: sessionId)
+        let history = path.prefix { $0.id != currentMessageId }
+        if history.isEmpty { return [] }
+
+        let target = modelSettings.currentTarget()
+        let contextSize = target.contextLength ?? 4096
+        let maxTokens = target.maxTokens ?? 1024
+        var budget = contextSize - maxTokens - 256
+        budget -= estimateTokens(promptText)
+        if budget <= 0 { return [] }
+
+        var selected: [InferenceMessage] = []
+        for node in history.reversed() {
+            let text = historyText(node)
+            let cost = estimateTokens(text)
+            if cost <= budget {
+                selected.append(InferenceMessage(text: text, isUser: node.role == .user, hasAttachments: !node.attachments.isEmpty))
+                budget -= cost
+            } else if selected.isEmpty {
+                selected.append(InferenceMessage(text: trimToBudget(text, budget: budget), isUser: node.role == .user, hasAttachments: !node.attachments.isEmpty))
+                break
+            } else {
+                break
+            }
+        }
+        return selected.reversed()
+    }
+
+    private func historyText(_ node: MessageNode) -> String {
+        var text = node.text
+        if node.role == .assistant {
+            text = text.replacingOccurrences(of: "<think>[\\s\\S]*?</think>", with: "", options: .regularExpression)
+            text = text.replacingOccurrences(of: "<todo_list>[\\s\\S]*?</todo_list>", with: "", options: .regularExpression)
+        } else if !node.attachments.isEmpty {
+            text += "\n\n[\(node.attachments.count) attachments attached]"
+        }
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func trimToBudget(_ text: String, budget: Int) -> String {
+        guard budget > 0 else { return "" }
+        let maxChars = budget * 4
+        if text.count <= maxChars { return text }
+        return String(text.suffix(maxChars))
+    }
+
+    private func estimateTokens(_ text: String) -> Int {
+        max(1, text.count / 4)
+    }
+
+    private struct MessageNode: Identifiable {
+        let id: UUID
+        let sessionId: UUID
+        let parentId: UUID?
+        let role: ChatMessage.Role
+        let text: String
+        let timestamp: Date
+        let attachments: [ChatAttachment]
+        let isInterrupted: Bool
+        let tokensPerSecond: Double?
+    }
+
+    private struct PromptResult {
+        let text: String
+        let imageFiles: [URL]
     }
 }

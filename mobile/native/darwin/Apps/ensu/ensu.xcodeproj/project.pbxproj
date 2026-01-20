@@ -10,6 +10,8 @@
 		DACC3DAB2E604C9C00DAF993 /* Sodium in Frameworks */ = {isa = PBXBuildFile; productRef = DA72BCAB2E5F87B000D128FF /* Sodium */; };
 		DACC3DC92E618D6A00DAF993 /* EnteNetwork in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteNetwork */; };
 		21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteNetwork */; };
+		DAB0F20D2F5E123400ABCD01 /* InferenceRS in Frameworks */ = {isa = PBXBuildFile; productRef = DAB0F20C2F5E123400ABCD01 /* InferenceRS */; };
+		DAB0F20E2F5E123400ABCD01 /* InferenceRS in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DAB0F20C2F5E123400ABCD01 /* InferenceRS */; };
 		DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +61,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DACC3DC92E618D6A00DAF993 /* EnteNetwork in Frameworks */,
+				DAB0F20D2F5E123400ABCD01 /* InferenceRS in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,6 +70,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks (macOS) */,
+				DAB0F20E2F5E123400ABCD01 /* InferenceRS in Frameworks (macOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +138,7 @@
 			name = ensu;
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
+				DAB0F20C2F5E123400ABCD01 /* InferenceRS */,
 			);
 			productName = ensu;
 			productReference = DA72BC612E5F87A000D128FF /* ensu.app */;
@@ -158,6 +163,7 @@
 			name = "ensu-macos";
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
+				DAB0F20C2F5E123400ABCD01 /* InferenceRS */,
 			);
 			productName = Ensu;
 			productReference = 77E1DDDF900AB047CB554122 /* Ensu.app */;
@@ -241,6 +247,7 @@
 			packageReferences = (
 				DA72BCAA2E5F87B000D128FF /* XCRemoteSwiftPackageReference "swift-sodium" */,
 				DACC3DC62E618D5300DAF993 /* XCLocalSwiftPackageReference "../../Packages/EnteNetwork" */,
+				DAB0F20B2F5E123400ABCD01 /* XCLocalSwiftPackageReference "../../Packages/Rust" */,
 				DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -817,6 +824,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Packages/EnteNetwork;
 		};
+		DAB0F20B2F5E123400ABCD01 /* XCLocalSwiftPackageReference "../../Packages/Rust" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/Rust;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -847,6 +858,10 @@
 		DACC3DC82E618D6A00DAF993 /* EnteNetwork */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = EnteNetwork;
+		};
+		DAB0F20C2F5E123400ABCD01 /* InferenceRS */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = InferenceRS;
 		};
 		DAF584662E61BB8300F8A08F /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
