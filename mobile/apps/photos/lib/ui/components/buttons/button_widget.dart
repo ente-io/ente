@@ -238,7 +238,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(
             Radius.circular(
-              flagService.increasedButtonBorderRadius ? 12 : 4,
+              flagService.increasedBorderRadius ? 12 : 4,
             ),
           ),
           border: widget.buttonType == ButtonType.tertiaryCritical
@@ -251,7 +251,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(
               Radius.circular(
-                flagService.increasedButtonBorderRadius ? 12 : 4,
+                flagService.increasedBorderRadius ? 12 : 4,
               ),
             ),
             color: buttonColor,

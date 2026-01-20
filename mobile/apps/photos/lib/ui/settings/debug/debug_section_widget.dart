@@ -63,10 +63,10 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingWidget: ToggleSwitchWidget(
-            value: () => localSettings.increasedButtonBorderRadius,
+            value: () => localSettings.increasedBorderRadius,
             onChanged: () async {
-              final newValue = !localSettings.increasedButtonBorderRadius;
-              await localSettings.setIncreasedButtonBorderRadius(newValue);
+              final newValue = !localSettings.increasedBorderRadius;
+              await localSettings.setIncreasedBorderRadius(newValue);
               setState(() {});
               showShortToast(
                 context,

@@ -79,7 +79,7 @@ class GradientButton extends StatelessWidget {
                   ],
           ),
           borderRadius: BorderRadius.circular(
-            flagService.increasedButtonBorderRadius ? 12 : 8,
+            flagService.increasedBorderRadius ? 12 : 8,
           ),
         ),
         child: Center(child: buttonContent),

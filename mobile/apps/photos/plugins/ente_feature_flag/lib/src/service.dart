@@ -99,8 +99,8 @@ class FlagService {
 
   bool get showSharedAlbumsInMoveSheet => internalUser;
 
-  bool get increasedButtonBorderRadius {
-    final isEnabled = _prefs.getBool("ls.increased_button_border_radius") ?? false;
+  bool get increasedBorderRadius {
+    final isEnabled = _prefs.getBool("ls.increased_border_radius") ?? false;
     return isEnabled || kDebugMode;
   }
 
