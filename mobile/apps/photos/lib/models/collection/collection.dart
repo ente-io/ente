@@ -105,6 +105,11 @@ class Collection {
         sharedMagicMetadata.visibility == archiveVisibility;
   }
 
+  bool hasShareeHidden() {
+    return sharedMmdVersion > 0 &&
+        sharedMagicMetadata.visibility == hiddenVisibility;
+  }
+
   bool hasShareePinned() {
     return (sharedMagicMetadata.order ?? 0) != 0;
   }
@@ -124,7 +129,14 @@ class Collection {
     if (isDefaultHidden()) {
       return true;
     }
-    return mMdVersion > 0 && (magicMetadata.visibility == hiddenVisibility);
+    final userID = Configuration.instance.getUserID();
+    if (userID != null && isOwner(userID)) {
+      // Owner: check owner's magic metadata
+      return mMdVersion > 0 && magicMetadata.visibility == hiddenVisibility;
+    } else {
+      // Sharee: check sharee's magic metadata
+      return hasShareeHidden();
+    }
   }
 
   bool isDefaultHidden() {

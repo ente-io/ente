@@ -143,8 +143,7 @@ class _DebugSettingsPageState extends State<DebugSettingsPage> {
                                 value: () =>
                                     localSettings.isChristmasBannerEnabled,
                                 onChanged: () async {
-                                  await localSettings
-                                      .setChristmasBannerEnabled(
+                                  await localSettings.setChristmasBannerEnabled(
                                     !localSettings.isChristmasBannerEnabled,
                                   );
                                   Bus.instance.fire(ChristmasBannerEvent());

@@ -210,9 +210,10 @@ class ReferralWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        AppLocalizations.of(context).referralsAreCurrentlyPaused,
-                        style:
-                            textTheme.small.copyWith(color: colorScheme.textFaint),
+                        AppLocalizations.of(context)
+                            .referralsAreCurrentlyPaused,
+                        style: textTheme.small
+                            .copyWith(color: colorScheme.textFaint),
                       ),
                     ],
                   ),
