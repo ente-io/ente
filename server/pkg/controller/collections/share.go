@@ -146,7 +146,7 @@ func (c *CollectionController) UnShare(ctx *gin.Context, cID int64, fromUserID i
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	if err := c.removeUserSocialActivity(ctx.Request.Context(), cID, toUserID); err != nil {
+	if err := c.removeUserSocialActivity(ctx, cID, toUserID); err != nil {
 		return nil, err
 	}
 	err = c.CastRepo.RevokeForGivenUserAndCollection(ctx, cID, toUserID)
@@ -185,7 +185,7 @@ func (c *CollectionController) Leave(ctx *gin.Context, cID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if err := c.removeUserSocialActivity(ctx.Request.Context(), cID, userID); err != nil {
+	if err := c.removeUserSocialActivity(ctx, cID, userID); err != nil {
 		return err
 	}
 	return nil

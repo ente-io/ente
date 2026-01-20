@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -20,6 +22,7 @@ import (
 	"github.com/awa/go-iap/appstore"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente-io/museum/pkg/repo/remotestore"
 	"github.com/ente-io/museum/pkg/utils/array"
 )
 
@@ -29,6 +32,7 @@ type AppStoreController struct {
 	BillingRepo            *repo.BillingRepository
 	FileRepo               *repo.FileRepository
 	UserRepo               *repo.UserRepository
+	RemoteStoreRepo        *remotestore.Repository
 	BillingPlansPerCountry ente.BillingPlansPerCountry
 	CommonBillCtrl         *commonbilling.Controller
 	DiscordController      *discord.DiscordController
@@ -42,6 +46,7 @@ func NewAppStoreController(
 	billingRepo *repo.BillingRepository,
 	fileRepo *repo.FileRepository,
 	userRepo *repo.UserRepository,
+	remoteStoreRepo *remotestore.Repository,
 	commonBillCtrl *commonbilling.Controller,
 	discordController *discord.DiscordController,
 ) *AppStoreController {
@@ -51,6 +56,7 @@ func NewAppStoreController(
 		BillingRepo:            billingRepo,
 		FileRepo:               fileRepo,
 		UserRepo:               userRepo,
+		RemoteStoreRepo:        remoteStoreRepo,
 		BillingPlansPerCountry: plans,
 		appStoreSharedPassword: appleSharedSecret,
 		CommonBillCtrl:         commonBillCtrl,
@@ -61,8 +67,8 @@ func NewAppStoreController(
 var SubsUpdateNotificationTypes = []string{string(appstore.NotificationTypeDidChangeRenewalStatus), string(appstore.NotificationTypeCancel), string(appstore.NotificationTypeDidRevoke)}
 
 // validateSandboxRequest checks if the request is from sandbox environment.
-// If sandbox, it sends a Discord alert and returns an error for non-ente.io users.
-func (c *AppStoreController) validateSandboxRequest(environment string, userID int64, context string) error {
+// If sandbox, it sends a Discord alert and returns an error for non-whitelisted users.
+func (c *AppStoreController) validateSandboxRequest(ctx context.Context, environment string, userID int64, sandboxContext string) error {
 	if environment != "Sandbox" {
 		return nil
 	}
@@ -74,13 +80,22 @@ func (c *AppStoreController) validateSandboxRequest(environment string, userID i
 
 	maskedEmail := email.GetMaskedEmailWithHint(user.Email)
 	c.DiscordController.Notify(fmt.Sprintf("iOS Sandbox %s for user: %s (userID: %d)",
-		context, maskedEmail, userID))
+		sandboxContext, maskedEmail, userID))
 
-	if !strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
-		return stacktrace.Propagate(ente.NewInternalError("sandbox request from external user"), "")
+	if strings.HasSuffix(strings.ToLower(user.Email), "@ente.io") {
+		return nil
 	}
 
-	return nil
+	value, err := c.RemoteStoreRepo.GetValue(ctx, userID, string(ente.IsInternalUser))
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return stacktrace.Propagate(err, "failed to get internal user flag for sandbox validation")
+		}
+	} else if value == "true" {
+		return nil
+	}
+
+	return stacktrace.Propagate(ente.NewInternalError("sandbox request from external user"), "")
 }
 
 // HandleNotification handles an AppStore notification
@@ -109,7 +124,7 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 		return stacktrace.Propagate(err, "")
 	}
 
-	if err := c.validateSandboxRequest(string(notification.Environment), subscription.UserID,
+	if err := c.validateSandboxRequest(ctx, string(notification.Environment), subscription.UserID,
 		fmt.Sprintf("notification (type: %s)", notification.NotificationType)); err != nil {
 		return err
 	}
@@ -188,7 +203,7 @@ func (c *AppStoreController) GetVerifiedSubscription(userID int64, productID str
 		return ente.Subscription{}, stacktrace.Propagate(err, "")
 	}
 
-	if err := c.validateSandboxRequest(string(response.Environment), userID, "subscription verification"); err != nil {
+	if err := c.validateSandboxRequest(context.Background(), string(response.Environment), userID, "subscription verification"); err != nil {
 		return ente.Subscription{}, err
 	}
 

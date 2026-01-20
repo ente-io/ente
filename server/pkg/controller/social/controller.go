@@ -69,11 +69,11 @@ func (c *Controller) UnifiedDiff(ctx *gin.Context, req UnifiedDiffRequest) ([]so
 			return nil, nil, false, false, stacktrace.Propagate(err, "")
 		}
 	}
-	comments, moreComments, err := c.CommentsRepo.GetDiff(ctx.Request.Context(), req.CollectionID, req.CommentsSince, req.Limit, req.FileID)
+	comments, moreComments, err := c.CommentsRepo.GetDiff(ctx, req.CollectionID, req.CommentsSince, req.Limit, req.FileID)
 	if err != nil {
 		return nil, nil, false, false, stacktrace.Propagate(err, "")
 	}
-	reactions, moreReactions, err := c.ReactionsRepo.GetDiff(ctx.Request.Context(), req.CollectionID, req.ReactionsSince, req.Limit, req.FileID, nil)
+	reactions, moreReactions, err := c.ReactionsRepo.GetDiff(ctx, req.CollectionID, req.ReactionsSince, req.Limit, req.FileID, nil)
 	if err != nil {
 		return nil, nil, false, false, stacktrace.Propagate(err, "")
 	}
@@ -243,6 +243,5 @@ func (c *Controller) ListAnonProfiles(ctx *gin.Context, req AnonProfilesRequest)
 			return nil, stacktrace.Propagate(err, "")
 		}
 	}
-	return c.AnonUsersRepo.ListByCollection(ctx.Request.Context(), req.CollectionID)
+	return c.AnonUsersRepo.ListByCollection(ctx, req.CollectionID)
 }
-

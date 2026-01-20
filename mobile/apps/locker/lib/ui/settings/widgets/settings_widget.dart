@@ -31,7 +31,7 @@ class SettingsItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
-        height: 60,
+        height: 56,
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
           borderRadius: BorderRadius.circular(20),
@@ -42,7 +42,7 @@ class SettingsItem extends StatelessWidget {
             if (icon != null) ...[
               HugeIcon(
                 icon: icon,
-                color: iconColor ?? colorScheme.strokeBase,
+                color: iconColor ?? colorScheme.textMuted,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -50,7 +50,7 @@ class SettingsItem extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.body.copyWith(
+                style: textTheme.small.copyWith(
                   color: textColor ?? colorScheme.textBase,
                 ),
               ),

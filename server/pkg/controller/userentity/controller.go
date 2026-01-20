@@ -1,6 +1,7 @@
 package authenticaor
 
 import (
+	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/userentity"
 	"github.com/ente-io/museum/pkg/repo/userentity"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -60,6 +61,9 @@ func (c *Controller) Delete(ctx *gin.Context, entityID string) (bool, error) {
 
 // GetDiff returns diff of EntityData for the given type
 func (c *Controller) GetDiff(ctx *gin.Context, req model.GetEntityDiffRequest) ([]model.EntityData, error) {
+	if req.Limit <= 0 || req.Limit > 5000 {
+		return nil, ente.NewBadRequestWithMessage("limit must be between 1 and 5000")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	return c.Repo.GetDiff(ctx, userID, req.Type, *req.SinceTime, req.Limit)
 }
