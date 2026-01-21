@@ -192,8 +192,7 @@ export const settingsStorage = {
             KEYS.SETTINGS
         );
         return {
-            autoFillSingleMatch: stored?.autoFillSingleMatch ?? true,
-            showNotifications: stored?.showNotifications ?? true,
+            autofillEnabled: stored?.autofillEnabled ?? true,
             syncInterval: stored?.syncInterval ?? 5,
             customApiEndpoint: stored?.customApiEndpoint,
             theme: stored?.theme ?? "system",

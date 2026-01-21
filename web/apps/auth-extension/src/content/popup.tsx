@@ -1,8 +1,9 @@
 /**
- * Inline popup component for MFA code selection.
+ * Inline autofill icon and dropdown component.
+ * Appears inside the MFA input field like LastPass.
  * Renders in a Shadow DOM for style isolation.
  */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { generateOTPs, getProgress } from "@shared/otp";
 import { prettyFormatCode } from "@shared/code";
@@ -11,53 +12,46 @@ import type { Code, DomainMatch } from "@shared/types";
 
 type ResolvedTheme = "light" | "dark";
 
-// Theme color definitions matching the CSS variables
+// Theme color definitions
 const themeColors = {
     dark: {
-        background: "#000000",
-        backgroundPaper: "#1B1B1B",
+        background: "#1B1B1B",
+        backgroundHover: "#252525",
         textPrimary: "#FFFFFF",
         textMuted: "rgba(255, 255, 255, 0.70)",
         textFaint: "rgba(255, 255, 255, 0.50)",
-        fillMuted: "rgba(255, 255, 255, 0.16)",
-        fillFaint: "rgba(255, 255, 255, 0.12)",
         stroke: "rgba(255, 255, 255, 0.12)",
         accentPurple: "#8F33D6",
     },
     light: {
         background: "#FFFFFF",
-        backgroundPaper: "#FAFAFA",
+        backgroundHover: "#F5F5F5",
         textPrimary: "#000000",
         textMuted: "rgba(0, 0, 0, 0.60)",
         textFaint: "rgba(0, 0, 0, 0.50)",
-        fillMuted: "rgba(0, 0, 0, 0.12)",
-        fillFaint: "rgba(0, 0, 0, 0.04)",
         stroke: "rgba(0, 0, 0, 0.12)",
         accentPurple: "#8F33D6",
     },
 };
 
-interface PopupProps {
+interface DropdownProps {
     matches: DomainMatch[];
     timeOffset: number;
     onFill: (code: string) => void;
-    onDismiss: () => void;
+    onClose: () => void;
+    theme: ResolvedTheme;
 }
 
-const Popup: React.FC<PopupProps> = ({
+const Dropdown: React.FC<DropdownProps> = ({
     matches,
     timeOffset,
     onFill,
-    onDismiss,
+    onClose,
+    theme,
 }) => {
     const [otps, setOtps] = useState<Map<string, string>>(new Map());
     const [progress, setProgress] = useState<Map<string, number>>(new Map());
-    const [theme, setTheme] = useState<ResolvedTheme>("dark");
-
-    // Load theme on mount
-    useEffect(() => {
-        getResolvedTheme().then(setTheme);
-    }, []);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Update OTPs every second
     useEffect(() => {
@@ -81,25 +75,132 @@ const Popup: React.FC<PopupProps> = ({
         return () => clearInterval(interval);
     }, [matches, timeOffset]);
 
-    // Auto-dismiss after 10 seconds
+    // Close on outside click - use mousedown instead of click to avoid interfering
     useEffect(() => {
-        const timeout = setTimeout(onDismiss, 10000);
-        return () => clearTimeout(timeout);
-    }, [onDismiss]);
+        const handleClickOutside = (e: MouseEvent) => {
+            // Check if click is outside the dropdown
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                onClose();
+            }
+        };
+
+        // Delay to avoid immediate close, and use mousedown on bubble phase
+        const timeoutId = setTimeout(() => {
+            document.addEventListener("mousedown", handleClickOutside, false);
+        }, 100);
+
+        return () => {
+            clearTimeout(timeoutId);
+            document.removeEventListener("mousedown", handleClickOutside, false);
+        };
+    }, [onClose]);
 
     const colors = themeColors[theme];
-    const styles = getStyles(colors);
+
+    const styles: Record<string, React.CSSProperties> = {
+        dropdown: {
+            position: "absolute",
+            top: "100%",
+            right: 0,
+            marginTop: "4px",
+            minWidth: "300px",
+            maxWidth: "340px",
+            backgroundColor: colors.background,
+            borderRadius: "8px",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+            border: `1px solid ${colors.stroke}`,
+            overflow: "hidden",
+            zIndex: 2147483647,
+            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        },
+        header: {
+            display: "flex",
+            alignItems: "center",
+            padding: "12px 16px",
+            borderBottom: `1px solid ${colors.stroke}`,
+            gap: "8px",
+            backgroundColor: colors.background,
+        },
+        headerText: {
+            fontSize: "14px",
+            fontWeight: 600,
+            color: colors.textPrimary,
+        },
+        list: {
+            maxHeight: "280px",
+            overflowY: "auto",
+            padding: "8px",
+        },
+        item: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 16px",
+            cursor: "pointer",
+            transition: "background-color 0.15s",
+            borderRadius: "8px",
+            marginBottom: "4px",
+            backgroundColor: "transparent",
+        },
+        itemInfo: {
+            flex: 1,
+            minWidth: 0,
+            marginRight: "16px",
+        },
+        issuer: {
+            fontSize: "15px",
+            fontWeight: 600,
+            color: colors.textPrimary,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            marginBottom: "2px",
+        },
+        account: {
+            fontSize: "13px",
+            fontWeight: 500,
+            color: colors.textFaint,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+        },
+        otpContainer: {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "4px",
+        },
+        otp: {
+            fontSize: "18px",
+            fontWeight: 600,
+            color: colors.textPrimary,
+            letterSpacing: "0.02em",
+        },
+        progressBarContainer: {
+            width: "50px",
+            height: "3px",
+            backgroundColor: colors.stroke,
+            borderRadius: "2px",
+            overflow: "hidden",
+        },
+        progressBar: {
+            height: "100%",
+            backgroundColor: colors.accentPurple,
+            transition: "width 1s linear",
+        },
+        empty: {
+            padding: "24px 16px",
+            textAlign: "center",
+            color: colors.textFaint,
+            fontSize: "14px",
+            fontWeight: 500,
+        },
+    };
 
     return (
-        <div style={styles.container}>
+        <div ref={dropdownRef} style={styles.dropdown}>
             <div style={styles.header}>
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    style={styles.logo}
-                >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path
                         d="M12 2L3 7V12C3 16.97 6.84 21.66 12 23C17.16 21.66 21 16.97 21 12V7L12 2Z"
                         fill="#8F33D6"
@@ -109,227 +210,266 @@ const Popup: React.FC<PopupProps> = ({
                         fill="white"
                     />
                 </svg>
-                <span style={styles.title}>Ente Auth</span>
-                <button style={styles.closeButton} onClick={onDismiss}>
-                    ×
-                </button>
+                <span style={styles.headerText}>Ente Auth</span>
             </div>
-            <div style={styles.content}>
-                {matches.map(({ code, confidence }) => (
-                    <div key={code.id} style={styles.codeItem}>
-                        <div style={styles.codeInfo}>
-                            <div style={styles.issuer}>{code.issuer}</div>
-                            {code.account && (
-                                <div style={styles.account}>{code.account}</div>
-                            )}
-                        </div>
-                        <div style={styles.codeActions}>
+            <div style={styles.list}>
+                {matches.length === 0 ? (
+                    <div style={styles.empty}>No matching codes found</div>
+                ) : (
+                    matches.map(({ code }) => (
+                        <div
+                            key={code.id}
+                            style={styles.item}
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const otp = otps.get(code.id) || "";
+                                onFill(otp);
+                            }}
+                            onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLDivElement).style.backgroundColor = colors.backgroundHover;
+                            }}
+                            onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLDivElement).style.backgroundColor = "transparent";
+                            }}
+                        >
+                            <div style={styles.itemInfo}>
+                                <div style={styles.issuer}>{code.issuer}</div>
+                                {code.account && (
+                                    <div style={styles.account}>{code.account}</div>
+                                )}
+                            </div>
                             <div style={styles.otpContainer}>
                                 <div style={styles.otp}>
                                     {prettyFormatCode(otps.get(code.id) || "")}
                                 </div>
-                                <div
-                                    style={{
-                                        ...styles.progressBar,
-                                        width: `${(progress.get(code.id) || 0) * 100}%`,
-                                    }}
-                                />
+                                <div style={styles.progressBarContainer}>
+                                    <div
+                                        style={{
+                                            ...styles.progressBar,
+                                            width: `${(progress.get(code.id) || 0) * 100}%`,
+                                        }}
+                                    />
+                                </div>
                             </div>
-                            <button
-                                style={styles.fillButton}
-                                onClick={() => onFill(otps.get(code.id) || "")}
-                            >
-                                Fill
-                            </button>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
 };
 
-type ThemeColorSet = typeof themeColors.dark;
+interface AutofillIconProps {
+    matches: DomainMatch[];
+    timeOffset: number;
+    onFill: (code: string) => void;
+    inputElement: HTMLInputElement;
+}
 
-const getStyles = (colors: ThemeColorSet): Record<string, React.CSSProperties> => ({
-    container: {
-        position: "fixed",
-        top: "16px",
-        right: "16px",
-        width: "320px",
-        backgroundColor: colors.backgroundPaper,
-        borderRadius: "4px",
-        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.75)",
-        fontFamily:
-            '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        zIndex: 2147483647,
-        overflow: "hidden",
-        color: colors.textPrimary,
-    },
-    header: {
-        display: "flex",
-        alignItems: "center",
-        padding: "12px 16px",
-        borderBottom: `1px solid ${colors.stroke}`,
-        backgroundColor: colors.background,
-    },
-    logo: {
-        marginRight: "8px",
-    },
-    title: {
-        flex: 1,
-        fontSize: "14px",
-        fontWeight: 600,
-        color: colors.textPrimary,
-    },
-    closeButton: {
-        background: "none",
-        border: "none",
-        color: colors.textMuted,
-        fontSize: "20px",
-        cursor: "pointer",
-        padding: "4px",
-        lineHeight: 1,
-        borderRadius: "4px",
-    },
-    content: {
-        maxHeight: "300px",
-        overflowY: "auto",
-        backgroundColor: colors.backgroundPaper,
-    },
-    codeItem: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "12px 16px",
-        borderBottom: `1px solid ${colors.fillFaint}`,
-        cursor: "pointer",
-        transition: "background-color 0.2s",
-    },
-    codeInfo: {
-        flex: 1,
-        minWidth: 0,
-    },
-    issuer: {
-        fontSize: "14px",
-        fontWeight: 500,
-        color: colors.textPrimary,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-    },
-    account: {
-        fontSize: "12px",
-        color: colors.textFaint,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        marginTop: "2px",
-    },
-    codeActions: {
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-    },
-    otpContainer: {
-        position: "relative",
-        backgroundColor: colors.fillFaint,
-        borderRadius: "4px",
-        padding: "6px 10px",
-        overflow: "hidden",
-    },
-    otp: {
-        fontSize: "16px",
-        fontWeight: 600,
-        color: colors.textPrimary,
-        position: "relative",
-        zIndex: 1,
-        letterSpacing: "-0.011em",
-    },
-    progressBar: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        height: "2px",
-        backgroundColor: colors.accentPurple,
-        transition: "width 1s linear",
-    },
-    fillButton: {
-        backgroundColor: colors.accentPurple,
-        color: "#fff",
-        border: "none",
-        borderRadius: "4px",
-        padding: "6px 12px",
-        fontSize: "12px",
-        fontWeight: 600,
-        cursor: "pointer",
-        transition: "background-color 0.2s",
-    },
-});
+const AutofillIcon: React.FC<AutofillIconProps> = ({
+    matches,
+    timeOffset,
+    onFill,
+    inputElement,
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [theme, setTheme] = useState<ResolvedTheme>("dark");
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Load theme on mount
+    useEffect(() => {
+        getResolvedTheme().then(setTheme);
+    }, []);
+
+    // Auto-fill if single match
+    useEffect(() => {
+        if (matches.length === 1) {
+            const { code } = matches[0]!;
+            const [otp] = generateOTPs(code, timeOffset);
+            // Small delay to let the UI render
+            setTimeout(() => {
+                onFill(otp);
+            }, 100);
+        }
+    }, [matches, timeOffset, onFill]);
+
+    const handleIconClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOpen(!isOpen);
+    };
+
+    const handleFill = (code: string) => {
+        onFill(code);
+        setIsOpen(false);
+    };
+
+    const colors = themeColors[theme];
+
+    const styles: Record<string, React.CSSProperties> = {
+        container: {
+            position: "relative",
+            display: "inline-flex",
+            alignItems: "center",
+            zIndex: 2147483647,
+        },
+        iconButton: {
+            width: "24px",
+            height: "24px",
+            borderRadius: "5px",
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            transition: "transform 0.15s, box-shadow 0.15s",
+            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.25)",
+            overflow: "hidden",
+        },
+    };
+
+    return (
+        <div ref={containerRef} style={styles.container}>
+            <button
+                style={styles.iconButton}
+                onClick={handleIconClick}
+                onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+                }}
+                title="Ente Auth - Click to autofill"
+            >
+                {/* Use the same PNG icon as extension toolbar */}
+                <img
+                    src={chrome.runtime.getURL("assets/icons/icon16.png")}
+                    alt="Ente Auth"
+                    width="20"
+                    height="20"
+                    style={{ borderRadius: "4px" }}
+                />
+            </button>
+            {isOpen && (
+                <Dropdown
+                    matches={matches}
+                    timeOffset={timeOffset}
+                    onFill={handleFill}
+                    onClose={() => setIsOpen(false)}
+                    theme={theme}
+                />
+            )}
+        </div>
+    );
+};
 
 // Global state for popup management
-let popupRoot: Root | null = null;
-let popupContainer: HTMLDivElement | null = null;
-let shadowRoot: ShadowRoot | null = null;
+let iconRoot: Root | null = null;
+let iconWrapper: HTMLDivElement | null = null;
+let shadowHost: HTMLDivElement | null = null;
 
 /**
- * Show the inline popup with matching codes.
+ * Position the icon inside the input field.
+ */
+const positionIcon = (inputElement: HTMLInputElement): void => {
+    if (!shadowHost) return;
+
+    const rect = inputElement.getBoundingClientRect();
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+
+    // Position to the right side inside the input (24px icon + 4px padding)
+    const iconSize = 24;
+    const padding = 4;
+    const top = rect.top + scrollY + (rect.height - iconSize) / 2;
+    const left = rect.right + scrollX - iconSize - padding;
+
+    shadowHost.style.position = "absolute";
+    shadowHost.style.top = `${top}px`;
+    shadowHost.style.left = `${left}px`;
+    shadowHost.style.zIndex = "2147483647";
+};
+
+/**
+ * Show the autofill icon next to an input field.
  */
 export const showPopup = (
     matches: DomainMatch[],
     timeOffset: number,
-    onFill: (code: string) => void
+    onFill: (code: string) => void,
+    inputElement?: HTMLInputElement
 ): void => {
-    // Don't show if no matches
-    if (matches.length === 0) return;
-
-    // Remove existing popup
+    // Remove existing icon
     hidePopup();
 
-    // Create container with Shadow DOM
-    popupContainer = document.createElement("div");
-    popupContainer.id = "ente-auth-popup-container";
-    shadowRoot = popupContainer.attachShadow({ mode: "closed" });
+    if (!inputElement) return;
 
-    // Create root element inside shadow DOM
-    const rootElement = document.createElement("div");
-    shadowRoot.appendChild(rootElement);
+    // Create shadow host
+    shadowHost = document.createElement("div");
+    shadowHost.id = "ente-auth-icon-host";
+    shadowHost.style.cssText = "all: initial; position: absolute; z-index: 2147483647;";
+
+    const shadow = shadowHost.attachShadow({ mode: "closed" });
+
+    // Create wrapper inside shadow DOM
+    iconWrapper = document.createElement("div");
+    shadow.appendChild(iconWrapper);
 
     // Mount React component
-    popupRoot = createRoot(rootElement);
-    popupRoot.render(
-        <Popup
+    iconRoot = createRoot(iconWrapper);
+    iconRoot.render(
+        <AutofillIcon
             matches={matches}
             timeOffset={timeOffset}
-            onFill={(code) => {
-                onFill(code);
-                hidePopup();
-            }}
-            onDismiss={hidePopup}
+            onFill={onFill}
+            inputElement={inputElement}
         />
     );
 
-    document.body.appendChild(popupContainer);
+    document.body.appendChild(shadowHost);
+
+    // Position the icon
+    positionIcon(inputElement);
+
+    // Reposition on scroll/resize
+    const handleReposition = () => positionIcon(inputElement);
+    window.addEventListener("scroll", handleReposition, true);
+    window.addEventListener("resize", handleReposition);
+
+    // Store cleanup handlers
+    (shadowHost as any)._cleanup = () => {
+        window.removeEventListener("scroll", handleReposition, true);
+        window.removeEventListener("resize", handleReposition);
+    };
 };
 
 /**
- * Hide and cleanup the popup.
+ * Hide and cleanup the icon.
  */
 export const hidePopup = (): void => {
-    if (popupRoot) {
-        popupRoot.unmount();
-        popupRoot = null;
+    if (shadowHost) {
+        // Run cleanup handlers
+        if ((shadowHost as any)._cleanup) {
+            (shadowHost as any)._cleanup();
+        }
     }
-    if (popupContainer && popupContainer.parentNode) {
-        popupContainer.parentNode.removeChild(popupContainer);
-        popupContainer = null;
+    if (iconRoot) {
+        iconRoot.unmount();
+        iconRoot = null;
     }
-    shadowRoot = null;
+    if (shadowHost && shadowHost.parentNode) {
+        shadowHost.parentNode.removeChild(shadowHost);
+        shadowHost = null;
+    }
+    iconWrapper = null;
 };
 
 /**
  * Check if popup is currently visible.
  */
 export const isPopupVisible = (): boolean => {
-    return popupContainer !== null;
+    return shadowHost !== null;
 };

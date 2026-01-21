@@ -57,6 +57,17 @@ const checkForMFAFields = async (): Promise<void> => {
     const domain = window.location.hostname;
 
     try {
+        // Get settings to check if autofill is enabled
+        const settingsResponse = await sendMessageWithRetry<{
+            success: boolean;
+            data?: ExtensionSettings;
+        }>({ type: "GET_SETTINGS" });
+
+        const settings = settingsResponse?.data;
+        if (settings && !settings.autofillEnabled) {
+            return;
+        }
+
         // Get matching codes from background
         const response = await sendMessageWithRetry<{
             success: boolean;
@@ -67,60 +78,21 @@ const checkForMFAFields = async (): Promise<void> => {
             domain,
         });
 
-        if (!response || !response.success || !response.data) {
-            // Silently return if no response (extension not ready) or no codes
-            return;
-        }
+        // Show popup with matches (or empty if not logged in)
+        const matches = response?.data?.matches || [];
+        const timeOffset = response?.data?.timeOffset || 0;
 
-        const { matches, timeOffset } = response.data;
-
-        // Only show popup if we have matches
-        if (matches.length === 0) {
-            return;
-        }
-
-        // Get settings to check if notifications are enabled
-        const settingsResponse = await sendMessageWithRetry<{
-            success: boolean;
-            data?: ExtensionSettings;
-        }>({ type: "GET_SETTINGS" });
-
-        const settings = settingsResponse?.data;
-        if (settings && !settings.showNotifications) {
-            return;
-        }
-
-        // Auto-fill if single match and setting enabled
-        if (matches.length === 1 && settings?.autoFillSingleMatch) {
-            console.log("Ente Auth: Auto-filling single match");
-            const { code } = matches[0]!;
-            const codesResponse = await sendMessageWithRetry<{
-                success: boolean;
-                data?: { codes: Array<{ id: string }>; timeOffset: number };
-            }>({ type: "GET_CODES" });
-
-            if (codesResponse?.success && codesResponse.data) {
-                // Generate OTP and fill
-                const { generateOTPs } = await import("@shared/otp");
-                const [otp] = generateOTPs(code, timeOffset);
-                if (currentDetection) {
-                    fillCode(currentDetection, otp);
-                }
-            }
-            hasShownPopup = true;
-            return;
-        }
-
-        // Show popup with matches
+        // Show popup with matches (or no matches message)
+        // The popup component handles auto-fill for single match
         showPopup(matches, timeOffset, (otp: string) => {
             if (currentDetection) {
                 fillCode(currentDetection, otp);
             }
-        });
+        }, currentDetection.element);
         hasShownPopup = true;
     } catch (error) {
         // Only log unexpected errors, not connection issues
-        console.error("Ente Auth: Unexpected error", error);
+        console.error("[Ente Auth] Unexpected error", error);
     }
 };
 

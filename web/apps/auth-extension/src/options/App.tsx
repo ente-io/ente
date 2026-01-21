@@ -185,38 +185,18 @@ export const App: React.FC = () => {
 
                     <div className="setting-item">
                         <div className="setting-info">
-                            <label>Auto-fill single match</label>
+                            <label>Enable autofill</label>
                             <p>
-                                Automatically fill the code when only one match is
-                                found for the current website.
+                                Show autofill icon on MFA fields and automatically
+                                fill codes when a single match is found.
                             </p>
                         </div>
                         <label className="toggle">
                             <input
                                 type="checkbox"
-                                checked={settings.autoFillSingleMatch}
+                                checked={settings.autofillEnabled}
                                 onChange={() =>
-                                    handleToggle("autoFillSingleMatch")
-                                }
-                            />
-                            <span className="toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <div className="setting-item">
-                        <div className="setting-info">
-                            <label>Show notifications</label>
-                            <p>
-                                Show a popup when an MFA field is detected on a
-                                website.
-                            </p>
-                        </div>
-                        <label className="toggle">
-                            <input
-                                type="checkbox"
-                                checked={settings.showNotifications}
-                                onChange={() =>
-                                    handleToggle("showNotifications")
+                                    handleToggle("autofillEnabled")
                                 }
                             />
                             <span className="toggle-slider"></span>

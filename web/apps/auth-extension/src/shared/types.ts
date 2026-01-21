@@ -66,10 +66,8 @@ export interface AuthCodesAndTimeOffset {
  * Extension settings stored in local storage.
  */
 export interface ExtensionSettings {
-    /** Auto-fill when only one match is found. Default: true */
-    autoFillSingleMatch: boolean;
-    /** Show popup on MFA detection. Default: true */
-    showNotifications: boolean;
+    /** Enable autofill functionality. Default: true */
+    autofillEnabled: boolean;
     /** Sync interval in minutes. Default: 5 */
     syncInterval: number;
     /** Custom API endpoint for self-hosted instances. */
@@ -82,8 +80,7 @@ export interface ExtensionSettings {
  * Default extension settings.
  */
 export const defaultSettings: ExtensionSettings = {
-    autoFillSingleMatch: true,
-    showNotifications: true,
+    autofillEnabled: true,
     syncInterval: 5,
     theme: "system",
 };
