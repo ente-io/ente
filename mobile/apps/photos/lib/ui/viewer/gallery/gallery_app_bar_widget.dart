@@ -623,7 +623,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? Icons.unarchive
               : Icons.archive_outlined,
         ),
-      if (galleryType == GalleryType.sharedCollection)
+      if (galleryType == GalleryType.sharedCollection &&
+          flagService.internalUser)
         EntePopupMenuItem(
           widget.collection!.hasShareeHidden()
               ? AppLocalizations.of(context).unhide
