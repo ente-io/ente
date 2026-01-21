@@ -1,0 +1,251 @@
+@import "../shared/theme.css";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+.options-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.options-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.options-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.options-content {
+    min-height: 400px;
+}
+
+.settings-section {
+    margin-bottom: 32px;
+}
+
+.settings-section h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: var(--fill-faint);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.setting-item.vertical {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.setting-info {
+    flex: 1;
+}
+
+.setting-info label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.setting-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Toggle switch */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--fill-muted);
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.toggle input:checked + .toggle-slider {
+    background-color: var(--accent-purple);
+}
+
+.toggle input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* Select input */
+.select-input {
+    padding: 8px 12px;
+    background-color: var(--background-paper);
+    border: 1px solid var(--stroke);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+.select-input:focus {
+    border-color: var(--accent-purple);
+}
+
+.select-input option {
+    background-color: var(--background-paper);
+    color: var(--text-primary);
+}
+
+/* Text input */
+.text-input {
+    width: 100%;
+    padding: 10px 12px;
+    background-color: var(--background-paper);
+    border: 1px solid var(--stroke);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+}
+
+.text-input::placeholder {
+    color: var(--text-faint);
+}
+
+.text-input:focus {
+    border-color: var(--accent-purple);
+}
+
+/* Status bar */
+.status-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--background-paper);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.status-bar .saving {
+    color: var(--text-muted);
+}
+
+.status-bar .saved {
+    color: var(--success-green);
+}
+
+.status-bar .error {
+    color: var(--error-red);
+}
+
+/* Footer */
+.options-footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--stroke);
+    text-align: center;
+}
+
+.options-footer p {
+    font-size: 12px;
+    color: var(--text-faint);
+}
+
+.options-footer a {
+    color: var(--accent-purple);
+    text-decoration: none;
+}
+
+.options-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Logout button */
+.logout-button {
+    padding: 8px 16px;
+    background-color: rgba(245, 52, 52, 0.1);
+    border: 1px solid rgba(245, 52, 52, 0.3);
+    border-radius: 6px;
+    color: var(--error-red);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: rgba(245, 52, 52, 0.2);
+    border-color: rgba(245, 52, 52, 0.5);
+}
+
+.logout-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading state */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--text-muted);
+}

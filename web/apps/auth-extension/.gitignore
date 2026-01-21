@@ -1,0 +1,6 @@
+# Build outputs
+dist-chrome/
+dist-firefox/
+
+# Dependencies
+node_modules/

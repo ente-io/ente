@@ -1,0 +1,44 @@
+{
+    "manifest_version": 3,
+    "name": "Ente Auth",
+    "version": "1.0.0",
+    "description": "Secure 2FA autofill from your Ente Auth vault",
+    "permissions": ["storage", "activeTab", "alarms"],
+    "host_permissions": ["https://api.ente.io/*", "<all_urls>"],
+    "background": {
+        "service_worker": "background/index.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "exclude_matches": ["https://auth.ente.io/*", "https://web.ente.io/*"],
+            "js": ["content/index.js"],
+            "css": ["content/index.css"],
+            "run_at": "document_idle"
+        },
+        {
+            "matches": ["https://auth.ente.io/*", "https://web.ente.io/*"],
+            "js": ["content/auth-capture.js"],
+            "run_at": "document_idle"
+        }
+    ],
+    "action": {
+        "default_popup": "popup/index.html",
+        "default_icon": {
+            "16": "assets/icons/icon16.png",
+            "32": "assets/icons/icon32.png",
+            "48": "assets/icons/icon48.png",
+            "128": "assets/icons/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "assets/icons/icon16.png",
+        "32": "assets/icons/icon32.png",
+        "48": "assets/icons/icon48.png",
+        "128": "assets/icons/icon128.png"
+    },
+    "options_page": "options/index.html",
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    }
+}

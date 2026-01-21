@@ -1,0 +1,416 @@
+@import "../shared/theme.css";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 380px;
+    min-height: 400px;
+    max-height: 520px;
+    background-color: var(--background);
+    color: var(--text-primary);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 500;
+    overflow: hidden;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.popup-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* Header / Navbar - matches web app navbar */
+.header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--background);
+    backdrop-filter: blur(7px);
+    border-bottom: 1px solid var(--stroke);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.logo {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+}
+
+.title {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 19px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-button:hover {
+    background-color: var(--fill-muted);
+    color: var(--text-primary);
+}
+
+/* Search - matches web app input style */
+.search-container {
+    padding: 12px 16px;
+    background-color: var(--background);
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 14px;
+    background-color: var(--background-paper);
+    border: 1px solid var(--stroke);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-input::placeholder {
+    color: var(--text-faint);
+}
+
+.search-input:focus {
+    border-color: var(--accent-purple);
+}
+
+/* Codes list */
+.codes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Code card - exact match to Ente Auth app */
+.code-card {
+    position: relative;
+    background-color: var(--background-paper);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+    max-width: 360px;
+    min-height: 120px;
+}
+
+.code-card:hover {
+    background-color: var(--background-paper-2);
+}
+
+.code-card:active {
+    background-color: var(--background-paper-2);
+}
+
+/* Progress bar at top of card */
+.code-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background-color: var(--accent-purple);
+    transition: background-color 0.3s;
+    z-index: 2;
+}
+
+.code-progress-bar.warning {
+    background-color: var(--warning-yellow);
+}
+
+/* Pin indicator - exact positioning from web app */
+.pin-ribbon {
+    position: absolute;
+    top: -5px;
+    right: -41px;
+    width: 107px;
+    height: 26px;
+    background-color: var(--pin-ribbon-bg);
+    transform: rotate(43deg);
+    z-index: 0;
+}
+
+.pin-icon {
+    position: absolute;
+    top: 6px;
+    right: 5px;
+    color: var(--accent-purple);
+    z-index: 1;
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card content layout - exact padding from web app */
+.code-content {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px 0px 20px;
+    min-height: 120px;
+    position: relative;
+    z-index: 1;
+}
+
+.code-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+}
+
+.code-issuer {
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+    max-width: 100%;
+}
+
+.code-account {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 500;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 16px;
+    flex: 1;
+    max-width: 100%;
+}
+
+.code-otp {
+    font-size: 24px;
+    line-height: 29px;
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    color: var(--text-primary);
+    margin-top: auto;
+    margin-bottom: 20px;
+}
+
+.code-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    text-align: right;
+    gap: 2px;
+    margin-bottom: 1rem;
+    margin-left: 12px;
+}
+
+.code-next-label {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 500;
+    color: var(--text-faint);
+}
+
+.code-next-otp {
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* Copy feedback */
+.code-card.copied .code-otp {
+    color: var(--success-green);
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-faint);
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* Login/Unlock screens */
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    min-height: 400px;
+}
+
+.auth-logo {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 24px;
+}
+
+.auth-logo svg {
+    width: 100%;
+    height: 100%;
+}
+
+.auth-title {
+    font-size: 22px;
+    line-height: 27px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.auth-description {
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    max-width: 280px;
+}
+
+.auth-form {
+    width: 100%;
+    max-width: 280px;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 14px 16px;
+    background-color: var(--background-paper);
+    border: 1px solid var(--stroke);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+}
+
+.auth-input:focus {
+    border-color: var(--accent-purple);
+}
+
+.auth-button {
+    width: 100%;
+    padding: 14px 24px;
+    background-color: var(--accent-purple);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    line-height: 19px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-button:hover {
+    background-color: var(--accent-purple-hover);
+}
+
+.auth-button:disabled {
+    background-color: var(--fill-muted);
+    color: var(--text-faint);
+    cursor: not-allowed;
+}
+
+.auth-error {
+    color: var(--error-red);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 12px;
+}
+
+.auth-hint {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 12px;
+    line-height: 1.5;
+}
+
+.auth-link {
+    color: var(--accent-purple);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Footer / sync indicator */
+.sync-indicator {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 500;
+    color: var(--text-faint);
+    padding: 10px 16px;
+    text-align: center;
+    border-top: 1px solid var(--stroke);
+    background-color: var(--background);
+}
+
+.syncing {
+    color: var(--accent-purple);
+}

@@ -1,0 +1,57 @@
+{
+    "manifest_version": 2,
+    "name": "Ente Auth",
+    "version": "1.0.0",
+    "description": "Secure 2FA autofill from your Ente Auth vault",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "alarms",
+        "https://api.ente.io/*",
+        "<all_urls>"
+    ],
+    "background": {
+        "scripts": ["background/index.js"],
+        "persistent": false
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "exclude_matches": ["https://auth.ente.io/*", "https://web.ente.io/*"],
+            "js": ["content/index.js"],
+            "css": ["content/index.css"],
+            "run_at": "document_idle"
+        },
+        {
+            "matches": ["https://auth.ente.io/*", "https://web.ente.io/*"],
+            "js": ["content/auth-capture.js"],
+            "run_at": "document_idle"
+        }
+    ],
+    "browser_action": {
+        "default_popup": "popup/index.html",
+        "default_icon": {
+            "16": "assets/icons/icon16.png",
+            "32": "assets/icons/icon32.png",
+            "48": "assets/icons/icon48.png",
+            "128": "assets/icons/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "assets/icons/icon16.png",
+        "32": "assets/icons/icon32.png",
+        "48": "assets/icons/icon48.png",
+        "128": "assets/icons/icon128.png"
+    },
+    "options_ui": {
+        "page": "options/index.html",
+        "browser_style": true
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "auth@ente.io",
+            "strict_min_version": "109.0"
+        }
+    },
+    "content_security_policy": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+}

@@ -1,0 +1,51 @@
+/**
+ * Theme CSS variables for Ente Auth Extension.
+ * Matches the Ente Auth mobile app color scheme.
+ */
+
+/* Dark theme (default) */
+:root,
+.theme-dark {
+    --background: #000000;
+    --background-paper: #1B1B1B;
+    --background-paper-2: #252525;
+    --text-primary: #FFFFFF;
+    --text-muted: rgba(255, 255, 255, 0.70);
+    --text-faint: rgba(255, 255, 255, 0.50);
+    --fill-muted: rgba(255, 255, 255, 0.16);
+    --fill-faint: rgba(255, 255, 255, 0.12);
+    --stroke: rgba(255, 255, 255, 0.12);
+
+    /* Fixed colors (both themes) */
+    --accent-purple: #8F33D6;
+    --accent-purple-hover: #9610D6;
+    --success-green: #1DB954;
+    --warning-yellow: #FFC247;
+    --error-red: #F53434;
+
+    /* Legacy support */
+    --pin-ribbon-bg: #390c4f;
+}
+
+/* Light theme */
+.theme-light {
+    --background: #FFFFFF;
+    --background-paper: #FAFAFA;
+    --background-paper-2: #F0F0F0;
+    --text-primary: #000000;
+    --text-muted: rgba(0, 0, 0, 0.60);
+    --text-faint: rgba(0, 0, 0, 0.50);
+    --fill-muted: rgba(0, 0, 0, 0.12);
+    --fill-faint: rgba(0, 0, 0, 0.04);
+    --stroke: rgba(0, 0, 0, 0.12);
+
+    /* Fixed colors remain the same */
+    --accent-purple: #8F33D6;
+    --accent-purple-hover: #7A2BB8;
+    --success-green: #1DB954;
+    --warning-yellow: #FFC247;
+    --error-red: #F53434;
+
+    /* Legacy support */
+    --pin-ribbon-bg: #e8d5f0;
+}

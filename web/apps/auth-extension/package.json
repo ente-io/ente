@@ -1,0 +1,38 @@
+{
+    "name": "auth-extension",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Ente Auth browser extension for secure 2FA autofill",
+    "scripts": {
+        "build": "webpack --config webpack.config.js",
+        "build:chrome": "BROWSER=chrome webpack --config webpack.config.js",
+        "build:firefox": "BROWSER=firefox webpack --config webpack.config.js",
+        "dev": "webpack --config webpack.config.js --watch",
+        "dev:chrome": "BROWSER=chrome webpack --config webpack.config.js --watch",
+        "dev:firefox": "BROWSER=firefox webpack --config webpack.config.js --watch"
+    },
+    "dependencies": {
+        "jssha": "~3.3.1",
+        "libsodium-wrappers-sumo": "^0.7.15",
+        "otpauth": "9.2.4",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "webextension-polyfill": "^0.12.0",
+        "zod": "^3.24.1"
+    },
+    "devDependencies": {
+        "@types/chrome": "^0.0.287",
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.0",
+        "@types/webextension-polyfill": "^0.12.1",
+        "copy-webpack-plugin": "^12.0.2",
+        "css-loader": "^7.1.2",
+        "html-webpack-plugin": "^5.6.3",
+        "mini-css-extract-plugin": "^2.9.2",
+        "style-loader": "^4.0.0",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.8.3",
+        "webpack": "^5.97.1",
+        "webpack-cli": "^6.0.1"
+    }
+}

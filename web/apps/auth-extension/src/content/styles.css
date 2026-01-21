@@ -1,0 +1,10 @@
+/* Content script styles */
+/* Most styles are inlined in the Shadow DOM popup component */
+/* This file is for any global content script styles if needed */
+
+#ente-auth-popup-container {
+    all: initial;
+    position: fixed;
+    z-index: 2147483647;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
