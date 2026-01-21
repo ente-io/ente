@@ -49,7 +49,6 @@ import {
     savedCollections,
     savedCollectionsUpdationTime,
 } from "./photos-fdb";
-import { settingsSnapshot } from "./settings";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -1464,8 +1463,7 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
-    // Only enable comments by default if the feature flag is enabled.
-    const enableComment = settingsSnapshot().isCommentsEnabled;
+    const enableComment = true;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
