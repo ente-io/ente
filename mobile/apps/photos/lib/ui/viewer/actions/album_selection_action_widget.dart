@@ -2,6 +2,7 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -189,7 +190,7 @@ class _AlbumSelectionActionWidgetState
           SelectionActionButton(
             labelText: AppLocalizations.of(context).hide,
             icon: Icons.visibility_off_outlined,
-            onTap: _onHideClickForSharee,
+            onTap: _onHideClick,
           ),
         );
       }
@@ -343,10 +344,12 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _onHideClick() async {
+    final userID = Configuration.instance.getUserID()!;
     for (final collection in widget.selectedAlbums.albums) {
       if (collection.type == CollectionType.favorites) {
         continue;
       }
+      final isOwner = collection.isOwner(userID);
       final isHidden = collection.isHidden();
       final int prevVisiblity = isHidden ? hiddenVisibility : visibleVisibility;
       final int newVisiblity = isHidden ? visibleVisibility : hiddenVisibility;
@@ -356,23 +359,11 @@ class _AlbumSelectionActionWidgetState
         collection: collection,
         newVisibility: newVisiblity,
         prevVisibility: prevVisiblity,
+        isOwner: isOwner,
       );
     }
     if (hasFavorites) {
       _showFavToast();
-    }
-    widget.selectedAlbums.clearAll();
-  }
-
-  Future<void> _onHideClickForSharee() async {
-    for (final collection in widget.selectedAlbums.albums) {
-      await changeCollectionVisibility(
-        context,
-        collection: collection,
-        newVisibility: hiddenVisibility,
-        prevVisibility: visibleVisibility,
-        isOwner: false,
-      );
     }
     widget.selectedAlbums.clearAll();
   }
