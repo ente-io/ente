@@ -171,6 +171,7 @@
     "join_album_and_comment": "",
     "like_all": "",
     "favorite": "收藏",
+    "un_favorite": "",
     "convert": "转换",
     "multi_folder_upload": "检测到多个文件夹",
     "upload_to_choice": "你想要上传他们到",

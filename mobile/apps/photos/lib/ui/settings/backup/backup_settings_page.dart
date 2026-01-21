@@ -106,7 +106,7 @@ class BackupSettingsPage extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     return HugeIcon(
       icon: icon,
-      color: colorScheme.strokeBase,
+      color: colorScheme.menuItemIconStroke,
       size: 20,
     );
   }

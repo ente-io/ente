@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
 
 class AppVersionWidget extends StatefulWidget {
   const AppVersionWidget({
@@ -45,13 +46,14 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
         future: _versionFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            final textTheme = getEnteTextTheme(context);
             return Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(
                   AppLocalizations.of(context)
                       .appVersion(versionValue: snapshot.data!),
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: textTheme.smallMuted,
                 ),
               ),
             );

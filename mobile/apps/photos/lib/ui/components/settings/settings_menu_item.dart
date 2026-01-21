@@ -47,7 +47,7 @@ class SettingsMenuItem extends StatelessWidget {
         child: Center(
           child: HugeIcon(
             icon: icon,
-            color: iconColor ?? colorScheme.strokeBase,
+            color: iconColor ?? colorScheme.menuItemIconStroke,
             size: 20,
           ),
         ),

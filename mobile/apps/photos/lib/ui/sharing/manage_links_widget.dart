@@ -389,8 +389,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.adaptive.share,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        // ignore: unawaited_futures
-                        await shareAlbumLinkWithPlaceholder(
+                        await shareAlbumLink(
                           context,
                           widget.collection!,
                           urlValue,

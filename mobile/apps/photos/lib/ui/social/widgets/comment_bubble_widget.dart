@@ -29,7 +29,7 @@ class CommentBubbleWidget extends StatefulWidget {
   final Comment comment;
   final User user;
   final bool isOwnComment;
-  final bool canModerateAnonComments;
+  final bool canModerateComments;
   final int currentUserID;
   final int collectionID;
   final Future<Comment?> Function()? onFetchParent;
@@ -51,7 +51,7 @@ class CommentBubbleWidget extends StatefulWidget {
     required this.comment,
     required this.user,
     required this.isOwnComment,
-    required this.canModerateAnonComments,
+    required this.canModerateComments,
     required this.currentUserID,
     required this.collectionID,
     this.onFetchParent,
@@ -478,8 +478,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
     double bubbleScale = 1.0,
     double capsuleOpacity = 1.0,
   }) {
-    final canDeleteComment = widget.isOwnComment ||
-        (widget.canModerateAnonComments && widget.comment.isAnonymous);
+    final canDeleteComment = widget.isOwnComment || widget.canModerateComments;
 
     final actualCount = _reactions.where((r) => !r.isDeleted).length;
     final likeCount = (actualCount + _optimisticLikeDelta).clamp(0, 999999);

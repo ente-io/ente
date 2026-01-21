@@ -629,7 +629,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final selectedCollection = _currentCollection;
-    final canModerateAnonComments = selectedCollection != null &&
+    final canModerateComments = selectedCollection != null &&
         (selectedCollection.isOwner(_currentUserID) ||
             selectedCollection.isAdmin(_currentUserID));
 
@@ -690,7 +690,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               comment: comment,
                               user: _getUserForComment(comment),
                               isOwnComment: comment.userID == _currentUserID,
-                              canModerateAnonComments: canModerateAnonComments,
+                              canModerateComments: canModerateComments,
                               currentUserID: _currentUserID,
                               collectionID: _selectedCollectionID,
                               isHighlighted: isHighlighted,
