@@ -72,6 +72,7 @@ import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
+import "package:photos/ui/social/feed_screen.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -1058,6 +1059,14 @@ class _HomeWidgetState extends State<HomeWidget> {
             albumId: albumId,
           ),
         );
+        return;
+      }
+      if (uri != null && uri.host.toLowerCase() == "feed") {
+        if (!Configuration.instance.isLoggedIn()) {
+          return;
+        }
+        // ignore: unawaited_futures
+        routeToPage(context, const FeedScreen());
         return;
       }
       if (payload.toLowerCase().contains("onthisday")) {

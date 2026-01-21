@@ -1,3 +1,6 @@
+- Neeraj: Settings screen redesign (v2)
+- Neeraj: (i) Notification for reaction/comment activity
+- Neeraj: Sync social feed before file uploads
 - Laurens: QOL: Improve the merge persons flow
 - Ashil: QOL: Better copy when sharing link
 - Laurens: Redesign search results page
@@ -9,7 +12,6 @@
 - Laurens: QOL: Add search and custom sorts 
 - Laurens: QOL: Add search to all search tab section
 - Neeraj: Referral screen redesign
-- Neeraj: Settings screen redesign
 - Ashil: Fix app getting stuck in splash screen after backup restore or device migration
 - Ashil: QOL: Fix home gallery getting cut on the right end on landscape mode (affects tablets)
 - Ashil: QOL: Fix uncategorized page not updating after move
