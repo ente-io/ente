@@ -7,6 +7,7 @@ import {
     Download05Icon,
     Location01Icon,
     RemoveCircleIcon,
+    StarOffIcon,
     Time04Icon,
     Unarchive03Icon,
     UserAdd02Icon,
@@ -25,7 +26,6 @@ import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import type { FileContextAction } from "ente-new/photos/utils/file-actions";
 import { t } from "i18next";
 import React, { memo, useCallback, useMemo } from "react";
-import { StarOffIcon } from "./icons/StarOffIcon";
 
 /**
  * Position for anchoring the context menu.
@@ -64,11 +64,16 @@ const actionConfigs: Record<FileContextAction, ActionConfig> = {
     fixTime: { label: "fix_creation_time", Icon: hugeIcon(Time04Icon) },
     editLocation: { label: "edit_location", Icon: hugeIcon(Location01Icon) },
     favorite: { label: "favorite", Icon: <StarBorderIcon fontSize="small" /> },
+    unfavorite: { label: "un_favorite", Icon: hugeIcon(StarOffIcon) },
     archive: { label: "archive", Icon: hugeIcon(Download05Icon) },
     unarchive: { label: "unarchive", Icon: hugeIcon(Unarchive03Icon) },
     hide: { label: "hide", Icon: hugeIcon(ViewOffSlashIcon) },
     unhide: { label: "unhide", Icon: hugeIcon(ViewIcon) },
-    trash: { label: "delete", Icon: hugeIcon(Delete02Icon), isDestructive: true },
+    trash: {
+        label: "delete",
+        Icon: hugeIcon(Delete02Icon),
+        isDestructive: true,
+    },
     deletePermanently: {
         label: "delete_permanently",
         Icon: hugeIcon(Delete02Icon),
@@ -142,9 +147,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                             key={action}
                             onClick={() => handleActionClick(action)}
                         >
-                            <ListItemIcon>
-                                {Icon}
-                            </ListItemIcon>
+                            <ListItemIcon>{Icon}</ListItemIcon>
                             <ListItemText>{t(label)}</ListItemText>
                         </StyledMenuItem>
                     );
