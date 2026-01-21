@@ -169,17 +169,6 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       (routeBuilder) => _navigateToSetting(routeBuilder),
     );
 
-    // Group suggestions into rows of 2
-    final List<List<SettingsSearchSuggestion>> rows = [];
-    for (int i = 0; i < suggestions.length; i += 2) {
-      rows.add(
-        suggestions.sublist(
-          i,
-          i + 2 > suggestions.length ? suggestions.length : i + 2,
-        ),
-      );
-    }
-
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -194,24 +183,18 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...rows.map(
-            (row) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: row
-                    .map(
-                      (suggestion) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _buildSuggestionChip(
-                          suggestion,
-                          colorScheme,
-                          textTheme,
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: suggestions
+                .map(
+                  (suggestion) => _buildSuggestionChip(
+                    suggestion,
+                    colorScheme,
+                    textTheme,
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
