@@ -5,7 +5,7 @@ import {
     Delete02Icon,
     Download01Icon,
     Download05Icon,
-    Location05Icon,
+    Location01Icon,
     RemoveCircleIcon,
     Time04Icon,
     Unarchive03Icon,
@@ -544,7 +544,7 @@ const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const EditLocationButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("edit_location")}>
         <IconButton {...{ onClick }}>
-            <HugeiconsIcon icon={Location05Icon} />
+            <HugeiconsIcon icon={Location01Icon} />
         </IconButton>
     </Tooltip>
 );
