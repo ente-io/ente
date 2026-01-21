@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
 import "package:ente_ui/components/buttons/gradient_button.dart";
@@ -49,14 +51,16 @@ class SettingsWidget extends StatelessWidget {
       );
       contents.add(itemSpacing);
 
-      contents.add(
-        SettingsItem(
-          icon: HugeIcons.strokeRoundedSun03,
-          title: l10n.appearance,
-          onTap: () => _navigateTo(context, const ThemeSettingsPage()),
-        ),
-      );
-      contents.add(itemSpacing);
+      if (Platform.isAndroid) {
+        contents.add(
+          SettingsItem(
+            icon: HugeIcons.strokeRoundedSun03,
+            title: l10n.appearance,
+            onTap: () => _navigateTo(context, const ThemeSettingsPage()),
+          ),
+        );
+        contents.add(itemSpacing);
+      }
     }
 
     contents.add(
