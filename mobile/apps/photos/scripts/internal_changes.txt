@@ -1,3 +1,4 @@
+- Ashil: QOL: Better copy when sharing link
 - Laurens: Redesign search results page
 - Ashil: Fix background audio from other apps stopping when opening Ente on iOS
 - Ashil: QOL: Enalbe swipe to select on Samsung S series devices after fixing issue introduced by it. 
