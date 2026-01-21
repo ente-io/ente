@@ -6,6 +6,7 @@ import {
     MenuItem,
     Stack,
     Typography,
+    styled,
     type IconButtonProps,
     type PaperProps,
 } from "@mui/material";
@@ -94,10 +95,9 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
             : { backgroundColor: "fill.faint" },
     ];
 
-    const menuPaperSxProps: PaperProps["sx"] = [
-        { marginBlock: 1, borderRadius: 2, overflow: "hidden" },
-        nestedInDialog ? { backgroundColor: "background.paper2" } : {},
-    ];
+    const menuPaperSxProps: PaperProps["sx"] | undefined = nestedInDialog
+        ? { backgroundColor: "background.paper2" }
+        : undefined;
 
     return (
         <>
@@ -110,13 +110,13 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
             >
                 <SortIcon />
             </IconButton>
-            <Menu
+            <StyledMenu
                 id={ariaID}
                 {...(anchorEl && { anchorEl })}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
                 slotProps={{
-                    paper: { sx: menuPaperSxProps },
+                    paper: menuPaperSxProps ? { sx: menuPaperSxProps } : {},
                     list: { disablePadding: true, "aria-labelledby": ariaID },
                     transition: {
                         onExited: () => {
@@ -139,7 +139,6 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                     label={t("name")}
                     ascLabel={t("sort_asc_indicator")}
                     descLabel={t("sort_desc_indicator")}
-                    showBorder
                 />
                 <SortCategoryOption
                     category="creation-time"
@@ -149,7 +148,6 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                     label={t("created")}
                     ascLabel={t("oldest")}
                     descLabel={t("newest")}
-                    showBorder
                 />
                 <SortCategoryOption
                     category="updation-time"
@@ -160,7 +158,7 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
                     ascLabel={t("oldest")}
                     descLabel={t("newest")}
                 />
-            </Menu>
+            </StyledMenu>
         </>
     );
 };
@@ -173,7 +171,6 @@ interface SortCategoryOptionProps {
     label: string;
     ascLabel: string;
     descLabel: string;
-    showBorder?: boolean;
 }
 
 const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
@@ -184,26 +181,14 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
     label,
     ascLabel,
     descLabel,
-    showBorder,
 }) => {
     const isSelected = category === activeCategory;
     const directionLabel = activeAscending ? ascLabel : descLabel;
     const arrowIcon = activeAscending ? ArrowUp02Icon : ArrowDown02Icon;
 
     return (
-        <MenuItem
-            disableGutters
+        <StyledMenuItem
             onClick={() => onClick(category)}
-            sx={{
-                minWidth: 220,
-                minHeight: 56,
-                py: 2,
-                px: 2.5,
-                display: "flex",
-                alignItems: "center",
-                borderBottom: showBorder ? "1px solid" : "none",
-                borderColor: "divider",
-            }}
         >
             <Stack direction="row" sx={{ alignItems: "center" }}>
                 <Typography
@@ -235,6 +220,38 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
                     </Stack>
                 )}
             </Stack>
-        </MenuItem>
+        </StyledMenuItem>
     );
 };
+
+const StyledMenu = styled(Menu)(({ theme }) => ({
+    "& .MuiPaper-root": {
+        backgroundColor: "#1f1f1f",
+        minWidth: 220,
+        width: 220,
+        borderRadius: 12,
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+        marginTop: 6,
+    },
+    "& .MuiList-root": { padding: theme.spacing(1) },
+    ...theme.applyStyles("dark", {
+        "& .MuiPaper-root": {
+            backgroundColor: "#161616",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.6)",
+        },
+    }),
+}));
+
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: theme.spacing(1.5, 2),
+    borderRadius: 10,
+    color: "#f5f5f5",
+    fontSize: 15,
+    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.08)" },
+    "& .MuiListItemIcon-root": { minWidth: 0, color: "inherit" },
+    "& .MuiListItemText-root": { margin: 0 },
+    "& .MuiListItemText-primary": { color: "inherit", fontSize: "inherit" },
+}));
