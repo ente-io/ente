@@ -26,7 +26,7 @@ class _DotsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = textBaseDark.withValues(alpha: 0.03)
+      ..color = Colors.white.withValues(alpha: 0.024)
       ..style = PaintingStyle.fill;
 
     final horizontalCount = (size.width / _horizontalSpacing).ceil() + 1;

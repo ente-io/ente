@@ -2499,5 +2499,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Search settings",
+  "suggestions": "Suggestions"
 }
