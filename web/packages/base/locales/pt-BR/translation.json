@@ -171,6 +171,7 @@
     "join_album_and_comment": "",
     "like_all": "",
     "favorite": "Favorito",
+    "un_favorite": "",
     "convert": "Converter",
     "multi_folder_upload": "Várias pastas detectadas",
     "upload_to_choice": "Adoraria enviá-los a",
