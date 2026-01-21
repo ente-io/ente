@@ -182,6 +182,18 @@ class _AlbumSelectionActionWidgetState
         );
       }
 
+      // Hide option for incoming collections (uses sharee metadata)
+      // Behind internal user flag
+      if (flagService.internalUser) {
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).hide,
+            icon: Icons.visibility_off_outlined,
+            onTap: _onHideClickForSharee,
+          ),
+        );
+      }
+
       items.add(
         SelectionActionButton(
           labelText: AppLocalizations.of(context).leaveAlbum,
@@ -348,6 +360,19 @@ class _AlbumSelectionActionWidgetState
     }
     if (hasFavorites) {
       _showFavToast();
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onHideClickForSharee() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      await changeCollectionVisibility(
+        context,
+        collection: collection,
+        newVisibility: hiddenVisibility,
+        prevVisibility: visibleVisibility,
+        isOwner: false,
+      );
     }
     widget.selectedAlbums.clearAll();
   }
