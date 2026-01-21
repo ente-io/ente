@@ -131,9 +131,9 @@ private fun CodeBlockView(code: String) {
                 .horizontalScroll(rememberScrollState())
                 .padding(
                     start = EnsuSpacing.cardPadding.dp,
-                    end = (EnsuSpacing.cardPadding + 28).dp,
+                    end = (EnsuSpacing.cardPadding + 32).dp,
                     top = EnsuSpacing.cardPadding.dp,
-                    bottom = EnsuSpacing.cardPadding.dp
+                    bottom = (EnsuSpacing.cardPadding + 32).dp
                 )
         ) {
             Text(
@@ -146,14 +146,15 @@ private fun CodeBlockView(code: String) {
         IconButton(
             onClick = { clipboard.setText(AnnotatedString(code)) },
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.BottomEnd)
                 .padding(EnsuSpacing.xs.dp)
                 .size(28.dp)
         ) {
             Icon(
                 imageVector = Icons.Outlined.ContentCopy,
                 contentDescription = "Copy code",
-                tint = EnsuColor.textMuted()
+                tint = EnsuColor.textMuted(),
+                modifier = Modifier.size(16.dp)
             )
         }
     }

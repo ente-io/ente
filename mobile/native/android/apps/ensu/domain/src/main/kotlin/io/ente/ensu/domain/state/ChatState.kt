@@ -22,5 +22,7 @@ data class ChatState(
     val isProcessingAttachments: Boolean = false,
     val attachmentDownloads: List<io.ente.ensu.domain.model.AttachmentDownloadItem> = emptyList(),
     val attachmentDownloadProgress: Int? = null,
-    val isAttachmentDownloadBlocked: Boolean = false
+    val isAttachmentDownloadBlocked: Boolean = false,
+    val transientAssistantError: String? = null,
+    val transientAssistantParentId: String? = null
 )

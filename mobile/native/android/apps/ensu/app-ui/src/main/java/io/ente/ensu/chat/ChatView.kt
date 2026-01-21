@@ -36,7 +36,6 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -55,10 +54,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalClipboardManager
 import io.ente.ensu.components.ActionButton
 import io.ente.ensu.components.BranchSwitcher
 import io.ente.ensu.designsystem.EnsuColor
@@ -170,7 +173,10 @@ private fun MessageList(
     }
 
     val listState = rememberLazyListState()
+    val haptic = LocalHapticFeedback.current
     var autoScrollEnabled by remember { mutableStateOf(true) }
+    var lastHapticLength by remember { mutableStateOf(0) }
+    var shouldJumpToBottomOnLoad by remember { mutableStateOf(true) }
     val isAtBottom by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
@@ -187,6 +193,14 @@ private fun MessageList(
     LaunchedEffect(isGenerating) {
         if (isGenerating) {
             autoScrollEnabled = true
+            lastHapticLength = 0
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (shouldJumpToBottomOnLoad && messages.isNotEmpty()) {
+            listState.scrollToItem(messages.size)
+            shouldJumpToBottomOnLoad = false
         }
     }
 
@@ -196,10 +210,24 @@ private fun MessageList(
         }
     }
 
+    LaunchedEffect(isAtBottom, isGenerating) {
+        if (isGenerating && isAtBottom) {
+            autoScrollEnabled = true
+        }
+    }
+
+    LaunchedEffect(streamingResponse, isGenerating) {
+        if (!isGenerating) return@LaunchedEffect
+        val length = streamingResponse.length
+        if (length > lastHapticLength) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            lastHapticLength = length
+        }
+    }
+
     LaunchedEffect(messages.size, streamingResponse, streamingParentId, isGenerating, autoScrollEnabled) {
         if (!autoScrollEnabled) return@LaunchedEffect
-        if (messages.isEmpty()) return@LaunchedEffect
-        val targetIndex = messages.lastIndex
+        val targetIndex = messages.size
         if (targetIndex >= 0) {
             listState.animateScrollToItem(targetIndex)
         }
@@ -243,6 +271,10 @@ private fun MessageList(
                 StreamingMessageBubble(text = streamingResponse)
             }
         }
+
+        item(key = "bottom") {
+            Spacer(modifier = Modifier.height(1.dp))
+        }
     }
 }
 
@@ -270,6 +302,8 @@ private fun UserMessageBubble(
     onBranchChange: (String, Int) -> Unit,
     onOpenAttachment: (Attachment) -> Unit
 ) {
+    val clipboard = LocalClipboardManager.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -316,7 +350,7 @@ private fun UserMessageBubble(
             )
             ActionButton(
                 icon = Icons.Outlined.ContentCopy,
-                onTap = {},
+                onTap = { clipboard.setText(AnnotatedString(message.text)) },
                 contentDescription = "Copy"
             )
         }
@@ -352,6 +386,8 @@ private fun AssistantMessageBubble(
     onRetry: () -> Unit,
     onBranchChange: (String, Int) -> Unit
 ) {
+    val clipboard = LocalClipboardManager.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -374,26 +410,14 @@ private fun AssistantMessageBubble(
         Row(verticalAlignment = Alignment.CenterVertically) {
             ActionButton(
                 icon = Icons.Outlined.ContentCopy,
-                onTap = {},
+                onTap = { clipboard.setText(AnnotatedString(message.text)) },
                 contentDescription = "Copy"
-            )
-            ActionButton(
-                icon = Icons.Outlined.Code,
-                onTap = {},
-                contentDescription = "Raw"
             )
             ActionButton(
                 icon = Icons.Outlined.Refresh,
                 onTap = onRetry,
                 contentDescription = "Retry"
             )
-            message.tokensPerSecond?.let { tokPerSec ->
-                Text(
-                    text = String.format(Locale.US, "%.1f tok/s", tokPerSec),
-                    style = EnsuTypography.mini,
-                    color = EnsuColor.textMuted()
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
@@ -429,11 +453,7 @@ private fun StreamingMessageBubble(text: String) {
         if (text.isBlank()) {
             LoadingDotsText()
         } else {
-            Text(
-                text = text,
-                style = EnsuTypography.message,
-                color = EnsuColor.textPrimary()
-            )
+            MarkdownView(markdown = text)
         }
     }
 }

@@ -8,7 +8,6 @@ struct ChatView: View {
 
     @State private var isDrawerOpen = false
     @State private var showModelSettings = false
-    @State private var rawMessage: ChatMessage?
     @State private var toastMessage: ToastMessage?
     @State private var deleteSession: ChatSession?
     @State private var developerTapCount = 0
@@ -85,9 +84,6 @@ struct ChatView: View {
                 showToast(message, duration: 2)
             }
         }
-        .sheet(item: $rawMessage) { message in
-            RawMessageDialog(text: message.text)
-        }
         .alert("Developer settings", isPresented: $showDeveloperAlert) {
             Button("Yes") {
                 showDeveloperSettings = true
@@ -161,9 +157,6 @@ struct ChatView: View {
                         onCopy: { message in
                             copyToPasteboard(message.text)
                             showToast("Copied to clipboard", duration: 1)
-                        },
-                        onShowRaw: { message in
-                            rawMessage = message
                         },
                         onRetry: { message in
                             viewModel.retryAssistantResponse(message)

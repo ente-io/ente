@@ -1,5 +1,8 @@
 import SwiftUI
 import QuickLook
+#if os(iOS)
+import UIKit
+#endif
 
 struct MessageListView: View {
     let messages: [ChatMessage]
@@ -8,13 +11,16 @@ struct MessageListView: View {
     let isGenerating: Bool
     let onEdit: (ChatMessage) -> Void
     let onCopy: (ChatMessage) -> Void
-    let onShowRaw: (ChatMessage) -> Void
     let onRetry: (ChatMessage) -> Void
     let onBranchChange: (ChatMessage, Int) -> Void
 
     @State private var isAtBottom = true
     @State private var autoScrollEnabled = true
     @State private var previewItem: AttachmentPreviewItem?
+    @State private var lastHapticLength = 0
+    #if os(iOS)
+    @State private var haptic = UIImpactFeedbackGenerator(style: .medium)
+    #endif
 
     var body: some View {
         GeometryReader { proxy in
@@ -42,7 +48,6 @@ struct MessageListView: View {
                                 AssistantMessageBubbleView(
                                     message: message,
                                     onCopy: { onCopy(message) },
-                                    onShowRaw: { onShowRaw(message) },
                                     onRetry: { onRetry(message) },
                                     onBranchChange: { delta in onBranchChange(message, delta) },
                                     onOpenAttachment: openAttachment
@@ -87,16 +92,39 @@ struct MessageListView: View {
                 .onChange(of: messages.count) { _ in
                     scrollToBottom(scrollProxy)
                 }
-                .onChange(of: streamingResponse) { _ in
+                .onChange(of: streamingResponse) { newValue in
+                    #if os(iOS)
+                    if isGenerating {
+                        let length = newValue.count
+                        if length > lastHapticLength {
+                            haptic.impactOccurred()
+                            haptic.prepare()
+                            lastHapticLength = length
+                        }
+                    }
+                    #endif
                     scrollToBottom(scrollProxy)
                 }
                 .onChange(of: isGenerating) { newValue in
                     if newValue {
                         autoScrollEnabled = true
+                        lastHapticLength = 0
+                        #if os(iOS)
+                        haptic.prepare()
+                        #endif
+                        scrollToBottom(scrollProxy, force: true)
+                    }
+                }
+                .onChange(of: isAtBottom) { newValue in
+                    if newValue && isGenerating {
+                        autoScrollEnabled = true
                         scrollToBottom(scrollProxy, force: true)
                     }
                 }
                 .onAppear {
+                    #if os(iOS)
+                    haptic.prepare()
+                    #endif
                     scrollToBottom(scrollProxy, force: true)
                 }
             }
@@ -229,7 +257,6 @@ private struct UserMessageBubbleView: View {
 private struct AssistantMessageBubbleView: View {
     let message: ChatMessage
     let onCopy: () -> Void
-    let onShowRaw: () -> Void
     let onRetry: () -> Void
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
@@ -248,15 +275,7 @@ private struct AssistantMessageBubbleView: View {
 
                 HStack(spacing: EnsuSpacing.xs) {
                     ActionButton(icon: "doc.on.doc", action: onCopy)
-                    ActionButton(icon: "chevron.left.slash.chevron.right", action: onShowRaw)
                     ActionButton(icon: "arrow.clockwise", action: onRetry)
-
-                    if let tokensPerSecond = message.tokensPerSecond {
-                        Text(String(format: "%.1f tok/s", tokensPerSecond))
-                            .font(EnsuTypography.mini)
-                            .italic()
-                            .foregroundStyle(EnsuColor.textMuted)
-                    }
                 }
 
                 HStack(spacing: EnsuSpacing.sm) {
@@ -787,60 +806,3 @@ private struct BlockQuoteView: View {
     }
 }
 
-struct RawMessageDialog: View {
-    let text: String
-
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        Group {
-            #if os(iOS)
-            NavigationStack {
-                content
-                    .navigationTitle("Raw message")
-                    .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            Button("Close") {
-                                dismiss()
-                            }
-                        }
-                    }
-            }
-            #else
-            content
-            #endif
-        }
-        #if os(macOS)
-        .safeAreaInset(edge: .top) {
-            MacSheetHeader(
-                leading: {
-                    EmptyView()
-                },
-                center: {
-                    Text("Raw message")
-                        .font(EnsuTypography.large)
-                        .foregroundStyle(EnsuColor.textPrimary)
-                },
-                trailing: {
-                    Button("Close") {
-                        dismiss()
-                    }
-                    .font(EnsuTypography.small)
-                    .foregroundStyle(EnsuColor.textMuted)
-                    .buttonStyle(.plain)
-                }
-            )
-        }
-        #endif
-    }
-
-    private var content: some View {
-        ScrollView {
-            Text(text)
-                .font(EnsuTypography.message)
-                .foregroundStyle(EnsuColor.textPrimary)
-                .textSelection(.enabled)
-                .padding(EnsuSpacing.lg)
-        }
-    }
-}
