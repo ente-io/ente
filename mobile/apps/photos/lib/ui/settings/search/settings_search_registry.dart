@@ -236,27 +236,32 @@ class SettingsSearchRegistry {
     final hasLoggedIn = Configuration.instance.isLoggedIn();
 
     return [
-      // App Icon suggestion
+      // Gallery suggestion
       SettingsSearchSuggestion(
-        title: l10n.appIcon,
-        onTap: () => onNavigate((_) => const AppearanceSettingsPage()),
+        title: l10n.gallery,
+        onTap: () => onNavigate(
+          (_) => const GallerySettingsScreen(
+            fromGalleryLayoutSettingsCTA: false,
+          ),
+        ),
       ),
       // App lock suggestion
       SettingsSearchSuggestion(
         title: l10n.appLock,
         onTap: () => onNavigate((_) => const SecuritySettingsPage()),
       ),
-      // Remove duplicates suggestion
+      // Free up device space suggestion
       if (hasLoggedIn)
         SettingsSearchSuggestion(
-          title: l10n.removeDuplicates,
+          title: l10n.freeUpDeviceSpace,
           onTap: () => onNavigate((_) => const FreeUpSpaceOptionsScreen()),
         ),
-      // Help suggestion
-      SettingsSearchSuggestion(
-        title: l10n.help,
-        onTap: () => onNavigate((_) => const HelpSupportPage()),
-      ),
+      // Backup settings suggestion
+      if (hasLoggedIn)
+        SettingsSearchSuggestion(
+          title: l10n.backupSettings,
+          onTap: () => onNavigate((_) => const BackupSettingsPage()),
+        ),
     ];
   }
 }
