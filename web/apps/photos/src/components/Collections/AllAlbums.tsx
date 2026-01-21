@@ -212,14 +212,20 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                                                 albumCreatedToast.albumId,
                                             );
                                         }
-                                        setAlbumCreatedToast({ open: false });
+                                        setAlbumCreatedToast((prev) => ({
+                                            ...prev,
+                                            open: false,
+                                        }));
                                     }}
                                 >
                                     <ArrowForwardIcon />
                                 </FilledIconButton>
                                 <FilledIconButton
                                     onClick={() =>
-                                        setAlbumCreatedToast({ open: false })
+                                        setAlbumCreatedToast((prev) => ({
+                                            ...prev,
+                                            open: false,
+                                        }))
                                     }
                                 >
                                     <CloseIcon />
