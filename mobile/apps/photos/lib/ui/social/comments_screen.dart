@@ -132,6 +132,7 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   GlobalKey? _highlightedCommentKey;
   String? _scrollTargetCommentID;
   GlobalKey? _scrollTargetKey;
+  String? _scrollTargetHighlightID;
 
   List<CollectionCommentInfo> _sharedCollections = [];
   late int _selectedCollectionID;
@@ -424,9 +425,12 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
             curve: Curves.easeOutExpo,
           );
         }
-        // Clear scroll target after animation
+        // Clear scroll target and trigger highlight
         _scrollTargetCommentID = null;
         _scrollTargetKey = null;
+        if (mounted) {
+          setState(() => _scrollTargetHighlightID = commentID);
+        }
       });
     });
   }
@@ -671,7 +675,8 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                             }
                             final comment = _comments[index];
                             final isHighlighted =
-                                comment.id == _highlightedCommentID;
+                                comment.id == _highlightedCommentID ||
+                                    comment.id == _scrollTargetHighlightID;
                             // Use widget.highlightCommentID (not state) to keep key stable after dismiss
                             // Priority: highlightCommentID (deep link) > scrollTargetCommentID (tap)
                             final key =
@@ -701,8 +706,19 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               onCommentDeleted: () =>
                                   _handleCommentDeleted(comment.id),
                               onAutoHighlightDismissed: () {
-                                if (mounted) {
-                                  setState(() => _highlightedCommentID = null);
+                                if (mounted &&
+                                    (_highlightedCommentID == comment.id ||
+                                        _scrollTargetHighlightID ==
+                                            comment.id)) {
+                                  setState(() {
+                                    if (_highlightedCommentID == comment.id) {
+                                      _highlightedCommentID = null;
+                                    }
+                                    if (_scrollTargetHighlightID ==
+                                        comment.id) {
+                                      _scrollTargetHighlightID = null;
+                                    }
+                                  });
                                   // Don't clear _highlightedCommentKey - prevents avatar flicker
                                 }
                               },
