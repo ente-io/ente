@@ -171,7 +171,7 @@
     "join_album_and_comment": "Join album and comment",
     "like_all": "Like all",
     "favorite": "Favorite",
-    "remove_favorite": "Unfavorite",
+    "un_favorite": "Unfavorite",
     "convert": "Convert",
     "multi_folder_upload": "Multiple folders detected",
     "upload_to_choice": "Would you like to upload them into",

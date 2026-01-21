@@ -58,7 +58,7 @@ const actionConfigs: Record<FileContextAction, ActionConfig> = {
     fixTime: { label: "fix_creation_time", Icon: ClockIcon },
     editLocation: { label: "edit_location", Icon: EditLocationAltIcon },
     favorite: { label: "favorite", Icon: StarBorderIcon },
-    unfavorite: { label: "remove_favorite", Icon: StarOffIcon },
+    unfavorite: { label: "un_favorite", Icon: StarOffIcon },
     archive: { label: "archive", Icon: ArchiveIcon },
     unarchive: { label: "unarchive", Icon: UnArchiveIcon },
     hide: { label: "hide", Icon: VisibilityOffOutlinedIcon },

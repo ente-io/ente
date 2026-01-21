@@ -32,6 +32,8 @@ import {
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
     addToFavoritesCollection,
+    isArchivedCollection,
+    isHiddenCollection,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -776,19 +778,51 @@ function isFileVisible(file: EnteFile): boolean {
 /**
  * Loads every file stored in IndexedDB, filters those belonging to the
  * target collection, removes duplicates by ID, filters out hidden/archived
- * files, and returns the unique set of visible files.
+ * files, and returns the unique set of visible files. For "All", it also
+ * excludes files that belong to hidden or archived collections.
  */
 async function getFilesForCollection(
     collectionSummary: CollectionSummary,
     activeCollection: Collection | undefined,
 ): Promise<EnteFile[]> {
-    const allFiles = await savedCollectionFiles();
-    // Filter out hidden and archived files to prevent leaking items users expect to remain hidden
-    const visibleFiles = allFiles.filter(isFileVisible);
-
     if (collectionSummary.type === "all") {
-        return uniqueFilesByID(visibleFiles);
+        const [allFiles, collections] = await Promise.all([
+            savedCollectionFiles(),
+            savedCollections(),
+        ]);
+        // Filter out hidden and archived files to prevent leaking items users expect to remain hidden.
+        const visibleFiles = allFiles.filter(isFileVisible);
+        const hiddenCollectionIDs = new Set(
+            collections
+                .filter(isHiddenCollection)
+                .map((collection) => collection.id),
+        );
+        const archivedCollectionIDs = new Set(
+            collections
+                .filter(isArchivedCollection)
+                .map((collection) => collection.id),
+        );
+        const hiddenFileIDs = new Set(
+            allFiles
+                .filter((file) => hiddenCollectionIDs.has(file.collectionID))
+                .map((file) => file.id),
+        );
+        const archivedFileIDs = new Set(
+            allFiles
+                .filter((file) =>
+                    archivedCollectionIDs.has(file.collectionID),
+                )
+                .map((file) => file.id),
+        );
+        const filtered = visibleFiles.filter(
+            (file) =>
+                !hiddenFileIDs.has(file.id) && !archivedFileIDs.has(file.id),
+        );
+        return uniqueFilesByID(filtered);
     }
+    const allFiles = await savedCollectionFiles();
+    // Filter out hidden and archived files to prevent leaking items users expect to remain hidden.
+    const visibleFiles = allFiles.filter(isFileVisible);
     if (!activeCollection) {
         return [];
     }

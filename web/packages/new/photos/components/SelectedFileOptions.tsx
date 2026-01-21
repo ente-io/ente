@@ -494,7 +494,7 @@ const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
 );
 
 const UnfavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
-    <Tooltip title={t("remove_favorite")}>
+    <Tooltip title={t("un_favorite")}>
         <IconButton {...{ onClick }}>
             <StarOffIcon fontSize="small" />
         </IconButton>
