@@ -200,29 +200,31 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     final textTheme = getEnteTextTheme(context);
     final List<Widget> childrens = [];
 
-    childrens.add(
-      Center(
-        child: DotsIndicator(
-          dotsCount: 3,
-          position: 2,
-          decorator: DotsDecorator(
-            activeColor: colorScheme.primary700,
-            color: colorScheme.primary700.withValues(alpha: 0.32),
-            activeShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+    if (widget.showProgressBar) {
+      childrens.add(
+        Center(
+          child: DotsIndicator(
+            dotsCount: 3,
+            position: 2,
+            decorator: DotsDecorator(
+              activeColor: colorScheme.primary700,
+              color: colorScheme.primary700.withValues(alpha: 0.32),
+              activeShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              size: const Size(10, 10),
+              activeSize: const Size(20, 10),
+              spacing: const EdgeInsets.all(6),
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            size: const Size(10, 10),
-            activeSize: const Size(20, 10),
-            spacing: const EdgeInsets.all(6),
           ),
         ),
-      ),
-    );
+      );
 
-    childrens.add(const SizedBox(height: 20));
+      childrens.add(const SizedBox(height: 20));
+    }
 
     childrens.add(
       GradientButton(
