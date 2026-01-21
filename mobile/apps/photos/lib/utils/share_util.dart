@@ -268,7 +268,7 @@ Future<void> shareAlbumLink(
   GlobalKey key,
 ) async {
   final description =
-      'Check out, comment and react on photos from ${collection.displayName} privately with Ente\'s end to end encryption';
+      'Check out, comment and react on photos from "${collection.displayName}" privately with Ente\'s end to end encryption';
 
   await shareLinkWithDescription(
     url,
