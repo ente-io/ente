@@ -1558,6 +1558,26 @@
   "addNewPerson": "Add new person",
   "addNameOrMerge": "Add name or merge",
   "mergeWithExisting": "Merge with existing",
+  "mergeWithPersonTitle": "Merge with {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "All photos from both face groups will be merged together under {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "New person",
   "addName": "Add name",
   "add": "Add",

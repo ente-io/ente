@@ -80,8 +80,8 @@ class ReferralCodeWidget extends StatelessWidget {
                   showInfoDialog(
                     context,
                     title: AppLocalizations.of(context).error,
-                    body:
-                        AppLocalizations.of(context).onlyFamilyAdminCanChangeCode(
+                    body: AppLocalizations.of(context)
+                        .onlyFamilyAdminCanChangeCode(
                       familyAdminEmail: familyAdmin,
                     ),
                     icon: Icons.error,
