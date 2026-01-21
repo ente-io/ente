@@ -155,8 +155,8 @@ export const sidebar = [
                                 link: "/photos/features/sharing-and-collaboration/collaboration",
                             },
                             {
-                                text: "Comments and reactions",
-                                link: "/photos/features/sharing-and-collaboration/comments-and-reactions",
+                                text: "Comments and likes",
+                                link: "/photos/features/sharing-and-collaboration/comments-and-likes",
                             },
                             {
                                 text: "Public links",
