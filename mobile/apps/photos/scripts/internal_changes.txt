@@ -1,3 +1,4 @@
+- Neeraj: Searchable settings
 - Ashil: Let admin and owner of album delete any comment
 - Neeraj: Settings screen redesign (v2)
 - Neeraj: (i) Notification for reaction/comment activity
