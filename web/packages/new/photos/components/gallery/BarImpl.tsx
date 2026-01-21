@@ -606,11 +606,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
             {person.name && <CardText>{person.name}</CardText>}
             {person.isPinned && (
                 <PersonPinnedIcon>
-                    <HugeiconsIcon
-                        icon={PinIcon}
-                        size={18}
-                        color="white"
-                    />
+                    <HugeiconsIcon icon={PinIcon} size={18} color="white" />
                 </PersonPinnedIcon>
             )}
         </ItemCard>

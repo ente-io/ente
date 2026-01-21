@@ -187,9 +187,7 @@ const SortCategoryOption: React.FC<SortCategoryOptionProps> = ({
     const arrowIcon = activeAscending ? ArrowUp02Icon : ArrowDown02Icon;
 
     return (
-        <StyledMenuItem
-            onClick={() => onClick(category)}
-        >
+        <StyledMenuItem onClick={() => onClick(category)}>
             <Stack direction="row" sx={{ alignItems: "center" }}>
                 <Typography
                     sx={{
