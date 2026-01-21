@@ -644,18 +644,42 @@ export const FileList: React.FC<FileListProps> = ({
         if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
-    // Compute available context menu actions based on stable context
-    // Note: We don't include contextMenu in deps since actions only depend on
-    // the gallery mode/context, not on whether the menu is open
+    const selectedFavoriteCount = useMemo(() => {
+        if (!favoriteFileIDs || selected.count == 0) return 0;
+        let count = 0;
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value === "boolean" && value) {
+                if (favoriteFileIDs.has(Number(key))) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }, [favoriteFileIDs, selected]);
+
+    // Compute available context menu actions based on stable context and
+    // the favorite status of the current selection (for toggling).
     const contextMenuActions = useMemo(() => {
         if (!onContextMenuAction) return [];
-        return getAvailableFileActions({
+        const actions = getAvailableFileActions({
             barMode: mode,
             isInSearchMode: modePlus === "search",
             collectionSummary,
             showAddPerson: !!showAddPersonAction,
             showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
         });
+        if (!actions.includes("favorite")) return actions;
+        if (selectedFavoriteCount > 0 && selectedFavoriteCount < selected.count) {
+            return actions.filter(
+                (action) => action !== "favorite" && action !== "unfavorite",
+            );
+        }
+        if (selectedFavoriteCount === selected.count && selected.count > 0) {
+            return actions.map((action) =>
+                action === "favorite" ? "unfavorite" : action,
+            );
+        }
+        return actions;
     }, [
         onContextMenuAction,
         mode,
@@ -664,6 +688,8 @@ export const FileList: React.FC<FileListProps> = ({
         showAddPersonAction,
         showEditLocationAction,
         selected.ownCount,
+        selectedFavoriteCount,
+        selected.count,
     ]);
 
     // Handle context menu open

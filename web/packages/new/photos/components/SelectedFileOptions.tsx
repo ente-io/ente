@@ -35,6 +35,7 @@ export type FileOp =
     | "download"
     | "fixTime"
     | "favorite"
+    | "unfavorite"
     | "archive"
     | "unarchive"
     | "hide"

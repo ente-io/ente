@@ -9,6 +9,7 @@ import {
     deleteFromTrash,
     hideFiles,
     moveToTrash,
+    removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { t } from "i18next";
@@ -67,6 +68,9 @@ export const performFileOp = async (
             break;
         case "favorite":
             await addToFavoritesCollection(files);
+            break;
+        case "unfavorite":
+            await removeFromFavoritesCollection(files);
             break;
         case "archive":
             await updateFilesVisibility(files, ItemVisibility.archived);

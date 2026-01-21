@@ -951,13 +951,19 @@ const Page: React.FC = () => {
                           )
                         : filteredFiles;
                 const selectedFiles = getSelectedFiles(selected, opFiles);
-                const toProcessFiles =
+                const ownedSelectedFiles =
                     op == "download"
                         ? selectedFiles
                         : selectedFiles.filter(
                               // There'll be a user if files are being selected.
                               (file) => file.ownerID == user!.id,
                           );
+                const toProcessFiles =
+                    op == "unfavorite"
+                        ? ownedSelectedFiles.filter((file) =>
+                              favoriteFileIDs.has(file.id),
+                          )
+                        : ownedSelectedFiles;
                 if (toProcessFiles.length > 0) {
                     await performFileOp(
                         op,
@@ -977,7 +983,10 @@ const Page: React.FC = () => {
                 // on the user's own files.
                 //
                 // See: [Note: Add and move of non-user files].
-                if (toProcessFiles.length != selectedFiles.length) {
+                if (
+                    op != "download" &&
+                    ownedSelectedFiles.length != selectedFiles.length
+                ) {
                     showMiniDialog(notifyOthersFilesDialogAttributes());
                 }
                 clearSelection();
@@ -1281,6 +1290,9 @@ const Page: React.FC = () => {
                     break;
                 case "favorite":
                     createFileOpHandler("favorite")();
+                    break;
+                case "unfavorite":
+                    createFileOpHandler("unfavorite")();
                     break;
                 case "archive":
                     createFileOpHandler("archive")();

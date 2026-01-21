@@ -23,6 +23,7 @@ import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import type { FileContextAction } from "ente-new/photos/utils/file-actions";
 import { t } from "i18next";
 import React, { memo, useCallback, useMemo } from "react";
+import { StarOffIcon } from "./icons/StartOffIcon";
 
 /**
  * Position for anchoring the context menu.
@@ -57,6 +58,7 @@ const actionConfigs: Record<FileContextAction, ActionConfig> = {
     fixTime: { label: "fix_creation_time", Icon: ClockIcon },
     editLocation: { label: "edit_location", Icon: EditLocationAltIcon },
     favorite: { label: "favorite", Icon: StarBorderIcon },
+    unfavorite: { label: "remove_favorite", Icon: StarOffIcon },
     archive: { label: "archive", Icon: ArchiveIcon },
     unarchive: { label: "unarchive", Icon: UnArchiveIcon },
     hide: { label: "hide", Icon: VisibilityOffOutlinedIcon },

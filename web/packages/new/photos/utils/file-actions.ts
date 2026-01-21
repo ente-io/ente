@@ -14,6 +14,7 @@ export type FileContextAction =
     | "fixTime"
     | "editLocation"
     | "favorite"
+    | "unfavorite"
     | "archive"
     | "unarchive"
     | "hide"
