@@ -1,3 +1,4 @@
+- Laurens: QOL: Improve the merge persons flow
 - Ashil: QOL: Better copy when sharing link
 - Laurens: Redesign search results page
 - Ashil: Fix background audio from other apps stopping when opening Ente on iOS
@@ -5,7 +6,6 @@
 - Laurens: QOL: Fix issies with contact list
 - Laurens: QOL: Improve search tab loading speed (especially for big libraries)
 - Laurens: QOL: Add overview of ignored persons
-- Laurens: QOL: Improve the merge persons flow
 - Laurens: QOL: Add search and custom sorts 
 - Laurens: QOL: Add search to all search tab section
 - Neeraj: Referral screen redesign
