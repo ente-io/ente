@@ -1008,7 +1008,6 @@ const Page: React.FC = () => {
                     startIcon: <CheckCircleIcon />,
                     title: t("added_to_person"),
                     caption: personName,
-                    autoHideDuration: 3000,
                 });
             } catch (e) {
                 onGenericError(e);

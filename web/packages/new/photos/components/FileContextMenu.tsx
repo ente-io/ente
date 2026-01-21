@@ -84,6 +84,15 @@ const actionConfigs: Record<FileContextAction, ActionConfig> = {
  */
 export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
     ({ open, anchorPosition, onClose, actions, onAction }) => {
+        const adjustedAnchorPosition = useMemo(() => {
+            if (!anchorPosition) return undefined;
+            const offset = 8;
+            return {
+                top: anchorPosition.top + offset,
+                left: anchorPosition.left + offset,
+            };
+        }, [anchorPosition]);
+
         const handleActionClick = useCallback(
             (action: FileContextAction) => {
                 onClose();
@@ -111,7 +120,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                 open={open}
                 onClose={onClose}
                 anchorReference="anchorPosition"
-                anchorPosition={anchorPosition}
+                anchorPosition={adjustedAnchorPosition}
                 slotProps={{
                     root: {
                         onContextMenu: (e: React.MouseEvent) =>
