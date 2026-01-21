@@ -669,7 +669,10 @@ export const FileList: React.FC<FileListProps> = ({
             showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
         });
         if (!actions.includes("favorite")) return actions;
-        if (selectedFavoriteCount > 0 && selectedFavoriteCount < selected.count) {
+        if (
+            selectedFavoriteCount > 0 &&
+            selectedFavoriteCount < selected.count
+        ) {
             return actions.filter(
                 (action) => action !== "favorite" && action !== "unfavorite",
             );

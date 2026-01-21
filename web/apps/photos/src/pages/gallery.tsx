@@ -1273,6 +1273,18 @@ const Page: React.FC = () => {
 
     const selectedCount = selected.count;
     const selectedOwnCount = selected.ownCount;
+    const selectedFavoriteCount = useMemo(() => {
+        if (selected.count == 0) return 0;
+        let count = 0;
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value === "boolean" && value) {
+                if (favoriteFileIDs.has(Number(key))) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }, [favoriteFileIDs, selected]);
 
     /**
      * Handle a context menu action on a file.
@@ -1598,6 +1610,7 @@ const Page: React.FC = () => {
                         }
                         selectedFileCount={selected.count}
                         selectedOwnFileCount={selected.ownCount}
+                        selectedFavoriteCount={selectedFavoriteCount}
                         onClearSelection={clearSelection}
                         onRemoveFilesFromCollection={
                             handleRemoveFilesFromCollection
