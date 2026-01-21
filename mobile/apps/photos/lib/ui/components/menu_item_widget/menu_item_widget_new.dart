@@ -235,9 +235,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     }
     setState(() {
       if (widget.pressedColor == null) {
-        hasPassedGestureCallbacks()
-            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
-            : menuItemColor = widget.menuItemColor;
+        if (hasPassedGestureCallbacks()) {
+          final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+          // Pressed color: Light #F5F5F5, Dark #2C2C2C
+          // These are the result of overlaying fillFaintPressed on the base color
+          menuItemColor =
+              isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF5F5F5);
+        } else {
+          menuItemColor = widget.menuItemColor;
+        }
       } else {
         menuItemColor = widget.pressedColor;
       }
@@ -272,8 +278,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
-    setState(() {
-      menuItemColor = widget.menuItemColor;
-    });
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () {
+        if (mounted) {
+          setState(() {
+            menuItemColor = widget.menuItemColor;
+          });
+        }
+      },
+    );
   }
 }

@@ -174,7 +174,7 @@ class LeadingWidget extends StatelessWidget {
   final Color? leadingIconColor;
 
   final Widget? leadingIconWidget;
-  // leadIconSize deafult value is 20.
+  // leadIconSize default value is 20.
   final double leadingIconSize;
   const LeadingWidget({
     required this.leadingIconSize,
