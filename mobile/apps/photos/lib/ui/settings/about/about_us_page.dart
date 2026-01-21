@@ -5,7 +5,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
-import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -50,101 +49,101 @@ class AboutUsPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      SettingsGroupedCard(
-                        children: [
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).weAreOpenSource,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedGithub,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await launchUrl(
-                                Uri.parse("https://github.com/ente-io/ente"),
-                              );
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).blog,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedPencilEdit01,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      AppLocalizations.of(context).blog,
-                                      "https://ente.io/blog",
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context).privacy,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedShield01,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      AppLocalizations.of(context).privacy,
-                                      "https://ente.io/privacy",
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          MenuItemWidgetNew(
-                            title: AppLocalizations.of(context)
-                                .termsOfServicesTitle,
-                            leadingIconWidget: _buildIconWidget(
-                              context,
-                              HugeIcons.strokeRoundedFile01,
-                            ),
-                            trailingIcon: Icons.chevron_right_outlined,
-                            trailingIconIsMuted: true,
-                            onTap: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      AppLocalizations.of(context)
-                                          .termsOfServicesTitle,
-                                      "https://ente.io/terms",
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          if (updateService.isIndependent())
-                            MenuItemWidgetNew(
-                              title:
-                                  AppLocalizations.of(context).checkForUpdates,
-                              leadingIconWidget: _buildIconWidget(
-                                context,
-                                HugeIcons.strokeRoundedDownload04,
-                              ),
-                              trailingIcon: Icons.chevron_right_outlined,
-                              trailingIconIsMuted: true,
-                              onTap: () async => _checkForUpdates(context),
-                            ),
-                        ],
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).weAreOpenSource,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedGithub,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await launchUrl(
+                            Uri.parse("https://github.com/ente-io/ente"),
+                          );
+                        },
                       ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).blog,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedPencilEdit01,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return WebPage(
+                                  AppLocalizations.of(context).blog,
+                                  "https://ente.io/blog",
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).privacy,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedShield01,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return WebPage(
+                                  AppLocalizations.of(context).privacy,
+                                  "https://ente.io/privacy",
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuItemWidgetNew(
+                        title:
+                            AppLocalizations.of(context).termsOfServicesTitle,
+                        leadingIconWidget: _buildIconWidget(
+                          context,
+                          HugeIcons.strokeRoundedFile01,
+                        ),
+                        trailingIcon: Icons.chevron_right_outlined,
+                        trailingIconIsMuted: true,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return WebPage(
+                                  AppLocalizations.of(context)
+                                      .termsOfServicesTitle,
+                                  "https://ente.io/terms",
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      if (updateService.isIndependent()) ...[
+                        const SizedBox(height: 8),
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).checkForUpdates,
+                          leadingIconWidget: _buildIconWidget(
+                            context,
+                            HugeIcons.strokeRoundedDownload04,
+                          ),
+                          trailingIcon: Icons.chevron_right_outlined,
+                          trailingIconIsMuted: true,
+                          onTap: () async => _checkForUpdates(context),
+                        ),
+                      ],
                     ],
                   ),
                 ),
