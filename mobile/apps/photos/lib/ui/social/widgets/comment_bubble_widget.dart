@@ -44,6 +44,9 @@ class CommentBubbleWidget extends StatefulWidget {
   /// Callback invoked when auto-highlight animation completes (dismissed).
   final VoidCallback? onAutoHighlightDismissed;
 
+  /// Callback invoked when the user taps on the parent quote preview.
+  final VoidCallback? onParentQuoteTap;
+
   const CommentBubbleWidget({
     required this.comment,
     required this.user,
@@ -58,6 +61,7 @@ class CommentBubbleWidget extends StatefulWidget {
     this.onCommentDeleted,
     this.isHighlighted = false,
     this.onAutoHighlightDismissed,
+    this.onParentQuoteTap,
     super.key,
   });
 
@@ -540,6 +544,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget>
                           parentComment: _parentComment,
                           currentUserID: widget.currentUserID,
                           userResolver: widget.userResolver,
+                          onParentQuoteTap: widget.onParentQuoteTap,
                         ),
                       ),
                       Positioned(
@@ -600,6 +605,7 @@ class _InlineParentQuote extends StatelessWidget {
   final bool isOwnComment;
   final int currentUserID;
   final User Function(Comment) userResolver;
+  final VoidCallback? onTap;
 
   const _InlineParentQuote({
     required this.isLoading,
@@ -607,6 +613,7 @@ class _InlineParentQuote extends StatelessWidget {
     required this.isOwnComment,
     required this.currentUserID,
     required this.userResolver,
+    this.onTap,
   });
 
   @override
@@ -652,7 +659,7 @@ class _InlineParentQuote extends StatelessWidget {
             ? const Color(0xB3FFFFFF)
             : const Color(0xB3000000);
 
-    return Container(
+    final content = Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: IntrinsicHeight(
         child: Row(
@@ -702,6 +709,18 @@ class _InlineParentQuote extends StatelessWidget {
         ),
       ),
     );
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap!();
+        },
+        behavior: HitTestBehavior.opaque,
+        child: content,
+      );
+    }
+    return content;
   }
 }
 
@@ -712,6 +731,7 @@ class _CommentBubble extends StatelessWidget {
   final Comment? parentComment;
   final int currentUserID;
   final User Function(Comment) userResolver;
+  final VoidCallback? onParentQuoteTap;
 
   const _CommentBubble({
     required this.comment,
@@ -720,6 +740,7 @@ class _CommentBubble extends StatelessWidget {
     required this.parentComment,
     required this.currentUserID,
     required this.userResolver,
+    this.onParentQuoteTap,
   });
 
   @override
@@ -759,6 +780,7 @@ class _CommentBubble extends StatelessWidget {
               isOwnComment: isOwnComment,
               currentUserID: currentUserID,
               userResolver: userResolver,
+              onTap: onParentQuoteTap,
             ),
           Text(
             comment.data,
