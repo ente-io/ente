@@ -288,6 +288,9 @@
       ]
     },
     {
+      "title": "btcturk"
+    },
+    {
       "title": "Bugzilla"
     },
     {
@@ -2136,6 +2139,9 @@
     {
       "title": "Netim",
       "slug": "netim"
+    },
+    {
+      "title": "nexo"
     },
     {
       "title": "Wordfence",
