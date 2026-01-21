@@ -809,9 +809,7 @@ async function getFilesForCollection(
         );
         const archivedFileIDs = new Set(
             allFiles
-                .filter((file) =>
-                    archivedCollectionIDs.has(file.collectionID),
-                )
+                .filter((file) => archivedCollectionIDs.has(file.collectionID))
                 .map((file) => file.id),
         );
         const filtered = visibleFiles.filter(
