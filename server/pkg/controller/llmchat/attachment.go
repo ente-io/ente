@@ -159,7 +159,7 @@ func (c *AttachmentController) VerifyUploaded(
 		}
 		return stacktrace.Propagate(err, "failed to verify attachment")
 	}
-	if out.ContentLength != nil && *out.ContentLength != expectedSize {
+	if out.ContentLength != nil && expectedSize > 0 && *out.ContentLength != expectedSize {
 		return stacktrace.Propagate(ente.ErrBadRequest, "attachment size mismatch")
 	}
 	return nil
