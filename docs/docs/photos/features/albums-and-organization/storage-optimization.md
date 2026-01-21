@@ -51,7 +51,9 @@ When you free up space, photos are removed from your device but stay in Ente. To
 
 - Simply open it in the Ente app
 - It will be automatically cached when you view it
-- To download and view the photo in any other gallery, choose download option on long pressing thumbnail or the download option in the three dot menu on opening the photo.
+- To download and view the photo in any other gallery
+    - Long press the thumbnail and choose download option
+    - Open the photo, choose the three dots at top right and choose download option.
 
 ## Remove exact duplicates
 
