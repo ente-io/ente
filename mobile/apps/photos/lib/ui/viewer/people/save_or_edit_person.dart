@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:math" as math;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
@@ -58,6 +59,7 @@ class SaveOrEditPerson extends StatefulWidget {
 }
 
 class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
+  static const int _maxSuggestedPersons = 3;
   bool isKeypadOpen = false;
   String _inputName = "";
   String? _selectedDate;
@@ -69,6 +71,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   Timer? _debounce;
   PersonEntity? person;
   final _nameFocsNode = FocusNode();
+  List<PersonEntity> _allPersons = [];
 
   @override
   void initState() {
@@ -79,11 +82,14 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     person = widget.person;
     _isPinned = widget.person?.data.isPinned ?? false;
     _hideFromMemories = widget.person?.data.hideFromMemories ?? false;
+    _nameFocsNode.addListener(_handleNameFocusChange);
+    _loadPersons();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _nameFocsNode.removeListener(_handleNameFocusChange);
     _nameFocsNode.dispose();
     super.dispose();
   }
@@ -92,6 +98,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final suggestions = _shouldShowSuggestions
+        ? _getPersonSuggestions()
+        : const <PersonEntity>[];
     return PopScope(
       canPop: !(changed && _inputName.isNotEmpty),
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -269,6 +278,19 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                             ),
                           ),
                         ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOutQuad,
+                          child: suggestions.isEmpty
+                              ? const SizedBox.shrink()
+                              : Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: _PersonSuggestionsDropdown(
+                                    persons: suggestions,
+                                    onPersonTap: _onSuggestionSelected,
+                                  ),
+                                ),
+                        ),
                         const SizedBox(height: 16),
                         DatePickerField(
                           hintText: context.l10n.enterDateOfBirth,
@@ -402,6 +424,100 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       return;
     }
     Navigator.pop(context, selectedPerson);
+  }
+
+  void _handleNameFocusChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _loadPersons() async {
+    final persons = await PersonService.instance.getPersons();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _allPersons = persons;
+    });
+  }
+
+  bool get _shouldShowSuggestions =>
+      !widget.isEditing &&
+      widget.clusterID != null &&
+      _nameFocsNode.hasFocus &&
+      _inputName.trim().isNotEmpty &&
+      !userAlreadyAssigned;
+
+  List<PersonEntity> _getPersonSuggestions() {
+    final query = _inputName.trim().toLowerCase();
+    if (query.isEmpty || _allPersons.isEmpty) {
+      return [];
+    }
+    final suggestions = _allPersons.where((personEntity) {
+      final name = personEntity.data.name.trim();
+      if (name.isEmpty) {
+        return false;
+      }
+      if (widget.isEditing && personEntity.remoteID == person?.remoteID) {
+        return false;
+      }
+      return name.toLowerCase().contains(query);
+    }).toList()
+      ..sort(
+        (a, b) => a.data.name.toLowerCase().compareTo(
+              b.data.name.toLowerCase(),
+            ),
+      );
+
+    if (suggestions.length > _maxSuggestedPersons) {
+      return suggestions.sublist(0, _maxSuggestedPersons);
+    }
+    return suggestions;
+  }
+
+  Future<void> _onSuggestionSelected(PersonEntity selectedPerson) async {
+    final clusterId = widget.clusterID;
+    if (clusterId == null || userAlreadyAssigned) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    final shouldMerge = await _showMergeConfirmationSheet(
+      context,
+      person: selectedPerson,
+      clusterId: clusterId,
+    );
+    if (!mounted || shouldMerge != true) {
+      return;
+    }
+    if (userAlreadyAssigned) {
+      return;
+    }
+    userAlreadyAssigned = true;
+    await ClusterFeedbackService.instance.addClusterToExistingPerson(
+      person: selectedPerson,
+      clusterID: clusterId,
+    );
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context, selectedPerson);
+  }
+
+  Future<bool?> _showMergeConfirmationSheet(
+    BuildContext context, {
+    required PersonEntity person,
+    required String clusterId,
+  }) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _MergePersonConfirmationSheet(
+        person: person,
+        clusterId: clusterId,
+      ),
+    );
   }
 
   Future<dynamic> _saveChangesPrompt(BuildContext context) async {
@@ -560,6 +676,347 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       await showGenericErrorDialog(context: context, error: e);
       return null;
     }
+  }
+}
+
+class _PersonSuggestionsDropdown extends StatelessWidget {
+  final List<PersonEntity> persons;
+  final ValueChanged<PersonEntity> onPersonTap;
+
+  const _PersonSuggestionsDropdown({
+    required this.persons,
+    required this.onPersonTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.strokeMuted.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final person in persons)
+            _PersonSuggestionTile(
+              key: ValueKey(person.remoteID),
+              person: person,
+              onTap: () => onPersonTap(person),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonSuggestionTile extends StatelessWidget {
+  final PersonEntity person;
+  final VoidCallback onTap;
+
+  const _PersonSuggestionTile({
+    super.key,
+    required this.person,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const double rowHeight = 52;
+    const double innerHeight = 44;
+    const double avatarSize = 30;
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+    final cachedPixelWidth =
+        (avatarSize * MediaQuery.devicePixelRatioOf(context)).round();
+
+    return SizedBox(
+      height: rowHeight,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: onTap,
+            splashColor: colorScheme.fillFaintPressed,
+            highlightColor: colorScheme.fillFaintPressed,
+            child: SizedBox(
+              height: innerHeight,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: avatarSize,
+                      height: avatarSize,
+                      child: FaceThumbnailSquircleClip(
+                        child: PersonFaceWidget(
+                          key: ValueKey("person_suggestion_${person.remoteID}"),
+                          personId: person.remoteID,
+                          useFullFile: false,
+                          cachedPixelWidth: cachedPixelWidth,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        person.data.name,
+                        style: textTheme.mini.copyWith(
+                          color: colorScheme.textBase,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MergePersonConfirmationSheet extends StatelessWidget {
+  final PersonEntity person;
+  final String clusterId;
+
+  const _MergePersonConfirmationSheet({
+    required this.person,
+    required this.clusterId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        border: Border.all(
+          color: colorScheme.strokeMuted.withValues(alpha: 0.2),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 56, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _MergeFacePair(
+                    clusterId: clusterId,
+                    personId: person.remoteID,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.mergeWithPersonTitle(name: person.data.name),
+                    style: textTheme.largeBold.copyWith(
+                      fontSize: 20,
+                      height: 20 / 20,
+                      letterSpacing: -0.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 11),
+                  Text(
+                    l10n.mergeWithPersonDescription(name: person.data.name),
+                    style: textTheme.smallMuted.copyWith(
+                      height: 20 / 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  _MergeSheetActionButton(
+                    label: l10n.merge,
+                    onTap: () => Navigator.of(context).pop(true),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: _MergeSheetCloseButton(
+                onTap: () => Navigator.of(context).pop(false),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MergeFacePair extends StatelessWidget {
+  final String clusterId;
+  final String personId;
+
+  const _MergeFacePair({
+    required this.clusterId,
+    required this.personId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const double leftSize = 74;
+    const double rightSize = 71;
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+    return SizedBox(
+      width: 120,
+      height: 90,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            top: 0,
+            child: Transform.rotate(
+              angle: -5 * math.pi / 180,
+              child: _MergeFaceThumbnail(
+                size: leftSize,
+                clusterId: clusterId,
+                cachedPixelWidth: (leftSize * devicePixelRatio).round(),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 35,
+            top: 5,
+            child: Transform.rotate(
+              angle: 12 * math.pi / 180,
+              child: _MergeFaceThumbnail(
+                size: rightSize,
+                personId: personId,
+                cachedPixelWidth: (rightSize * devicePixelRatio).round(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MergeFaceThumbnail extends StatelessWidget {
+  final double size;
+  final String? personId;
+  final String? clusterId;
+  final int cachedPixelWidth;
+
+  const _MergeFaceThumbnail({
+    required this.size,
+    required this.cachedPixelWidth,
+    this.personId,
+    this.clusterId,
+  }) : assert(
+          personId != null || clusterId != null,
+          "Merge face thumbnail requires personId or clusterId",
+        );
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: FaceThumbnailSquircleClip(
+        child: PersonFaceWidget(
+          personId: personId,
+          clusterID: clusterId,
+          useFullFile: false,
+          cachedPixelWidth: cachedPixelWidth,
+        ),
+      ),
+    );
+  }
+}
+
+class _MergeSheetActionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _MergeSheetActionButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final borderRadius = BorderRadius.circular(14);
+
+    return SizedBox(
+      height: 52,
+      width: double.infinity,
+      child: Material(
+        color: colorScheme.primary500,
+        borderRadius: borderRadius,
+        child: InkWell(
+          borderRadius: borderRadius,
+          onTap: onTap,
+          child: Center(
+            child: Text(
+              label,
+              style: textTheme.smallBold.copyWith(
+                color: Colors.white,
+                height: 20 / 14,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MergeSheetCloseButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _MergeSheetCloseButton({
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    const double size = 40;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: colorScheme.fillFaint,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.close,
+          size: 20,
+          color: colorScheme.textBase,
+        ),
+      ),
+    );
   }
 }
 
