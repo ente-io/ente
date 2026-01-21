@@ -1,4 +1,5 @@
 import SwiftUI
+import QuickLook
 
 struct MessageListView: View {
     let messages: [ChatMessage]
@@ -13,6 +14,7 @@ struct MessageListView: View {
 
     @State private var isAtBottom = true
     @State private var autoScrollEnabled = true
+    @State private var previewItem: AttachmentPreviewItem?
 
     var body: some View {
         GeometryReader { proxy in
@@ -32,7 +34,8 @@ struct MessageListView: View {
                                     message: message,
                                     onEdit: { onEdit(message) },
                                     onCopy: { onCopy(message) },
-                                    onBranchChange: { delta in onBranchChange(message, delta) }
+                                    onBranchChange: { delta in onBranchChange(message, delta) },
+                                    onOpenAttachment: openAttachment
                                 )
                                 .id(message.id)
                             } else {
@@ -41,7 +44,8 @@ struct MessageListView: View {
                                     onCopy: { onCopy(message) },
                                     onShowRaw: { onShowRaw(message) },
                                     onRetry: { onRetry(message) },
-                                    onBranchChange: { delta in onBranchChange(message, delta) }
+                                    onBranchChange: { delta in onBranchChange(message, delta) },
+                                    onOpenAttachment: openAttachment
                                 )
                                 .id(message.id)
                             }
@@ -97,6 +101,9 @@ struct MessageListView: View {
                 }
             }
         }
+        .sheet(item: $previewItem) { item in
+            QuickLookPreview(url: item.url)
+        }
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false) {
@@ -104,6 +111,12 @@ struct MessageListView: View {
         withAnimation(.easeOut(duration: 0.2)) {
             proxy.scrollTo("bottom", anchor: .bottom)
         }
+    }
+
+    private func openAttachment(_ attachment: ChatAttachment) {
+        guard let url = attachment.url else { return }
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        previewItem = AttachmentPreviewItem(url: url)
     }
 }
 
@@ -115,11 +128,52 @@ private struct BottomOffsetKey: PreferenceKey {
     }
 }
 
+private struct AttachmentPreviewItem: Identifiable {
+    let url: URL
+    var id: String { url.path }
+}
+
+private struct QuickLookPreview: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> QLPreviewController {
+        let controller = QLPreviewController()
+        controller.dataSource = context.coordinator
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: QLPreviewController, context: Context) {
+        context.coordinator.url = url
+        uiViewController.reloadData()
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(url: url)
+    }
+
+    final class Coordinator: NSObject, QLPreviewControllerDataSource {
+        var url: URL
+
+        init(url: URL) {
+            self.url = url
+        }
+
+        func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+            1
+        }
+
+        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+            url as NSURL
+        }
+    }
+}
+
 private struct UserMessageBubbleView: View {
     let message: ChatMessage
     let onEdit: () -> Void
     let onCopy: () -> Void
     let onBranchChange: (Int) -> Void
+    let onOpenAttachment: (ChatAttachment) -> Void
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -135,6 +189,9 @@ private struct UserMessageBubbleView: View {
                                 icon: attachment.iconName,
                                 isUploading: attachment.isUploading
                             )
+                            .onTapGesture {
+                                onOpenAttachment(attachment)
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -175,6 +232,7 @@ private struct AssistantMessageBubbleView: View {
     let onShowRaw: () -> Void
     let onRetry: () -> Void
     let onBranchChange: (Int) -> Void
+    let onOpenAttachment: (ChatAttachment) -> Void
 
     var body: some View {
         HStack(alignment: .bottom) {

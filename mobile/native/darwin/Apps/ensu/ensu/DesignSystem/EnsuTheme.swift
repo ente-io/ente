@@ -95,7 +95,7 @@ enum EnsuFont {
     }
 
     static func message(size: CGFloat, weight: Font.Weight) -> Font {
-        font(named: messageName(for: weight), size: size, fallbackDesign: .serif, weight: weight)
+        ui(size: size, weight: weight)
     }
 
     static func code(size: CGFloat, weight: Font.Weight) -> Font {
@@ -110,12 +110,7 @@ enum EnsuFont {
     }
 
     private static func serifName(for weight: Font.Weight) -> String {
-        switch weight {
-        case .semibold, .bold:
-            return "CormorantGaramond-SemiBold"
-        default:
-            return "CormorantGaramond-Medium"
-        }
+        "DMSerifText-Regular"
     }
 
     private static func uiName(for weight: Font.Weight) -> String {
@@ -131,16 +126,6 @@ enum EnsuFont {
         }
     }
 
-    private static func messageName(for weight: Font.Weight) -> String {
-        switch weight {
-        case .bold:
-            return "SourceSerif4-Bold"
-        case .semibold:
-            return "SourceSerif4-SemiBold"
-        default:
-            return "SourceSerif4-Regular"
-        }
-    }
 }
 
 extension Color {

@@ -138,6 +138,63 @@ impl<B: crate::Backend> LlmChatDb<B> {
     pub fn hard_delete(&self, entity_type: EntityType, uuid: Uuid) -> Result<()> {
         self.chat.hard_delete(entity_type, uuid)
     }
+
+    // Sync apply helpers
+    pub fn upsert_session_from_remote(
+        &self,
+        session_uuid: Uuid,
+        title: &str,
+        created_at: i64,
+        updated_at: i64,
+    ) -> Result<Session> {
+        self.chat
+            .upsert_session_from_remote(session_uuid, title, created_at, updated_at)
+    }
+
+    pub fn apply_session_tombstone(&self, session_uuid: Uuid, deleted_at: i64) -> Result<()> {
+        self.chat.apply_session_tombstone(session_uuid, deleted_at)
+    }
+
+    pub fn upsert_message_from_remote(
+        &self,
+        message_uuid: Uuid,
+        session_uuid: Uuid,
+        sender: &str,
+        text: &str,
+        parent: Option<Uuid>,
+        attachments: Vec<AttachmentMeta>,
+        created_at: i64,
+    ) -> Result<Message> {
+        self.chat.upsert_message_from_remote(
+            message_uuid,
+            session_uuid,
+            sender,
+            text,
+            parent,
+            attachments,
+            created_at,
+        )
+    }
+
+    pub fn apply_message_tombstone(&self, message_uuid: Uuid, deleted_at: i64) -> Result<()> {
+        self.chat.apply_message_tombstone(message_uuid, deleted_at)
+    }
+
+    pub fn upsert_attachment_with_state(
+        &self,
+        attachment_id: &str,
+        session_uuid: Uuid,
+        message_uuid: Uuid,
+        size: i64,
+        state: UploadState,
+    ) -> Result<()> {
+        self.attachments
+            .upsert_attachment_with_state(attachment_id, session_uuid, message_uuid, size, state)
+    }
+
+    pub fn get_attachment_upload_state(&self, attachment_id: &str) -> Result<Option<UploadState>> {
+        self.attachments.get_upload_state(attachment_id)
+    }
 }
 
 #[cfg(feature = "sqlite")]

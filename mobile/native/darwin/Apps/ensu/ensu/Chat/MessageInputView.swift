@@ -10,6 +10,7 @@ struct MessageInputView: View {
     let isDownloading: Bool
     let editingMessage: ChatMessage?
     let isProcessingAttachments: Bool
+    let isAttachmentDownloadBlocked: Bool
     let onSend: () -> Void
     let onStop: () -> Void
     let onCancelEdit: () -> Void
@@ -20,15 +21,20 @@ struct MessageInputView: View {
     @StateObject private var keyboard = KeyboardObserver()
     @FocusState private var isFocused: Bool
     @State private var isImagePickerPresented = false
-    @State private var isDocumentPickerPresented = false
 
     private var placeholder: String {
-        isDownloading ? "Downloading model... (queue messages)" : "Compose your message..."
+        if isDownloading {
+            return "Downloading model... (queue messages)"
+        }
+        if isAttachmentDownloadBlocked {
+            return "Downloading attachments..."
+        }
+        return "Compose your message..."
     }
 
     private var canSend: Bool {
         let hasContent = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachments.isEmpty
-        return hasContent && !isGenerating && !isDownloading
+        return hasContent && !isGenerating && !isDownloading && !isAttachmentDownloadBlocked
     }
 
     var body: some View {
@@ -90,23 +96,16 @@ struct MessageInputView: View {
                         }
 
                     if editingMessage == nil {
-                        Menu {
-                            Button("Image") {
-                                isImagePickerPresented = true
-                            }
-                            Button("Document") {
-                                isDocumentPickerPresented = true
-                            }
+                        Button {
+                            isImagePickerPresented = true
                         } label: {
                             Image(systemName: "paperclip")
                                 .font(attachmentIconFont)
                                 .frame(width: 32, height: 32, alignment: .center)
                         }
-                        .disabled(isGenerating || isDownloading)
+                        .disabled(isGenerating || isDownloading || isAttachmentDownloadBlocked)
                         .foregroundStyle(EnsuColor.textMuted)
                         #if os(macOS)
-                        .menuStyle(.borderlessButton)
-                        .menuIndicator(.hidden)
                         .buttonStyle(.plain)
                         .frame(width: 32, height: 32, alignment: .center)
                         #endif
@@ -118,17 +117,6 @@ struct MessageInputView: View {
                                 },
                                 onCancel: {
                                     isImagePickerPresented = false
-                                }
-                            )
-                        }
-                        .sheet(isPresented: $isDocumentPickerPresented) {
-                            DocumentPicker(
-                                onPick: { url in
-                                    onAddDocument(url)
-                                    isDocumentPickerPresented = false
-                                },
-                                onCancel: {
-                                    isDocumentPickerPresented = false
                                 }
                             )
                         }

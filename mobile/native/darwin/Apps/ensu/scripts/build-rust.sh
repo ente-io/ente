@@ -6,6 +6,7 @@ set -euo pipefail
 # Outputs universal static libraries at:
 #   $TARGET_TEMP_DIR/ensu_rust/libensu_uniffi.a
 #   $TARGET_TEMP_DIR/ensu_rust/libllmchat_db_uniffi.a
+#   $TARGET_TEMP_DIR/ensu_rust/libllmchat_sync_uniffi.a
 
 if [ -z "${SRCROOT:-}" ] || [ -z "${TARGET_TEMP_DIR:-}" ] || [ -z "${PLATFORM_NAME:-}" ] || [ -z "${ARCHS:-}" ]; then
   echo "Missing required Xcode environment variables (SRCROOT/TARGET_TEMP_DIR/PLATFORM_NAME/ARCHS)" >&2
@@ -160,3 +161,4 @@ build_crate_universal() {
 
 build_crate_universal "ensu_uniffi" "${REPO_ROOT}/rust/ensu_uniffi" "libensu_uniffi.a"
 build_crate_universal "llmchat_db_uniffi" "${REPO_ROOT}/rust/llmchat_db_uniffi" "libllmchat_db_uniffi.a"
+build_crate_universal "llmchat_sync_uniffi" "${REPO_ROOT}/rust/llmchat_sync_uniffi" "libllmchat_sync_uniffi.a"

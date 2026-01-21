@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.ente.ensu.components.EnsuLogo
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -55,6 +56,7 @@ fun SessionDrawer(
     userEmail: String?,
     onNewChat: () -> Unit,
     onSelectSession: (ChatSession) -> Unit,
+    onDeleteSession: (ChatSession) -> Unit,
     onSync: () -> Unit,
     onOpenLogs: () -> Unit,
     onOpenDeveloperSettings: () -> Unit,
@@ -93,7 +95,8 @@ fun SessionDrawer(
                 SessionGroups(
                     sessions = sessions,
                     selectedSessionId = selectedSessionId,
-                    onSelectSession = onSelectSession
+                    onSelectSession = onSelectSession,
+                    onDeleteSession = onDeleteSession
                 )
             }
 
@@ -124,11 +127,7 @@ private fun DrawerHeader(
             .padding(EnsuSpacing.lg.dp),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
     ) {
-        Text(
-            text = "ensu",
-            style = EnsuTypography.h2.copy(letterSpacing = 1.sp),
-            color = EnsuColor.textPrimary()
-        )
+        EnsuLogo(height = 28.dp)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp),
@@ -219,7 +218,8 @@ private fun DrawerNewChat(onNewChat: () -> Unit) {
 private fun SessionGroups(
     sessions: List<ChatSession>,
     selectedSessionId: String?,
-    onSelectSession: (ChatSession) -> Unit
+    onSelectSession: (ChatSession) -> Unit,
+    onDeleteSession: (ChatSession) -> Unit
 ) {
     val grouped = sessions.groupBy { sessionGroupLabel(it.updatedAtMillis) }
     val order = listOf("TODAY", "YESTERDAY", "THIS WEEK", "LAST WEEK", "THIS MONTH", "OLDER")
@@ -245,7 +245,8 @@ private fun SessionGroups(
                     SessionTile(
                         session = session,
                         isSelected = session.id == selectedSessionId,
-                        onSelect = { onSelectSession(session) }
+                        onSelect = { onSelectSession(session) },
+                        onDelete = { onDeleteSession(session) }
                     )
                 }
             }
@@ -257,7 +258,8 @@ private fun SessionGroups(
 private fun SessionTile(
     session: ChatSession,
     isSelected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -292,7 +294,7 @@ private fun SessionTile(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .clickable(onClick = {}),
+                    .clickable(onClick = onDelete),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

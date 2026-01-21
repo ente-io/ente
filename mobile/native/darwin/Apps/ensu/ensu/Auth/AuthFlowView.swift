@@ -69,9 +69,7 @@ struct AuthFlowView: View {
                     }
                 },
                 center: {
-                    Text("ensu")
-                        .font(EnsuTypography.h3)
-                        .foregroundStyle(EnsuColor.textPrimary)
+                    EnsuLogo(height: 20)
                 },
                 trailing: {
                     Button("Close") {
@@ -99,9 +97,7 @@ struct AuthFlowView: View {
         #if os(iOS)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("ensu")
-                    .font(EnsuTypography.h3)
-                    .foregroundStyle(EnsuColor.textPrimary)
+                EnsuLogo(height: 20)
             }
 
             ToolbarItem(placement: trailingPlacement) {
@@ -216,9 +212,7 @@ struct AuthFlowView: View {
                 }
 
                 ToolbarItem(placement: .principal) {
-                    Text("ensu")
-                        .font(EnsuTypography.h3)
-                        .foregroundStyle(EnsuColor.textPrimary)
+                    EnsuLogo(height: 20)
                 }
 
                 ToolbarItem(placement: trailingPlacement) {

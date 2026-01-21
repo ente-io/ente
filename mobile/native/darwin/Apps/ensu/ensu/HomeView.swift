@@ -13,6 +13,7 @@ struct HomeView: View {
             .onChange(of: appState.isLoggedIn) { isLoggedIn in
                 if isLoggedIn {
                     isShowingAuth = false
+                    chatModel.syncNow()
                 }
             }
     }

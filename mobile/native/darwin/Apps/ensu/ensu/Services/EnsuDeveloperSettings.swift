@@ -3,11 +3,12 @@ import EnteNetwork
 
 enum EnsuDeveloperSettings {
     private static let endpointKey = "ensu.customEndpoint"
+    private static let fixedEndpoint = URL(string: "https://1227635d8108.ngrok-free.app")
 
     static var currentEndpoint: URL? {
         guard let stored = UserDefaults.standard.string(forKey: endpointKey),
               let url = URL(string: stored) else {
-            return nil
+            return fixedEndpoint
         }
         return url
     }

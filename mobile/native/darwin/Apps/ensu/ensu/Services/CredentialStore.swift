@@ -46,6 +46,10 @@ final class CredentialStore {
         return token + String(repeating: "=", count: 4 - remainder)
     }
 
+    var masterKey: Data? {
+        try? KeychainStore.get(service: keychainService, account: KeychainAccount.masterKey)
+    }
+
     var hasConfiguredAccount: Bool {
         token?.isEmpty == false &&
             email?.isEmpty == false &&

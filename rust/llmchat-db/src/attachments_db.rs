@@ -126,6 +126,57 @@ impl<B: Backend> AttachmentsDb<B> {
         Ok(())
     }
 
+    pub fn get_upload_state(&self, attachment_id: &str) -> Result<Option<UploadState>> {
+        let row = self.backend.query_row(
+            "SELECT upload_state FROM attachments WHERE attachment_id = ?",
+            &[Value::Text(attachment_id.to_string())],
+        )?;
+        match row {
+            Some(row) => {
+                let state: UploadState = row.get_string(0)?.parse()?;
+                Ok(Some(state))
+            }
+            None => Ok(None),
+        }
+    }
+
+    pub fn upsert_attachment_with_state(
+        &self,
+        attachment_id: &str,
+        session_uuid: Uuid,
+        message_uuid: Uuid,
+        size: i64,
+        state: UploadState,
+    ) -> Result<()> {
+        let now = self.clock.now_us();
+        let uploaded_at = if state == UploadState::Uploaded {
+            Value::Integer(now)
+        } else {
+            Value::Null
+        };
+        self.backend.execute(
+            "INSERT INTO attachments (attachment_id, session_uuid, message_uuid, size, upload_state, uploaded_at, updated_at) \
+             VALUES (?, ?, ?, ?, ?, ?, ?) \
+             ON CONFLICT(attachment_id) DO UPDATE SET \
+               session_uuid = excluded.session_uuid, \
+               message_uuid = excluded.message_uuid, \
+               size = excluded.size, \
+               upload_state = excluded.upload_state, \
+               uploaded_at = excluded.uploaded_at, \
+               updated_at = excluded.updated_at",
+            &[
+                Value::Text(attachment_id.to_string()),
+                Value::Text(session_uuid.to_string()),
+                Value::Text(message_uuid.to_string()),
+                Value::Integer(size),
+                Value::Text(state.as_str().to_string()),
+                uploaded_at,
+                Value::Integer(now),
+            ],
+        )?;
+        Ok(())
+    }
+
     pub fn get_pending_uploads_for_session(
         &self,
         session_uuid: Uuid,

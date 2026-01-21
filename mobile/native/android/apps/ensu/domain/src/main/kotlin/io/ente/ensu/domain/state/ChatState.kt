@@ -19,5 +19,8 @@ data class ChatState(
     val attachments: List<Attachment> = emptyList(),
     val editingMessageId: String? = null,
     val branchSelections: Map<String, Int> = emptyMap(),
-    val isProcessingAttachments: Boolean = false
+    val isProcessingAttachments: Boolean = false,
+    val attachmentDownloads: List<io.ente.ensu.domain.model.AttachmentDownloadItem> = emptyList(),
+    val attachmentDownloadProgress: Int? = null,
+    val isAttachmentDownloadBlocked: Boolean = false
 )

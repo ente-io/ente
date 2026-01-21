@@ -39,8 +39,6 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -89,7 +87,8 @@ fun ChatView(
     onEditMessage: (ChatMessage) -> Unit,
     onRetryMessage: (ChatMessage) -> Unit,
     onCancelEdit: () -> Unit,
-    onBranchChange: (String, Int) -> Unit
+    onBranchChange: (String, Int) -> Unit,
+    onOpenAttachment: (Attachment) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -108,7 +107,8 @@ fun ChatView(
                 branchSelections = chatState.branchSelections,
                 onEditMessage = onEditMessage,
                 onRetryMessage = onRetryMessage,
-                onBranchChange = onBranchChange
+                onBranchChange = onBranchChange,
+                onOpenAttachment = onOpenAttachment
             )
 
             val editingMessage = chatState.editingMessageId?.let { editingId ->
@@ -127,6 +127,8 @@ fun ChatView(
                 isGenerating = chatState.isGenerating,
                 isDownloading = chatState.isDownloading,
                 downloadPercent = chatState.downloadPercent,
+                isAttachmentDownloadBlocked = chatState.isAttachmentDownloadBlocked,
+                attachmentDownloadPercent = chatState.attachmentDownloadProgress,
                 onMessageChange = onMessageChange,
                 onSend = onSend,
                 onStop = onStop,
@@ -159,7 +161,8 @@ private fun MessageList(
     branchSelections: Map<String, Int>,
     onEditMessage: (ChatMessage) -> Unit,
     onRetryMessage: (ChatMessage) -> Unit,
-    onBranchChange: (String, Int) -> Unit
+    onBranchChange: (String, Int) -> Unit,
+    onOpenAttachment: (Attachment) -> Unit
 ) {
     if (messages.isEmpty() && !isGenerating) {
         EmptyState(modifier = modifier)
@@ -215,7 +218,8 @@ private fun MessageList(
                         message = message,
                         branchSelections = branchSelections,
                         onEdit = { onEditMessage(message) },
-                        onBranchChange = onBranchChange
+                        onBranchChange = onBranchChange,
+                        onOpenAttachment = onOpenAttachment
                     )
                 }
                 MessageAuthor.Assistant -> {
@@ -263,7 +267,8 @@ private fun UserMessageBubble(
     message: ChatMessage,
     branchSelections: Map<String, Int>,
     onEdit: () -> Unit,
-    onBranchChange: (String, Int) -> Unit
+    onBranchChange: (String, Int) -> Unit,
+    onOpenAttachment: (Attachment) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -286,7 +291,8 @@ private fun UserMessageBubble(
                         name = attachment.name,
                         size = "${attachment.sizeBytes / 1024} KB",
                         icon = icon,
-                        isUploading = attachment.isUploading
+                        isUploading = attachment.isUploading,
+                        onClick = { onOpenAttachment(attachment) }
                     )
                 }
             }
@@ -485,7 +491,7 @@ private fun DownloadToastOverlay(
             }
             Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
             LinearProgressIndicator(
-                progress = clamped / 100f,
+                progress = { clamped / 100f },
                 color = if (isLoading) EnsuColor.accent() else EnsuColor.accent(),
                 trackColor = EnsuColor.border(),
                 modifier = Modifier.fillMaxWidth()
@@ -573,6 +579,8 @@ private fun MessageInput(
     isGenerating: Boolean,
     isDownloading: Boolean,
     downloadPercent: Int?,
+    isAttachmentDownloadBlocked: Boolean,
+    attachmentDownloadPercent: Int?,
     onMessageChange: (String) -> Unit,
     onSend: () -> Unit,
     onStop: () -> Unit,
@@ -580,12 +588,16 @@ private fun MessageInput(
     onRemoveAttachment: (Attachment) -> Unit,
     onCancelEdit: () -> Unit
 ) {
-    var showMenu by remember { mutableStateOf(false) }
-    val placeholder = if (isDownloading) {
-        val percent = downloadPercent?.let { " ($it%)" } ?: ""
-        "Downloading model...$percent"
-    } else {
-        "Compose your message..."
+    val placeholder = when {
+        isDownloading -> {
+            val percent = downloadPercent?.let { " ($it%)" } ?: ""
+            "Downloading model...$percent"
+        }
+        isAttachmentDownloadBlocked -> {
+            val percent = attachmentDownloadPercent?.let { " ($it%)" } ?: ""
+            "Downloading attachments...$percent"
+        }
+        else -> "Compose your message..."
     }
 
     Column(
@@ -675,33 +687,15 @@ private fun MessageInput(
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
 
                 if (editingMessage == null) {
-                    Box {
-                        IconButton(
-                            onClick = { showMenu = true },
-                            enabled = !isGenerating && !isDownloading,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.AttachFile,
-                                contentDescription = "Attach"
-                            )
-                        }
-                        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                            DropdownMenuItem(
-                                text = { Text(text = "Image") },
-                                onClick = {
-                                    showMenu = false
-                                    onAttachmentSelected(AttachmentType.Image)
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(text = "Document") },
-                                onClick = {
-                                    showMenu = false
-                                    onAttachmentSelected(AttachmentType.Document)
-                                }
-                            )
-                        }
+                    IconButton(
+                        onClick = { onAttachmentSelected(AttachmentType.Image) },
+                        enabled = !isGenerating && !isDownloading && !isAttachmentDownloadBlocked,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.AttachFile,
+                            contentDescription = "Attach"
+                        )
                     }
                 }
 
@@ -709,7 +703,7 @@ private fun MessageInput(
 
                 IconButton(
                     onClick = if (isGenerating) onStop else onSend,
-                    enabled = !isDownloading && (isGenerating || canSend),
+                    enabled = isGenerating || (!isDownloading && !isAttachmentDownloadBlocked && canSend),
                     modifier = Modifier.size(36.dp)
                 ) {
                     val icon = when {

@@ -53,10 +53,7 @@ struct SessionDrawerView: View {
     private var drawerHeader: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.md) {
             HStack {
-                Text("ensu")
-                    .font(EnsuTypography.h2)
-                    .tracking(1)
-                    .foregroundStyle(EnsuColor.textPrimary)
+                EnsuLogo(height: 28)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         onDeveloperTap()
@@ -113,28 +110,27 @@ struct SessionDrawerView: View {
     }
 
     private func sessionTile(_ session: ChatSession) -> some View {
-        Button {
-            onSelectSession(session)
-        } label: {
-            HStack(alignment: .center, spacing: EnsuSpacing.sm) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(session.title)
-                        .font(session.id == currentSessionId ? EnsuFont.ui(size: 16, weight: .semibold) : EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.textPrimary)
-                    Text(session.lastMessage)
-                        .font(EnsuTypography.mini)
-                        .foregroundStyle(EnsuColor.textMuted)
-                        .lineLimit(1)
-                }
-                Spacer()
-                ActionButton(icon: "trash", color: EnsuColor.textMuted) {
-                    onDeleteSession(session)
-                }
+        HStack(alignment: .center, spacing: EnsuSpacing.sm) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(session.title)
+                    .font(session.id == currentSessionId ? EnsuFont.ui(size: 16, weight: .semibold) : EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textPrimary)
+                Text(session.lastMessage)
+                    .font(EnsuTypography.mini)
+                    .foregroundStyle(EnsuColor.textMuted)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, EnsuSpacing.lg)
-            .padding(.vertical, EnsuSpacing.sm)
+            Spacer()
+            ActionButton(icon: "trash", color: EnsuColor.textMuted) {
+                onDeleteSession(session)
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, EnsuSpacing.lg)
+        .padding(.vertical, EnsuSpacing.sm)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onSelectSession(session)
+        }
     }
 
     private var footer: some View {

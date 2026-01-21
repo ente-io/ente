@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import io.ente.ensu.components.EnsuLogo
 import io.ente.ensu.data.auth.AuthResponsePayload
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.auth.KeyAttributes
@@ -96,11 +97,7 @@ fun AuthFlowScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "ensu",
-                        style = EnsuTypography.h3Bold,
-                        color = EnsuColor.textPrimary()
-                    )
+                    EnsuLogo(height = 20.dp)
                 },
                 navigationIcon = {
                     IconButton(onClick = {

@@ -17,6 +17,7 @@ struct ChatView: View {
     @State private var showDeveloperAlert = false
     @State private var showDeveloperSettings = false
     @State private var showSignOutAlert = false
+    @State private var showAttachmentDownloads = false
 
     private var editingMessage: ChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
@@ -62,9 +63,22 @@ struct ChatView: View {
                     isDrawerOpen = false
                 }
             }
+            .onChange(of: viewModel.syncErrorMessage) { message in
+                guard let message else { return }
+                showToast(message, duration: 2)
+                viewModel.syncErrorMessage = nil
+            }
         }
         .sheet(isPresented: $showModelSettings) {
             ModelSettingsView()
+        }
+        .sheet(isPresented: $showAttachmentDownloads) {
+            AttachmentDownloadsSheet(
+                downloads: viewModel.attachmentDownloads,
+                sessionTitle: { viewModel.sessionTitle(for: $0) },
+                onCancel: { viewModel.cancelAttachmentDownload($0) },
+                onDismiss: { showAttachmentDownloads = false }
+            )
         }
         .platformFullScreenCover(isPresented: $showDeveloperSettings) {
             DeveloperSettingsView { message in
@@ -119,13 +133,16 @@ struct ChatView: View {
     private func mainContent(showsMenuButton: Bool) -> some View {
         VStack(spacing: 0) {
             ChatAppBar(
-                title: "ensu",
                 sessionTitle: viewModel.currentSession?.title ?? "New chat",
                 showBrand: viewModel.messages.isEmpty,
                 showSignIn: !appState.isLoggedIn,
                 showsMenuButton: showsMenuButton,
+                attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
                 onMenu: { isDrawerOpen.toggle() },
-                onSignIn: { isShowingAuth = true }
+                onSignIn: { isShowingAuth = true },
+                onAttachmentDownloads: {
+                    showAttachmentDownloads = true
+                }
             )
 
             Divider()
@@ -163,6 +180,7 @@ struct ChatView: View {
                         isDownloading: viewModel.isDownloading,
                         editingMessage: editingMessage,
                         isProcessingAttachments: viewModel.isProcessingAttachments,
+                        isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
                         onSend: {
                             viewModel.sendDraft()
                         },
@@ -218,7 +236,7 @@ struct ChatView: View {
                 deleteSession = session
             },
             onSync: {
-                viewModel.retryDownload()
+                viewModel.syncNow()
             },
             onShowLogs: {
                 showToast("Logs are not available yet.", duration: 2)
@@ -289,14 +307,101 @@ private struct ToastMessage: Identifiable {
     let text: String
 }
 
+private struct AttachmentDownloadsSheet: View {
+    let downloads: [AttachmentDownloadItem]
+    let sessionTitle: (UUID) -> String
+    let onCancel: (String) -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Attachment downloads")
+                    .font(EnsuTypography.h3Bold)
+                Spacer()
+                Button("Close", action: onDismiss)
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.accent)
+            }
+            .padding(.horizontal, EnsuSpacing.pageHorizontal)
+            .padding(.vertical, EnsuSpacing.sm)
+
+            Divider()
+                .background(EnsuColor.border)
+
+            if downloads.isEmpty {
+                Text("No pending downloads")
+                    .font(EnsuTypography.body)
+                    .foregroundStyle(EnsuColor.textMuted)
+                    .padding(.top, EnsuSpacing.lg)
+                Spacer()
+            } else {
+                List(downloads) { item in
+                    HStack(spacing: EnsuSpacing.md) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.name)
+                                .font(EnsuTypography.body)
+                                .foregroundStyle(EnsuColor.textPrimary)
+                                .lineLimit(1)
+                            Text("\(sessionTitle(item.sessionId)) • \(item.formattedSize)")
+                                .font(EnsuTypography.mini)
+                                .foregroundStyle(EnsuColor.textMuted)
+                            if item.status == .failed, let errorMessage = item.errorMessage, !errorMessage.isEmpty {
+                                Text(errorMessage)
+                                    .font(EnsuTypography.mini)
+                                    .foregroundStyle(EnsuColor.error)
+                                    .lineLimit(2)
+                            }
+                        }
+
+                        Spacer()
+
+                        Text(statusText(for: item.status))
+                            .font(EnsuTypography.mini)
+                            .foregroundStyle(EnsuColor.textMuted)
+
+                        if item.status == .queued || item.status == .downloading {
+                            Button(action: { onCancel(item.id) }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(EnsuColor.textMuted)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .listStyle(.plain)
+            }
+        }
+        .frame(minHeight: 320)
+        .background(EnsuColor.backgroundBase)
+    }
+
+    private func statusText(for status: AttachmentDownloadItem.Status) -> String {
+        switch status {
+        case .queued:
+            return "Queued"
+        case .downloading:
+            return "Downloading"
+        case .completed:
+            return "Completed"
+        case .failed:
+            return "Failed"
+        case .canceled:
+            return "Canceled"
+        }
+    }
+}
+
 private struct ChatAppBar: View {
-    let title: String
     let sessionTitle: String
     let showBrand: Bool
     let showSignIn: Bool
     let showsMenuButton: Bool
+    let attachmentDownloadSummary: (completed: Int, total: Int)?
     let onMenu: () -> Void
     let onSignIn: () -> Void
+    let onAttachmentDownloads: () -> Void
 
     private let centerInset: CGFloat = 72
 
@@ -324,15 +429,36 @@ private struct ChatAppBar: View {
                             .foregroundStyle(EnsuColor.accent)
                     }
                     .buttonStyle(.plain)
+                } else if let summary = attachmentDownloadSummary {
+                    Button(action: onAttachmentDownloads) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.down.circle")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(EnsuColor.textPrimary)
+                            Text("\(summary.completed)/\(summary.total)")
+                                .font(EnsuTypography.mini)
+                                .foregroundStyle(EnsuColor.textMuted)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(EnsuColor.fillFaint)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
-            Text(showBrand ? title : sessionTitle)
-                .font(showBrand ? EnsuTypography.h3Bold : EnsuTypography.large)
-                .foregroundStyle(EnsuColor.textPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
-                .padding(.horizontal, centerInset)
+            if showBrand {
+                EnsuLogo(height: 20)
+                    .padding(.horizontal, centerInset)
+            } else {
+                Text(sessionTitle)
+                    .font(EnsuTypography.large)
+                    .foregroundStyle(EnsuColor.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .padding(.horizontal, centerInset)
+            }
         }
         .padding(.horizontal, EnsuSpacing.pageHorizontal)
         .padding(.vertical, EnsuSpacing.sm)

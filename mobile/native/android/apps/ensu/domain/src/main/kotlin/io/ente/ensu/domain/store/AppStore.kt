@@ -1,9 +1,12 @@
 package io.ente.ensu.domain.store
 
+import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.model.Attachment
+import io.ente.ensu.domain.model.AttachmentDownloadItem
+import io.ente.ensu.domain.model.AttachmentDownloadStatus
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.AuthState
 import io.ente.ensu.domain.model.ChatMessage
@@ -16,6 +19,7 @@ import io.ente.ensu.domain.state.ModelSettingsState
 import io.ente.ensu.domain.logging.LogRepository
 import io.ente.ensu.domain.logging.NoOpLogRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,12 +29,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.io.File
 import kotlin.math.abs
 import kotlin.math.max
 
 class AppStore(
     private val sessionPreferences: SessionPreferences,
     private val chatRepository: io.ente.ensu.domain.chat.ChatRepository,
+    private val chatSyncRepository: ChatSyncRepository? = null,
     private val llmProvider: LlmProvider,
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val logRepository: LogRepository = NoOpLogRepository
@@ -44,6 +51,13 @@ class AppStore(
     private var generationJob: Job? = null
     private var stopRequested = false
     private var streamingParentId: String? = null
+    private var pendingSyncRequested = false
+    private var pendingSyncErrorHandler: ((String) -> Unit)? = null
+
+    private val attachmentDownloads = mutableMapOf<String, AttachmentDownloadItem>()
+    private val attachmentDownloadQueue = ArrayDeque<String>()
+    private val attachmentDownloadActive = mutableMapOf<String, Job>()
+    private val maxAttachmentDownloadConcurrency = 2
 
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
@@ -105,8 +119,35 @@ class AppStore(
         }
         // Session is empty, no DB load needed.
         rebuildChatState(session.id)
+        updateAttachmentDownloadState()
         logRepository.log(LogLevel.Info, "Created new session")
         return session.id
+    }
+
+    fun startNewSessionDraft() {
+        generationJob?.cancel()
+        llmProvider.stopGeneration()
+        streamingParentId = null
+        _state.update { appState ->
+            appState.copy(
+                chat = appState.chat.copy(
+                    currentSessionId = null,
+                    messages = emptyList(),
+                    branchSelections = emptyMap(),
+                    isGenerating = false,
+                    isDownloading = false,
+                    streamingResponse = "",
+                    streamingParentId = null,
+                    downloadPercent = null,
+                    downloadStatus = null,
+                    messageText = "",
+                    attachments = emptyList(),
+                    editingMessageId = null
+                )
+            )
+        }
+        updateAttachmentDownloadState()
+        logRepository.log(LogLevel.Info, "Started new session draft")
     }
 
     fun selectSession(sessionId: String) {
@@ -128,7 +169,72 @@ class AppStore(
         }
         loadMessagesFromDb(sessionId)
         rebuildChatState(sessionId)
+        ensureAttachmentsAvailable(sessionId)
         logRepository.log(LogLevel.Info, "Selected session", sessionId)
+    }
+
+    fun deleteSession(sessionId: String) {
+        val currentState = _state.value
+        val isCurrent = currentState.chat.currentSessionId == sessionId
+
+        if (isCurrent) {
+            generationJob?.cancel()
+            llmProvider.stopGeneration()
+            streamingParentId = null
+        }
+
+        chatRepository.deleteSession(sessionId)
+        messageStore.remove(sessionId)
+        branchSelections.remove(sessionId)
+        purgeAttachmentDownloads(sessionId)
+
+        val remaining = currentState.chat.sessions.filterNot { it.id == sessionId }
+        val sessions = remaining
+
+        sessions.forEach { session ->
+            messageStore.getOrPut(session.id) { mutableListOf() }
+            branchSelections.getOrPut(session.id) { mutableMapOf() }
+        }
+
+        val newCurrent = if (isCurrent) {
+            sessions.firstOrNull()?.id
+        } else {
+            currentState.chat.currentSessionId?.takeIf { id -> sessions.any { it.id == id } }
+                ?: sessions.firstOrNull()?.id
+        }
+
+        _state.update { appState ->
+            val resetCurrent = isCurrent
+            appState.copy(
+                chat = appState.chat.copy(
+                    sessions = sessions,
+                    currentSessionId = newCurrent,
+                    isGenerating = if (resetCurrent) false else appState.chat.isGenerating,
+                    isDownloading = if (resetCurrent) false else appState.chat.isDownloading,
+                    streamingResponse = if (resetCurrent) "" else appState.chat.streamingResponse,
+                    streamingParentId = if (resetCurrent) null else appState.chat.streamingParentId,
+                    downloadPercent = if (resetCurrent) null else appState.chat.downloadPercent,
+                    downloadStatus = if (resetCurrent) null else appState.chat.downloadStatus,
+                    messageText = if (resetCurrent) "" else appState.chat.messageText,
+                    attachments = if (resetCurrent) emptyList() else appState.chat.attachments,
+                    editingMessageId = if (resetCurrent) null else appState.chat.editingMessageId
+                )
+            )
+        }
+
+        if (newCurrent != null) {
+            loadMessagesFromDb(newCurrent)
+            rebuildChatState(newCurrent)
+            ensureAttachmentsAvailable(newCurrent)
+        } else {
+            _state.update { appState ->
+                appState.copy(chat = appState.chat.copy(messages = emptyList(), branchSelections = emptyMap()))
+            }
+        }
+
+        scope?.launch { sessionPreferences.setSelectedSessionId(newCurrent) }
+        syncNow()
+        logRepository.log(LogLevel.Info, "Deleted session", sessionId)
     }
 
     fun persistSelectedSession(scope: CoroutineScope, sessionId: String?) {
@@ -192,7 +298,7 @@ class AppStore(
     }
 
     fun addAttachment(attachment: Attachment) {
-        if (_state.value.chat.isGenerating || _state.value.chat.isDownloading) return
+        if (_state.value.chat.isGenerating || _state.value.chat.isDownloading || _state.value.chat.isAttachmentDownloadBlocked) return
 
         _state.update { appState ->
             appState.copy(
@@ -244,8 +350,13 @@ class AppStore(
         val parentId = message.parentId ?: return
         val parent = messageStore[sessionId]?.firstOrNull { it.id == parentId } ?: return
 
+        if (missingAttachments(sessionId).isNotEmpty()) {
+            ensureAttachmentsAvailable(sessionId)
+            return
+        }
         llmProvider.resetContext()
         startGeneration(sessionId, parent)
+        requestSync()
     }
 
     fun sendMessage() {
@@ -256,6 +367,10 @@ class AppStore(
         if (text.isEmpty() && attachments.isEmpty()) return
 
         val sessionId = currentState.chat.currentSessionId ?: createNewSession()
+        if (missingAttachments(sessionId).isNotEmpty()) {
+            ensureAttachmentsAvailable(sessionId)
+            return
+        }
         val timestamp = clock()
 
         val editingMessageId = currentState.chat.editingMessageId
@@ -290,6 +405,7 @@ class AppStore(
         updateCurrentSessionPreview(sessionId, text, timestamp)
         rebuildChatState(sessionId)
         startGeneration(sessionId, userMessage)
+        requestSync()
         logRepository.log(LogLevel.Info, "Sent message", text)
     }
 
@@ -310,6 +426,7 @@ class AppStore(
             appState.copy(auth = AuthState(isLoggedIn = true, email = email))
         }
         logRepository.log(LogLevel.Info, "Signed in", email)
+        syncNow()
     }
 
     fun signOut() {
@@ -317,6 +434,223 @@ class AppStore(
             appState.copy(auth = AuthState())
         }
         logRepository.log(LogLevel.Info, "Signed out")
+    }
+
+    fun syncNow(onError: ((String) -> Unit)? = null) {
+        requestSync(onError)
+    }
+
+    private fun requestSync(onError: ((String) -> Unit)? = null) {
+        if (_state.value.chat.isGenerating) {
+            pendingSyncRequested = true
+            if (onError != null) {
+                pendingSyncErrorHandler = onError
+            }
+            return
+        }
+
+        val handler = pendingSyncErrorHandler ?: onError
+        pendingSyncRequested = false
+        pendingSyncErrorHandler = null
+        performSync(handler)
+    }
+
+    private fun syncAfterGeneration() {
+        val handler = pendingSyncErrorHandler
+        val shouldAutoSync = _state.value.auth.isLoggedIn
+        if (!pendingSyncRequested && !shouldAutoSync) {
+            pendingSyncErrorHandler = null
+            return
+        }
+        if (!shouldAutoSync && handler == null) {
+            pendingSyncRequested = false
+            pendingSyncErrorHandler = null
+            return
+        }
+        pendingSyncRequested = false
+        pendingSyncErrorHandler = null
+        performSync(handler)
+    }
+
+    private fun performSync(onError: ((String) -> Unit)? = null) {
+        val scope = scope ?: return
+        scope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    chatSyncRepository?.sync()
+                }
+                loadSessionsFromDb()
+            } catch (err: Throwable) {
+                val message = syncErrorMessage(err)
+                logRepository.log(LogLevel.Error, "Sync failed", message)
+                if (onError != null) {
+                    withContext(Dispatchers.Main) {
+                        onError("Sync failed: $message")
+                    }
+                }
+            }
+        }
+    }
+
+    fun cancelAttachmentDownload(attachmentId: String) {
+        attachmentDownloadActive[attachmentId]?.cancel()
+        attachmentDownloadActive.remove(attachmentId)
+        attachmentDownloadQueue.removeAll { it == attachmentId }
+        attachmentDownloads[attachmentId]?.let { item ->
+            attachmentDownloads[attachmentId] = item.copy(status = AttachmentDownloadStatus.Canceled)
+        }
+        updateAttachmentDownloadState()
+        startNextAttachmentDownloads()
+    }
+
+    private fun syncErrorMessage(error: Throwable): String {
+        var current: Throwable? = error
+        while (current != null) {
+            val message = current.message
+            if (!message.isNullOrBlank()) {
+                return message
+            }
+            current = current.cause
+        }
+        return "Unknown error"
+    }
+
+    private fun purgeAttachmentDownloads(sessionId: String) {
+        val ids = attachmentDownloads.values.filter { it.sessionId == sessionId }.map { it.id }
+        ids.forEach { id ->
+            attachmentDownloadActive[id]?.cancel()
+            attachmentDownloadActive.remove(id)
+            attachmentDownloadQueue.removeAll { it == id }
+            attachmentDownloads.remove(id)
+        }
+        updateAttachmentDownloadState()
+    }
+
+    private fun ensureAttachmentsAvailable(sessionId: String) {
+        val missing = missingAttachments(sessionId)
+        if (missing.isEmpty()) {
+            updateAttachmentDownloadState()
+            return
+        }
+        queueAttachmentDownloads(missing)
+        updateAttachmentDownloadState()
+    }
+
+    private fun missingAttachments(sessionId: String): List<AttachmentDownloadItem> {
+        val messages = messageStore[sessionId].orEmpty()
+        if (messages.isEmpty()) return emptyList()
+        val seen = mutableSetOf<String>()
+        val missing = mutableListOf<AttachmentDownloadItem>()
+
+        for (message in messages) {
+            for (attachment in message.attachments) {
+                if (!seen.add(attachment.id)) continue
+                val path = attachment.localPath
+                if (path != null && File(path).exists()) {
+                    attachmentDownloadActive[attachment.id]?.cancel()
+                    attachmentDownloadActive.remove(attachment.id)
+                    attachmentDownloadQueue.removeAll { it == attachment.id }
+                    attachmentDownloads.remove(attachment.id)
+                    continue
+                }
+                val existing = attachmentDownloads[attachment.id]
+                val status = existing?.status ?: AttachmentDownloadStatus.Queued
+                missing.add(
+                    AttachmentDownloadItem(
+                        id = attachment.id,
+                        sessionId = sessionId,
+                        name = attachment.name,
+                        sizeBytes = attachment.sizeBytes,
+                        status = status
+                    )
+                )
+            }
+        }
+
+        return missing
+    }
+
+    private fun queueAttachmentDownloads(items: List<AttachmentDownloadItem>) {
+        items.forEach { item ->
+            val existing = attachmentDownloads[item.id]
+            val updated = if (existing == null ||
+                existing.status == AttachmentDownloadStatus.Failed ||
+                existing.status == AttachmentDownloadStatus.Canceled
+            ) {
+                item
+            } else {
+                existing
+            }
+            attachmentDownloads[item.id] = updated
+            if (updated.status != AttachmentDownloadStatus.Completed &&
+                updated.status != AttachmentDownloadStatus.Canceled &&
+                attachmentDownloadActive[item.id] == null &&
+                !attachmentDownloadQueue.contains(item.id)
+            ) {
+                attachmentDownloadQueue.addLast(item.id)
+            }
+        }
+        startNextAttachmentDownloads()
+    }
+
+    private fun startNextAttachmentDownloads() {
+        val scope = scope ?: return
+        while (attachmentDownloadActive.size < maxAttachmentDownloadConcurrency && attachmentDownloadQueue.isNotEmpty()) {
+            val id = attachmentDownloadQueue.removeFirst()
+            val item = attachmentDownloads[id] ?: continue
+            if (item.status == AttachmentDownloadStatus.Completed || item.status == AttachmentDownloadStatus.Canceled) {
+                continue
+            }
+            attachmentDownloads[id] = item.copy(status = AttachmentDownloadStatus.Downloading)
+            updateAttachmentDownloadState()
+
+            val job = scope.launch(Dispatchers.IO) {
+                val result = runCatching {
+                    chatSyncRepository?.downloadAttachment(id, item.sessionId)
+                        ?: throw IllegalStateException("Sync unavailable")
+                }
+                val status = if (result.isSuccess) {
+                    AttachmentDownloadStatus.Completed
+                } else {
+                    AttachmentDownloadStatus.Failed
+                }
+                withContext(Dispatchers.Main) {
+                    attachmentDownloads[id]?.let { current ->
+                        if (current.status != AttachmentDownloadStatus.Canceled) {
+                            attachmentDownloads[id] = current.copy(status = status)
+                        }
+                    }
+                    attachmentDownloadActive.remove(id)
+                    updateAttachmentDownloadState()
+                    startNextAttachmentDownloads()
+                }
+            }
+            attachmentDownloadActive[id] = job
+        }
+    }
+
+    private fun updateAttachmentDownloadState() {
+        val currentSessionId = _state.value.chat.currentSessionId
+        val missing = currentSessionId?.let { missingAttachments(it) }.orEmpty()
+        val items = attachmentDownloads.values.sortedBy { it.name }
+        val active = items.filter { it.status != AttachmentDownloadStatus.Canceled }
+        val total = active.size
+        val completed = active.count { it.status == AttachmentDownloadStatus.Completed }
+        val hasPending = active.any {
+            it.status == AttachmentDownloadStatus.Queued ||
+                it.status == AttachmentDownloadStatus.Downloading ||
+                it.status == AttachmentDownloadStatus.Failed
+        }
+        val progress = if (total > 0 && hasPending) (completed * 100 / total) else null
+        _state.update { appState ->
+            appState.copy(
+                chat = appState.chat.copy(
+                    attachmentDownloads = items,
+                    attachmentDownloadProgress = progress,
+                    isAttachmentDownloadBlocked = missing.isNotEmpty()
+                )
+            )
+        }
     }
 
     private fun startGeneration(sessionId: String, userMessage: ChatMessage) {
@@ -374,6 +708,7 @@ class AppStore(
                 if (!cancelled) {
                     logRepository.log(LogLevel.Error, "Model load failed", err.message ?: "")
                 }
+                syncAfterGeneration()
                 return@launch
             }
 
@@ -460,6 +795,7 @@ class AppStore(
             )
         }
         rebuildChatState(sessionId)
+        syncAfterGeneration()
     }
 
     private fun updateCurrentSessionPreview(sessionId: String, preview: String, timestamp: Long) {
@@ -696,26 +1032,38 @@ class AppStore(
 
     private fun loadSessionsFromDb() {
         val sessions = chatRepository.listSessions()
-        val initial = if (sessions.isEmpty()) {
-            listOf(chatRepository.createSession("New Chat"))
-        } else {
-            sessions
-        }
 
-        initial.forEach { session ->
+        sessions.forEach { session ->
             messageStore.getOrPut(session.id) { mutableListOf() }
             branchSelections.getOrPut(session.id) { mutableMapOf() }
         }
 
         val stored = runBlocking { sessionPreferences.selectedSessionId.first() }
-        val current = stored?.takeIf { id -> initial.any { it.id == id } } ?: initial.first().id
+        val resolvedStored = stored?.takeIf { id -> sessions.any { it.id == id } }
+        val shouldKeepDraft = resolvedStored == null &&
+            stored == null &&
+            _state.value.chat.currentSessionId == null &&
+            _state.value.chat.sessions.isNotEmpty()
+        val current = if (shouldKeepDraft) null else resolvedStored ?: sessions.firstOrNull()?.id
 
         _state.update { appState ->
-            appState.copy(chat = appState.chat.copy(sessions = initial, currentSessionId = current))
+            appState.copy(
+                chat = appState.chat.copy(
+                    sessions = sessions,
+                    currentSessionId = current,
+                    messages = if (current == null) emptyList() else appState.chat.messages,
+                    branchSelections = if (current == null) emptyMap() else appState.chat.branchSelections
+                )
+            )
         }
 
-        loadMessagesFromDb(current)
-        rebuildChatState(current)
+        if (current != null) {
+            loadMessagesFromDb(current)
+            rebuildChatState(current)
+            ensureAttachmentsAvailable(current)
+        } else {
+            updateAttachmentDownloadState()
+        }
     }
 
     private data class PromptResult(

@@ -304,6 +304,7 @@
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -320,6 +321,7 @@
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -526,6 +528,7 @@
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
@@ -533,6 +536,8 @@
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
 				);
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -583,6 +588,7 @@
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
@@ -590,6 +596,8 @@
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
 				);
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -639,6 +647,7 @@
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
@@ -646,6 +655,8 @@
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
 				);
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -696,6 +707,7 @@
 					"-force_load",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
@@ -703,6 +715,8 @@
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
 				);
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;

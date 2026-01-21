@@ -192,6 +192,7 @@ fun CodeTextField(
         placeholder = {
             Text(
                 text = "• • • • • •",
+                modifier = Modifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = 28.sp,
                     lineHeight = 32.sp,

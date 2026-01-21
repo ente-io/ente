@@ -103,8 +103,8 @@ object EnsuCornerRadius {
 
 object EnsuTypography {
     private val serifFamily = FontFamily(
-        Font(R.font.cormorant_garamond_variable, FontWeight.Medium),
-        Font(R.font.cormorant_garamond_variable, FontWeight.SemiBold)
+        Font(R.font.dm_serif_text_regular, FontWeight.Medium),
+        Font(R.font.dm_serif_text_regular, FontWeight.SemiBold)
     )
 
     private val uiFamily = FontFamily(
@@ -114,11 +114,7 @@ object EnsuTypography {
         Font(R.font.inter_bold, FontWeight.Bold)
     )
 
-    private val messageFamily = FontFamily(
-        Font(R.font.sourceserif4_variable, FontWeight.Normal),
-        Font(R.font.sourceserif4_variable, FontWeight.SemiBold),
-        Font(R.font.sourceserif4_variable, FontWeight.Bold)
-    )
+    private val messageFamily = uiFamily
 
     private val codeFamily = FontFamily(
         Font(R.font.jetbrainsmono_regular, FontWeight.Normal)

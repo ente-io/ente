@@ -1,6 +1,7 @@
 package io.ente.ensu.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,13 +34,21 @@ fun AttachmentChip(
     size: String,
     icon: ImageVector,
     isUploading: Boolean,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null
 ) {
+    val clickModifier = if (onClick != null) {
+        Modifier.clickable(onClick = onClick)
+    } else {
+        Modifier
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .widthIn(max = 220.dp)
             .background(EnsuColor.fillFaint(), RoundedCornerShape(EnsuCornerRadius.input.dp))
+            .then(clickModifier)
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Icon(

@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
 INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/inference_rs_uniffi"
 CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_db_uniffi"
+CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_sync_uniffi"
 # Note: Older builds used to patch llama-cpp sources; this repo no longer ships that patch script.
 PATCH_SCRIPT=""
 OUT_DIR="$ROOT/src/main/jniLibs"
@@ -29,7 +30,7 @@ export CARGO_CFG_TARGET_FEATURE="${CARGO_CFG_TARGET_FEATURE:-}"
 
 mkdir -p "$OUT_DIR"
 
-for CRATE_DIR in "$INFERENCE_UNIFFI_RUST_DIR" "$CHATDB_UNIFFI_RUST_DIR"; do
+for CRATE_DIR in "$INFERENCE_UNIFFI_RUST_DIR" "$CHATDB_UNIFFI_RUST_DIR" "$CHAT_SYNC_UNIFFI_RUST_DIR"; do
   pushd "$CRATE_DIR" >/dev/null
   cargo ndk \
     --platform 23 \

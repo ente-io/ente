@@ -10,6 +10,7 @@ import io.ente.ensu.domain.model.ChatSession
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.labs.llmchat_db.AttachmentKind
 import io.ente.labs.llmchat_db.AttachmentMeta
+import io.ente.labs.llmchat_db.DbException
 import io.ente.labs.llmchat_db.LlmChatDb
 import java.io.File
 
@@ -19,22 +20,20 @@ class RustChatRepository(
 ) : ChatRepository {
 
     private val attachmentsDir = File(context.filesDir, "attachments")
-    private val db: LlmChatDb
+    private val mainDbFile = File(context.filesDir, "llmchat.db")
+    private val attachmentsDbFile = File(context.filesDir, "llmchat_attachments.db")
+    private val dbKey = credentialStore.getOrCreateChatDbKey()
+    private var db: LlmChatDb = openDb()
 
     init {
         if (!attachmentsDir.exists()) {
             attachmentsDir.mkdirs()
         }
-
-        val mainDb = File(context.filesDir, "llmchat.db").absolutePath
-        val attachmentsDb = File(context.filesDir, "llmchat_attachments.db").absolutePath
-        val key = credentialStore.getOrCreateChatDbKey()
-        db = LlmChatDb.open(mainDb, attachmentsDb, key)
     }
 
-    override fun listSessions(): List<ChatSession> {
+    override fun listSessions(): List<ChatSession> = withDbRecovery {
         val sessions = db.listSessions()
-        return sessions.map { session ->
+        sessions.map { session ->
             val lastMessage = runCatching { db.getMessages(session.uuid) }.getOrNull()?.lastOrNull()?.text
             ChatSession(
                 id = session.uuid,
@@ -45,9 +44,9 @@ class RustChatRepository(
         }
     }
 
-    override fun createSession(title: String): ChatSession {
+    override fun createSession(title: String): ChatSession = withDbRecovery {
         val session = db.createSession(title)
-        return ChatSession(
+        ChatSession(
             id = session.uuid,
             title = session.title,
             lastMessagePreview = null,
@@ -55,12 +54,12 @@ class RustChatRepository(
         )
     }
 
-    override fun deleteSession(sessionId: String) {
+    override fun deleteSession(sessionId: String) = withDbRecovery {
         db.deleteSession(sessionId)
     }
 
-    override fun getMessages(sessionId: String): List<ChatMessage> {
-        return db.getMessages(sessionId).map { message ->
+    override fun getMessages(sessionId: String): List<ChatMessage> = withDbRecovery {
+        db.getMessages(sessionId).map { message ->
             ChatMessage(
                 id = message.uuid,
                 sessionId = message.sessionUuid,
@@ -94,7 +93,7 @@ class RustChatRepository(
         author: MessageAuthor,
         text: String,
         attachments: List<Attachment>
-    ): ChatMessage {
+    ): ChatMessage = withDbRecovery {
         val meta = attachments.map { att ->
             AttachmentMeta(
                 id = att.id,
@@ -115,7 +114,7 @@ class RustChatRepository(
             attachments = meta
         )
 
-        return ChatMessage(
+        ChatMessage(
             id = message.uuid,
             sessionId = message.sessionUuid,
             parentId = message.parentMessageUuid,
@@ -126,7 +125,44 @@ class RustChatRepository(
         )
     }
 
-    override fun updateMessageText(messageId: String, text: String) {
+    override fun updateMessageText(messageId: String, text: String) = withDbRecovery {
         db.updateMessageText(messageId, text)
+    }
+
+    private fun openDb(): LlmChatDb {
+        return LlmChatDb.open(
+            mainDbFile.absolutePath,
+            attachmentsDbFile.absolutePath,
+            dbKey
+        )
+    }
+
+    private fun <T> withDbRecovery(block: () -> T): T {
+        return try {
+            block()
+        } catch (error: DbException) {
+            if (shouldResetDb(error)) {
+                resetDb()
+                block()
+            } else {
+                throw error
+            }
+        }
+    }
+
+    private fun shouldResetDb(error: DbException): Boolean {
+        val message = when (error) {
+            is DbException.Message -> error.v1
+            else -> error.message.orEmpty()
+        }.lowercase()
+        return message.contains("stream pull failed") ||
+            message.contains("invalid blob") ||
+            message.contains("invalid encrypted")
+    }
+
+    private fun resetDb() {
+        mainDbFile.delete()
+        attachmentsDbFile.delete()
+        db = openDb()
     }
 }
