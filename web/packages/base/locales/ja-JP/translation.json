@@ -171,6 +171,7 @@
     "join_album_and_comment": "",
     "like_all": "",
     "favorite": "お気に入り",
+    "un_favorite": "",
     "convert": "変換する",
     "multi_folder_upload": "複数のフォルダが検出されました",
     "upload_to_choice": "アップロードしますか",

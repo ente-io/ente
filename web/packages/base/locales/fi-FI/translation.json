@@ -171,6 +171,7 @@
     "join_album_and_comment": "",
     "like_all": "",
     "favorite": "Lisää suosikkeihin",
+    "un_favorite": "",
     "convert": "Muunna",
     "multi_folder_upload": "Useita kansioita havaittu",
     "upload_to_choice": "Haluaisitko ladata ne kohteeseen",
