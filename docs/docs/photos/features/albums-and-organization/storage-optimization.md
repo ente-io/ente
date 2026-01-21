@@ -30,7 +30,7 @@ The app will delete all photos and videos that have been successfully backed up 
 **After freeing up space:**
 
 - Your photos remain in Ente and can be viewed anytime
-- Photos are automatically downloaded when you view them in the app
+- Photos are automatically cached when you view them in the app
 - You may need to clear your device's trash/recently deleted folder to fully reclaim the space
 
 **What gets deleted:**
@@ -50,8 +50,8 @@ The app will delete all photos and videos that have been successfully backed up 
 When you free up space, photos are removed from your device but stay in Ente. To view a photo:
 
 - Simply open it in the Ente app
-- It will be downloaded automatically when you view it
-- Downloaded photos use your device storage again
+- It will be automatically cached when you view it
+- To download and view the photo in any other gallery, choose download option on long pressing thumbnail or the download option in the three dot menu on opening the photo.
 
 ## Remove exact duplicates
 
