@@ -32,6 +32,7 @@ import "package:photos/ui/settings/inherited_settings_state.dart";
 import "package:photos/ui/settings/memories_settings_screen.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/notification_settings_screen.dart";
+import "package:photos/ui/settings/search/settings_search_page.dart";
 import "package:photos/ui/settings/security/security_settings_page.dart";
 import "package:photos/ui/settings/storage_card_widget.dart";
 import "package:photos/ui/settings/streaming/video_streaming_settings_page.dart";
@@ -151,24 +152,46 @@ class _SettingsBody extends StatelessWidget {
             ),
           ),
         ),
-        if (localSettings.enableDatabaseLogging)
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const LogViewerPage(),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsSearchPage(),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: colorScheme.textMuted,
                 ),
-              );
-            },
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Icon(
-                Icons.bug_report,
-                size: 20,
-                color: colorScheme.textMuted,
               ),
             ),
-          ),
+            if (localSettings.enableDatabaseLogging)
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const LogViewerPage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.bug_report,
+                    size: 20,
+                    color: colorScheme.textMuted,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
