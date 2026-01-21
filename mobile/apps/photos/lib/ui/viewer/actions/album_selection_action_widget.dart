@@ -106,7 +106,7 @@ class _AlbumSelectionActionWidgetState
         SelectionActionButton(
           labelText: AppLocalizations.of(context).hide,
           icon: Icons.visibility_off_outlined,
-          onTap: _onHideClick,
+          onTap: _onHideOrUnHideClick,
         ),
       );
     }
@@ -133,7 +133,7 @@ class _AlbumSelectionActionWidgetState
         SelectionActionButton(
           labelText: AppLocalizations.of(context).unhide,
           icon: Icons.visibility_outlined,
-          onTap: _onHideClick,
+          onTap: _onHideOrUnHideClick,
         ),
       );
       items.add(
@@ -190,7 +190,7 @@ class _AlbumSelectionActionWidgetState
           SelectionActionButton(
             labelText: AppLocalizations.of(context).hide,
             icon: Icons.visibility_off_outlined,
-            onTap: _onHideClick,
+            onTap: _onHideOrUnHideClick,
           ),
         );
       }
@@ -343,7 +343,7 @@ class _AlbumSelectionActionWidgetState
     widget.selectedAlbums.clearAll();
   }
 
-  Future<void> _onHideClick() async {
+  Future<void> _onHideOrUnHideClick() async {
     final userID = Configuration.instance.getUserID()!;
     final collections = widget.selectedAlbums.albums
         .where((c) => c.type != CollectionType.favorites)
