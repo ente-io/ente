@@ -241,6 +241,29 @@ body {
     cursor: not-allowed;
 }
 
+/* Sync button */
+.sync-button {
+    padding: 8px 16px;
+    background-color: var(--accent-purple);
+    border: 1px solid var(--accent-purple);
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.sync-button:hover {
+    background-color: var(--accent-purple-hover);
+    border-color: var(--accent-purple-hover);
+}
+
+.sync-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 /* Loading state */
 .loading {
     display: flex;

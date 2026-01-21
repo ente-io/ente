@@ -30,35 +30,38 @@ body {
     min-height: 400px;
 }
 
-/* Header / Navbar - matches web app navbar */
+/* Header - matches desktop app */
 .header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 12px 16px;
     background-color: var(--background);
-    backdrop-filter: blur(7px);
     border-bottom: 1px solid var(--stroke);
     position: sticky;
     top: 0;
     z-index: 10;
 }
 
-.logo {
-    width: 28px;
-    height: 28px;
-    margin-right: 10px;
-}
-
-.title {
-    flex: 1;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 19px;
-}
-
-.header-actions {
+.header-left {
     display: flex;
+    align-items: center;
+    width: 80px;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
     gap: 4px;
+    width: 80px;
+    justify-content: flex-end;
 }
 
 .icon-button {
@@ -79,15 +82,95 @@ body {
     color: var(--text-primary);
 }
 
-/* Search - matches web app input style */
-.search-container {
+.icon-button.active {
+    color: var(--accent-purple);
+}
+
+/* Sort dropdown */
+.sort-container {
+    position: relative;
+}
+
+.sort-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background-color: var(--background-paper);
+    border: 1px solid var(--stroke);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 160px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.sort-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.sort-option:hover {
+    background-color: var(--fill-faint);
+}
+
+.sort-option.active {
+    color: var(--text-primary);
+}
+
+.sort-option svg {
+    color: var(--text-muted);
+}
+
+/* Filter section with tags */
+.filter-section {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: var(--background);
+    overflow-x: auto;
+}
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background-color: var(--fill-faint);
+    color: var(--text-muted);
+}
+
+.filter-pill.active {
+    background-color: var(--accent-purple);
+    color: #fff;
+}
+
+.filter-pill:hover:not(.active) {
+    background-color: var(--fill-muted);
+}
+
+/* Search */
+.search-container {
+    padding: 8px 16px 12px;
     background-color: var(--background);
 }
 
 .search-input {
     width: 100%;
-    padding: 12px 14px;
+    padding: 10px 14px;
     background-color: var(--background-paper);
     border: 1px solid var(--stroke);
     border-radius: 8px;
@@ -111,24 +194,21 @@ body {
 .codes-list {
     flex: 1;
     overflow-y: auto;
-    padding: 4px 10px 12px;
+    padding: 0 16px 12px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 8px;
 }
 
-/* Code card - exact match to Ente Auth app */
+/* Code card - matches desktop app */
 .code-card {
     position: relative;
     background-color: var(--background-paper);
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: hidden;
-    margin-bottom: 8px;
     cursor: pointer;
     transition: background-color 0.2s;
     width: 100%;
-    max-width: 360px;
-    min-height: 120px;
 }
 
 .code-card:hover {
@@ -144,17 +224,17 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    height: 3px;
+    height: 4px;
     background-color: var(--accent-purple);
-    transition: background-color 0.3s;
-    z-index: 2;
+    transition: width 0.1s linear;
+    border-radius: 0 2px 2px 0;
 }
 
 .code-progress-bar.warning {
     background-color: var(--warning-yellow);
 }
 
-/* Pin indicator - exact positioning from web app */
+/* Pin indicator */
 .pin-ribbon {
     position: absolute;
     top: -5px;
@@ -178,12 +258,11 @@ body {
     justify-content: center;
 }
 
-/* Card content layout - exact padding from web app */
+/* Card content layout - matches desktop */
 .code-content {
     display: flex;
     justify-content: space-between;
-    padding: 12px 20px 0px 20px;
-    min-height: 120px;
+    padding: 16px 20px;
     position: relative;
     z-index: 1;
 }
@@ -191,16 +270,16 @@ body {
 .code-left {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     align-items: flex-start;
     flex: 1;
     min-width: 0;
 }
 
 .code-issuer {
-    font-size: 14px;
-    line-height: 17px;
-    font-weight: 500;
+    font-size: 15px;
+    line-height: 18px;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -209,26 +288,23 @@ body {
 }
 
 .code-account {
-    font-size: 12px;
-    line-height: 15px;
+    font-size: 13px;
+    line-height: 16px;
     font-weight: 500;
     color: var(--text-faint);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 16px;
-    flex: 1;
     max-width: 100%;
+    margin-bottom: 8px;
 }
 
 .code-otp {
-    font-size: 24px;
-    line-height: 29px;
+    font-size: 26px;
+    line-height: 32px;
     font-weight: 600;
-    letter-spacing: -0.011em;
+    letter-spacing: 0.02em;
     color: var(--text-primary);
-    margin-top: auto;
-    margin-bottom: 20px;
 }
 
 .code-right {
@@ -237,21 +313,20 @@ body {
     align-items: flex-end;
     justify-content: flex-end;
     text-align: right;
-    gap: 2px;
-    margin-bottom: 1rem;
+    gap: 4px;
     margin-left: 12px;
 }
 
 .code-next-label {
     font-size: 12px;
-    line-height: 15px;
+    line-height: 14px;
     font-weight: 500;
     color: var(--text-faint);
 }
 
 .code-next-otp {
-    font-size: 14px;
-    line-height: 17px;
+    font-size: 15px;
+    line-height: 18px;
     font-weight: 500;
     color: var(--text-muted);
 }

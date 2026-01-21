@@ -19,6 +19,9 @@ export const App: React.FC = () => {
     const [codes, setCodes] = useState<Code[]>([]);
     const [filteredCodes, setFilteredCodes] = useState<Code[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [showSearch, setShowSearch] = useState(false);
+    const [showSortMenu, setShowSortMenu] = useState(false);
+    const [sortOrder, setSortOrder] = useState<"issuer" | "account" | "recent" | "frequent">("issuer");
     const [timeOffset, setTimeOffset] = useState(0);
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -111,14 +114,32 @@ export const App: React.FC = () => {
         return () => clearInterval(interval);
     }, [view, filteredCodes, timeOffset]);
 
-    // Filter codes when search query changes
+    // Filter and sort codes when search query or sort order changes
     useEffect(() => {
-        if (searchQuery.trim()) {
-            setFilteredCodes(searchCodes(codes, searchQuery));
-        } else {
-            setFilteredCodes(codes);
-        }
-    }, [searchQuery, codes]);
+        let result = searchQuery.trim()
+            ? searchCodes(codes, searchQuery)
+            : [...codes];
+
+        // Apply sorting
+        result.sort((a, b) => {
+            switch (sortOrder) {
+                case "issuer":
+                    return a.issuer.localeCompare(b.issuer);
+                case "account":
+                    return (a.account || "").localeCompare(b.account || "");
+                case "recent":
+                    // Most recently used first (using updatedAt or id as fallback)
+                    return (b.id || "").localeCompare(a.id || "");
+                case "frequent":
+                    // For now, just use issuer as we don't track frequency
+                    return a.issuer.localeCompare(b.issuer);
+                default:
+                    return 0;
+            }
+        });
+
+        setFilteredCodes(result);
+    }, [searchQuery, codes, sortOrder]);
 
     // Handle unlock
     const handleUnlock = async () => {
@@ -211,6 +232,14 @@ export const App: React.FC = () => {
             clearInterval(checkInterval);
             setLoggingIn(false);
         }, 5 * 60 * 1000);
+    };
+
+    // Toggle search
+    const toggleSearch = () => {
+        setShowSearch(!showSearch);
+        if (showSearch) {
+            setSearchQuery("");
+        }
     };
 
     // Render loading state
@@ -309,18 +338,7 @@ export const App: React.FC = () => {
     return (
         <div className="popup-container">
             <div className="header">
-                <div className="logo">
-                    <Logo />
-                </div>
-                <span className="title">Ente Auth</span>
-                <div className="header-actions">
-                    <button
-                        className="icon-button"
-                        onClick={handleSync}
-                        title="Sync codes"
-                    >
-                        <SyncIcon />
-                    </button>
+                <div className="header-left">
                     <button
                         className="icon-button"
                         onClick={() => openOptionsPage()}
@@ -329,17 +347,78 @@ export const App: React.FC = () => {
                         <SettingsIcon />
                     </button>
                 </div>
+                <span className="header-title">Auth</span>
+                <div className="header-right">
+                    <button
+                        className="icon-button"
+                        onClick={handleLogout}
+                        title="Lock"
+                    >
+                        <LockIcon />
+                    </button>
+                    <div className="sort-container">
+                        <button
+                            className={`icon-button ${showSortMenu ? "active" : ""}`}
+                            onClick={() => setShowSortMenu(!showSortMenu)}
+                            title="Sort order"
+                        >
+                            <SortIcon />
+                        </button>
+                        {showSortMenu && (
+                            <div className="sort-menu">
+                                <div
+                                    className={`sort-option ${sortOrder === "issuer" ? "active" : ""}`}
+                                    onClick={() => { setSortOrder("issuer"); setShowSortMenu(false); }}
+                                >
+                                    Issuer
+                                    {sortOrder === "issuer" && <CheckIcon />}
+                                </div>
+                                <div
+                                    className={`sort-option ${sortOrder === "account" ? "active" : ""}`}
+                                    onClick={() => { setSortOrder("account"); setShowSortMenu(false); }}
+                                >
+                                    Account
+                                    {sortOrder === "account" && <CheckIcon />}
+                                </div>
+                                <div
+                                    className={`sort-option ${sortOrder === "frequent" ? "active" : ""}`}
+                                    onClick={() => { setSortOrder("frequent"); setShowSortMenu(false); }}
+                                >
+                                    Frequently used
+                                    {sortOrder === "frequent" && <CheckIcon />}
+                                </div>
+                                <div
+                                    className={`sort-option ${sortOrder === "recent" ? "active" : ""}`}
+                                    onClick={() => { setSortOrder("recent"); setShowSortMenu(false); }}
+                                >
+                                    Recently used
+                                    {sortOrder === "recent" && <CheckIcon />}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        className={`icon-button ${showSearch ? "active" : ""}`}
+                        onClick={toggleSearch}
+                        title="Search"
+                    >
+                        <SearchIcon />
+                    </button>
+                </div>
             </div>
 
-            <div className="search-container">
-                <input
-                    type="text"
-                    className="search-input"
-                    placeholder="Search codes..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
+            {showSearch && (
+                <div className="search-container">
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder="Search codes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoFocus
+                    />
+                </div>
+            )}
 
             <div className="codes-list">
                 {filteredCodes.length === 0 ? (
@@ -369,10 +448,6 @@ export const App: React.FC = () => {
                     })
                 )}
             </div>
-
-            <div className={`sync-indicator ${syncing ? "syncing" : ""}`}>
-                {syncing ? "Syncing..." : `${codes.length} codes`}
-            </div>
         </div>
     );
 };
@@ -382,7 +457,7 @@ const Logo: React.FC = () => (
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
         <path
             d="M12 2L3 7V12C3 16.97 6.84 21.66 12 23C17.16 21.66 21 16.97 21 12V7L12 2Z"
-            fill="#8e2de2"
+            fill="#8F33D6"
         />
         <path
             d="M10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z"
@@ -391,17 +466,42 @@ const Logo: React.FC = () => (
     </svg>
 );
 
-// Sync icon
-const SyncIcon: React.FC = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+// Settings icon (gear)
+const SettingsIcon: React.FC = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
 );
 
-// Settings icon
-const SettingsIcon: React.FC = () => (
+// Lock icon
+const LockIcon: React.FC = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+);
+
+// Sort icon (lines with varying lengths)
+const SortIcon: React.FC = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="4" y1="6" x2="20" y2="6" />
+        <line x1="4" y1="12" x2="16" y2="12" />
+        <line x1="4" y1="18" x2="12" y2="18" />
+    </svg>
+);
+
+// Search icon
+const SearchIcon: React.FC = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+);
+
+// Check icon
+const CheckIcon: React.FC = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        <polyline points="20 6 9 17 4 12" />
     </svg>
 );

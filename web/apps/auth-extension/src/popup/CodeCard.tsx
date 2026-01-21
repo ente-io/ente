@@ -1,6 +1,6 @@
 /**
  * Individual code display card component.
- * Matches the Ente Auth app design.
+ * Matches the Ente Auth desktop app design.
  */
 import React, { useState, useEffect, useRef } from "react";
 import { prettyFormatCode } from "@shared/code";
@@ -86,7 +86,7 @@ export const CodeCard: React.FC<CodeCardProps> = ({
                     </div>
                 </div>
                 <div className="code-right">
-                    <div className="code-next-label">Next</div>
+                    <div className="code-next-label">next</div>
                     <div className="code-next-otp">{prettyFormatCode(nextOtp)}</div>
                 </div>
             </div>

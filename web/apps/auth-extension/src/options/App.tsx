@@ -16,6 +16,8 @@ export const App: React.FC = () => {
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loggingOut, setLoggingOut] = useState(false);
+    const [syncing, setSyncing] = useState(false);
+    const [syncSuccess, setSyncSuccess] = useState(false);
 
     // Load settings and auth state on mount
     useEffect(() => {
@@ -54,6 +56,21 @@ export const App: React.FC = () => {
             console.error("Failed to logout:", e);
         } finally {
             setLoggingOut(false);
+        }
+    };
+
+    // Handle manual sync
+    const handleSync = async () => {
+        setSyncing(true);
+        setSyncSuccess(false);
+        try {
+            await sendMessage({ type: "SYNC_CODES" });
+            setSyncSuccess(true);
+            setTimeout(() => setSyncSuccess(false), 2000);
+        } catch (e) {
+            console.error("Failed to sync:", e);
+        } finally {
+            setSyncing(false);
         }
     };
 
@@ -250,6 +267,22 @@ export const App: React.FC = () => {
                                 disabled={loggingOut}
                             >
                                 {loggingOut ? "Logging out..." : "Log out"}
+                            </button>
+                        </div>
+
+                        <div className="setting-item">
+                            <div className="setting-info">
+                                <label>Sync codes</label>
+                                <p>
+                                    Codes sync automatically every 5 minutes.
+                                </p>
+                            </div>
+                            <button
+                                className="sync-button"
+                                onClick={handleSync}
+                                disabled={syncing}
+                            >
+                                {syncing ? "Syncing..." : syncSuccess ? "Synced!" : "Sync now"}
                             </button>
                         </div>
                     </section>
