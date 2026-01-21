@@ -107,11 +107,7 @@ You can delete your own comments, and album owners/admins can delete any comment
 - Confirm the deletion
 
 **On web/desktop:**
-- Hover over your comment
-- Click the delete icon (trash can)
-- Confirm the deletion
-
-Deleted comments are replaced with "(deleted)" text while preserving the conversation thread structure. Any replies remain visible.
+- Right click on the comment and click delete
 
 ### Multi-album files
 
@@ -123,11 +119,11 @@ If a photo appears in multiple shared albums, you can choose which album's comme
 
 Each album maintains its own separate comments and likes for the same photo.
 
-## Comments on public links
+## Comments and likes on public links
 
-### Anonymous commenting
+### Anonymous commenting and liking
 
-People viewing your album through a public link can comment without creating an Ente account:
+People viewing your album through a public link can comment and like without creating an Ente account:
 
 **First-time visitors are prompted to:**
 1. Enter a display name (used to identify their comments)
@@ -135,11 +131,11 @@ People viewing your album through a public link can comment without creating an 
 
 The display name is stored encrypted and associated with their browsing session for that specific album.
 
-### Managing public link comments
+### Managing public link comments and likes
 
-**Enable or disable comments:**
+**Enable or disable comments and likes:**
 
-Album owners can control whether comments are allowed on public links:
+Album owners can control whether comments and likes are allowed on public links:
 
 1. Open album settings
 2. Go to "Manage public link"
