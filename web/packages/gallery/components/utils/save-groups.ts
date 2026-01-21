@@ -83,6 +83,11 @@ export interface SaveGroup {
      */
     failureReason?: "network_offline" | "file_error";
     /**
+     * `true` when we expect the ZIP download to span multiple parts, so part
+     * numbers should be shown from the first part.
+     */
+    includeZipNumber?: boolean;
+    /**
      * `true` when the ZIP file is being downloaded from memory to the user's
      * device. This is only relevant for web downloads where files are first
      * collected into a ZIP in memory, then saved to the device.
@@ -129,6 +134,7 @@ export type AddSaveGroup = (
         | "isHiddenCollectionSummary"
         | "downloadDirPath"
         | "total"
+        | "includeZipNumber"
         | "canceller"
         | "retry"
     >,

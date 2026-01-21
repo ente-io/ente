@@ -22,7 +22,7 @@ class SocialIconsRow extends StatelessWidget {
         const SizedBox(width: 8),
         _SocialIconButton(
           icon: HugeIcons.strokeRoundedYoutube,
-          url: "https://youtube.com/@enteio",
+          url: "https://www.youtube.com/@entestudio",
           color: colorScheme.textMuted,
         ),
         const SizedBox(width: 8),

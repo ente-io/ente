@@ -12,6 +12,10 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import {
+    FileContextMenu,
+    type ContextMenuPosition,
+} from "ente-new/photos/components/FileContextMenu";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
@@ -24,7 +28,14 @@ import {
     thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import {
+    PseudoCollectionID,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
+import {
+    getAvailableFileActions,
+    type FileContextAction,
+} from "ente-new/photos/utils/file-actions";
 import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
@@ -245,6 +256,30 @@ export interface FileListProps {
      * Called when the visible date at the top of the viewport changes.
      */
     onVisibleDateChange?: (date: string | undefined) => void;
+    /**
+     * The collection summary for the current view.
+     *
+     * Used to determine available context menu actions.
+     */
+    collectionSummary?: CollectionSummary;
+    /**
+     * Called when a context menu action is triggered on a file.
+     *
+     * @param action The action that was triggered.
+     */
+    onContextMenuAction?: (action: FileContextAction) => void;
+    /**
+     * Whether to show the "Add Person" action in the context menu.
+     */
+    showAddPersonAction?: boolean;
+    /**
+     * Whether to show the "Edit Location" action in the context menu.
+     */
+    showEditLocationAction?: boolean;
+    /**
+     * Called when the context menu opens or closes.
+     */
+    onContextMenuOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -271,6 +306,11 @@ export const FileList: React.FC<FileListProps> = ({
     onItemClick,
     onScroll,
     onVisibleDateChange,
+    collectionSummary,
+    onContextMenuAction,
+    showAddPersonAction,
+    showEditLocationAction,
+    onContextMenuOpenChange,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -287,6 +327,26 @@ export const FileList: React.FC<FileListProps> = ({
         useState(new Set<string>());
     // Show back-to-top button when scrolled past threshold
     const [showBackToTop, setShowBackToTop] = useState(false);
+
+    // Context menu state
+    const [contextMenu, setContextMenu] = useState<{
+        position: ContextMenuPosition;
+        file: EnteFile;
+        fileIndex: number;
+    } | null>(null);
+    const isContextMenuOpen = contextMenu !== null;
+
+    // Track selection state before right-click modified it.
+    // If there are already 3 files explicitly selected via checkmarks,
+    // right-clicking an unselected item will store the previous selections
+    // in this ref and temporarily select only the right-clicked file.
+    // If no action is taken from the context menu, the previous selection
+    // is restored when the menu closes.
+    const previousSelectionRef = useRef<SelectedState | null>(null);
+    // Track whether an action was taken from the context menu.
+    // This ref works in conjunction with previousSelectionRef: if an action
+    // is taken, the previous selection is not reverted when the context menu closes.
+    const contextMenuActionTakenRef = useRef(false);
 
     const listRef = useRef<VariableSizeList | null>(null);
     const outerRef = useRef<HTMLDivElement | null>(null);
@@ -584,16 +644,151 @@ export const FileList: React.FC<FileListProps> = ({
         if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
+    const selectedFavoriteCount = useMemo(() => {
+        if (!favoriteFileIDs || selected.count == 0) return 0;
+        let count = 0;
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value === "boolean" && value) {
+                if (favoriteFileIDs.has(Number(key))) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }, [favoriteFileIDs, selected]);
+
+    // Compute available context menu actions based on stable context and
+    // the favorite status of the current selection (for toggling).
+    const contextMenuActions = useMemo(() => {
+        if (!onContextMenuAction) return [];
+        const actions = getAvailableFileActions({
+            barMode: mode,
+            isInSearchMode: modePlus === "search",
+            collectionSummary,
+            showAddPerson: !!showAddPersonAction,
+            showEditLocation: !!showEditLocationAction && selected.ownCount > 0,
+        });
+        if (!actions.includes("favorite")) return actions;
+        if (
+            selectedFavoriteCount > 0 &&
+            selectedFavoriteCount < selected.count
+        ) {
+            return actions.filter(
+                (action) => action !== "favorite" && action !== "unfavorite",
+            );
+        }
+        if (selectedFavoriteCount === selected.count && selected.count > 0) {
+            return actions.map((action) =>
+                action === "favorite" ? "unfavorite" : action,
+            );
+        }
+        return actions;
+    }, [
+        onContextMenuAction,
+        mode,
+        modePlus,
+        collectionSummary,
+        showAddPersonAction,
+        showEditLocationAction,
+        selected.ownCount,
+        selectedFavoriteCount,
+        selected.count,
+    ]);
+
+    // Handle context menu open
+    const handleContextMenu = useCallback(
+        (event: React.MouseEvent, file: EnteFile, fileIndex: number) => {
+            if (!onContextMenuAction) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Reset tracking for this menu open.
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+
+            // Handle selection behavior on right-click
+            if (!selected[file.id]) {
+                // Store current selection before replacing it
+                previousSelectionRef.current = { ...selected };
+
+                // File not selected: clear selection and select only this file
+                const isOwnFile = file.ownerID === user?.id;
+                const context =
+                    mode === "people" && activePersonID
+                        ? { mode: "people" as const, personID: activePersonID }
+                        : {
+                              mode: (mode ?? "albums") as
+                                  | "albums"
+                                  | "hidden-albums",
+                              collectionID: activeCollectionID,
+                          };
+                setSelected({
+                    [file.id]: true,
+                    ownCount: isOwnFile ? 1 : 0,
+                    count: 1,
+                    collectionID: activeCollectionID,
+                    context,
+                });
+            }
+            // If file is already selected, keep current multi-selection
+
+            setContextMenu({
+                position: { top: event.clientY, left: event.clientX },
+                file,
+                fileIndex,
+            });
+            onContextMenuOpenChange?.(true);
+        },
+        [
+            onContextMenuAction,
+            onContextMenuOpenChange,
+            selected,
+            setSelected,
+            user,
+            activeCollectionID,
+            activePersonID,
+            mode,
+        ],
+    );
+
+    // Handle context menu close
+    const handleContextMenuClose = useCallback(() => {
+        // Defer restore so a menu-item click can mark the close as action-driven.
+        void Promise.resolve().then(() => {
+            if (
+                !contextMenuActionTakenRef.current &&
+                previousSelectionRef.current
+            ) {
+                setSelected(previousSelectionRef.current);
+            }
+            previousSelectionRef.current = null;
+            contextMenuActionTakenRef.current = false;
+        });
+
+        setContextMenu(null);
+        onContextMenuOpenChange?.(false);
+    }, [onContextMenuOpenChange, setSelected]);
+
+    const handleContextMenuActionWithTracking = useCallback(
+        (action: FileContextAction) => {
+            contextMenuActionTakenRef.current = true;
+            onContextMenuAction?.(action);
+        },
+        [onContextMenuAction],
+    );
+
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
+            const showGroupCheckbox = haveSelection && !isContextMenuOpen;
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
                         item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
-                                {haveSelection && (
+                                {showGroupCheckbox && (
                                     <Checkbox
                                         key={date}
                                         name={date}
@@ -666,6 +861,16 @@ export const FileList: React.FC<FileListProps> = ({
                                         onRangeSelect={() =>
                                             handleRangeSelect(index)
                                         }
+                                        onContextMenu={
+                                            onContextMenuAction
+                                                ? (e) =>
+                                                      handleContextMenu(
+                                                          e,
+                                                          file,
+                                                          index,
+                                                      )
+                                                : undefined
+                                        }
                                     />
                                 );
                             }),
@@ -683,12 +888,15 @@ export const FileList: React.FC<FileListProps> = ({
             checkedTimelineDateStrings,
             emailByUserID,
             favoriteFileIDs,
+            handleContextMenu,
             handleRangeSelect,
             handleSelect,
             hoverIndex,
+            isContextMenuOpen,
             isShiftKeyPressed,
             mode,
             onChangeSelectAllCheckBox,
+            onContextMenuAction,
             onItemClick,
             rangeStartIndex,
             enableSelect,
@@ -806,6 +1014,15 @@ export const FileList: React.FC<FileListProps> = ({
                 >
                     <KeyboardArrowUpIcon />
                 </BackToTopButton>
+            )}
+            {onContextMenuAction && (
+                <FileContextMenu
+                    open={contextMenu !== null}
+                    anchorPosition={contextMenu?.position}
+                    onClose={handleContextMenuClose}
+                    actions={contextMenuActions}
+                    onAction={handleContextMenuActionWithTracking}
+                />
             )}
         </Box>
     );
@@ -972,6 +1189,7 @@ type FileThumbnailProps = {
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
+    onContextMenu?: (event: React.MouseEvent) => void;
 } & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
@@ -990,6 +1208,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     onSelect,
     onHover,
     onRangeSelect,
+    onContextMenu,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
@@ -1064,6 +1283,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         <FileThumbnail_
             key={`thumb-${file.id}}`}
             onClick={handleClick}
+            onContextMenu={onContextMenu}
             onMouseEnter={handleHover}
             disabled={!imageURL}
             {...(enableSelect && longPressHandlers)}

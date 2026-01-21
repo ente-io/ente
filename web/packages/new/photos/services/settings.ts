@@ -47,10 +47,6 @@ export interface Settings {
      * `true` if the current user is an internal user.
      */
     isInternalUser: boolean;
-    /**
-     * `true` if the comments and reactions feature is enabled.
-     */
-    isCommentsEnabled: boolean;
 
     /**
      * `true` if maps are enabled.
@@ -110,7 +106,6 @@ export interface Settings {
 
 const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
-    isCommentsEnabled: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
@@ -197,23 +192,12 @@ const FeatureFlags = z.object({
     customDomainCNAME: z.string().nullish().transform(nullToUndefined),
 });
 
-/**
- * Bit flags for server API features.
- * These correspond to the constants in server/ente/remotestore.go.
- */
-const ServerApiFlag = {
-    /** Comments feature is enabled. */
-    Comments: 1 << 1,
-};
-
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
 const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
-    settings.isCommentsEnabled =
-        ((flags?.serverApiFlag ?? 0) & ServerApiFlag.Comments) !== 0;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;

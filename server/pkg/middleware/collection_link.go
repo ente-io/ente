@@ -298,7 +298,7 @@ func (m *CollectionLinkMiddleware) attachAnonIdentity(c *gin.Context, collection
 		return ente.ErrAuthenticationRequired
 	}
 	if m.AnonUsersRepo != nil {
-		anonUser, err := m.AnonUsersRepo.GetByID(c.Request.Context(), anonID)
+		anonUser, err := m.AnonUsersRepo.GetByID(c, anonID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return ente.ErrAuthenticationRequired

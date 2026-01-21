@@ -28,6 +28,7 @@ class TrailingWidget extends StatefulWidget {
 class _TrailingWidgetState extends State<TrailingWidget> {
   Widget? trailingWidget;
   bool _listenerAdded = false;
+  bool _didInitialize = false;
 
   @override
   void initState() {
@@ -36,7 +37,15 @@ class _TrailingWidgetState extends State<TrailingWidget> {
       widget.executionStateNotifier.addListener(_executionStateListener);
       _listenerAdded = true;
     }
-    _setTrailingIcon();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitialize) {
+      _didInitialize = true;
+      _setTrailingIcon();
+    }
   }
 
   @override
@@ -165,7 +174,7 @@ class LeadingWidget extends StatelessWidget {
   final Color? leadingIconColor;
 
   final Widget? leadingIconWidget;
-  // leadIconSize deafult value is 20.
+  // leadIconSize default value is 20.
   final double leadingIconSize;
   const LeadingWidget({
     required this.leadingIconSize,
