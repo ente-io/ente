@@ -85,9 +85,9 @@ class DrawerPage extends StatelessWidget {
       contents.addAll([
         sectionSpacing,
         const UsageCardWidget(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         const LegacyCollectionsTrashWidget(),
-        sectionSpacing,
+        const SizedBox(height: 24),
       ]);
     }
 

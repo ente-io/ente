@@ -17,22 +17,16 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
-import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
-import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
-import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     PseudoCollectionID,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
-import { isMLEnabled } from "ente-new/photos/services/ml";
 import { t } from "i18next";
-import { useMemo } from "react";
-import { useWrapAsyncOperation } from "./utils/use-wrap-async";
 
 /**
  * Operations on selected files.
@@ -144,10 +138,16 @@ interface SelectedFileOptionsProps {
      */
     createFileOpHandler: (op: FileOp) => () => void;
     /**
-     * If set, then an option to manually associate the selected file(s) with a
-     * person will be shown (when ML is enabled and there are named people).
+     * Callback to show the assign person dialog.
+     *
+     * Similar to {@link onOpenCollectionSelector}, this opens a shared dialog
+     * defined in the parent component where the user can select a person to
+     * associate with the selected files.
+     *
+     * If not set, the "Add Person" option will not be shown.
      */
-    onAddPersonToSelectedFiles?: (personID: string) => Promise<void>;
+    onShowAssignPersonDialog?: () => void;
+
     /**
      * Called when the user wants to edit the location of the selected files.
      *
@@ -181,33 +181,12 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     createOnCreateForCollectionOp,
     createOnSelectForCollectionOp,
     createFileOpHandler,
-    onAddPersonToSelectedFiles,
+    onShowAssignPersonDialog,
     onEditLocation,
     onSelectAll,
     isAllSelected,
 }) => {
     const { showMiniDialog } = useBaseContext();
-
-    const peopleState = usePeopleStateSnapshot();
-    const namedPeople = useMemo(
-        () =>
-            (peopleState?.visiblePeople ?? []).filter(
-                (p) => p.type == "cgroup" && !!p.name,
-            ),
-        [peopleState],
-    );
-    const shouldShowAddPerson =
-        !!onAddPersonToSelectedFiles && isMLEnabled() && namedPeople.length > 0;
-
-    const { show: showAssignPerson, props: assignPersonVisibilityProps } =
-        useModalVisibility();
-    const handleSelectPerson = useWrapAsyncOperation(
-        async (personID: string) => {
-            assignPersonVisibilityProps.onClose();
-            if (!onAddPersonToSelectedFiles) return;
-            await onAddPersonToSelectedFiles(personID);
-        },
-    );
 
     const isUserFavorites =
         !!collectionSummary?.attributes.has("userFavorites");
@@ -365,8 +344,10 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
                         />
-                        {shouldShowAddPerson && (
-                            <AddPersonButton onClick={showAssignPerson} />
+                        {!!onShowAssignPersonDialog && (
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <ArchiveButton onClick={handleArchive} />
                         <HideButton onClick={handleHide} />
@@ -379,8 +360,10 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
                         />
-                        {shouldShowAddPerson && (
-                            <AddPersonButton onClick={showAssignPerson} />
+                        {!!onShowAssignPersonDialog && (
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <ArchiveButton onClick={handleArchive} />
                         <HideButton onClick={handleHide} />
@@ -396,8 +379,10 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 ) : collectionSummary?.attributes.has("uncategorized") ? (
                     <>
                         <DownloadButton onClick={handleDownload} />
-                        {shouldShowAddPerson && (
-                            <AddPersonButton onClick={showAssignPerson} />
+                        {!!onShowAssignPersonDialog && (
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <MoveToCollectionButton
                             onClick={handleMoveToCollection}
@@ -407,8 +392,10 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 ) : collectionSummary?.attributes.has("sharedIncoming") ? (
                     <>
                         <DownloadButton onClick={handleDownload} />
-                        {shouldShowAddPerson && (
-                            <AddPersonButton onClick={showAssignPerson} />
+                        {!!onShowAssignPersonDialog && (
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <RemoveFromCollectionButton
                             onClick={handleRemoveFromCollection}
@@ -417,8 +404,10 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 ) : barMode == "hidden-albums" ? (
                     <>
                         <DownloadButton onClick={handleDownload} />
-                        {shouldShowAddPerson && (
-                            <AddPersonButton onClick={showAssignPerson} />
+                        {!!onShowAssignPersonDialog && (
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         <UnhideButton onClick={handleUnhide} />
                         <DeleteButton onClick={handleDelete} />
@@ -438,8 +427,10 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
                         />
-                        {shouldShowAddPerson && (
-                            <AddPersonButton onClick={showAssignPerson} />
+                        {!!onShowAssignPersonDialog && (
+                            <AddPersonButton
+                                onClick={onShowAssignPersonDialog}
+                            />
                         )}
                         {collectionSummary?.id === PseudoCollectionID.all ? (
                             <ArchiveButton onClick={handleArchive} />
@@ -463,15 +454,6 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 )}
             </SpacedRow>
-
-            {shouldShowAddPerson && (
-                <AssignPersonDialog
-                    {...assignPersonVisibilityProps}
-                    people={namedPeople}
-                    title={t("add_a_person")}
-                    onSelectPerson={handleSelectPerson}
-                />
-            )}
         </>
     );
 };
@@ -526,7 +508,7 @@ const UnhideButton: React.FC<ButtonishProps> = ({ onClick }) => (
 
 const DeleteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete")}>
-        <IconButton {...{ onClick }}>
+        <IconButton {...{ onClick }} sx={{ color: "critical.main" }}>
             <DeleteIcon />
         </IconButton>
     </Tooltip>
@@ -542,7 +524,7 @@ const RestoreButton: React.FC<ButtonishProps> = ({ onClick }) => (
 
 const DeletePermanentlyButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete_permanently")}>
-        <IconButton {...{ onClick }}>
+        <IconButton {...{ onClick }} sx={{ color: "critical.main" }}>
             <DeleteIcon />
         </IconButton>
     </Tooltip>

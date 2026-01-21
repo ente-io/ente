@@ -8,7 +8,6 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:flutter/services.dart";
-import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
@@ -35,6 +34,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
@@ -51,7 +51,6 @@ import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
 import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/common/web_page.dart";
@@ -80,7 +79,6 @@ import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
-import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -792,8 +790,26 @@ class _HomeWidgetState extends State<HomeWidget> {
           ///screens the have different appbar colours.
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(0),
-            child: AppBar(
-              backgroundColor: getEnteColorScheme(context).backgroundBase,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isOnSearchTabNotifier,
+              builder: (context, isOnSearchTab, _) {
+                return AnimatedBuilder(
+                  animation: IndexOfStackNotifier(),
+                  builder: (context, _) {
+                    final colorScheme = getEnteColorScheme(context);
+                    final resultsBackground = EnteTheme.isDark(context)
+                        ? const Color.fromRGBO(22, 22, 22, 1)
+                        : colorScheme.backgroundElevated2;
+                    final isSearchResults =
+                        isOnSearchTab && IndexOfStackNotifier().index == 1;
+                    return AppBar(
+                      backgroundColor: isSearchResults
+                          ? resultsBackground
+                          : colorScheme.backgroundBase,
+                    );
+                  },
+                );
+              },
             ),
           ),
           resizeToAvoidBottomInset: false,
@@ -919,46 +935,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return Container(
-                decoration: value
-                    ? BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated,
-                        boxShadow: shadowFloatFaintLight,
-                      )
-                    : null,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    value
-                        ? const SearchWidget()
-                            .animate()
-                            .fadeIn(
-                              duration: const Duration(milliseconds: 225),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1, 1),
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .slide(
-                              begin: const Offset(0, 0.4),
-                              curve: Curves.easeInOutSine,
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                            )
-                        : const SizedBox.shrink(),
-                    HomeBottomNavigationBar(
-                      _selectedFiles,
-                      _selectedAlbums,
-                      selectedTabIndex: _selectedTabIndex,
-                    ),
-                  ],
-                ),
+              return HomeBottomNavigationBar(
+                _selectedFiles,
+                _selectedAlbums,
+                selectedTabIndex: _selectedTabIndex,
               );
             },
           ),

@@ -62,6 +62,9 @@ class LocalSettings {
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
+  static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
+  static const _kDefaultClusteringDistanceOverride =
+      "ml_debug.default_clustering_distance";
 
   final SharedPreferences _prefs;
 
@@ -195,6 +198,28 @@ class LocalSettings {
 
   bool get isSmartMemoriesEnabled =>
       _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
+
+  double? get autoMergeThresholdOverride =>
+      _prefs.getDouble(_kAutoMergeThresholdOverride);
+
+  Future<void> setAutoMergeThresholdOverride(double? value) async {
+    if (value == null) {
+      await _prefs.remove(_kAutoMergeThresholdOverride);
+      return;
+    }
+    await _prefs.setDouble(_kAutoMergeThresholdOverride, value);
+  }
+
+  double? get defaultClusteringDistanceOverride =>
+      _prefs.getDouble(_kDefaultClusteringDistanceOverride);
+
+  Future<void> setDefaultClusteringDistanceOverride(double? value) async {
+    if (value == null) {
+      await _prefs.remove(_kDefaultClusteringDistanceOverride);
+      return;
+    }
+    await _prefs.setDouble(_kDefaultClusteringDistanceOverride, value);
+  }
 
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);

@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
@@ -54,6 +55,7 @@ import {
     hasPendingAlbumToJoin,
     processPendingAlbumJoin,
 } from "ente-new/albums/services/join-album";
+import { AssignPersonDialog } from "ente-new/photos/components/AssignPersonDialog";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -108,7 +110,11 @@ import {
     updateFilesLocation,
     updateFilesVisibility,
 } from "ente-new/photos/services/file";
-import { addManualFileAssignmentsToPerson } from "ente-new/photos/services/ml";
+import {
+    addManualFileAssignmentsToPerson,
+    isMLEnabled,
+} from "ente-new/photos/services/ml";
+
 import {
     savedCollectionFiles,
     savedCollections,
@@ -134,6 +140,7 @@ import {
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
+import type { FileContextAction } from "ente-new/photos/utils/file-actions";
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
@@ -163,8 +170,12 @@ import {
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, watchFolderView } =
-        usePhotosAppContext();
+    const {
+        showLoadingBar,
+        hideLoadingBar,
+        watchFolderView,
+        showNotification,
+    } = usePhotosAppContext();
 
     const isOffline = useIsOffline();
     const [state, dispatch] = useGalleryReducer();
@@ -182,6 +193,7 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
     // Pending navigation from feed item click
     const [pendingFileNavigation, setPendingFileNavigation] = useState<{
@@ -229,6 +241,25 @@ const Page: React.FC = () => {
 
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
+
+    // Modal visibility for the context menu "Add Person" action
+    const {
+        show: showContextMenuAssignPerson,
+        props: contextMenuAssignPersonProps,
+    } = useModalVisibility();
+
+    // Named people available for assignment (used by context menu)
+    const namedPeople = useMemo(
+        () =>
+            (peopleState?.visiblePeople ?? []).filter(
+                (p) => p.type == "cgroup" && !!p.name,
+            ),
+        [peopleState],
+    );
+    const showAddPersonAction = useMemo(
+        () => isMLEnabled() && namedPeople.length > 0,
+        [namedPeople],
+    );
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
@@ -961,14 +992,49 @@ const Page: React.FC = () => {
 
     const handleAddPersonToSelectedFiles = useCallback(
         async (personID: string) => {
-            const selectedFiles = getSelectedFiles(selected, filteredFiles);
-            await addManualFileAssignmentsToPerson(
-                personID,
-                selectedFiles.map((f) => f.id),
-            );
-            clearSelection();
+            showLoadingBar();
+            try {
+                const selectedFiles = getSelectedFiles(selected, filteredFiles);
+                await addManualFileAssignmentsToPerson(
+                    personID,
+                    selectedFiles.map((f) => f.id),
+                );
+                clearSelection();
+                const personName = namedPeople.find(
+                    (p) => p.id === personID,
+                )?.name;
+                showNotification({
+                    color: "secondary",
+                    startIcon: <CheckCircleIcon />,
+                    title: t("added_to_person"),
+                    caption: personName,
+                    autoHideDuration: 3000,
+                });
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                hideLoadingBar();
+            }
         },
-        [selected, filteredFiles, clearSelection],
+        [
+            selected,
+            filteredFiles,
+            clearSelection,
+            showNotification,
+            namedPeople,
+            showLoadingBar,
+            hideLoadingBar,
+            onGenericError,
+        ],
+    );
+
+    // Handler for selecting a person from the context menu assign person dialog
+    const handleContextMenuSelectPerson = useCallback(
+        (personID: string) => {
+            contextMenuAssignPersonProps.onClose();
+            void handleAddPersonToSelectedFiles(personID);
+        },
+        [contextMenuAssignPersonProps, handleAddPersonToSelectedFiles],
     );
 
     const handleEditLocationConfirm = useCallback(
@@ -1197,6 +1263,181 @@ const Page: React.FC = () => {
         [],
     );
 
+    const selectedCount = selected.count;
+    const selectedOwnCount = selected.ownCount;
+
+    /**
+     * Handle a context menu action on a file.
+     *
+     * This handler is called when the user right-clicks on a file thumbnail
+     * and selects an action from the context menu.
+     */
+    const handleContextMenuAction = useCallback(
+        (action: FileContextAction) => {
+            // The selection should already be set by FileList's handleContextMenu
+            // We just need to invoke the appropriate action handler
+            switch (action) {
+                case "download":
+                    createFileOpHandler("download")();
+                    break;
+                case "favorite":
+                    createFileOpHandler("favorite")();
+                    break;
+                case "archive":
+                    createFileOpHandler("archive")();
+                    break;
+                case "unarchive":
+                    createFileOpHandler("unarchive")();
+                    break;
+                case "hide":
+                    createFileOpHandler("hide")();
+                    break;
+                case "fixTime":
+                    createFileOpHandler("fixTime")();
+                    break;
+                case "trash":
+                    showMiniDialog({
+                        title: t("trash_files_title"),
+                        message: t("trash_files_message"),
+                        continue: {
+                            text: t("move_to_trash"),
+                            color: "critical",
+                            action: createFileOpHandler("trash"),
+                        },
+                    });
+                    break;
+                case "deletePermanently":
+                    showMiniDialog({
+                        title: t("delete_files_title"),
+                        message: t("delete_files_message"),
+                        continue: {
+                            text: t("delete"),
+                            color: "critical",
+                            action: createFileOpHandler("deletePermanently"),
+                        },
+                    });
+                    break;
+                case "restore":
+                    handleOpenCollectionSelector({
+                        action: "restore",
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("restore"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("restore"),
+                    });
+                    break;
+                case "addToAlbum":
+                    handleOpenCollectionSelector({
+                        action: "add",
+                        sourceCollectionSummaryID: activeCollectionSummary?.id,
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("add"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("add"),
+                    });
+                    break;
+                case "moveToAlbum":
+                    handleOpenCollectionSelector({
+                        action: "move",
+                        sourceCollectionSummaryID: activeCollectionSummary?.id,
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("move"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("move"),
+                    });
+                    break;
+                case "removeFromAlbum": {
+                    if (!activeCollection) break;
+                    const isSharedIncoming =
+                        activeCollectionSummary?.attributes.has(
+                            "sharedIncoming",
+                        );
+                    const isSharedOutgoing =
+                        activeCollectionSummary?.attributes.has(
+                            "sharedOutgoing",
+                        );
+                    const isRemovingOthers = selectedCount != selectedOwnCount;
+                    const remove = () =>
+                        handleRemoveFilesFromCollection(activeCollection);
+
+                    if (isSharedIncoming) {
+                        if (isRemovingOthers) {
+                            showMiniDialog({
+                                title: t("remove_from_album"),
+                                message: t("remove_from_album_others_message"),
+                                continue: {
+                                    text: t("remove"),
+                                    color: "critical",
+                                    action: remove,
+                                },
+                                cancel: t("cancel"),
+                            });
+                        } else {
+                            remove();
+                        }
+                        break;
+                    }
+
+                    if (isSharedOutgoing && isRemovingOthers) {
+                        showMiniDialog({
+                            title: t("remove_from_album"),
+                            message: t("remove_from_album_others_message"),
+                            continue: {
+                                text: t("remove"),
+                                color: "critical",
+                                action: remove,
+                            },
+                        });
+                        break;
+                    }
+
+                    const onlyUserFiles = !isRemovingOthers;
+                    showMiniDialog({
+                        title: t("remove_from_album"),
+                        message: onlyUserFiles
+                            ? t("confirm_remove_message")
+                            : t("confirm_remove_incl_others_message"),
+                        continue: {
+                            text: t("yes_remove"),
+                            color: onlyUserFiles ? "primary" : "critical",
+                            action: remove,
+                        },
+                    });
+                    break;
+                }
+                case "unhide":
+                    handleOpenCollectionSelector({
+                        action: "unhide",
+                        onCreateCollection:
+                            createOnCreateForCollectionOp("unhide"),
+                        onSelectCollection:
+                            createOnSelectForCollectionOp("unhide"),
+                    });
+                    break;
+                case "addPerson":
+                    showContextMenuAssignPerson();
+                    break;
+                case "editLocation":
+                    showEditLocation();
+                    break;
+            }
+        },
+        [
+            createFileOpHandler,
+            createOnCreateForCollectionOp,
+            createOnSelectForCollectionOp,
+            handleOpenCollectionSelector,
+            handleRemoveFilesFromCollection,
+            showMiniDialog,
+            showContextMenuAssignPerson,
+            showEditLocation,
+            activeCollectionSummary,
+            activeCollection,
+            selectedCount,
+            selectedOwnCount,
+        ],
+    );
+
     const handleCloseCollectionSelector = useCallback(
         () => setOpenCollectionSelector(false),
         [],
@@ -1277,7 +1518,9 @@ const Page: React.FC = () => {
     );
 
     const showSelectionBar =
-        selected.count > 0 && selected.collectionID === activeCollectionID;
+        selected.count > 0 &&
+        selected.collectionID === activeCollectionID &&
+        !isContextMenuOpen;
 
     if (!user) {
         // Don't render until we dispatch "mount" with the logged in user.
@@ -1355,8 +1598,9 @@ const Page: React.FC = () => {
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
                             createFileOpHandler,
-                            onAddPersonToSelectedFiles:
-                                handleAddPersonToSelectedFiles,
+                            onShowAssignPersonDialog: showAddPersonAction
+                                ? showContextMenuAssignPerson
+                                : undefined,
                         }}
                         onEditLocation={showEditLocation}
                     />
@@ -1457,6 +1701,12 @@ const Page: React.FC = () => {
                 onAuthenticateUser={authenticateUser}
             />
             <WhatsNew {...whatsNewVisibilityProps} />
+            <AssignPersonDialog
+                {...contextMenuAssignPersonProps}
+                people={namedPeople}
+                title={t("add_a_person")}
+                onSelectPerson={handleContextMenuSelectPerson}
+            />
             {!isInSearchMode &&
             !isFirstLoad &&
             !state.collectionFiles.length &&
@@ -1492,6 +1742,10 @@ const Page: React.FC = () => {
                         "sharedIncoming",
                     )}
                     isInHiddenSection={barMode == "hidden-albums"}
+                    onContextMenuAction={handleContextMenuAction}
+                    onContextMenuOpenChange={setIsContextMenuOpen}
+                    showAddPersonAction={showAddPersonAction}
+                    showEditLocationAction={selected.ownCount > 0}
                     {...{
                         favoriteFileIDs,
                         collectionNameByID,
