@@ -55,7 +55,8 @@ class _TrailingWidgetState extends State<TrailingWidget> {
     if (oldWidget.showExecutionStates && !widget.showExecutionStates) {
       // Was true, now false: remove listener and reset to icon
       if (_listenerAdded) {
-        oldWidget.executionStateNotifier.removeListener(_executionStateListener);
+        oldWidget.executionStateNotifier
+            .removeListener(_executionStateListener);
         _listenerAdded = false;
       }
       _setTrailingIcon();
@@ -173,7 +174,7 @@ class LeadingWidget extends StatelessWidget {
   final Color? leadingIconColor;
 
   final Widget? leadingIconWidget;
-  // leadIconSize deafult value is 20.
+  // leadIconSize default value is 20.
   final double leadingIconSize;
   const LeadingWidget({
     required this.leadingIconSize,

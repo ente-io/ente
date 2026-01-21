@@ -1018,8 +1018,11 @@ class _FileSelectionActionsWidgetState
         _cachedCollectionForSharedLink!,
       );
       unawaited(Clipboard.setData(ClipboardData(text: url)));
-      await shareText(
+      const description =
+          'Check out, comment and react on photos privately with Ente\'s end to end encryption';
+      await shareLinkWithDescription(
         url,
+        description: description,
         context: context,
         key: sendLinkButtonKey,
       );

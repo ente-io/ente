@@ -114,9 +114,11 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (hasLoggedIn) ...[
                   _buildLogoutCard(context, colorScheme),
-                  const SizedBox(height: 16),
                 ],
-                const SocialIconsRow(),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 28),
+                  child: SocialIconsRow(),
+                ),
                 const AppVersionWidget(),
                 if (hasLoggedIn &&
                     (flagService.flags.internalUser || kDebugMode)) ...[
@@ -204,7 +206,9 @@ class _SettingsBody extends StatelessWidget {
   }) {
     return HugeIcon(
       icon: icon,
-      color: isDestructive ? colorScheme.warning700 : colorScheme.strokeBase,
+      color: isDestructive
+          ? colorScheme.warning700
+          : colorScheme.menuItemIconStroke,
       size: 20,
     );
   }
