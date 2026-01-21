@@ -1,3 +1,4 @@
+- Ashil: (i)QOL: Support for hiding incoming shared albums
 - Neeraj: Searchable settings
 - Ashil: Let admin and owner of album delete any comment
 - Neeraj: Settings screen redesign (v2)

@@ -97,12 +97,22 @@ class Collection {
   });
 
   bool isArchived() {
-    return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+    final userID = Configuration.instance.getUserID();
+    if (userID != null && isOwner(userID)) {
+      return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+    } else {
+      return hasShareeArchived();
+    }
   }
 
   bool hasShareeArchived() {
     return sharedMmdVersion > 0 &&
         sharedMagicMetadata.visibility == archiveVisibility;
+  }
+
+  bool hasShareeHidden() {
+    return sharedMmdVersion > 0 &&
+        sharedMagicMetadata.visibility == hiddenVisibility;
   }
 
   bool hasShareePinned() {
@@ -124,7 +134,14 @@ class Collection {
     if (isDefaultHidden()) {
       return true;
     }
-    return mMdVersion > 0 && (magicMetadata.visibility == hiddenVisibility);
+    final userID = Configuration.instance.getUserID();
+    if (userID != null && isOwner(userID)) {
+      // Owner: check owner's magic metadata
+      return mMdVersion > 0 && magicMetadata.visibility == hiddenVisibility;
+    } else {
+      // Sharee: check sharee's magic metadata
+      return hasShareeHidden();
+    }
   }
 
   bool isDefaultHidden() {

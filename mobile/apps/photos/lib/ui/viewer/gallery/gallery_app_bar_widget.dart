@@ -94,6 +94,7 @@ enum AlbumPopupAction {
   ownedArchive,
   sharedArchive,
   ownedHide,
+  sharedHide,
   playOnTv,
   autoAddPhotos,
   sort,
@@ -622,6 +623,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? Icons.unarchive
               : Icons.archive_outlined,
         ),
+      if (galleryType == GalleryType.sharedCollection &&
+          flagService.internalUser)
+        EntePopupMenuItem(
+          widget.collection!.hasShareeHidden()
+              ? AppLocalizations.of(context).unhide
+              : AppLocalizations.of(context).hide,
+          value: AlbumPopupAction.sharedHide,
+          icon: widget.collection!.hasShareeHidden()
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+        ),
       if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
           AppLocalizations.of(context).leaveAlbum,
@@ -703,6 +715,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 hasShareeArchived ? archiveVisibility : visibleVisibility;
             final int newVisiblity =
                 hasShareeArchived ? visibleVisibility : archiveVisibility;
+
+            await changeCollectionVisibility(
+              context,
+              collection: widget.collection!,
+              newVisibility: newVisiblity,
+              prevVisibility: prevVisiblity,
+              isOwner: false,
+            );
+            if (mounted) {
+              setState(() {});
+            }
+          } else if (value == AlbumPopupAction.sharedHide) {
+            final hasShareeHidden = widget.collection!.hasShareeHidden();
+            final int prevVisiblity =
+                hasShareeHidden ? hiddenVisibility : visibleVisibility;
+            final int newVisiblity =
+                hasShareeHidden ? visibleVisibility : hiddenVisibility;
 
             await changeCollectionVisibility(
               context,
