@@ -1,9 +1,9 @@
+import { Link05Icon, PinIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import { Overlay } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
@@ -541,11 +541,11 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
         {attributes.has("userFavorites") && <StarIcon fontSize="small" />}
         {(attributes.has("pinned") || attributes.has("shareePinned")) && (
             // Need && to override the 20px set in the container.
-            <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
+            <HugeiconsIcon icon={PinIcon} size={18} />
         )}
         {attributes.has("shared") &&
             (attributes.has("sharedOnlyViaLink") ? (
-                <LinkIcon />
+                <HugeiconsIcon icon={Link05Icon} size={20} />
             ) : (
                 <PeopleIcon />
             ))}
@@ -606,8 +606,10 @@ const PersonCard: React.FC<PersonCardProps> = ({
             {person.name && <CardText>{person.name}</CardText>}
             {person.isPinned && (
                 <PersonPinnedIcon>
-                    <PushPinIcon
-                        sx={{ "&&": { fontSize: "18px", color: "white" } }}
+                    <HugeiconsIcon
+                        icon={PinIcon}
+                        size={18}
+                        color="white"
                     />
                 </PersonPinnedIcon>
             )}

@@ -1,16 +1,19 @@
-import ClockIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
-import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
-import MoveIcon from "@mui/icons-material/ArrowForward";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DownloadIcon from "@mui/icons-material/Download";
-import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
+import {
+    AddSquareIcon,
+    ArrowRight02Icon,
+    Clock02Icon,
+    Delete02Icon,
+    Download01Icon,
+    Download05Icon,
+    Location05Icon,
+    RemoveCircleIcon,
+    Time04Icon,
+    Unarchive03Icon,
+    ViewIcon,
+    ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
-import RestoreIcon from "@mui/icons-material/Restore";
-import UnArchiveIcon from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import type { SvgIconProps } from "@mui/material";
 import {
     ListItemIcon,
@@ -52,15 +55,47 @@ interface ActionConfig {
     isDestructive?: boolean;
 }
 
+const getHugeIconSize = (fontSize: SvgIconProps["fontSize"]) =>
+    fontSize === "small" ? 20 : fontSize === "large" ? 35 : 24;
+
+const createHugeIcon = (icon: IconSvgElement): React.FC<SvgIconProps> => {
+    const HugeIcon: React.FC<SvgIconProps> = ({
+        fontSize,
+        className,
+        htmlColor,
+    }) => (
+        <HugeiconsIcon
+            icon={icon}
+            size={getHugeIconSize(fontSize)}
+            className={className}
+            color={htmlColor ?? "currentColor"}
+        />
+    );
+    return HugeIcon;
+};
+
+const FixTimeIcon = createHugeIcon(Time04Icon);
+const DownloadIcon = createHugeIcon(Download01Icon);
+const EditLocationIcon = createHugeIcon(Location05Icon);
+const ArchiveIcon = createHugeIcon(Download05Icon);
+const UnArchiveIcon = createHugeIcon(Unarchive03Icon);
+const HideIcon = createHugeIcon(ViewOffSlashIcon);
+const UnhideIcon = createHugeIcon(ViewIcon);
+const DeleteIcon = createHugeIcon(Delete02Icon);
+const RestoreIcon = createHugeIcon(Clock02Icon);
+const AddIcon = createHugeIcon(AddSquareIcon);
+const MoveIcon = createHugeIcon(ArrowRight02Icon);
+const RemoveIcon = createHugeIcon(RemoveCircleIcon);
+
 const actionConfigs: Record<FileContextAction, ActionConfig> = {
     download: { label: "download", Icon: DownloadIcon },
-    fixTime: { label: "fix_creation_time", Icon: ClockIcon },
-    editLocation: { label: "edit_location", Icon: EditLocationAltIcon },
+    fixTime: { label: "fix_creation_time", Icon: FixTimeIcon },
+    editLocation: { label: "edit_location", Icon: EditLocationIcon },
     favorite: { label: "favorite", Icon: StarBorderIcon },
     archive: { label: "archive", Icon: ArchiveIcon },
     unarchive: { label: "unarchive", Icon: UnArchiveIcon },
-    hide: { label: "hide", Icon: VisibilityOffOutlinedIcon },
-    unhide: { label: "unhide", Icon: VisibilityOutlinedIcon },
+    hide: { label: "hide", Icon: HideIcon },
+    unhide: { label: "unhide", Icon: UnhideIcon },
     trash: { label: "delete", Icon: DeleteIcon, isDestructive: true },
     deletePermanently: {
         label: "delete_permanently",
