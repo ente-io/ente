@@ -147,7 +147,9 @@ class AccountSettingsPage extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     return HugeIcon(
       icon: icon,
-      color: isDestructive ? colorScheme.warning700 : colorScheme.strokeBase,
+      color: isDestructive
+          ? colorScheme.warning700
+          : colorScheme.menuItemIconStroke,
       size: 20,
     );
   }

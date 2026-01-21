@@ -49,7 +49,6 @@ import {
     savedCollections,
     savedCollectionsUpdationTime,
 } from "./photos-fdb";
-import { settingsSnapshot } from "./settings";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -1339,11 +1338,20 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
 /**
  * Return `true` if the given collection is hidden.
  *
- * Hidden collections are those that have their visibility set to hidden in the
- * collection's owner's private magic metadata.
+ * Hidden collections are those that have their visibility set to hidden for
+ * the current user (owner or sharee).
  */
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+export const isHiddenCollection = (collection: Collection) => {
+    const userID = ensureLocalUser().id;
+    if (collection.owner.id == userID) {
+        return (
+            collection.magicMetadata?.data.visibility == ItemVisibility.hidden
+        );
+    }
+    return (
+        collection.sharedMagicMetadata?.data.visibility == ItemVisibility.hidden
+    );
+};
 
 /**
  * Return `true` if the given collection is archived.
@@ -1464,8 +1472,7 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
-    // Only enable comments by default if the feature flag is enabled.
-    const enableComment = settingsSnapshot().isCommentsEnabled;
+    const enableComment = true;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),

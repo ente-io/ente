@@ -171,6 +171,7 @@
     "join_album_and_comment": "",
     "like_all": "",
     "favorite": "Добавить в избранное",
+    "un_favorite": "",
     "convert": "Преобразовать",
     "multi_folder_upload": "Обнаружено несколько папок",
     "upload_to_choice": "Вы хотите загрузить их в",

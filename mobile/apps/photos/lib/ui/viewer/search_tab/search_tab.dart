@@ -108,7 +108,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     final searchTypes = SectionType.values.toList(growable: true);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 4),
       child: Stack(
         children: [
           FutureBuilder<List<List<SearchResult>>>(

@@ -25,6 +25,7 @@ import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
+import { StarOffIcon } from "ente-new/photos/components/icons/StarOffIcon";
 import {
     PseudoCollectionID,
     type CollectionSummary,
@@ -38,6 +39,7 @@ export type FileOp =
     | "download"
     | "fixTime"
     | "favorite"
+    | "unfavorite"
     | "archive"
     | "unarchive"
     | "hide"
@@ -73,6 +75,10 @@ interface SelectedFileOptionsProps {
      * The subset of {@link selectedFileCount} that are also owned by the user.
      */
     selectedOwnFileCount: number;
+    /**
+     * The number of selected files that are currently favorited.
+     */
+    selectedFavoriteCount: number;
     /**
      * Called when the user clears the selection by pressing the cancel button
      * on the selection bar.
@@ -178,6 +184,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     collectionSummary,
     selectedFileCount,
     selectedOwnFileCount,
+    selectedFavoriteCount,
     onClearSelection,
     onRemoveFilesFromCollection,
     onOpenCollectionSelector,
@@ -195,6 +202,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         !!collectionSummary?.attributes.has("userFavorites");
 
     const handleFavorite = createFileOpHandler("favorite");
+    const handleUnfavorite = createFileOpHandler("unfavorite");
 
     const handleFixTime = createFileOpHandler("fixTime");
 
@@ -246,6 +254,18 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const isSharedOutgoing =
         collectionSummary?.attributes.has("sharedOutgoing");
     const isRemovingOthers = selectedFileCount != selectedOwnFileCount;
+    const favoriteAction =
+        selectedFavoriteCount === 0
+            ? "favorite"
+            : selectedFavoriteCount === selectedFileCount
+              ? "unfavorite"
+              : "none";
+    const favoriteActionButton =
+        favoriteAction === "favorite" ? (
+            <FavoriteButton onClick={handleFavorite} />
+        ) : favoriteAction === "unfavorite" ? (
+            <UnfavoriteButton onClick={handleUnfavorite} />
+        ) : null;
 
     const handleRemoveFromCollection = () => {
         if (!collection) return;
@@ -338,7 +358,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
                 {isInSearchMode ? (
                     <>
-                        <FavoriteButton onClick={handleFavorite} />
+                        {favoriteActionButton}
                         <FixTimeButton onClick={handleFixTime} />
                         {onEditLocation && selectedOwnFileCount > 0 && (
                             <EditLocationButton onClick={onEditLocation} />
@@ -358,7 +378,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : barMode == "people" ? (
                     <>
-                        <FavoriteButton onClick={handleFavorite} />
+                        {favoriteActionButton}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
@@ -419,9 +439,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <>
                         {!isUserFavorites &&
                             collectionSummary?.id !=
-                                PseudoCollectionID.archiveItems && (
-                                <FavoriteButton onClick={handleFavorite} />
-                            )}
+                                PseudoCollectionID.archiveItems &&
+                            favoriteActionButton}
                         <FixTimeButton onClick={handleFixTime} />
                         {onEditLocation && selectedOwnFileCount > 0 && (
                             <EditLocationButton onClick={onEditLocation} />
@@ -473,6 +492,14 @@ const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("favorite")}>
         <IconButton {...{ onClick }}>
             <StarBorderIcon fontSize="small" />
+        </IconButton>
+    </Tooltip>
+);
+
+const UnfavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("un_favorite")}>
+        <IconButton {...{ onClick }}>
+            <StarOffIcon fontSize="small" />
         </IconButton>
     </Tooltip>
 );
