@@ -35,6 +35,7 @@ type CollectionController struct {
 	UserRepo              *repo.UserRepository
 	FileRepo              *repo.FileRepository
 	QueueRepo             *repo.QueueRepository
+	TrashRepo             *repo.TrashRepository
 	CastRepo              *cast.Repository
 	TaskRepo              *repo.TaskLockRepository
 	CollectionActionsRepo *repo.CollectionActionsRepository

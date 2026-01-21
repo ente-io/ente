@@ -7,3 +7,12 @@
 
 # Ignore CLAUDE.local.md files anywhere in the repository
 CLAUDE.local.md
+
+# Local cargo config / per-dev exports
+.cargo/
+!rust/.cargo/
+!rust/.cargo/config.toml
+rust/cli/exports/
+
+# Node
+node_modules/

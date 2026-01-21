@@ -102,7 +102,6 @@ class _FileTypeSectionState extends State<FileTypeSection> {
               SectionType.fileTypesAndExtension,
               hasMore:
                   (_fileTypesSearchResults.length >= kSearchSectionLimit - 1),
-              showSearch: true,
             ),
             const SizedBox(height: 2),
             SizedBox(

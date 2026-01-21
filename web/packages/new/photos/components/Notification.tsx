@@ -72,6 +72,11 @@ export interface NotificationAttributes {
      * notification body.
      */
     onEndIconClick?: () => void;
+    /**
+     * If set, the notification will automatically close after this many
+     * milliseconds.
+     */
+    autoHideDuration?: number;
 }
 
 type NotificationProps = ModalVisibilityProps & {
@@ -98,6 +103,11 @@ type NotificationProps = ModalVisibilityProps & {
      */
     vertical?: "top" | "bottom";
     /**
+     * If set, the notification will automatically close after this many
+     * milliseconds.
+     */
+    autoHideDuration?: number;
+    /**
      * sx props to customize the appearance of the underlying MUI
      * {@link Snackbar}.
      */
@@ -121,6 +131,7 @@ export const Notification: React.FC<NotificationProps> = ({
     onClose,
     horizontal,
     vertical,
+    autoHideDuration,
     sx,
     attributes,
     keepOpenOnClick,
@@ -136,6 +147,7 @@ export const Notification: React.FC<NotificationProps> = ({
         endIcon,
         onClick,
         onEndIconClick,
+        autoHideDuration: attrAutoHideDuration,
     } = attributes;
 
     const handleClose: React.MouseEventHandler = (event) => {
@@ -160,6 +172,8 @@ export const Notification: React.FC<NotificationProps> = ({
     return (
         <Snackbar
             open={open}
+            autoHideDuration={attrAutoHideDuration ?? autoHideDuration}
+            onClose={onClose}
             anchorOrigin={{
                 horizontal: horizontal ?? "right",
                 vertical: vertical ?? "bottom",

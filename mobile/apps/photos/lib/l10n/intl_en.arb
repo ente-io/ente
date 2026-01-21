@@ -321,9 +321,12 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB claimed!",
   "details": "Details",
   "claimMore": "Claim more!",
+  "earnMoreSpace": "Earn more space!",
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB for them + {storageAmountInGB} GB for you when they upgrade.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
   "shareTextReferralCode": "Ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
   "claimFreeStorage": "Claim free storage",
@@ -471,6 +474,10 @@
   "mlConsentPrivacy": "Please click here for more details about this feature in our privacy policy",
   "mlConsentConfirmation": "I understand, and wish to enable machine learning",
   "magicSearch": "Magic search",
+  "magic": "Magic",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Discover",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -1111,6 +1118,46 @@
   "loadMessage8": "web.ente.io has a slick uploader",
   "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data",
   "photoDescriptions": "Photo descriptions",
+  "searchResultFileName": "File name",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Description",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Type",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "File extension",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Person",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Shared",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Uploaded by",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Camera make",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Camera model",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Files",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "File types and names",
   "location": "Location",
   "moments": "Moments",
@@ -1425,6 +1472,7 @@
   "enterPin": "Enter PIN",
   "setNewPin": "Set new PIN",
   "appLock": "App lock",
+  "lockScreenType": "Lock type",
   "noSystemLockFound": "No system lock found",
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",

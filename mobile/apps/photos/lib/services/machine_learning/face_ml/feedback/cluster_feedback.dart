@@ -493,7 +493,7 @@ class ClusterFeedbackService<T> {
         await _getFastSuggestions(
       p,
       personClusterID,
-      0.24,
+      PersonService.autoMergeThreshold,
     );
 
     if (suggestions.isEmpty) {

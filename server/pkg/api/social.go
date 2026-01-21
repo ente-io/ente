@@ -90,7 +90,7 @@ func (h *SocialHandler) Counts(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	counts, err := h.Controller.CountActiveCollections(c.Request.Context(), userID)
+	counts, err := h.Controller.CountActiveCollections(c, userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -105,7 +105,7 @@ func (h *SocialHandler) LatestUpdates(c *gin.Context) {
 		return
 	}
 	app := auth.GetApp(c)
-	updates, err := h.Controller.LatestUpdates(c.Request.Context(), userID, app)
+	updates, err := h.Controller.LatestUpdates(c, userID, app)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -135,4 +135,3 @@ func (h *SocialHandler) AnonProfiles(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"profiles": profiles})
 }
-
