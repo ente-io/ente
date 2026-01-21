@@ -9,12 +9,11 @@ import {
     RemoveCircleIcon,
     Time04Icon,
     Unarchive03Icon,
+    UserAdd02Icon,
     ViewIcon,
     ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import type { SvgIconProps } from "@mui/material";
 import {
     ListItemIcon,
     ListItemText,
@@ -51,62 +50,34 @@ interface FileContextMenuProps {
 
 interface ActionConfig {
     label: string;
-    Icon: React.ComponentType<SvgIconProps>;
+    Icon: React.ReactNode;
     isDestructive?: boolean;
 }
 
-const getHugeIconSize = (fontSize: SvgIconProps["fontSize"]) =>
-    fontSize === "small" ? 20 : fontSize === "large" ? 35 : 24;
-
-const createHugeIcon = (icon: IconSvgElement): React.FC<SvgIconProps> => {
-    const HugeIcon: React.FC<SvgIconProps> = ({
-        fontSize,
-        className,
-        htmlColor,
-    }) => (
-        <HugeiconsIcon
-            icon={icon}
-            size={getHugeIconSize(fontSize)}
-            className={className}
-            color={htmlColor ?? "currentColor"}
-        />
-    );
-    return HugeIcon;
-};
-
-const FixTimeIcon = createHugeIcon(Time04Icon);
-const DownloadIcon = createHugeIcon(Download01Icon);
-const EditLocationIcon = createHugeIcon(Location05Icon);
-const ArchiveIcon = createHugeIcon(Download05Icon);
-const UnArchiveIcon = createHugeIcon(Unarchive03Icon);
-const HideIcon = createHugeIcon(ViewOffSlashIcon);
-const UnhideIcon = createHugeIcon(ViewIcon);
-const DeleteIcon = createHugeIcon(Delete02Icon);
-const RestoreIcon = createHugeIcon(Clock02Icon);
-const AddIcon = createHugeIcon(AddSquareIcon);
-const MoveIcon = createHugeIcon(ArrowRight02Icon);
-const RemoveIcon = createHugeIcon(RemoveCircleIcon);
+const hugeIcon = (icon: IconSvgElement, size = 20) => (
+    <HugeiconsIcon icon={icon} size={size} />
+);
 
 const actionConfigs: Record<FileContextAction, ActionConfig> = {
-    download: { label: "download", Icon: DownloadIcon },
-    fixTime: { label: "fix_creation_time", Icon: FixTimeIcon },
-    editLocation: { label: "edit_location", Icon: EditLocationIcon },
-    favorite: { label: "favorite", Icon: StarBorderIcon },
-    archive: { label: "archive", Icon: ArchiveIcon },
-    unarchive: { label: "unarchive", Icon: UnArchiveIcon },
-    hide: { label: "hide", Icon: HideIcon },
-    unhide: { label: "unhide", Icon: UnhideIcon },
-    trash: { label: "delete", Icon: DeleteIcon, isDestructive: true },
+    download: { label: "download", Icon: hugeIcon(Download01Icon) },
+    fixTime: { label: "fix_creation_time", Icon: hugeIcon(Time04Icon) },
+    editLocation: { label: "edit_location", Icon: hugeIcon(Location05Icon) },
+    favorite: { label: "favorite", Icon: <StarBorderIcon fontSize="small" /> },
+    archive: { label: "archive", Icon: hugeIcon(Download05Icon) },
+    unarchive: { label: "unarchive", Icon: hugeIcon(Unarchive03Icon) },
+    hide: { label: "hide", Icon: hugeIcon(ViewOffSlashIcon) },
+    unhide: { label: "unhide", Icon: hugeIcon(ViewIcon) },
+    trash: { label: "delete", Icon: hugeIcon(Delete02Icon), isDestructive: true },
     deletePermanently: {
         label: "delete_permanently",
-        Icon: DeleteIcon,
+        Icon: hugeIcon(Delete02Icon),
         isDestructive: true,
     },
-    restore: { label: "restore", Icon: RestoreIcon },
-    addToAlbum: { label: "add", Icon: AddIcon },
-    moveToAlbum: { label: "move", Icon: MoveIcon },
-    removeFromAlbum: { label: "remove", Icon: RemoveIcon },
-    addPerson: { label: "add_a_person", Icon: PersonAddIcon },
+    restore: { label: "restore", Icon: hugeIcon(Clock02Icon) },
+    addToAlbum: { label: "add", Icon: hugeIcon(AddSquareIcon) },
+    moveToAlbum: { label: "move", Icon: hugeIcon(ArrowRight02Icon) },
+    removeFromAlbum: { label: "remove", Icon: hugeIcon(RemoveCircleIcon) },
+    addPerson: { label: "add_a_person", Icon: hugeIcon(UserAdd02Icon) },
 };
 
 /**
@@ -162,7 +133,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                             onClick={() => handleActionClick(action)}
                         >
                             <ListItemIcon>
-                                <Icon fontSize="small" />
+                                {Icon}
                             </ListItemIcon>
                             <ListItemText>{t(label)}</ListItemText>
                         </StyledMenuItem>
@@ -184,7 +155,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                             }}
                         >
                             <ListItemIcon sx={{ color: "inherit" }}>
-                                <Icon fontSize="small" />
+                                {Icon}
                             </ListItemIcon>
                             <ListItemText>{t(label)}</ListItemText>
                         </StyledMenuItem>

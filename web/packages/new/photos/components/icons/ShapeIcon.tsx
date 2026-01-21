@@ -1,8 +1,9 @@
 import SvgIcon, { type SvgIconProps } from "@mui/material/SvgIcon";
 import React from "react";
 
-export const ShapeIcon: React.FC<SvgIconProps> = ({ sx, ...props }) => (
-    <SvgIcon {...props} viewBox="0 0 24 24" sx={[{ fontSize: 24 }, sx]}>
+// Custom icon because Shape01 is not available in Hugeicons.
+export const ShapeIcon: React.FC<SvgIconProps> = (props) => (
+    <SvgIcon {...props} viewBox="0 0 24 24">
         <path
             d="M13.3382 10H10.6618C9.1273 10 8.36006 10 8.08543 9.49297C7.8108 8.98594 8.21743 8.32019 9.0307 6.9887L10.3689 4.79773C11.101 3.59924 11.467 3 12 3C12.533 3 12.899 3.59924 13.6311 4.79773L14.9693 6.9887C15.7826 8.32019 16.1892 8.98594 15.9146 9.49297C15.6399 10 14.8727 10 13.3382 10Z"
             fill="none"
