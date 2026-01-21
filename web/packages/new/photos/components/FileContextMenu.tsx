@@ -23,7 +23,7 @@ import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import type { FileContextAction } from "ente-new/photos/utils/file-actions";
 import { t } from "i18next";
 import React, { memo, useCallback, useMemo } from "react";
-import { StarOffIcon } from "./icons/StartOffIcon";
+import { StarOffIcon } from "./icons/StarOffIcon";
 
 /**
  * Position for anchoring the context menu.

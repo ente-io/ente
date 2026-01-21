@@ -22,7 +22,7 @@ import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
-import { StarOffIcon } from "ente-new/photos/components/icons/StartOffIcon";
+import { StarOffIcon } from "ente-new/photos/components/icons/StarOffIcon";
 import {
     PseudoCollectionID,
     type CollectionSummary,
