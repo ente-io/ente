@@ -130,6 +130,9 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
   String? _highlightedCommentID;
   bool _hasScrolledToHighlight = false;
   GlobalKey? _highlightedCommentKey;
+  String? _scrollTargetCommentID;
+  GlobalKey? _scrollTargetKey;
+  String? _scrollTargetHighlightID;
 
   List<CollectionCommentInfo> _sharedCollections = [];
   late int _selectedCollectionID;
@@ -360,6 +363,74 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOutExpo,
         );
+      });
+    });
+  }
+
+  Future<void> _scrollToParentComment(String parentCommentID) async {
+    _scrollTargetCommentID =
+        parentCommentID; // Set immediately for race detection
+
+    // Check if already loaded
+    int index = _comments.indexWhere((c) => c.id == parentCommentID);
+
+    if (index != -1) {
+      _performScrollToIndex(index, parentCommentID);
+      return;
+    }
+
+    // Parent not in loaded comments - need to load more
+    while (_hasMoreComments) {
+      await _loadMoreComments();
+
+      // Check if user tapped a different parent (race condition)
+      if (_scrollTargetCommentID != null &&
+          _scrollTargetCommentID != parentCommentID) {
+        return; // Abort, another scroll is in progress
+      }
+
+      index = _comments.indexWhere((c) => c.id == parentCommentID);
+      if (index != -1) {
+        _performScrollToIndex(index, parentCommentID);
+        return;
+      }
+    }
+
+    // Parent not found (deleted) - do nothing silently
+  }
+
+  void _performScrollToIndex(int index, String commentID) {
+    _scrollTargetCommentID = commentID;
+    _scrollTargetKey = GlobalKey();
+    setState(() {});
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+
+      // Phase 1: Jump to approximate position
+      const estimatedItemHeight = 120.0;
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final scrollPosition =
+          (index * estimatedItemHeight).clamp(0.0, maxScroll);
+      _scrollController.jumpTo(scrollPosition);
+
+      // Phase 2: Precise scroll with ensureVisible
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final context = _scrollTargetKey?.currentContext;
+        if (context != null) {
+          Scrollable.ensureVisible(
+            context,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutExpo,
+          );
+        }
+        // Clear scroll target and trigger highlight
+        _scrollTargetCommentID = null;
+        _scrollTargetKey = null;
+        if (mounted) {
+          setState(() => _scrollTargetHighlightID = commentID);
+        }
       });
     });
   }
@@ -604,12 +675,16 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                             }
                             final comment = _comments[index];
                             final isHighlighted =
-                                comment.id == _highlightedCommentID;
+                                comment.id == _highlightedCommentID ||
+                                    comment.id == _scrollTargetHighlightID;
                             // Use widget.highlightCommentID (not state) to keep key stable after dismiss
+                            // Priority: highlightCommentID (deep link) > scrollTargetCommentID (tap)
                             final key =
                                 (comment.id == widget.highlightCommentID)
                                     ? (_highlightedCommentKey ??= GlobalKey())
-                                    : ValueKey(comment.id);
+                                    : (comment.id == _scrollTargetCommentID)
+                                        ? _scrollTargetKey
+                                        : ValueKey(comment.id);
                             return CommentBubbleWidget(
                               key: key,
                               comment: comment,
@@ -631,11 +706,27 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
                               onCommentDeleted: () =>
                                   _handleCommentDeleted(comment.id),
                               onAutoHighlightDismissed: () {
-                                if (mounted) {
-                                  setState(() => _highlightedCommentID = null);
+                                if (mounted &&
+                                    (_highlightedCommentID == comment.id ||
+                                        _scrollTargetHighlightID ==
+                                            comment.id)) {
+                                  setState(() {
+                                    if (_highlightedCommentID == comment.id) {
+                                      _highlightedCommentID = null;
+                                    }
+                                    if (_scrollTargetHighlightID ==
+                                        comment.id) {
+                                      _scrollTargetHighlightID = null;
+                                    }
+                                  });
                                   // Don't clear _highlightedCommentKey - prevents avatar flicker
                                 }
                               },
+                              onParentQuoteTap: comment.isReply
+                                  ? () => _scrollToParentComment(
+                                        comment.parentCommentID!,
+                                      )
+                                  : null,
                             );
                           },
                         ),
