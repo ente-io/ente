@@ -382,6 +382,8 @@
   "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
+  "cannotMoveToSharedAlbums": "Can't move to shared albums",
+  "cannotMoveToSharedAlbumsMessage": "Items can only be added to shared albums, not moved. Would you like to add instead?",
   "deleteSharedAlbum": "Delete shared album?",
   "deleteAlbum": "Delete album",
   "deleteAlbumDialog": "Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?",

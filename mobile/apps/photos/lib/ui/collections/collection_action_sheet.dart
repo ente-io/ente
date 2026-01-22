@@ -355,10 +355,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                 collections.removeWhere((c) => recentIds.contains(c.id));
               }
 
-              // Get shared collections for move action (internal users only)
+              // Get shared collections for move action
               List<Collection> sharedCollections = [];
-              if (widget.actionType == CollectionActionType.moveFiles &&
-                  flagService.showSharedAlbumsInMoveSheet) {
+              if (widget.actionType == CollectionActionType.moveFiles) {
                 sharedCollections = _getSharedCollections();
                 // Filter shared collections by search query
                 if (_searchQuery.isNotEmpty) {
