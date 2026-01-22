@@ -7,3 +7,8 @@ stripe:
     path:
         success: ?status=success&session_id={CHECKOUT_SESSION_ID}
         cancel: ?status=fail&reason=canceled
+
+internal:
+    hardcoded-ott:
+        emails:
+            - "appstore@ente.io,565656"
