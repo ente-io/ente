@@ -6,14 +6,7 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 
-import {
-    Box,
-    Button,
-    IconButton,
-    Stack,
-    styled,
-    Tooltip,
-} from "@mui/material";
+import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -25,10 +18,7 @@ import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import {
-    SpacedRow,
-    Stack100vhCenter,
-} from "ente-base/components/containers";
+import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     LoadingIndicator,
@@ -41,7 +31,10 @@ import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    useIsSmallWidth,
+    useIsTouchscreen,
+} from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -102,6 +95,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
+import { getEnteURL } from "utils/public-album";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -745,6 +739,7 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     collectionKey,
     credentials,
 }) => {
+    const isTouchscreen = useIsTouchscreen();
     const { handleJoinAlbum } = useJoinAlbum({
         publicCollection,
         accessToken,
@@ -760,8 +755,12 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
         );
     }
 
+    const handleGetEnte = () => {
+        window.open(getEnteURL(isTouchscreen), "_blank", "noopener");
+    };
+
     return (
-        <GreenButton color="accent" href="https://ente.io">
+        <GreenButton color="accent" onClick={handleGetEnte}>
             {t("get_ente")}
         </GreenButton>
     );
@@ -883,4 +882,6 @@ const fileListFooterHeight = 24;
  * It scrolls along with the content. It has a fixed height,
  * {@link fileListFooterHeight}.
  */
-const FileListFooter: React.FC = () => <Box sx={{ height: fileListFooterHeight }} />;
+const FileListFooter: React.FC = () => (
+    <Box sx={{ height: fileListFooterHeight }} />
+);
