@@ -2099,10 +2099,12 @@
   "hoorayyyy": "Huráááá!",
   "nothingToTidyUpHere": "Tady není co uklízet",
   "deletingDash": "Mazání - ",
-  "cLTitle1": "Komentáře a reakce",
-  "cLDesc1": "Představujeme komentáře a reakce na sdílené fotografie. Můžete reagovat nebo komentovat fotografii tím, že ji otevřete a použijete akce v dolní části. Všechny příchozí komentáře a reakce budou viditelné na záložce Sdílené.",
-  "cLTitle2": "Správce alb",
-  "cLDesc2": "Nyní můžete přiřadit jiného uživatele Ente jako správce Vašeho alba. Tímto budou moci přidat další diváky a spolupracovníky, odstranit fotografie z alba, a dokonce navrhovat účastníkům odstranit jejich fotografie.",
+  "cLTitle1": "Změny designu",
+  "cLDesc1": "Obrazovka nastavení a stránka s výsledky vyhledávání byly přepracovány. Vyhledávací panel se přesunul nahoru.",
+  "cLTitle2": "Vylepšení",
+  "cLDesc2": "Přiblížení a oddálení u videa. Rychlejší načítání karty vyhledávání. Správci a vlastníci alb mohou mazat komentáře. Náhled pro nepodporované formáty. Vyhledávání v objevování, místech, osobách a typu souboru. Vlastní řazení na stránce osob. Lepší proces sloučení osob. Zobrazení všech ignorovaných osob. Konzistentní řazení kontaktů.",
+  "cLTitle3": "Opravy chyb",
+  "cLDesc3": "Opraveno pozastavování hudby při otevření aplikace. Opraven výběr přejetím na zařízeních Samsung S. Opraven problém s frekvencí snímků na informačním panelu. Opraveny problémy s galerií na tabletech a v režimu na šířku. Opravena stránka nekategorizovaných položek, která se neaktualizovala po přesunu.",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

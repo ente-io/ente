@@ -96,7 +96,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
 
         final filteredEntries = entries
             .where(
-              (entry) => !(hasSubPageMatch[entry.sectionKey] ?? false) ||
+              (entry) =>
+                  !(hasSubPageMatch[entry.sectionKey] ?? false) ||
                   entry.item.isSubPage,
             )
             .toList();
@@ -329,9 +330,8 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
     final rows = <Widget>[];
     String? currentSectionKey;
     for (final entry in _filteredItems) {
-      final shouldShowHeader =
-          sectionCounts[entry.sectionKey] != null &&
-              sectionCounts[entry.sectionKey]! >= 2;
+      final shouldShowHeader = sectionCounts[entry.sectionKey] != null &&
+          sectionCounts[entry.sectionKey]! >= 2;
       if (shouldShowHeader && currentSectionKey != entry.sectionKey) {
         currentSectionKey = entry.sectionKey;
         rows.add(
