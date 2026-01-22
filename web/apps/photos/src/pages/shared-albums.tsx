@@ -10,7 +10,6 @@ import {
     Box,
     Button,
     IconButton,
-    Link,
     Stack,
     styled,
     Tooltip,
@@ -27,7 +26,6 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import {
-    CenteredFill,
     SpacedRow,
     Stack100vhCenter,
 } from "ente-base/components/containers";
@@ -43,10 +41,7 @@ import {
     SingleInputForm,
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
-import {
-    useIsSmallWidth,
-    useIsTouchscreen,
-} from "ente-base/components/utils/hooks";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -105,10 +100,8 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
-import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
-import { getSignUpOrInstallURL } from "utils/public-album";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -520,14 +513,14 @@ export default function PublicCollectionGallery() {
         ],
     );
 
-    const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
-        const props = { onAddPhotos };
-        return {
-            component: <FileListFooter {...props} />,
-            height: fileListFooterHeightForProps(props),
+    const fileListFooter = useMemo<FileListHeaderOrFooter>(
+        () => ({
+            component: <FileListFooter />,
+            height: fileListFooterHeight,
             extendToInlineEdges: true,
-        };
-    }, [onAddPhotos]);
+        }),
+        [],
+    );
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
@@ -613,24 +606,18 @@ export default function PublicCollectionGallery() {
                                             onClick={onAddPhotos}
                                         />
                                     )}
-                                    {!onAddPhotos ||
-                                    publicCollection?.publicURLs[0]
-                                        ?.enableJoin ? (
-                                        <PrimaryActionButton
-                                            enableJoin={
-                                                publicCollection?.publicURLs[0]
-                                                    ?.enableJoin
-                                            }
-                                            publicCollection={publicCollection}
-                                            accessToken={
-                                                credentials.current.accessToken
-                                            }
-                                            collectionKey={
-                                                collectionKey.current
-                                            }
-                                            credentials={credentials}
-                                        />
-                                    ) : null}
+                                    <PrimaryActionButton
+                                        enableJoin={
+                                            publicCollection?.publicURLs[0]
+                                                ?.enableJoin
+                                        }
+                                        publicCollection={publicCollection}
+                                        accessToken={
+                                            credentials.current.accessToken
+                                        }
+                                        collectionKey={collectionKey.current}
+                                        credentials={credentials}
+                                    />
                                 </Stack>
                             </SpacedRow>
                         )}
@@ -710,6 +697,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 
 const GreenButton = styled(Button)(() => ({
     backgroundColor: "#08C225",
+    borderRadius: "16px",
     "&:hover": { backgroundColor: "#07A820" },
 }));
 
@@ -727,30 +715,13 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
                     {t("add_photos")}
                 </FocusVisibleButton>
             )}
         </Box>
-    );
-};
-
-/**
- * A visually different variation of {@link AddPhotosButton}. It also does not
- * shrink on mobile sized screens.
- */
-const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = uploadManager.isUploadInProgress();
-
-    return (
-        <FocusVisibleButton
-            color="accent"
-            startIcon={<AddPhotoAlternateOutlinedIcon />}
-            {...{ onClick, disabled }}
-        >
-            {t("add_more_photos")}
-        </FocusVisibleButton>
     );
 };
 
@@ -774,7 +745,6 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     collectionKey,
     credentials,
 }) => {
-    const isTouchscreen = useIsTouchscreen();
     const { handleJoinAlbum } = useJoinAlbum({
         publicCollection,
         accessToken,
@@ -791,8 +761,8 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     }
 
     return (
-        <GreenButton color="accent" href={getSignUpOrInstallURL(isTouchscreen)}>
-            {isTouchscreen ? t("install") : t("sign_up")}
+        <GreenButton color="accent" href="https://ente.io">
+            {t("get_ente")}
         </GreenButton>
     );
 };
@@ -902,58 +872,15 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     );
 };
 
-interface FileListFooterProps {
-    onAddPhotos?: () => void;
-}
-
 /**
- * The dynamic (prop-dependent) height of {@link FileListFooter}.
+ * The fixed height (in px) of {@link FileListFooter}.
  */
-const fileListFooterHeightForProps = ({ onAddPhotos }: FileListFooterProps) =>
-    (onAddPhotos ? 104 : 0) + 75;
+const fileListFooterHeight = 24;
 
 /**
  * A footer shown after the listing of files.
  *
- * It scrolls along with the content. It has a dynamic height, dependent on the
- * props, calculated using {@link fileListFooterHeightForProps}.
+ * It scrolls along with the content. It has a fixed height,
+ * {@link fileListFooterHeight}.
  */
-
-const FileListFooter: React.FC<FileListFooterProps> = ({ onAddPhotos }) => (
-    <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
-        {onAddPhotos && (
-            <CenteredFill>
-                <AddMorePhotosButton onClick={onAddPhotos} />
-            </CenteredFill>
-        )}
-        {/* Make the entire area tappable, otherwise it is hard to
-            get at on mobile devices. */}
-        <Link
-            color="text.muted"
-            sx={{
-                mt: "48px",
-                mb: "6px",
-                textAlign: "center",
-                "&:hover": { color: "inherit" },
-            }}
-            target="_blank"
-            href="https://ente.io"
-        >
-            <Typography variant="small">
-                <Trans
-                    i18nKey="shared_using"
-                    components={{
-                        a: (
-                            <Typography
-                                variant="small"
-                                component="span"
-                                sx={{ color: "accent.main" }}
-                            />
-                        ),
-                    }}
-                    values={{ url: "ente.io" }}
-                />
-            </Typography>
-        </Link>
-    </Stack>
-);
+const FileListFooter: React.FC = () => <Box sx={{ height: fileListFooterHeight }} />;
