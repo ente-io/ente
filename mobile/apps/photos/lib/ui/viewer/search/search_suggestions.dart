@@ -84,6 +84,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   void releaseResources() {
     subscription?.cancel();
     timer?.cancel();
+    queueOfSearchResults.clear();
   }
 
   ///This method generates searchResultsWidgets from the queueOfEvents by checking
@@ -179,37 +180,15 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       if (widgets.isNotEmpty) {
         widgets.add(const SizedBox(height: 18));
       }
-      final orderedResults = _orderedResultsForSection(section, results);
       widgets.add(
         _SearchResultsSectionWidget(
           title: _sectionTitle(context, section),
           icon: _sectionIcon(section),
-          results: orderedResults,
+          results: results,
         ),
       );
     }
     return widgets;
-  }
-
-  List<SearchResult> _orderedResultsForSection(
-    _SearchResultsSection section,
-    List<SearchResult> results,
-  ) {
-    if (section != _SearchResultsSection.people) {
-      return results;
-    }
-    final people = <SearchResult>[];
-    final shared = <SearchResult>[];
-    for (final result in results) {
-      if (result.type() == ResultType.faces) {
-        people.add(result);
-      } else if (result.type() == ResultType.shared) {
-        shared.add(result);
-      } else {
-        shared.add(result);
-      }
-    }
-    return [...people, ...shared];
   }
 }
 
@@ -261,6 +240,7 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
 
 enum _SearchResultsSection {
   people,
+  shared,
   albums,
   magic,
   files,
@@ -274,14 +254,16 @@ const List<_SearchResultsSection> _sectionOrder = [
   _SearchResultsSection.albums,
   _SearchResultsSection.locations,
   _SearchResultsSection.people,
+  _SearchResultsSection.shared,
   _SearchResultsSection.magic,
 ];
 
 _SearchResultsSection _sectionForResult(SearchResult result) {
   switch (result.type()) {
     case ResultType.faces:
-    case ResultType.shared:
       return _SearchResultsSection.people;
+    case ResultType.shared:
+      return _SearchResultsSection.shared;
     case ResultType.collection:
       return _SearchResultsSection.albums;
     case ResultType.magic:
@@ -308,6 +290,8 @@ String _sectionTitle(BuildContext context, _SearchResultsSection section) {
   switch (section) {
     case _SearchResultsSection.people:
       return AppLocalizations.of(context).people;
+    case _SearchResultsSection.shared:
+      return AppLocalizations.of(context).searchResultShared;
     case _SearchResultsSection.albums:
       return AppLocalizations.of(context).albums;
     case _SearchResultsSection.magic:
@@ -325,6 +309,8 @@ List<List<dynamic>> _sectionIcon(_SearchResultsSection section) {
   switch (section) {
     case _SearchResultsSection.people:
       return HugeIcons.strokeRoundedUserMultiple;
+    case _SearchResultsSection.shared:
+      return HugeIcons.strokeRoundedShare08;
     case _SearchResultsSection.albums:
       return HugeIcons.strokeRoundedImage01;
     case _SearchResultsSection.magic:
