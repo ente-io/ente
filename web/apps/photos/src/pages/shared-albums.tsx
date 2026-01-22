@@ -684,7 +684,6 @@ export default function PublicCollectionGallery() {
             {publicCollection && collectionKey.current && (
                 <PublicFeedSidebar
                     {...publicFeedVisibilityProps}
-                    albumName={publicCollection.name}
                     files={publicFiles}
                     credentials={credentials.current}
                     collectionKey={collectionKey.current}
@@ -707,6 +706,11 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
     svg: { verticalAlign: "middle" },
     color: theme.vars.palette.text.base,
     ":hover": { color: theme.vars.palette.accent.main },
+}));
+
+const GreenButton = styled(Button)(() => ({
+    backgroundColor: "#08C225",
+    "&:hover": { backgroundColor: "#07A820" },
 }));
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
@@ -780,16 +784,16 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 
     if (enableJoin) {
         return (
-            <Button color="accent" onClick={handleJoinAlbum}>
+            <GreenButton color="accent" onClick={handleJoinAlbum}>
                 {t("join_album")}
-            </Button>
+            </GreenButton>
         );
     }
 
     return (
-        <Button color="accent" href={getSignUpOrInstallURL(isTouchscreen)}>
+        <GreenButton color="accent" href={getSignUpOrInstallURL(isTouchscreen)}>
             {isTouchscreen ? t("install") : t("sign_up")}
-        </Button>
+        </GreenButton>
     );
 };
 
