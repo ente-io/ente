@@ -1953,5 +1953,11 @@
   "streetFood": "Street food bites",
   "riverCruises": "Uitzichten vanaf de cruise",
   "playfulKids": "Spelende kinderen",
-  "coastalCliffs": "Kliffen bij de zee"
+  "coastalCliffs": "Kliffen bij de zee",
+  "cLTitle1": "Ontwerpwijzigingen",
+  "cLDesc1": "Het instellingenscherm en de zoekresultatenpagina zijn opnieuw ontworpen. De zoekbalk is naar boven verplaatst.",
+  "cLTitle2": "Verbeteringen",
+  "cLDesc2": "Knijpen om te zoomen op video. Sneller laden van zoektab. Beheerders en albumeigenaren kunnen reacties verwijderen. Voorvertoning voor niet-ondersteunde formaten. Zoeken binnen ontdekken, locatie, personen en bestandstype. Aangepaste sortering op personenpagina. Een betere workflow voor het samenvoegen van personen. Bekijk alle genegeerde personen. Consistente contactsortering.",
+  "cLTitle3": "Bugfixes",
+  "cLDesc3": "Muziek pauzeerde niet meer bij het openen van de app. Veeg-om-te-selecteren op Samsung S-apparaten opgelost. Framerate-probleem op info-blad opgelost. Galerijproblemen op tablets en in landschapsmodus opgelost. Ongecategoriseerde pagina die niet bijwerkte na verplaatsingen opgelost."
 }

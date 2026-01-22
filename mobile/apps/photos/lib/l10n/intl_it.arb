@@ -1883,5 +1883,11 @@
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   },
-  "snowAdventures": "Avventure invernali"
+  "snowAdventures": "Avventure invernali",
+  "cLTitle1": "Modifiche al design",
+  "cLDesc1": "La schermata delle impostazioni e la pagina dei risultati di ricerca sono state ridisegnate. La barra di ricerca è stata spostata in alto.",
+  "cLTitle2": "Miglioramenti",
+  "cLDesc2": "Pizzica per zoomare sui video. Caricamento più veloce della scheda di ricerca. Amministratori e proprietari di album possono eliminare i commenti. Anteprima per formati non supportati. Ricerca in scoperta, posizione, persone e tipo di file. Ordinamento personalizzato nella pagina delle persone. Un migliore flusso di unione delle persone. Visualizza tutte le persone ignorate. Ordinamento coerente dei contatti.",
+  "cLTitle3": "Correzioni di bug",
+  "cLDesc3": "Risolto il problema della musica che si metteva in pausa all'apertura dell'app. Risolto il problema dello swipe per selezionare sui dispositivi Samsung S. Risolto il problema del frame rate nel foglio informazioni. Risolti problemi della galleria su tablet e in orizzontale. Risolta la pagina non categorizzata che non si aggiornava dopo gli spostamenti."
 }

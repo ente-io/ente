@@ -2081,10 +2081,12 @@
   "hoorayyyy": "Hurraaaa!",
   "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
   "deletingDash": "Lösche - ",
-  "cLTitle1": "Kommentare und Reaktionen",
-  "cLDesc1": "Wir führen Kommentare und Reaktionen für geteilte Fotos ein. Du kannst auf ein Foto reagieren oder es kommentieren, indem du es öffnest und die Aktionen unten verwendest. Alle eingehenden Kommentare und Reaktionen werden auf der Teilen-Registerkarte angezeigt.",
-  "cLTitle2": "Admin für Alben",
-  "cLDesc2": "Du kannst jetzt einen Ente-Nutzer als Administrator für dein Album zuweisen. Auf diese Weise kann er andere Betrachter und Bearbeiter hinzufügen, Fotos aus dem Album entfernen und sogar Teilnehmern vorschlagen, ihre Fotos zu löschen.",
+  "cLTitle1": "Design-Änderungen",
+  "cLDesc1": "Die Einstellungsseite und die Suchergebnisseite wurden neu gestaltet. Die Suchleiste wurde nach oben verschoben.",
+  "cLTitle2": "Verbesserungen",
+  "cLDesc2": "Pinch-to-Zoom bei Videos. Schnelleres Laden des Such-Tabs. Admins und Albumbesitzer können Kommentare löschen. Vorschau für nicht unterstützte Formate. Suche in Entdecken, Orten, Personen und Dateitypen. Benutzerdefinierte Sortierung auf der Personen-Seite. Ein besserer Personen-Zusammenführungsablauf. Alle ignorierten Personen anzeigen. Konsistente Kontaktsortierung.",
+  "cLTitle3": "Fehlerbehebungen",
+  "cLDesc3": "Musik wird beim Öffnen der App nicht mehr pausiert. Wisch-zum-Auswählen auf Samsung S-Geräten behoben. Bildfrequenz-Problem im Info-Bereich behoben. Galerie-Probleme auf Tablets und im Querformat behoben. Nicht kategorisierte Seite wurde nach Verschiebungen nicht aktualisiert - behoben.",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
