@@ -1,8 +1,9 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Download01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import {
@@ -83,6 +84,8 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
@@ -469,9 +472,15 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
+            const singleFile =
+                selectedFiles.length === 1 ? selectedFiles[0] : undefined;
+            const title =
+                singleFile?.metadata.fileType === FileType.livePhoto
+                    ? fileFileName(singleFile)
+                    : t("files_count", { count: selectedFiles.length });
             await downloadAndSaveFiles(
                 selectedFiles,
-                t("files_count", { count: selectedFiles.length }),
+                title,
                 onAddSaveGroup,
             );
             clearSelection();
@@ -819,7 +828,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         </Typography>
         <Tooltip title={t("download")}>
             <IconButton onClick={downloadFilesHelper}>
-                <DownloadIcon />
+                <HugeiconsIcon icon={Download01Icon} size={22} />
             </IconButton>
         </Tooltip>
     </Stack>

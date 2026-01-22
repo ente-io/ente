@@ -1,7 +1,8 @@
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { EnteFile } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
+import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import { type SelectionContext } from "ente-new/photos/components/gallery";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
@@ -56,9 +57,14 @@ export const performFileOp = async (
 ) => {
     switch (op) {
         case "download": {
+            const singleFile = files.length === 1 ? files[0] : undefined;
+            const title =
+                singleFile?.metadata.fileType === FileType.livePhoto
+                    ? fileFileName(singleFile)
+                    : t("files_count", { count: files.length });
             await downloadAndSaveFiles(
                 files,
-                t("files_count", { count: files.length }),
+                title,
                 onAddSaveGroup,
             );
             break;

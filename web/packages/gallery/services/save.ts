@@ -420,9 +420,14 @@ class ZipBatcher {
                 this.currentFileCount === 1
                     ? "1 file"
                     : `${this.currentFileCount} files`;
-            const zipName = this.includePartNumber
-                ? `${this.baseName} Part ${this.batchIndex} - ${fileLabel}.zip`
-                : `${this.baseName} - ${fileLabel}.zip`;
+            const baseName = this.baseName.trim();
+            const nameBase = this.includePartNumber
+                ? `${baseName} Part ${this.batchIndex}`
+                : baseName;
+            const zipName =
+                baseName.toLowerCase() === fileLabel.toLowerCase()
+                    ? `${nameBase}.zip`
+                    : `${nameBase} - ${fileLabel}.zip`;
 
             const url = URL.createObjectURL(zipBlob);
             saveAsFileAndRevokeObjectURL(url, zipName);

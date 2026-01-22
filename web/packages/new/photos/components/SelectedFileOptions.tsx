@@ -437,9 +437,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : (
                     <>
-                        {!isUserFavorites &&
-                            collectionSummary?.id !=
-                                PseudoCollectionID.archiveItems &&
+                        {collectionSummary?.id !=
+                            PseudoCollectionID.archiveItems &&
                             favoriteActionButton}
                         <FixTimeButton onClick={handleFixTime} />
                         {onEditLocation && selectedOwnFileCount > 0 && (
