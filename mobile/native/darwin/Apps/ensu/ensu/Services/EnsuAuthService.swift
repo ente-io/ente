@@ -27,6 +27,7 @@ struct AuthResponsePayload: Hashable {
 final class EnsuAuthService {
     static let shared = EnsuAuthService()
 
+    private let logger = EnsuLogging.shared.logger("EnsuAuthService")
     private let tokenProvider = EnsuAuthTokenProvider()
 
     private var networkFactory: NetworkFactory
@@ -43,13 +44,17 @@ final class EnsuAuthService {
         )
 
         // Initialise Rust crypto backend once (no-op for pure Rust, but keeps parity).
-        // Ignore errors here and surface them when actually used.
-        try? initCrypto()
+        do {
+            try initCrypto()
+        } catch {
+            logger.error("Crypto init failed", error)
+        }
     }
 
     // MARK: - Network
 
     func updateEndpoint(_ endpoint: URL?) {
+        logger.info("Updated endpoint", details: endpoint?.absoluteString ?? "default")
         EnsuDeveloperSettings.setEndpoint(endpoint)
         networkFactory = NetworkFactory(
             configuration: EnsuDeveloperSettings.networkConfiguration,
@@ -103,73 +108,84 @@ final class EnsuAuthService {
     // MARK: - SRP Login
 
     func loginWithSrp(email: String, password: String, srpAttributes: SrpAttributes) async throws -> SrpLoginResult {
+        logger.info("SRP login started")
         defer { srpClear() }
 
-        // 1) Start SRP (heavy crypto)
-        let start = try await Task.detached(priority: .userInitiated) {
-            try srpStart(password: password, srpAttrs: srpAttributes)
-        }.value
+        do {
+            // 1) Start SRP (heavy crypto)
+            let start = try await Task.detached(priority: .userInitiated) {
+                try srpStart(password: password, srpAttrs: srpAttributes)
+            }.value
 
-        // 2) Create SRP session
-        let session = try await networkFactory.authentication.createSRPSession(
-            srpUserID: srpAttributes.srpUserId,
-            clientPub: start.srpA
-        )
-
-        // 3) Finish SRP
-        let verify = try await Task.detached(priority: .userInitiated) {
-            try srpFinish(srpB: session.srpB)
-        }.value
-
-        // 4) Verify SRP session
-        let authResponse = try await networkFactory.authentication.verifySRPSession(
-            srpUserID: srpAttributes.srpUserId,
-            sessionID: session.sessionID,
-            clientM1: verify.srpM1
-        )
-
-        // If additional auth factors are required, return the session IDs.
-        let passkeySessionId = (authResponse.passkeySessionID?.isEmpty == false) ? authResponse.passkeySessionID : nil
-        let twoFactorSessionId = (authResponse.effectiveTwoFactorSessionID?.isEmpty == false) ? authResponse.effectiveTwoFactorSessionID : nil
-        if passkeySessionId != nil || twoFactorSessionId != nil {
-            return SrpLoginResult(
-                twoFactorSessionId: twoFactorSessionId,
-                passkeySessionId: passkeySessionId,
-                accountsUrl: (authResponse.accountsUrl?.isEmpty == false) ? authResponse.accountsUrl : accountsUrlFallback
+            // 2) Create SRP session
+            let session = try await networkFactory.authentication.createSRPSession(
+                srpUserID: srpAttributes.srpUserId,
+                clientPub: start.srpA
             )
-        }
 
-        // 5) Decrypt secrets using the KEK derived in srpStart
-        guard let keyAttrsNet = authResponse.keyAttributes else {
-            throw EnteError.invalidResponse
-        }
+            // 3) Finish SRP
+            let verify = try await Task.detached(priority: .userInitiated) {
+                try srpFinish(srpB: session.srpB)
+            }.value
 
-        let keyAttrs = KeyAttributes(
-            kekSalt: keyAttrsNet.kekSalt,
-            encryptedKey: keyAttrsNet.encryptedKey,
-            keyDecryptionNonce: keyAttrsNet.keyDecryptionNonce,
-            publicKey: keyAttrsNet.publicKey,
-            encryptedSecretKey: keyAttrsNet.encryptedSecretKey,
-            secretKeyDecryptionNonce: keyAttrsNet.secretKeyDecryptionNonce,
-            memLimit: UInt32(keyAttrsNet.memLimit),
-            opsLimit: UInt32(keyAttrsNet.opsLimit)
-        )
-
-        let secrets = try await Task.detached(priority: .userInitiated) {
-            try srpDecryptSecrets(
-                keyAttrs: keyAttrs,
-                encryptedToken: authResponse.encryptedToken,
-                plainToken: authResponse.token
+            // 4) Verify SRP session
+            let authResponse = try await networkFactory.authentication.verifySRPSession(
+                srpUserID: srpAttributes.srpUserId,
+                sessionID: session.sessionID,
+                clientM1: verify.srpM1
             )
-        }.value
 
-        try storeSecrets(
-            email: email,
-            userId: authResponse.id.rawValue,
-            secrets: secrets
-        )
+            // If additional auth factors are required, return the session IDs.
+            let passkeySessionId = (authResponse.passkeySessionID?.isEmpty == false) ? authResponse.passkeySessionID : nil
+            let twoFactorSessionId = (authResponse.effectiveTwoFactorSessionID?.isEmpty == false) ? authResponse.effectiveTwoFactorSessionID : nil
+            if passkeySessionId != nil || twoFactorSessionId != nil {
+                logger.info(
+                    "SRP login requires additional auth",
+                    details: "2fa=\(twoFactorSessionId != nil) passkey=\(passkeySessionId != nil)"
+                )
+                return SrpLoginResult(
+                    twoFactorSessionId: twoFactorSessionId,
+                    passkeySessionId: passkeySessionId,
+                    accountsUrl: (authResponse.accountsUrl?.isEmpty == false) ? authResponse.accountsUrl : accountsUrlFallback
+                )
+            }
 
-        return SrpLoginResult(twoFactorSessionId: nil, passkeySessionId: nil, accountsUrl: nil)
+            // 5) Decrypt secrets using the KEK derived in srpStart
+            guard let keyAttrsNet = authResponse.keyAttributes else {
+                throw EnteError.invalidResponse
+            }
+
+            let keyAttrs = KeyAttributes(
+                kekSalt: keyAttrsNet.kekSalt,
+                encryptedKey: keyAttrsNet.encryptedKey,
+                keyDecryptionNonce: keyAttrsNet.keyDecryptionNonce,
+                publicKey: keyAttrsNet.publicKey,
+                encryptedSecretKey: keyAttrsNet.encryptedSecretKey,
+                secretKeyDecryptionNonce: keyAttrsNet.secretKeyDecryptionNonce,
+                memLimit: UInt32(keyAttrsNet.memLimit),
+                opsLimit: UInt32(keyAttrsNet.opsLimit)
+            )
+
+            let secrets = try await Task.detached(priority: .userInitiated) {
+                try srpDecryptSecrets(
+                    keyAttrs: keyAttrs,
+                    encryptedToken: authResponse.encryptedToken,
+                    plainToken: authResponse.token
+                )
+            }.value
+
+            try storeSecrets(
+                email: email,
+                userId: authResponse.id.rawValue,
+                secrets: secrets
+            )
+
+            logger.info("SRP login success")
+            return SrpLoginResult(twoFactorSessionId: nil, passkeySessionId: nil, accountsUrl: nil)
+        } catch {
+            logger.error("SRP login failed", error)
+            throw error
+        }
     }
 
     // MARK: - Continuation (email MFA / 2FA / passkeys)
@@ -183,6 +199,7 @@ final class EnsuAuthService {
         encryptedToken: String?,
         token: String?
     ) async throws {
+        logger.info("Login after challenge started")
         var kek = try await Task.detached(priority: .userInitiated) {
             try deriveKekForLogin(
                 password: password,
@@ -206,6 +223,7 @@ final class EnsuAuthService {
         }.value
 
         try storeSecrets(email: email, userId: userId, secrets: secrets)
+        logger.info("Login after challenge success")
     }
 
     // MARK: - Storage

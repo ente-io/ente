@@ -8,11 +8,13 @@ struct ModelSettingsView: View {
     @State private var mmprojUrl: String = ""
     @State private var contextLength: String = ""
     @State private var maxTokens: String = ""
+    @State private var temperature: String = ""
 
     @State private var urlError: String?
     @State private var mmprojError: String?
     @State private var contextError: String?
     @State private var maxTokensError: String?
+    @State private var temperatureError: String?
     @State private var isSaving = false
 
     private let suggestedModels: [SuggestedModel] = [
@@ -61,6 +63,7 @@ struct ModelSettingsView: View {
             mmprojUrl = settings.mmprojUrl
             contextLength = settings.contextLength
             maxTokens = settings.maxTokens
+            temperature = settings.temperature
         }
         #if os(macOS)
         .safeAreaInset(edge: .top) {
@@ -170,6 +173,14 @@ struct ModelSettingsView: View {
                         .font(EnsuTypography.small)
                         .foregroundStyle(EnsuColor.textMuted)
                         .frame(maxWidth: .infinity, alignment: .leading)
+
+                    field(
+                        label: "Temperature",
+                        hint: "0.7",
+                        text: $temperature,
+                        error: temperatureError,
+                        keyboardType: .decimalPad
+                    )
                 }
 
                 Divider().background(EnsuColor.border)
@@ -262,6 +273,7 @@ struct ModelSettingsView: View {
         mmprojError = nil
         contextError = nil
         maxTokensError = nil
+        temperatureError = nil
 
         guard validate() else { return }
 
@@ -271,7 +283,8 @@ struct ModelSettingsView: View {
                 url: modelUrl,
                 mmproj: mmprojUrl,
                 contextLength: contextLength,
-                maxTokens: maxTokens
+                maxTokens: maxTokens,
+                temperature: temperature
             )
             isSaving = false
         }
@@ -283,6 +296,7 @@ struct ModelSettingsView: View {
         mmprojUrl = ""
         contextLength = ""
         maxTokens = ""
+        temperature = ""
     }
 
     private func validate() -> Bool {
@@ -305,6 +319,11 @@ struct ModelSettingsView: View {
 
         if !maxTokens.isEmpty, Int(maxTokens) == nil {
             maxTokensError = "Enter a valid integer"
+            isValid = false
+        }
+
+        if !temperature.isEmpty, Float(temperature) == nil {
+            temperatureError = "Enter a valid number"
             isValid = false
         }
 

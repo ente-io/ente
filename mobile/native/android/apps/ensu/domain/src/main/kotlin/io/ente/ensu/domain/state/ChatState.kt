@@ -24,5 +24,8 @@ data class ChatState(
     val attachmentDownloadProgress: Int? = null,
     val isAttachmentDownloadBlocked: Boolean = false,
     val transientAssistantError: String? = null,
-    val transientAssistantParentId: String? = null
+    val transientAssistantParentId: String? = null,
+    val isModelDownloaded: Boolean = false,
+    val modelDownloadSizeBytes: Long? = null,
+    val hasRequestedModelDownload: Boolean = false
 )

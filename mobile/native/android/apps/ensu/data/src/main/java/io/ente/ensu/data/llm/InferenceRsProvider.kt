@@ -131,7 +131,7 @@ class InferenceRsProvider(
 
         val request = GenerateChatRequest(
             messages = messages.map { msg ->
-                io.ente.labs.inference_rs.ChatMessage(msg.isUserRole(), msg.text)
+                io.ente.labs.inference_rs.ChatMessage(msg.roleString(), msg.text)
             },
             templateOverride = null,
             addAssistant = true,
@@ -154,6 +154,36 @@ class InferenceRsProvider(
         GenerationSummary(summary.jobId, summary.generatedTokens ?: 0, summary.totalTimeMs)
     }
 
+    override fun isModelDownloaded(target: LlmModelTarget): Boolean {
+        val modelFile = modelPathFor(target)
+        if (!modelFile.exists()) return false
+        val mmprojFile = mmprojPathFor(target)
+        if (mmprojFile != null && !mmprojFile.exists()) return false
+        return true
+    }
+
+    override suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long? = withContext(ioDispatcher) {
+        val modelFile = modelPathFor(target)
+        val mmprojFile = mmprojPathFor(target)
+        val mmprojUrl = target.mmprojUrl
+        val modelSize = if (modelFile.exists()) {
+            modelFile.length().takeIf { it > 0 }
+        } else {
+            fetchContentLength(target.url)
+        }
+        val mmprojSize = if (mmprojFile != null && !mmprojUrl.isNullOrBlank()) {
+            if (mmprojFile.exists()) {
+                mmprojFile.length().takeIf { it > 0 }
+            } else {
+                fetchContentLength(mmprojUrl)
+            }
+        } else {
+            null
+        }
+        val sizes = listOfNotNull(modelSize, mmprojSize)
+        if (sizes.isEmpty()) null else sizes.sum()
+    }
+
     override fun stopGeneration() {
         currentJobId?.let { cancel(it) }
     }
@@ -174,8 +204,12 @@ class InferenceRsProvider(
         downloadCall?.cancel()
     }
 
-    private fun LlmMessage.isUserRole(): String {
-        return if (isUser) "user" else "assistant"
+    private fun LlmMessage.roleString(): String {
+        return when (role) {
+            io.ente.ensu.domain.llm.LlmMessageRole.User -> "user"
+            io.ente.ensu.domain.llm.LlmMessageRole.Assistant -> "assistant"
+            io.ente.ensu.domain.llm.LlmMessageRole.System -> "system"
+        }
     }
 
     private fun unloadModel() {
@@ -227,48 +261,88 @@ class InferenceRsProvider(
         onProgress: (Long, Long?) -> Unit
     ) {
         val tmp = File(dest.absolutePath + ".tmp")
-        if (tmp.exists()) tmp.delete()
-
-        val request = Request.Builder().url(url).build()
-        val call = httpClient.newCall(request)
-        downloadCall = call
-
-        val response = call.execute()
-        if (!response.isSuccessful) {
-            response.close()
-            throw IOException("Download failed: HTTP ${response.code}")
+        var existing = if (tmp.exists()) tmp.length() else 0L
+        if (existing > 0 && !looksLikeGguf(tmp)) {
+            tmp.delete()
+            existing = 0L
         }
 
-        val body = response.body ?: throw IOException("Empty response body")
-        val totalBytes = body.contentLength().takeIf { it > 0 }
-        var downloaded = 0L
+        while (true) {
+            val requestBuilder = Request.Builder().url(url)
+            if (existing > 0) {
+                requestBuilder.header("Range", "bytes=$existing-")
+            }
+            val call = httpClient.newCall(requestBuilder.build())
+            downloadCall = call
 
-        FileOutputStream(tmp).use { out ->
-            body.byteStream().use { input ->
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                while (true) {
-                    if (downloadCancelled.get()) {
-                        call.cancel()
-                        response.close()
-                        tmp.delete()
-                        throw IOException("Download cancelled")
+            val response = call.execute()
+            if (!response.isSuccessful) {
+                response.close()
+                throw IOException("Download failed: HTTP ${response.code}")
+            }
+
+            if (existing > 0 && response.code == 200) {
+                response.close()
+                tmp.delete()
+                existing = 0L
+                continue
+            }
+
+            val body = response.body ?: throw IOException("Empty response body")
+            val totalBytes = resolveTotalBytes(response, existing, body.contentLength())
+            if (totalBytes != null && totalBytes <= existing) {
+                response.close()
+                tmp.delete()
+                existing = 0L
+                continue
+            }
+
+            val append = existing > 0 && response.code == 206
+            var downloaded = existing
+
+            FileOutputStream(tmp, append).use { out ->
+                body.byteStream().use { input ->
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    while (true) {
+                        if (downloadCancelled.get()) {
+                            call.cancel()
+                            response.close()
+                            tmp.delete()
+                            throw IOException("Download cancelled")
+                        }
+                        val read = input.read(buffer)
+                        if (read == -1) break
+                        out.write(buffer, 0, read)
+                        downloaded += read
+                        onProgress(downloaded, totalBytes)
                     }
-                    val read = input.read(buffer)
-                    if (read == -1) break
-                    out.write(buffer, 0, read)
-                    downloaded += read
-                    onProgress(downloaded, totalBytes)
                 }
             }
-        }
-        response.close()
+            response.close()
 
-        if (!looksLikeGguf(tmp)) {
-            tmp.delete()
-            throw IOException("Downloaded file is not GGUF")
+            if (totalBytes != null && downloaded < totalBytes) {
+                tmp.delete()
+                throw IOException("Download incomplete")
+            }
+
+            if (!looksLikeGguf(tmp)) {
+                tmp.delete()
+                throw IOException("Downloaded file is not GGUF")
+            }
+            if (dest.exists()) dest.delete()
+            tmp.renameTo(dest)
+            return
         }
-        if (dest.exists()) dest.delete()
-        tmp.renameTo(dest)
+    }
+
+    private fun resolveTotalBytes(response: okhttp3.Response, existing: Long, remainingLength: Long): Long? {
+        val contentLength = remainingLength.takeIf { it > 0 }
+        if (existing > 0 && response.code == 206) {
+            val contentRange = response.header("Content-Range")
+            val totalFromRange = contentRange?.substringAfter('/')?.toLongOrNull()
+            return totalFromRange ?: contentLength?.let { existing + it }
+        }
+        return contentLength
     }
 
     private fun fetchContentLength(url: String): Long? {

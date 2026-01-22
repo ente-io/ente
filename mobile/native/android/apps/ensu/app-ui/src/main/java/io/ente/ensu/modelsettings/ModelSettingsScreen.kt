@@ -41,6 +41,7 @@ fun ModelSettingsScreen(
     var mmprojUrl by remember(state) { mutableStateOf(state.mmprojUrl) }
     var contextLength by remember(state) { mutableStateOf(state.contextLength) }
     var maxTokens by remember(state) { mutableStateOf(state.maxTokens) }
+    var temperature by remember(state) { mutableStateOf(state.temperature) }
 
     val suggestedModels = listOf(
         SuggestedModel(
@@ -155,6 +156,17 @@ fun ModelSettingsScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
+        Text(text = "Temperature", style = EnsuTypography.small, color = EnsuColor.textMuted())
+        Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+        OutlinedTextField(
+            value = temperature,
+            onValueChange = { temperature = it },
+            placeholder = { Text(text = "0.7") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+        )
+
         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
         Text(text = "Leave blank to use model defaults", style = EnsuTypography.small, color = EnsuColor.textMuted())
 
@@ -170,7 +182,8 @@ fun ModelSettingsScreen(
                         modelUrl = modelUrl,
                         mmprojUrl = mmprojUrl,
                         contextLength = contextLength,
-                        maxTokens = maxTokens
+                        maxTokens = maxTokens,
+                        temperature = temperature
                     )
                 )
             },
@@ -188,6 +201,7 @@ fun ModelSettingsScreen(
             mmprojUrl = ""
             contextLength = ""
             maxTokens = ""
+            temperature = ""
         }) {
             Text(text = "Use Default Model", style = EnsuTypography.body, color = EnsuColor.accent())
         }

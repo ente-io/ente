@@ -19,6 +19,9 @@ final class ModelSettingsStore: ObservableObject {
     @Published var maxTokens: String {
         didSet { persist() }
     }
+    @Published var temperature: String {
+        didSet { persist() }
+    }
 
     private let defaults = UserDefaults.standard
 
@@ -28,14 +31,16 @@ final class ModelSettingsStore: ObservableObject {
         self.mmprojUrl = defaults.string(forKey: Keys.mmprojUrl) ?? ""
         self.contextLength = defaults.string(forKey: Keys.contextLength) ?? ""
         self.maxTokens = defaults.string(forKey: Keys.maxTokens) ?? ""
+        self.temperature = defaults.string(forKey: Keys.temperature) ?? ""
     }
 
-    func saveCustomModel(url: String, mmproj: String, contextLength: String, maxTokens: String) {
+    func saveCustomModel(url: String, mmproj: String, contextLength: String, maxTokens: String, temperature: String) {
         useCustomModel = true
         modelUrl = url
         mmprojUrl = mmproj
         self.contextLength = contextLength
         self.maxTokens = maxTokens
+        self.temperature = temperature
     }
 
     func resetToDefault() {
@@ -44,6 +49,7 @@ final class ModelSettingsStore: ObservableObject {
         mmprojUrl = ""
         contextLength = ""
         maxTokens = ""
+        temperature = ""
     }
 
     func currentTarget() -> InferenceModelTarget {
@@ -66,6 +72,7 @@ final class ModelSettingsStore: ObservableObject {
         defaults.set(mmprojUrl, forKey: Keys.mmprojUrl)
         defaults.set(contextLength, forKey: Keys.contextLength)
         defaults.set(maxTokens, forKey: Keys.maxTokens)
+        defaults.set(temperature, forKey: Keys.temperature)
     }
 
     private enum Keys {
@@ -74,6 +81,7 @@ final class ModelSettingsStore: ObservableObject {
         static let mmprojUrl = "ensu.model.mmproj"
         static let contextLength = "ensu.model.context"
         static let maxTokens = "ensu.model.max_tokens"
+        static let temperature = "ensu.model.temperature"
     }
 
     private enum Defaults {

@@ -16,9 +16,15 @@ data class DownloadProgress(
     val status: String
 )
 
+enum class LlmMessageRole {
+    User,
+    Assistant,
+    System
+}
+
 data class LlmMessage(
     val text: String,
-    val isUser: Boolean,
+    val role: LlmMessageRole,
     val hasAttachments: Boolean = false
 )
 
@@ -42,6 +48,9 @@ interface LlmProvider {
         maxTokens: Int,
         onToken: (String) -> Unit
     ): GenerationSummary
+
+    fun isModelDownloaded(target: LlmModelTarget): Boolean
+    suspend fun estimateModelDownloadSize(target: LlmModelTarget): Long?
 
     fun stopGeneration()
     fun resetContext()

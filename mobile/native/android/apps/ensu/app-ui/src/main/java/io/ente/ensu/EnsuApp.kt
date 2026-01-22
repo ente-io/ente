@@ -12,6 +12,7 @@ fun EnsuApp(appViewModel: AppViewModel) {
         appState = appState,
         store = appViewModel.store,
         logs = logs,
+        logRepository = appViewModel.logRepository,
         authService = appViewModel.authService,
         currentEndpointFlow = appViewModel.currentEndpointFlow
     )

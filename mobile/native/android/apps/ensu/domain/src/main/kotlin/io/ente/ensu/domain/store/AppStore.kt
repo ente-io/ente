@@ -2,6 +2,7 @@ package io.ente.ensu.domain.store
 
 import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.llm.LlmMessage
+import io.ente.ensu.domain.llm.LlmMessageRole
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
 import io.ente.ensu.domain.model.Attachment
@@ -13,6 +14,7 @@ import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.model.MessageAuthor
+import io.ente.ensu.domain.model.sessionTitleFromText
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.state.ModelSettingsState
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -47,10 +50,14 @@ class AppStore(
 
     private val messageStore = mutableMapOf<String, MutableList<ChatMessage>>()
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
+    private val sessionSummaries = mutableMapOf<String, String>()
     private var scope: CoroutineScope? = null
     private var generationJob: Job? = null
+    private var modelDownloadJob: Job? = null
+    private var sessionSummaryJob: Job? = null
     private var stopRequested = false
     private var streamingParentId: String? = null
+    private var activeGenerationToken = 0L
     private var pendingSyncRequested = false
     private var pendingSyncErrorHandler: ((String) -> Unit)? = null
 
@@ -61,24 +68,44 @@ class AppStore(
 
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
-        logRepository.log(LogLevel.Info, "Ensū started")
+
+        sessionSummaries.clear()
+        sessionSummaries.putAll(runBlocking { sessionPreferences.sessionSummaries.first() })
 
         if (_state.value.chat.sessions.isEmpty()) {
             loadSessionsFromDb()
         }
 
+        refreshModelDownloadInfo()
+
         scope.launch {
-            sessionPreferences.selectedSessionId.collectLatest { storedId ->
-                if (storedId != null) {
-                    _state.update { appState ->
-                        if (appState.chat.sessions.any { it.id == storedId }) {
-                            appState.copy(chat = appState.chat.copy(currentSessionId = storedId))
-                        } else {
-                            appState
-                        }
-                    }
-                    loadMessagesFromDb(storedId)
-                    rebuildChatState(storedId)
+            sessionPreferences.sessionSummaries.collectLatest { summaries ->
+                sessionSummaries.clear()
+                sessionSummaries.putAll(summaries)
+                applySessionSummariesToState()
+            }
+        }
+
+    }
+
+    private fun refreshModelDownloadInfo() {
+        val target = resolveTarget(_state.value.modelSettings)
+        val isDownloaded = llmProvider.isModelDownloaded(target)
+        _state.update { appState ->
+            appState.copy(
+                chat = appState.chat.copy(
+                    isModelDownloaded = isDownloaded,
+                    modelDownloadSizeBytes = if (isDownloaded) null else appState.chat.modelDownloadSizeBytes
+                )
+            )
+        }
+
+        if (!isDownloaded) {
+            val scope = scope ?: return
+            scope.launch {
+                val size = llmProvider.estimateModelDownloadSize(target)
+                _state.update { appState ->
+                    appState.copy(chat = appState.chat.copy(modelDownloadSizeBytes = size))
                 }
             }
         }
@@ -87,6 +114,7 @@ class AppStore(
     fun createNewSession(): String {
         generationJob?.cancel()
         llmProvider.stopGeneration()
+        invalidateGenerationToken()
         streamingParentId = null
         _state.update { appState ->
             appState.copy(
@@ -120,13 +148,14 @@ class AppStore(
         // Session is empty, no DB load needed.
         rebuildChatState(session.id)
         updateAttachmentDownloadState()
-        logRepository.log(LogLevel.Info, "Created new session")
+        logRepository.log(LogLevel.Info, "Session created", tag = "Chat")
         return session.id
     }
 
     fun startNewSessionDraft() {
         generationJob?.cancel()
         llmProvider.stopGeneration()
+        invalidateGenerationToken()
         streamingParentId = null
         _state.update { appState ->
             appState.copy(
@@ -147,12 +176,12 @@ class AppStore(
             )
         }
         updateAttachmentDownloadState()
-        logRepository.log(LogLevel.Info, "Started new session draft")
     }
 
     fun selectSession(sessionId: String) {
         generationJob?.cancel()
         llmProvider.stopGeneration()
+        invalidateGenerationToken()
         streamingParentId = null
         _state.update { appState ->
             appState.copy(
@@ -170,7 +199,6 @@ class AppStore(
         loadMessagesFromDb(sessionId)
         rebuildChatState(sessionId)
         ensureAttachmentsAvailable(sessionId)
-        logRepository.log(LogLevel.Info, "Selected session", sessionId)
     }
 
     fun deleteSession(sessionId: String) {
@@ -180,6 +208,7 @@ class AppStore(
         if (isCurrent) {
             generationJob?.cancel()
             llmProvider.stopGeneration()
+            invalidateGenerationToken()
             streamingParentId = null
         }
 
@@ -187,6 +216,8 @@ class AppStore(
         messageStore.remove(sessionId)
         branchSelections.remove(sessionId)
         purgeAttachmentDownloads(sessionId)
+        sessionSummaries.remove(sessionId)
+        scope?.launch { sessionPreferences.setSessionSummary(sessionId, null) }
 
         val remaining = currentState.chat.sessions.filterNot { it.id == sessionId }
         val sessions = remaining
@@ -234,7 +265,7 @@ class AppStore(
 
         scope?.launch { sessionPreferences.setSelectedSessionId(newCurrent) }
         syncNow()
-        logRepository.log(LogLevel.Info, "Deleted session", sessionId)
+        logRepository.log(LogLevel.Info, "Session deleted", tag = "Chat")
     }
 
     fun persistSelectedSession(scope: CoroutineScope, sessionId: String?) {
@@ -325,9 +356,111 @@ class AppStore(
         llmProvider.stopGeneration()
     }
 
+    fun startModelDownload(userInitiated: Boolean = true) {
+        val scope = scope ?: return
+        val currentState = _state.value
+        if (currentState.chat.isDownloading || currentState.chat.isGenerating) return
+
+        val target = resolveTarget(currentState.modelSettings)
+        val isDownloaded = llmProvider.isModelDownloaded(target)
+        if (isDownloaded) {
+            _state.update { appState ->
+                appState.copy(
+                    chat = appState.chat.copy(
+                        isModelDownloaded = true,
+                        modelDownloadSizeBytes = null,
+                        hasRequestedModelDownload = if (userInitiated) true else appState.chat.hasRequestedModelDownload
+                    )
+                )
+            }
+        }
+
+        modelDownloadJob?.cancel()
+        if (!isDownloaded) {
+            logRepository.log(
+                LogLevel.Info,
+                "Model download started",
+                details = "model=${target.id}",
+                tag = "Model"
+            )
+            _state.update { appState ->
+                appState.copy(
+                    chat = appState.chat.copy(
+                        isDownloading = true,
+                        downloadPercent = 0,
+                        downloadStatus = "Starting download...",
+                        hasRequestedModelDownload = if (userInitiated) true else appState.chat.hasRequestedModelDownload
+                    )
+                )
+            }
+        }
+
+        modelDownloadJob = scope.launch {
+            var loggedComplete = false
+            try {
+                llmProvider.ensureModelReady(target) { progress ->
+                    val downloading = (progress.percent in 0..99) || progress.status.contains("Loading", ignoreCase = true)
+                    val finished = progress.status.contains("Ready", ignoreCase = true)
+                    if (!isDownloaded && finished && !loggedComplete) {
+                        loggedComplete = true
+                        logRepository.log(
+                            LogLevel.Info,
+                            "Model download complete",
+                            details = "model=${target.id}",
+                            tag = "Model"
+                        )
+                    }
+                    _state.update { appState ->
+                        appState.copy(
+                            chat = appState.chat.copy(
+                                isDownloading = downloading && !finished,
+                                downloadPercent = progress.percent.takeIf { it >= 0 },
+                                downloadStatus = progress.status,
+                                isModelDownloaded = if (finished) true else appState.chat.isModelDownloaded,
+                                modelDownloadSizeBytes = if (finished) null else appState.chat.modelDownloadSizeBytes
+                            )
+                        )
+                    }
+                }
+            } catch (err: Throwable) {
+                val cancelled = err is kotlinx.coroutines.CancellationException ||
+                    err.message?.contains("cancel", ignoreCase = true) == true
+                _state.update { appState ->
+                    appState.copy(
+                        chat = appState.chat.copy(
+                            isDownloading = false,
+                            downloadPercent = null,
+                            downloadStatus = if (cancelled) "Download cancelled" else "Download failed",
+                            hasRequestedModelDownload = if (cancelled) false else appState.chat.hasRequestedModelDownload
+                        )
+                    )
+                }
+                if (cancelled) {
+                    if (!isDownloaded) {
+                        logRepository.log(LogLevel.Info, "Model download cancelled", tag = "Model")
+                    }
+                } else {
+                    logRepository.log(
+                        LogLevel.Error,
+                        if (isDownloaded) "Model load failed" else "Model download failed",
+                        details = err.message,
+                        tag = "Model",
+                        throwable = err
+                    )
+                }
+            } finally {
+                modelDownloadJob = null
+                refreshModelDownloadInfo()
+            }
+        }
+    }
+
     fun cancelDownload() {
         generationJob?.cancel()
+        modelDownloadJob?.cancel()
+        modelDownloadJob = null
         llmProvider.cancelDownload()
+        invalidateGenerationToken()
         streamingParentId = null
         _state.update { appState ->
             appState.copy(
@@ -337,10 +470,12 @@ class AppStore(
                     streamingResponse = "",
                     streamingParentId = null,
                     downloadPercent = null,
-                    downloadStatus = "Download cancelled"
+                    downloadStatus = "Download cancelled",
+                    hasRequestedModelDownload = false
                 )
             )
         }
+        refreshModelDownloadInfo()
     }
 
     fun retryAssistantMessage(messageId: String) {
@@ -406,26 +541,34 @@ class AppStore(
         rebuildChatState(sessionId)
         startGeneration(sessionId, userMessage)
         requestSync()
-        logRepository.log(LogLevel.Info, "Sent message", text)
+        logRepository.log(
+            LogLevel.Info,
+            "Message sent",
+            details = "len=${text.length} attachments=${attachments.size} edited=${editingMessageId != null}",
+            tag = "Chat"
+        )
     }
 
     fun updateModelSettings(state: ModelSettingsState) {
         _state.update { appState ->
             appState.copy(modelSettings = state)
         }
+        refreshModelDownloadInfo()
     }
 
     fun resetModelSettings() {
         _state.update { appState ->
             appState.copy(modelSettings = ModelSettingsState())
         }
+        refreshModelDownloadInfo()
     }
 
     fun signIn(email: String) {
         _state.update { appState ->
             appState.copy(auth = AuthState(isLoggedIn = true, email = email))
         }
-        logRepository.log(LogLevel.Info, "Signed in", email)
+        // Do not log PII like user email.
+        logRepository.log(LogLevel.Info, "Signed in", tag = "Auth")
         syncNow()
     }
 
@@ -433,7 +576,7 @@ class AppStore(
         _state.update { appState ->
             appState.copy(auth = AuthState())
         }
-        logRepository.log(LogLevel.Info, "Signed out")
+        logRepository.log(LogLevel.Info, "Signed out", tag = "Auth")
     }
 
     fun syncNow(onError: ((String) -> Unit)? = null) {
@@ -476,13 +619,21 @@ class AppStore(
         val scope = scope ?: return
         scope.launch {
             try {
+                logRepository.log(LogLevel.Info, "Sync started", tag = "Sync")
                 withContext(Dispatchers.IO) {
                     chatSyncRepository?.sync()
                 }
                 loadSessionsFromDb()
+                logRepository.log(LogLevel.Info, "Sync success", tag = "Sync")
             } catch (err: Throwable) {
                 val message = syncErrorMessage(err)
-                logRepository.log(LogLevel.Error, "Sync failed", message)
+                logRepository.log(
+                    LogLevel.Error,
+                    "Sync failed",
+                    details = message,
+                    tag = "Sync",
+                    throwable = err
+                )
                 if (onError != null) {
                     withContext(Dispatchers.Main) {
                         onError("Sync failed: $message")
@@ -653,10 +804,25 @@ class AppStore(
         }
     }
 
+    private fun nextGenerationToken(): Long {
+        activeGenerationToken += 1
+        return activeGenerationToken
+    }
+
+    private fun invalidateGenerationToken() {
+        activeGenerationToken += 1
+    }
+
+    private fun isGenerationActive(token: Long, sessionId: String): Boolean {
+        return token == activeGenerationToken && _state.value.chat.currentSessionId == sessionId
+    }
+
     private fun startGeneration(sessionId: String, userMessage: ChatMessage) {
         val scope = scope ?: return
         generationJob?.cancel()
+        sessionSummaryJob?.cancel()
         stopRequested = false
+        val generationToken = nextGenerationToken()
 
         streamingParentId = userMessage.id
         _state.update { appState ->
@@ -676,8 +842,10 @@ class AppStore(
         generationJob = scope.launch {
             val settings = _state.value.modelSettings
             val target = resolveTarget(settings)
+            val isActive = { isGenerationActive(generationToken, sessionId) }
             try {
                 llmProvider.ensureModelReady(target) { progress ->
+                    if (!isActive()) return@ensureModelReady
                     val downloading = (progress.percent in 0..99) || progress.status.contains("Loading", ignoreCase = true)
                     val finished = progress.status.contains("Ready", ignoreCase = true)
                     _state.update { appState ->
@@ -685,7 +853,9 @@ class AppStore(
                             chat = appState.chat.copy(
                                 isDownloading = downloading && !finished,
                                 downloadPercent = progress.percent.takeIf { it >= 0 },
-                                downloadStatus = progress.status
+                                downloadStatus = progress.status,
+                                isModelDownloaded = if (finished) true else appState.chat.isModelDownloaded,
+                                modelDownloadSizeBytes = if (finished) null else appState.chat.modelDownloadSizeBytes
                             )
                         )
                     }
@@ -693,6 +863,7 @@ class AppStore(
             } catch (err: Throwable) {
                 val cancelled = err is kotlinx.coroutines.CancellationException ||
                     err.message?.contains("cancel", ignoreCase = true) == true
+                if (!isActive()) return@launch
                 streamingParentId = null
                 _state.update { appState ->
                     appState.copy(
@@ -701,22 +872,35 @@ class AppStore(
                             isDownloading = false,
                             streamingParentId = null,
                             downloadPercent = null,
-                            downloadStatus = if (cancelled) "Download cancelled" else null
+                            downloadStatus = if (cancelled) "Download cancelled" else null,
+                            hasRequestedModelDownload = if (cancelled) false else appState.chat.hasRequestedModelDownload
                         )
                     )
                 }
                 if (!cancelled) {
-                    logRepository.log(LogLevel.Error, "Model load failed", err.message ?: "")
+                    logRepository.log(
+                        LogLevel.Error,
+                        "Model load failed",
+                        details = err.message,
+                        tag = "Model",
+                        throwable = err
+                    )
                 }
                 syncAfterGeneration()
                 return@launch
             }
 
+            if (!isActive()) return@launch
+
             val prompt = buildPrompt(userMessage.text, userMessage.attachments)
             val history = buildHistory(sessionId, prompt.text, userMessage.id)
-            val llmMessages = history + LlmMessage(
+            val systemMessage = LlmMessage(
+                text = SYSTEM_PROMPT,
+                role = LlmMessageRole.System
+            )
+            val llmMessages = listOf(systemMessage) + history + LlmMessage(
                 text = prompt.text,
-                isUser = true,
+                role = LlmMessageRole.User,
                 hasAttachments = userMessage.attachments.isNotEmpty()
             )
 
@@ -728,22 +912,46 @@ class AppStore(
                     target = target,
                     messages = llmMessages,
                     imageFiles = prompt.imageFiles,
-                    temperature = 0.7f,
+                    temperature = resolveTemperature(settings),
                     maxTokens = target.maxTokens ?: 1024
                 ) { token ->
                     buffer.append(token)
                     tokenCount += estimateTokens(token)
-                    _state.update { appState ->
-                        appState.copy(chat = appState.chat.copy(streamingResponse = buffer.toString()))
+                    if (isActive()) {
+                        _state.update { appState ->
+                            appState.copy(chat = appState.chat.copy(streamingResponse = buffer.toString()))
+                        }
                     }
                 }
 
-                finishGeneration(sessionId, userMessage, buffer, tokenCount, summary.totalTimeMs, false)
+                finishGeneration(
+                    sessionId,
+                    userMessage,
+                    buffer,
+                    tokenCount,
+                    summary.totalTimeMs,
+                    interrupted = false,
+                    shouldUpdateUi = isActive()
+                )
             } catch (err: Throwable) {
                 val interrupted = stopRequested || err.message?.contains("cancel", ignoreCase = true) == true
-                finishGeneration(sessionId, userMessage, buffer, tokenCount, null, interrupted)
+                finishGeneration(
+                    sessionId,
+                    userMessage,
+                    buffer,
+                    tokenCount,
+                    totalTimeMs = null,
+                    interrupted = interrupted,
+                    shouldUpdateUi = isActive()
+                )
                 if (!interrupted) {
-                    logRepository.log(LogLevel.Error, "Generation failed", err.message ?: "")
+                    logRepository.log(
+                        LogLevel.Error,
+                        "Generation failed",
+                        details = err.message,
+                        tag = "LLM",
+                        throwable = err
+                    )
                 }
             }
         }
@@ -755,7 +963,8 @@ class AppStore(
         buffer: StringBuilder,
         tokenCount: Int,
         totalTimeMs: Long?,
-        interrupted: Boolean
+        interrupted: Boolean,
+        shouldUpdateUi: Boolean
     ) {
         val finalText = buffer.toString().trim()
         if (finalText.isNotEmpty()) {
@@ -781,34 +990,117 @@ class AppStore(
             updateCurrentSessionPreview(sessionId, finalText, assistantMessage.timestampMillis)
         }
 
-        streamingParentId = null
-        _state.update { appState ->
-            appState.copy(
-                chat = appState.chat.copy(
-                    isGenerating = false,
-                    isDownloading = false,
-                    streamingResponse = "",
-                    streamingParentId = null,
-                    downloadPercent = null,
-                    downloadStatus = null
+        if (shouldUpdateUi) {
+            streamingParentId = null
+            _state.update { appState ->
+                appState.copy(
+                    chat = appState.chat.copy(
+                        isGenerating = false,
+                        isDownloading = false,
+                        streamingResponse = "",
+                        streamingParentId = null,
+                        downloadPercent = null,
+                        downloadStatus = null
+                    )
                 )
-            )
+            }
+            rebuildChatState(sessionId)
+            syncAfterGeneration()
         }
-        rebuildChatState(sessionId)
-        syncAfterGeneration()
+        scheduleSessionSummary(sessionId)
     }
 
     private fun updateCurrentSessionPreview(sessionId: String, preview: String, timestamp: Long) {
         _state.update { appState ->
             val updatedSessions = appState.chat.sessions.map { session ->
                 if (session.id == sessionId) {
-                    session.copy(lastMessagePreview = preview, updatedAtMillis = timestamp)
+                    val shouldUpdateTitle = session.title.isBlank() || session.title.equals("New Chat", ignoreCase = true)
+                    val updatedTitle = if (shouldUpdateTitle) {
+                        sessionTitleFromText(preview, fallback = session.title)
+                    } else {
+                        session.title
+                    }
+                    session.copy(
+                        title = updatedTitle,
+                        lastMessagePreview = preview,
+                        updatedAtMillis = timestamp
+                    )
                 } else {
                     session
                 }
             }
             appState.copy(chat = appState.chat.copy(sessions = updatedSessions))
         }
+    }
+
+    private fun applySessionSummariesToState() {
+        _state.update { appState ->
+            val updatedSessions = appState.chat.sessions.map { session ->
+                val summary = sessionSummaries[session.id]
+                if (!summary.isNullOrBlank() && summary != session.title) {
+                    session.copy(title = summary)
+                } else {
+                    session
+                }
+            }
+            appState.copy(chat = appState.chat.copy(sessions = updatedSessions))
+        }
+    }
+
+    private fun scheduleSessionSummary(sessionId: String) {
+        val scope = scope ?: return
+        sessionSummaryJob?.cancel()
+        sessionSummaryJob = scope.launch(Dispatchers.Default) {
+            val summary = buildSessionSummary(sessionId) ?: return@launch
+            if (!isActive) return@launch
+            withContext(Dispatchers.Main) {
+                applySessionSummary(sessionId, summary)
+            }
+        }
+    }
+
+    private fun buildSessionSummary(sessionId: String): String? {
+        val firstUserMessage = messageStore[sessionId]
+            ?.asSequence()
+            ?.filter { it.author == MessageAuthor.User }
+            ?.minByOrNull { it.timestampMillis }
+            ?: return null
+        val summary = summarizeQuestion(firstUserMessage.text)
+        if (summary.isBlank()) return null
+        val existing = sessionSummaries[sessionId]
+        if (!existing.isNullOrBlank() && existing == summary) return null
+        return summary
+    }
+
+    private fun applySessionSummary(sessionId: String, summary: String) {
+        if (summary.isBlank()) return
+        if (sessionSummaries[sessionId] == summary) return
+        sessionSummaries[sessionId] = summary
+        scope?.launch { sessionPreferences.setSessionSummary(sessionId, summary) }
+        _state.update { appState ->
+            val updatedSessions = appState.chat.sessions.map { session ->
+                if (session.id == sessionId) {
+                    session.copy(title = summary)
+                } else {
+                    session
+                }
+            }
+            appState.copy(chat = appState.chat.copy(sessions = updatedSessions))
+        }
+    }
+
+    private fun summarizeQuestion(text: String): String {
+        val cleaned = text
+            .replace(Regex("[\r\n]+"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+        if (cleaned.isBlank()) return ""
+        val words = cleaned.split(" ")
+            .map { word -> word.trim { ch -> !ch.isLetterOrDigit() } }
+            .filter { it.isNotBlank() }
+        if (words.isEmpty()) return ""
+        val summaryWords = words.take(6)
+        return summaryWords.joinToString(" ")
     }
 
     private fun loadMessagesFromDb(sessionId: String) {
@@ -979,10 +1271,22 @@ class AppStore(
             val text = historyText(message)
             val cost = estimateTokens(text)
             if (cost <= remaining) {
-                selected.add(LlmMessage(text, message.author == MessageAuthor.User, message.attachments.isNotEmpty()))
+                selected.add(
+                    LlmMessage(
+                        text = text,
+                        role = if (message.author == MessageAuthor.User) LlmMessageRole.User else LlmMessageRole.Assistant,
+                        hasAttachments = message.attachments.isNotEmpty()
+                    )
+                )
                 remaining -= cost
             } else if (selected.isEmpty()) {
-                selected.add(LlmMessage(trimToBudget(text, remaining), message.author == MessageAuthor.User, message.attachments.isNotEmpty()))
+                selected.add(
+                    LlmMessage(
+                        text = trimToBudget(text, remaining),
+                        role = if (message.author == MessageAuthor.User) LlmMessageRole.User else LlmMessageRole.Assistant,
+                        hasAttachments = message.attachments.isNotEmpty()
+                    )
+                )
                 break
             } else {
                 break
@@ -1013,6 +1317,11 @@ class AppStore(
         return max(1, text.length / 4)
     }
 
+    private fun resolveTemperature(settings: ModelSettingsState): Float {
+        val temperature = settings.temperature.trim().toFloatOrNull()
+        return temperature?.takeIf { it >= 0f } ?: DEFAULT_TEMPERATURE
+    }
+
     private fun resolveTarget(settings: ModelSettingsState): LlmModelTarget {
         val useCustom = settings.useCustomModel && settings.modelUrl.isNotBlank()
         val url = if (useCustom) settings.modelUrl else DEFAULT_MODEL_URL
@@ -1031,36 +1340,35 @@ class AppStore(
     }
 
     private fun loadSessionsFromDb() {
-        val sessions = chatRepository.listSessions()
+        val sessions = chatRepository.listSessions().map { session ->
+            val summary = sessionSummaries[session.id]
+            if (!summary.isNullOrBlank()) {
+                session.copy(title = summary)
+            } else {
+                session
+            }
+        }
 
         sessions.forEach { session ->
             messageStore.getOrPut(session.id) { mutableListOf() }
             branchSelections.getOrPut(session.id) { mutableMapOf() }
         }
 
-        val stored = runBlocking { sessionPreferences.selectedSessionId.first() }
-        val resolvedStored = stored?.takeIf { id -> sessions.any { it.id == id } }
-        val shouldKeepDraft = resolvedStored == null &&
-            stored == null &&
-            _state.value.chat.currentSessionId == null &&
-            _state.value.chat.sessions.isNotEmpty()
-        val current = if (shouldKeepDraft) null else resolvedStored ?: sessions.firstOrNull()?.id
+        val currentSessionId = _state.value.chat.currentSessionId
+        val sessionStillExists = currentSessionId != null && sessions.any { it.id == currentSessionId }
 
         _state.update { appState ->
             appState.copy(
                 chat = appState.chat.copy(
                     sessions = sessions,
-                    currentSessionId = current,
-                    messages = if (current == null) emptyList() else appState.chat.messages,
-                    branchSelections = if (current == null) emptyMap() else appState.chat.branchSelections
+                    currentSessionId = if (sessionStillExists) currentSessionId else null
                 )
             )
         }
 
-        if (current != null) {
-            loadMessagesFromDb(current)
-            rebuildChatState(current)
-            ensureAttachmentsAvailable(current)
+        if (sessionStillExists && currentSessionId != null) {
+            loadMessagesFromDb(currentSessionId)
+            rebuildChatState(currentSessionId)
         } else {
             updateAttachmentDownloadState()
         }
@@ -1077,5 +1385,8 @@ class AppStore(
         private const val DEFAULT_MMPROJ_URL =
             "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
         private const val MEDIA_MARKER = "<__media__>"
+        private const val DEFAULT_TEMPERATURE = 0.7f
+        private const val SYSTEM_PROMPT =
+            "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points."
     }
 }

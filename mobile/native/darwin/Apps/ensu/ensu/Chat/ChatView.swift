@@ -1,3 +1,4 @@
+#if canImport(EnteCore)
 import SwiftUI
 
 struct ChatView: View {
@@ -5,10 +6,14 @@ struct ChatView: View {
     @Binding var isShowingAuth: Bool
 
     @EnvironmentObject private var appState: EnsuAppState
+    @ObservedObject private var modelSettings = ModelSettingsStore.shared
 
     @State private var isDrawerOpen = false
+    @State private var showSettings = false
     @State private var showModelSettings = false
+    @State private var showLogs = false
     @State private var toastMessage: ToastMessage?
+    @StateObject private var keyboard = KeyboardObserver()
     @State private var deleteSession: ChatSession?
     @State private var developerTapCount = 0
     @State private var lastDeveloperTapAt: Date?
@@ -17,6 +22,7 @@ struct ChatView: View {
     @State private var showDeveloperSettings = false
     @State private var showSignOutAlert = false
     @State private var showAttachmentDownloads = false
+    @State private var didAutoFocusInput = false
 
     private var editingMessage: ChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
@@ -67,9 +73,31 @@ struct ChatView: View {
                 showToast(message, duration: 2)
                 viewModel.syncErrorMessage = nil
             }
+            .onChange(of: modelSettings.useCustomModel) { _ in
+                viewModel.refreshModelDownloadInfo()
+            }
+            .onChange(of: modelSettings.modelUrl) { _ in
+                viewModel.refreshModelDownloadInfo()
+            }
+            .onChange(of: modelSettings.mmprojUrl) { _ in
+                viewModel.refreshModelDownloadInfo()
+            }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(
+                onOpenModelSettings: {
+                    showModelSettings = true
+                },
+                onOpenLogs: {
+                    showLogs = true
+                }
+            )
         }
         .sheet(isPresented: $showModelSettings) {
             ModelSettingsView()
+        }
+        .sheet(isPresented: $showLogs) {
+            LogsView()
         }
         .sheet(isPresented: $showAttachmentDownloads) {
             AttachmentDownloadsSheet(
@@ -134,6 +162,7 @@ struct ChatView: View {
                 showSignIn: !appState.isLoggedIn,
                 showsMenuButton: showsMenuButton,
                 attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
+                modelDownloadState: viewModel.downloadToast,
                 onMenu: { isDrawerOpen.toggle() },
                 onSignIn: { isShowingAuth = true },
                 onAttachmentDownloads: {
@@ -144,58 +173,92 @@ struct ChatView: View {
             Divider()
                 .background(EnsuColor.border)
 
+            let showDownloadOnboarding = viewModel.messages.isEmpty && !viewModel.isGenerating && !viewModel.isModelDownloaded
+
             ZStack(alignment: .top) {
                 VStack(spacing: 0) {
-                    MessageListView(
-                        messages: viewModel.messages,
-                        streamingResponse: viewModel.displayedStreamingResponse,
-                        streamingParentId: viewModel.displayedStreamingParentId,
-                        isGenerating: viewModel.isGenerating,
-                        onEdit: { message in
-                            viewModel.beginEditing(message: message)
-                        },
-                        onCopy: { message in
-                            copyToPasteboard(message.text)
-                            showToast("Copied to clipboard", duration: 1)
-                        },
-                        onRetry: { message in
-                            viewModel.retryAssistantResponse(message)
-                        },
-                        onBranchChange: { message, delta in
-                            viewModel.changeBranch(for: message, delta: delta)
-                        }
-                    )
+                    if showDownloadOnboarding {
+                        DownloadOnboardingView(
+                            isDownloading: viewModel.isDownloading,
+                            downloadPercent: viewModel.downloadToast?.percent,
+                            statusText: viewModel.downloadToast?.status,
+                            totalBytes: viewModel.modelDownloadSizeBytes,
+                            sizeText: viewModel.modelDownloadSizeText,
+                            onDownload: {
+                                viewModel.startModelDownload()
+                            }
+                        )
+                    } else {
+                        MessageListView(
+                            messages: viewModel.messages,
+                            streamingResponse: viewModel.displayedStreamingResponse,
+                            streamingParentId: viewModel.displayedStreamingParentId,
+                            isGenerating: viewModel.isGenerating,
+                            keyboardHeight: keyboard.height,
+                            emptyStateTitle: "Welcome to ensu",
+                            emptyStateSubtitle: "Start typing to begin a conversation",
+                            onEdit: { message in
+                                viewModel.beginEditing(message: message)
+                            },
+                            onCopy: { message in
+                                copyToPasteboard(message.text)
+                                showToast("Copied to clipboard", duration: 1)
+                            },
+                            onRetry: { message in
+                                viewModel.retryAssistantResponse(message)
+                            },
+                            onBranchChange: { message, delta in
+                                viewModel.changeBranch(for: message, delta: delta)
+                            }
+                        )
+                    }
 
-                    MessageInputView(
-                        text: $viewModel.draftText,
-                        attachments: $viewModel.draftAttachments,
-                        isGenerating: viewModel.isGenerating,
-                        isDownloading: viewModel.isDownloading,
-                        editingMessage: editingMessage,
-                        isProcessingAttachments: viewModel.isProcessingAttachments,
-                        isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
-                        onSend: {
-                            viewModel.sendDraft()
-                        },
-                        onStop: {
-                            viewModel.stopGenerating()
-                        },
-                        onCancelEdit: {
-                            viewModel.cancelEditing()
-                        },
-                        onAddImage: { data, name in
-                            viewModel.addImageAttachment(data: data, fileName: name)
-                        },
-                        onAddDocument: { url in
-                            viewModel.addDocumentAttachment(url: url)
-                        },
-                        onRemoveAttachment: { attachment in
-                            viewModel.removeAttachment(attachment)
+                    if !showDownloadOnboarding {
+                        let shouldAutoFocus = viewModel.isModelDownloaded && !viewModel.isDownloading && !viewModel.isGenerating && !didAutoFocusInput
+
+                        MessageInputView(
+                            text: $viewModel.draftText,
+                            attachments: $viewModel.draftAttachments,
+                            isGenerating: viewModel.isGenerating,
+                            isDownloading: viewModel.isDownloading,
+                            editingMessage: editingMessage,
+                            isProcessingAttachments: viewModel.isProcessingAttachments,
+                            isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
+                            autoFocus: shouldAutoFocus,
+                            onSend: {
+                                viewModel.sendDraft()
+                            },
+                            onStop: {
+                                viewModel.stopGenerating()
+                            },
+                            onCancelEdit: {
+                                viewModel.cancelEditing()
+                            },
+                            onAddImage: { data, name in
+                                viewModel.addImageAttachment(data: data, fileName: name)
+                            },
+                            onAddDocument: { url in
+                                viewModel.addDocumentAttachment(url: url)
+                            },
+                            onRemoveAttachment: { attachment in
+                                viewModel.removeAttachment(attachment)
+                            }
+                        )
+                        .onAppear {
+                            if shouldAutoFocus {
+                                didAutoFocusInput = true
+                            }
                         }
-                    )
+                    }
+                }
+                .onAppear {
+                    viewModel.autoStartModelDownloadIfNeeded()
+                }
+                .onChange(of: viewModel.messages.count) { _ in
+                    viewModel.autoStartModelDownloadIfNeeded()
                 }
 
-                if let downloadToast = viewModel.downloadToast {
+                if let downloadToast = viewModel.downloadToast, !showDownloadOnboarding, downloadToast.phase != .loading {
                     DownloadToastView(state: downloadToast) {
                         viewModel.downloadToast = nil
                     } onRetry: {
@@ -231,17 +294,12 @@ struct ChatView: View {
             onSync: {
                 viewModel.syncNow()
             },
-            onShowLogs: {
-                showToast("Logs are not available yet.", duration: 2)
-            },
-            onShowModelSettings: {
-                showModelSettings = true
+            onOpenSettings: {
+                isDrawerOpen = false
+                showSettings = true
             },
             onDeveloperTap: {
                 handleDeveloperTap()
-            },
-            onDeveloperSettings: {
-                presentDeveloperPrompt()
             },
             onSignOut: {
                 showSignOutAlert = true
@@ -274,6 +332,9 @@ struct ChatView: View {
     }
 
     private func handleDeveloperTap() {
+        // Don't allow switching endpoints for logged-in users.
+        guard !appState.isLoggedIn else { return }
+
         let now = Date()
         if let lastDeveloperTapAt,
            now.timeIntervalSince(lastDeveloperTapAt) > 2 {
@@ -292,6 +353,83 @@ struct ChatView: View {
         guard !isOpeningDeveloperSettings else { return }
         isOpeningDeveloperSettings = true
         showDeveloperAlert = true
+    }
+}
+
+private struct DownloadOnboardingView: View {
+    let isDownloading: Bool
+    let downloadPercent: Int?
+    let statusText: String?
+    let totalBytes: Int64?
+    let sizeText: String
+    let onDownload: () -> Void
+
+    var body: some View {
+        VStack(spacing: EnsuSpacing.md) {
+            Text("Download to begin using the Chat")
+                .font(EnsuTypography.large)
+                .foregroundStyle(EnsuColor.textPrimary)
+                .multilineTextAlignment(.center)
+
+            if isDownloading {
+                let statusLine: String = {
+                    if let statusText, statusText.localizedCaseInsensitiveContains("loading") {
+                        return statusText
+                    }
+                    if let totalBytes, let percent = downloadPercent, percent >= 0 {
+                        let clamped = min(max(percent, 0), 100)
+                        let downloaded = Int64(Double(totalBytes) * Double(clamped) / 100.0)
+                        return "Downloading... \(formatBytes(downloaded)) / \(formatBytes(totalBytes))"
+                    }
+                    if let statusText, !statusText.isEmpty {
+                        return statusText
+                    }
+                    return "Downloading..."
+                }()
+
+                Text(statusLine)
+                    .font(EnsuTypography.body)
+                    .foregroundStyle(EnsuColor.textMuted)
+                    .multilineTextAlignment(.center)
+
+                progressView
+            } else {
+                Button("Download") {
+                    hapticMedium()
+                    onDownload()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(EnsuColor.accent)
+
+                Text(sizeText)
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, EnsuSpacing.pageHorizontal)
+    }
+
+    @ViewBuilder
+    private var progressView: some View {
+        if let percent = downloadPercent, percent >= 0 {
+            let clamped = min(max(percent, 0), 100)
+            ProgressView(value: Double(clamped), total: 100)
+                .progressViewStyle(.linear)
+                .tint(EnsuColor.accent)
+                .frame(maxWidth: 240)
+        } else {
+            ProgressView()
+                .progressViewStyle(.linear)
+                .tint(EnsuColor.accent)
+                .frame(maxWidth: 240)
+        }
+    }
+
+    private func formatBytes(_ bytes: Int64) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
     }
 }
 
@@ -354,8 +492,14 @@ private struct AttachmentDownloadsSheet: View {
                             .foregroundStyle(EnsuColor.textMuted)
 
                         if item.status == .queued || item.status == .downloading {
-                            Button(action: { onCancel(item.id) }) {
-                                Image(systemName: "xmark.circle.fill")
+                            Button(action: {
+                                hapticWarning()
+                                onCancel(item.id)
+                            }) {
+                                Image("Cancel01Icon")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 18, height: 18)
                                     .foregroundStyle(EnsuColor.textMuted)
                             }
                             .buttonStyle(.plain)
@@ -392,19 +536,35 @@ private struct ChatAppBar: View {
     let showSignIn: Bool
     let showsMenuButton: Bool
     let attachmentDownloadSummary: (completed: Int, total: Int)?
+    let modelDownloadState: DownloadToastState?
     let onMenu: () -> Void
     let onSignIn: () -> Void
     let onAttachmentDownloads: () -> Void
 
     private let centerInset: CGFloat = 72
 
+    private var modelProgressState: DownloadToastState? {
+        guard let modelDownloadState else { return nil }
+        switch modelDownloadState.phase {
+        case .loading:
+            return modelDownloadState
+        default:
+            return nil
+        }
+    }
+
     var body: some View {
         ZStack {
             HStack(spacing: EnsuSpacing.md) {
                 if showsMenuButton {
-                    Button(action: onMenu) {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 18, weight: .semibold))
+                    Button(action: {
+                        hapticTap()
+                        onMenu()
+                    }) {
+                        Image("Menu01Icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
                             .frame(width: 40, height: 40)
                     }
                     .buttonStyle(.plain)
@@ -415,29 +575,47 @@ private struct ChatAppBar: View {
 
                 Spacer()
 
-                if showSignIn {
-                    Button(action: onSignIn) {
-                        Text("Sign In")
-                            .font(EnsuTypography.small)
-                            .foregroundStyle(EnsuColor.accent)
-                    }
-                    .buttonStyle(.plain)
-                } else if let summary = attachmentDownloadSummary {
-                    Button(action: onAttachmentDownloads) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.down.circle")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(EnsuColor.textPrimary)
-                            Text("\(summary.completed)/\(summary.total)")
-                                .font(EnsuTypography.mini)
-                                .foregroundStyle(EnsuColor.textMuted)
+                HStack(spacing: EnsuSpacing.md) {
+                    if showSignIn {
+                        if let progress = modelProgressState {
+                            ModelProgressIndicator(state: progress)
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .background(EnsuColor.fillFaint)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        Button(action: {
+                            hapticTap()
+                            onSignIn()
+                        }) {
+                            Text("Sign In")
+                                .font(EnsuTypography.small)
+                                .foregroundStyle(EnsuColor.accent)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        if let summary = attachmentDownloadSummary {
+                            Button(action: {
+                                hapticTap()
+                                onAttachmentDownloads()
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image("Upload01Icon")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 14, height: 14)
+                                        .foregroundStyle(EnsuColor.textPrimary)
+                                    Text("\(summary.completed)/\(summary.total)")
+                                        .font(EnsuTypography.mini)
+                                        .foregroundStyle(EnsuColor.textMuted)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                                .background(EnsuColor.fillFaint)
+                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        if let progress = modelProgressState {
+                            ModelProgressIndicator(state: progress)
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
             }
 
@@ -458,3 +636,31 @@ private struct ChatAppBar: View {
         .background(EnsuColor.backgroundBase)
     }
 }
+
+private struct ModelProgressIndicator: View {
+    let state: DownloadToastState
+
+    var body: some View {
+        let clamped = min(max(state.percent, 0), 100)
+        if state.phase == .downloading {
+            ProgressView(value: Double(clamped), total: 100)
+                .progressViewStyle(.circular)
+                .tint(EnsuColor.accent)
+                .frame(width: 16, height: 16)
+        } else {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(EnsuColor.accent)
+                .frame(width: 16, height: 16)
+        }
+    }
+}
+#else
+import SwiftUI
+
+struct ChatView: View {
+    var body: some View {
+        Text("Chat unavailable")
+    }
+}
+#endif

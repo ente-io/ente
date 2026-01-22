@@ -40,3 +40,15 @@ data class Attachment(
     val localPath: String? = null,
     val isUploading: Boolean = false
 )
+
+const val SessionTitleMaxLength = 50
+
+fun sessionTitleFromText(text: String, fallback: String = "New Chat"): String {
+    val trimmed = text.trim()
+    if (trimmed.isBlank()) return fallback
+    return if (trimmed.length <= SessionTitleMaxLength) {
+        trimmed
+    } else {
+        trimmed.take(SessionTitleMaxLength).trimEnd() + "…"
+    }
+}

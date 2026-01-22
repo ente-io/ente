@@ -6,5 +6,6 @@ data class ModelSettingsState(
     val mmprojUrl: String = "",
     val contextLength: String = "",
     val maxTokens: String = "",
+    val temperature: String = "",
     val isSaving: Boolean = false
 )

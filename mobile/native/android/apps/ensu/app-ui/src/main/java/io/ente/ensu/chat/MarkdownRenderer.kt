@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -40,13 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
+import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 
 @Composable
-fun MarkdownView(markdown: String) {
+fun MarkdownView(markdown: String, enableSelection: Boolean = true) {
     val blocks = MarkdownParser.parse(markdown)
-    SelectionContainer {
+    val content = @Composable {
         Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)) {
             blocks.forEach { block ->
                 when (block) {
@@ -90,6 +90,14 @@ fun MarkdownView(markdown: String) {
                 }
             }
         }
+    }
+
+    if (enableSelection) {
+        SelectionContainer {
+            content()
+        }
+    } else {
+        content()
     }
 }
 
@@ -151,7 +159,7 @@ private fun CodeBlockView(code: String) {
                 .size(28.dp)
         ) {
             Icon(
-                imageVector = Icons.Outlined.ContentCopy,
+                painter = painterResource(HugeIcons.Copy01Icon),
                 contentDescription = "Copy code",
                 tint = EnsuColor.textMuted(),
                 modifier = Modifier.size(16.dp)

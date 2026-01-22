@@ -1,7 +1,7 @@
+#if canImport(EnteCore)
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
-import UIKit
 
 struct MessageInputView: View {
     @Binding var text: String
@@ -11,6 +11,7 @@ struct MessageInputView: View {
     let editingMessage: ChatMessage?
     let isProcessingAttachments: Bool
     let isAttachmentDownloadBlocked: Bool
+    let autoFocus: Bool
     let onSend: () -> Void
     let onStop: () -> Void
     let onCancelEdit: () -> Void
@@ -20,21 +21,24 @@ struct MessageInputView: View {
 
     @StateObject private var keyboard = KeyboardObserver()
     @FocusState private var isFocused: Bool
-    @State private var isImagePickerPresented = false
+
+    @State private var selectedPhotoItem: PhotosPickerItem?
 
     private var placeholder: String {
-        if isDownloading {
-            return "Downloading model... (queue messages)"
-        }
         if isAttachmentDownloadBlocked {
             return "Downloading attachments..."
         }
-        return "Compose your message..."
+        return "Write a message..."
     }
 
     private var canSend: Bool {
         let hasContent = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachments.isEmpty
         return hasContent && !isGenerating && !isDownloading && !isAttachmentDownloadBlocked
+    }
+
+    private var isSendEnabled: Bool {
+        let hasContent = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachments.isEmpty
+        return hasContent && !isDownloading && !isAttachmentDownloadBlocked
     }
 
     var body: some View {
@@ -45,9 +49,14 @@ struct MessageInputView: View {
                 }
 
                 let hasAttachmentContent = !attachments.isEmpty || isProcessingAttachments
-                let inputVerticalPadding: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : EnsuSpacing.inputVertical
-                let textFieldPadding: CGFloat = hasAttachmentContent ? 2 : 8
-                let bottomPadding: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : EnsuSpacing.sm
+
+                // Make the input bar a bit more compact when showing "Write a message..."
+                let inputVerticalPadding: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : 10
+                let textFieldPadding: CGFloat = hasAttachmentContent ? 2 : 6
+
+                // Lift the bar slightly off the bottom edge.
+                let bottomPadding: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : EnsuSpacing.md
+
                 let inputStackSpacing: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : EnsuSpacing.sm
 
                 VStack(alignment: .leading, spacing: inputStackSpacing) {
@@ -96,43 +105,66 @@ struct MessageInputView: View {
                         }
 
                     if editingMessage == nil {
-                        Button {
-                            isImagePickerPresented = true
-                        } label: {
-                            Image(systemName: "paperclip")
-                                .font(attachmentIconFont)
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            Image("Upload01Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: attachmentIconSize, height: attachmentIconSize)
                                 .frame(width: 32, height: 32, alignment: .center)
                         }
                         .disabled(isGenerating || isDownloading || isAttachmentDownloadBlocked)
                         .foregroundStyle(EnsuColor.textMuted)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            hapticTap()
+                        })
                         #if os(macOS)
                         .buttonStyle(.plain)
                         .frame(width: 32, height: 32, alignment: .center)
                         #endif
-                        .sheet(isPresented: $isImagePickerPresented) {
-                            ImagePicker(
-                                onPick: { data, name in
-                                    onAddImage(data, name)
-                                    isImagePickerPresented = false
-                                },
-                                onCancel: {
-                                    isImagePickerPresented = false
+                        .onChange(of: selectedPhotoItem) { newItem in
+                            guard let newItem else { return }
+                            Task {
+                                let data = try? await newItem.loadTransferable(type: Data.self)
+                                await MainActor.run {
+                                    if let data {
+                                        onAddImage(data, nil)
+                                    }
+                                    selectedPhotoItem = nil
                                 }
-                            )
+                            }
                         }
                     }
 
                     Button {
                         if isGenerating {
+                            hapticWarning()
                             onStop()
-                        } else if canSend {
+                        } else if isSendEnabled {
+                            hapticMedium()
                             onSend()
                         }
                     } label: {
-                        Image(systemName: sendIcon)
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(sendColor)
+                        if sendIcon == "StopIcon" {
+                            ZStack {
+                                Circle()
+                                    .fill(EnsuColor.textPrimary)
+                                    .frame(width: attachmentIconSize + 6, height: attachmentIconSize + 6)
+                                Image(sendIcon)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: attachmentIconSize - 4, height: attachmentIconSize - 4)
+                                    .foregroundStyle(EnsuColor.stopButton)
+                            }
                             .frame(width: 32, height: 32)
+                        } else {
+                            Image(sendIcon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: attachmentIconSize, height: attachmentIconSize)
+                                .rotationEffect(sendIcon == "Navigation06Icon" ? .degrees(90) : .zero)
+                                .foregroundStyle(sendColor)
+                                .frame(width: 32, height: 32)
+                        }
                     }
                     .disabled(isDownloading || (!canSend && !isGenerating))
                 }
@@ -140,7 +172,7 @@ struct MessageInputView: View {
                 .padding(.vertical, inputVerticalPadding)
                 .frame(maxWidth: .infinity)
                 .background(EnsuColor.fillFaint)
-                .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input + 4, style: .continuous))
                 .padding(.horizontal, EnsuSpacing.pageHorizontal)
                 .padding(.bottom, bottomPadding)
             }
@@ -149,6 +181,7 @@ struct MessageInputView: View {
 
         if keyboard.isVisible {
                 Button {
+                    hapticTap()
                     isFocused = false
                     hideKeyboard()
                 } label: {
@@ -166,11 +199,11 @@ struct MessageInputView: View {
         .background(EnsuColor.backgroundBase)
     }
 
-    private var attachmentIconFont: Font {
+    private var attachmentIconSize: CGFloat {
         #if os(macOS)
-        return .system(size: 22, weight: .semibold)
+        return 18
         #else
-        return .system(size: 18, weight: .regular)
+        return 16
         #endif
     }
 
@@ -192,28 +225,24 @@ struct MessageInputView: View {
 
     private var sendIcon: String {
         if isGenerating {
-            return "stop.fill"
+            return "StopIcon"
         }
-        if isDownloading {
-            return "arrow.down"
-        }
-        return "paperplane"
+        return "Navigation06Icon"
     }
 
     private var sendColor: Color {
         if isGenerating {
             return EnsuColor.stopButton
         }
-        if isDownloading {
-            return EnsuColor.textMuted
-        }
-        return EnsuColor.textMuted
+        return isSendEnabled ? EnsuColor.textPrimary : EnsuColor.textMuted
     }
 
     private func editBanner(for message: ChatMessage) -> some View {
         HStack(spacing: EnsuSpacing.sm) {
-            Image(systemName: "pencil")
-                .font(.system(size: 14))
+            Image("Edit01Icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 14, height: 14)
                 .foregroundStyle(EnsuColor.accent)
 
             Text("Editing:")
@@ -227,9 +256,14 @@ struct MessageInputView: View {
 
             Spacer()
 
-            Button(action: onCancelEdit) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .semibold))
+            Button(action: {
+                hapticTap()
+                onCancelEdit()
+            }) {
+                Image("Cancel01Icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 12, height: 12)
                     .foregroundStyle(EnsuColor.textMuted)
             }
             .buttonStyle(.plain)
@@ -249,91 +283,13 @@ struct MessageInputView: View {
         .padding(.horizontal, EnsuSpacing.pageHorizontal)
     }
 }
+#else
+import SwiftUI
 
-private struct ImagePicker: UIViewControllerRepresentable {
-    let onPick: (Data, String?) -> Void
-    let onCancel: () -> Void
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onPick: onPick, onCancel: onCancel)
-    }
-
-    func makeUIViewController(context: Context) -> PHPickerViewController {
-        var config = PHPickerConfiguration(photoLibrary: .shared())
-        config.filter = .images
-        config.selectionLimit = 1
-        let picker = PHPickerViewController(configuration: config)
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
-
-    final class Coordinator: NSObject, PHPickerViewControllerDelegate {
-        private let onPick: (Data, String?) -> Void
-        private let onCancel: () -> Void
-
-        init(onPick: @escaping (Data, String?) -> Void, onCancel: @escaping () -> Void) {
-            self.onPick = onPick
-            self.onCancel = onCancel
-        }
-
-        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            guard let result = results.first else {
-                onCancel()
-                return
-            }
-            let provider = result.itemProvider
-            let typeIdentifier = UTType.image.identifier
-            provider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { data, _ in
-                DispatchQueue.main.async {
-                    guard let data else {
-                        self.onCancel()
-                        return
-                    }
-                    self.onPick(data, provider.suggestedName)
-                }
-            }
-        }
+struct MessageInputView: View {
+    var body: some View {
+        Text("Input unavailable")
     }
 }
+#endif
 
-private struct DocumentPicker: UIViewControllerRepresentable {
-    let onPick: (URL) -> Void
-    let onCancel: () -> Void
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onPick: onPick, onCancel: onCancel)
-    }
-
-    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.data], asCopy: true)
-        picker.delegate = context.coordinator
-        picker.allowsMultipleSelection = false
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
-
-    final class Coordinator: NSObject, UIDocumentPickerDelegate {
-        private let onPick: (URL) -> Void
-        private let onCancel: () -> Void
-
-        init(onPick: @escaping (URL) -> Void, onCancel: @escaping () -> Void) {
-            self.onPick = onPick
-            self.onCancel = onCancel
-        }
-
-        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            guard let url = urls.first else {
-                onCancel()
-                return
-            }
-            onPick(url)
-        }
-
-        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-            onCancel()
-        }
-    }
-}

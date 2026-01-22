@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,9 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.components.EnsuLogo
+import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.data.auth.AuthResponsePayload
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.auth.KeyAttributes
@@ -107,7 +107,10 @@ fun AuthFlowScreen(
                             onDismiss()
                         }
                     }) {
-                        Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            painter = painterResource(HugeIcons.ArrowLeft01Icon),
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 actions = {},
@@ -322,6 +325,63 @@ private fun OtpVerificationView(
     val scope = rememberCoroutineScope()
     val hasValidCode = code.trim().length == 6
 
+    fun submitOtp() {
+        if (!hasValidCode || isLoading) return
+        scope.launch {
+            if (isLoading) return@launch
+            isLoading = true
+            errorMessage = null
+            try {
+                val payload = authService.verifyOtp(email, code)
+                val keyAttrs = payload.keyAttributes
+                if (keyAttrs == null) {
+                    errorMessage = "New user signup not implemented. Please use an existing account."
+                } else if (payload.requiresPasskey) {
+                    onNavigate(
+                        AuthRoute.Passkey(
+                            email = email,
+                            srp = srpAttributes,
+                            sessionId = payload.passkeySessionId.orEmpty(),
+                            accountsUrl = payload.accountsUrl ?: "https://accounts.ente.io",
+                            twoFactorSessionId = payload.twoFactorSessionId,
+                            password = null
+                        )
+                    )
+                } else if (payload.requiresTwoFactor) {
+                    onNavigate(
+                        AuthRoute.TwoFactor(
+                            email = email,
+                            srp = srpAttributes,
+                            sessionId = payload.twoFactorSessionId.orEmpty(),
+                            password = null
+                        )
+                    )
+                } else {
+                    onNavigate(
+                        AuthRoute.PasswordAfterMfa(
+                            email = email,
+                            srp = srpAttributes,
+                            userId = payload.userId,
+                            keyAttributes = keyAttrs,
+                            encryptedToken = payload.encryptedToken,
+                            token = payload.token
+                        )
+                    )
+                }
+            } catch (error: Exception) {
+                errorMessage = error.message
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    LaunchedEffect(code) {
+        if (code.trim().length == 6) {
+            submitOtp()
+        }
+    }
+
     AuthScreen(
         content = {
             AuthHeader(title = "Verify email", subtitle = email)
@@ -353,53 +413,7 @@ private fun OtpVerificationView(
                 isLoading = isLoading,
                 isEnabled = hasValidCode && !isLoading
             ) {
-                scope.launch {
-                    if (isLoading) return@launch
-                    isLoading = true
-                    errorMessage = null
-                    try {
-                        val payload = authService.verifyOtp(email, code)
-                        val keyAttrs = payload.keyAttributes
-                        if (keyAttrs == null) {
-                            errorMessage = "New user signup not implemented. Please use an existing account."
-                        } else if (payload.requiresPasskey) {
-                            onNavigate(
-                                AuthRoute.Passkey(
-                                    email = email,
-                                    srp = srpAttributes,
-                                    sessionId = payload.passkeySessionId.orEmpty(),
-                                    accountsUrl = payload.accountsUrl ?: "https://accounts.ente.io",
-                                    twoFactorSessionId = payload.twoFactorSessionId,
-                                    password = null
-                                )
-                            )
-                        } else if (payload.requiresTwoFactor) {
-                            onNavigate(
-                                AuthRoute.TwoFactor(
-                                    email = email,
-                                    srp = srpAttributes,
-                                    sessionId = payload.twoFactorSessionId.orEmpty(),
-                                    password = null
-                                )
-                            )
-                        } else {
-                            onNavigate(
-                                AuthRoute.PasswordAfterMfa(
-                                    email = email,
-                                    srp = srpAttributes,
-                                    userId = payload.userId,
-                                    keyAttributes = keyAttrs,
-                                    encryptedToken = payload.encryptedToken,
-                                    token = payload.token
-                                )
-                            )
-                        }
-                    } catch (error: Exception) {
-                        errorMessage = error.message
-                    } finally {
-                        isLoading = false
-                    }
-                }
+                submitOtp()
             }
         }
     )
@@ -420,6 +434,54 @@ private fun TwoFactorView(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val hasValidCode = code.trim().length == 6
+
+    fun submitTwoFactor() {
+        if (!hasValidCode || isLoading) return
+        scope.launch {
+            if (isLoading) return@launch
+            isLoading = true
+            errorMessage = null
+            try {
+                val payload = authService.verifyTwoFactor(sessionId, code)
+                val keyAttrs = payload.keyAttributes
+                if (keyAttrs == null) {
+                    errorMessage = "Invalid response"
+                } else if (!password.isNullOrBlank()) {
+                    authService.loginAfterChallenge(
+                        email = email,
+                        password = password,
+                        srpAttributes = srpAttributes,
+                        userId = payload.userId,
+                        keyAttributes = keyAttrs,
+                        encryptedToken = payload.encryptedToken,
+                        token = payload.token
+                    )
+                    onLoggedIn()
+                } else {
+                    onNavigate(
+                        AuthRoute.PasswordAfterMfa(
+                            email = email,
+                            srp = srpAttributes,
+                            userId = payload.userId,
+                            keyAttributes = keyAttrs,
+                            encryptedToken = payload.encryptedToken,
+                            token = payload.token
+                        )
+                    )
+                }
+            } catch (error: Exception) {
+                errorMessage = error.message
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    LaunchedEffect(code) {
+        if (code.trim().length == 6) {
+            submitTwoFactor()
+        }
+    }
 
     AuthScreen(
         content = {
@@ -449,44 +511,7 @@ private fun TwoFactorView(
                 isLoading = isLoading,
                 isEnabled = hasValidCode && !isLoading
             ) {
-                scope.launch {
-                    if (isLoading) return@launch
-                    isLoading = true
-                    errorMessage = null
-                    try {
-                        val payload = authService.verifyTwoFactor(sessionId, code)
-                        val keyAttrs = payload.keyAttributes
-                        if (keyAttrs == null) {
-                            errorMessage = "Invalid response"
-                        } else if (!password.isNullOrBlank()) {
-                            authService.loginAfterChallenge(
-                                email = email,
-                                password = password,
-                                srpAttributes = srpAttributes,
-                                userId = payload.userId,
-                                keyAttributes = keyAttrs,
-                                encryptedToken = payload.encryptedToken,
-                                token = payload.token
-                            )
-                            onLoggedIn()
-                        } else {
-                            onNavigate(
-                                AuthRoute.PasswordAfterMfa(
-                                    email = email,
-                                    srp = srpAttributes,
-                                    userId = payload.userId,
-                                    keyAttributes = keyAttrs,
-                                    encryptedToken = payload.encryptedToken,
-                                    token = payload.token
-                                )
-                            )
-                        }
-                    } catch (error: Exception) {
-                        errorMessage = error.message
-                    } finally {
-                        isLoading = false
-                    }
-                }
+                submitTwoFactor()
             }
         }
     )

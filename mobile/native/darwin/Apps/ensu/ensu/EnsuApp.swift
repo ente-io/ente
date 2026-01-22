@@ -5,6 +5,10 @@ struct EnsuApp: App {
     @StateObject private var appState = EnsuAppState()
     @StateObject private var deepLinkRouter = DeepLinkRouter()
 
+    init() {
+        EnsuLogging.shared.start()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

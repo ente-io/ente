@@ -1,3 +1,4 @@
+#if canImport(EnteCore)
 import SwiftUI
 
 struct SessionDrawerView: View {
@@ -9,10 +10,8 @@ struct SessionDrawerView: View {
     let onSelectSession: (ChatSession) -> Void
     let onDeleteSession: (ChatSession) -> Void
     let onSync: () -> Void
-    let onShowLogs: () -> Void
-    let onShowModelSettings: () -> Void
+    let onOpenSettings: () -> Void
     let onDeveloperTap: () -> Void
-    let onDeveloperSettings: () -> Void
     let onSignOut: () -> Void
     let onSignIn: () -> Void
 
@@ -58,17 +57,10 @@ struct SessionDrawerView: View {
                     .onTapGesture {
                         onDeveloperTap()
                     }
-                Spacer()
-            }
 
-            HStack(spacing: EnsuSpacing.sm) {
-                if isLoggedIn {
-                    iconButton(symbol: "arrow.clockwise", action: onSync)
-                }
-                iconButton(symbol: "ladybug", action: onShowLogs)
-                iconButton(symbol: "wrench.and.screwdriver", action: onDeveloperSettings)
-                iconButton(symbol: "slider.horizontal.3", action: onShowModelSettings)
                 Spacer()
+
+                iconButton(symbol: "Settings01Icon", action: onOpenSettings)
             }
 
             if isLoggedIn, let email {
@@ -96,17 +88,23 @@ struct SessionDrawerView: View {
     }
 
     private var newChatTile: some View {
-        Button(action: onNewChat) {
-            HStack(spacing: EnsuSpacing.sm) {
-                Image(systemName: "plus")
-                Text("New Chat")
-                    .font(EnsuTypography.body)
+        HStack(spacing: EnsuSpacing.sm) {
+            drawerPrimaryTile(
+                icon: "PlusSignIcon",
+                title: "New Chat",
+                action: onNewChat
+            )
+
+            if isLoggedIn {
+                drawerPrimaryTile(
+                    icon: "ArrowReloadHorizontalIcon",
+                    title: "Sync",
+                    action: onSync
+                )
             }
-            .foregroundStyle(EnsuColor.textPrimary)
-            .padding(.horizontal, EnsuSpacing.lg)
-            .padding(.vertical, EnsuSpacing.sm)
         }
-        .buttonStyle(.plain)
+        // Make the tiles take equal width (50/50) and keep some space between.
+        .padding(.horizontal, EnsuSpacing.lg)
     }
 
     private func sessionTile(_ session: ChatSession) -> some View {
@@ -121,7 +119,7 @@ struct SessionDrawerView: View {
                     .lineLimit(1)
             }
             Spacer()
-            ActionButton(icon: "trash", color: EnsuColor.textMuted) {
+            ActionButton(icon: "Delete01Icon", color: EnsuColor.textMuted) {
                 onDeleteSession(session)
             }
         }
@@ -129,6 +127,7 @@ struct SessionDrawerView: View {
         .padding(.vertical, EnsuSpacing.sm)
         .contentShape(Rectangle())
         .onTapGesture {
+            hapticTap()
             onSelectSession(session)
         }
     }
@@ -136,13 +135,19 @@ struct SessionDrawerView: View {
     private var footer: some View {
         HStack {
             if isLoggedIn {
-                Button("Sign Out", action: onSignOut)
-                    .font(EnsuTypography.body)
-                    .foregroundStyle(EnsuColor.textPrimary)
+                Button("Sign Out") {
+                    hapticWarning()
+                    onSignOut()
+                }
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textPrimary)
             } else {
-                Button("Sign In to Backup", action: onSignIn)
-                    .font(EnsuTypography.body)
-                    .foregroundStyle(EnsuColor.textPrimary)
+                Button("Sign In to Backup") {
+                    hapticTap()
+                    onSignIn()
+                }
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textPrimary)
             }
             Spacer()
         }
@@ -150,13 +155,43 @@ struct SessionDrawerView: View {
     }
 
     private func iconButton(symbol: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 18))
+        Button(action: {
+            hapticTap()
+            action()
+        }) {
+            Image(symbol)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
                 .frame(width: 40, height: 40)
                 .foregroundStyle(EnsuColor.textPrimary)
         }
         .buttonStyle(.plain)
+    }
+
+    private func drawerPrimaryTile(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: {
+            hapticTap()
+            action()
+        }) {
+            HStack(spacing: EnsuSpacing.sm) {
+                Image(icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+
+                Text(title)
+                    .font(EnsuTypography.body)
+            }
+            .foregroundStyle(EnsuColor.textPrimary)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, EnsuSpacing.lg)
+            .padding(.vertical, EnsuSpacing.md)
+            .background(EnsuColor.fillFaint)
+            .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
     private var sectionedSessions: [SessionSection] {
@@ -189,3 +224,12 @@ private struct SessionSection: Identifiable {
     let title: String
     let sessions: [ChatSession]
 }
+#else
+import SwiftUI
+
+struct SessionDrawerView: View {
+    var body: some View {
+        Text("Sessions unavailable")
+    }
+}
+#endif

@@ -58,8 +58,10 @@ struct AuthFlowView: View {
                             path.removeLast()
                         } label: {
                             HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
+                                Image("ArrowLeft01Icon")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 14, height: 14)
                                 Text("Back")
                             }
                             .font(EnsuTypography.small)
@@ -201,8 +203,10 @@ struct AuthFlowView: View {
                         path.removeLast()
                     } label: {
                         HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 14, weight: .semibold))
+                            Image("ArrowLeft01Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 14, height: 14)
                             Text("Back")
                         }
                         .font(EnsuTypography.small)

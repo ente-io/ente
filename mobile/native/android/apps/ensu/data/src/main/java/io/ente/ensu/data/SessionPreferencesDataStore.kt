@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import io.ente.ensu.domain.preferences.SessionPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 
 class SessionPreferencesDataStore(context: Context) : SessionPreferences {
     private val dataStore: DataStore<Preferences> = PreferenceDataStoreFactory.create {
@@ -18,6 +19,10 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
 
     override val selectedSessionId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[Keys.SELECTED_SESSION_ID]
+    }
+
+    override val sessionSummaries: Flow<Map<String, String>> = dataStore.data.map { preferences ->
+        decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES])
     }
 
     override suspend fun setSelectedSessionId(sessionId: String?) {
@@ -30,7 +35,45 @@ class SessionPreferencesDataStore(context: Context) : SessionPreferences {
         }
     }
 
+    override suspend fun setSessionSummary(sessionId: String, summary: String?) {
+        dataStore.edit { preferences ->
+            val summaries = decodeSessionSummaries(preferences[Keys.SESSION_SUMMARIES]).toMutableMap()
+            if (summary.isNullOrBlank()) {
+                summaries.remove(sessionId)
+            } else {
+                summaries[sessionId] = summary
+            }
+            preferences[Keys.SESSION_SUMMARIES] = encodeSessionSummaries(summaries)
+        }
+    }
+
+    private fun decodeSessionSummaries(raw: String?): Map<String, String> {
+        if (raw.isNullOrBlank()) return emptyMap()
+        return runCatching {
+            val json = JSONObject(raw)
+            val map = mutableMapOf<String, String>()
+            val keys = json.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val value = json.optString(key)
+                if (value.isNotBlank()) {
+                    map[key] = value
+                }
+            }
+            map
+        }.getOrDefault(emptyMap())
+    }
+
+    private fun encodeSessionSummaries(summaries: Map<String, String>): String {
+        val json = JSONObject()
+        summaries.forEach { (key, value) ->
+            json.put(key, value)
+        }
+        return json.toString()
+    }
+
     private object Keys {
         val SELECTED_SESSION_ID = stringPreferencesKey("selected_session_id")
+        val SESSION_SUMMARIES = stringPreferencesKey("session_summaries")
     }
 }

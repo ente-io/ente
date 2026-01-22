@@ -5,24 +5,32 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.designsystem.EnsuColor
+import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.domain.model.LogEntry
@@ -32,19 +40,58 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun LogViewerScreen(logs: List<LogEntry>) {
+fun LogViewerScreen(
+    logRepository: FileLogRepository
+) {
+    var entries by remember { mutableStateOf<List<LogEntry>>(emptyList()) }
     var selectedLog by remember { mutableStateOf<LogEntry?>(null) }
+    var query by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        entries = logRepository.readTodayEntries()
+    }
+
+    LaunchedEffect(logRepository.logs) {
+        entries = logRepository.readTodayEntries()
+    }
+
+    val filteredLogs = remember(entries, query) {
+        val q = query.trim().lowercase()
+        if (q.isEmpty()) return@remember entries
+        entries.filter { entry ->
+            entry.message.lowercase().contains(q) ||
+                (entry.tag?.lowercase()?.contains(q) == true) ||
+                (entry.details?.lowercase()?.contains(q) == true)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(EnsuSpacing.pageHorizontal.dp)
     ) {
-        if (logs.isEmpty()) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(text = "Search logs", style = EnsuTypography.body) },
+            singleLine = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = EnsuColor.fillFaint(),
+                unfocusedContainerColor = EnsuColor.fillFaint(),
+                focusedIndicatorColor = EnsuColor.fillFaint(),
+                unfocusedIndicatorColor = EnsuColor.fillFaint()
+            ),
+            shape = RoundedCornerShape(EnsuCornerRadius.input.dp)
+        )
+
+        Spacer(modifier = Modifier.height(EnsuSpacing.lg.dp))
+
+        if (filteredLogs.isEmpty()) {
             Text(text = "No logs available", style = EnsuTypography.body, color = EnsuColor.textMuted())
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                items(logs, key = { it.id }) { log ->
+                items(filteredLogs, key = { it.id }) { log ->
                     LogRow(logEntry = log, onOpenDetails = { selectedLog = log })
                 }
             }
@@ -57,6 +104,13 @@ fun LogViewerScreen(logs: List<LogEntry>) {
             title = { Text(text = "Log details", style = EnsuTypography.h3) },
             text = {
                 Column {
+                    Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
+                        Text(text = log.level.name, style = EnsuTypography.small, color = levelColor(log.level))
+                        log.tag?.let { tag ->
+                            Text(text = tag, style = EnsuTypography.small, color = EnsuColor.textMuted())
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
                     Text(text = log.message, style = EnsuTypography.body)
                     log.details?.let { details ->
                         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -65,9 +119,7 @@ fun LogViewerScreen(logs: List<LogEntry>) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedLog = null }) {
-                    Text(text = "Close")
-                }
+                TextButton(onClick = { selectedLog = null }) { Text(text = "Close") }
             }
         )
     }
@@ -78,15 +130,20 @@ private fun LogRow(logEntry: LogEntry, onOpenDetails: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onOpenDetails)
             .padding(vertical = EnsuSpacing.xs.dp)
     ) {
-        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = logEntry.level.name,
                 style = EnsuTypography.mini,
                 color = levelColor(logEntry.level)
             )
             Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
+            logEntry.tag?.let { tag ->
+                Text(text = tag, style = EnsuTypography.mini, color = EnsuColor.textMuted())
+                Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
+            }
             Text(
                 text = logTimestampFormatter.format(Date(logEntry.timestampMillis)),
                 style = EnsuTypography.mini,
@@ -95,9 +152,6 @@ private fun LogRow(logEntry: LogEntry, onOpenDetails: () -> Unit) {
         }
         Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
         Text(text = logEntry.message, style = EnsuTypography.body)
-        TextButton(onClick = onOpenDetails) {
-            Text(text = "Details", style = EnsuTypography.small, color = EnsuColor.accent())
-        }
     }
 }
 
@@ -108,4 +162,4 @@ private fun levelColor(level: LogLevel): Color = when (level) {
     LogLevel.Error -> EnsuColor.error
 }
 
-private val logTimestampFormatter = SimpleDateFormat("h:mm:ss a", Locale.getDefault())
+private val logTimestampFormatter = SimpleDateFormat("MMM d, h:mm:ss a", Locale.getDefault())

@@ -53,7 +53,9 @@ class EnsuAuthService(
                 logRepository.log(
                     LogLevel.Error,
                     "Crypto init failed",
-                    error.message ?: "Unknown error"
+                    details = error.message,
+                    tag = "Auth",
+                    throwable = error
                 )
             }
             .getOrThrow()
@@ -90,10 +92,16 @@ class EnsuAuthService(
             pingEndpoint(url)
             endpointPreferences.setEndpoint(normalized)
             updateEndpointUrl(url)
-            logRepository.log(LogLevel.Info, "Updated endpoint", normalized)
+            logRepository.log(LogLevel.Info, "Updated endpoint", details = normalized, tag = "Auth")
             Result.success(normalized)
         } catch (error: Exception) {
-            logRepository.log(LogLevel.Error, "Endpoint update failed", error.message ?: "Unknown error")
+            logRepository.log(
+                LogLevel.Error,
+                "Endpoint update failed",
+                details = error.message,
+                tag = "Auth",
+                throwable = error
+            )
             Result.failure(error)
         }
     }
@@ -137,7 +145,7 @@ class EnsuAuthService(
 
     suspend fun loginWithSrp(email: String, password: String, srpAttributes: SrpAttributes): SrpLoginResult {
         try {
-            logRepository.log(LogLevel.Info, "SRP login started")
+            logRepository.log(LogLevel.Info, "SRP login started", tag = "Auth")
             val start = withContext(Dispatchers.Default) {
                 EnsuCryptoBridge.srpStart(password, srpAttributes.toCrypto())
             }
@@ -179,7 +187,7 @@ class EnsuAuthService(
             }
 
             storeSecrets(email, payload.userId, secrets)
-            logRepository.log(LogLevel.Info, "SRP login success")
+            logRepository.log(LogLevel.Info, "SRP login success", tag = "Auth")
             return SrpLoginResult(null, null, null)
         } finally {
             EnsuCryptoBridge.srpClear()
@@ -219,7 +227,7 @@ class EnsuAuthService(
         }
 
         storeSecrets(email, userId, secrets)
-        logRepository.log(LogLevel.Info, "Login after challenge success")
+        logRepository.log(LogLevel.Info, "Login after challenge success", tag = "Auth")
     }
 
     fun clearCredentials() {

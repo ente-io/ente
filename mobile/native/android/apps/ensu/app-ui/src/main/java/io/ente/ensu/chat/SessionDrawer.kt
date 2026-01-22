@@ -21,13 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -36,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import io.ente.ensu.components.EnsuLogo
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
+import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.domain.model.ChatSession
@@ -58,9 +54,8 @@ fun SessionDrawer(
     onSelectSession: (ChatSession) -> Unit,
     onDeleteSession: (ChatSession) -> Unit,
     onSync: () -> Unit,
-    onOpenLogs: () -> Unit,
-    onOpenDeveloperSettings: () -> Unit,
-    onOpenModelSettings: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onDeveloperTap: () -> Unit,
     onSignIn: () -> Unit,
     onSignOut: () -> Unit
 ) {
@@ -76,10 +71,8 @@ fun SessionDrawer(
             DrawerHeader(
                 isLoggedIn = isLoggedIn,
                 userEmail = userEmail,
-                onSync = onSync,
-                onOpenLogs = onOpenLogs,
-                onOpenDeveloperSettings = onOpenDeveloperSettings,
-                onOpenModelSettings = onOpenModelSettings
+                onOpenSettings = onOpenSettings,
+                onDeveloperTap = onDeveloperTap
             )
 
             HorizontalDivider(color = EnsuColor.border())
@@ -91,7 +84,11 @@ fun SessionDrawer(
                     .padding(vertical = EnsuSpacing.lg.dp),
                 verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
             ) {
-                DrawerNewChat(onNewChat = onNewChat)
+                DrawerNewChat(
+                    onNewChat = onNewChat,
+                    onSync = onSync,
+                    isLoggedIn = isLoggedIn
+                )
                 SessionGroups(
                     sessions = sessions,
                     selectedSessionId = selectedSessionId,
@@ -115,10 +112,8 @@ fun SessionDrawer(
 private fun DrawerHeader(
     isLoggedIn: Boolean,
     userEmail: String?,
-    onSync: () -> Unit,
-    onOpenLogs: () -> Unit,
-    onOpenDeveloperSettings: () -> Unit,
-    onOpenModelSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onDeveloperTap: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -127,19 +122,22 @@ private fun DrawerHeader(
             .padding(EnsuSpacing.lg.dp),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
     ) {
-        EnsuLogo(height = 28.dp)
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (isLoggedIn) {
-                DrawerIconButton(icon = Icons.Outlined.Refresh, contentDescription = "Sync", onClick = onSync)
+            Box(
+                modifier = Modifier
+                    .clickable { onDeveloperTap() }
+            ) {
+                EnsuLogo(height = 28.dp)
             }
-            DrawerIconButton(icon = Icons.Outlined.BugReport, contentDescription = "Logs", onClick = onOpenLogs)
-            DrawerIconButton(icon = Icons.Outlined.Build, contentDescription = "Developer settings", onClick = onOpenDeveloperSettings)
-            DrawerIconButton(icon = Icons.Outlined.Tune, contentDescription = "Model settings", onClick = onOpenModelSettings)
             Spacer(modifier = Modifier.weight(1f))
+            DrawerIconButton(
+                iconRes = HugeIcons.Settings01Icon,
+                contentDescription = "Settings",
+                onClick = onOpenSettings
+            )
         }
 
         if (isLoggedIn && !userEmail.isNullOrBlank()) {
@@ -150,22 +148,53 @@ private fun DrawerHeader(
 
 @Composable
 private fun DrawerIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconRes: Int,
     contentDescription: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isEnabled: Boolean = true
 ) {
     Box(
         modifier = Modifier
             .size(40.dp)
-            .clickable(onClick = onClick),
+            .clickable(enabled = isEnabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = icon,
+            painter = painterResource(iconRes),
             contentDescription = contentDescription,
             modifier = Modifier.size(18.dp),
-            tint = EnsuColor.textPrimary()
+            tint = if (isEnabled) EnsuColor.textPrimary() else EnsuColor.textMuted()
         )
+    }
+}
+
+@Composable
+private fun DrawerPrimaryTile(
+    iconRes: Int,
+    label: String,
+    onClick: () -> Unit,
+    isEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val tint = if (isEnabled) EnsuColor.textPrimary() else EnsuColor.textMuted()
+
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
+            .background(EnsuColor.fillFaint())
+            .clickable(enabled = isEnabled, onClick = onClick)
+            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.md.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = label,
+            modifier = Modifier.size(18.dp),
+            tint = tint
+        )
+        Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
+        Text(text = label, style = EnsuTypography.body, color = tint)
     }
 }
 
@@ -195,22 +224,34 @@ private fun CloudBadge(email: String) {
 }
 
 @Composable
-private fun DrawerNewChat(onNewChat: () -> Unit) {
+private fun DrawerNewChat(
+    onNewChat: () -> Unit,
+    onSync: () -> Unit,
+    isLoggedIn: Boolean
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onNewChat)
-            .padding(horizontal = EnsuSpacing.lg.dp, vertical = EnsuSpacing.sm.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = EnsuSpacing.lg.dp),
+        horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
     ) {
-        Icon(
-            imageVector = Icons.Outlined.Add,
-            contentDescription = "New chat",
-            modifier = Modifier.size(18.dp),
-            tint = EnsuColor.textPrimary()
+        DrawerPrimaryTile(
+            iconRes = HugeIcons.PlusSignIcon,
+            label = "New Chat",
+            onClick = onNewChat,
+            isEnabled = true,
+            modifier = Modifier.weight(1f)
         )
-        Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
-        Text(text = "New Chat", style = EnsuTypography.body, color = EnsuColor.textPrimary())
+
+        if (isLoggedIn) {
+            DrawerPrimaryTile(
+                iconRes = HugeIcons.ArrowReloadHorizontalIcon,
+                label = "Sync",
+                onClick = onSync,
+                isEnabled = true,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
@@ -279,7 +320,9 @@ private fun SessionTile(
                     text = session.title,
                     style = if (isSelected) EnsuTypography.body else EnsuTypography.small,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                    color = EnsuColor.textPrimary()
+                    color = EnsuColor.textPrimary(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 val subtitle = session.lastMessagePreview ?: "Nothing here"
                 Text(
@@ -298,7 +341,7 @@ private fun SessionTile(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    painter = painterResource(HugeIcons.Delete01Icon),
                     contentDescription = "Delete",
                     modifier = Modifier.size(18.dp),
                     tint = EnsuColor.textMuted()

@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.data.auth.EnsuAuthService
+import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.domain.model.LogEntry
 import io.ente.ensu.domain.state.AppState
 import io.ente.ensu.domain.store.AppStore
@@ -17,6 +18,7 @@ fun RootView(
     appState: AppState,
     store: AppStore,
     logs: List<LogEntry>,
+    logRepository: FileLogRepository,
     authService: EnsuAuthService,
     currentEndpointFlow: Flow<String>
 ) {
@@ -29,6 +31,7 @@ fun RootView(
             appState = appState,
             store = store,
             logs = logs,
+            logRepository = logRepository,
             authService = authService,
             currentEndpointFlow = currentEndpointFlow
         )

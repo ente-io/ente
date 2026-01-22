@@ -3,4 +3,12 @@
     <files-path
         name="attachments"
         path="attachments/" />
+
+    <files-path
+        name="logs"
+        path="logs/" />
+
+    <cache-path
+        name="cache"
+        path="." />
 </paths>

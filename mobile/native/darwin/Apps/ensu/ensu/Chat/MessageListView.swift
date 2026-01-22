@@ -1,3 +1,4 @@
+#if canImport(EnteCore)
 import SwiftUI
 import QuickLook
 #if os(iOS)
@@ -9,6 +10,9 @@ struct MessageListView: View {
     let streamingResponse: String
     let streamingParentId: UUID?
     let isGenerating: Bool
+    let keyboardHeight: CGFloat
+    let emptyStateTitle: String
+    let emptyStateSubtitle: String?
     let onEdit: (ChatMessage) -> Void
     let onCopy: (ChatMessage) -> Void
     let onRetry: (ChatMessage) -> Void
@@ -18,6 +22,7 @@ struct MessageListView: View {
     @State private var autoScrollEnabled = true
     @State private var previewItem: AttachmentPreviewItem?
     @State private var lastHapticLength = 0
+    @State private var wasAtBottomBeforeKeyboard = false
     #if os(iOS)
     @State private var haptic = UIImpactFeedbackGenerator(style: .medium)
     #endif
@@ -28,10 +33,18 @@ struct MessageListView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: EnsuSpacing.lg) {
                         if messages.isEmpty && !isGenerating {
-                            Text("Start typing to begin a conversation")
-                                .font(EnsuTypography.body)
-                                .foregroundStyle(EnsuColor.textMuted)
-                                .frame(maxWidth: .infinity, minHeight: proxy.size.height * 0.6)
+                            VStack(spacing: EnsuSpacing.sm) {
+                                Text(emptyStateTitle)
+                                    .font(EnsuTypography.large)
+                                    .foregroundStyle(EnsuColor.textPrimary)
+                                if let emptyStateSubtitle {
+                                    Text(emptyStateSubtitle)
+                                        .font(EnsuTypography.body)
+                                        .foregroundStyle(EnsuColor.textMuted)
+                                }
+                            }
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, minHeight: proxy.size.height * 0.6)
                         }
 
                         ForEach(messages) { message in
@@ -105,6 +118,18 @@ struct MessageListView: View {
                     #endif
                     scrollToBottom(scrollProxy)
                 }
+                .onChange(of: keyboardHeight) { newValue in
+                    if newValue > 0 {
+                        wasAtBottomBeforeKeyboard = isAtBottom
+                    }
+                    if wasAtBottomBeforeKeyboard {
+                        autoScrollEnabled = true
+                        scrollToBottom(scrollProxy, force: true)
+                    }
+                    if newValue == 0 {
+                        wasAtBottomBeforeKeyboard = false
+                    }
+                }
                 .onChange(of: isGenerating) { newValue in
                     if newValue {
                         autoScrollEnabled = true
@@ -161,6 +186,7 @@ private struct AttachmentPreviewItem: Identifiable {
     var id: String { url.path }
 }
 
+#if os(iOS)
 private struct QuickLookPreview: UIViewControllerRepresentable {
     let url: URL
 
@@ -195,6 +221,22 @@ private struct QuickLookPreview: UIViewControllerRepresentable {
         }
     }
 }
+#elseif os(macOS)
+private struct QuickLookPreview: NSViewRepresentable {
+    let url: URL
+
+    func makeNSView(context: Context) -> QLPreviewView {
+        let view = QLPreviewView(frame: .zero, style: .normal)
+        view.autostarts = true
+        view.previewItem = url as NSURL
+        return view
+    }
+
+    func updateNSView(_ nsView: QLPreviewView, context: Context) {
+        nsView.previewItem = url as NSURL
+    }
+}
+#endif
 
 private struct UserMessageBubbleView: View {
     let message: ChatMessage
@@ -204,38 +246,53 @@ private struct UserMessageBubbleView: View {
     let onOpenAttachment: (ChatAttachment) -> Void
 
     var body: some View {
+        let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+
         HStack(alignment: .bottom) {
             Spacer(minLength: EnsuSpacing.messageBubbleInset)
 
             VStack(alignment: .trailing, spacing: EnsuSpacing.sm) {
-                if !message.attachments.isEmpty {
-                    FlowLayout(spacing: EnsuSpacing.sm) {
-                        ForEach(message.attachments) { attachment in
-                            AttachmentChip(
-                                name: attachment.name,
-                                size: attachment.formattedSize,
-                                icon: attachment.iconName,
-                                isUploading: attachment.isUploading
-                            )
-                            .onTapGesture {
-                                onOpenAttachment(attachment)
+                VStack(alignment: .trailing, spacing: EnsuSpacing.sm) {
+                    if !message.attachments.isEmpty {
+                        FlowLayout(spacing: EnsuSpacing.sm) {
+                            ForEach(message.attachments) { attachment in
+                                AttachmentChip(
+                                    name: attachment.name,
+                                    size: attachment.formattedSize,
+                                    icon: attachment.iconName,
+                                    isUploading: attachment.isUploading
+                                )
+                                .onTapGesture {
+                                    hapticTap()
+                                    onOpenAttachment(attachment)
+                                }
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                }
 
-                Text(message.text)
-                    .font(EnsuTypography.message)
-                    .foregroundStyle(EnsuColor.userMessageText)
-                    .lineSpacing(EnsuLineHeight.spacing(fontSize: 15, lineHeight: 1.7))
-                    .multilineTextAlignment(.trailing)
-                    .textSelection(.enabled)
-
-                HStack(spacing: EnsuSpacing.xs) {
-                    ActionButton(icon: "pencil", action: onEdit)
-                    ActionButton(icon: "doc.on.doc", action: onCopy)
+                    Text(message.text)
+                        .font(EnsuTypography.message)
+                        .foregroundStyle(EnsuColor.userMessageText)
+                        .lineSpacing(EnsuLineHeight.spacing(fontSize: 15, lineHeight: 1.7))
+                        .multilineTextAlignment(.trailing)
+                        .textSelection(.enabled)
                 }
+                .padding(EnsuSpacing.md)
+                .background(EnsuColor.border.opacity(0.2))
+                .clipShape(bubbleShape)
+                #if os(iOS)
+                .contextMenu {
+                    Button("Edit") {
+                        hapticTap()
+                        onEdit()
+                    }
+                    Button("Copy") {
+                        hapticTap()
+                        onCopy()
+                    }
+                }
+                #endif
 
                 HStack(spacing: EnsuSpacing.sm) {
                     Spacer()
@@ -262,21 +319,35 @@ private struct AssistantMessageBubbleView: View {
     let onOpenAttachment: (ChatAttachment) -> Void
 
     var body: some View {
+        let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                AssistantMessageRenderer(text: message.text, isStreaming: false, storageId: message.id.uuidString)
+                VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
+                    AssistantMessageRenderer(text: message.text, isStreaming: false, storageId: message.id.uuidString)
 
-                if message.isInterrupted {
-                    Text("Interrupted")
-                        .font(EnsuTypography.small)
-                        .italic()
-                        .foregroundStyle(EnsuColor.textMuted)
+                    if message.isInterrupted {
+                        Text("Interrupted")
+                            .font(EnsuTypography.small)
+                            .italic()
+                            .foregroundStyle(EnsuColor.textMuted)
+                    }
                 }
-
-                HStack(spacing: EnsuSpacing.xs) {
-                    ActionButton(icon: "doc.on.doc", action: onCopy)
-                    ActionButton(icon: "arrow.clockwise", action: onRetry)
+                .padding(EnsuSpacing.md)
+                .background(EnsuColor.border.opacity(0.2))
+                .clipShape(bubbleShape)
+                #if os(iOS)
+                .contextMenu {
+                    Button("Copy") {
+                        hapticTap()
+                        onCopy()
+                    }
+                    Button("Retry") {
+                        hapticMedium()
+                        onRetry()
+                    }
                 }
+                #endif
 
                 HStack(spacing: EnsuSpacing.sm) {
                     TimestampView(date: message.timestamp)
@@ -302,24 +373,31 @@ private struct StreamingBubbleView: View {
     @State private var cursorOpacity: Double = 1
 
     var body: some View {
+        let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    LoadingDotsView()
-                } else {
-                    HStack(alignment: .bottom, spacing: 4) {
-                        AssistantMessageRenderer(text: text, isStreaming: true, storageId: UUID().uuidString)
-                        Rectangle()
-                            .fill(EnsuColor.accent)
-                            .frame(width: 2, height: 18)
-                            .opacity(cursorOpacity)
-                            .onAppear {
-                                withAnimation(.easeInOut(duration: 0.53).repeatForever(autoreverses: true)) {
-                                    cursorOpacity = 0
+                VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
+                    if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        LoadingDotsView()
+                    } else {
+                        HStack(alignment: .bottom, spacing: 4) {
+                            AssistantMessageRenderer(text: text, isStreaming: true, storageId: UUID().uuidString)
+                            Rectangle()
+                                .fill(EnsuColor.accent)
+                                .frame(width: 2, height: 18)
+                                .opacity(cursorOpacity)
+                                .onAppear {
+                                    withAnimation(.easeInOut(duration: 0.53).repeatForever(autoreverses: true)) {
+                                        cursorOpacity = 0
+                                    }
                                 }
-                            }
+                        }
                     }
                 }
+                .padding(EnsuSpacing.md)
+                .background(EnsuColor.border.opacity(0.2))
+                .clipShape(bubbleShape)
             }
 
             Spacer(minLength: EnsuSpacing.messageBubbleInset)
@@ -328,19 +406,59 @@ private struct StreamingBubbleView: View {
 }
 
 private struct LoadingDotsView: View {
+    @State private var phrase: String = LoadingDotsView.randomPhrase()
+
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.5)) { context in
             let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 3
-            Text(dots(for: phase))
+            Text(phrase + dots(for: phase))
                 .font(EnsuTypography.message)
                 .foregroundStyle(EnsuColor.textMuted)
         }
     }
 
+    private static let loadingPhraseVerbs = [
+        "Generating",
+        "Thinking through",
+        "Assembling",
+        "Drafting",
+        "Composing",
+        "Crunching",
+        "Exploring",
+        "Piecing together",
+        "Reviewing",
+        "Organizing",
+        "Synthesizing",
+        "Sketching",
+        "Refining",
+        "Shaping"
+    ]
+
+    private static let loadingPhraseTargets = [
+        "your reply",
+        "an answer",
+        "ideas",
+        "context",
+        "details",
+        "the response",
+        "the next steps",
+        "a solution",
+        "the summary",
+        "insights",
+        "the draft",
+        "the explanation"
+    ]
+
+    private static func randomPhrase() -> String {
+        let verb = loadingPhraseVerbs.randomElement() ?? "Generating"
+        let target = loadingPhraseTargets.randomElement() ?? "your reply"
+        return "\(verb) \(target)"
+    }
+
     private func dots(for phase: Int) -> String {
         switch phase {
-        case 0: return ".  "
-        case 1: return ".. "
+        case 0: return "."
+        case 1: return ".."
         default: return "..."
         }
     }
@@ -767,10 +885,13 @@ private struct CodeBlockView: View {
             }
 
             Button {
+                hapticTap()
                 copyToPasteboard(code)
             } label: {
-                Image(systemName: "doc.on.doc")
-                    .font(.system(size: 14))
+                Image("Copy01Icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 14, height: 14)
                     .padding(6)
                     .background(EnsuColor.fillFaint.opacity(0.8))
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -805,4 +926,13 @@ private struct BlockQuoteView: View {
             .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
     }
 }
+#else
+import SwiftUI
+
+struct MessageListView: View {
+    var body: some View {
+        Text("Messages unavailable")
+    }
+}
+#endif
 

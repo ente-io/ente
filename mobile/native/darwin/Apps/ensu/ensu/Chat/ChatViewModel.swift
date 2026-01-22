@@ -1,5 +1,292 @@
 import Foundation
+#if canImport(EnteCore)
 import EnteCore
+#else
+struct SyncAuth {
+    let baseUrl: String
+    let authToken: String
+    let masterKey: Data
+    let userAgent: String
+    let clientPackage: String
+    let clientVersion: String?
+}
+
+enum SyncError: Error {
+    case Message(String)
+}
+
+final class CredentialStore {
+    static let shared = CredentialStore()
+    var hasConfiguredAccount: Bool { false }
+    var token: String? { nil }
+    var masterKey: Data? { nil }
+
+    func getOrCreateChatDbKey() -> Data {
+        Data()
+    }
+}
+
+struct EntePlatform {
+    static let current = EntePlatform()
+    var userAgent: String { "ensu" }
+}
+
+enum EnteApp {
+    case ensu
+
+    var packageIdentifier: String {
+        "ensu"
+    }
+}
+
+enum EnsuLogLevel: String {
+    case info
+    case warning
+    case error
+}
+
+struct EnsuLogger {
+    let tag: String
+
+    func info(_ message: String, details: String? = nil) {}
+    func warning(_ message: String, details: String? = nil) {}
+    func error(_ message: String, _ error: Error? = nil, details: String? = nil) {}
+}
+
+final class EnsuLogging {
+    static let shared = EnsuLogging()
+
+    func start() {}
+
+    func logger(_ tag: String) -> EnsuLogger {
+        EnsuLogger(tag: tag)
+    }
+
+    func log(level: EnsuLogLevel, tag: String, message: String, details: String? = nil, error: Error? = nil) {}
+
+    func todayLogFileURL() -> URL { URL(fileURLWithPath: "") }
+    func listLogFiles() -> [URL] { [] }
+    func readLogText(fileURL: URL) -> String { "" }
+    func createLogsArchive() throws -> URL { URL(fileURLWithPath: "") }
+}
+
+struct NetworkConfiguration {
+    let apiEndpoint: URL
+
+    static var `default`: NetworkConfiguration {
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+    }
+}
+
+enum EnsuDeveloperSettings {
+    static var networkConfiguration: NetworkConfiguration {
+        .default
+    }
+}
+
+struct InferenceModelTarget: Equatable {
+    let id: String
+    let url: String
+    let mmprojUrl: String?
+    let contextLength: Int?
+    let maxTokens: Int?
+}
+
+struct InferenceDownloadProgress: Equatable {
+    let percent: Int
+    let status: String
+}
+
+enum InferenceMessageRole {
+    case user
+    case assistant
+    case system
+
+    var roleString: String {
+        switch self {
+        case .user:
+            return "user"
+        case .assistant:
+            return "assistant"
+        case .system:
+            return "system"
+        }
+    }
+}
+
+struct InferenceMessage {
+    let text: String
+    let role: InferenceMessageRole
+    let hasAttachments: Bool
+}
+
+struct InferenceGenerationSummary {
+    let jobId: Int64
+    let generatedTokens: Int
+    let totalTimeMs: Int64?
+}
+
+final class InferenceRsProvider {
+    init(modelDir: URL) {
+        _ = modelDir
+    }
+
+    func ensureModelReady(
+        target: InferenceModelTarget,
+        onProgress: @escaping (InferenceDownloadProgress) -> Void
+    ) async throws {
+        _ = (target, onProgress)
+    }
+
+    func generateChat(
+        target: InferenceModelTarget,
+        messages: [InferenceMessage],
+        imageFiles: [URL],
+        temperature: Float,
+        maxTokens: Int,
+        onToken: @escaping (String) -> Void
+    ) async throws -> InferenceGenerationSummary {
+        _ = (target, messages, imageFiles, temperature, maxTokens, onToken)
+        return InferenceGenerationSummary(jobId: 0, generatedTokens: 0, totalTimeMs: nil)
+    }
+
+    func isModelDownloaded(target: InferenceModelTarget) -> Bool {
+        _ = target
+        return true
+    }
+
+    func estimatedDownloadSize(target: InferenceModelTarget) async -> Int64? {
+        _ = target
+        return nil
+    }
+
+    func stopGeneration() {}
+
+    func resetContext() {}
+
+    func cancelDownload() {}
+}
+
+@MainActor
+final class ModelSettingsStore: ObservableObject {
+    static let shared = ModelSettingsStore()
+
+    var temperature: String = ""
+    var contextLength: String = ""
+    var maxTokens: String = ""
+    var useCustomModel: Bool = false
+    var modelUrl: String = ""
+    var mmprojUrl: String = ""
+
+    func currentTarget() -> InferenceModelTarget {
+        let context = Int(contextLength)
+        let maxOutput = Int(maxTokens)
+        return InferenceModelTarget(
+            id: "default",
+            url: "",
+            mmprojUrl: nil,
+            contextLength: context,
+            maxTokens: maxOutput
+        )
+    }
+}
+
+enum MessageSender {
+    case selfUser
+    case other
+}
+
+enum AttachmentKind {
+    case image
+    case document
+}
+
+struct AttachmentMeta {
+    let id: String
+    let kind: AttachmentKind
+    let size: Int64
+    let name: String
+}
+
+struct LlmChatSession {
+    let uuid: String
+    let title: String
+    let updatedAtUs: Int64
+}
+
+struct LlmChatMessage {
+    let uuid: String
+    let sender: MessageSender
+    let createdAtUs: Int64
+    let text: String
+    let parentMessageUuid: String?
+    let attachments: [AttachmentMeta]
+}
+
+final class LlmChatDb {
+    static func open(mainDbPath: String, attachmentsDbPath: String, key: Data) throws -> LlmChatDb {
+        _ = (mainDbPath, attachmentsDbPath, key)
+        return LlmChatDb()
+    }
+
+    func listSessions() throws -> [LlmChatSession] { [] }
+
+    func getMessages(sessionUuid: String) throws -> [LlmChatMessage] {
+        _ = sessionUuid
+        return []
+    }
+
+    func deleteSession(uuid: String) throws {
+        _ = uuid
+    }
+
+    func insertMessage(
+        sessionUuid: String,
+        sender: MessageSender,
+        text: String,
+        parentMessageUuid: String?,
+        attachments: [AttachmentMeta]
+    ) throws -> LlmChatMessage {
+        _ = (sessionUuid, sender, text, parentMessageUuid, attachments)
+        return LlmChatMessage(
+            uuid: UUID().uuidString,
+            sender: sender,
+            createdAtUs: Int64(Date().timeIntervalSince1970 * 1_000_000),
+            text: text,
+            parentMessageUuid: parentMessageUuid,
+            attachments: attachments
+        )
+    }
+
+    func createSession(title: String) throws -> LlmChatSession {
+        LlmChatSession(uuid: UUID().uuidString, title: title, updatedAtUs: Int64(Date().timeIntervalSince1970 * 1_000_000))
+    }
+}
+
+final class LlmChatSync {
+    static func open(
+        mainDbPath: String,
+        attachmentsDbPath: String,
+        dbKey: Data,
+        attachmentsDir: String,
+        metaDir: String,
+        plaintextDir: String
+    ) throws -> LlmChatSync {
+        _ = (mainDbPath, attachmentsDbPath, dbKey, attachmentsDir, metaDir, plaintextDir)
+        return LlmChatSync()
+    }
+
+    func sync(auth: SyncAuth) throws -> Bool {
+        _ = auth
+        return true
+    }
+
+    func downloadAttachment(attachmentId: String, sessionUuid: String, auth: SyncAuth) throws -> Bool {
+        _ = (attachmentId, sessionUuid, auth)
+        return true
+    }
+}
+#endif
 
 struct ChatAttachment: Identifiable, Equatable {
     enum Kind {
@@ -30,9 +317,9 @@ struct ChatAttachment: Identifiable, Equatable {
     var iconName: String {
         switch kind {
         case .image:
-            return "photo"
+            return "Attachment01Icon"
         case .document:
-            return "doc.text"
+            return "Attachment01Icon"
         }
     }
 }
@@ -129,6 +416,13 @@ struct DownloadToastState: Identifiable, Equatable {
 
 @MainActor
 final class ChatViewModel: ObservableObject {
+    private static let defaultTemperature: Float = 0.7
+    private static let systemPrompt = "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points."
+    private static let sessionTitleMaxLength = 50
+    private static let sessionSummaryStoreKey = "ensu.session_summaries"
+
+    private let logger = EnsuLogging.shared.logger("ChatViewModel")
+
     @Published var sessions: [ChatSession]
     @Published var currentSessionId: UUID?
     @Published var messages: [ChatMessage]
@@ -159,6 +453,8 @@ final class ChatViewModel: ObservableObject {
     @Published var draftAttachments: [ChatAttachment] = []
     @Published var editingMessageId: UUID?
     @Published var downloadToast: DownloadToastState?
+    @Published var isModelDownloaded: Bool = false
+    @Published var modelDownloadSizeBytes: Int64?
     @Published var attachmentDownloads: [AttachmentDownloadItem] = []
     @Published var currentSessionMissingAttachments: [AttachmentDownloadItem] = []
     @Published var syncErrorMessage: String?
@@ -171,19 +467,25 @@ final class ChatViewModel: ObservableObject {
 
     private var messageStore: [UUID: [MessageNode]] = [:]
     private var branchSelections: [UUID: [String: UUID]] = [:]
+    private var sessionSummaries: [String: String] = [:]
+    private var sessionSummaryTask: Task<Void, Never>?
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
     private var generationTask: Task<Void, Never>?
+    private var modelDownloadTask: Task<Void, Never>?
     private var stopRequested = false
     private var activeGenerationId: UUID?
     private var activeGenerationSessionId: UUID?
     private var pendingSyncRequested = false
     private var pendingSyncShowErrors = false
+    private var modelDownloadLoggedStart = false
 
     private var attachmentDownloadQueue: [String] = []
     private var attachmentDownloadTasks: [String: Task<Void, Never>] = [:]
     private let maxAttachmentDownloads = 2
 
     init() {
+        logger.info("Initializing")
+        let summaries = Self.loadSessionSummaries()
         let baseDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
 
@@ -231,10 +533,14 @@ final class ChatViewModel: ObservableObject {
         let loaded = (try? chatDb.listSessions()) ?? []
         let sessions: [ChatSession] = loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
-            let lastMessage = (try? chatDb.getMessages(sessionUuid: session.uuid))?.last?.text ?? ""
+            let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
+            let firstMessage = messages.first?.text ?? ""
+            let lastMessage = messages.last?.text ?? ""
+            let summary = summaries[session.uuid]
+            let title = summary ?? Self.sessionTitle(from: firstMessage, fallback: session.title)
             return ChatSession(
                 id: id,
-                title: session.title,
+                title: title,
                 lastMessage: lastMessage,
                 updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
             )
@@ -245,9 +551,10 @@ final class ChatViewModel: ObservableObject {
         self.chatDb = chatDb
         self.syncEngine = syncEngine
         self.attachmentsDir = attachmentsDir
+        self.sessionSummaries = summaries
 
         self.sessions = sessions
-        self.currentSessionId = sessions.first?.id
+        self.currentSessionId = nil
         self.messages = []
 
         for session in sessions {
@@ -262,6 +569,8 @@ final class ChatViewModel: ObservableObject {
         } else {
             refreshAttachmentDownloadState()
         }
+
+        refreshModelDownloadInfo()
     }
 
     var currentSession: ChatSession? {
@@ -293,6 +602,13 @@ final class ChatViewModel: ObservableObject {
         }
         let completed = active.filter { $0.status == .completed }.count
         return (completed, total)
+    }
+
+    var modelDownloadSizeText: String {
+        guard let bytes = modelDownloadSizeBytes else { return "Approx. size varies by model" }
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return "Approx. \(formatter.string(fromByteCount: bytes))"
     }
 
     func sessionTitle(for sessionId: UUID) -> String {
@@ -350,6 +666,8 @@ final class ChatViewModel: ObservableObject {
             downloadToast = nil
         }
         try? chatDb.deleteSession(uuid: session.id.uuidString)
+        sessionSummaries.removeValue(forKey: session.id.uuidString)
+        persistSessionSummaries()
 
         sessions.removeAll { $0.id == session.id }
         messageStore[session.id] = nil
@@ -385,22 +703,28 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func performSync(showErrors: Bool) {
+        let log = logger
         guard let auth = buildSyncAuth() else {
+            log.warning("Sync skipped", details: "not logged in")
             if showErrors {
                 syncErrorMessage = "Sync failed: Sign in to sync"
             }
             return
         }
 
-        Task.detached { [weak self] in
+        log.info("Sync started")
+
+        Task.detached { [weak self, log] in
             guard let self else { return }
             do {
                 _ = try self.syncEngine.sync(auth: auth)
+                log.info("Sync success")
                 await MainActor.run {
                     self.reloadFromDb()
                 }
             } catch {
                 let message = syncErrorMessage(from: error)
+                log.error("Sync failed", error, details: message)
                 await MainActor.run {
                     if showErrors {
                         self.syncErrorMessage = "Sync failed: \(message)"
@@ -487,6 +811,11 @@ final class ChatViewModel: ObservableObject {
         let attachments = draftAttachments
         guard !trimmed.isEmpty || !attachments.isEmpty else { return }
 
+        logger.info(
+            "Sent message",
+            details: "len=\(trimmed.count) attachments=\(attachments.count) edited=\(editingMessageId != nil)"
+        )
+
         let sessionId = currentSessionId ?? createSessionForDraft()
 
         if !missingAttachments(for: sessionId).isEmpty {
@@ -553,22 +882,37 @@ final class ChatViewModel: ObservableObject {
         provider.stopGeneration()
     }
 
-    func cancelDownload() {
-        generationTask?.cancel()
-        provider.cancelDownload()
-        stopRequested = true
-        activeGenerationId = nil
-        activeGenerationSessionId = nil
-        isGenerating = false
-        isDownloading = false
-        streamingResponse = ""
-        streamingParentId = nil
-        downloadToast = nil
+    func refreshModelDownloadInfo() {
+        let target = modelSettings.currentTarget()
+        isModelDownloaded = provider.isModelDownloaded(target: target)
+        if isModelDownloaded {
+            modelDownloadSizeBytes = nil
+            return
+        }
+
+        Task { [weak self] in
+            guard let self else { return }
+            let size = await provider.estimatedDownloadSize(target: target)
+            await MainActor.run {
+                self.modelDownloadSizeBytes = size
+            }
+        }
     }
 
-    func retryDownload() {
+    func startModelDownload() {
+        guard !isDownloading && !isGenerating else { return }
         let target = modelSettings.currentTarget()
-        Task {
+        let isDownloaded = provider.isModelDownloaded(target: target)
+        if isDownloaded {
+            isModelDownloaded = true
+            modelDownloadSizeBytes = nil
+        } else {
+            modelDownloadLoggedStart = true
+            logger.info("Model download started", details: "model=\(target.id)")
+        }
+
+        modelDownloadTask?.cancel()
+        modelDownloadTask = Task {
             do {
                 try await provider.ensureModelReady(target: target) { progress in
                     Task { @MainActor in
@@ -579,7 +923,77 @@ final class ChatViewModel: ObservableObject {
                 if isCancellation(error) {
                     return
                 }
-                downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: error.localizedDescription, offerRetryDownload: true)
+                if self.modelDownloadLoggedStart {
+                    self.logger.error("Model download failed", error)
+                    self.modelDownloadLoggedStart = false
+                } else {
+                    self.logger.error("Model load failed", error)
+                }
+                await MainActor.run {
+                    self.downloadToast = DownloadToastState(
+                        phase: .errorDownload,
+                        percent: -1,
+                        status: error.localizedDescription,
+                        offerRetryDownload: true
+                    )
+                    self.isDownloading = false
+                }
+            }
+        }
+    }
+
+    func autoStartModelDownloadIfNeeded() {
+        guard !isDownloading && !isGenerating else { return }
+        if isModelDownloaded {
+            startModelDownload()
+            return
+        }
+        guard !messages.isEmpty else { return }
+        startModelDownload()
+    }
+
+    func cancelDownload() {
+        generationTask?.cancel()
+        modelDownloadTask?.cancel()
+        modelDownloadTask = nil
+        provider.cancelDownload()
+        if modelDownloadLoggedStart {
+            logger.info("Model download cancelled")
+            modelDownloadLoggedStart = false
+        }
+        stopRequested = true
+        activeGenerationId = nil
+        activeGenerationSessionId = nil
+        isGenerating = false
+        isDownloading = false
+        streamingResponse = ""
+        streamingParentId = nil
+        downloadToast = nil
+        refreshModelDownloadInfo()
+    }
+
+    func retryDownload() {
+        let target = modelSettings.currentTarget()
+        modelDownloadTask?.cancel()
+        modelDownloadTask = Task {
+            do {
+                try await provider.ensureModelReady(target: target) { progress in
+                    Task { @MainActor in
+                        self.handleProgress(progress)
+                    }
+                }
+            } catch {
+                if isCancellation(error) {
+                    return
+                }
+                await MainActor.run {
+                    self.downloadToast = DownloadToastState(
+                        phase: .errorDownload,
+                        percent: -1,
+                        status: error.localizedDescription,
+                        offerRetryDownload: true
+                    )
+                }
             }
         }
     }
@@ -631,6 +1045,7 @@ final class ChatViewModel: ObservableObject {
 
     private func startGeneration(for userNode: MessageNode) {
         generationTask?.cancel()
+        sessionSummaryTask?.cancel()
         stopRequested = false
         let generationId = UUID()
         activeGenerationId = generationId
@@ -679,7 +1094,8 @@ final class ChatViewModel: ObservableObject {
 
             let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
             let history = buildHistory(sessionId: userNode.sessionId, promptText: prompt.text, currentMessageId: userNode.id)
-            let messages = history + [InferenceMessage(text: prompt.text, isUser: true, hasAttachments: !userNode.attachments.isEmpty)]
+            let systemMessage = InferenceMessage(text: Self.systemPrompt, role: .system, hasAttachments: false)
+            let messages = [systemMessage] + history + [InferenceMessage(text: prompt.text, role: .user, hasAttachments: !userNode.attachments.isEmpty)]
 
             let bufferLock = NSLock()
             var buffer = ""
@@ -690,7 +1106,7 @@ final class ChatViewModel: ObservableObject {
                     target: target,
                     messages: messages,
                     imageFiles: prompt.imageFiles,
-                    temperature: 0.7,
+                    temperature: resolveTemperature(),
                     maxTokens: target.maxTokens ?? 1024
                 ) { token in
                     bufferLock.lock()
@@ -762,10 +1178,15 @@ final class ChatViewModel: ObservableObject {
             rebuildMessages(for: parent.sessionId)
         }
         syncNow(showErrors: false)
+        scheduleSessionSummary(for: parent.sessionId)
     }
 
     private func handleProgress(_ progress: InferenceDownloadProgress) {
         if progress.percent == -1 {
+            if modelDownloadLoggedStart {
+                logger.error("Model download failed", details: progress.status)
+                modelDownloadLoggedStart = false
+            }
             downloadToast = DownloadToastState(phase: .errorDownload, percent: -1, status: progress.status, offerRetryDownload: true)
             isDownloading = false
             return
@@ -781,8 +1202,14 @@ final class ChatViewModel: ObservableObject {
         }
 
         if isReady {
+            if modelDownloadLoggedStart {
+                logger.info("Model download complete", details: progress.status)
+                modelDownloadLoggedStart = false
+            }
             downloadToast = DownloadToastState(phase: .complete, percent: 100, status: progress.status, offerRetryDownload: false)
             isDownloading = false
+            isModelDownloaded = true
+            modelDownloadSizeBytes = nil
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 1_500_000_000)
                 if self.downloadToast?.phase == .complete {
@@ -982,9 +1409,10 @@ final class ChatViewModel: ObservableObject {
         let refreshed: [ChatSession] = loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
             let lastMessage = (try? chatDb.getMessages(sessionUuid: session.uuid))?.last?.text ?? ""
+            let summary = sessionSummaries[session.uuid]
             return ChatSession(
                 id: id,
-                title: session.title,
+                title: summary ?? session.title,
                 lastMessage: lastMessage,
                 updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
             )
@@ -1175,10 +1603,82 @@ final class ChatViewModel: ObservableObject {
         sessions = sessions.map { session in
             guard session.id == sessionId else { return session }
             var updated = session
+            let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                session.title.caseInsensitiveCompare("New chat") == .orderedSame
+            if isPlaceholderTitle {
+                updated.title = Self.sessionTitle(from: preview, fallback: session.title)
+            }
             updated.lastMessage = preview
             updated.updatedAt = date
             return updated
         }
+    }
+
+    private func scheduleSessionSummary(for sessionId: UUID) {
+        sessionSummaryTask?.cancel()
+        sessionSummaryTask = Task(priority: .utility) { [weak self] in
+            guard let self else { return }
+            do {
+                try await Task.sleep(nanoseconds: 200_000_000)
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            await self.generateSessionSummaryIfNeeded(sessionId: sessionId)
+        }
+    }
+
+    @MainActor
+    private func generateSessionSummaryIfNeeded(sessionId: UUID) {
+        guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return }
+        guard let firstUser = nodes.sorted(by: { $0.timestamp < $1.timestamp }).first(where: { $0.role == .user }) else {
+            return
+        }
+        let summary = Self.summarizeQuestion(firstUser.text)
+        guard !summary.isEmpty else { return }
+        if sessionSummaries[sessionId.uuidString] == summary { return }
+        sessionSummaries[sessionId.uuidString] = summary
+        persistSessionSummaries()
+        sessions = sessions.map { session in
+            guard session.id == sessionId else { return session }
+            var updated = session
+            updated.title = summary
+            return updated
+        }
+    }
+
+    private func persistSessionSummaries() {
+        guard let data = try? JSONEncoder().encode(sessionSummaries) else { return }
+        UserDefaults.standard.set(data, forKey: Self.sessionSummaryStoreKey)
+    }
+
+    private static func loadSessionSummaries() -> [String: String] {
+        guard let data = UserDefaults.standard.data(forKey: Self.sessionSummaryStoreKey) else { return [:] }
+        return (try? JSONDecoder().decode([String: String].self, from: data)) ?? [:]
+    }
+
+    private static func summarizeQuestion(_ text: String) -> String {
+        let cleaned = text
+            .replacingOccurrences(of: "[\\r\\n]+", with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return "" }
+        let words = cleaned.split(separator: " ").map {
+            String($0).trimmingCharacters(in: .punctuationCharacters)
+        }.filter { !$0.isEmpty }
+        guard !words.isEmpty else { return "" }
+        let summaryWords = words.prefix(6)
+        return summaryWords.joined(separator: " ")
+    }
+
+    private static func sessionTitle(from text: String, fallback: String = "New chat") -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return fallback }
+        if trimmed.count <= Self.sessionTitleMaxLength {
+            return trimmed
+        }
+        let prefix = trimmed.prefix(Self.sessionTitleMaxLength)
+        return String(prefix).trimmingCharacters(in: .whitespacesAndNewlines) + "…"
     }
 
     private func isCancellation(_ error: Error) -> Bool {
@@ -1251,9 +1751,9 @@ final class ChatViewModel: ObservableObject {
         if history.isEmpty { return [] }
 
         let target = modelSettings.currentTarget()
-        let contextSize = target.contextLength ?? 4096
-        let maxTokens = target.maxTokens ?? 1024
-        var budget = contextSize - maxTokens - 256
+        let contextSize: Int = target.contextLength ?? 4096
+        let maxTokens: Int = target.maxTokens ?? 1024
+        var budget: Int = contextSize - maxTokens - 256
         budget -= estimateTokens(promptText)
         if budget <= 0 { return [] }
 
@@ -1262,10 +1762,10 @@ final class ChatViewModel: ObservableObject {
             let text = historyText(node)
             let cost = estimateTokens(text)
             if cost <= budget {
-                selected.append(InferenceMessage(text: text, isUser: node.role == .user, hasAttachments: !node.attachments.isEmpty))
+                selected.append(InferenceMessage(text: text, role: node.role == .user ? .user : .assistant, hasAttachments: !node.attachments.isEmpty))
                 budget -= cost
             } else if selected.isEmpty {
-                selected.append(InferenceMessage(text: trimToBudget(text, budget: budget), isUser: node.role == .user, hasAttachments: !node.attachments.isEmpty))
+                selected.append(InferenceMessage(text: trimToBudget(text, budget: budget), role: node.role == .user ? .user : .assistant, hasAttachments: !node.attachments.isEmpty))
                 break
             } else {
                 break
@@ -1282,7 +1782,7 @@ final class ChatViewModel: ObservableObject {
         } else if !node.attachments.isEmpty {
             text += "\n\n[\(node.attachments.count) attachments attached]"
         }
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
     }
 
     private func trimToBudget(_ text: String, budget: Int) -> String {
@@ -1294,6 +1794,11 @@ final class ChatViewModel: ObservableObject {
 
     private func estimateTokens(_ text: String) -> Int {
         max(1, text.count / 4)
+    }
+
+    private func resolveTemperature() -> Float {
+        let value = Float(modelSettings.temperature.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
+        return value.map { max(0, $0) } ?? Self.defaultTemperature
     }
 
     private struct MessageNode: Identifiable {

@@ -10,6 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuTypography
@@ -21,8 +24,12 @@ fun ActionButton(
     contentDescription: String,
     color: Color = EnsuColor.textMuted()
 ) {
+    val haptic = LocalHapticFeedback.current
     IconButton(
-        onClick = onTap,
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onTap()
+        },
         modifier = Modifier.size(36.dp),
         colors = IconButtonDefaults.iconButtonColors(contentColor = color)
     ) {
@@ -35,11 +42,39 @@ fun ActionButton(
 }
 
 @Composable
+fun ActionButton(
+    iconRes: Int,
+    onTap: () -> Unit,
+    contentDescription: String,
+    color: Color = EnsuColor.textMuted()
+) {
+    val haptic = LocalHapticFeedback.current
+    IconButton(
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onTap()
+        },
+        modifier = Modifier.size(36.dp),
+        colors = IconButtonDefaults.iconButtonColors(contentColor = color)
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = contentDescription,
+            modifier = Modifier.size(16.dp)
+        )
+    }
+}
+
+@Composable
 fun TextActionButton(
     text: String,
     onTap: () -> Unit
 ) {
-    TextButton(onClick = onTap) {
+    val haptic = LocalHapticFeedback.current
+    TextButton(onClick = {
+        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        onTap()
+    }) {
         Text(text = text, style = EnsuTypography.small, color = EnsuColor.textMuted())
     }
 }

@@ -7,7 +7,10 @@ struct PrimaryButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            hapticMedium()
+            action()
+        }) {
             ZStack {
                 if isLoading {
                     ProgressView()
@@ -35,7 +38,10 @@ struct TextLink: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            hapticTap()
+            action()
+        }) {
             Text(text)
                 .font(EnsuFont.ui(size: 14, weight: .semibold))
                 .underline()
@@ -47,15 +53,28 @@ struct TextLink: View {
 
 struct ActionButton: View {
     let icon: String
+    var isSystemSymbol: Bool = false
     var tooltip: String? = nil
     var color: Color = EnsuColor.textMuted
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .regular))
-                .frame(width: 36, height: 36)
+        Button(action: {
+            hapticTap()
+            action()
+        }) {
+            Group {
+                if isSystemSymbol {
+                    Image(systemName: icon)
+                        .font(.system(size: 16, weight: .regular))
+                } else {
+                    Image(icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                }
+            }
+            .frame(width: 36, height: 36)
         }
         .buttonStyle(ActionButtonStyle(color: color))
         .accessibilityLabel(tooltip ?? "")
@@ -69,7 +88,10 @@ struct TextActionButton: View {
     @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            hapticTap()
+            action()
+        }) {
             Text(text)
                 .font(EnsuTypography.small)
                 .foregroundStyle(isEnabled ? EnsuColor.textMuted : EnsuColor.textMuted.opacity(0.4))
@@ -102,8 +124,10 @@ struct AttachmentChip: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
+            Image(icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 14, height: 14)
                 .foregroundStyle(EnsuColor.textMuted)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -124,9 +148,14 @@ struct AttachmentChip: View {
             }
 
             if let onDelete {
-                Button(action: onDelete) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .semibold))
+                Button(action: {
+                    hapticTap()
+                    onDelete()
+                }) {
+                    Image("Cancel01Icon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 10, height: 10)
                         .padding(4)
                 }
                 .buttonStyle(.plain)

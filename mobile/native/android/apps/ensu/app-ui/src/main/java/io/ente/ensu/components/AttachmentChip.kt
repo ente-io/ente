@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,11 +18,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
+import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 
@@ -32,13 +33,17 @@ import io.ente.ensu.designsystem.EnsuTypography
 fun AttachmentChip(
     name: String,
     size: String,
-    icon: ImageVector,
+    iconRes: Int,
     isUploading: Boolean,
     onDelete: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
+    val haptic = LocalHapticFeedback.current
     val clickModifier = if (onClick != null) {
-        Modifier.clickable(onClick = onClick)
+        Modifier.clickable {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onClick()
+        }
     } else {
         Modifier
     }
@@ -52,7 +57,7 @@ fun AttachmentChip(
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Icon(
-            imageVector = icon,
+            painter = painterResource(iconRes),
             contentDescription = null,
             modifier = Modifier.size(14.dp),
             tint = EnsuColor.textMuted()
@@ -86,9 +91,15 @@ fun AttachmentChip(
         }
         if (onDelete != null) {
             Spacer(modifier = Modifier.width(EnsuSpacing.xs.dp))
-            IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+            IconButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onDelete()
+                },
+                modifier = Modifier.size(24.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Outlined.Close,
+                    painter = painterResource(HugeIcons.Cancel01Icon),
                     contentDescription = "Remove attachment",
                     tint = EnsuColor.textMuted()
                 )

@@ -11,3 +11,7 @@ import kotlinx.coroutines.runBlocking
 fun SessionPreferences.getSelectedSessionIdSync(): String? = runBlocking {
     selectedSessionId.first()
 }
+
+fun SessionPreferences.getSessionSummariesSync(): Map<String, String> = runBlocking {
+    sessionSummaries.first()
+}

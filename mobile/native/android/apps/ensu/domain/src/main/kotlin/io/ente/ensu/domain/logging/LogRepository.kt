@@ -7,12 +7,18 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface LogRepository {
     val logs: StateFlow<List<LogEntry>>
-    fun log(level: LogLevel, message: String, details: String? = null)
+    fun log(
+        level: LogLevel,
+        message: String,
+        details: String? = null,
+        tag: String? = null,
+        throwable: Throwable? = null
+    )
 }
 
 object NoOpLogRepository : LogRepository {
     private val emptyFlow = MutableStateFlow<List<LogEntry>>(emptyList())
     override val logs: StateFlow<List<LogEntry>> = emptyFlow
 
-    override fun log(level: LogLevel, message: String, details: String?) = Unit
+    override fun log(level: LogLevel, message: String, details: String?, tag: String?, throwable: Throwable?) = Unit
 }

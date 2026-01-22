@@ -10,6 +10,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuTypography
@@ -23,9 +25,13 @@ fun BranchSwitcher(
 ) {
     if (totalCount <= 1) return
 
+    val haptic = LocalHapticFeedback.current
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextButton(
-            onClick = onPrevious,
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onPrevious()
+            },
             enabled = currentIndex > 1,
             modifier = Modifier.size(36.dp),
             contentPadding = ButtonDefaults.TextButtonContentPadding
@@ -40,7 +46,10 @@ fun BranchSwitcher(
         )
         Spacer(modifier = Modifier.width(4.dp))
         TextButton(
-            onClick = onNext,
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onNext()
+            },
             enabled = currentIndex < totalCount,
             modifier = Modifier.size(36.dp),
             contentPadding = ButtonDefaults.TextButtonContentPadding

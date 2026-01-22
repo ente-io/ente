@@ -32,7 +32,7 @@ struct DownloadToastView: View {
     private var iconName: String {
         switch state.phase {
         case .downloading:
-            return "arrow.down.circle"
+            return "Upload01Icon"
         case .loading:
             return "cpu"
         case .complete:
@@ -56,9 +56,17 @@ struct DownloadToastView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
             HStack(spacing: EnsuSpacing.md) {
-                Image(systemName: iconName)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(iconColor)
+                if iconName.hasSuffix("Icon") {
+                    Image(iconName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(iconColor)
+                } else {
+                    Image(systemName: iconName)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(iconColor)
+                }
 
                 Text(title)
                     .font(EnsuTypography.large)
@@ -67,9 +75,14 @@ struct DownloadToastView: View {
                 Spacer()
 
                 if !isComplete && !hasError {
-                    Button(action: onCancel) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .semibold))
+                    Button(action: {
+                        hapticWarning()
+                        onCancel()
+                    }) {
+                        Image("Cancel01Icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(EnsuColor.textMuted)
@@ -102,12 +115,19 @@ struct DownloadToastView: View {
             if hasError {
                 HStack {
                     Spacer()
-                    Button("Dismiss", action: onDismiss)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.textMuted)
-                    Button(state.offerRetryDownload ? "Retry download" : "Retry", action: onRetry)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.accent)
+                    Button("Dismiss") {
+                        hapticTap()
+                        onDismiss()
+                    }
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.textMuted)
+
+                    Button(state.offerRetryDownload ? "Retry download" : "Retry") {
+                        hapticMedium()
+                        onRetry()
+                    }
+                    .font(EnsuTypography.small)
+                    .foregroundStyle(EnsuColor.accent)
                 }
             }
         }

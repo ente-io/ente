@@ -163,25 +163,45 @@ fun EnsuTheme(content: @Composable () -> Unit) {
 private fun lightEnsuColorScheme(): ColorScheme = lightColorScheme(
     primary = EnsuColor.accentLight,
     onPrimary = EnsuColor.backgroundBaseLight,
+
     secondary = EnsuColor.fillFaintLight,
     onSecondary = EnsuColor.textPrimaryLight,
+
     background = EnsuColor.backgroundBaseLight,
     onBackground = EnsuColor.textPrimaryLight,
+
     surface = EnsuColor.fillFaintLight,
     onSurface = EnsuColor.textPrimaryLight,
+
+    // Important for default M3 components (e.g. TextField placeholder/label colors).
+    // If not set, Material uses its default palette (purple-ish).
+    surfaceVariant = EnsuColor.fillFaintLight,
+    onSurfaceVariant = EnsuColor.textMutedLight,
+
     outline = EnsuColor.borderLight,
+    outlineVariant = EnsuColor.borderLight,
+
     error = EnsuColor.error
 )
 
 private fun darkEnsuColorScheme(): ColorScheme = darkColorScheme(
     primary = EnsuColor.accentDark,
     onPrimary = EnsuColor.backgroundBaseDark,
+
     secondary = EnsuColor.fillFaintDark,
     onSecondary = EnsuColor.textPrimaryDark,
+
     background = EnsuColor.backgroundBaseDark,
     onBackground = EnsuColor.textPrimaryDark,
+
     surface = EnsuColor.fillFaintDark,
     onSurface = EnsuColor.textPrimaryDark,
+
+    surfaceVariant = EnsuColor.fillFaintDark,
+    onSurfaceVariant = EnsuColor.textMutedDark,
+
     outline = EnsuColor.borderDark,
+    outlineVariant = EnsuColor.borderDark,
+
     error = EnsuColor.error
 )

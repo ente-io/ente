@@ -115,7 +115,10 @@ struct PasswordTextField: View {
                 Button {
                     showPassword.toggle()
                 } label: {
-                    Image(systemName: showPassword ? "eye.slash" : "eye")
+                    Image(showPassword ? "ViewOffSlashIcon" : "ViewIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
                         .foregroundStyle(EnsuColor.textMuted)
                 }
             }

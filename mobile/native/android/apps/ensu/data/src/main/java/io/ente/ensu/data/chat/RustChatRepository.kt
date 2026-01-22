@@ -8,6 +8,7 @@ import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
 import io.ente.ensu.domain.model.MessageAuthor
+import io.ente.ensu.domain.model.sessionTitleFromText
 import io.ente.labs.llmchat_db.AttachmentKind
 import io.ente.labs.llmchat_db.AttachmentMeta
 import io.ente.labs.llmchat_db.DbException
@@ -34,10 +35,12 @@ class RustChatRepository(
     override fun listSessions(): List<ChatSession> = withDbRecovery {
         val sessions = db.listSessions()
         sessions.map { session ->
-            val lastMessage = runCatching { db.getMessages(session.uuid) }.getOrNull()?.lastOrNull()?.text
+            val messages = runCatching { db.getMessages(session.uuid) }.getOrNull().orEmpty()
+            val firstMessage = messages.firstOrNull()?.text.orEmpty()
+            val lastMessage = messages.lastOrNull()?.text
             ChatSession(
                 id = session.uuid,
-                title = session.title,
+                title = sessionTitleFromText(firstMessage, fallback = session.title),
                 lastMessagePreview = lastMessage,
                 updatedAtMillis = session.updatedAtUs / 1000
             )
