@@ -328,7 +328,7 @@
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB for them + {storageAmountInGB} GB for you when they upgrade.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
-  "shareTextReferralCode": "Ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos is a private and safe home for your photos\n* Download Ente Photos from https://ente.io/app\n* Create an account\n* Apply the referral code {referralCode} in Settings->Referral\n* Get {referralStorageInGB}GB free when you upgrade to a paid plan",
   "claimFreeStorage": "Claim free storage",
   "inviteYourFriends": "Invite your friends",
   "earnFreeStorage": "Earn free storage",
