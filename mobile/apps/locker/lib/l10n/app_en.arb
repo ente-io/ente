@@ -1023,5 +1023,9 @@
   "usageFamily": "Family",
   "searchSettings": "Search settings",
   "suggestions": "Suggestions",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "viewActiveSessions": "View active sessions",
+  "authToViewYourActiveSessions": "Please authenticate to view your active sessions",
+  "emailVerificationEnableWarning": "To avoid getting locked out of your account, be sure to store a copy of your email 2FA outside of Ente Locker before enabling email verification.",
+  "iUnderStand": "I understand"
 }
