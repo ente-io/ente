@@ -62,11 +62,7 @@ export const performFileOp = async (
                 singleFile?.metadata.fileType === FileType.livePhoto
                     ? fileFileName(singleFile)
                     : t("files_count", { count: files.length });
-            await downloadAndSaveFiles(
-                files,
-                title,
-                onAddSaveGroup,
-            );
+            await downloadAndSaveFiles(files, title, onAddSaveGroup);
             break;
         }
         case "fixTime":

@@ -478,11 +478,7 @@ export default function PublicCollectionGallery() {
                 singleFile?.metadata.fileType === FileType.livePhoto
                     ? fileFileName(singleFile)
                     : t("files_count", { count: selectedFiles.length });
-            await downloadAndSaveFiles(
-                selectedFiles,
-                title,
-                onAddSaveGroup,
-            );
+            await downloadAndSaveFiles(selectedFiles, title, onAddSaveGroup);
             clearSelection();
         } catch (e) {
             log.error("failed to download selected files", e);
