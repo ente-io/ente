@@ -11,7 +11,7 @@ The content from **Hide vs Archive** has been reorganized. You can find it in th
 ## Hidden Photos
 
 - [Hidden photos feature guide](/photos/features/albums-and-organization/hide) - Complete guide to hiding photos with biometric protection
-- [Can I hide shared photos?](/photos/faq/albums-and-organization#hide-shared) - Hiding photos shared with you
+- [Can I hide shared albums or photos?](/photos/faq/albums-and-organization#hide-shared) - Hiding albums shared with you
 
 ## Archive
 

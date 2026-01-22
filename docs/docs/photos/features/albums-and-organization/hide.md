@@ -15,8 +15,7 @@ Hiding differs from [Archiving](./archive) in that hidden content won't appear a
 - Hidden photos will be removed from all regular albums. If you want to unhide
   again you will have to specify the album to move it to.
 
-- You cannot hide photos or albums shared with you. You can archive shared
-  albums instead.
+- You can hide albums shared with you, but you cannot hide individual photos from shared albums.
 
 ## How to
 
@@ -65,6 +64,6 @@ Ente has no information about whether you have hidden a photo or album.
 ## Related FAQs
 
 - [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
-- [Can I hide photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
+- [Can I hide albums or photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
 - [How do I hide photos in Ente?](/photos/faq/albums-and-organization#how-to-hide)
 - [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
