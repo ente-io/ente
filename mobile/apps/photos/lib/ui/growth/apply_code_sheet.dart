@@ -41,6 +41,7 @@ class _ApplyCodeContent extends StatefulWidget {
 
 class _ApplyCodeContentState extends State<_ApplyCodeContent> {
   late TextEditingController _controller;
+  late FocusNode _codeFocusNode;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -48,13 +49,20 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _codeFocusNode = FocusNode();
     _controller.addListener(_onTextChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _codeFocusNode.requestFocus();
+      }
+    });
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
+    _codeFocusNode.dispose();
     super.dispose();
   }
 
@@ -143,6 +151,7 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
           ),
           child: TextField(
             controller: _controller,
+            focusNode: _codeFocusNode,
             inputFormatters: [UpperCaseTextFormatter()],
             textCapitalization: TextCapitalization.characters,
             style: textTheme.body,
