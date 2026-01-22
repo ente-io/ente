@@ -194,27 +194,25 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
               ),
             ),
             if (_searchQuery.isNotEmpty)
-              GestureDetector(
-                onTap: _clearSearch,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(
-                    Icons.cancel_rounded,
-                    size: 16,
-                    color: colorScheme.textMuted,
-                  ),
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: EdgeInsets.zero,
+                iconSize: 16,
+                onPressed: _clearSearch,
+                icon: Icon(
+                  Icons.cancel_rounded,
+                  color: colorScheme.textMuted,
                 ),
               )
             else
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 16,
-                    color: colorScheme.textMuted,
-                  ),
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: EdgeInsets.zero,
+                iconSize: 16,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: colorScheme.textMuted,
                 ),
               ),
           ],

@@ -146,7 +146,7 @@ class _SettingsBody extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             child: Icon(
-              Icons.chevron_left,
+              Icons.keyboard_double_arrow_left,
               size: 24,
               color: colorScheme.textBase,
             ),
@@ -155,39 +155,37 @@ class _SettingsBody extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            GestureDetector(
-              onTap: () {
+            IconButton(
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              padding: const EdgeInsets.all(8),
+              iconSize: 20,
+              onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const SettingsSearchPage(),
                   ),
                 );
               },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: Icon(
-                  Icons.search_rounded,
-                  size: 20,
-                  color: colorScheme.textMuted,
-                ),
+              icon: Icon(
+                Icons.search_rounded,
+                color: colorScheme.textMuted,
               ),
             ),
             if (localSettings.enableDatabaseLogging)
-              GestureDetector(
-                onTap: () {
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: const EdgeInsets.all(8),
+                iconSize: 20,
+                onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const LogViewerPage(),
                     ),
                   );
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.bug_report,
-                    size: 20,
-                    color: colorScheme.textMuted,
-                  ),
+                icon: Icon(
+                  Icons.bug_report,
+                  color: colorScheme.textMuted,
                 ),
               ),
           ],
