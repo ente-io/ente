@@ -59,14 +59,7 @@ class SearchWidgetState extends State<SearchWidget> {
       if (!mounted) {
         return;
       }
-      if (event.selectedIndex == 3) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
-          focusNode.requestFocus();
-        });
-      } else {
+      if (event.selectedIndex != 3) {
         focusNode.unfocus();
       }
     });
