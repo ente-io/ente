@@ -143,8 +143,9 @@ class SearchWidgetState extends State<SearchWidget> {
     final textTheme = getEnteTextTheme(context);
     final mutedTextColor =
         textTheme.smallMuted.color ?? colorScheme.strokeMuted;
-    final shouldShowClearButton =
-        focusNode.hasFocus || MediaQuery.viewInsetsOf(context).bottom > 0;
+    final shouldShowClearButton = focusNode.hasFocus ||
+        MediaQuery.viewInsetsOf(context).bottom > 0 ||
+        textController.text.trim().isNotEmpty;
     return RepaintBoundary(
       key: widgetKey,
       child: Padding(
