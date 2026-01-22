@@ -50,6 +50,11 @@ class SearchWidgetState extends State<SearchWidget> {
   void initState() {
     super.initState();
     focusNode = FocusNode();
+    focusNode.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen((event) async {
       if (!mounted) {
         return;
@@ -145,6 +150,8 @@ class SearchWidgetState extends State<SearchWidget> {
     final textTheme = getEnteTextTheme(context);
     final mutedTextColor =
         textTheme.smallMuted.color ?? colorScheme.strokeMuted;
+    final shouldShowClearButton =
+        focusNode.hasFocus || MediaQuery.viewInsetsOf(context).bottom > 0;
     return RepaintBoundary(
       key: widgetKey,
       child: Padding(
@@ -198,6 +205,7 @@ class SearchWidgetState extends State<SearchWidget> {
                         ) {
                           return SearchSuffixIcon(
                             isSearching,
+                            showClearButton: shouldShowClearButton,
                           );
                         },
                       ),
