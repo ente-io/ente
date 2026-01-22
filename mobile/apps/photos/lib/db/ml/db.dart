@@ -1357,6 +1357,25 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       );
       await ClipVectorDB.instance.setMigrationDone();
       _logger.info("ClipVectorDB migration done");
+      try {
+        final latestClipCount = await getClipIndexedFileCount();
+        final vectorStats = await ClipVectorDB.instance.getIndexStats();
+        if (vectorStats.size != latestClipCount) {
+          _logger.warning(
+            "ClipVectorDB size mismatch: vectorDb=${vectorStats.size}, clipTableLatest=$latestClipCount",
+          );
+        } else {
+          _logger.info(
+            "ClipVectorDB size match: vectorDb=${vectorStats.size}, clipTableLatest=$latestClipCount",
+          );
+        }
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to log ClipVectorDB size after migration",
+          e,
+          s,
+        );
+      }
     } catch (e, s) {
       _logger.severe(
         "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",

@@ -5,6 +5,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
@@ -59,6 +60,10 @@ class SemanticSearchService {
         _imageEmbeddingsAreCached = false;
       }
     });
+
+    if (flagService.usearchForSearch) {
+      unawaited(mlDataDB.checkMigrateFillClipVectorDB());
+    }
 
     unawaited(_loadTextModel(delay: true));
   }
@@ -280,6 +285,21 @@ class SemanticSearchService {
     //     dev.log("CLIPTEXT Query: $queryText, embedding: $embedding");
     //   }
     // }
+    if (await _canUseVectorDbForSearch()) {
+      final queryResults = await ClipVectorDB.instance.computeBulkSimilarities(
+        textQueryToEmbeddingMap,
+        minimumSimilarityMap,
+      );
+      final endTime = DateTime.now();
+      _logger.info(
+        "computingSimilarities (usearch) took for ${textQueryToEmbeddingMap.length} queries " +
+            (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+                .toString() +
+            "ms",
+      );
+      return queryResults;
+    }
+
     await _cacheClipVectors();
     final Map<String, List<QueryResult>> queryResults =
         await MLComputer.instance.computeBulkSimilarities(
@@ -288,12 +308,18 @@ class SemanticSearchService {
     );
     final endTime = DateTime.now();
     _logger.info(
-      "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +
+      "computingSimilarities (dot-product) took for ${textQueryToEmbeddingMap.length} queries " +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
               .toString() +
           "ms",
     );
     return queryResults;
+  }
+
+  Future<bool> _canUseVectorDbForSearch() async {
+    if (!flagService.usearchForSearch) return false;
+    if (!flagService.hasGrantedMLConsent) return false;
+    return ClipVectorDB.instance.checkIfMigrationDone();
   }
 
   void _resetInactivityTimer() {
