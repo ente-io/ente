@@ -52,7 +52,7 @@ class _ApplyCodeContentState extends State<_ApplyCodeContent> {
     _codeFocusNode = FocusNode();
     _controller.addListener(_onTextChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 150), () {
+      Future.delayed(const Duration(milliseconds: 75), () {
         if (mounted) {
           _codeFocusNode.requestFocus();
         }
