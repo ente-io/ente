@@ -3,12 +3,7 @@
  * Provides a unified interface for chrome.storage.local and chrome.storage.session.
  */
 import { browser } from "@shared/browser";
-import type {
-    Code,
-    ExtensionSettings,
-    KeyAttributes,
-    defaultSettings,
-} from "@shared/types";
+import type { Code, ExtensionSettings, KeyAttributes } from "@shared/types";
 
 // Storage keys
 const KEYS = {

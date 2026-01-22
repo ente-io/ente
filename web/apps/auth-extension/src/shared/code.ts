@@ -117,8 +117,13 @@ const parseCounter = (url: URL): number | undefined => {
     return c ? parseInt(c, 10) : undefined;
 };
 
-const parseSecret = (url: URL): string =>
-    url.searchParams.get("secret")!.replaceAll(" ", "").toUpperCase();
+const parseSecret = (url: URL): string => {
+    const secret = url.searchParams.get("secret");
+    if (!secret) {
+        throw new Error("Missing required 'secret' parameter in OTP URI");
+    }
+    return secret.replaceAll(" ", "").toUpperCase();
+};
 
 const parseCodeDisplay = (url: URL): CodeDisplay | undefined => {
     const s = url.searchParams.get("codeDisplay");

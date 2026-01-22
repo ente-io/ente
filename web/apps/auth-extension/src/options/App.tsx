@@ -2,9 +2,20 @@
  * Options page application component.
  */
 import React, { useEffect, useState } from "react";
-import { sendMessage } from "@shared/browser";
+import { browser, sendMessage } from "@shared/browser";
 import { useTheme } from "@shared/useTheme";
 import type { AuthState, ExtensionSettings, ThemeMode } from "@shared/types";
+
+/**
+ * Get the extension version from the manifest.
+ */
+const getExtensionVersion = (): string => {
+    try {
+        return browser.runtime.getManifest().version;
+    } catch {
+        return "1.0.0";
+    }
+};
 
 export const App: React.FC = () => {
     // Initialize theme
@@ -279,7 +290,7 @@ export const App: React.FC = () => {
 
             <div className="options-footer">
                 <p>
-                    Ente Auth v1.0.0 •{" "}
+                    Ente Auth v{getExtensionVersion()} •{" "}
                     <a
                         href="https://ente.io"
                         target="_blank"

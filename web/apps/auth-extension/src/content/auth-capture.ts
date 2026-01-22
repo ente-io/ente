@@ -42,7 +42,6 @@ const setupPasswordCapture = () => {
         const passwordInput = form.querySelector('input[type="password"]') as HTMLInputElement;
         if (passwordInput?.value) {
             capturedPassword = passwordInput.value;
-            console.log(`[Ente Extension] Password captured on form submit (length: ${passwordInput.value.length})`);
         }
     }, true);
 
@@ -52,7 +51,6 @@ const setupPasswordCapture = () => {
             const target = e.target as HTMLInputElement;
             if (target.type === "password" && target.value) {
                 capturedPassword = target.value;
-                console.log(`[Ente Extension] Password captured on Enter key (length: ${target.value.length})`);
             }
         }
     }, true);
@@ -70,7 +68,6 @@ const setupPasswordCapture = () => {
 
             if (passwordInput?.value) {
                 capturedPassword = passwordInput.value;
-                console.log(`[Ente Extension] Password captured on button click (length: ${passwordInput.value.length})`);
             }
         }
     }, true);

@@ -35,8 +35,6 @@ const authenticatedFetch = async (
     token: string,
     options?: RequestInit
 ): Promise<Response> => {
-    console.log("API Request:", url, "Token (first 20 chars):", token?.substring(0, 20));
-
     const response = await fetch(url, {
         ...options,
         headers: {

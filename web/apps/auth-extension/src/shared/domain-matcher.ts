@@ -76,6 +76,35 @@ const KNOWN_DOMAIN_MAPPINGS: Record<string, string[]> = {
     ea: ["ea.com", "origin.com"],
     blizzard: ["blizzard.com", "battle.net"],
     ente: ["ente.io", "auth.ente.io", "web.ente.io"],
+    snowflake: ["snowflakecomputing.com", "snowflake.com"],
+    okta: ["okta.com", "oktapreview.com"],
+    auth0: ["auth0.com"],
+    duo: ["duosecurity.com", "duo.com"],
+    onelogin: ["onelogin.com"],
+    ping: ["pingidentity.com", "pingone.com"],
+    datadog: ["datadoghq.com", "datadog.com"],
+    pagerduty: ["pagerduty.com"],
+    sentry: ["sentry.io"],
+    newrelic: ["newrelic.com"],
+    mongodb: ["mongodb.com", "cloud.mongodb.com"],
+    postgres: ["postgresql.org"],
+    elastic: ["elastic.co", "elasticsearch.com"],
+    redis: ["redis.io", "redis.com", "redislabs.com"],
+    jenkins: ["jenkins.io"],
+    circleci: ["circleci.com"],
+    travisci: ["travis-ci.com", "travis-ci.org"],
+    terraform: ["terraform.io", "hashicorp.com"],
+    hashicorp: ["hashicorp.com", "terraform.io", "vault.io", "consul.io"],
+    vault: ["vaultproject.io", "hashicorp.com"],
+    twilio: ["twilio.com"],
+    sendgrid: ["sendgrid.com"],
+    mailchimp: ["mailchimp.com"],
+    zendesk: ["zendesk.com"],
+    intercom: ["intercom.com", "intercom.io"],
+    hubspot: ["hubspot.com"],
+    salesforce: ["salesforce.com", "force.com", "lightning.force.com"],
+    zoom: ["zoom.us", "zoom.com"],
+    webex: ["webex.com", "cisco.com"],
 };
 
 /**
@@ -197,10 +226,20 @@ export const matchCodesToDomain = (
         }
 
         // 3. Subdomain/partial match (confidence: 0.8)
-        if (confidence === 0) {
+        // Only apply partial matching if issuer is at least 4 chars to avoid false positives
+        if (confidence === 0 && normalizedIssuer.length >= 4) {
+            const domainName = baseDomain.split(".")[0]!;
+
+            // Check various partial match scenarios:
+            // - hostname contains the issuer (e.g., "snowflakecomputing.com" contains "snowflake")
+            // - issuer contains the domain name (e.g., issuer "GitHub Enterprise" contains "github")
+            // - domain name starts with issuer (e.g., "snowflakecomputing" starts with "snowflake")
+            // - issuer starts with domain name (e.g., "githubenterprise" starts with "github")
             if (
                 hostname.includes(normalizedIssuer) ||
-                normalizedIssuer.includes(baseDomain.split(".")[0]!)
+                normalizedIssuer.includes(domainName) ||
+                domainName.startsWith(normalizedIssuer) ||
+                normalizedIssuer.startsWith(domainName)
             ) {
                 confidence = 0.8;
             }

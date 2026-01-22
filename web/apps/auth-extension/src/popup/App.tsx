@@ -21,7 +21,7 @@ export const App: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showSearch, setShowSearch] = useState(false);
     const [showSortMenu, setShowSortMenu] = useState(false);
-    const [sortOrder, setSortOrder] = useState<"issuer" | "account" | "recent" | "frequent">("issuer");
+    const [sortOrder, setSortOrder] = useState<"issuer" | "account" | "recent">("issuer");
     const [timeOffset, setTimeOffset] = useState(0);
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -130,9 +130,6 @@ export const App: React.FC = () => {
                 case "recent":
                     // Most recently used first (using updatedAt or id as fallback)
                     return (b.id || "").localeCompare(a.id || "");
-                case "frequent":
-                    // For now, just use issuer as we don't track frequency
-                    return a.issuer.localeCompare(b.issuer);
                 default:
                     return 0;
             }
@@ -379,13 +376,6 @@ export const App: React.FC = () => {
                                 >
                                     Account
                                     {sortOrder === "account" && <CheckIcon />}
-                                </div>
-                                <div
-                                    className={`sort-option ${sortOrder === "frequent" ? "active" : ""}`}
-                                    onClick={() => { setSortOrder("frequent"); setShowSortMenu(false); }}
-                                >
-                                    Frequently used
-                                    {sortOrder === "frequent" && <CheckIcon />}
                                 </div>
                                 <div
                                     className={`sort-option ${sortOrder === "recent" ? "active" : ""}`}
