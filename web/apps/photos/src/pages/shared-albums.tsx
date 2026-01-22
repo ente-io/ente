@@ -1,9 +1,10 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Download01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 import {
     Box,
@@ -38,10 +39,6 @@ import {
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "ente-base/components/Navbar";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "ente-base/components/OverflowMenu";
 import {
     SingleInputForm,
     type SingleInputFormProps,
@@ -888,14 +885,12 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                         </IconButton>
                     )}
                     {downloadEnabled && (
-                        <OverflowMenu ariaID="collection-options">
-                            <OverflowMenuOption
-                                startIcon={<FileDownloadOutlinedIcon />}
-                                onClick={downloadAllFiles}
-                            >
-                                {t("download_album")}
-                            </OverflowMenuOption>
-                        </OverflowMenu>
+                        <IconButton onClick={downloadAllFiles}>
+                            <HugeiconsIcon
+                                icon={Download01Icon}
+                                strokeWidth={1.6}
+                            />
+                        </IconButton>
                     )}
                 </Stack>
             </SpacedRow>
