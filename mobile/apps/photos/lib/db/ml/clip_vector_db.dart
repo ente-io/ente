@@ -250,9 +250,21 @@ class ClipVectorDB {
 
   Future<Map<String, List<QueryResult>>> computeBulkSimilarities(
     Map<String, List<double>> textQueryToEmbeddingMap,
-    Map<String, double> minimumSimilarityMap,
-  ) async {
+    Map<String, double> minimumSimilarityMap, {
+    int? maxResults,
+  }) async {
     try {
+      int? resolvedMaxResults = maxResults;
+      if (resolvedMaxResults == null || resolvedMaxResults <= 0) {
+        final stats = await getIndexStats();
+        resolvedMaxResults = stats.size;
+      }
+      if (resolvedMaxResults == 0) {
+        return {
+          for (final query in textQueryToEmbeddingMap.keys)
+            query: <QueryResult>[],
+        };
+      }
       final queryToResults = <String, List<QueryResult>>{};
       for (final MapEntry<String, List<double>> entry
           in textQueryToEmbeddingMap.entries) {
@@ -260,13 +272,14 @@ class ClipVectorDB {
         final minimumSimilarity = minimumSimilarityMap[query]!;
         final textEmbedding = entry.value;
         final (potentialFileIDs, distances) =
-            await searchClosestVectors(textEmbedding, 1000);
+            await searchClosestVectors(textEmbedding, resolvedMaxResults);
         final queryResults = <QueryResult>[];
         for (var i = 0; i < potentialFileIDs.length; i++) {
           final similarity = 1 - distances[i];
           if (similarity >= minimumSimilarity) {
-            queryResults
-                .add(QueryResult(potentialFileIDs[i].toInt(), similarity));
+            queryResults.add(
+              QueryResult(potentialFileIDs[i].toInt(), similarity),
+            );
           } else {
             break;
           }

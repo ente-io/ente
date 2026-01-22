@@ -30,6 +30,7 @@ class SemanticSearchService {
 
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
+  static const int _kSearchMaxResults = 5000;
   late final mlDataDB = MLDataDB.instance;
 
   bool _hasInitialized = false;
@@ -150,6 +151,7 @@ class SemanticSearchService {
       minimumSimilarityMap: {
         query: similarityThreshold ?? kMinimumSimilarityThreshold,
       },
+      maxResults: _kSearchMaxResults,
     );
     final queryResults = similarityResults[query]!;
     // Uncomment if needed for debugging: print query for top ten scores
@@ -221,6 +223,7 @@ class SemanticSearchService {
     final queryResults = await _getSimilarities(
       textEmbeddings,
       minimumSimilarityMap: minimumSimilarityMap,
+      maxResults: 0,
     );
 
     final result = <String, List<int>>{};
@@ -276,6 +279,7 @@ class SemanticSearchService {
   Future<Map<String, List<QueryResult>>> _getSimilarities(
     Map<String, List<double>> textQueryToEmbeddingMap, {
     required Map<String, double> minimumSimilarityMap,
+    int? maxResults,
   }) async {
     final startTime = DateTime.now();
     // Uncomment if needed for debugging: print query embeddings
@@ -289,6 +293,7 @@ class SemanticSearchService {
       final queryResults = await ClipVectorDB.instance.computeBulkSimilarities(
         textQueryToEmbeddingMap,
         minimumSimilarityMap,
+        maxResults: maxResults,
       );
       final endTime = DateTime.now();
       _logger.info(
