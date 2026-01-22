@@ -84,6 +84,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   void releaseResources() {
     subscription?.cancel();
     timer?.cancel();
+    queueOfSearchResults.clear();
   }
 
   ///This method generates searchResultsWidgets from the queueOfEvents by checking
