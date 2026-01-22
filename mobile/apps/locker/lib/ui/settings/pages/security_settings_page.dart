@@ -9,6 +9,8 @@ import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
+import "package:ente_ui/components/alert_bottom_sheet.dart";
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -234,16 +236,25 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         );
       }
       if (enableEmailMFA) {
-        await showChoiceActionSheet(
+        await showAlertBottomSheet(
           context,
           title: context.l10n.warning,
-          body: context.l10n.emailVerificationEnableWarning,
-          isCritical: true,
-          firstButtonOnTap: () async {
-            await UserService.instance.updateEmailMFA(enableEmailMFA);
-          },
-          secondButtonLabel: context.l10n.cancel,
-          firstButtonLabel: context.l10n.iUnderStand,
+          message: context.l10n.emailVerificationEnableWarning,
+          assetPath: "assets/warning-grey.png",
+          buttons: [
+            GradientButton(
+              text: context.l10n.iUnderStand,
+              onTap: () async {
+                await UserService.instance.updateEmailMFA(enableEmailMFA);
+                Navigator.of(context).pop();
+              },
+            ),
+            GradientButton(
+              text: context.l10n.cancel,
+              buttonType: GradientButtonType.secondary,
+              onTap: () => Navigator.of(context).pop(),
+            ),
+          ],
         );
       } else {
         await UserService.instance.updateEmailMFA(enableEmailMFA);
