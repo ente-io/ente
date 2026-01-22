@@ -23,7 +23,13 @@ import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
   final Locale? locale;
-  const App({super.key, this.locale = const Locale("en")});
+  final AdaptiveThemeMode? savedThemeMode;
+
+  const App({
+    super.key,
+    this.locale = const Locale("en"),
+    this.savedThemeMode,
+  });
 
   static void setLocale(BuildContext context, Locale newLocale) {
     final _AppState state = context.findAncestorStateOfType<_AppState>()!;
@@ -104,7 +110,7 @@ class _AppState extends State<App>
         return AdaptiveTheme(
           light: lightThemeData,
           dark: darkThemeData,
-          initial: AdaptiveThemeMode.system,
+          initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
           builder: (lightTheme, dartTheme) => MaterialApp(
             title: "ente",
             themeMode: ThemeMode.system,
