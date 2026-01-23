@@ -510,6 +510,11 @@ extension HiddenService on CollectionsService {
 
   /// Cleans up hidden files by moving them from non-hidden collections to their
   /// hidden collection.
+  /// Only own files are processed.
+  /// For files whose hidden collection is owned by the user,
+  /// they are moved back to their original hidden collection.
+  /// For files whose hidden collection is not owned by the user,
+  /// they are moved to the user's default hidden collection.
   Future<void> cleanupHiddenFiles(BuildContext context) async {
     final dialog = createProgressDialog(
       context,
