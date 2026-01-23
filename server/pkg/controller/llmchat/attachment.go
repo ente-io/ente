@@ -2,12 +2,8 @@ package llmchat
 
 import (
 	"context"
-	"crypto/md5"
 	"database/sql"
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -46,6 +42,7 @@ func (c *AttachmentController) GetUploadURL(
 	ctx *gin.Context,
 	attachmentID string,
 	req model.GetAttachmentUploadURLRequest,
+	force bool,
 ) (model.AttachmentUploadURLResponse, error) {
 	if attachmentID == "" {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
@@ -69,7 +66,19 @@ func (c *AttachmentController) GetUploadURL(
 	if err != nil {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to check attachment reference")
 	}
-	if referenced {
+	if referenced && !force {
+		exists, err := c.attachmentExists(ctx, userID, attachmentID)
+		if err != nil {
+			return model.AttachmentUploadURLResponse{}, err
+		}
+		if !exists {
+			if err := c.Repo.DeleteAttachmentRecords(ctx, userID, attachmentID); err != nil {
+				return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to clear attachment records")
+			}
+			referenced = false
+		}
+	}
+	if referenced && !force {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.NewConflictError("attachment is already committed"), "")
 	}
 
@@ -84,23 +93,14 @@ func (c *AttachmentController) GetUploadURL(
 		}
 	}
 
-	checksum, err := normalizeMD5String(req.ContentMD5)
-	if err != nil {
-		return model.AttachmentUploadURLResponse{}, err
-	}
-
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
 	s3Client := c.S3Config.GetHotS3Client()
 	dc := c.S3Config.GetHotDataCenter()
 	bucket := c.S3Config.GetHotBucket()
 
-	length := req.ContentLength
-	checksumCopy := checksum
 	putInput := &s3.PutObjectInput{
-		Bucket:        bucket,
-		Key:           aws.String(objectKey),
-		ContentLength: &length,
-		ContentMD5:    &checksumCopy,
+		Bucket: bucket,
+		Key:    aws.String(objectKey),
 	}
 	putReq, _ := s3Client.PutObjectRequest(putInput)
 	url, err := putReq.Presign(llmChatPresignedRequestValidityDuration)
@@ -130,6 +130,28 @@ func (c *AttachmentController) GetUploadURL(
 		ObjectKey: objectKey,
 		URL:       url,
 	}, nil
+}
+
+func (c *AttachmentController) attachmentExists(
+	ctx *gin.Context,
+	userID int64,
+	attachmentID string,
+) (bool, error) {
+	objectKey := buildAttachmentObjectKey(userID, attachmentID)
+	bucket := c.S3Config.GetHotBucket()
+	s3Client := c.S3Config.GetHotS3Client()
+
+	_, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
+		Bucket: bucket,
+		Key:    aws.String(objectKey),
+	})
+	if err != nil {
+		if isAttachmentNotFound(err) {
+			return false, nil
+		}
+		return false, stacktrace.Propagate(err, "failed to check attachment in storage")
+	}
+	return true, nil
 }
 
 func (c *AttachmentController) VerifyUploaded(
@@ -182,6 +204,17 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 		return "", stacktrace.Propagate(err, "failed to verify attachment access")
 	}
 	if !referenced {
+		return "", stacktrace.Propagate(ente.ErrNotFound, "attachment not found")
+	}
+
+	exists, err := c.attachmentExists(ctx, userID, attachmentID)
+	if err != nil {
+		return "", err
+	}
+	if !exists {
+		if err := c.Repo.DeleteAttachmentRecords(ctx, userID, attachmentID); err != nil {
+			return "", stacktrace.Propagate(err, "failed to clear attachment records")
+		}
 		return "", stacktrace.Propagate(ente.ErrNotFound, "attachment not found")
 	}
 
@@ -336,24 +369,6 @@ func (c *AttachmentController) CleanupDeletedAttachments(ctx context.Context, li
 
 func buildAttachmentObjectKey(userID int64, attachmentID string) string {
 	return fmt.Sprintf("%s/%d/%s", llmChatAttachmentPrefix, userID, attachmentID)
-}
-
-func normalizeMD5String(value string) (string, error) {
-	trimmed := strings.TrimSpace(value)
-	if trimmed == "" {
-		return "", stacktrace.Propagate(ente.ErrBadRequest, "content_md5 must not be empty")
-	}
-	decoded, err := base64.StdEncoding.DecodeString(trimmed)
-	if err != nil {
-		decoded, err = hex.DecodeString(trimmed)
-		if err != nil {
-			return "", stacktrace.Propagate(ente.ErrBadRequest, "content_md5 must be base64 or hex encoded")
-		}
-	}
-	if len(decoded) != md5.Size {
-		return "", stacktrace.Propagate(ente.ErrBadRequest, "content_md5 must be exactly 16 bytes")
-	}
-	return base64.StdEncoding.EncodeToString(decoded), nil
 }
 
 func isAttachmentNotFound(err error) bool {

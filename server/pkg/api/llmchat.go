@@ -263,7 +263,18 @@ func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.AttachmentController.GetUploadURL(c, attachmentID, req)
+	force := false
+	forceParam := c.Query("force")
+	if forceParam != "" {
+		parsed, err := strconv.ParseBool(forceParam)
+		if err != nil {
+			handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid force flag"))
+			return
+		}
+		force = parsed
+	}
+
+	resp, err := h.AttachmentController.GetUploadURL(c, attachmentID, req, force)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to get attachment upload URL"))
 		return

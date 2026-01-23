@@ -18,7 +18,7 @@ type AttachmentMeta struct {
 
 type GetAttachmentUploadURLRequest struct {
 	ContentLength int64  `json:"content_length" binding:"required"`
-	ContentMD5    string `json:"content_md5" binding:"required"`
+	ContentMD5    string `json:"content_md5"` // optional, not used for presigning
 }
 
 type AttachmentUploadURLResponse struct {
