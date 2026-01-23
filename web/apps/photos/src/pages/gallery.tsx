@@ -1909,6 +1909,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
                     {t("upload")}

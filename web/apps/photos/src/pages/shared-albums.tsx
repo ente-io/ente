@@ -1,8 +1,7 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Download01Icon } from "@hugeicons/core-free-icons";
+import { Download01Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -479,6 +478,8 @@ export default function PublicCollectionGallery() {
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
 
+    const hasSelection = selected.count > 0;
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -493,6 +494,7 @@ export default function PublicCollectionGallery() {
                                   onShowFeed: commentsEnabled
                                       ? showPublicFeed
                                       : undefined,
+                                  hasSelection,
                               }}
                           />
                       ),
@@ -506,6 +508,7 @@ export default function PublicCollectionGallery() {
             downloadEnabled,
             showPublicFeed,
             commentsEnabled,
+            hasSelection,
         ],
     );
 
@@ -563,6 +566,7 @@ export default function PublicCollectionGallery() {
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
+            message={t("upload_dropzone_hint_public_album")}
         >
             {layout === "trip" ? (
                 <TripLayout
@@ -701,16 +705,26 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlinedIcon />;
-
     return (
         <Box>
             {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
+                <IconButton {...{ onClick, disabled }}>
+                    <HugeiconsIcon
+                        icon={ImageAdd02Icon}
+                        size={22}
+                        strokeWidth={1.8}
+                    />
+                </IconButton>
             ) : (
                 <FocusVisibleButton
                     color="secondary"
-                    startIcon={icon}
+                    startIcon={
+                        <HugeiconsIcon
+                            icon={ImageAdd02Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
+                    }
                     sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
@@ -791,7 +805,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         </Typography>
         <Tooltip title={t("download")}>
             <IconButton onClick={downloadFilesHelper}>
-                <HugeiconsIcon icon={Download01Icon} size={22} />
+                <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
         </Tooltip>
     </Stack>
@@ -803,6 +817,7 @@ interface FileListHeaderProps {
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
     onShowFeed?: () => void;
+    hasSelection: boolean;
 }
 
 /**
@@ -822,6 +837,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     downloadEnabled,
     onAddSaveGroup,
     onShowFeed,
+    hasSelection,
 }) => {
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
@@ -859,7 +875,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                             </Box>
                         </IconButton>
                     )}
-                    {downloadEnabled && (
+                    {downloadEnabled && !hasSelection && (
                         <IconButton onClick={downloadAllFiles}>
                             <HugeiconsIcon
                                 icon={Download01Icon}
