@@ -2099,10 +2099,12 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Commentaires et réactions",
-  "cLDesc1": "Nous ajoutons les commentaires et réactions sur les photos partagées. Vous pouvez réagir ou commenter une photo en l'ouvrant et en utilisant les actions en bas de page. Tous les commentaires et réactions entrants seront visibles dans l’onglet Partagé.",
-  "cLTitle2": "Administrateur pour les albums",
-  "cLDesc2": "Vous pouvez maintenant assigner un autre utilisateur Ente en tant qu'administrateur de votre album. Avec cela, ils seront en mesure d'ajouter d'autres spectateurs et collaborateurs, de supprimer des photos des albums, et même de suggérer aux participants de supprimer leurs photos.",
+  "cLTitle1": "Changements de design",
+  "cLDesc1": "L'écran des paramètres et la page des résultats de recherche ont été redessinés. La barre de recherche a été déplacée en haut.",
+  "cLTitle2": "Améliorations",
+  "cLDesc2": "Pincer pour zoomer sur les vidéos. Chargement plus rapide de l'onglet de recherche. Les administrateurs et propriétaires d'albums peuvent supprimer les commentaires. Aperçu pour les formats non pris en charge. Recherche dans découverte, lieu, personnes et type de fichier. Tri personnalisé sur la page des personnes. Un meilleur flux de fusion de personnes. Voir toutes les personnes ignorées. Tri cohérent des contacts.",
+  "cLTitle3": "Corrections de bugs",
+  "cLDesc3": "Correction de la musique qui se mettait en pause à l'ouverture de l'app. Correction du glisser pour sélectionner sur les appareils Samsung S. Correction du problème de fréquence d'images sur la fiche d'informations. Correction des problèmes de galerie sur les tablettes et en mode paysage. Correction de la page non catégorisée qui ne se mettait pas à jour après les déplacements.",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

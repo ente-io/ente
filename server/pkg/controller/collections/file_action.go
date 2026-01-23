@@ -182,10 +182,15 @@ func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, actorUserID int64
 	collectionOwnerID := accessResp.Collection.Owner.ID
 	role := accessResp.Role
 
-	// Validate that all requested files exist in the target collection
-	if err := c.CollectionRepo.VerifyAllFileIDsExistsInCollection(ctx, req.CollectionID, req.FileIDs); err != nil {
+	// Validate requested files exist in the target collection and filter already-removed ones.
+	fileIDsToRemove, err := c.CollectionRepo.FilterActiveFileIDsInCollection(ctx, req.CollectionID, req.FileIDs)
+	if err != nil {
 		return stacktrace.Propagate(err, "file not found in collection")
 	}
+	if len(fileIDsToRemove) == 0 {
+		return nil
+	}
+	req.FileIDs = fileIDsToRemove
 
 	// Partition fileIDs by owner
 	ownerToFilesMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
@@ -256,19 +261,26 @@ func (c *CollectionController) SuggestDeleteInSharedCollection(ctx *gin.Context,
 	if accessResp.Role == nil || (*accessResp.Role != ente.OWNER && *accessResp.Role != ente.ADMIN) {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "role not allowed to suggest delete")
 	}
-	// Validate all fileIDs exist in the collection
-	if err := c.CollectionRepo.VerifyAllFileIDsExistsInCollection(ctx, req.CollectionID, req.FileIDs); err != nil {
+	// Validate fileIDs exist in the collection and filter already-removed ones.
+	fileIDsToRemove, err := c.CollectionRepo.FilterActiveFileIDsInCollection(ctx, req.CollectionID, req.FileIDs)
+	if err != nil {
 		return stacktrace.Propagate(err, "file not found in collection")
 	}
+	if len(fileIDsToRemove) == 0 {
+		return nil
+	}
 	// Ensure none of the files belong to actor
-	ownerMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
+	ownerMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, fileIDsToRemove)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get owner map")
 	}
 	if _, ok := ownerMap[actorUserID]; ok {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not suggest delete for actor-owned files")
 	}
-	if removeErr := c.RemoveFilesV3(ctx, actorUserID, ente.RemoveFilesV3Request(req)); removeErr != nil {
+	if removeErr := c.RemoveFilesV3(ctx, actorUserID, ente.RemoveFilesV3Request{
+		CollectionID: req.CollectionID,
+		FileIDs:      fileIDsToRemove,
+	}); removeErr != nil {
 		return stacktrace.Propagate(removeErr, "failed to remove files")
 	}
 

@@ -1833,5 +1833,11 @@
   "closeBy": "Kapat",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "cLTitle1": "Tasarım değişiklikleri",
+  "cLDesc1": "Ayarlar ekranı ve arama sonuçları sayfası yeniden tasarlandı. Arama çubuğu üste taşındı.",
+  "cLTitle2": "İyileştirmeler",
+  "cLDesc2": "Videoda yakınlaştırmak için sıkıştırın. Arama sekmesi daha hızlı yükleniyor. Yöneticiler ve albüm sahipleri yorumları silebilir. Desteklenmeyen formatlar için önizleme. Keşif, konum, kişiler ve dosya türü içinde arama. Kişiler sayfasında özel sıralama. Daha iyi bir kişi birleştirme akışı. Tüm yoksayılan kişileri görüntüle. Tutarlı kişi sıralaması.",
+  "cLTitle3": "Hata düzeltmeleri",
+  "cLDesc3": "Uygulama açılırken müziğin duraklaması düzeltildi. Samsung S cihazlarında kaydırarak seçme düzeltildi. Bilgi sayfasında kare hızı sorunu düzeltildi. Tabletlerde ve yatay modda galeri sorunları düzeltildi. Taşımalardan sonra güncellenmeyen kategorize edilmemiş sayfa düzeltildi."
 }

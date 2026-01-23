@@ -1,19 +1,10 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Download01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-
-import {
-    Box,
-    Button,
-    IconButton,
-    Link,
-    Stack,
-    styled,
-    Tooltip,
-} from "@mui/material";
+import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { FeedIcon } from "components/Collections/CollectionHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -25,11 +16,7 @@ import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import {
-    CenteredFill,
-    SpacedRow,
-    Stack100vhCenter,
-} from "ente-base/components/containers";
+import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     LoadingIndicator,
@@ -38,10 +25,6 @@ import {
 import type { ButtonishProps } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { NavbarBase } from "ente-base/components/Navbar";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "ente-base/components/OverflowMenu";
 import {
     SingleInputForm,
     type SingleInputFormProps,
@@ -83,6 +66,8 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
@@ -108,10 +93,9 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
-import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
-import { getSignUpOrInstallURL } from "utils/public-album";
+import { getEnteURL } from "utils/public-album";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -469,11 +453,13 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
-            await downloadAndSaveFiles(
-                selectedFiles,
-                t("files_count", { count: selectedFiles.length }),
-                onAddSaveGroup,
-            );
+            const singleFile =
+                selectedFiles.length === 1 ? selectedFiles[0] : undefined;
+            const title =
+                singleFile?.metadata.fileType === FileType.livePhoto
+                    ? fileFileName(singleFile)
+                    : t("files_count", { count: selectedFiles.length });
+            await downloadAndSaveFiles(selectedFiles, title, onAddSaveGroup);
             clearSelection();
         } catch (e) {
             log.error("failed to download selected files", e);
@@ -523,14 +509,14 @@ export default function PublicCollectionGallery() {
         ],
     );
 
-    const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
-        const props = { onAddPhotos };
-        return {
-            component: <FileListFooter {...props} />,
-            height: fileListFooterHeightForProps(props),
+    const fileListFooter = useMemo<FileListHeaderOrFooter>(
+        () => ({
+            component: <FileListFooter />,
+            height: fileListFooterHeight,
             extendToInlineEdges: true,
-        };
-    }, [onAddPhotos]);
+        }),
+        [],
+    );
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
@@ -616,24 +602,18 @@ export default function PublicCollectionGallery() {
                                             onClick={onAddPhotos}
                                         />
                                     )}
-                                    {!onAddPhotos ||
-                                    publicCollection?.publicURLs[0]
-                                        ?.enableJoin ? (
-                                        <PrimaryActionButton
-                                            enableJoin={
-                                                publicCollection?.publicURLs[0]
-                                                    ?.enableJoin
-                                            }
-                                            publicCollection={publicCollection}
-                                            accessToken={
-                                                credentials.current.accessToken
-                                            }
-                                            collectionKey={
-                                                collectionKey.current
-                                            }
-                                            credentials={credentials}
-                                        />
-                                    ) : null}
+                                    <PrimaryActionButton
+                                        enableJoin={
+                                            publicCollection?.publicURLs[0]
+                                                ?.enableJoin
+                                        }
+                                        publicCollection={publicCollection}
+                                        accessToken={
+                                            credentials.current.accessToken
+                                        }
+                                        collectionKey={collectionKey.current}
+                                        credentials={credentials}
+                                    />
                                 </Stack>
                             </SpacedRow>
                         )}
@@ -687,7 +667,6 @@ export default function PublicCollectionGallery() {
             {publicCollection && collectionKey.current && (
                 <PublicFeedSidebar
                     {...publicFeedVisibilityProps}
-                    albumName={publicCollection.name}
                     files={publicFiles}
                     credentials={credentials.current}
                     collectionKey={collectionKey.current}
@@ -712,6 +691,12 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
     ":hover": { color: theme.vars.palette.accent.main },
 }));
 
+const GreenButton = styled(Button)(() => ({
+    backgroundColor: "#08C225",
+    borderRadius: "16px",
+    "&:hover": { backgroundColor: "#07A820" },
+}));
+
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
@@ -726,30 +711,13 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
                     {t("add_photos")}
                 </FocusVisibleButton>
             )}
         </Box>
-    );
-};
-
-/**
- * A visually different variation of {@link AddPhotosButton}. It also does not
- * shrink on mobile sized screens.
- */
-const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = uploadManager.isUploadInProgress();
-
-    return (
-        <FocusVisibleButton
-            color="accent"
-            startIcon={<AddPhotoAlternateOutlinedIcon />}
-            {...{ onClick, disabled }}
-        >
-            {t("add_more_photos")}
-        </FocusVisibleButton>
     );
 };
 
@@ -783,16 +751,20 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 
     if (enableJoin) {
         return (
-            <Button color="accent" onClick={handleJoinAlbum}>
+            <GreenButton color="accent" onClick={handleJoinAlbum}>
                 {t("join_album")}
-            </Button>
+            </GreenButton>
         );
     }
 
+    const handleGetEnte = () => {
+        window.open(getEnteURL(isTouchscreen), "_blank", "noopener");
+    };
+
     return (
-        <Button color="accent" href={getSignUpOrInstallURL(isTouchscreen)}>
-            {isTouchscreen ? t("install") : t("sign_up")}
-        </Button>
+        <GreenButton color="accent" onClick={handleGetEnte}>
+            {t("get_ente")}
+        </GreenButton>
     );
 };
 
@@ -819,7 +791,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         </Typography>
         <Tooltip title={t("download")}>
             <IconButton onClick={downloadFilesHelper}>
-                <DownloadIcon />
+                <HugeiconsIcon icon={Download01Icon} size={22} />
             </IconButton>
         </Tooltip>
     </Stack>
@@ -888,14 +860,12 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                         </IconButton>
                     )}
                     {downloadEnabled && (
-                        <OverflowMenu ariaID="collection-options">
-                            <OverflowMenuOption
-                                startIcon={<FileDownloadOutlinedIcon />}
-                                onClick={downloadAllFiles}
-                            >
-                                {t("download_album")}
-                            </OverflowMenuOption>
-                        </OverflowMenu>
+                        <IconButton onClick={downloadAllFiles}>
+                            <HugeiconsIcon
+                                icon={Download01Icon}
+                                strokeWidth={1.6}
+                            />
+                        </IconButton>
                     )}
                 </Stack>
             </SpacedRow>
@@ -903,58 +873,17 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     );
 };
 
-interface FileListFooterProps {
-    onAddPhotos?: () => void;
-}
-
 /**
- * The dynamic (prop-dependent) height of {@link FileListFooter}.
+ * The fixed height (in px) of {@link FileListFooter}.
  */
-const fileListFooterHeightForProps = ({ onAddPhotos }: FileListFooterProps) =>
-    (onAddPhotos ? 104 : 0) + 75;
+const fileListFooterHeight = 24;
 
 /**
  * A footer shown after the listing of files.
  *
- * It scrolls along with the content. It has a dynamic height, dependent on the
- * props, calculated using {@link fileListFooterHeightForProps}.
+ * It scrolls along with the content. It has a fixed height,
+ * {@link fileListFooterHeight}.
  */
-
-const FileListFooter: React.FC<FileListFooterProps> = ({ onAddPhotos }) => (
-    <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
-        {onAddPhotos && (
-            <CenteredFill>
-                <AddMorePhotosButton onClick={onAddPhotos} />
-            </CenteredFill>
-        )}
-        {/* Make the entire area tappable, otherwise it is hard to
-            get at on mobile devices. */}
-        <Link
-            color="text.muted"
-            sx={{
-                mt: "48px",
-                mb: "6px",
-                textAlign: "center",
-                "&:hover": { color: "inherit" },
-            }}
-            target="_blank"
-            href="https://ente.io"
-        >
-            <Typography variant="small">
-                <Trans
-                    i18nKey="shared_using"
-                    components={{
-                        a: (
-                            <Typography
-                                variant="small"
-                                component="span"
-                                sx={{ color: "accent.main" }}
-                            />
-                        ),
-                    }}
-                    values={{ url: "ente.io" }}
-                />
-            </Typography>
-        </Link>
-    </Stack>
+const FileListFooter: React.FC = () => (
+    <Box sx={{ height: fileListFooterHeight }} />
 );

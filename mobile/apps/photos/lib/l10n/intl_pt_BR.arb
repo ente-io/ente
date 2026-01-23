@@ -1978,5 +1978,11 @@
   "streetFood": "Petiscos de rua",
   "riverCruises": "Vistas do cruzeiro fluvial",
   "playfulKids": "Crianças brincalhonas",
-  "coastalCliffs": "Penhascos à beira-mar"
+  "coastalCliffs": "Penhascos à beira-mar",
+  "cLTitle1": "Mudanças de design",
+  "cLDesc1": "A tela de configurações e a página de resultados de pesquisa foram redesenhadas. A barra de pesquisa foi movida para o topo.",
+  "cLTitle2": "Melhorias",
+  "cLDesc2": "Pinçar para ampliar em vídeos. Carregamento mais rápido da aba de pesquisa. Administradores e proprietários de álbuns podem excluir comentários. Pré-visualização para formatos não suportados. Pesquisa em descoberta, localização, pessoas e tipo de arquivo. Classificação personalizada na página de pessoas. Um melhor fluxo de mesclagem de pessoas. Ver todas as pessoas ignoradas. Classificação consistente de contatos.",
+  "cLTitle3": "Correções de bugs",
+  "cLDesc3": "Corrigido o problema de música pausando ao abrir o app. Corrigido o deslizar para selecionar em dispositivos Samsung S. Corrigido o problema de taxa de quadros na ficha de informações. Corrigidos problemas de galeria em tablets e em modo paisagem. Corrigida a página de não categorizados que não atualizava após movimentações."
 }

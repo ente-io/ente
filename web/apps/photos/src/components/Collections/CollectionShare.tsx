@@ -1831,6 +1831,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onUpdate={handlePublicURLUpdate}
                     />
                     <RowButtonDivider />
+                    <ManageJoinAlbum
+                        {...{ publicURL }}
+                        onUpdate={handlePublicURLUpdate}
+                    />
+                    <RowButtonDivider />
                     <ManageLinkPassword
                         {...{ publicURL }}
                         onUpdate={handlePublicURLUpdate}
@@ -2113,6 +2118,23 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
             label={t("allow_downloads")}
             checked={publicURL.enableDownload}
             onClick={handleFileDownloadSetting}
+        />
+    );
+};
+
+const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
+    publicURL,
+    onUpdate,
+}) => {
+    const handleJoinSetting = () => {
+        void onUpdate({ enableJoin: !publicURL.enableJoin });
+    };
+
+    return (
+        <RowSwitch
+            label={t("allow_joining_album")}
+            checked={publicURL.enableJoin}
+            onClick={handleJoinSetting}
         />
     );
 };
