@@ -1,7 +1,9 @@
+#if canImport(EnteCore)
 import SwiftUI
 
 struct ModelSettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    let embeddedInNavigation: Bool
 
     @ObservedObject private var settings = ModelSettingsStore.shared
     @State private var modelUrl: String = ""
@@ -42,21 +44,42 @@ struct ModelSettingsView: View {
         )
     ]
 
+    init(embeddedInNavigation: Bool = false) {
+        self.embeddedInNavigation = embeddedInNavigation
+    }
+
     var body: some View {
         Group {
-            #if os(iOS)
-            NavigationStack {
+            if embeddedInNavigation {
                 content
-                    .navigationTitle("Model Settings")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            Button("Done") { dismiss() }
+                        ToolbarItem(placement: .principal) {
+                            Text("Model Settings")
+                                .font(EnsuTypography.large)
+                                .foregroundStyle(EnsuColor.textPrimary)
                         }
                     }
+            } else {
+                #if os(iOS)
+                NavigationStack {
+                    content
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .principal) {
+                                Text("Model Settings")
+                                    .font(EnsuTypography.large)
+                                    .foregroundStyle(EnsuColor.textPrimary)
+                            }
+                            ToolbarItem(placement: .primaryAction) {
+                                Button("Done") { dismiss() }
+                            }
+                        }
+                }
+                #else
+                content
+                #endif
             }
-            #else
-            content
-            #endif
         }
         .onAppear {
             modelUrl = settings.modelUrl
@@ -67,24 +90,28 @@ struct ModelSettingsView: View {
         }
         #if os(macOS)
         .safeAreaInset(edge: .top) {
-            MacSheetHeader(
-                leading: {
-                    EmptyView()
-                },
-                center: {
-                    Text("Model Settings")
-                        .font(EnsuTypography.large)
-                        .foregroundStyle(EnsuColor.textPrimary)
-                },
-                trailing: {
-                    Button("Done") {
-                        dismiss()
+            if embeddedInNavigation {
+                EmptyView()
+            } else {
+                MacSheetHeader(
+                    leading: {
+                        EmptyView()
+                    },
+                    center: {
+                        Text("Model Settings")
+                            .font(EnsuTypography.large)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                    },
+                    trailing: {
+                        Button("Done") {
+                            dismiss()
+                        }
+                        .font(EnsuTypography.small)
+                        .foregroundStyle(EnsuColor.textMuted)
+                        .buttonStyle(.plain)
                     }
-                    .font(EnsuTypography.small)
-                    .foregroundStyle(EnsuColor.textMuted)
-                    .buttonStyle(.plain)
-                }
-            )
+                )
+            }
         }
         #endif
     }
@@ -356,3 +383,13 @@ private struct SuggestedModel: Identifiable {
         self.mmproj = mmproj
     }
 }
+
+#else
+import SwiftUI
+
+struct ModelSettingsView: View {
+    var body: some View {
+        Text("Model settings unavailable")
+    }
+}
+#endif

@@ -20,8 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cloud
+
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -55,9 +54,7 @@ fun SessionDrawer(
     onDeleteSession: (ChatSession) -> Unit,
     onSync: () -> Unit,
     onOpenSettings: () -> Unit,
-    onDeveloperTap: () -> Unit,
-    onSignIn: () -> Unit,
-    onSignOut: () -> Unit
+    onDeveloperTap: () -> Unit
 ) {
     ModalDrawerSheet(
         drawerContainerColor = EnsuColor.backgroundBase(),
@@ -70,9 +67,9 @@ fun SessionDrawer(
         ) {
             DrawerHeader(
                 isLoggedIn = isLoggedIn,
-                userEmail = userEmail,
-                onOpenSettings = onOpenSettings,
-                onDeveloperTap = onDeveloperTap
+                onDeveloperTap = onDeveloperTap,
+                onNewChat = onNewChat,
+                onSync = onSync
             )
 
             HorizontalDivider(color = EnsuColor.border())
@@ -84,11 +81,6 @@ fun SessionDrawer(
                     .padding(vertical = EnsuSpacing.lg.dp),
                 verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
             ) {
-                DrawerNewChat(
-                    onNewChat = onNewChat,
-                    onSync = onSync,
-                    isLoggedIn = isLoggedIn
-                )
                 SessionGroups(
                     sessions = sessions,
                     selectedSessionId = selectedSessionId,
@@ -101,8 +93,8 @@ fun SessionDrawer(
 
             DrawerFooter(
                 isLoggedIn = isLoggedIn,
-                onSignIn = onSignIn,
-                onSignOut = onSignOut
+                userEmail = userEmail,
+                onOpenSettings = onOpenSettings
             )
         }
     }
@@ -111,9 +103,9 @@ fun SessionDrawer(
 @Composable
 private fun DrawerHeader(
     isLoggedIn: Boolean,
-    userEmail: String?,
-    onOpenSettings: () -> Unit,
-    onDeveloperTap: () -> Unit
+    onDeveloperTap: () -> Unit,
+    onNewChat: () -> Unit,
+    onSync: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -122,48 +114,18 @@ private fun DrawerHeader(
             .padding(EnsuSpacing.lg.dp),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
         ) {
-            Box(
-                modifier = Modifier
-                    .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
-            ) {
-                EnsuLogo(height = 28.dp)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            DrawerIconButton(
-                iconRes = HugeIcons.Settings01Icon,
-                contentDescription = "Settings",
-                onClick = onOpenSettings
-            )
+            EnsuLogo(height = 28.dp)
         }
 
-        if (isLoggedIn && !userEmail.isNullOrBlank()) {
-            CloudBadge(email = userEmail)
-        }
-    }
-}
-
-@Composable
-private fun DrawerIconButton(
-    iconRes: Int,
-    contentDescription: String,
-    onClick: () -> Unit,
-    isEnabled: Boolean = true
-) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clickable(enabled = isEnabled, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = contentDescription,
-            modifier = Modifier.size(18.dp),
-            tint = if (isEnabled) EnsuColor.textPrimary() else EnsuColor.textMuted()
+        DrawerNewChat(
+            modifier = Modifier.fillMaxWidth(),
+            onNewChat = onNewChat,
+            onSync = onSync,
+            isLoggedIn = isLoggedIn
         )
     }
 }
@@ -198,41 +160,16 @@ private fun DrawerPrimaryTile(
     }
 }
 
-@Composable
-private fun CloudBadge(email: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
-            .background(EnsuColor.fillFaint())
-            .padding(horizontal = EnsuSpacing.md.dp, vertical = EnsuSpacing.sm.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.Cloud,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = EnsuColor.textMuted()
-        )
-        Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
-        Text(
-            text = email,
-            style = EnsuTypography.small,
-            color = EnsuColor.textMuted(),
-            maxLines = 1
-        )
-    }
-}
 
 @Composable
 private fun DrawerNewChat(
+    modifier: Modifier = Modifier,
     onNewChat: () -> Unit,
     onSync: () -> Unit,
     isLoggedIn: Boolean
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = EnsuSpacing.lg.dp),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
     ) {
         DrawerPrimaryTile(
@@ -354,18 +291,53 @@ private fun SessionTile(
 @Composable
 private fun DrawerFooter(
     isLoggedIn: Boolean,
-    onSignIn: () -> Unit,
-    onSignOut: () -> Unit
+    userEmail: String?,
+    onOpenSettings: () -> Unit
 ) {
-    val label = if (isLoggedIn) "Sign Out" else "Sign In to Backup"
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = if (isLoggedIn) onSignOut else onSignIn)
-            .padding(EnsuSpacing.lg.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = label, style = EnsuTypography.body, color = EnsuColor.textPrimary())
+    if (isLoggedIn) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenSettings)
+                .padding(EnsuSpacing.lg.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
+        ) {
+            Text(
+                text = userEmail.orEmpty(),
+                style = EnsuTypography.body,
+                color = EnsuColor.textPrimary(),
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                painter = painterResource(HugeIcons.ArrowRight01Icon),
+                contentDescription = "Settings",
+                modifier = Modifier.size(18.dp),
+                tint = EnsuColor.textMuted()
+            )
+        }
+    } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenSettings)
+                .padding(EnsuSpacing.lg.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
+        ) {
+            Text(
+                text = "Settings",
+                style = EnsuTypography.body,
+                color = EnsuColor.textPrimary(),
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                painter = painterResource(HugeIcons.ArrowRight01Icon),
+                contentDescription = "Settings",
+                modifier = Modifier.size(18.dp),
+                tint = EnsuColor.textMuted()
+            )
+        }
     }
 }
 

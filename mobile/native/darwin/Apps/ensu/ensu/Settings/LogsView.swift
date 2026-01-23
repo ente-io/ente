@@ -1,7 +1,9 @@
+#if canImport(EnteCore)
 import SwiftUI
 
 struct LogsView: View {
     @Environment(\.dismiss) private var dismiss
+    let embeddedInNavigation: Bool
 
     @State private var selectedFile: URL?
     @State private var logText: String = ""
@@ -12,23 +14,57 @@ struct LogsView: View {
 
     private let logger = EnsuLogging.shared.logger("LogsView")
 
+    init(embeddedInNavigation: Bool = false) {
+        self.embeddedInNavigation = embeddedInNavigation
+    }
+
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                content
-            }
-            .background(EnsuColor.backgroundBase)
-            .navigationTitle("Logs")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+        Group {
+            if embeddedInNavigation {
+                VStack(spacing: 0) {
+                    content
                 }
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button("Share") { shareTapped() }
-                        Button("Export") { exportTapped() }
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
+                .background(EnsuColor.backgroundBase)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Logs")
+                            .font(EnsuTypography.large)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            Button("Share") { shareTapped() }
+                            Button("Export") { exportTapped() }
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                    }
+                }
+            } else {
+                NavigationStack {
+                    VStack(spacing: 0) {
+                        content
+                    }
+                    .background(EnsuColor.backgroundBase)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("Logs")
+                                .font(EnsuTypography.large)
+                                .foregroundStyle(EnsuColor.textPrimary)
+                        }
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Close") { dismiss() }
+                        }
+                        ToolbarItem(placement: .primaryAction) {
+                            Menu {
+                                Button("Share") { shareTapped() }
+                                Button("Export") { exportTapped() }
+                            } label: {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                        }
                     }
                 }
             }
@@ -160,6 +196,16 @@ private final class MacShareSheet: NSObject {
               let contentView = keyWindow.contentView else { return }
         let picker = NSSharingServicePicker(items: items)
         picker.show(relativeTo: .zero, of: contentView, preferredEdge: .minY)
+    }
+}
+#endif
+
+#else
+import SwiftUI
+
+struct LogsView: View {
+    var body: some View {
+        Text("Logs unavailable")
     }
 }
 #endif

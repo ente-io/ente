@@ -1,16 +1,35 @@
 import Foundation
+#if canImport(EnteNetwork)
 import EnteNetwork
+#else
+struct NetworkConfiguration {
+    let apiEndpoint: URL
+
+    static var `default`: NetworkConfiguration {
+        NetworkConfiguration(apiEndpoint: URL(string: "https://api.ente.io")!)
+    }
+
+    static func selfHosted(baseURL: URL) -> NetworkConfiguration {
+        NetworkConfiguration(apiEndpoint: baseURL)
+    }
+}
+#endif
 
 enum EnsuDeveloperSettings {
     private static let endpointKey = "ensu.customEndpoint"
-    private static let fixedEndpoint = URL(string: "https://1227635d8108.ngrok-free.app")
+    private static let infoPlistKey = "ENTE_API_ENDPOINT"
 
     static var currentEndpoint: URL? {
-        guard let stored = UserDefaults.standard.string(forKey: endpointKey),
-              let url = URL(string: stored) else {
-            return fixedEndpoint
+        if let stored = UserDefaults.standard.string(forKey: endpointKey),
+           let url = URL(string: stored) {
+            return url
         }
-        return url
+        if let plistValue = Bundle.main.object(forInfoDictionaryKey: infoPlistKey) as? String,
+           !plistValue.isEmpty,
+           let url = URL(string: plistValue) {
+            return url
+        }
+        return nil
     }
 
     static var currentEndpointString: String {

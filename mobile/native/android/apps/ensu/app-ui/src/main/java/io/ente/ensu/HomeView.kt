@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +24,7 @@ import android.content.Intent
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -31,6 +33,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
@@ -226,6 +229,12 @@ fun HomeView(
         isShowingAuth = false
     }
 
+    BackHandler(enabled = !isChatRoute) {
+        if (!navController.popBackStack()) {
+            navController.navigate(HomeRoute.Chat) { launchSingleTop = true }
+        }
+    }
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -244,11 +253,8 @@ fun HomeView(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    androidx.compose.runtime.LaunchedEffect(currentRoute) {
-        if (!isChatRoute) {
-            drawerState.close()
-        }
-    }
+    // Note: Drawer close is handled in navigation callbacks (onOpenSettings, onAccount, etc.)
+    // to avoid race conditions with route changes during navigation transitions.
 
     val scaffoldContent: @Composable () -> Unit = {
         Scaffold(
@@ -311,6 +317,7 @@ fun HomeView(
                     ) {
                         ChatView(
                             chatState = appState.chat,
+                            isDrawerOpen = drawerState.currentValue == DrawerValue.Open,
                             onMessageChange = store::updateMessageText,
                             onSend = store::sendMessage,
                             onStop = store::stopGeneration,
@@ -348,8 +355,12 @@ fun HomeView(
                         val currentEndpoint by currentEndpointFlow.collectAsState(initial = "https://api.ente.io")
                         SettingsScreen(
                             currentEndpoint = currentEndpoint,
-                            onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
-                            onOpenLogs = { navController.navigate(HomeRoute.Logs) }
+                            isLoggedIn = appState.auth.isLoggedIn,
+                            userEmail = appState.auth.email,
+                            onOpenLogs = { navController.navigate(HomeRoute.Logs) },
+                            onSignOut = { isShowingSignOutDialog = true },
+                            onSignIn = { isShowingAuth = true },
+                            onDeleteAccount = { openDeleteAccountEmail(context) }
                         )
                     }
                     composable(
@@ -386,6 +397,7 @@ fun HomeView(
                         DeveloperSettingsScreen(
                             authService = authService,
                             currentEndpointFlow = currentEndpointFlow,
+                            onOpenModelSettings = { navController.navigate(HomeRoute.ModelSettings) },
                             onSaved = { navController.popBackStack() }
                         )
                     }
@@ -398,57 +410,68 @@ fun HomeView(
         drawerState = drawerState,
         gesturesEnabled = isChatRoute,
         drawerContent = {
-            if (isChatRoute) {
-                SessionDrawer(
-                    sessions = appState.chat.sessions,
-                    selectedSessionId = appState.chat.currentSessionId,
-                    isLoggedIn = appState.auth.isLoggedIn,
-                    userEmail = appState.auth.email,
-                    onNewChat = {
-                        // We're already on the chat route when the drawer is visible.
-                        // Avoid re-navigating to the same destination, which causes an unnecessary transition.
-                        store.startNewSessionDraft()
-                        store.persistSelectedSession(scope, null)
-                        scope.launch { drawerState.close() }
-                    },
-                    onSelectSession = { session ->
-                        // Same reason as above: just swap the session in-place.
-                        store.selectSession(session.id)
-                        store.persistSelectedSession(scope, session.id)
-                        scope.launch { drawerState.close() }
-                    },
-                    onDeleteSession = { session ->
-                        deleteSessionTarget = session
-                    },
-                    onSync = {
-                        store.syncNow(
-                            onSuccess = {
-                                Toast.makeText(context, "Sync complete", Toast.LENGTH_SHORT).show()
-                            },
-                            onError = { message ->
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                            }
-                        )
-                    },
-                    onOpenSettings = {
-                        navController.navigate(HomeRoute.Settings)
-                        scope.launch { drawerState.close() }
-                    },
-                    onDeveloperTap = {
-                        handleDeveloperTap()
-                    },
-                    onSignIn = { isShowingAuth = true },
-                    onSignOut = { isShowingSignOutDialog = true }
-                )
-            } else {
-                Box(modifier = Modifier.width(1.dp))
-            }
+            // Always render SessionDrawer - don't conditionally swap content based on route.
+            // Changing drawer content while navigating can cause race conditions with the
+            // navigation back stack. The drawer is already hidden via gesturesEnabled.
+            SessionDrawer(
+                sessions = appState.chat.sessions,
+                selectedSessionId = appState.chat.currentSessionId,
+                isLoggedIn = appState.auth.isLoggedIn,
+                userEmail = appState.auth.email,
+                onNewChat = {
+                    // We're already on the chat route when the drawer is visible.
+                    // Avoid re-navigating to the same destination, which causes an unnecessary transition.
+                    store.startNewSessionDraft()
+                    store.persistSelectedSession(scope, null)
+                    scope.launch { drawerState.close() }
+                },
+                onSelectSession = { session ->
+                    // Same reason as above: just swap the session in-place.
+                    store.selectSession(session.id)
+                    store.persistSelectedSession(scope, session.id)
+                    scope.launch { drawerState.close() }
+                },
+                onDeleteSession = { session ->
+                    deleteSessionTarget = session
+                },
+                onSync = {
+                    store.syncNow(
+                        onSuccess = {
+                            Toast.makeText(context, "Sync complete", Toast.LENGTH_SHORT).show()
+                        },
+                        onError = { message ->
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                },
+                onOpenSettings = {
+                    navController.navigate(HomeRoute.Settings) {
+                        launchSingleTop = true
+                        restoreState = true
+                        popUpTo(HomeRoute.Chat) { inclusive = false }
+                    }
+                    scope.launch { drawerState.close() }
+                },
+                onDeveloperTap = {
+                    handleDeveloperTap()
+                }
+            )
         }
     ) {
         scaffoldContent()
     }
 
-    if (isShowingAuth) {
+    AnimatedVisibility(
+        visible = isShowingAuth,
+        enter = slideInHorizontally(
+            initialOffsetX = { fullWidth -> fullWidth },
+            animationSpec = tween(220)
+        ) + fadeIn(animationSpec = tween(90)),
+        exit = slideOutHorizontally(
+            targetOffsetX = { fullWidth -> fullWidth },
+            animationSpec = tween(220)
+        ) + fadeOut(animationSpec = tween(90))
+    ) {
         AuthFlowScreen(
             authService = authService,
             onLoggedIn = { email ->
@@ -547,7 +570,11 @@ fun HomeView(
                 TextButton(
                     onClick = {
                         showDeveloperDialog = false
-                        navController.navigate(HomeRoute.DeveloperSettings)
+                        navController.navigate(HomeRoute.DeveloperSettings) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(HomeRoute.Chat) { inclusive = false }
+                        }
                         scope.launch { drawerState.close() }
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
@@ -819,7 +846,8 @@ private fun LogsTopBar(onBack: () -> Unit, onShare: () -> Unit) {
             IconButton(onClick = onShare) {
                 Icon(
                     painter = painterResource(HugeIcons.Upload01Icon),
-                    contentDescription = "Share"
+                    contentDescription = "Share",
+                    modifier = Modifier.size(18.dp)
                 )
             }
         },
@@ -931,6 +959,18 @@ private fun openAttachment(context: Context, attachment: Attachment) {
         context.startActivity(chooser)
     } else {
         Toast.makeText(context, "No app available to open this file", Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun openDeleteAccountEmail(context: Context) {
+    val subject = Uri.encode("Request Deletion for Ente Account")
+    val uri = Uri.parse("mailto:support@ente.io?subject=$subject")
+    val intent = Intent(Intent.ACTION_SENDTO, uri)
+    val resolved = intent.resolveActivity(context.packageManager)
+    if (resolved != null) {
+        context.startActivity(intent)
+    } else {
+        Toast.makeText(context, "No email app available", Toast.LENGTH_SHORT).show()
     }
 }
 

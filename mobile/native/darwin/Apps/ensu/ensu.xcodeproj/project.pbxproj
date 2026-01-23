@@ -13,6 +13,7 @@
 		DAB0F20D2F5E123400ABCD01 /* InferenceRS in Frameworks */ = {isa = PBXBuildFile; productRef = DAB0F20C2F5E123400ABCD01 /* InferenceRS */; };
 		DAB0F20E2F5E123400ABCD01 /* InferenceRS in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DAB0F20C2F5E123400ABCD01 /* InferenceRS */; };
 		DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
+		DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
 /* End PBXBuildFile section */
 
 
@@ -62,6 +63,7 @@
 			files = (
 				DACC3DC92E618D6A00DAF993 /* EnteNetwork in Frameworks */,
 				DAB0F20D2F5E123400ABCD01 /* InferenceRS in Frameworks */,
+				DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			files = (
 				21BBA57867859DAD206D6A46 /* EnteNetwork in Frameworks (macOS) */,
 				DAB0F20E2F5E123400ABCD01 /* InferenceRS in Frameworks (macOS) */,
+				DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks (macOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +142,7 @@
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
 				DAB0F20C2F5E123400ABCD01 /* InferenceRS */,
+				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 			);
 			productName = ensu;
 			productReference = DA72BC612E5F87A000D128FF /* ensu.app */;
@@ -164,6 +168,7 @@
 			packageProductDependencies = (
 				DACC3DC82E618D6A00DAF993 /* EnteNetwork */,
 				DAB0F20C2F5E123400ABCD01 /* InferenceRS */,
+				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 			);
 			productName = Ensu;
 			productReference = 77E1DDDF900AB047CB554122 /* Ensu.app */;
@@ -492,7 +497,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -507,7 +512,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -552,7 +557,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -567,7 +572,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -612,7 +617,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -625,8 +630,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.mac;
+				MARKETING_VERSION = 0.1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = Ensu;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -672,7 +677,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -685,8 +690,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu.mac;
+				MARKETING_VERSION = 0.1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.ensu;
 				PRODUCT_NAME = Ensu;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -733,7 +738,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SN6GQPQWGV;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tv.castTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -752,7 +757,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SN6GQPQWGV;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tvTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -770,7 +775,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SN6GQPQWGV;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tv.castUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -787,7 +792,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SN6GQPQWGV;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.photos.tvUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

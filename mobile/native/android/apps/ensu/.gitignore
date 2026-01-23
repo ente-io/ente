@@ -4,5 +4,9 @@
 # Build outputs
 **/build/
 
+# Signing keys
+*.keystore
+key.properties
+
 # OS
 .DS_Store

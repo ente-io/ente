@@ -14,6 +14,19 @@ Run commands from `android/apps/ensu`.
 - `./gradlew test`: Run unit tests for modules that include tests.
 - `./gradlew lint`: Run Android lint checks (if configured).
 
+### Custom API Endpoint
+Override the default API (`https://api.ente.io`) with `ENTE_API_ENDPOINT`:
+
+```bash
+ENTE_API_ENDPOINT=https://your-endpoint ./gradlew :app-ui:installDebug
+```
+
+Or via Gradle property:
+
+```bash
+./gradlew :app-ui:installDebug -PENTE_API_ENDPOINT=https://your-endpoint
+```
+
 ## Coding Style & Naming Conventions
 - Kotlin: 4-space indentation, `camelCase` for functions/variables, `PascalCase` for classes/types.
 - Keep file/module names aligned with feature or domain (e.g., `app-ui`, `crypto-auth-core`).

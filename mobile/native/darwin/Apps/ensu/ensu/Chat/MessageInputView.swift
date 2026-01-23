@@ -11,7 +11,8 @@ struct MessageInputView: View {
     let editingMessage: ChatMessage?
     let isProcessingAttachments: Bool
     let isAttachmentDownloadBlocked: Bool
-    let autoFocus: Bool
+    let focusRequestId: Int
+    let dismissKeyboardId: Int
     let onSend: () -> Void
     let onStop: () -> Void
     let onCancelEdit: () -> Void
@@ -197,6 +198,24 @@ struct MessageInputView: View {
         }
         .padding(.top, EnsuSpacing.sm)
         .background(EnsuColor.backgroundBase)
+        .onAppear {
+            if focusRequestId > 0 {
+                requestFocus()
+            }
+        }
+        .onChange(of: focusRequestId) { _ in
+            requestFocus()
+        }
+        .onChange(of: dismissKeyboardId) { _ in
+            isFocused = false
+            hideKeyboard()
+        }
+    }
+
+    private func requestFocus() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            isFocused = true
+        }
     }
 
     private var attachmentIconSize: CGFloat {

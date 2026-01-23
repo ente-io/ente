@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(ZIPFoundation)
+import ZIPFoundation
+#endif
 
 enum EnsuLogLevel: String {
     case info = "INFO"
@@ -140,10 +143,12 @@ final class EnsuLogging {
             try? FileManager.default.removeItem(at: dest)
         }
 
+        #if canImport(ZIPFoundation)
         if #available(iOS 16.0, macOS 13.0, *) {
             try FileManager.default.zipItem(at: logsDirectory, to: dest, shouldKeepParent: true)
             return dest
         }
+        #endif
 
         // Fallback: concatenate logs into a single text file.
         let fallback = dest.deletingPathExtension().appendingPathExtension("txt")

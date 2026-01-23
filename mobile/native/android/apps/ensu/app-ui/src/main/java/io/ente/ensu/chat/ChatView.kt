@@ -1,10 +1,6 @@
-@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
-
 package io.ente.ensu.chat
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -30,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,7 +44,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -68,15 +63,19 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Surface
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import kotlin.math.roundToInt
 import io.ente.ensu.components.BranchSwitcher
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
@@ -97,6 +96,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun ChatView(
     chatState: ChatState,
+    isDrawerOpen: Boolean,
     onMessageChange: (String) -> Unit,
     onSend: () -> Unit,
     onStop: () -> Unit,
@@ -115,16 +115,38 @@ fun ChatView(
         chatState.messages.isEmpty() &&
         !chatState.isGenerating
 
+    val focusManager = LocalFocusManager.current
     var didAutoFocusInput by remember { mutableStateOf(false) }
+    var focusRequestId by remember { mutableStateOf(0) }
+    var wasDrawerOpen by remember { mutableStateOf(false) }
+
     val shouldAutoFocusInput = chatState.isModelDownloaded &&
         !showDownloadOnboarding &&
         !chatState.isDownloading &&
         !chatState.isGenerating &&
-        !didAutoFocusInput
+        !didAutoFocusInput &&
+        !isDrawerOpen
 
     LaunchedEffect(shouldAutoFocusInput) {
         if (shouldAutoFocusInput) {
+            focusRequestId += 1
             didAutoFocusInput = true
+        }
+    }
+
+    LaunchedEffect(isDrawerOpen) {
+        if (isDrawerOpen) {
+            focusManager.clearFocus()
+            wasDrawerOpen = true
+        } else if (wasDrawerOpen) {
+            val shouldRestoreFocus = chatState.isModelDownloaded &&
+                !showDownloadOnboarding &&
+                !chatState.isDownloading &&
+                !chatState.isGenerating
+            if (shouldRestoreFocus) {
+                focusRequestId += 1
+            }
+            wasDrawerOpen = false
         }
     }
 
@@ -190,7 +212,7 @@ fun ChatView(
                     onAttachmentSelected = onAttachmentSelected,
                     onRemoveAttachment = onRemoveAttachment,
                     onCancelEdit = onCancelEdit,
-                    shouldRequestFocus = shouldAutoFocusInput
+                    focusRequestId = focusRequestId
                 )
             }
         }
@@ -245,7 +267,7 @@ private fun MessageList(
         } else {
             EmptyState(
                 modifier = modifier,
-                title = "Welcome to ensu",
+                title = "Welcome",
                 subtitle = "Type a message to start chatting"
             )
         }
@@ -395,7 +417,7 @@ private fun EmptyState(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = title,
-                style = EnsuTypography.large,
+                style = EnsuTypography.h2,
                 color = EnsuColor.textPrimary(),
                 textAlign = TextAlign.Center
             )
@@ -508,7 +530,6 @@ private fun UserMessageBubble(
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     val bubbleShape = RoundedCornerShape(18.dp)
     val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
-    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
 
     Column(
         modifier = Modifier
@@ -558,66 +579,21 @@ private fun UserMessageBubble(
                 )
             }
 
-            val menuOffset = with(LocalDensity.current) {
-                DpOffset(pressOffset.x.toDp(), pressOffset.y.toDp())
-            }
-
-            val menuSurface = if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color.White
-            val menuColors = MaterialTheme.colorScheme.copy(
-                surface = menuSurface,
-                surfaceVariant = menuSurface,
-                surfaceTint = Color.Transparent,
-                primary = EnsuColor.textPrimary(),
-                primaryContainer = menuSurface,
-                secondary = EnsuColor.textPrimary(),
-                secondaryContainer = menuSurface,
-                onSurface = EnsuColor.textPrimary(),
-                onSurfaceVariant = EnsuColor.textPrimary()
+            MessageActionsMenu(
+                showMenu = showMenu,
+                pressOffset = pressOffset,
+                onDismiss = { showMenu = false },
+                actions = listOf(
+                    MessageAction("Edit", HugeIcons.Edit01Icon) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onEdit()
+                    },
+                    MessageAction("Copy", HugeIcons.Copy01Icon) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        clipboard.setText(AnnotatedString(message.text))
+                    }
+                )
             )
-
-            MaterialTheme(colorScheme = menuColors) {
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    offset = menuOffset,
-                    modifier = Modifier
-                        .shadow(8.dp, RoundedCornerShape(12.dp))
-                        .border(1.dp, EnsuColor.border(), RoundedCornerShape(12.dp))
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(text = "Edit", style = EnsuTypography.body, color = EnsuColor.textPrimary()) },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(HugeIcons.Edit01Icon),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = EnsuColor.textPrimary()
-                            )
-                        },
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showMenu = false
-                            onEdit()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = "Copy", style = EnsuTypography.body, color = EnsuColor.textPrimary()) },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(HugeIcons.Copy01Icon),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = EnsuColor.textPrimary()
-                            )
-                        },
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showMenu = false
-                            clipboard.setText(AnnotatedString(message.text))
-                        }
-                    )
-                }
-            }
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -691,66 +667,21 @@ private fun AssistantMessageBubble(
                 }
             }
 
-            val menuOffset = with(LocalDensity.current) {
-                DpOffset(pressOffset.x.toDp(), pressOffset.y.toDp())
-            }
-
-            val menuSurface = if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color.White
-            val menuColors = MaterialTheme.colorScheme.copy(
-                surface = menuSurface,
-                surfaceVariant = menuSurface,
-                surfaceTint = Color.Transparent,
-                primary = EnsuColor.textPrimary(),
-                primaryContainer = menuSurface,
-                secondary = EnsuColor.textPrimary(),
-                secondaryContainer = menuSurface,
-                onSurface = EnsuColor.textPrimary(),
-                onSurfaceVariant = EnsuColor.textPrimary()
+            MessageActionsMenu(
+                showMenu = showMenu,
+                pressOffset = pressOffset,
+                onDismiss = { showMenu = false },
+                actions = listOf(
+                    MessageAction("Copy", HugeIcons.Copy01Icon) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        clipboard.setText(AnnotatedString(message.text))
+                    },
+                    MessageAction("Retry", HugeIcons.RepeatIcon) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onRetry()
+                    }
+                )
             )
-
-            MaterialTheme(colorScheme = menuColors) {
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    offset = menuOffset,
-                    modifier = Modifier
-                        .shadow(8.dp, RoundedCornerShape(12.dp))
-                        .border(1.dp, EnsuColor.border(), RoundedCornerShape(12.dp))
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(text = "Copy", style = EnsuTypography.body, color = EnsuColor.textPrimary()) },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(HugeIcons.Copy01Icon),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = EnsuColor.textPrimary()
-                            )
-                        },
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showMenu = false
-                            clipboard.setText(AnnotatedString(message.text))
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = "Retry", style = EnsuTypography.body, color = EnsuColor.textPrimary()) },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(HugeIcons.RepeatIcon),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = EnsuColor.textPrimary()
-                            )
-                        },
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            showMenu = false
-                            onRetry()
-                        }
-                    )
-                }
-            }
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -770,6 +701,68 @@ private fun AssistantMessageBubble(
                         onBranchChange(message.id, (current + 1).coerceAtMost(message.branchCount))
                     }
                 )
+            }
+        }
+    }
+}
+
+private data class MessageAction(
+    val label: String,
+    val iconRes: Int,
+    val onClick: () -> Unit
+)
+
+@Composable
+private fun MessageActionsMenu(
+    showMenu: Boolean,
+    pressOffset: Offset,
+    onDismiss: () -> Unit,
+    actions: List<MessageAction>
+) {
+    if (!showMenu) return
+    val menuSurface = if (isSystemInDarkTheme()) Color(0xFF1C1C1E) else Color.White
+    val offset = IntOffset(pressOffset.x.roundToInt(), pressOffset.y.roundToInt())
+
+    Popup(
+        alignment = Alignment.TopStart,
+        offset = offset,
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true)
+    ) {
+        Surface(
+            modifier = Modifier.wrapContentSize(),
+            color = menuSurface,
+            shadowElevation = 4.dp,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(IntrinsicSize.Min)
+                    .padding(vertical = EnsuSpacing.xs.dp)
+            ) {
+                actions.forEach { action ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = action.label,
+                                style = EnsuTypography.body,
+                                color = EnsuColor.textPrimary()
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(action.iconRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = EnsuColor.textPrimary()
+                            )
+                        },
+                        onClick = {
+                            onDismiss()
+                            action.onClick()
+                        }
+                    )
+                }
             }
         }
     }
@@ -1010,7 +1003,7 @@ private fun MessageInput(
     onAttachmentSelected: (AttachmentType) -> Unit,
     onRemoveAttachment: (Attachment) -> Unit,
     onCancelEdit: () -> Unit,
-    shouldRequestFocus: Boolean
+    focusRequestId: Int
 ) {
     val haptic = LocalHapticFeedback.current
     val placeholder = when {
@@ -1022,8 +1015,8 @@ private fun MessageInput(
     }
 
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(shouldRequestFocus) {
-        if (shouldRequestFocus) {
+    LaunchedEffect(focusRequestId) {
+        if (focusRequestId > 0) {
             // Give the screen a moment to settle so IME shows reliably.
             delay(120)
             focusRequester.requestFocus()
@@ -1165,7 +1158,7 @@ private fun MessageInput(
                         Box(
                             modifier = Modifier
                                 .size(22.dp)
-                                .background(EnsuColor.textPrimary(), CircleShape),
+                                .background(Color.White, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

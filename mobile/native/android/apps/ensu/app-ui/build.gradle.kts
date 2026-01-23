@@ -1,27 +1,55 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
+val apiEndpointOverride = (System.getenv("ENTE_API_ENDPOINT")
+    ?: project.findProperty("ENTE_API_ENDPOINT") as? String)
+    ?.trim()
+    .orEmpty()
+
+if (apiEndpointOverride.isNotBlank()) {
+    println("ENTE_API_ENDPOINT set for build: $apiEndpointOverride")
+} else {
+    println("ENTE_API_ENDPOINT not set; BuildConfig.API_ENDPOINT will be empty")
+}
+
+val keystorePropsFile = rootProject.file("key.properties")
+val keystoreProps = Properties()
+val hasReleaseKeystore = keystorePropsFile.exists()
+if (hasReleaseKeystore) {
+    keystorePropsFile.inputStream().use { keystoreProps.load(it) }
+}
+
 android {
     namespace = "io.ente.ensu"
-    compileSdk = 34
+    compileSdk = 35
 
     signingConfigs {
         create("release") {
-            storeFile = file("../debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            if (hasReleaseKeystore) {
+                storeFile = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+                keyAlias = keystoreProps["keyAlias"] as String
+                keyPassword = keystoreProps["keyPassword"] as String
+            } else {
+                storeFile = file("../debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
         }
     }
 
     defaultConfig {
         applicationId = "io.ente.ensu"
         minSdk = 23
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 6
+        versionName = "0.1.2"
+        buildConfigField("String", "API_ENDPOINT", "\"$apiEndpointOverride\"")
     }
 
     buildTypes {
@@ -32,6 +60,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {

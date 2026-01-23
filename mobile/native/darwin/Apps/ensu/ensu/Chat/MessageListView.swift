@@ -35,7 +35,7 @@ struct MessageListView: View {
                         if messages.isEmpty && !isGenerating {
                             VStack(spacing: EnsuSpacing.sm) {
                                 Text(emptyStateTitle)
-                                    .font(EnsuTypography.large)
+                                    .font(EnsuTypography.h2)
                                     .foregroundStyle(EnsuColor.textPrimary)
                                 if let emptyStateSubtitle {
                                     Text(emptyStateSubtitle)

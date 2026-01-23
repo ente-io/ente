@@ -1,4 +1,6 @@
+#if canImport(EnteCore)
 import SwiftUI
+import Foundation
 
 struct DeveloperSettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -9,14 +11,20 @@ struct DeveloperSettingsView: View {
     @State private var currentEndpoint: String = EnsuDeveloperSettings.currentEndpointString
     @State private var isSaving = false
     @State private var alert: DeveloperSettingsAlert?
+    @State private var showModelSettings = false
 
     var body: some View {
         Group {
             #if os(iOS)
             NavigationStack {
                 content
-                    .navigationTitle("Developer settings")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("Developer settings")
+                                .font(EnsuTypography.large)
+                                .foregroundStyle(EnsuColor.textPrimary)
+                        }
                         ToolbarItem(placement: .primaryAction) {
                             Button("Close") {
                                 dismiss()
@@ -37,6 +45,9 @@ struct DeveloperSettingsView: View {
             )
         }
         #if os(macOS)
+        .sheet(isPresented: $showModelSettings) {
+            ModelSettingsView(embeddedInNavigation: true)
+        }
         .safeAreaInset(edge: .top) {
             MacSheetHeader(
                 leading: {
@@ -62,6 +73,22 @@ struct DeveloperSettingsView: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.xxl) {
+            #if os(iOS)
+            NavigationLink {
+                ModelSettingsView(embeddedInNavigation: true)
+            } label: {
+                settingsRow(title: "Model settings", subtitle: "Model URL, mmproj, context length")
+            }
+            .buttonStyle(.plain)
+            #else
+            Button {
+                showModelSettings = true
+            } label: {
+                settingsRow(title: "Model settings", subtitle: "Model URL, mmproj, context length")
+            }
+            .buttonStyle(.plain)
+            #endif
+
             VStack(alignment: .leading, spacing: 6) {
                 Text("Server endpoint")
                     .font(EnsuTypography.small)
@@ -91,6 +118,30 @@ struct DeveloperSettingsView: View {
             Spacer()
         }
         .padding(EnsuSpacing.lg)
+    }
+
+    private func settingsRow(title: String, subtitle: String?) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(EnsuTypography.body)
+                    .foregroundStyle(EnsuColor.textPrimary)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(EnsuTypography.small)
+                        .foregroundStyle(EnsuColor.textMuted)
+                }
+            }
+            Spacer()
+            Image("ArrowRight01Icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .foregroundStyle(EnsuColor.textMuted)
+        }
+        .padding(EnsuSpacing.lg)
+        .background(EnsuColor.fillFaint)
+        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
     }
 
     private var isSavable: Bool {
@@ -147,3 +198,12 @@ private struct DeveloperSettingsAlert: Identifiable {
     let title: String
     let message: String
 }
+#else
+import SwiftUI
+
+struct DeveloperSettingsView: View {
+    var body: some View {
+        Text("Developer settings unavailable")
+    }
+}
+#endif

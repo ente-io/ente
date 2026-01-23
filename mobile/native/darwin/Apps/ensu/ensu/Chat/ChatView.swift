@@ -10,8 +10,6 @@ struct ChatView: View {
 
     @State private var isDrawerOpen = false
     @State private var showSettings = false
-    @State private var showModelSettings = false
-    @State private var showLogs = false
     @State private var toastMessage: ToastMessage?
     @StateObject private var keyboard = KeyboardObserver()
     @State private var deleteSession: ChatSession?
@@ -23,6 +21,9 @@ struct ChatView: View {
     @State private var showSignOutAlert = false
     @State private var showAttachmentDownloads = false
     @State private var didAutoFocusInput = false
+    @State private var focusRequestId = 0
+    @State private var dismissKeyboardId = 0
+    @State private var wasDrawerOpen = false
 
     private var editingMessage: ChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
@@ -68,6 +69,18 @@ struct ChatView: View {
                     isDrawerOpen = false
                 }
             }
+            .onChange(of: isDrawerOpen) { isOpen in
+                if isOpen {
+                    dismissKeyboardId += 1
+                    wasDrawerOpen = true
+                } else if wasDrawerOpen {
+                    let shouldRestoreFocus = viewModel.isModelDownloaded && !viewModel.isDownloading && !viewModel.isGenerating
+                    if shouldRestoreFocus {
+                        focusRequestId += 1
+                    }
+                    wasDrawerOpen = false
+                }
+            }
             .onChange(of: viewModel.syncErrorMessage) { message in
                 guard let message else { return }
                 showToast(message, duration: 2)
@@ -90,19 +103,19 @@ struct ChatView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(
-                onOpenModelSettings: {
-                    showModelSettings = true
+                isLoggedIn: appState.isLoggedIn,
+                email: CredentialStore.shared.email,
+                onSignOut: {
+                    showSettings = false
+                    showSignOutAlert = true
                 },
-                onOpenLogs: {
-                    showLogs = true
+                onSignIn: {
+                    showSettings = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        isShowingAuth = true
+                    }
                 }
             )
-        }
-        .sheet(isPresented: $showModelSettings) {
-            ModelSettingsView()
-        }
-        .sheet(isPresented: $showLogs) {
-            LogsView()
         }
         .sheet(isPresented: $showAttachmentDownloads) {
             AttachmentDownloadsSheet(
@@ -200,7 +213,7 @@ struct ChatView: View {
                             streamingParentId: viewModel.displayedStreamingParentId,
                             isGenerating: viewModel.isGenerating,
                             keyboardHeight: keyboard.height,
-                            emptyStateTitle: "Welcome to ensu",
+                            emptyStateTitle: "Welcome",
                             emptyStateSubtitle: "Start typing to begin a conversation",
                             onEdit: { message in
                                 viewModel.beginEditing(message: message)
@@ -219,7 +232,7 @@ struct ChatView: View {
                     }
 
                     if !showDownloadOnboarding {
-                        let shouldAutoFocus = viewModel.isModelDownloaded && !viewModel.isDownloading && !viewModel.isGenerating && !didAutoFocusInput
+                        let shouldAutoFocus = viewModel.isModelDownloaded && !viewModel.isDownloading && !viewModel.isGenerating && !didAutoFocusInput && !isDrawerOpen
 
                         MessageInputView(
                             text: $viewModel.draftText,
@@ -229,7 +242,8 @@ struct ChatView: View {
                             editingMessage: editingMessage,
                             isProcessingAttachments: viewModel.isProcessingAttachments,
                             isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
-                            autoFocus: shouldAutoFocus,
+                            focusRequestId: focusRequestId,
+                            dismissKeyboardId: dismissKeyboardId,
                             onSend: {
                                 viewModel.sendDraft()
                             },
@@ -251,6 +265,13 @@ struct ChatView: View {
                         )
                         .onAppear {
                             if shouldAutoFocus {
+                                focusRequestId += 1
+                                didAutoFocusInput = true
+                            }
+                        }
+                        .onChange(of: shouldAutoFocus) { newValue in
+                            if newValue {
+                                focusRequestId += 1
                                 didAutoFocusInput = true
                             }
                         }
@@ -305,13 +326,6 @@ struct ChatView: View {
             },
             onDeveloperTap: {
                 handleDeveloperTap()
-            },
-            onSignOut: {
-                showSignOutAlert = true
-            },
-            onSignIn: {
-                isDrawerOpen = false
-                isShowingAuth = true
             }
         )
         .frame(width: drawerWidth)

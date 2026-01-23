@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -35,24 +37,49 @@ import io.ente.ensu.designsystem.HugeIcons
 @Composable
 fun SettingsScreen(
     currentEndpoint: String,
-    onOpenModelSettings: () -> Unit,
-    onOpenLogs: () -> Unit
+    isLoggedIn: Boolean,
+    userEmail: String?,
+    onOpenLogs: () -> Unit,
+    onSignOut: () -> Unit,
+    onSignIn: () -> Unit,
+    onDeleteAccount: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
 
-    val allItems = remember(onOpenModelSettings, onOpenLogs) {
-        listOf(
-            SettingsItem(
-                title = "Model settings",
-                subtitle = "Model URL, mmproj, context length, max output",
-                onClick = onOpenModelSettings
-            ),
-            SettingsItem(
-                title = "Logs",
-                subtitle = "View, export, and share logs",
-                onClick = onOpenLogs
+    val allItems = remember(onOpenLogs, onSignOut, onSignIn, onDeleteAccount, isLoggedIn) {
+        buildList {
+            add(
+                SettingsItem(
+                    title = "Logs",
+                    subtitle = "View, export, and share logs",
+                    onClick = onOpenLogs
+                )
             )
-        )
+            if (isLoggedIn) {
+                add(
+                    SettingsItem(
+                        title = "Sign Out",
+                        subtitle = "Stop syncing this device",
+                        onClick = onSignOut
+                    )
+                )
+                add(
+                    SettingsItem(
+                        title = "Delete Account",
+                        subtitle = "Email support to delete your account",
+                        onClick = onDeleteAccount
+                    )
+                )
+            } else {
+                add(
+                    SettingsItem(
+                        title = "Sign In to Backup",
+                        subtitle = "Sync your chats across devices",
+                        onClick = onSignIn
+                    )
+                )
+            }
+        }
     }
 
     val filteredItems = remember(query, allItems) {
@@ -81,6 +108,28 @@ fun SettingsScreen(
         )
 
         Spacer(modifier = Modifier.size(EnsuSpacing.lg.dp))
+
+        if (isLoggedIn && !userEmail.isNullOrBlank()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(EnsuCornerRadius.card.dp))
+                    .background(EnsuColor.fillFaint())
+                    .padding(EnsuSpacing.lg.dp)
+            ) {
+                Text(
+                    text = "Signed in as",
+                    style = EnsuTypography.small,
+                    color = EnsuColor.textMuted()
+                )
+                Text(
+                    text = userEmail,
+                    style = EnsuTypography.body,
+                    color = EnsuColor.textPrimary()
+                )
+            }
+            Spacer(modifier = Modifier.size(EnsuSpacing.md.dp))
+        }
 
         val normalizedEndpoint = currentEndpoint.trim().trimEnd('/')
         val defaultEndpoint = "https://api.ente.io"

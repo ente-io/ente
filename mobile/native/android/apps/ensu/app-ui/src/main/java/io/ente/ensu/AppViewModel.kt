@@ -26,10 +26,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val endpointPreferences = EndpointPreferencesDataStore(application)
     private val credentialStore = CredentialStore(application)
 
-    private companion object {
-        const val fixedEndpoint = "https://1227635d8108.ngrok-free.app"
-    }
-
     val logRepository = FileLogRepository(application)
     private val llmProvider = InferenceRsProvider(
         modelDir = File(application.filesDir, "llm")
@@ -64,8 +60,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
         runBlocking {
             val endpoint = endpointPreferences.endpointFlow.first()
+            val buildEndpoint = BuildConfig.API_ENDPOINT.trim()
             if (endpoint.isNullOrBlank()) {
-                endpointPreferences.setEndpoint(fixedEndpoint)
+                val fallback = "https://api.ente.io"
+                val resolved = if (buildEndpoint.isNotBlank()) buildEndpoint else fallback
+                endpointPreferences.setEndpoint(resolved)
+            } else if (buildEndpoint.isNotBlank() && buildEndpoint != endpoint) {
+                logRepository.log(
+                    LogLevel.Info,
+                    "Build endpoint ignored",
+                    details = "stored=$endpoint build=$buildEndpoint",
+                    tag = "App"
+                )
             }
         }
 

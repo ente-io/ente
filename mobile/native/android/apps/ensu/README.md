@@ -63,6 +63,20 @@ Note: If upgrading from a differently signed build, uninstall first:
 adb uninstall io.ente.ensu
 ```
 
+## Custom API Endpoint
+
+Set `ENTE_API_ENDPOINT` to override the default (`https://api.ente.io`).
+
+```bash
+ENTE_API_ENDPOINT=https://your-endpoint ./gradlew :app-ui:installDebug
+```
+
+Or via Gradle property:
+
+```bash
+./gradlew :app-ui:installDebug -PENTE_API_ENDPOINT=https://your-endpoint
+```
+
 ## Project Structure
 
 - `app-ui/` - Main application module (Compose UI)
