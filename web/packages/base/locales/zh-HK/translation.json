@@ -124,6 +124,7 @@
     "upload_first_photo": "上載你的第一張照片",
     "import_your_folders": "匯入你的資料夾",
     "upload_dropzone_hint": "放開以上傳檔案",
+    "upload_dropzone_hint_public_album": "",
     "watch_folder_dropzone_hint": "",
     "trash_files_title": "刪除多個檔案？",
     "trash_file_title": "刪除檔案？",
