@@ -17,17 +17,13 @@ struct NetworkConfiguration {
 
 enum EnsuDeveloperSettings {
     private static let endpointKey = "ensu.customEndpoint"
-    private static let infoPlistKey = "ENTE_API_ENDPOINT"
 
     static var currentEndpoint: URL? {
-        if let stored = UserDefaults.standard.string(forKey: endpointKey),
-           let url = URL(string: stored) {
-            return url
+        if let buildEndpoint = endpointURL(from: BuildEndpointConfig.endpoint) {
+            return buildEndpoint
         }
-        if let plistValue = Bundle.main.object(forInfoDictionaryKey: infoPlistKey) as? String,
-           !plistValue.isEmpty,
-           let url = URL(string: plistValue) {
-            return url
+        if let storedEndpoint = endpointURL(from: UserDefaults.standard.string(forKey: endpointKey)) {
+            return storedEndpoint
         }
         return nil
     }
@@ -53,6 +49,12 @@ enum EnsuDeveloperSettings {
         } else {
             UserDefaults.standard.removeObject(forKey: endpointKey)
         }
+    }
+
+    private static func endpointURL(from value: String?) -> URL? {
+        guard let value, !value.isEmpty else { return nil }
+        let normalized = normalize(value)
+        return URL(string: normalized)
     }
 
     static func normalize(_ value: String) -> String {

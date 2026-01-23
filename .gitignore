@@ -20,4 +20,8 @@ node_modules/
 # Build artifacts
 mobile/native/android/packages/rust/build/
 mobile/native/darwin/Packages/Rust/build/
+mobile/native/darwin/Apps/ensu/build/
 target/
+
+# Local ensu endpoint overrides (compile-time)
+mobile/native/darwin/Apps/ensu/ensu/Generated/EndpointConfig.swift

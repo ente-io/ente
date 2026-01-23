@@ -54,6 +54,9 @@
         <string>Fonts/JetBrainsMono-Regular.ttf</string>
     </array>
 
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Allow access to select photos and images to attach to chat messages.</string>
+
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>
