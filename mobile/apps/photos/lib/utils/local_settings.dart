@@ -60,6 +60,7 @@ class LocalSettings {
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
+  static const _kAppLockEnabled = "ls.app_lock_enabled";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
   static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
@@ -134,6 +135,12 @@ class LocalSettings {
 
   Future<void> setPeopleSimilaritySortSelected(bool value) async {
     await _prefs.setBool(kPeopleSortSimilaritySelected, value);
+  }
+
+  bool get appLockEnabledCached => _prefs.getBool(_kAppLockEnabled) ?? false;
+
+  Future<void> setAppLockEnabledCached(bool value) async {
+    await _prefs.setBool(_kAppLockEnabled, value);
   }
 
   GroupType getGalleryGroupType() {
