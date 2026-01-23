@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import "package:flutter_timezone/flutter_timezone.dart";
 import "package:logging/logging.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/services/timezone_aliases.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:timezone/data/latest_10y.dart' as tzdb;
 import "package:timezone/timezone.dart" as tz;
@@ -15,18 +16,6 @@ class NotificationService {
       "notification_permission_granted";
   static const String keyShouldShowNotificationsForSharedPhotos =
       "notifications_enabled_shared_photos";
-  static const Map<String, String> _timeZoneAliases = {
-    "Asia/Calcutta": "Asia/Kolkata",
-    "US/Eastern": "America/New_York",
-    "US/Central": "America/Chicago",
-    "US/Mountain": "America/Denver",
-    "US/Pacific": "America/Los_Angeles",
-    "US/Arizona": "America/Phoenix",
-    "US/Alaska": "America/Anchorage",
-    "US/Hawaii": "Pacific/Honolulu",
-    "US/Samoa": "Pacific/Pago_Pago",
-    "US/East-Indiana": "America/Indiana/Indianapolis",
-  };
 
   NotificationService._privateConstructor();
 
@@ -91,7 +80,7 @@ class NotificationService {
       return timeZoneName;
     }
 
-    final alias = _timeZoneAliases[timeZoneName];
+    final alias = kTimeZoneAliases[timeZoneName];
     if (alias != null && tz.timeZoneDatabase.locations.containsKey(alias)) {
       _logger.warning(
         'Timezone "$timeZoneName" not found, using alias "$alias".',
