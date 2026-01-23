@@ -15,6 +15,7 @@ import {
     DialogTitle,
     Link,
     Stack,
+    styled,
     Typography,
     type DialogProps,
 } from "@mui/material";
@@ -1179,8 +1180,17 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                     sx: (theme) => ({
                         maxWidth: "375px",
                         p: 1,
+                        borderRadius: "28px",
+                        boxShadow: "none",
+                        border: "1px solid",
+                        borderColor: "stroke.faint",
                         [theme.breakpoints.down(360)]: { p: 0 },
                     }),
+                },
+            }}
+            sx={{
+                "& .MuiBackdrop-root": {
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
                 },
             }}
         >
@@ -1262,7 +1272,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                 <DialogCloseIconButton {...{ onClose }} />
             </SpacedRow>
             <Box sx={{ p: "12px", pt: "16px" }}>
-                <Stack sx={{ gap: 0.5 }}>
+                <RoundedButtonStack>
                     {intent != "import" && (
                         <RowButton
                             startIcon={<ImageOutlinedIcon />}
@@ -1297,7 +1307,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                             onClick={() => onSelect("zips")}
                         />
                     )}
-                </Stack>
+                </RoundedButtonStack>
                 <Typography
                     sx={{
                         color: "text.muted",
@@ -1326,7 +1336,7 @@ const TakeoutOptions: React.FC<
             <DialogCloseIconButton {...{ onClose }} />
         </SpacedRow>
         <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
-            <Stack sx={{ gap: "8px" }}>
+            <Stack sx={{ gap: "8px", "& button": { borderRadius: "16px" } }}>
                 <FocusVisibleButton
                     color="accent"
                     fullWidth
@@ -1357,3 +1367,12 @@ const TakeoutOptions: React.FC<
         </Stack>
     </>
 );
+
+const RoundedButtonStack = styled("div")`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    & > button {
+        border-radius: 16px;
+    }
+`;
