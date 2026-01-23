@@ -15,6 +15,18 @@ class NotificationService {
       "notification_permission_granted";
   static const String keyShouldShowNotificationsForSharedPhotos =
       "notifications_enabled_shared_photos";
+  static const Map<String, String> _timeZoneAliases = {
+    "Asia/Calcutta": "Asia/Kolkata",
+    "US/Eastern": "America/New_York",
+    "US/Central": "America/Chicago",
+    "US/Mountain": "America/Denver",
+    "US/Pacific": "America/Los_Angeles",
+    "US/Arizona": "America/Phoenix",
+    "US/Alaska": "America/Anchorage",
+    "US/Hawaii": "Pacific/Honolulu",
+    "US/Samoa": "Pacific/Pago_Pago",
+    "US/East-Indiana": "America/Indiana/Indianapolis",
+  };
 
   NotificationService._privateConstructor();
 
@@ -69,8 +81,52 @@ class NotificationService {
     if (timezoneInitialized) return;
     tzdb.initializeTimeZones();
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    final String resolvedTimeZone = _resolveTimeZoneName(currentTimeZone);
+    tz.setLocalLocation(tz.getLocation(resolvedTimeZone));
     timezoneInitialized = true;
+  }
+
+  String _resolveTimeZoneName(String timeZoneName) {
+    if (tz.timeZoneDatabase.locations.containsKey(timeZoneName)) {
+      return timeZoneName;
+    }
+
+    final alias = _timeZoneAliases[timeZoneName];
+    if (alias != null && tz.timeZoneDatabase.locations.containsKey(alias)) {
+      _logger.warning(
+        'Timezone "$timeZoneName" not found, using alias "$alias".',
+      );
+      return alias;
+    }
+
+    final normalized = timeZoneName.replaceAll(' ', '_');
+    if (normalized != timeZoneName &&
+        tz.timeZoneDatabase.locations.containsKey(normalized)) {
+      _logger.warning(
+        'Timezone "$timeZoneName" not found, using normalized "$normalized".',
+      );
+      return normalized;
+    }
+
+    final lower = timeZoneName.toLowerCase();
+    String? caseMatch;
+    for (final name in tz.timeZoneDatabase.locations.keys) {
+      if (name.toLowerCase() == lower) {
+        caseMatch = name;
+        break;
+      }
+    }
+    if (caseMatch != null) {
+      _logger.warning(
+        'Timezone "$timeZoneName" not found, using "$caseMatch".',
+      );
+      return caseMatch;
+    }
+
+    _logger.warning(
+      'Timezone "$timeZoneName" not found, falling back to UTC.',
+    );
+    return 'UTC';
   }
 
   Future<void> requestPermissions() async {
