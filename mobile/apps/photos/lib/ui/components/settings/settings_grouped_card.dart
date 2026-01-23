@@ -32,8 +32,9 @@ class SettingsGroupedCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.vertical(
                 top: i == 0 ? const Radius.circular(20) : Radius.zero,
-                bottom:
-                    i == childCount - 1 ? const Radius.circular(20) : Radius.zero,
+                bottom: i == childCount - 1
+                    ? const Radius.circular(20)
+                    : Radius.zero,
               ),
               child: children[i],
             ),

@@ -1831,6 +1831,11 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onUpdate={handlePublicURLUpdate}
                     />
                     <RowButtonDivider />
+                    <ManageJoinAlbum
+                        {...{ publicURL }}
+                        onUpdate={handlePublicURLUpdate}
+                    />
+                    <RowButtonDivider />
                     <ManageLinkPassword
                         {...{ publicURL }}
                         onUpdate={handlePublicURLUpdate}
@@ -1903,8 +1908,6 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     publicURL,
     onUpdate,
 }) => {
-    const { isCommentsEnabled } = useSettingsSnapshot();
-
     const handleCollectSetting = () => {
         void onUpdate({ enableCollect: !publicURL.enableCollect });
     };
@@ -1921,16 +1924,12 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                     checked={publicURL.enableCollect}
                     onClick={handleCollectSetting}
                 />
-                {isCommentsEnabled && (
-                    <>
-                        <RowButtonDivider />
-                        <RowSwitch
-                            label={t("enable_comments")}
-                            checked={publicURL.enableComment}
-                            onClick={handleCommentSetting}
-                        />
-                    </>
-                )}
+                <RowButtonDivider />
+                <RowSwitch
+                    label={t("enable_comments")}
+                    checked={publicURL.enableComment}
+                    onClick={handleCommentSetting}
+                />
             </RowButtonGroup>
         </Stack>
     );
@@ -2119,6 +2118,23 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
             label={t("allow_downloads")}
             checked={publicURL.enableDownload}
             onClick={handleFileDownloadSetting}
+        />
+    );
+};
+
+const ManageJoinAlbum: React.FC<ManagePublicLinkSettingProps> = ({
+    publicURL,
+    onUpdate,
+}) => {
+    const handleJoinSetting = () => {
+        void onUpdate({ enableJoin: !publicURL.enableJoin });
+    };
+
+    return (
+        <RowSwitch
+            label={t("allow_joining_album")}
+            checked={publicURL.enableJoin}
+            onClick={handleJoinSetting}
         />
     );
 };

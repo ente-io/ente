@@ -27,8 +27,12 @@ class HomeBottomNavigationBar extends StatefulWidget {
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
+  static const int _searchTabIndex = 3;
+  static const Duration _doubleTapWindow = Duration(milliseconds: 350);
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   int currentTabIndex = 0;
+  int? _lastTapIndex;
+  DateTime? _lastTapAt;
 
   @override
   void initState() {
@@ -77,6 +81,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   }
 
   void _onTabChange(int index, {String mode = 'tabChanged'}) {
+    if (mode == "OnPressed") {
+      _handleSearchTabDoubleTap(index);
+    }
     debugPrint("_TabChanged called via method $mode");
     Bus.instance.fire(
       TabChangedEvent(
@@ -84,6 +91,21 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
         TabChangedEventSource.tabBar,
       ),
     );
+  }
+
+  void _handleSearchTabDoubleTap(int index) {
+    final now = DateTime.now();
+    final isRepeatTap = _lastTapIndex == index &&
+        _lastTapAt != null &&
+        now.difference(_lastTapAt!) <= _doubleTapWindow;
+    _lastTapIndex = index;
+    _lastTapAt = now;
+    if (index != _searchTabIndex || !isRepeatTap) {
+      return;
+    }
+    if (currentTabIndex != _searchTabIndex) {
+      Bus.instance.fire(TabDoubleTapEvent(index));
+    }
   }
 
   @override

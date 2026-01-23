@@ -1891,5 +1891,11 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - "
+  "deletingDash": "Usuwanie - ",
+  "cLTitle1": "Zmiany w wyglądzie",
+  "cLDesc1": "Ekran ustawień i strona wyników wyszukiwania zostały przeprojektowane. Pasek wyszukiwania przesunął się na górę.",
+  "cLTitle2": "Ulepszenia",
+  "cLDesc2": "Ściąganie do powiększania wideo. Szybsze ładowanie karty wyszukiwania. Administratorzy i właściciele albumów mogą usuwać komentarze. Podgląd dla niewspieranych formatów. Wyszukiwanie w odkrywaniu, lokalizacji, osobach i typie pliku. Niestandardowe sortowanie na stronie osób. Lepszy przepływ łączenia osób. Zobacz wszystkie ignorowane osoby. Spójne sortowanie kontaktów.",
+  "cLTitle3": "Poprawki błędów",
+  "cLDesc3": "Naprawiono pauzowanie muzyki przy otwieraniu aplikacji. Naprawiono przeciągnięcie do wyboru na urządzeniach Samsung S. Naprawiono problem z liczbą klatek na arkuszu informacyjnym. Naprawiono problemy z galerią na tabletach i w trybie poziomym. Naprawiono stronę niekategoryzowanych, która nie aktualizowała się po przeniesieniu."
 }

@@ -330,15 +330,12 @@ class CollectionsService {
   List<Collection> getHiddenCollections({bool includeDefaultHidden = true}) {
     if (includeDefaultHidden) {
       return _collectionIDToCollections.values
-          .toList()
-          .where((element) => element.isHidden())
+          .where((c) => c.isHidden())
           .toList();
     } else {
       return _collectionIDToCollections.values
-          .toList()
           .where(
-            (element) => (element.isHidden() &&
-                element.id != cachedDefaultHiddenCollection?.id),
+            (c) => c.isHidden() && c.id != cachedDefaultHiddenCollection?.id,
           )
           .toList();
     }
@@ -346,21 +343,14 @@ class CollectionsService {
 
   Set<int> getHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.isHidden())
+        .where((c) => c.isHidden())
         .map((e) => e.id)
         .toSet();
   }
 
   Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) =>
-              element.hasShareeArchived() ||
-              element.isHidden() ||
-              element.isArchived(),
-        )
+        .where((c) => c.isArchived() || c.isHidden())
         .map((e) => e.id)
         .toSet();
   }

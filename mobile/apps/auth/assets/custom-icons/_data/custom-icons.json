@@ -288,6 +288,9 @@
       ]
     },
     {
+      "title": "btcturk"
+    },
+    {
       "title": "Bugzilla"
     },
     {
@@ -2138,12 +2141,21 @@
       "slug": "netim"
     },
     {
+      "title": "nexo"
+    },
+    {
       "title": "Wordfence",
       "slug": "wordfence"
     },
     {
       "title": "Hytale",
       "slug": "hytale"
+    },
+    {
+      "title": "Manage My Health",
+      "name": "Manage My Health",
+      "slug": "managemyhealth",
+      "altNames": ["managemyhealth", "Manage My Health NZ"]
     }
   ]
 }

@@ -356,9 +356,8 @@ export type FileViewerProps = ModalVisibilityProps & {
     /**
      * `true` if the comments and reactions feature is enabled for the user.
      *
-     * This is controlled by a server-side feature flag. When `false`, the
-     * like and comment buttons will be hidden for logged-in users.
-     * Defaults to `false`.
+     * When `false`, the like and comment buttons will be hidden for logged-in
+     * users. Defaults to `true`.
      */
     isCommentsFeatureEnabled?: boolean;
     /**
@@ -412,7 +411,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     collectionKey,
     onJoinAlbum,
     enableComment = true,
-    isCommentsFeatureEnabled = false,
+    isCommentsFeatureEnabled = true,
     enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
