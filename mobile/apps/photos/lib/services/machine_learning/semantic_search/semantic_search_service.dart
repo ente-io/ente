@@ -30,7 +30,6 @@ class SemanticSearchService {
 
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
-  static const int _kSearchMaxResults = 5000;
   late final mlDataDB = MLDataDB.instance;
 
   bool _hasInitialized = false;
@@ -146,14 +145,13 @@ class SemanticSearchService {
     }
     final textEmbedding = await _getTextEmbedding(query);
 
-    final similarityResults = await _getSimilarities(
-      {query: textEmbedding},
-      minimumSimilarityMap: {
-        query: similarityThreshold ?? kMinimumSimilarityThreshold,
-      },
-      maxResults: _kSearchMaxResults,
+    final minimumSimilarity =
+        similarityThreshold ?? kMinimumSimilarityThreshold;
+    final queryResults = await _getSimilaritiesForUserSearch(
+      query,
+      textEmbedding,
+      minimumSimilarity,
     );
-    final queryResults = similarityResults[query]!;
     // Uncomment if needed for debugging: print query for top ten scores
     // if (kDebugMode) {
     //   for (int i = 0; i < min(10, queryResults.length); i++) {
@@ -319,6 +317,43 @@ class SemanticSearchService {
           "ms",
     );
     return queryResults;
+  }
+
+  Future<List<QueryResult>> _getSimilaritiesForUserSearch(
+    String query,
+    List<double> textEmbedding,
+    double minimumSimilarity,
+  ) async {
+    final startTime = DateTime.now();
+    if (await _canUseVectorDbForSearch()) {
+      final queryResults =
+          await ClipVectorDB.instance.searchExactSimilaritiesWithinThreshold(
+        textEmbedding,
+        minimumSimilarity,
+      );
+      final endTime = DateTime.now();
+      _logger.info(
+        "computingSimilarities (usearch exact) took for 1 query " +
+            (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+                .toString() +
+            "ms",
+      );
+      return queryResults;
+    }
+
+    await _cacheClipVectors();
+    final queryResults = await MLComputer.instance.computeBulkSimilarities(
+      {query: textEmbedding},
+      {query: minimumSimilarity},
+    );
+    final endTime = DateTime.now();
+    _logger.info(
+      "computingSimilarities (dot-product) took for 1 query " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+    return queryResults[query] ?? <QueryResult>[];
   }
 
   Future<bool> _canUseVectorDbForSearch() async {

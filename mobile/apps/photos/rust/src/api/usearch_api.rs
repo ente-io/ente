@@ -128,6 +128,41 @@ impl VectorDB {
         (matches.keys, matches.distances)
     }
 
+    pub fn exact_search_vectors_within_similarity(
+        &self,
+        query: &[f32],
+        minimum_similarity: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let count = self.index.size();
+        if count == 0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let max_distance = 1.0_f32 - minimum_similarity;
+        if max_distance < 0.0 {
+            return (Vec::new(), Vec::new());
+        }
+
+        let matches = self
+            .index
+            .exact_search(query, count)
+            .expect("Failed to exact search vectors");
+
+        let mut keys = Vec::new();
+        let mut distances = Vec::new();
+
+        for (key, distance) in matches.keys.iter().zip(matches.distances.iter()) {
+            if *distance <= max_distance {
+                keys.push(*key);
+                distances.push(*distance);
+            } else {
+                break;
+            }
+        }
+
+        (keys, distances)
+    }
+
     pub fn bulk_search_vectors(
         &self,
         queries: &Vec<Vec<f32>>,

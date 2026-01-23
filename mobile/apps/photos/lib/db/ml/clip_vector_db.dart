@@ -210,6 +210,29 @@ class ClipVectorDB {
     }
   }
 
+  Future<List<QueryResult>> searchExactSimilaritiesWithinThreshold(
+    List<double> query,
+    double minimumSimilarity,
+  ) async {
+    final db = await _vectorDB;
+    try {
+      final result = await db.exactSearchVectorsWithinSimilarity(
+        query: query,
+        minimumSimilarity: minimumSimilarity,
+      );
+      final keys = result.$1;
+      final distances = result.$2;
+      final queryResults = <QueryResult>[];
+      for (var i = 0; i < keys.length; i++) {
+        queryResults.add(QueryResult(keys[i].toInt(), 1.0 - distances[i]));
+      }
+      return queryResults;
+    } catch (e, s) {
+      _logger.severe("Error searching exact similarities", e, s);
+      rethrow;
+    }
+  }
+
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
     List<Float32List> queries,
     BigInt count, {
