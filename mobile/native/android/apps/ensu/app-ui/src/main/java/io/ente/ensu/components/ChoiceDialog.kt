@@ -43,7 +43,10 @@ fun ChoiceDialog(
         },
         dismissButton = {
             if (secondButtonLabel != null && onSecond != null) {
-                TextButton(onClick = onSecond) {
+                TextButton(
+                    onClick = onSecond,
+                    colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textMuted())
+                ) {
                     Text(text = secondButtonLabel)
                 }
             }

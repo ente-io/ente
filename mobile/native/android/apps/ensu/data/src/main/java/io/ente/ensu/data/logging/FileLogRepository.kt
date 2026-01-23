@@ -224,10 +224,17 @@ class FileLogRepository(
             val levelValue = match.groupValues[2]
             val timestampValue = match.groupValues[3]
             val message = match.groupValues[4]
-
-            val isDetail = message.trimStart().startsWith("⤷")
-            if (isDetail && current != null) {
-                details.add(message.replaceFirst("⤷", "").trim())
+            val trimmedMessage = message.trimStart()
+            val isDetail = isDetailLine(trimmedMessage)
+            if (isDetail) {
+                if (current != null) {
+                    val cleaned = if (trimmedMessage.startsWith("⤷")) {
+                        trimmedMessage.removePrefix("⤷").trim()
+                    } else {
+                        trimmedMessage
+                    }
+                    details.add(cleaned)
+                }
                 return@forEach
             }
 
@@ -265,6 +272,15 @@ class FileLogRepository(
         "WARNING", "WARN" -> LogLevel.Warning
         "ERROR" -> LogLevel.Error
         else -> null
+    }
+
+    private fun isDetailLine(message: String): Boolean {
+        val trimmed = message.trimStart()
+        return trimmed.startsWith("⤷") ||
+            trimmed.startsWith("at ") ||
+            trimmed.startsWith("...") ||
+            trimmed.startsWith("Caused by") ||
+            trimmed.startsWith("Suppressed:")
     }
 
     companion object {

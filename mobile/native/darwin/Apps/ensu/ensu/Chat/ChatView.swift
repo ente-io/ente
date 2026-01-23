@@ -73,6 +73,11 @@ struct ChatView: View {
                 showToast(message, duration: 2)
                 viewModel.syncErrorMessage = nil
             }
+            .onChange(of: viewModel.syncSuccessMessage) { message in
+                guard let message else { return }
+                showToast(message, duration: 2)
+                viewModel.syncSuccessMessage = nil
+            }
             .onChange(of: modelSettings.useCustomModel) { _ in
                 viewModel.refreshModelDownloadInfo()
             }
@@ -185,7 +190,7 @@ struct ChatView: View {
                             totalBytes: viewModel.modelDownloadSizeBytes,
                             sizeText: viewModel.modelDownloadSizeText,
                             onDownload: {
-                                viewModel.startModelDownload()
+                                viewModel.startModelDownload(userInitiated: true)
                             }
                         )
                     } else {
@@ -292,7 +297,7 @@ struct ChatView: View {
                 deleteSession = session
             },
             onSync: {
-                viewModel.syncNow()
+                viewModel.syncNow(showErrors: true, showSuccess: true)
             },
             onOpenSettings: {
                 isDrawerOpen = false

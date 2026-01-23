@@ -52,11 +52,15 @@ struct SessionDrawerView: View {
     private var drawerHeader: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.md) {
             HStack {
-                EnsuLogo(height: 28)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        onDeveloperTap()
-                    }
+                if isLoggedIn {
+                    EnsuLogo(height: 28)
+                } else {
+                    EnsuLogo(height: 28)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            onDeveloperTap()
+                        }
+                }
 
                 Spacer()
 

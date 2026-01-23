@@ -108,13 +108,12 @@ fun ChatView(
     onCancelEdit: () -> Unit,
     onBranchChange: (String, Int) -> Unit,
     onOpenAttachment: (Attachment) -> Unit,
-    onStartDownload: () -> Unit
+    onStartDownload: (Boolean) -> Unit
 ) {
     val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val showDownloadOnboarding = !chatState.isModelDownloaded &&
         chatState.messages.isEmpty() &&
         !chatState.isGenerating
-    val hasMessages = chatState.messages.isNotEmpty()
 
     var didAutoFocusInput by remember { mutableStateOf(false) }
     val shouldAutoFocusInput = chatState.isModelDownloaded &&
@@ -129,15 +128,13 @@ fun ChatView(
         }
     }
 
-    LaunchedEffect(hasMessages, chatState.isModelDownloaded, chatState.isDownloading, chatState.isGenerating) {
-        if (hasMessages && !chatState.isModelDownloaded && !chatState.isDownloading && !chatState.isGenerating) {
-            onStartDownload()
-        }
-    }
+    val shouldAutoDownload = chatState.hasRequestedModelDownload &&
+        !chatState.isDownloading &&
+        !chatState.isGenerating
 
-    LaunchedEffect(chatState.isModelDownloaded) {
-        if (chatState.isModelDownloaded && !chatState.isDownloading && !chatState.isGenerating) {
-            onStartDownload()
+    LaunchedEffect(chatState.isModelDownloaded, shouldAutoDownload) {
+        if (!chatState.isModelDownloaded && shouldAutoDownload) {
+            onStartDownload(false)
         }
     }
 
@@ -233,7 +230,7 @@ private fun MessageList(
     onRetryMessage: (ChatMessage) -> Unit,
     onBranchChange: (String, Int) -> Unit,
     onOpenAttachment: (Attachment) -> Unit,
-    onStartDownload: () -> Unit
+    onStartDownload: (Boolean) -> Unit
 ) {
     if (messages.isEmpty() && !isGenerating) {
         if (!isModelDownloaded) {
@@ -243,7 +240,7 @@ private fun MessageList(
                 downloadPercent = downloadPercent,
                 downloadStatus = downloadStatus,
                 modelDownloadSizeBytes = modelDownloadSizeBytes,
-                onDownload = onStartDownload
+                onDownload = { onStartDownload(true) }
             )
         } else {
             EmptyState(
@@ -510,6 +507,8 @@ private fun UserMessageBubble(
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     val bubbleShape = RoundedCornerShape(18.dp)
+    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
+    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
 
     Column(
         modifier = Modifier
@@ -517,10 +516,29 @@ private fun UserMessageBubble(
             .padding(start = EnsuSpacing.messageBubbleInset.dp),
         horizontalAlignment = Alignment.End
     ) {
+        if (message.attachments.isNotEmpty()) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
+            ) {
+                message.attachments.forEach { attachment ->
+                    io.ente.ensu.components.AttachmentChip(
+                        name = attachment.name,
+                        size = "${attachment.sizeBytes / 1024} KB",
+                        iconRes = HugeIcons.Attachment01Icon,
+                        isUploading = attachment.isUploading,
+                        onClick = { onOpenAttachment(attachment) }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+        }
+
         Box {
             Column(
                 modifier = Modifier
-                    .background(EnsuColor.border().copy(alpha = 0.2f), bubbleShape)
+                    .background(bubbleFill, bubbleShape)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { offset ->
@@ -532,25 +550,6 @@ private fun UserMessageBubble(
                     }
                     .padding(EnsuSpacing.md.dp)
             ) {
-                if (message.attachments.isNotEmpty()) {
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp, Alignment.End),
-                        verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
-                    ) {
-                        message.attachments.forEach { attachment ->
-                            io.ente.ensu.components.AttachmentChip(
-                                name = attachment.name,
-                                size = "${attachment.sizeBytes / 1024} KB",
-                                iconRes = HugeIcons.Attachment01Icon,
-                                isUploading = attachment.isUploading,
-                                onClick = { onOpenAttachment(attachment) }
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                }
-
                 Text(
                     text = message.text,
                     style = EnsuTypography.message,
@@ -657,6 +656,7 @@ private fun AssistantMessageBubble(
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     val bubbleShape = RoundedCornerShape(18.dp)
+    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
 
     Column(
         modifier = Modifier
@@ -667,7 +667,7 @@ private fun AssistantMessageBubble(
         Box {
             Column(
                 modifier = Modifier
-                    .background(EnsuColor.border().copy(alpha = 0.2f), bubbleShape)
+                    .background(bubbleFill, bubbleShape)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { offset ->
@@ -778,6 +778,7 @@ private fun AssistantMessageBubble(
 @Composable
 private fun StreamingMessageBubble(text: String) {
     val bubbleShape = RoundedCornerShape(18.dp)
+    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
 
     Column(
         modifier = Modifier
@@ -787,7 +788,7 @@ private fun StreamingMessageBubble(text: String) {
     ) {
         Column(
             modifier = Modifier
-                .background(EnsuColor.border().copy(alpha = 0.2f), bubbleShape)
+                .background(bubbleFill, bubbleShape)
                 .padding(EnsuSpacing.md.dp)
         ) {
             if (text.isBlank()) {

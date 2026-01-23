@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import android.app.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.designsystem.EnsuColor
@@ -99,29 +100,42 @@ fun LogViewerScreen(
     }
 
     selectedLog?.let { log ->
-        AlertDialog(
-            onDismissRequest = { selectedLog = null },
-            title = { Text(text = "Log details", style = EnsuTypography.h3) },
-            text = {
-                Column {
-                    Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                        Text(text = log.level.name, style = EnsuTypography.small, color = levelColor(log.level))
-                        log.tag?.let { tag ->
-                            Text(text = tag, style = EnsuTypography.small, color = EnsuColor.textMuted())
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                    Text(text = log.message, style = EnsuTypography.body)
-                    log.details?.let { details ->
-                        Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                        Text(text = details, style = EnsuTypography.small, color = EnsuColor.textMuted())
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { selectedLog = null }) { Text(text = "Close") }
+        NativeLogDetailsDialog(logEntry = log, onDismiss = { selectedLog = null })
+    }
+}
+
+@Composable
+private fun NativeLogDetailsDialog(logEntry: LogEntry, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val message = remember(logEntry) {
+        buildString {
+            append("Level: ")
+            append(logEntry.level.name)
+            logEntry.tag?.let { tag ->
+                append("\nTag: ")
+                append(tag)
             }
-        )
+            append("\n\n")
+            append(logEntry.message)
+            logEntry.details?.let { details ->
+                if (details.isNotBlank()) {
+                    append("\n\nDetails:\n")
+                    append(details)
+                }
+            }
+        }
+    }
+
+    DisposableEffect(logEntry) {
+        val dialog = AlertDialog.Builder(context)
+            .setTitle("Log details")
+            .setMessage(message)
+            .setPositiveButton("Close") { _, _ -> onDismiss() }
+            .setOnDismissListener { onDismiss() }
+            .create()
+
+        dialog.show()
+        onDispose { dialog.dismiss() }
     }
 }
 

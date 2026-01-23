@@ -128,7 +128,7 @@ private fun DrawerHeader(
         ) {
             Box(
                 modifier = Modifier
-                    .clickable { onDeveloperTap() }
+                    .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
             ) {
                 EnsuLogo(height = 28.dp)
             }

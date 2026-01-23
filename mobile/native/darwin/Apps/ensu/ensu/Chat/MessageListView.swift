@@ -245,32 +245,35 @@ private struct UserMessageBubbleView: View {
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        let bubbleFill = colorScheme == .dark ? EnsuColor.fillFaint : EnsuColor.border.opacity(0.2)
 
         HStack(alignment: .bottom) {
             Spacer(minLength: EnsuSpacing.messageBubbleInset)
 
             VStack(alignment: .trailing, spacing: EnsuSpacing.sm) {
-                VStack(alignment: .trailing, spacing: EnsuSpacing.sm) {
-                    if !message.attachments.isEmpty {
-                        FlowLayout(spacing: EnsuSpacing.sm) {
-                            ForEach(message.attachments) { attachment in
-                                AttachmentChip(
-                                    name: attachment.name,
-                                    size: attachment.formattedSize,
-                                    icon: attachment.iconName,
-                                    isUploading: attachment.isUploading
-                                )
-                                .onTapGesture {
-                                    hapticTap()
-                                    onOpenAttachment(attachment)
-                                }
+                if !message.attachments.isEmpty {
+                    FlowLayout(spacing: EnsuSpacing.sm) {
+                        ForEach(message.attachments) { attachment in
+                            AttachmentChip(
+                                name: attachment.name,
+                                size: attachment.formattedSize,
+                                icon: attachment.iconName,
+                                isUploading: attachment.isUploading
+                            )
+                            .onTapGesture {
+                                hapticTap()
+                                onOpenAttachment(attachment)
                             }
                         }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                }
 
+                VStack(alignment: .trailing, spacing: EnsuSpacing.sm) {
                     Text(message.text)
                         .font(EnsuTypography.message)
                         .foregroundStyle(EnsuColor.userMessageText)
@@ -279,7 +282,7 @@ private struct UserMessageBubbleView: View {
                         .textSelection(.enabled)
                 }
                 .padding(EnsuSpacing.md)
-                .background(EnsuColor.border.opacity(0.2))
+                .background(bubbleFill)
                 .clipShape(bubbleShape)
                 #if os(iOS)
                 .contextMenu {
@@ -318,8 +321,11 @@ private struct AssistantMessageBubbleView: View {
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        let bubbleFill = colorScheme == .dark ? EnsuColor.fillFaint : EnsuColor.border.opacity(0.2)
 
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
@@ -334,7 +340,7 @@ private struct AssistantMessageBubbleView: View {
                     }
                 }
                 .padding(EnsuSpacing.md)
-                .background(EnsuColor.border.opacity(0.2))
+                .background(bubbleFill)
                 .clipShape(bubbleShape)
                 #if os(iOS)
                 .contextMenu {
@@ -371,9 +377,11 @@ private struct StreamingBubbleView: View {
     let text: String
 
     @State private var cursorOpacity: Double = 1
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        let bubbleFill = colorScheme == .dark ? EnsuColor.fillFaint : EnsuColor.border.opacity(0.2)
 
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
@@ -396,7 +404,7 @@ private struct StreamingBubbleView: View {
                     }
                 }
                 .padding(EnsuSpacing.md)
-                .background(EnsuColor.border.opacity(0.2))
+                .background(bubbleFill)
                 .clipShape(bubbleShape)
             }
 

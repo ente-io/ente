@@ -455,9 +455,11 @@ final class ChatViewModel: ObservableObject {
     @Published var downloadToast: DownloadToastState?
     @Published var isModelDownloaded: Bool = false
     @Published var modelDownloadSizeBytes: Int64?
+    @Published var hasRequestedModelDownload: Bool = false
     @Published var attachmentDownloads: [AttachmentDownloadItem] = []
     @Published var currentSessionMissingAttachments: [AttachmentDownloadItem] = []
     @Published var syncErrorMessage: String?
+    @Published var syncSuccessMessage: String?
 
     private let provider: InferenceRsProvider
     private let chatDb: LlmChatDb
@@ -477,6 +479,7 @@ final class ChatViewModel: ObservableObject {
     private var activeGenerationSessionId: UUID?
     private var pendingSyncRequested = false
     private var pendingSyncShowErrors = false
+    private var pendingSyncShowSuccess = false
     private var modelDownloadLoggedStart = false
 
     private var attachmentDownloadQueue: [String] = []
@@ -687,22 +690,25 @@ final class ChatViewModel: ObservableObject {
         syncNow()
     }
 
-    func syncNow(showErrors: Bool = true) {
+    func syncNow(showErrors: Bool = true, showSuccess: Bool = false) {
         if isGenerating {
             pendingSyncRequested = true
             pendingSyncShowErrors = pendingSyncShowErrors || showErrors
+            pendingSyncShowSuccess = pendingSyncShowSuccess || showSuccess
             return
         }
 
-        let shouldSync = pendingSyncRequested || showErrors
+        let shouldSync = pendingSyncRequested || showErrors || showSuccess
         let shouldShowErrors = pendingSyncShowErrors || showErrors
+        let shouldShowSuccess = pendingSyncShowSuccess || showSuccess
         pendingSyncRequested = false
         pendingSyncShowErrors = false
+        pendingSyncShowSuccess = false
         guard shouldSync else { return }
-        performSync(showErrors: shouldShowErrors)
+        performSync(showErrors: shouldShowErrors, showSuccess: shouldShowSuccess)
     }
 
-    private func performSync(showErrors: Bool) {
+    private func performSync(showErrors: Bool, showSuccess: Bool) {
         let log = logger
         guard let auth = buildSyncAuth() else {
             log.warning("Sync skipped", details: "not logged in")
@@ -721,6 +727,9 @@ final class ChatViewModel: ObservableObject {
                 log.info("Sync success")
                 await MainActor.run {
                     self.reloadFromDb()
+                    if showSuccess {
+                        self.syncSuccessMessage = "Sync complete"
+                    }
                 }
             } catch {
                 let message = syncErrorMessage(from: error)
@@ -899,17 +908,23 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    func startModelDownload() {
+    func startModelDownload(userInitiated: Bool = true) {
         guard !isDownloading && !isGenerating else { return }
+        if userInitiated {
+            hasRequestedModelDownload = true
+        }
+
         let target = modelSettings.currentTarget()
         let isDownloaded = provider.isModelDownloaded(target: target)
         if isDownloaded {
             isModelDownloaded = true
             modelDownloadSizeBytes = nil
-        } else {
-            modelDownloadLoggedStart = true
-            logger.info("Model download started", details: "model=\(target.id)")
+            return
         }
+
+        isDownloading = true
+        modelDownloadLoggedStart = true
+        logger.info("Model download started", details: "model=\(target.id)")
 
         modelDownloadTask?.cancel()
         modelDownloadTask = Task {
@@ -943,13 +958,12 @@ final class ChatViewModel: ObservableObject {
     }
 
     func autoStartModelDownloadIfNeeded() {
+        guard hasRequestedModelDownload else { return }
         guard !isDownloading && !isGenerating else { return }
         if isModelDownloaded {
-            startModelDownload()
             return
         }
-        guard !messages.isEmpty else { return }
-        startModelDownload()
+        startModelDownload(userInitiated: false)
     }
 
     func cancelDownload() {
@@ -966,6 +980,7 @@ final class ChatViewModel: ObservableObject {
         activeGenerationSessionId = nil
         isGenerating = false
         isDownloading = false
+        hasRequestedModelDownload = false
         streamingResponse = ""
         streamingParentId = nil
         downloadToast = nil
@@ -973,29 +988,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func retryDownload() {
-        let target = modelSettings.currentTarget()
-        modelDownloadTask?.cancel()
-        modelDownloadTask = Task {
-            do {
-                try await provider.ensureModelReady(target: target) { progress in
-                    Task { @MainActor in
-                        self.handleProgress(progress)
-                    }
-                }
-            } catch {
-                if isCancellation(error) {
-                    return
-                }
-                await MainActor.run {
-                    self.downloadToast = DownloadToastState(
-                        phase: .errorDownload,
-                        percent: -1,
-                        status: error.localizedDescription,
-                        offerRetryDownload: true
-                    )
-                }
-            }
-        }
+        startModelDownload(userInitiated: true)
     }
 
     func retryAssistantResponse(_ message: ChatMessage) {
@@ -1052,6 +1045,7 @@ final class ChatViewModel: ObservableObject {
         activeGenerationSessionId = userNode.sessionId
         isGenerating = true
         isDownloading = false
+        hasRequestedModelDownload = true
         streamingResponse = ""
         streamingParentId = userNode.id
         downloadToast = nil

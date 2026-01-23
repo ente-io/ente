@@ -60,6 +60,7 @@ class AppStore(
     private var activeGenerationToken = 0L
     private var pendingSyncRequested = false
     private var pendingSyncErrorHandler: ((String) -> Unit)? = null
+    private var pendingSyncSuccessHandler: (() -> Unit)? = null
 
     private val attachmentDownloads = mutableMapOf<String, AttachmentDownloadItem>()
     private val attachmentDownloadQueue = ArrayDeque<String>()
@@ -95,7 +96,8 @@ class AppStore(
             appState.copy(
                 chat = appState.chat.copy(
                     isModelDownloaded = isDownloaded,
-                    modelDownloadSizeBytes = if (isDownloaded) null else appState.chat.modelDownloadSizeBytes
+                    modelDownloadSizeBytes = if (isDownloaded) null else appState.chat.modelDownloadSizeBytes,
+                    hasRequestedModelDownload = appState.chat.hasRequestedModelDownload || isDownloaded
                 )
             )
         }
@@ -359,7 +361,9 @@ class AppStore(
     fun startModelDownload(userInitiated: Boolean = true) {
         val scope = scope ?: return
         val currentState = _state.value
+        if (modelDownloadJob?.isActive == true) return
         if (currentState.chat.isDownloading || currentState.chat.isGenerating) return
+        if (!userInitiated && !currentState.chat.hasRequestedModelDownload) return
 
         val target = resolveTarget(currentState.modelSettings)
         val isDownloaded = llmProvider.isModelDownloaded(target)
@@ -579,43 +583,61 @@ class AppStore(
         logRepository.log(LogLevel.Info, "Signed out", tag = "Auth")
     }
 
-    fun syncNow(onError: ((String) -> Unit)? = null) {
-        requestSync(onError)
+    fun syncNow(
+        onSuccess: (() -> Unit)? = null,
+        onError: ((String) -> Unit)? = null
+    ) {
+        requestSync(onSuccess, onError)
     }
 
-    private fun requestSync(onError: ((String) -> Unit)? = null) {
+    private fun requestSync(
+        onSuccess: (() -> Unit)? = null,
+        onError: ((String) -> Unit)? = null
+    ) {
         if (_state.value.chat.isGenerating) {
             pendingSyncRequested = true
             if (onError != null) {
                 pendingSyncErrorHandler = onError
             }
+            if (onSuccess != null) {
+                pendingSyncSuccessHandler = onSuccess
+            }
             return
         }
 
         val handler = pendingSyncErrorHandler ?: onError
+        val successHandler = pendingSyncSuccessHandler ?: onSuccess
         pendingSyncRequested = false
         pendingSyncErrorHandler = null
-        performSync(handler)
+        pendingSyncSuccessHandler = null
+        performSync(handler, successHandler)
     }
 
     private fun syncAfterGeneration() {
         val handler = pendingSyncErrorHandler
+        val successHandler = pendingSyncSuccessHandler
         val shouldAutoSync = _state.value.auth.isLoggedIn
         if (!pendingSyncRequested && !shouldAutoSync) {
             pendingSyncErrorHandler = null
+            pendingSyncSuccessHandler = null
             return
         }
-        if (!shouldAutoSync && handler == null) {
+        if (!shouldAutoSync && handler == null && successHandler == null) {
             pendingSyncRequested = false
             pendingSyncErrorHandler = null
+            pendingSyncSuccessHandler = null
             return
         }
         pendingSyncRequested = false
         pendingSyncErrorHandler = null
-        performSync(handler)
+        pendingSyncSuccessHandler = null
+        performSync(handler, successHandler)
     }
 
-    private fun performSync(onError: ((String) -> Unit)? = null) {
+    private fun performSync(
+        onError: ((String) -> Unit)? = null,
+        onSuccess: (() -> Unit)? = null
+    ) {
         val scope = scope ?: return
         scope.launch {
             try {
@@ -625,6 +647,11 @@ class AppStore(
                 }
                 loadSessionsFromDb()
                 logRepository.log(LogLevel.Info, "Sync success", tag = "Sync")
+                if (onSuccess != null) {
+                    withContext(Dispatchers.Main) {
+                        onSuccess()
+                    }
+                }
             } catch (err: Throwable) {
                 val message = syncErrorMessage(err)
                 logRepository.log(
@@ -833,7 +860,8 @@ class AppStore(
                     streamingResponse = "",
                     streamingParentId = userMessage.id,
                     downloadPercent = null,
-                    downloadStatus = null
+                    downloadStatus = null,
+                    hasRequestedModelDownload = true
                 )
             )
         }

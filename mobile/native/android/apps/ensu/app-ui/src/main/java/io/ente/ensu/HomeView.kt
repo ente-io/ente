@@ -333,7 +333,9 @@ fun HomeView(
                             onOpenAttachment = { attachment ->
                                 openAttachment(context, attachment)
                             },
-                            onStartDownload = { store.startModelDownload(userInitiated = true) }
+                            onStartDownload = { userInitiated ->
+                                store.startModelDownload(userInitiated = userInitiated)
+                            }
                         )
                     }
                     composable(
@@ -419,9 +421,14 @@ fun HomeView(
                         deleteSessionTarget = session
                     },
                     onSync = {
-                        store.syncNow { message ->
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
+                        store.syncNow(
+                            onSuccess = {
+                                Toast.makeText(context, "Sync complete", Toast.LENGTH_SHORT).show()
+                            },
+                            onError = { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     },
                     onOpenSettings = {
                         navController.navigate(HomeRoute.Settings)
@@ -492,20 +499,29 @@ fun HomeView(
                 Text(text = "Logs", style = EnsuTypography.h3Bold, color = EnsuColor.textPrimary())
                 Text(text = "Export or share logs for support.", style = EnsuTypography.body, color = EnsuColor.textMuted())
                 Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                    TextButton(onClick = {
-                        showLogShareDialog = false
-                        shareLogs()
-                    }) {
+                    TextButton(
+                        onClick = {
+                            showLogShareDialog = false
+                            shareLogs()
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
+                    ) {
                         Text(text = "Share")
                     }
-                    TextButton(onClick = {
-                        showLogShareDialog = false
-                        exportLogs()
-                    }) {
+                    TextButton(
+                        onClick = {
+                            showLogShareDialog = false
+                            exportLogs()
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
+                    ) {
                         Text(text = "Export")
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    TextButton(onClick = { showLogShareDialog = false }) {
+                    TextButton(
+                        onClick = { showLogShareDialog = false },
+                        colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textMuted())
+                    ) {
                         Text(text = "Cancel")
                     }
                 }
@@ -534,7 +550,7 @@ fun HomeView(
                         navController.navigate(HomeRoute.DeveloperSettings)
                         scope.launch { drawerState.close() }
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.accent())
+                    colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
                 ) {
                     Text(text = "Yes")
                 }
@@ -730,7 +746,10 @@ private fun AttachmentDownloadsDialog(
                                 modifier = Modifier.padding(end = EnsuSpacing.xs.dp)
                             )
                             if (item.status == AttachmentDownloadStatus.Queued || item.status == AttachmentDownloadStatus.Downloading) {
-                                TextButton(onClick = { onCancel(item.id) }) {
+                                TextButton(
+                                    onClick = { onCancel(item.id) },
+                                    colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
+                                ) {
                                     Text(text = "Cancel", style = EnsuTypography.mini)
                                 }
                             }
@@ -740,7 +759,10 @@ private fun AttachmentDownloadsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
+            ) {
                 Text(text = "Close", style = EnsuTypography.small)
             }
         }
