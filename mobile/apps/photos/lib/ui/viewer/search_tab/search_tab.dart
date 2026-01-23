@@ -229,17 +229,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
               }
             },
           ),
-          ValueListenableBuilder(
-            valueListenable:
-                InheritedAllSectionsExamples.of(context).isDebouncingNotifier,
-            builder: (context, value, _) {
-              return value
-                  ? const EnteLoadingWidget(
-                      alignment: Alignment.topRight,
-                    )
-                  : const SizedBox.shrink();
-            },
-          ),
         ],
       ),
     );
