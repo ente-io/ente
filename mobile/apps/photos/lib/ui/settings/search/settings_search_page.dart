@@ -20,7 +20,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
   final FocusNode _searchFocusNode = FocusNode();
   String _searchQuery = "";
   List<SettingsSearchItem>? _allItems;
-  List<SettingsSearchItem> _filteredItems = [];
+  List<_SearchResultEntry> _filteredItems = [];
 
   @override
   void initState() {
@@ -50,8 +50,71 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       if (query.isEmpty || _allItems == null) {
         _filteredItems = [];
       } else {
-        _filteredItems =
-            _allItems!.where((item) => item.matchesQuery(query)).toList();
+        final l10n = AppLocalizations.of(context);
+        final sectionOrder = <String, int>{};
+        for (var i = 0; i < _allItems!.length; i++) {
+          final item = _allItems![i];
+          final sectionKey = _sectionKey(item.sectionPath);
+          sectionOrder.putIfAbsent(sectionKey, () => i);
+        }
+
+        final freeUpSpacePriority = <String, int>{
+          l10n.deleteSuggestions: 0,
+          l10n.freeUpDeviceSpace: 1,
+        };
+
+        final entries = <_SearchResultEntry>[];
+        for (var i = 0; i < _allItems!.length; i++) {
+          final item = _allItems![i];
+          final matchType = item.matchType(query);
+          if (matchType == SettingsSearchMatchType.none) {
+            continue;
+          }
+          final sectionKey = _sectionKey(item.sectionPath);
+          final intraSectionOrder =
+              sectionKey == l10n.freeUpSpace && freeUpSpacePriority.isNotEmpty
+                  ? (freeUpSpacePriority[item.title] ?? 100 + i)
+                  : i;
+          entries.add(
+            _SearchResultEntry(
+              item: item,
+              matchType: matchType,
+              sectionKey: sectionKey,
+              sectionOrder: sectionOrder[sectionKey] ?? i,
+              itemOrder: i,
+              intraSectionOrder: intraSectionOrder,
+            ),
+          );
+        }
+
+        final hasSubPageMatch = <String, bool>{};
+        for (final entry in entries) {
+          if (entry.item.isSubPage) {
+            hasSubPageMatch[entry.sectionKey] = true;
+          }
+        }
+
+        final filteredEntries = entries
+            .where(
+              (entry) =>
+                  !(hasSubPageMatch[entry.sectionKey] ?? false) ||
+                  entry.item.isSubPage,
+            )
+            .toList();
+
+        filteredEntries.sort((a, b) {
+          final matchPriority = _matchPriority(a.matchType)
+              .compareTo(_matchPriority(b.matchType));
+          if (matchPriority != 0) return matchPriority;
+          final sectionPriority = a.sectionOrder.compareTo(b.sectionOrder);
+          if (sectionPriority != 0) return sectionPriority;
+          final intraSection =
+              a.intraSectionOrder.compareTo(b.intraSectionOrder);
+          if (intraSection != 0) return intraSection;
+          return a.itemOrder.compareTo(b.itemOrder);
+        });
+
+        _filteredItems = filteredEntries;
       }
     });
   }
@@ -131,27 +194,25 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
               ),
             ),
             if (_searchQuery.isNotEmpty)
-              GestureDetector(
-                onTap: _clearSearch,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(
-                    Icons.cancel_rounded,
-                    size: 16,
-                    color: colorScheme.textMuted,
-                  ),
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: EdgeInsets.zero,
+                iconSize: 16,
+                onPressed: _clearSearch,
+                icon: Icon(
+                  Icons.cancel_rounded,
+                  color: colorScheme.textMuted,
                 ),
               )
             else
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 16,
-                    color: colorScheme.textMuted,
-                  ),
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: EdgeInsets.zero,
+                iconSize: 16,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: colorScheme.textMuted,
                 ),
               ),
           ],
@@ -241,14 +302,54 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       );
     }
 
+    final rows = _buildResultRows(colorScheme, textTheme);
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: _filteredItems.length,
+      itemCount: rows.length,
       itemBuilder: (context, index) {
-        final item = _filteredItems[index];
-        return _buildSearchResultItem(item, colorScheme, textTheme);
+        return rows[index];
       },
     );
+  }
+
+  List<Widget> _buildResultRows(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    final sectionCounts = <String, int>{};
+    for (final entry in _filteredItems) {
+      sectionCounts.update(
+        entry.sectionKey,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+
+    final rows = <Widget>[];
+    String? currentSectionKey;
+    for (final entry in _filteredItems) {
+      final shouldShowHeader = sectionCounts[entry.sectionKey] != null &&
+          sectionCounts[entry.sectionKey]! >= 2;
+      if (shouldShowHeader && currentSectionKey != entry.sectionKey) {
+        currentSectionKey = entry.sectionKey;
+        rows.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: Text(
+              entry.sectionKey,
+              style: textTheme.mini.copyWith(
+                color: colorScheme.textMuted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+      }
+      rows.add(
+        _buildSearchResultItem(entry.item, colorScheme, textTheme),
+      );
+    }
+    return rows;
   }
 
   Widget _buildSearchResultItem(
@@ -285,7 +386,7 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
                       color: colorScheme.textBase,
                     ),
                   ),
-                  if (item.isSubPage) ...[
+                  if (item.sectionPath != item.title) ...[
                     const SizedBox(height: 2),
                     Text(
                       item.sectionPath,
@@ -307,4 +408,50 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
       ),
     );
   }
+
+  String _sectionKey(String sectionPath) {
+    final parts = sectionPath.split(" > ");
+    return parts.isNotEmpty ? parts.first : sectionPath;
+  }
+
+  int _matchPriority(SettingsSearchMatchType matchType) {
+    switch (matchType) {
+      case SettingsSearchMatchType.titlePrefix:
+        return 0;
+      case SettingsSearchMatchType.title:
+        return 1;
+      case SettingsSearchMatchType.subtitlePrefix:
+        return 2;
+      case SettingsSearchMatchType.subtitle:
+        return 3;
+      case SettingsSearchMatchType.sectionPathPrefix:
+        return 4;
+      case SettingsSearchMatchType.sectionPath:
+        return 5;
+      case SettingsSearchMatchType.keywordPrefix:
+        return 6;
+      case SettingsSearchMatchType.keyword:
+        return 7;
+      case SettingsSearchMatchType.none:
+        return 8;
+    }
+  }
+}
+
+class _SearchResultEntry {
+  final SettingsSearchItem item;
+  final SettingsSearchMatchType matchType;
+  final String sectionKey;
+  final int sectionOrder;
+  final int itemOrder;
+  final int intraSectionOrder;
+
+  _SearchResultEntry({
+    required this.item,
+    required this.matchType,
+    required this.sectionKey,
+    required this.sectionOrder,
+    required this.itemOrder,
+    required this.intraSectionOrder,
+  });
 }

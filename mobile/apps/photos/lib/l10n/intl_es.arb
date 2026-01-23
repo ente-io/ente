@@ -2099,10 +2099,12 @@
   "hoorayyyy": "¡Hurraaaa!",
   "nothingToTidyUpHere": "Nada que limpiar aquí",
   "deletingDash": "Eliminando - ",
-  "cLTitle1": "Comentarios y reacciones",
-  "cLDesc1": "Estamos introduciendo comentarios y reacciones sobre las fotos compartidas. Puedes reaccionar o comentar una foto abriéndola y usando las acciones en la parte inferior. Todos los comentarios y reacciones entrantes serán visibles en la pestaña Compartir.",
-  "cLTitle2": "Administradores para álbumes",
-  "cLDesc2": "Ahora puedes asignar otro usuario de Ente como administrador de tu álbum. Con esto, podrá añadir otros televidentes y colaboradores, eliminar fotos de los álbumes e incluso sugerir a los participantes que eliminen sus fotos.",
+  "cLTitle1": "Cambios de diseño",
+  "cLDesc1": "La pantalla de configuración y la página de resultados de búsqueda han sido rediseñadas. La barra de búsqueda se ha movido a la parte superior.",
+  "cLTitle2": "Mejoras",
+  "cLDesc2": "Pellizcar para hacer zoom en vídeos. Carga más rápida de la pestaña de búsqueda. Los administradores y propietarios de álbumes pueden eliminar comentarios. Vista previa para formatos no compatibles. Búsqueda en descubrimiento, ubicación, personas y tipo de archivo. Ordenación personalizada en la página de personas. Un mejor flujo para fusionar personas. Ver todas las personas ignoradas. Ordenación consistente de contactos.",
+  "cLTitle3": "Corrección de errores",
+  "cLDesc3": "Corregido el problema de la música pausándose al abrir la app. Corregido el deslizar para seleccionar en dispositivos Samsung S. Corregido el problema de frecuencia de cuadros en la hoja de información. Corregidos problemas de la galería en tablets y en horizontal. Corregida la página de no categorizados que no se actualizaba después de mover.",
   "closeBy": "Cerrar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

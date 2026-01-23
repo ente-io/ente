@@ -33,27 +33,83 @@ class SettingsSearchItem {
     this.keywords = const [],
   });
 
+  SettingsSearchMatchType matchType(String query) {
+    final normalizedQuery = query.toLowerCase().trim();
+    if (normalizedQuery.isEmpty) return SettingsSearchMatchType.none;
+
+    final normalizedTitle = title.toLowerCase();
+    if (normalizedTitle.startsWith(normalizedQuery)) {
+      return SettingsSearchMatchType.titlePrefix;
+    }
+    if (normalizedTitle.contains(normalizedQuery)) {
+      return SettingsSearchMatchType.title;
+    }
+    final normalizedSubtitle = subtitle?.toLowerCase();
+    if (normalizedSubtitle?.startsWith(normalizedQuery) ?? false) {
+      return SettingsSearchMatchType.subtitlePrefix;
+    }
+    if (normalizedSubtitle?.contains(normalizedQuery) ?? false) {
+      return SettingsSearchMatchType.subtitle;
+    }
+    final normalizedSectionPath = sectionPath.toLowerCase();
+    if (normalizedSectionPath.startsWith(normalizedQuery)) {
+      return SettingsSearchMatchType.sectionPathPrefix;
+    }
+    if (normalizedSectionPath.contains(normalizedQuery)) {
+      return SettingsSearchMatchType.sectionPath;
+    }
+    for (final keyword in keywords) {
+      final normalizedKeyword = keyword.toLowerCase();
+      if (normalizedKeyword.startsWith(normalizedQuery)) {
+        return SettingsSearchMatchType.keywordPrefix;
+      }
+      if (normalizedKeyword.contains(normalizedQuery)) {
+        return SettingsSearchMatchType.keyword;
+      }
+    }
+
+    return SettingsSearchMatchType.none;
+  }
+
   /// Check if this item matches the search query
   bool matchesQuery(String query) {
     final normalizedQuery = query.toLowerCase().trim();
     if (normalizedQuery.isEmpty) return false;
 
-    // Check title
+    return matchType(normalizedQuery) != SettingsSearchMatchType.none;
+  }
+
+  bool matchesLabel(String query) {
+    final normalizedQuery = query.toLowerCase().trim();
+    if (normalizedQuery.isEmpty) return false;
+
     if (title.toLowerCase().contains(normalizedQuery)) return true;
-
-    // Check subtitle
     if (subtitle?.toLowerCase().contains(normalizedQuery) ?? false) return true;
-
-    // Check section path
     if (sectionPath.toLowerCase().contains(normalizedQuery)) return true;
+    return false;
+  }
 
-    // Check keywords
+  bool matchesKeyword(String query) {
+    final normalizedQuery = query.toLowerCase().trim();
+    if (normalizedQuery.isEmpty) return false;
+
     for (final keyword in keywords) {
       if (keyword.toLowerCase().contains(normalizedQuery)) return true;
     }
-
     return false;
   }
+}
+
+enum SettingsSearchMatchType {
+  titlePrefix,
+  title,
+  subtitlePrefix,
+  subtitle,
+  sectionPathPrefix,
+  sectionPath,
+  keywordPrefix,
+  keyword,
+  none,
 }
 
 /// Represents a quick suggestion shown when search is empty

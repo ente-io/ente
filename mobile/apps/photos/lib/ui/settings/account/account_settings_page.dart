@@ -119,6 +119,7 @@ class AccountSettingsPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       MenuItemWidgetNew(
                         title: AppLocalizations.of(context).deleteAccount,
+                        titleColor: colorScheme.warning700,
                         leadingIconWidget: _buildIconWidget(
                           context,
                           HugeIcons.strokeRoundedDelete02,
