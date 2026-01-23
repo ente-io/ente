@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
@@ -19,7 +20,52 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
+
+/// Represents a file that needs to be cleaned up from a non-hidden collection.
+class HiddenCleanupItem {
+  final EnteFile file;
+  final int nonHiddenCollectionID;
+  final int hiddenCollectionID;
+
+  HiddenCleanupItem({
+    required this.file,
+    required this.nonHiddenCollectionID,
+    required this.hiddenCollectionID,
+  });
+
+  bool get isNonHiddenCollectionOwnedByUser {
+    final userID = Configuration.instance.getUserID()!;
+    final collection =
+        CollectionsService.instance.getCollectionByID(nonHiddenCollectionID);
+    return collection?.isOwner(userID) ?? false;
+  }
+
+  bool get isHiddenCollectionOwnedByUser {
+    final userID = Configuration.instance.getUserID()!;
+    final collection =
+        CollectionsService.instance.getCollectionByID(hiddenCollectionID);
+    return collection?.isOwner(userID) ?? false;
+  }
+
+  /// Returns true if this item should be acted upon (cleaned up).
+  /// An item is actionable if the user owns the non-hidden collection.
+  bool get isActionable => isNonHiddenCollectionOwnedByUser;
+
+  /// Returns the collection ID to move from.
+  int get fromCollectionID => nonHiddenCollectionID;
+
+  /// Returns the collection ID to move to.
+  /// Uses the original hidden collection if owned by user,
+  /// otherwise uses the user's default hidden collection.
+  int get toCollectionID {
+    if (isHiddenCollectionOwnedByUser) {
+      return hiddenCollectionID;
+    }
+    return CollectionsService.instance.cachedDefaultHiddenCollection!.id;
+  }
+}
 
 extension HiddenService on CollectionsService {
   static final _logger = Logger("HiddenCollectionService");
@@ -347,5 +393,186 @@ extension HiddenService on CollectionsService {
       magicMetadata: metadataRequest,
     );
     return createRequest;
+  }
+
+  /// Checks if there are hidden files that also exist in non-hidden collections.
+  /// Only considers files owned by the user.
+  Future<bool> hasFilesNeedingHiddenCleanup() async {
+    final int userID = config.getUserID()!;
+    final hiddenCollectionIds = getHiddenCollectionIds();
+    if (hiddenCollectionIds.isEmpty) {
+      return false;
+    }
+
+    final uploadedHiddenFileIds = await filesDB.getUploadedFileIDsInCollections(
+      hiddenCollectionIds,
+      ownerID: userID,
+    );
+    if (uploadedHiddenFileIds.isEmpty) {
+      return false;
+    }
+
+    final allCollectionIdsHiddenFilesExistsIn =
+        await filesDB.getCollectionIDsForUploadedFileIDs(
+      uploadedHiddenFileIds,
+    );
+
+    // Check if any collection is non-hidden
+    for (final collectionId in allCollectionIdsHiddenFilesExistsIn) {
+      if (hiddenCollectionIds.contains(collectionId)) {
+        continue;
+      }
+
+      final collection = getCollectionByID(collectionId);
+      if (collection != null && collection.isOwner(userID)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Gets the list of files that need to be cleaned up from non-hidden
+  /// collections. Only processes files owned by the user.
+  Future<List<HiddenCleanupItem>> getFilesNeedingHiddenCleanup() async {
+    final int userID = config.getUserID()!;
+    final hiddenCollectionIds = getHiddenCollectionIds();
+    if (hiddenCollectionIds.isEmpty) {
+      return [];
+    }
+
+    final uploadedHiddenFileIds = await filesDB.getUploadedFileIDsInCollections(
+      hiddenCollectionIds,
+      ownerID: userID,
+    );
+    if (uploadedHiddenFileIds.isEmpty) {
+      return [];
+    }
+
+    final filesByCollectionID = await filesDB.getAllFilesGroupByCollectionID(
+      uploadedHiddenFileIds,
+    );
+
+    // Build map of uploadedFileID -> hiddenCollectionID
+    final Map<int, int> fileToHiddenCollection = {};
+    for (final entry in filesByCollectionID.entries) {
+      final collectionID = entry.key;
+      if (hiddenCollectionIds.contains(collectionID)) {
+        for (final file in entry.value) {
+          if (file.uploadedFileID != null) {
+            // Store first hidden collection found for each file
+            fileToHiddenCollection.putIfAbsent(
+              file.uploadedFileID!,
+              () => collectionID,
+            );
+          }
+        }
+      }
+    }
+
+    // Create cleanup items for non-hidden collections
+    final cleanupItems = <HiddenCleanupItem>[];
+    for (final entry in filesByCollectionID.entries) {
+      final collectionID = entry.key;
+
+      if (hiddenCollectionIds.contains(collectionID)) {
+        continue;
+      }
+
+      final collection = getCollectionByID(collectionID);
+      if (collection == null) {
+        continue;
+      }
+
+      for (final file in entry.value) {
+        // Files are already filtered by ownerID at DB level, but double-check
+        if (file.ownerID != userID) {
+          continue;
+        }
+
+        final hiddenCollectionID = fileToHiddenCollection[file.uploadedFileID];
+        if (hiddenCollectionID == null) {
+          continue; // Shouldn't happen
+        }
+
+        cleanupItems.add(
+          HiddenCleanupItem(
+            file: file,
+            nonHiddenCollectionID: collectionID,
+            hiddenCollectionID: hiddenCollectionID,
+          ),
+        );
+      }
+    }
+
+    return cleanupItems;
+  }
+
+  /// Cleans up hidden files by moving them from non-hidden collections to their
+  /// hidden collection.
+  Future<void> cleanupHiddenFiles(BuildContext context) async {
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).pleaseWait,
+    );
+    await dialog.show();
+
+    try {
+      final cleanupItems = await getFilesNeedingHiddenCleanup();
+
+      if (cleanupItems.isEmpty) {
+        await dialog.hide();
+        return;
+      }
+
+      final actionableItems =
+          cleanupItems.where((item) => item.isActionable).toList();
+      final nonActionableItems =
+          cleanupItems.where((item) => !item.isActionable).toList();
+
+      for (final item in nonActionableItems) {
+        _logger.info(
+          "Should not clean up file ${item.file.uploadedFileID} from collection "
+          "${item.nonHiddenCollectionID} - user doesn't own the collection",
+        );
+      }
+
+      // Group actionable items by (fromCollectionID, toCollectionID) for batch moves
+      final Map<(int, int), List<EnteFile>> moveGroups = {};
+      for (final item in actionableItems) {
+        final key = (item.fromCollectionID, item.toCollectionID);
+        moveGroups.putIfAbsent(key, () => []).add(item.file);
+      }
+
+      // Execute moves
+      for (final entry in moveGroups.entries) {
+        final (fromCollectionID, toCollectionID) = entry.key;
+        final files = entry.value;
+
+        await move(
+          files,
+          toCollectionID: toCollectionID,
+          fromCollectionID: fromCollectionID,
+        );
+      }
+
+      // Fire events for UI refresh
+      final allMovedFiles = actionableItems.map((e) => e.file).toList();
+      if (allMovedFiles.isNotEmpty) {
+        Bus.instance.fire(
+          FilesUpdatedEvent(
+            allMovedFiles,
+            source: "hiddenCleanup",
+          ),
+        );
+      }
+
+      await dialog.hide();
+      showShortToast(context, AppLocalizations.of(context).cleanupComplete);
+    } catch (e, s) {
+      _logger.severe("Failed to cleanup hidden files", e, s);
+      await dialog.hide();
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 }
