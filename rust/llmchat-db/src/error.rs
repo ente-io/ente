@@ -27,8 +27,6 @@ pub enum Error {
     #[error("{entity:?} not found: {id}")]
     NotFound { entity: EntityType, id: uuid::Uuid },
 
-    #[error("attachment not found: {0}")]
-    AttachmentNotFound(String),
 
     #[error(transparent)]
     Crypto(#[from] ente_core::crypto::CryptoError),

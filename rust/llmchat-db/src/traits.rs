@@ -110,6 +110,11 @@ impl FsAttachmentStore {
         Self { root: root.into() }
     }
 
+    pub fn size(&self, id: &str) -> Result<u64> {
+        let path = self.attachment_path(id);
+        Ok(fs::metadata(path)?.len())
+    }
+
     fn attachment_path(&self, id: &str) -> PathBuf {
         self.root.join(id)
     }

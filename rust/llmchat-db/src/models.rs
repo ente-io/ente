@@ -19,24 +19,17 @@ pub struct Message {
     pub parent_message_uuid: Option<Uuid>,
     pub sender: Sender,
     pub text: String,
-    pub attachments: Vec<Attachment>,
+    pub attachments: Vec<AttachmentMeta>,
     pub created_at: i64,
     pub deleted_at: Option<i64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Attachment {
+pub struct AttachmentMeta {
     pub id: String,
     pub kind: AttachmentKind,
     pub size: i64,
     pub name: String,
-    pub uploaded_at: Option<i64>,
-}
-
-impl Attachment {
-    pub fn needs_upload(&self) -> bool {
-        self.uploaded_at.is_none()
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -85,6 +78,4 @@ pub(crate) struct StoredAttachment {
     pub kind: AttachmentKind,
     pub size: i64,
     pub encrypted_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub uploaded_at: Option<i64>,
 }
