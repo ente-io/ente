@@ -4,7 +4,6 @@ import { Download01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
 
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -477,6 +476,8 @@ export default function PublicCollectionGallery() {
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
 
+    const hasSelection = selected.count > 0;
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -491,6 +492,7 @@ export default function PublicCollectionGallery() {
                                   onShowFeed: commentsEnabled
                                       ? showPublicFeed
                                       : undefined,
+                                  hasSelection,
                               }}
                           />
                       ),
@@ -504,6 +506,7 @@ export default function PublicCollectionGallery() {
             downloadEnabled,
             showPublicFeed,
             commentsEnabled,
+            hasSelection,
         ],
     );
 
@@ -789,7 +792,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         </Typography>
         <Tooltip title={t("download")}>
             <IconButton onClick={downloadFilesHelper}>
-                <DownloadIcon />
+                <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
         </Tooltip>
     </Stack>
@@ -801,6 +804,7 @@ interface FileListHeaderProps {
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
     onShowFeed?: () => void;
+    hasSelection: boolean;
 }
 
 /**
@@ -820,6 +824,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     downloadEnabled,
     onAddSaveGroup,
     onShowFeed,
+    hasSelection,
 }) => {
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
@@ -857,7 +862,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                             </Box>
                         </IconButton>
                     )}
-                    {downloadEnabled && (
+                    {downloadEnabled && !hasSelection && (
                         <IconButton onClick={downloadAllFiles}>
                             <HugeiconsIcon
                                 icon={Download01Icon}
