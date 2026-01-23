@@ -1,8 +1,7 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Download01Icon } from "@hugeicons/core-free-icons";
+import { Download01Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
@@ -702,16 +701,26 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlinedIcon />;
-
     return (
         <Box>
             {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
+                <IconButton {...{ onClick, disabled }}>
+                    <HugeiconsIcon
+                        icon={ImageAdd02Icon}
+                        size={22}
+                        strokeWidth={1.8}
+                    />
+                </IconButton>
             ) : (
                 <FocusVisibleButton
                     color="secondary"
-                    startIcon={icon}
+                    startIcon={
+                        <HugeiconsIcon
+                            icon={ImageAdd02Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
+                    }
                     sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
