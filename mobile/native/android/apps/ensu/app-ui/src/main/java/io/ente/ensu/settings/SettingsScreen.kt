@@ -58,16 +58,16 @@ fun SettingsScreen(
             if (isLoggedIn) {
                 add(
                     SettingsItem(
-                        title = "Sign Out",
-                        subtitle = "Stop syncing this device",
-                        onClick = onSignOut
+                        title = "Delete Account",
+                        subtitle = "Email support to delete your account",
+                        onClick = onDeleteAccount
                     )
                 )
                 add(
                     SettingsItem(
-                        title = "Delete Account",
-                        subtitle = "Email support to delete your account",
-                        onClick = onDeleteAccount
+                        title = "Sign Out",
+                        subtitle = "Stop syncing this device",
+                        onClick = onSignOut
                     )
                 )
             } else {

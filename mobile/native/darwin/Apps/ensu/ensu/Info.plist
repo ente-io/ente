@@ -6,7 +6,7 @@
     <string>en</string>
 
     <key>CFBundleDisplayName</key>
-    <string>Ensu</string>
+    <string>Ente SU</string>
 
     <key>CFBundleIdentifier</key>
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -24,7 +24,7 @@
     <string>0.1.0</string>
 
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>4</string>
 
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
@@ -57,10 +57,28 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Allow access to select photos and images to attach to chat messages.</string>
 
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>
         <true/>
     </dict>
+
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>

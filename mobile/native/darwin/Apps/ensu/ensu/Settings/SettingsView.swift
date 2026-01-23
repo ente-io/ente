@@ -12,61 +12,50 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var query: String = ""
+    @State private var showSignOutConfirm = false
 
     var body: some View {
         NavigationStack {
-            List {
-                if let email, isLoggedIn, trimmedQuery.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Signed in as")
+            ScrollView {
+                VStack(alignment: .leading, spacing: EnsuSpacing.lg) {
+                    if let email, isLoggedIn, trimmedQuery.isEmpty {
+                        signedInCard(email: email)
+                    }
+
+                    ForEach(filteredItems) { item in
+                        NavigationLink {
+                            item.destination
+                        } label: {
+                            settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    ForEach(filteredAccountItems) { item in
+                        Button(action: item.action) {
+                            settingsCard(title: item.title, subtitle: item.subtitle, showsChevron: false)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    if shouldShowSignInRow {
+                        Button(action: onSignIn) {
+                            settingsCard(title: signInTitle, subtitle: signInSubtitle, showsChevron: false)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    if let endpointInfoText {
+                        Text(endpointInfoText)
                             .font(EnsuTypography.small)
                             .foregroundStyle(EnsuColor.textMuted)
-                        Text(email)
-                            .font(EnsuTypography.body)
-                            .foregroundStyle(EnsuColor.textPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(EnsuSpacing.lg)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(EnsuColor.fillFaint)
-                    .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
-                    .listRowInsets(EdgeInsets(top: 0, leading: EnsuSpacing.lg, bottom: EnsuSpacing.md, trailing: EnsuSpacing.lg))
-                    .listRowBackground(EnsuColor.backgroundBase)
-                }
-
-                ForEach(filteredItems) { item in
-                    NavigationLink {
-                        item.destination
-                    } label: {
-                        settingsRow(title: item.title, subtitle: item.subtitle)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 8)
                     }
                 }
-
-                ForEach(filteredAccountItems) { item in
-                    Button(action: item.action) {
-                        settingsRow(title: item.title, subtitle: item.subtitle)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if shouldShowSignInRow {
-                    Button(action: onSignIn) {
-                        settingsRow(title: signInTitle, subtitle: signInSubtitle)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                if let endpointInfoText {
-                    Text(endpointInfoText)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.textMuted)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 8)
-                        .listRowBackground(EnsuColor.backgroundBase)
-                }
+                .padding(EnsuSpacing.lg)
             }
-            .scrollContentBackground(.hidden)
             .background(EnsuColor.backgroundBase)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always))
             .navigationBarTitleDisplayMode(.inline)
@@ -79,6 +68,14 @@ struct SettingsView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Close") { dismiss() }
                 }
+            }
+            .alert("Sign out of Ente SU?", isPresented: $showSignOutConfirm) {
+                Button("Sign Out", role: .destructive) {
+                    onSignOut()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will stop syncing on this device.")
             }
         }
     }
@@ -95,14 +92,14 @@ struct SettingsView: View {
         guard isLoggedIn else { return [] }
         return [
             SettingsActionItem(
-                title: "Sign Out",
-                subtitle: "Stop syncing this device",
-                action: onSignOut
-            ),
-            SettingsActionItem(
                 title: "Delete Account",
                 subtitle: "Email support to delete your account",
                 action: { openDeleteAccountEmail() }
+            ),
+            SettingsActionItem(
+                title: "Sign Out",
+                subtitle: "Stop syncing this device",
+                action: { showSignOutConfirm = true }
             )
         ]
     }
@@ -158,8 +155,24 @@ struct SettingsView: View {
         openURL(url)
     }
 
-    private func settingsRow(title: String, subtitle: String?) -> some View {
-        HStack {
+    private func signedInCard(email: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Signed in as")
+                .font(EnsuTypography.small)
+                .foregroundStyle(EnsuColor.textMuted)
+            Text(email)
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(EnsuSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(EnsuColor.fillFaint)
+        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
+    }
+
+    private func settingsCard(title: String, subtitle: String?, showsChevron: Bool) -> some View {
+        HStack(spacing: EnsuSpacing.md) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(EnsuTypography.body)
@@ -171,13 +184,18 @@ struct SettingsView: View {
                 }
             }
             Spacer()
-            Image("ArrowRight01Icon")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 18)
-                .foregroundStyle(EnsuColor.textMuted)
+            if showsChevron {
+                Image("ArrowRight01Icon")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+                    .foregroundStyle(EnsuColor.textMuted)
+            }
         }
-        .padding(.vertical, 6)
+        .padding(EnsuSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(EnsuColor.fillFaint)
+        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
     }
 }
 

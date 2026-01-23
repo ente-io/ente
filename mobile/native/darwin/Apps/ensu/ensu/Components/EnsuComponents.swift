@@ -14,11 +14,11 @@ struct PrimaryButton: View {
             ZStack {
                 if isLoading {
                     ProgressView()
-                        .tint(.white)
+                        .tint(EnsuColor.backgroundBase)
                 } else {
                     Text(text)
                         .font(EnsuFont.ui(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(EnsuColor.backgroundBase)
                 }
             }
             .frame(maxWidth: .infinity)

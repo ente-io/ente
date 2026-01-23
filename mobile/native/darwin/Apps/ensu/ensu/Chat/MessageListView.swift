@@ -10,6 +10,7 @@ struct MessageListView: View {
     let streamingResponse: String
     let streamingParentId: UUID?
     let isGenerating: Bool
+    let sessionId: UUID?
     let keyboardHeight: CGFloat
     let emptyStateTitle: String
     let emptyStateSubtitle: String?
@@ -105,6 +106,10 @@ struct MessageListView: View {
                 .onChange(of: messages.count) { _ in
                     scrollToBottom(scrollProxy)
                 }
+                .onChange(of: sessionId) { _ in
+                    autoScrollEnabled = true
+                    scrollToBottom(scrollProxy, force: true)
+                }
                 .onChange(of: streamingResponse) { newValue in
                     #if os(iOS)
                     if isGenerating {
@@ -169,7 +174,28 @@ struct MessageListView: View {
     private func openAttachment(_ attachment: ChatAttachment) {
         guard let url = attachment.url else { return }
         guard FileManager.default.fileExists(atPath: url.path) else { return }
-        previewItem = AttachmentPreviewItem(url: url)
+
+        let tempDir = FileManager.default.temporaryDirectory
+        let fileName = sanitizedAttachmentName(attachment)
+        let previewUrl = tempDir.appendingPathComponent(fileName)
+
+        do {
+            if FileManager.default.fileExists(atPath: previewUrl.path) {
+                try FileManager.default.removeItem(at: previewUrl)
+            }
+            try FileManager.default.copyItem(at: url, to: previewUrl)
+            previewItem = AttachmentPreviewItem(url: previewUrl)
+        } catch {
+            previewItem = AttachmentPreviewItem(url: url)
+        }
+    }
+
+    private func sanitizedAttachmentName(_ attachment: ChatAttachment) -> String {
+        let rawName = attachment.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let baseName = rawName.isEmpty ? attachment.id.uuidString : rawName
+        let invalidCharacters = CharacterSet(charactersIn: "/\\:")
+        let sanitized = baseName.components(separatedBy: invalidCharacters).joined(separator: "-")
+        return sanitized.isEmpty ? attachment.id.uuidString : sanitized
     }
 }
 
@@ -321,12 +347,7 @@ private struct AssistantMessageBubbleView: View {
     let onBranchChange: (Int) -> Void
     let onOpenAttachment: (ChatAttachment) -> Void
 
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
-        let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
-        let bubbleFill = colorScheme == .dark ? EnsuColor.fillFaint : EnsuColor.border.opacity(0.2)
-
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
                 VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
@@ -339,9 +360,8 @@ private struct AssistantMessageBubbleView: View {
                             .foregroundStyle(EnsuColor.textMuted)
                     }
                 }
-                .padding(EnsuSpacing.md)
-                .background(bubbleFill)
-                .clipShape(bubbleShape)
+                .padding(.vertical, EnsuSpacing.md)
+                .padding(.horizontal, EnsuSpacing.sm)
                 #if os(iOS)
                 .contextMenu {
                     Button("Copy") {
@@ -366,9 +386,10 @@ private struct AssistantMessageBubbleView: View {
                         )
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, EnsuSpacing.sm)
             }
-
-            Spacer(minLength: EnsuSpacing.messageBubbleInset)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -377,12 +398,8 @@ private struct StreamingBubbleView: View {
     let text: String
 
     @State private var cursorOpacity: Double = 1
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        let bubbleShape = RoundedRectangle(cornerRadius: 18, style: .continuous)
-        let bubbleFill = colorScheme == .dark ? EnsuColor.fillFaint : EnsuColor.border.opacity(0.2)
-
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
                 VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
@@ -403,12 +420,10 @@ private struct StreamingBubbleView: View {
                         }
                     }
                 }
-                .padding(EnsuSpacing.md)
-                .background(bubbleFill)
-                .clipShape(bubbleShape)
+                .padding(.vertical, EnsuSpacing.md)
+                .padding(.horizontal, EnsuSpacing.sm)
             }
-
-            Spacer(minLength: EnsuSpacing.messageBubbleInset)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

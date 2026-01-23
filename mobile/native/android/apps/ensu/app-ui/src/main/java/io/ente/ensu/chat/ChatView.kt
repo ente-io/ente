@@ -631,19 +631,13 @@ private fun AssistantMessageBubble(
     val haptic = LocalHapticFeedback.current
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
-    val bubbleShape = RoundedCornerShape(18.dp)
-    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
-
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(end = EnsuSpacing.messageBubbleInset.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
         Box {
             Column(
                 modifier = Modifier
-                    .background(bubbleFill, bubbleShape)
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { offset ->
@@ -653,7 +647,7 @@ private fun AssistantMessageBubble(
                             }
                         )
                     }
-                    .padding(EnsuSpacing.md.dp)
+                    .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
             ) {
                 MarkdownView(markdown = message.text, enableSelection = false)
 
@@ -770,19 +764,12 @@ private fun MessageActionsMenu(
 
 @Composable
 private fun StreamingMessageBubble(text: String) {
-    val bubbleShape = RoundedCornerShape(18.dp)
-    val bubbleFill = if (isSystemInDarkTheme()) EnsuColor.fillFaint() else EnsuColor.border().copy(alpha = 0.2f)
-
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(end = EnsuSpacing.messageBubbleInset.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
         Column(
-            modifier = Modifier
-                .background(bubbleFill, bubbleShape)
-                .padding(EnsuSpacing.md.dp)
+            modifier = Modifier.padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
         ) {
             if (text.isBlank()) {
                 LoadingDotsText()

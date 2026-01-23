@@ -94,12 +94,14 @@ struct SessionDrawerView: View {
     }
 
     private func sessionTile(_ session: ChatSession) -> some View {
-        HStack(alignment: .center, spacing: EnsuSpacing.sm) {
+        let title = ChatViewModel.sessionTitle(from: session.title, fallback: "New chat")
+
+        return HStack(alignment: .center, spacing: EnsuSpacing.sm) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(session.title)
+                Text(title)
                     .font(session.id == currentSessionId ? EnsuFont.ui(size: 16, weight: .semibold) : EnsuTypography.small)
                     .foregroundStyle(EnsuColor.textPrimary)
-                Text(session.lastMessage)
+                Text(session.lastMessage.isEmpty ? "Nothing here" : session.lastMessage)
                     .font(EnsuTypography.mini)
                     .foregroundStyle(EnsuColor.textMuted)
                     .lineLimit(1)

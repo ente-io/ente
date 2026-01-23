@@ -18,7 +18,6 @@ struct ChatView: View {
     @State private var isOpeningDeveloperSettings = false
     @State private var showDeveloperAlert = false
     @State private var showDeveloperSettings = false
-    @State private var showSignOutAlert = false
     @State private var showAttachmentDownloads = false
     @State private var didAutoFocusInput = false
     @State private var focusRequestId = 0
@@ -106,8 +105,9 @@ struct ChatView: View {
                 isLoggedIn: appState.isLoggedIn,
                 email: CredentialStore.shared.email,
                 onSignOut: {
+                    appState.logout()
                     showSettings = false
-                    showSignOutAlert = true
+                    isDrawerOpen = false
                 },
                 onSignIn: {
                     showSettings = false
@@ -151,17 +151,6 @@ struct ChatView: View {
                 secondaryButton: .cancel()
             )
         }
-        .alert("Sign out", isPresented: $showSignOutAlert) {
-            Button("Sign Out", role: .destructive) {
-                appState.logout()
-                isDrawerOpen = false
-            }
-            Button("Cancel", role: .cancel) {
-                isDrawerOpen = false
-            }
-        } message: {
-            Text("Are you sure you want to sign out?")
-        }
         .overlay(alignment: .bottom) {
             if let toastMessage {
                 ToastView(message: toastMessage.text)
@@ -175,7 +164,7 @@ struct ChatView: View {
     private func mainContent(showsMenuButton: Bool) -> some View {
         VStack(spacing: 0) {
             ChatAppBar(
-                sessionTitle: viewModel.currentSession?.title ?? "New chat",
+                sessionTitle: viewModel.currentSessionId.map { viewModel.sessionTitle(for: $0) } ?? "New chat",
                 showBrand: viewModel.messages.isEmpty,
                 showSignIn: !appState.isLoggedIn,
                 showsMenuButton: showsMenuButton,
@@ -212,6 +201,7 @@ struct ChatView: View {
                             streamingResponse: viewModel.displayedStreamingResponse,
                             streamingParentId: viewModel.displayedStreamingParentId,
                             isGenerating: viewModel.isGenerating,
+                            sessionId: viewModel.currentSessionId,
                             keyboardHeight: keyboard.height,
                             emptyStateTitle: "Welcome",
                             emptyStateSubtitle: "Start typing to begin a conversation",
@@ -417,8 +407,12 @@ private struct DownloadOnboardingView: View {
                     hapticMedium()
                     onDownload()
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(EnsuColor.accent)
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.backgroundBase)
+                .frame(maxWidth: 200)
+                .padding(.vertical, EnsuSpacing.md)
+                .background(EnsuColor.accent)
+                .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.button))
 
                 Text(sizeText)
                     .font(EnsuTypography.small)

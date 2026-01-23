@@ -313,7 +313,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/scripts/build-rust.sh\"\n";
+			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
 		};
 		25484CE4873ED7217FB27990 /* Build Rust (ensu_uniffi) */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -330,7 +330,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/scripts/build-rust.sh\"\n";
+			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -503,6 +503,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ensu/Info.plist;
+				ENTE_API_ENDPOINT = "";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ensu";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -563,6 +564,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ensu/Info.plist;
+				ENTE_API_ENDPOINT = "";
 				INFOPLIST_KEY_CFBundleDisplayName = "Ensu";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

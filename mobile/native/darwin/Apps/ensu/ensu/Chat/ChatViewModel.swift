@@ -418,8 +418,10 @@ struct DownloadToastState: Identifiable, Equatable {
 final class ChatViewModel: ObservableObject {
     private static let defaultTemperature: Float = 0.7
     private static let systemPrompt = "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points."
-    private static let sessionTitleMaxLength = 50
+    private static let sessionTitleMaxLength = 40
+    private static let sessionSummaryMaxWords = 5
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
+    private static let sessionSummarySystemPrompt = "You are a title generator. Summarize this conversation into a 4-5 word chat title. Reply with only the title, no quotes."
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
 
@@ -537,10 +539,12 @@ final class ChatViewModel: ObservableObject {
         let sessions: [ChatSession] = loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
             let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
-            let firstMessage = messages.first?.text ?? ""
-            let lastMessage = messages.last?.text ?? ""
+            let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
+            let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
+            let lastMessage = sortedMessages.last?.text ?? ""
             let summary = summaries[session.uuid]
-            let title = summary ?? Self.sessionTitle(from: firstMessage, fallback: session.title)
+            let seedTitle = summary ?? firstUserMessage
+            let title = Self.sessionTitle(from: seedTitle, fallback: session.title)
             return ChatSession(
                 id: id,
                 title: title,
@@ -615,7 +619,8 @@ final class ChatViewModel: ObservableObject {
     }
 
     func sessionTitle(for sessionId: UUID) -> String {
-        sessions.first { $0.id == sessionId }?.title ?? "Chat"
+        guard let title = sessions.first(where: { $0.id == sessionId })?.title else { return "Chat" }
+        return Self.sessionTitle(from: title, fallback: "Chat")
     }
 
     func startNewSession() {
@@ -1402,11 +1407,15 @@ final class ChatViewModel: ObservableObject {
         let loaded = (try? chatDb.listSessions()) ?? []
         let refreshed: [ChatSession] = loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
-            let lastMessage = (try? chatDb.getMessages(sessionUuid: session.uuid))?.last?.text ?? ""
+            let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
+            let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
+            let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
+            let lastMessage = sortedMessages.last?.text ?? ""
             let summary = sessionSummaries[session.uuid]
+            let title = summary ?? Self.sessionTitle(from: firstUserMessage, fallback: session.title)
             return ChatSession(
                 id: id,
-                title: summary ?? session.title,
+                title: title,
                 lastMessage: lastMessage,
                 updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
             )
@@ -1610,7 +1619,13 @@ final class ChatViewModel: ObservableObject {
 
     private func scheduleSessionSummary(for sessionId: UUID) {
         sessionSummaryTask?.cancel()
-        sessionSummaryTask = Task(priority: .utility) { [weak self] in
+        guard sessionSummaries[sessionId.uuidString] == nil else { return }
+        guard let summaryInput = buildSessionSummaryInput(sessionId: sessionId) else { return }
+        let existingSummary = sessionSummaries[sessionId.uuidString]
+        let target = modelSettings.currentTarget()
+        let provider = provider
+
+        sessionSummaryTask = Task.detached(priority: .utility) { [weak self] in
             guard let self else { return }
             do {
                 try await Task.sleep(nanoseconds: 200_000_000)
@@ -1618,25 +1633,44 @@ final class ChatViewModel: ObservableObject {
                 return
             }
             guard !Task.isCancelled else { return }
-            await self.generateSessionSummaryIfNeeded(sessionId: sessionId)
+
+            let summary = await Self.generateSessionSummary(
+                input: summaryInput.text,
+                fallback: summaryInput.fallback,
+                existingSummary: existingSummary,
+                provider: provider,
+                target: target
+            )
+            guard let summary else { return }
+
+            await MainActor.run {
+                self.applySessionSummary(sessionId: sessionId, summary: summary)
+            }
         }
     }
 
-    @MainActor
-    private func generateSessionSummaryIfNeeded(sessionId: UUID) {
-        guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return }
-        guard let firstUser = nodes.sorted(by: { $0.timestamp < $1.timestamp }).first(where: { $0.role == .user }) else {
-            return
-        }
-        let summary = Self.summarizeQuestion(firstUser.text)
-        guard !summary.isEmpty else { return }
-        if sessionSummaries[sessionId.uuidString] == summary { return }
-        sessionSummaries[sessionId.uuidString] = summary
+    private func buildSessionSummaryInput(sessionId: UUID) -> (text: String, fallback: String)? {
+        guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return nil }
+        let sorted = nodes.sorted(by: { $0.timestamp < $1.timestamp })
+        guard let firstUser = sorted.first(where: { $0.role == .user }) else { return nil }
+        let assistants = sorted.filter { $0.role == .assistant }
+        guard assistants.count == 1, let firstAssistant = assistants.first else { return nil }
+
+        let input = "User: \(firstUser.text)\nAssistant: \(firstAssistant.text)"
+        let fallback = Self.summarizeQuestion(firstUser.text)
+        return (text: input, fallback: fallback)
+    }
+
+    private func applySessionSummary(sessionId: UUID, summary: String) {
+        let sanitized = Self.sessionTitle(from: summary, fallback: "New chat")
+        guard !sanitized.isEmpty else { return }
+        if sessionSummaries[sessionId.uuidString] == sanitized { return }
+        sessionSummaries[sessionId.uuidString] = sanitized
         persistSessionSummaries()
         sessions = sessions.map { session in
             guard session.id == sessionId else { return session }
             var updated = session
-            updated.title = summary
+            updated.title = sanitized
             return updated
         }
     }
@@ -1652,27 +1686,76 @@ final class ChatViewModel: ObservableObject {
     }
 
     private static func summarizeQuestion(_ text: String) -> String {
-        let cleaned = text
-            .replacingOccurrences(of: "[\\r\\n]+", with: " ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleaned = sanitizeTitleText(text)
         guard !cleaned.isEmpty else { return "" }
         let words = cleaned.split(separator: " ").map {
             String($0).trimmingCharacters(in: .punctuationCharacters)
         }.filter { !$0.isEmpty }
         guard !words.isEmpty else { return "" }
-        let summaryWords = words.prefix(6)
+        let summaryWords = words.prefix(Self.sessionSummaryMaxWords)
         return summaryWords.joined(separator: " ")
     }
 
-    private static func sessionTitle(from text: String, fallback: String = "New chat") -> String {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    private static func sanitizeTitleText(_ text: String) -> String {
+        text
+            .replacingOccurrences(of: "[\\r\\n\\t]+", with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func sessionTitle(from text: String, fallback: String = "New chat") -> String {
+        let trimmed = sanitizeTitleText(text)
         guard !trimmed.isEmpty else { return fallback }
         if trimmed.count <= Self.sessionTitleMaxLength {
             return trimmed
         }
         let prefix = trimmed.prefix(Self.sessionTitleMaxLength)
         return String(prefix).trimmingCharacters(in: .whitespacesAndNewlines) + "…"
+    }
+
+    private static func generateSessionSummary(
+        input: String,
+        fallback: String,
+        existingSummary: String?,
+        provider: InferenceRsProvider,
+        target: InferenceModelTarget
+    ) async -> String? {
+        if let existingSummary, !existingSummary.isEmpty { return nil }
+        let cleanedInput = sanitizeTitleText(input)
+        guard !cleanedInput.isEmpty else { return sessionTitle(from: fallback, fallback: fallback) }
+
+        let messages = [
+            InferenceMessage(text: sessionSummarySystemPrompt, role: .system, hasAttachments: false),
+            InferenceMessage(text: cleanedInput, role: .user, hasAttachments: false)
+        ]
+
+        let bufferLock = NSLock()
+        var buffer = ""
+
+        do {
+            _ = try await provider.generateChat(
+                target: target,
+                messages: messages,
+                imageFiles: [],
+                temperature: 0.2,
+                maxTokens: 64
+            ) { token in
+                bufferLock.lock()
+                buffer.append(token)
+                bufferLock.unlock()
+            }
+        } catch {
+            let fallbackSummary = summarizeQuestion(fallback)
+            return fallbackSummary.isEmpty ? nil : sessionTitle(from: fallbackSummary, fallback: fallback)
+        }
+
+        let raw = sanitizeTitleText(buffer)
+        guard !raw.isEmpty else { return nil }
+        let words = raw.split(separator: " ").map { String($0) }.filter { !$0.isEmpty }
+        guard !words.isEmpty else { return nil }
+        let summaryWords = words.prefix(Self.sessionSummaryMaxWords)
+        let summary = summaryWords.joined(separator: " ")
+        return sessionTitle(from: summary, fallback: fallback)
     }
 
     private func isCancellation(_ error: Error) -> Bool {
