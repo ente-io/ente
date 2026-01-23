@@ -563,6 +563,7 @@ export default function PublicCollectionGallery() {
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
+            message={t("upload_dropzone_hint_public_album")}
         >
             {layout === "trip" ? (
                 <TripLayout
