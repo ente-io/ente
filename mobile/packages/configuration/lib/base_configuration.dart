@@ -414,16 +414,20 @@ class BaseConfiguration {
       _secretKey = await _secureStorage.read(key: secretKeyKey);
     } catch (e, s) {
       _logger.severe("Configuration init failed", e, s);
-      /*
-      Check if it's a known is related to reading secret from secure storage
-      on android https://github.com/mogol/flutter_secure_storage/issues/541
-       */
       if (e is PlatformException) {
         final PlatformException error = e;
+        // Android: BadPaddingException from corrupted keystore
+        // https://github.com/mogol/flutter_secure_storage/issues/541
         final bool isBadPaddingError =
             error.toString().contains('BadPaddingException') ||
                 (error.message ?? '').contains('BadPaddingException');
-        if (isBadPaddingError) {
+        // Linux: libsecret errors when keyring is locked or unavailable
+        // https://github.com/ente-io/ente/issues/6564
+        final bool isLibsecretError =
+            (error.message ?? '').contains('Libsecret') ||
+                (error.message ?? '').contains('Failed to unlock') ||
+                (error.message ?? '').contains('keyring');
+        if (isBadPaddingError || isLibsecretError) {
           await logout(autoLogout: true);
           return;
         }

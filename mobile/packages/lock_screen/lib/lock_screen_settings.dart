@@ -6,8 +6,10 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_api/ente_crypto_api.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
+import "package:logging/logging.dart";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:local_auth/local_auth.dart";
 import "package:privacy_screen/privacy_screen.dart";
@@ -18,6 +20,7 @@ class LockScreenSettings {
 
   static final LockScreenSettings instance =
       LockScreenSettings._privateConstructor();
+  static final _logger = Logger("LockScreenSettings");
   static const password = "ls_password";
   static const pin = "ls_pin";
   static const saltKey = "ls_salt";
@@ -175,13 +178,23 @@ class LockScreenSettings {
   }
 
   Future<Uint8List?> getSalt() async {
-    final String? salt = await _secureStorage.read(key: saltKey);
-    if (salt == null) return null;
-    return base64Decode(salt);
+    try {
+      final String? salt = await _secureStorage.read(key: saltKey);
+      if (salt == null) return null;
+      return base64Decode(salt);
+    } on PlatformException catch (e) {
+      _logger.severe("Failed to read salt from secure storage", e);
+      return null;
+    }
   }
 
   Future<String?> getPin() async {
-    return _secureStorage.read(key: pin);
+    try {
+      return await _secureStorage.read(key: pin);
+    } on PlatformException catch (e) {
+      _logger.severe("Failed to read pin from secure storage", e);
+      return null;
+    }
   }
 
   Future<void> setPassword(String pass) async {
@@ -203,21 +216,40 @@ class LockScreenSettings {
   }
 
   Future<String?> getPassword() async {
-    return _secureStorage.read(key: password);
+    try {
+      return await _secureStorage.read(key: password);
+    } on PlatformException catch (e) {
+      _logger.severe("Failed to read password from secure storage", e);
+      return null;
+    }
   }
 
   Future<void> removePinAndPassword() async {
-    await _secureStorage.delete(key: saltKey);
-    await _secureStorage.delete(key: pin);
-    await _secureStorage.delete(key: password);
+    try {
+      await _secureStorage.delete(key: saltKey);
+      await _secureStorage.delete(key: pin);
+      await _secureStorage.delete(key: password);
+    } on PlatformException catch (e) {
+      _logger.severe("Failed to remove pin/password from secure storage", e);
+    }
   }
 
   Future<bool> isPinSet() async {
-    return await _secureStorage.containsKey(key: pin);
+    try {
+      return await _secureStorage.containsKey(key: pin);
+    } on PlatformException catch (e) {
+      _logger.severe("Failed to check pin in secure storage", e);
+      return false;
+    }
   }
 
   Future<bool> isPasswordSet() async {
-    return await _secureStorage.containsKey(key: password);
+    try {
+      return await _secureStorage.containsKey(key: password);
+    } on PlatformException catch (e) {
+      _logger.severe("Failed to check password in secure storage", e);
+      return false;
+    }
   }
 
   Future<bool> shouldShowLockScreen() async {
