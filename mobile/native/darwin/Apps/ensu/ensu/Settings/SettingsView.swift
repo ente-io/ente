@@ -57,8 +57,12 @@ struct SettingsView: View {
                 .padding(EnsuSpacing.lg)
             }
             .background(EnsuColor.backgroundBase)
+            #if os(iOS)
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always))
             .navigationBarTitleDisplayMode(.inline)
+            #else
+            .searchable(text: $query)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Settings")

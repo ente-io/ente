@@ -12,6 +12,7 @@ enum PlatformKeyboardType {
     case `default`
     case emailAddress
     case numberPad
+    case decimalPad
     case URL
 }
 

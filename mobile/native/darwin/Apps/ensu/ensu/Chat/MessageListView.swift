@@ -1,6 +1,10 @@
 #if canImport(EnteCore)
 import SwiftUI
+#if os(macOS)
+import QuickLookUI
+#else
 import QuickLook
+#endif
 #if os(iOS)
 import UIKit
 #endif
@@ -307,7 +311,7 @@ private struct QuickLookPreview: NSViewRepresentable {
     let url: URL
 
     func makeNSView(context: Context) -> QLPreviewView {
-        let view = QLPreviewView(frame: .zero, style: .normal)
+        let view = QLPreviewView(frame: .zero, style: .normal)!
         view.autostarts = true
         view.previewItem = url as NSURL
         return view

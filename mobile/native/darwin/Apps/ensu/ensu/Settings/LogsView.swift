@@ -29,7 +29,9 @@ struct LogsView: View {
                     content
                 }
                 .background(EnsuColor.backgroundBase)
+                #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
+                #endif
                 .toolbar {
                     toolbarContent
                 }
@@ -39,7 +41,9 @@ struct LogsView: View {
                         content
                     }
                     .background(EnsuColor.backgroundBase)
+                    #if os(iOS)
                     .navigationBarTitleDisplayMode(.inline)
+                    #endif
                     .toolbar {
                         toolbarContent
                         ToolbarItem(placement: .cancellationAction) {
@@ -344,7 +348,9 @@ private struct LogDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .navigationTitle("Log details")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }

@@ -52,7 +52,9 @@ struct ModelSettingsView: View {
         Group {
             if embeddedInNavigation {
                 content
+                    #if os(iOS)
                     .navigationBarTitleDisplayMode(.inline)
+                    #endif
                     .toolbar {
                         ToolbarItem(placement: .principal) {
                             Text("Model Settings")
