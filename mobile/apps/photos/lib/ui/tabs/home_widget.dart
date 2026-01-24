@@ -53,7 +53,6 @@ import "package:photos/states/user_details_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
-import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
@@ -72,6 +71,7 @@ import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
+import "package:photos/ui/social/feed_screen.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -355,19 +355,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       // Check for action=join parameter to show join dialog
       final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
           Configuration.instance.isLoggedIn();
-
-      // Check for trip layout and show in webview
-      if (collection.pubMagicMetadata.layout == "trip") {
-        await routeToPage(
-          context,
-          WebPage(
-            collection.displayName,
-            uri.toString(),
-            canOpenInBrowser: true,
-          ),
-        );
-        return;
-      }
 
       final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs[0];
@@ -1058,6 +1045,14 @@ class _HomeWidgetState extends State<HomeWidget> {
             albumId: albumId,
           ),
         );
+        return;
+      }
+      if (uri != null && uri.host.toLowerCase() == "feed") {
+        if (!Configuration.instance.isLoggedIn()) {
+          return;
+        }
+        // ignore: unawaited_futures
+        routeToPage(context, const FeedScreen());
         return;
       }
       if (payload.toLowerCase().contains("onthisday")) {

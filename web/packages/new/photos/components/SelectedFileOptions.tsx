@@ -1,19 +1,22 @@
-import ClockIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
-import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
-import MoveIcon from "@mui/icons-material/ArrowForward";
+import {
+    AddSquareIcon,
+    ArrowRight02Icon,
+    Clock02Icon,
+    Delete02Icon,
+    Download01Icon,
+    Download05Icon,
+    Location01Icon,
+    RemoveCircleIcon,
+    Time04Icon,
+    Unarchive03Icon,
+    ViewIcon,
+    ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DownloadIcon from "@mui/icons-material/Download";
-import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
-import RestoreIcon from "@mui/icons-material/Restore";
-import UnArchiveIcon from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
@@ -22,6 +25,7 @@ import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
+import { StarOffIcon } from "ente-new/photos/components/icons/StarOffIcon";
 import {
     PseudoCollectionID,
     type CollectionSummary,
@@ -35,6 +39,7 @@ export type FileOp =
     | "download"
     | "fixTime"
     | "favorite"
+    | "unfavorite"
     | "archive"
     | "unarchive"
     | "hide"
@@ -70,6 +75,10 @@ interface SelectedFileOptionsProps {
      * The subset of {@link selectedFileCount} that are also owned by the user.
      */
     selectedOwnFileCount: number;
+    /**
+     * The number of selected files that are currently favorited.
+     */
+    selectedFavoriteCount: number;
     /**
      * Called when the user clears the selection by pressing the cancel button
      * on the selection bar.
@@ -175,6 +184,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     collectionSummary,
     selectedFileCount,
     selectedOwnFileCount,
+    selectedFavoriteCount,
     onClearSelection,
     onRemoveFilesFromCollection,
     onOpenCollectionSelector,
@@ -192,6 +202,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         !!collectionSummary?.attributes.has("userFavorites");
 
     const handleFavorite = createFileOpHandler("favorite");
+    const handleUnfavorite = createFileOpHandler("unfavorite");
 
     const handleFixTime = createFileOpHandler("fixTime");
 
@@ -243,6 +254,18 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const isSharedOutgoing =
         collectionSummary?.attributes.has("sharedOutgoing");
     const isRemovingOthers = selectedFileCount != selectedOwnFileCount;
+    const favoriteAction =
+        selectedFavoriteCount === 0
+            ? "favorite"
+            : selectedFavoriteCount === selectedFileCount
+              ? "unfavorite"
+              : "none";
+    const favoriteActionButton =
+        favoriteAction === "favorite" ? (
+            <FavoriteButton onClick={handleFavorite} />
+        ) : favoriteAction === "unfavorite" ? (
+            <UnfavoriteButton onClick={handleUnfavorite} />
+        ) : null;
 
     const handleRemoveFromCollection = () => {
         if (!collection) return;
@@ -335,7 +358,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
                 {isInSearchMode ? (
                     <>
-                        <FavoriteButton onClick={handleFavorite} />
+                        {favoriteActionButton}
                         <FixTimeButton onClick={handleFixTime} />
                         {onEditLocation && selectedOwnFileCount > 0 && (
                             <EditLocationButton onClick={onEditLocation} />
@@ -355,7 +378,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : barMode == "people" ? (
                     <>
-                        <FavoriteButton onClick={handleFavorite} />
+                        {favoriteActionButton}
                         <DownloadButton onClick={handleDownload} />
                         <AddToCollectionButton
                             onClick={handleAddToCollection}
@@ -414,11 +437,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     </>
                 ) : (
                     <>
-                        {!isUserFavorites &&
-                            collectionSummary?.id !=
-                                PseudoCollectionID.archiveItems && (
-                                <FavoriteButton onClick={handleFavorite} />
-                            )}
+                        {collectionSummary?.id !=
+                            PseudoCollectionID.archiveItems &&
+                            favoriteActionButton}
                         <FixTimeButton onClick={handleFixTime} />
                         {onEditLocation && selectedOwnFileCount > 0 && (
                             <EditLocationButton onClick={onEditLocation} />
@@ -461,7 +482,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("download")}>
         <IconButton {...{ onClick }}>
-            <DownloadIcon />
+            <HugeiconsIcon icon={Download01Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -474,10 +495,18 @@ const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     </Tooltip>
 );
 
+const UnfavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("un_favorite")}>
+        <IconButton {...{ onClick }}>
+            <StarOffIcon fontSize="small" />
+        </IconButton>
+    </Tooltip>
+);
+
 const ArchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("archive")}>
         <IconButton {...{ onClick }}>
-            <ArchiveIcon />
+            <HugeiconsIcon icon={Download05Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -485,7 +514,7 @@ const ArchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const UnarchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("unarchive")}>
         <IconButton {...{ onClick }}>
-            <UnArchiveIcon />
+            <HugeiconsIcon icon={Unarchive03Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -493,7 +522,7 @@ const UnarchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const HideButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("hide")}>
         <IconButton {...{ onClick }}>
-            <VisibilityOffOutlinedIcon />
+            <HugeiconsIcon icon={ViewOffSlashIcon} />
         </IconButton>
     </Tooltip>
 );
@@ -501,7 +530,7 @@ const HideButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const UnhideButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("unhide")}>
         <IconButton {...{ onClick }}>
-            <VisibilityOutlinedIcon />
+            <HugeiconsIcon icon={ViewIcon} />
         </IconButton>
     </Tooltip>
 );
@@ -509,7 +538,7 @@ const UnhideButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const DeleteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete")}>
         <IconButton {...{ onClick }} sx={{ color: "critical.main" }}>
-            <DeleteIcon />
+            <HugeiconsIcon icon={Delete02Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -517,7 +546,7 @@ const DeleteButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const RestoreButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("restore")}>
         <IconButton {...{ onClick }}>
-            <RestoreIcon />
+            <HugeiconsIcon icon={Clock02Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -525,7 +554,7 @@ const RestoreButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const DeletePermanentlyButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete_permanently")}>
         <IconButton {...{ onClick }} sx={{ color: "critical.main" }}>
-            <DeleteIcon />
+            <HugeiconsIcon icon={Delete02Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -533,7 +562,7 @@ const DeletePermanentlyButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("fix_creation_time")}>
         <IconButton {...{ onClick }}>
-            <ClockIcon />
+            <HugeiconsIcon icon={Time04Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -541,7 +570,7 @@ const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const EditLocationButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("edit_location")}>
         <IconButton {...{ onClick }}>
-            <EditLocationAltIcon />
+            <HugeiconsIcon icon={Location01Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -549,7 +578,7 @@ const EditLocationButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const AddToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("add")}>
         <IconButton {...{ onClick }}>
-            <AddIcon />
+            <HugeiconsIcon icon={AddSquareIcon} />
         </IconButton>
     </Tooltip>
 );
@@ -565,7 +594,7 @@ const AddPersonButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const MoveToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("move")}>
         <IconButton {...{ onClick }}>
-            <MoveIcon />
+            <HugeiconsIcon icon={ArrowRight02Icon} />
         </IconButton>
     </Tooltip>
 );
@@ -573,7 +602,7 @@ const MoveToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const RemoveFromCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("remove")}>
         <IconButton {...{ onClick }}>
-            <RemoveIcon />
+            <HugeiconsIcon icon={RemoveCircleIcon} />
         </IconButton>
     </Tooltip>
 );

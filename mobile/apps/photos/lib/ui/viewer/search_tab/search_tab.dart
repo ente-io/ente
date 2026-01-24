@@ -108,7 +108,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     final searchTypes = SectionType.values.toList(growable: true);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 4),
       child: Stack(
         children: [
           FutureBuilder<List<List<SearchResult>>>(
@@ -227,17 +227,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   child: EnteLoadingWidget(),
                 );
               }
-            },
-          ),
-          ValueListenableBuilder(
-            valueListenable:
-                InheritedAllSectionsExamples.of(context).isDebouncingNotifier,
-            builder: (context, value, _) {
-              return value
-                  ? const EnteLoadingWidget(
-                      alignment: Alignment.topRight,
-                    )
-                  : const SizedBox.shrink();
             },
           ),
         ],

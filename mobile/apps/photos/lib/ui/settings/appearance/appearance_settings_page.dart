@@ -145,7 +145,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
     final colorScheme = getEnteColorScheme(context);
     return HugeIcon(
       icon: icon,
-      color: colorScheme.strokeBase,
+      color: colorScheme.menuItemIconStroke,
       size: 20,
     );
   }

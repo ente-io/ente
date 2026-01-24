@@ -89,7 +89,8 @@ class _ChangeReferralCodeContentState
       if (e is DioException) {
         if (e.response?.statusCode == 400) {
           setState(() {
-            _errorMessage = AppLocalizations.of(context).unavailableReferralCode;
+            _errorMessage =
+                AppLocalizations.of(context).unavailableReferralCode;
           });
         } else if (e.response?.statusCode == 429) {
           setState(() {

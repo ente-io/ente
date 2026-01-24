@@ -240,9 +240,8 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     // Show dialog asking if user wants to add instead of move
     final result = await showChoiceActionSheet(
       context,
-      title: "Can't move to shared albums",
-      body:
-          "Items can only be added to shared albums, not moved. Would you like to add instead?\n\n(i) This option is shown for internal users only",
+      title: AppLocalizations.of(context).cannotMoveToSharedAlbums,
+      body: AppLocalizations.of(context).cannotMoveToSharedAlbumsMessage,
       icon: Icons.info_outline,
       firstButtonLabel: AppLocalizations.of(context).add,
       secondButtonLabel: AppLocalizations.of(context).cancel,

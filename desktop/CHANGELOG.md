@@ -2,7 +2,8 @@
 
 ## v1.7.18 (unreleased)
 
--
+- Hide shared albums (remove internal flag).
+- .
 
 ## v1.7.17
 
