@@ -20,8 +20,7 @@ struct ChatView: View {
     @State private var showDeveloperSettings = false
     @State private var showAttachmentDownloads = false
     @State private var didAutoFocusInput = false
-    @State private var focusRequestId = 0
-    @State private var dismissKeyboardId = 0
+    @FocusState private var isInputFocused: Bool
     @State private var inputBarHeight: CGFloat = 0
     @State private var wasDrawerOpen = false
     @State private var didDismissKeyboard = false
@@ -72,7 +71,7 @@ struct ChatView: View {
             }
             .onChange(of: isDrawerOpen) { isOpen in
                 if isOpen {
-                    dismissKeyboardId += 1
+                    isInputFocused = false
                     wasDrawerOpen = true
                 } else if wasDrawerOpen {
                     let shouldRestoreFocus = viewModel.isModelDownloaded
@@ -82,7 +81,7 @@ struct ChatView: View {
                         && !showSettings
                         && !showDeveloperSettings
                     if shouldRestoreFocus {
-                        focusRequestId += 1
+                        requestInputFocus()
                     }
                     wasDrawerOpen = false
                 }
@@ -132,7 +131,7 @@ struct ChatView: View {
         .onChange(of: showSettings) { isPresented in
             if isPresented {
                 didDismissKeyboard = true
-                dismissKeyboardId += 1
+                isInputFocused = false
             }
         }
         .sheet(isPresented: $showAttachmentDownloads) {
@@ -221,6 +220,10 @@ struct ChatView: View {
                     },
                     onBranchChange: { message, delta in
                         viewModel.changeBranch(for: message, delta: delta)
+                    },
+                    onDismissKeyboard: {
+                        didDismissKeyboard = true
+                        isInputFocused = false
                     }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -242,8 +245,6 @@ struct ChatView: View {
                         editingMessage: editingMessage,
                         isProcessingAttachments: viewModel.isProcessingAttachments,
                         isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
-                        focusRequestId: focusRequestId,
-                        dismissKeyboardId: dismissKeyboardId,
                         onSend: {
                             viewModel.sendDraft()
                         },
@@ -267,21 +268,22 @@ struct ChatView: View {
                         },
                         onDismissKeyboard: {
                             didDismissKeyboard = true
-                        }
+                        },
+                        isFocused: $isInputFocused
                     )
                     .onPreferenceChange(InputBarHeightKey.self) { newValue in
                         inputBarHeight = newValue
                     }
                     .onAppear {
                         if shouldAutoFocus {
-                            focusRequestId += 1
+                            requestInputFocus()
                             didAutoFocusInput = true
                             didDismissKeyboard = false
                         }
                     }
                     .onChange(of: shouldAutoFocus) { newValue in
                         if newValue {
-                            focusRequestId += 1
+                            requestInputFocus()
                             didAutoFocusInput = true
                             didDismissKeyboard = false
                         }
@@ -346,6 +348,12 @@ struct ChatView: View {
             withAnimation(.easeIn(duration: 0.2)) {
                 toastMessage = nil
             }
+        }
+    }
+
+    private func requestInputFocus() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            isInputFocused = true
         }
     }
 

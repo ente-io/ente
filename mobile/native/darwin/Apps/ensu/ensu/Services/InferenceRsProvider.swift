@@ -52,9 +52,9 @@ final class InferenceRsProvider {
     private var contextHandle: ContextHandle?
     private var currentModelId: String?
     private var backendInitialized = false
-    private var currentJobId: Int64?
     private var downloadCancelled = false
     private var currentDownloadTask: URLSessionTask?
+    private var currentJobId: Int64?
 
     init(modelDir: URL) {
         self.modelDir = modelDir

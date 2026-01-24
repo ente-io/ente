@@ -421,7 +421,7 @@ final class ChatViewModel: ObservableObject {
     private static let sessionTitleMaxLength = 40
     private static let sessionSummaryMaxWords = 5
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
-    private static let sessionSummarySystemPrompt = "You are a title generator. Summarize this conversation into a 4-5 word chat title. Reply with only the title, no quotes."
+    private static let sessionSummarySystemPrompt = "You are a title generator. Rewrite the message in 4-5 words for a chat title. Reply with only the title, no quotes."
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
 
@@ -1137,6 +1137,35 @@ final class ChatViewModel: ObservableObject {
             let bufferLock = NSLock()
             var buffer = ""
             var tokenCount = 0
+            let uiUpdateInterval: TimeInterval = 0.05
+            var lastUiUpdate = Date.distantPast
+            var pendingSnapshot: String?
+            var updateWorkItem: DispatchWorkItem?
+
+            let scheduleStreamingUpdate = {
+                bufferLock.lock()
+                if updateWorkItem != nil {
+                    bufferLock.unlock()
+                    return
+                }
+                let workItem = DispatchWorkItem { [weak self] in
+                    guard let self else { return }
+                    bufferLock.lock()
+                    let snapshot = pendingSnapshot
+                    pendingSnapshot = nil
+                    updateWorkItem = nil
+                    lastUiUpdate = Date()
+                    bufferLock.unlock()
+                    guard let snapshot else { return }
+                    Task { @MainActor in
+                        guard self.activeGenerationId == generationId else { return }
+                        self.streamingResponse = snapshot
+                    }
+                }
+                updateWorkItem = workItem
+                bufferLock.unlock()
+                DispatchQueue.main.asyncAfter(deadline: .now() + uiUpdateInterval, execute: workItem)
+            }
 
             do {
                 let summary = try await provider.generateChat(
@@ -1144,19 +1173,37 @@ final class ChatViewModel: ObservableObject {
                     messages: messages,
                     imageFiles: prompt.imageFiles,
                     temperature: resolveTemperature(),
-                    maxTokens: target.maxTokens ?? 1024
-                ) { token in
-                    bufferLock.lock()
-                    buffer.append(token)
-                    tokenCount += self.estimateTokens(token)
-                    let snapshot = buffer
-                    bufferLock.unlock()
+                    maxTokens: target.maxTokens ?? 1024,
+                    onToken: { token in
+                        let tokenEstimate = max(1, token.count / 4)
+                        var snapshot = ""
+                        var shouldUpdateNow = false
 
-                    Task { @MainActor in
-                        guard self.activeGenerationId == generationId else { return }
-                        self.streamingResponse = snapshot
+                        bufferLock.lock()
+                        buffer.append(token)
+                        tokenCount += tokenEstimate
+                        snapshot = buffer
+                        pendingSnapshot = snapshot
+                        let now = Date()
+                        shouldUpdateNow = now.timeIntervalSince(lastUiUpdate) >= uiUpdateInterval
+                        if shouldUpdateNow {
+                            lastUiUpdate = now
+                            pendingSnapshot = nil
+                            updateWorkItem?.cancel()
+                            updateWorkItem = nil
+                        }
+                        bufferLock.unlock()
+
+                        if shouldUpdateNow {
+                            Task { @MainActor in
+                                guard self.activeGenerationId == generationId else { return }
+                                self.streamingResponse = snapshot
+                            }
+                        } else {
+                            scheduleStreamingUpdate()
+                        }
                     }
-                }
+                )
 
                 finishGeneration(parent: userNode, response: buffer, tokenCount: tokenCount, totalTimeMs: summary.totalTimeMs, interrupted: false, generationId: generationId)
             } catch {

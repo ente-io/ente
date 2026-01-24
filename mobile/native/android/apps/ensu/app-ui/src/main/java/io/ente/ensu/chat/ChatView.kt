@@ -361,7 +361,7 @@ private fun MessageList(
         state = listState,
         contentPadding = PaddingValues(
             top = EnsuSpacing.pageVertical.dp,
-            bottom = (EnsuSpacing.xxxl + EnsuSpacing.xl).dp + imePadding
+            bottom = (EnsuSpacing.xxxl + EnsuSpacing.xl).dp
         ),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
     ) {

@@ -424,7 +424,9 @@ class InferenceRsProvider(
                 when (event) {
                     is GenerateEvent.Text -> {
                         currentJobId = event.jobId
-                        onToken(event.text)
+                        if (event.text.isNotEmpty()) {
+                            onToken(event.text)
+                        }
                     }
                     is GenerateEvent.Done -> Unit
                     is GenerateEvent.Error -> {

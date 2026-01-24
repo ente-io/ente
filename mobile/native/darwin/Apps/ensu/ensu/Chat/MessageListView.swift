@@ -19,6 +19,7 @@ struct MessageListView: View {
     let onCopy: (ChatMessage) -> Void
     let onRetry: (ChatMessage) -> Void
     let onBranchChange: (ChatMessage, Int) -> Void
+    let onDismissKeyboard: () -> Void
 
     @State private var isAtBottom = true
     @State private var autoScrollEnabled = true
@@ -43,12 +44,19 @@ struct MessageListView: View {
                         .onChanged { _ in
                             isUserDragging = true
                             autoScrollEnabled = false
+                            onDismissKeyboard()
                         }
                         .onEnded { _ in
                             isUserDragging = false
                             if isAtBottom {
                                 autoScrollEnabled = true
                             }
+                        }
+                )
+                .simultaneousGesture(
+                    TapGesture()
+                        .onEnded {
+                            onDismissKeyboard()
                         }
                 )
                 .onPreferenceChange(BottomOffsetKey.self) { value in
@@ -204,7 +212,7 @@ struct MessageListView: View {
         let fallbackPadding = EnsuSpacing.xxxl + EnsuSpacing.xxl + 60
         let measuredPadding = inputBarHeight > 0 ? inputBarHeight + EnsuSpacing.md : fallbackPadding
         let basePadding = max(fallbackPadding, measuredPadding)
-        return max(basePadding, keyboardHeight + EnsuSpacing.xxl)
+        return basePadding
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false, animated: Bool = true) {
@@ -444,7 +452,7 @@ private struct AssistantMessageBubbleView: View {
 private struct StreamingBubbleView: View {
     let text: String
 
-    @State private var cursorOpacity: Double = 1
+    private static let cursorGlyph = "▍"
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -453,17 +461,15 @@ private struct StreamingBubbleView: View {
                     if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         LoadingDotsView()
                     } else {
-                        HStack(alignment: .bottom, spacing: 4) {
-                            AssistantMessageRenderer(text: text, isStreaming: true, storageId: UUID().uuidString)
-                            Rectangle()
-                                .fill(EnsuColor.accent)
-                                .frame(width: 2, height: 18)
-                                .opacity(cursorOpacity)
-                                .onAppear {
-                                    withAnimation(.easeInOut(duration: 0.53).repeatForever(autoreverses: true)) {
-                                        cursorOpacity = 0
-                                    }
-                                }
+                        TimelineView(.periodic(from: .now, by: 0.55)) { context in
+                            let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
+                            let showCursor = phase == 0
+                            let displayText = showCursor ? text + StreamingBubbleView.cursorGlyph : text
+                            AssistantMessageRenderer(
+                                text: displayText,
+                                isStreaming: true,
+                                storageId: UUID().uuidString
+                            )
                         }
                     }
                 }

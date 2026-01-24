@@ -63,7 +63,7 @@ class AppStore(
     private var pendingSyncSuccessHandler: (() -> Unit)? = null
 
     private val sessionSummarySystemPrompt =
-        "You are a title generator. Summarize this conversation into a 4-5 word chat title. Reply with only the title, no quotes."
+        "You are a title generator. Rewrite the message in 4-5 words for a chat title. Reply with only the title, no quotes."
     private val sessionSummaryMaxWords = 5
 
     private val attachmentDownloads = mutableMapOf<String, AttachmentDownloadItem>()

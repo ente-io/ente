@@ -11,8 +11,6 @@ struct MessageInputView: View {
     let editingMessage: ChatMessage?
     let isProcessingAttachments: Bool
     let isAttachmentDownloadBlocked: Bool
-    let focusRequestId: Int
-    let dismissKeyboardId: Int
     let onSend: () -> Void
     let onStop: () -> Void
     let onCancelEdit: () -> Void
@@ -22,10 +20,10 @@ struct MessageInputView: View {
     let onUserFocus: () -> Void
     let onDismissKeyboard: () -> Void
 
-    @StateObject private var keyboard = KeyboardObserver()
-    @FocusState private var isFocused: Bool
+    @FocusState.Binding var isFocused: Bool
 
     @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var inputResetToken = UUID()
 
     private var placeholder: String {
         if isAttachmentDownloadBlocked {
@@ -51,16 +49,13 @@ struct MessageInputView: View {
                     editBanner(for: editingMessage)
                 }
 
-                let hasAttachmentContent = !attachments.isEmpty || isProcessingAttachments
-
-                // Make the input bar a bit more compact when showing "Write a message..."
-                let inputVerticalPadding: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : 10
-                let textFieldPadding: CGFloat = hasAttachmentContent ? 2 : 6
+                let inputVerticalPadding: CGFloat = 10
+                let textFieldPadding: CGFloat = 6
 
                 // Lift the bar slightly off the bottom edge.
-                let bottomPadding: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : EnsuSpacing.md
+                let bottomPadding: CGFloat = EnsuSpacing.md
 
-                let inputStackSpacing: CGFloat = hasAttachmentContent ? EnsuSpacing.xs : EnsuSpacing.sm
+                let inputStackSpacing: CGFloat = EnsuSpacing.sm
 
                 VStack(alignment: .leading, spacing: inputStackSpacing) {
                     if !attachments.isEmpty {
@@ -94,6 +89,7 @@ struct MessageInputView: View {
 
                 HStack(alignment: .bottom, spacing: EnsuSpacing.sm) {
                     TextField(placeholder, text: $text, axis: .vertical)
+                        .id(inputResetToken)
                         .focused($isFocused)
                         .onChange(of: isFocused) { focused in
                             if focused {
@@ -112,6 +108,11 @@ struct MessageInputView: View {
                                 isFocused = false
                                 hideKeyboard()
                                 onDismissKeyboard()
+                            }
+                        }
+                        .onChange(of: text) { newValue in
+                            if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isFocused {
+                                inputResetToken = UUID()
                             }
                         }
 
@@ -199,46 +200,9 @@ struct MessageInputView: View {
                 }
             )
         }
-
-        if keyboard.isVisible {
-                Button {
-                    hapticTap()
-                    isFocused = false
-                    hideKeyboard()
-                    onDismissKeyboard()
-                } label: {
-                    Image(systemName: "keyboard.chevron.compact.down")
-                        .font(.system(size: 18, weight: .semibold))
-                        .scaleEffect(0.8)
-                        .padding(12)
-                        .background(.ultraThinMaterial)
-                        .clipShape(Circle())
-                        .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 2)
-                }
-                .padding(.trailing, EnsuSpacing.pageHorizontal)
-                .padding(.bottom, 64)
-            }
-        }
-        .padding(.top, EnsuSpacing.sm)
-        .onAppear {
-            if focusRequestId > 0 {
-                requestFocus()
-            }
-        }
-        .onChange(of: focusRequestId) { _ in
-            requestFocus()
-        }
-        .onChange(of: dismissKeyboardId) { _ in
-            isFocused = false
-            hideKeyboard()
-        }
     }
-
-    private func requestFocus() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            isFocused = true
-        }
-    }
+    .padding(.top, EnsuSpacing.sm)
+}
 
     private var attachmentIconSize: CGFloat {
         #if os(macOS)
