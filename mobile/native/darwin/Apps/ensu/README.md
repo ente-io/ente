@@ -9,7 +9,7 @@ All commands below assume you run them from `darwin/Apps/ensu`.
 cd darwin/Apps/ensu
 xcodebuild \
   -project ensu.xcodeproj \
-  -scheme Ensu \
+  -scheme ensu \
   -configuration Debug \
   -sdk iphonesimulator \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
@@ -21,7 +21,7 @@ xcodebuild \
 cd darwin/Apps/ensu
 xcodebuild \
   -project ensu.xcodeproj \
-  -scheme Ensu \
+  -scheme ensu \
   -configuration Debug \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
@@ -33,21 +33,22 @@ xcodebuild \
 cd darwin/Apps/ensu
 xcodebuild \
   -project ensu.xcodeproj \
-  -scheme Ensu \
+  -scheme ensu \
   -configuration Release \
   -sdk iphoneos \
   -destination 'generic/platform=iOS' \
-  -archivePath build/Ensu.xcarchive \
+  -archivePath build/Archive/ensu.xcarchive \
   archive
 ```
 
-To export an IPA, provide an `ExportOptions.plist` and run:
+### Release IPA (App Store)
 ```bash
+cd darwin/Apps/ensu
 xcodebuild \
   -exportArchive \
-  -archivePath build/Ensu.xcarchive \
+  -archivePath build/Archive/ensu.xcarchive \
   -exportPath build/Export \
-  -exportOptionsPlist /path/to/ExportOptions.plist
+  -exportOptionsPlist ExportOptions-AppStore.plist
 ```
 
 ## Installation (Terminal)
@@ -56,7 +57,7 @@ xcodebuild \
 ```bash
 cd darwin/Apps/ensu
 xcrun simctl boot "iPhone 15" || true
-xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Ensu.app
+xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/ensu.app
 xcrun simctl launch booted io.ente.ensu
 ```
 
@@ -66,7 +67,7 @@ cd darwin/Apps/ensu
 xcrun devicectl device list
 xcrun devicectl device install app \
   --device <DEVICE_UDID> \
-  build/Build/Products/Debug-iphoneos/Ensu.app
+  build/Build/Products/Debug-iphoneos/ensu.app
 ```
 
 ### Release (IPA)
@@ -81,7 +82,7 @@ cd darwin/Apps/ensu
 ENTE_API_ENDPOINT="https://your-endpoint.example" \
   xcodebuild \
   -project ensu.xcodeproj \
-  -scheme Ensu \
+  -scheme ensu \
   -configuration Debug \
   -sdk iphonesimulator \
   -destination 'platform=iOS Simulator,name=iPhone 15' \
