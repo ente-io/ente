@@ -165,6 +165,11 @@ impl LlmChatDb {
         Ok(self.inner.delete_session(uuid)?)
     }
 
+    pub fn update_session_title(&self, uuid: String, title: String) -> Result<(), DbError> {
+        let uuid = Uuid::parse_str(&uuid).map_err(|e| DbError::Message(e.to_string()))?;
+        Ok(self.inner.update_session_title(uuid, &title)?)
+    }
+
     pub fn insert_message(
         &self,
         session_uuid: String,

@@ -62,6 +62,10 @@ class AppStore(
     private var pendingSyncErrorHandler: ((String) -> Unit)? = null
     private var pendingSyncSuccessHandler: (() -> Unit)? = null
 
+    private val sessionSummarySystemPrompt =
+        "You are a title generator. Summarize this conversation into a 4-5 word chat title. Reply with only the title, no quotes."
+    private val sessionSummaryMaxWords = 5
+
     private val attachmentDownloads = mutableMapOf<String, AttachmentDownloadItem>()
     private val attachmentDownloadQueue = ArrayDeque<String>()
     private val attachmentDownloadActive = mutableMapOf<String, Job>()
@@ -71,7 +75,7 @@ class AppStore(
         this.scope = scope
 
         sessionSummaries.clear()
-        sessionSummaries.putAll(runBlocking { sessionPreferences.sessionSummaries.first() })
+        sessionSummaries.putAll(runBlocking { sessionPreferences.sessionSummaries.first() }.mapKeys { it.key.lowercase() })
 
         if (_state.value.chat.sessions.isEmpty()) {
             loadSessionsFromDb()
@@ -82,7 +86,7 @@ class AppStore(
         scope.launch {
             sessionPreferences.sessionSummaries.collectLatest { summaries ->
                 sessionSummaries.clear()
-                sessionSummaries.putAll(summaries)
+                sessionSummaries.putAll(summaries.mapKeys { it.key.lowercase() })
                 applySessionSummariesToState()
             }
         }
@@ -218,7 +222,7 @@ class AppStore(
         messageStore.remove(sessionId)
         branchSelections.remove(sessionId)
         purgeAttachmentDownloads(sessionId)
-        sessionSummaries.remove(sessionId)
+        sessionSummaries.remove(sessionId.lowercase())
         scope?.launch { sessionPreferences.setSessionSummary(sessionId, null) }
 
         val remaining = currentState.chat.sessions.filterNot { it.id == sessionId }
@@ -1048,6 +1052,9 @@ class AppStore(
                     } else {
                         session.title
                     }
+                    if (updatedTitle != session.title) {
+                        chatRepository.updateSessionTitle(sessionId, updatedTitle)
+                    }
                     session.copy(
                         title = updatedTitle,
                         lastMessagePreview = preview,
@@ -1064,7 +1071,7 @@ class AppStore(
     private fun applySessionSummariesToState() {
         _state.update { appState ->
             val updatedSessions = appState.chat.sessions.map { session ->
-                val summary = sessionSummaries[session.id]
+                val summary = sessionSummaries[session.id.lowercase()]
                 if (!summary.isNullOrBlank() && summary != session.title) {
                     session.copy(title = summary)
                 } else {
@@ -1078,8 +1085,16 @@ class AppStore(
     private fun scheduleSessionSummary(sessionId: String) {
         val scope = scope ?: return
         sessionSummaryJob?.cancel()
+        if (sessionSummaries.containsKey(sessionId.lowercase())) return
+        val summaryInput = buildSessionSummaryInput(sessionId) ?: return
+        val target = resolveTarget(_state.value.modelSettings)
+
         sessionSummaryJob = scope.launch(Dispatchers.Default) {
-            val summary = buildSessionSummary(sessionId) ?: return@launch
+            val summary = generateSessionSummary(
+                input = summaryInput.text,
+                fallback = summaryInput.fallback,
+                target = target
+            ) ?: return@launch
             if (!isActive) return@launch
             withContext(Dispatchers.Main) {
                 applySessionSummary(sessionId, summary)
@@ -1087,28 +1102,79 @@ class AppStore(
         }
     }
 
-    private fun buildSessionSummary(sessionId: String): String? {
-        val firstUserMessage = messageStore[sessionId]
-            ?.asSequence()
-            ?.filter { it.author == MessageAuthor.User }
-            ?.minByOrNull { it.timestampMillis }
+    private data class SessionSummaryInput(val text: String, val fallback: String)
+
+    private fun buildSessionSummaryInput(sessionId: String): SessionSummaryInput? {
+        val messages = messageStore[sessionId].orEmpty()
+        if (messages.isEmpty()) return null
+        val firstUser = messages.filter { it.author == MessageAuthor.User }
+            .minByOrNull { it.timestampMillis }
             ?: return null
-        val summary = summarizeQuestion(firstUserMessage.text)
-        if (summary.isBlank()) return null
-        val existing = sessionSummaries[sessionId]
-        if (!existing.isNullOrBlank() && existing == summary) return null
-        return summary
+        val assistants = messages.filter { it.author == MessageAuthor.Assistant }
+        if (assistants.size != 1) return null
+        val firstAssistant = assistants.first()
+        if (firstAssistant.isInterrupted) return null
+
+        val fallback = summarizeQuestion(firstUser.text)
+        if (fallback.isBlank()) return null
+        val input = "User: ${firstUser.text}\nAssistant: ${firstAssistant.text}"
+        return SessionSummaryInput(text = input, fallback = fallback)
+    }
+
+    private suspend fun generateSessionSummary(
+        input: String,
+        fallback: String,
+        target: LlmModelTarget
+    ): String? {
+        if (!llmProvider.isModelDownloaded(target)) {
+            return sessionTitleFromText(fallback, fallback = fallback)
+        }
+        val cleanedInput = sanitizeTitleText(input)
+        if (cleanedInput.isBlank()) return sessionTitleFromText(fallback, fallback = fallback)
+
+        val messages = listOf(
+            LlmMessage(text = sessionSummarySystemPrompt, role = LlmMessageRole.System),
+            LlmMessage(text = cleanedInput, role = LlmMessageRole.User)
+        )
+
+        val buffer = StringBuilder()
+        try {
+            llmProvider.generateChat(
+                target = target,
+                messages = messages,
+                imageFiles = emptyList(),
+                temperature = 0.2f,
+                maxTokens = 64
+            ) { token ->
+                buffer.append(token)
+            }
+        } catch (err: Throwable) {
+            val fallbackSummary = summarizeQuestion(fallback)
+            return if (fallbackSummary.isBlank()) null else sessionTitleFromText(fallbackSummary, fallback = fallback)
+        }
+
+        val raw = sanitizeTitleText(buffer.toString())
+        if (raw.isBlank()) return null
+        val words = raw.split(" ")
+            .map { word -> word.trim { ch -> !ch.isLetterOrDigit() } }
+            .filter { it.isNotBlank() }
+        if (words.isEmpty()) return null
+        val summary = words.take(sessionSummaryMaxWords).joinToString(" ")
+        return sessionTitleFromText(summary, fallback = fallback)
     }
 
     private fun applySessionSummary(sessionId: String, summary: String) {
-        if (summary.isBlank()) return
-        if (sessionSummaries[sessionId] == summary) return
-        sessionSummaries[sessionId] = summary
-        scope?.launch { sessionPreferences.setSessionSummary(sessionId, summary) }
+        val sanitized = sessionTitleFromText(summary, fallback = "New Chat")
+        if (sanitized.isBlank()) return
+        val summaryKey = sessionId.lowercase()
+        if (sessionSummaries[summaryKey] == sanitized) return
+        sessionSummaries[summaryKey] = sanitized
+        scope?.launch { sessionPreferences.setSessionSummary(sessionId, sanitized) }
+        chatRepository.updateSessionTitle(sessionId, sanitized)
         _state.update { appState ->
             val updatedSessions = appState.chat.sessions.map { session ->
                 if (session.id == sessionId) {
-                    session.copy(title = summary)
+                    session.copy(title = sanitized)
                 } else {
                     session
                 }
@@ -1118,17 +1184,21 @@ class AppStore(
     }
 
     private fun summarizeQuestion(text: String): String {
-        val cleaned = text
-            .replace(Regex("[\r\n]+"), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
+        val cleaned = sanitizeTitleText(text)
         if (cleaned.isBlank()) return ""
         val words = cleaned.split(" ")
             .map { word -> word.trim { ch -> !ch.isLetterOrDigit() } }
             .filter { it.isNotBlank() }
         if (words.isEmpty()) return ""
-        val summaryWords = words.take(6)
+        val summaryWords = words.take(sessionSummaryMaxWords)
         return summaryWords.joinToString(" ")
+    }
+
+    private fun sanitizeTitleText(text: String): String {
+        return text
+            .replace(Regex("[\r\n\t]+"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
     }
 
     private fun loadMessagesFromDb(sessionId: String) {
@@ -1369,7 +1439,7 @@ class AppStore(
 
     private fun loadSessionsFromDb() {
         val sessions = chatRepository.listSessions().map { session ->
-            val summary = sessionSummaries[session.id]
+            val summary = sessionSummaries[session.id.lowercase()]
             if (!summary.isNullOrBlank()) {
                 session.copy(title = summary)
             } else {

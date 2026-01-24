@@ -19,6 +19,8 @@ struct MessageInputView: View {
     let onAddImage: (Data, String?) -> Void
     let onAddDocument: (URL) -> Void
     let onRemoveAttachment: (ChatAttachment) -> Void
+    let onUserFocus: () -> Void
+    let onDismissKeyboard: () -> Void
 
     @StateObject private var keyboard = KeyboardObserver()
     @FocusState private var isFocused: Bool
@@ -93,6 +95,11 @@ struct MessageInputView: View {
                 HStack(alignment: .bottom, spacing: EnsuSpacing.sm) {
                     TextField(placeholder, text: $text, axis: .vertical)
                         .focused($isFocused)
+                        .onChange(of: isFocused) { focused in
+                            if focused {
+                                onUserFocus()
+                            }
+                        }
                         .lineLimit(1...5)
                         .font(EnsuTypography.message)
                         .foregroundStyle(EnsuColor.textPrimary)
@@ -102,6 +109,9 @@ struct MessageInputView: View {
                         .onSubmit {
                             if canSend {
                                 onSend()
+                                isFocused = false
+                                hideKeyboard()
+                                onDismissKeyboard()
                             }
                         }
 
@@ -143,6 +153,9 @@ struct MessageInputView: View {
                         } else if isSendEnabled {
                             hapticMedium()
                             onSend()
+                            isFocused = false
+                            hideKeyboard()
+                            onDismissKeyboard()
                         }
                     } label: {
                         if sendIcon == "StopIcon" {
@@ -172,12 +185,19 @@ struct MessageInputView: View {
                 .padding(.horizontal, EnsuSpacing.inputHorizontal)
                 .padding(.vertical, inputVerticalPadding)
                 .frame(maxWidth: .infinity)
-                .background(EnsuColor.fillFaint)
+                .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input + 4, style: .continuous))
+                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
                 .padding(.horizontal, EnsuSpacing.pageHorizontal)
                 .padding(.bottom, bottomPadding)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                GeometryReader { proxy in
+                    Color.clear
+                        .preference(key: InputBarHeightKey.self, value: proxy.size.height)
+                }
+            )
         }
 
         if keyboard.isVisible {
@@ -185,19 +205,21 @@ struct MessageInputView: View {
                     hapticTap()
                     isFocused = false
                     hideKeyboard()
+                    onDismissKeyboard()
                 } label: {
                     Image(systemName: "keyboard.chevron.compact.down")
                         .font(.system(size: 18, weight: .semibold))
-                        .frame(width: 36, height: 36)
-                        .background(EnsuColor.fillFaint)
+                        .scaleEffect(0.8)
+                        .padding(12)
+                        .background(.ultraThinMaterial)
                         .clipShape(Circle())
+                        .shadow(color: Color.black.opacity(0.12), radius: 6, x: 0, y: 2)
                 }
                 .padding(.trailing, EnsuSpacing.pageHorizontal)
                 .padding(.bottom, 64)
             }
         }
         .padding(.top, EnsuSpacing.sm)
-        .background(EnsuColor.backgroundBase)
         .onAppear {
             if focusRequestId > 0 {
                 requestFocus()
@@ -300,6 +322,14 @@ struct MessageInputView: View {
             alignment: .leading
         )
         .padding(.horizontal, EnsuSpacing.pageHorizontal)
+    }
+}
+
+struct InputBarHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 #else

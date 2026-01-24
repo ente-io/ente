@@ -57,7 +57,7 @@ final class ModelSettingsStore: ObservableObject {
         let url = useCustom ? modelUrl : Defaults.modelUrl
         let mmproj = useCustom ? (mmprojUrl.isEmpty ? nil : mmprojUrl) : Defaults.mmprojUrl
         let context = Int(contextLength)
-        let maxOutput = Int(maxTokens)
+        let maxOutput = Int(maxTokens).flatMap { $0 > 0 ? $0 : nil }
         let id = useCustom ? "custom:\(url)" : "default"
         return InferenceModelTarget(id: id, url: url, mmprojUrl: mmproj, contextLength: context, maxTokens: maxOutput)
     }

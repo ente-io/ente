@@ -12,6 +12,7 @@ struct MessageListView: View {
     let isGenerating: Bool
     let sessionId: UUID?
     let keyboardHeight: CGFloat
+    let inputBarHeight: CGFloat
     let emptyStateTitle: String
     let emptyStateSubtitle: String?
     let onEdit: (ChatMessage) -> Void
@@ -24,6 +25,7 @@ struct MessageListView: View {
     @State private var previewItem: AttachmentPreviewItem?
     @State private var lastHapticLength = 0
     @State private var wasAtBottomBeforeKeyboard = false
+    @State private var isUserDragging = false
     #if os(iOS)
     @State private var haptic = UIImpactFeedbackGenerator(style: .medium)
     #endif
@@ -32,83 +34,36 @@ struct MessageListView: View {
         GeometryReader { proxy in
             ScrollViewReader { scrollProxy in
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: EnsuSpacing.lg) {
-                        if messages.isEmpty && !isGenerating {
-                            VStack(spacing: EnsuSpacing.sm) {
-                                Text(emptyStateTitle)
-                                    .font(EnsuTypography.h2)
-                                    .foregroundStyle(EnsuColor.textPrimary)
-                                if let emptyStateSubtitle {
-                                    Text(emptyStateSubtitle)
-                                        .font(EnsuTypography.body)
-                                        .foregroundStyle(EnsuColor.textMuted)
-                                }
-                            }
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, minHeight: proxy.size.height * 0.6)
-                        }
-
-                        ForEach(messages) { message in
-                            if message.role == .user {
-                                UserMessageBubbleView(
-                                    message: message,
-                                    onEdit: { onEdit(message) },
-                                    onCopy: { onCopy(message) },
-                                    onBranchChange: { delta in onBranchChange(message, delta) },
-                                    onOpenAttachment: openAttachment
-                                )
-                                .id(message.id)
-                            } else {
-                                AssistantMessageBubbleView(
-                                    message: message,
-                                    onCopy: { onCopy(message) },
-                                    onRetry: { onRetry(message) },
-                                    onBranchChange: { delta in onBranchChange(message, delta) },
-                                    onOpenAttachment: openAttachment
-                                )
-                                .id(message.id)
-                            }
-
-                            if isGenerating, streamingParentId == message.id {
-                                StreamingBubbleView(text: streamingResponse)
-                                    .id("streaming-\(message.id.uuidString)")
-                            }
-                        }
-
-                        if isGenerating, streamingParentId == nil {
-                            StreamingBubbleView(text: streamingResponse)
-                                .id("streaming")
-                        }
-
-                        Color.clear
-                            .frame(height: 1)
-                            .id("bottom")
-                            .background(
-                                GeometryReader { geo in
-                                    Color.clear
-                                        .preference(key: BottomOffsetKey.self, value: geo.frame(in: .named("scroll")).maxY)
-                                }
-                            )
-                    }
-                    .padding(.horizontal, EnsuSpacing.pageHorizontal)
-                    .padding(.vertical, EnsuSpacing.lg)
+                    messageListContent()
                 }
+                .id(sessionId)
                 .coordinateSpace(name: "scroll")
                 .simultaneousGesture(
-                    DragGesture().onChanged { _ in
-                        autoScrollEnabled = false
-                    }
+                    DragGesture()
+                        .onChanged { _ in
+                            isUserDragging = true
+                            autoScrollEnabled = false
+                        }
+                        .onEnded { _ in
+                            isUserDragging = false
+                            if isAtBottom {
+                                autoScrollEnabled = true
+                            }
+                        }
                 )
                 .onPreferenceChange(BottomOffsetKey.self) { value in
-                    let threshold: CGFloat = 24
-                    isAtBottom = value < proxy.size.height + threshold
+                    let threshold: CGFloat = EnsuSpacing.xxxl
+                    let distanceToBottom = value - proxy.size.height
+                    isAtBottom = distanceToBottom <= threshold
                 }
                 .onChange(of: messages.count) { _ in
                     scrollToBottom(scrollProxy)
                 }
                 .onChange(of: sessionId) { _ in
                     autoScrollEnabled = true
-                    scrollToBottom(scrollProxy, force: true)
+                    DispatchQueue.main.async {
+                        scrollToBottom(scrollProxy, force: true, animated: false)
+                    }
                 }
                 .onChange(of: streamingResponse) { newValue in
                     #if os(iOS)
@@ -121,7 +76,7 @@ struct MessageListView: View {
                         }
                     }
                     #endif
-                    scrollToBottom(scrollProxy)
+                    scrollToBottom(scrollProxy, animated: false)
                 }
                 .onChange(of: keyboardHeight) { newValue in
                     if newValue > 0 {
@@ -129,10 +84,15 @@ struct MessageListView: View {
                     }
                     if wasAtBottomBeforeKeyboard {
                         autoScrollEnabled = true
-                        scrollToBottom(scrollProxy, force: true)
+                        scrollToBottom(scrollProxy, force: true, animated: false)
                     }
                     if newValue == 0 {
                         wasAtBottomBeforeKeyboard = false
+                    }
+                }
+                .onChange(of: inputBarHeight) { _ in
+                    if autoScrollEnabled && !isUserDragging {
+                        scrollToBottom(scrollProxy, force: true, animated: false)
                     }
                 }
                 .onChange(of: isGenerating) { newValue in
@@ -142,20 +102,28 @@ struct MessageListView: View {
                         #if os(iOS)
                         haptic.prepare()
                         #endif
-                        scrollToBottom(scrollProxy, force: true)
+                        #if os(iOS) || os(macOS)
+                        if #available(iOS 17.0, macOS 14.0, *) {
+                            scrollToBottom(scrollProxy, force: true, animated: false)
+                        } else {
+                            scrollToBottom(scrollProxy, force: true, animated: false)
+                        }
+                        #else
+                        scrollToBottom(scrollProxy, force: true, animated: false)
+                        #endif
                     }
                 }
                 .onChange(of: isAtBottom) { newValue in
-                    if newValue && isGenerating {
+                    if newValue && !isUserDragging {
                         autoScrollEnabled = true
-                        scrollToBottom(scrollProxy, force: true)
+                        scrollToBottom(scrollProxy, force: true, animated: false)
                     }
                 }
                 .onAppear {
                     #if os(iOS)
                     haptic.prepare()
                     #endif
-                    scrollToBottom(scrollProxy, force: true)
+                    scrollToBottom(scrollProxy, force: true, animated: false)
                 }
             }
         }
@@ -164,9 +132,88 @@ struct MessageListView: View {
         }
     }
 
-    private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false) {
+    @ViewBuilder
+    private func messageListContent() -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: EnsuSpacing.lg) {
+                if messages.isEmpty && !isGenerating {
+                    VStack(spacing: EnsuSpacing.sm) {
+                        Text(emptyStateTitle)
+                            .font(EnsuTypography.h2)
+                            .foregroundStyle(EnsuColor.textPrimary)
+                        if let emptyStateSubtitle {
+                            Text(emptyStateSubtitle)
+                                .font(EnsuTypography.body)
+                                .foregroundStyle(EnsuColor.textMuted)
+                        }
+                    }
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.top, EnsuSpacing.lg)
+                }
+
+                ForEach(messages) { message in
+                    if message.role == .user {
+                        UserMessageBubbleView(
+                            message: message,
+                            onEdit: { onEdit(message) },
+                            onCopy: { onCopy(message) },
+                            onBranchChange: { delta in onBranchChange(message, delta) },
+                            onOpenAttachment: openAttachment
+                        )
+                        .id(message.id)
+                    } else {
+                        AssistantMessageBubbleView(
+                            message: message,
+                            onCopy: { onCopy(message) },
+                            onRetry: { onRetry(message) },
+                            onBranchChange: { delta in onBranchChange(message, delta) },
+                            onOpenAttachment: openAttachment
+                        )
+                        .id(message.id)
+                    }
+
+                    if isGenerating, streamingParentId == message.id {
+                        StreamingBubbleView(text: streamingResponse)
+                            .id("streaming-\(message.id.uuidString)")
+                    }
+                }
+
+                if isGenerating, streamingParentId == nil {
+                    StreamingBubbleView(text: streamingResponse)
+                        .id("streaming")
+                }
+            }
+            .padding(.horizontal, EnsuSpacing.pageHorizontal)
+            .padding(.top, EnsuSpacing.lg)
+            .padding(.bottom, EnsuSpacing.lg)
+
+            Color.clear
+                .frame(height: contentBottomPadding)
+                .id("bottom")
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(key: BottomOffsetKey.self, value: geo.frame(in: .named("scroll")).maxY)
+                    }
+                )
+        }
+    }
+
+    private var contentBottomPadding: CGFloat {
+        let fallbackPadding = EnsuSpacing.xxxl + EnsuSpacing.xxl + 60
+        let measuredPadding = inputBarHeight > 0 ? inputBarHeight + EnsuSpacing.md : fallbackPadding
+        let basePadding = max(fallbackPadding, measuredPadding)
+        return max(basePadding, keyboardHeight + EnsuSpacing.xxl)
+    }
+
+    private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false, animated: Bool = true) {
         guard force || (autoScrollEnabled && isAtBottom) else { return }
-        withAnimation(.easeOut(duration: 0.2)) {
+        if animated {
+            withAnimation(.easeOut(duration: 0.2)) {
+                proxy.scrollTo("bottom", anchor: .bottom)
+            }
+        } else {
             proxy.scrollTo("bottom", anchor: .bottom)
         }
     }

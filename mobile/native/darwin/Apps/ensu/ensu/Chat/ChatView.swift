@@ -22,7 +22,9 @@ struct ChatView: View {
     @State private var didAutoFocusInput = false
     @State private var focusRequestId = 0
     @State private var dismissKeyboardId = 0
+    @State private var inputBarHeight: CGFloat = 0
     @State private var wasDrawerOpen = false
+    @State private var didDismissKeyboard = false
 
     private var editingMessage: ChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
@@ -73,7 +75,12 @@ struct ChatView: View {
                     dismissKeyboardId += 1
                     wasDrawerOpen = true
                 } else if wasDrawerOpen {
-                    let shouldRestoreFocus = viewModel.isModelDownloaded && !viewModel.isDownloading && !viewModel.isGenerating
+                    let shouldRestoreFocus = viewModel.isModelDownloaded
+                        && !viewModel.isDownloading
+                        && !viewModel.isGenerating
+                        && !didDismissKeyboard
+                        && !showSettings
+                        && !showDeveloperSettings
                     if shouldRestoreFocus {
                         focusRequestId += 1
                     }
@@ -89,6 +96,11 @@ struct ChatView: View {
                 guard let message else { return }
                 showToast(message, duration: 2)
                 viewModel.syncSuccessMessage = nil
+            }
+            .onChange(of: viewModel.generationErrorMessage) { message in
+                guard let message else { return }
+                showToast(message, duration: 2)
+                viewModel.generationErrorMessage = nil
             }
             .onChange(of: modelSettings.useCustomModel) { _ in
                 viewModel.refreshModelDownloadInfo()
@@ -116,6 +128,12 @@ struct ChatView: View {
                     }
                 }
             )
+        }
+        .onChange(of: showSettings) { isPresented in
+            if isPresented {
+                didDismissKeyboard = true
+                dismissKeyboardId += 1
+            }
         }
         .sheet(isPresented: $showAttachmentDownloads) {
             AttachmentDownloadsSheet(
@@ -180,90 +198,92 @@ struct ChatView: View {
             Divider()
                 .background(EnsuColor.border)
 
-            let showDownloadOnboarding = viewModel.messages.isEmpty && !viewModel.isGenerating && !viewModel.isModelDownloaded
-
             ZStack(alignment: .top) {
-                VStack(spacing: 0) {
-                    if showDownloadOnboarding {
-                        DownloadOnboardingView(
-                            isDownloading: viewModel.isDownloading,
-                            downloadPercent: viewModel.downloadToast?.percent,
-                            statusText: viewModel.downloadToast?.status,
-                            totalBytes: viewModel.modelDownloadSizeBytes,
-                            sizeText: viewModel.modelDownloadSizeText,
-                            onDownload: {
-                                viewModel.startModelDownload(userInitiated: true)
-                            }
-                        )
-                    } else {
-                        MessageListView(
-                            messages: viewModel.messages,
-                            streamingResponse: viewModel.displayedStreamingResponse,
-                            streamingParentId: viewModel.displayedStreamingParentId,
-                            isGenerating: viewModel.isGenerating,
-                            sessionId: viewModel.currentSessionId,
-                            keyboardHeight: keyboard.height,
-                            emptyStateTitle: "Welcome",
-                            emptyStateSubtitle: "Start typing to begin a conversation",
-                            onEdit: { message in
-                                viewModel.beginEditing(message: message)
-                            },
-                            onCopy: { message in
-                                copyToPasteboard(message.text)
-                                showToast("Copied to clipboard", duration: 1)
-                            },
-                            onRetry: { message in
-                                viewModel.retryAssistantResponse(message)
-                            },
-                            onBranchChange: { message, delta in
-                                viewModel.changeBranch(for: message, delta: delta)
-                            }
-                        )
+                MessageListView(
+                    messages: viewModel.messages,
+                    streamingResponse: viewModel.displayedStreamingResponse,
+                    streamingParentId: viewModel.displayedStreamingParentId,
+                    isGenerating: viewModel.isGenerating,
+                    sessionId: viewModel.currentSessionId,
+                    keyboardHeight: keyboard.height,
+                    inputBarHeight: inputBarHeight,
+                    emptyStateTitle: "Welcome",
+                    emptyStateSubtitle: "Start typing to begin a conversation",
+                    onEdit: { message in
+                        viewModel.beginEditing(message: message)
+                    },
+                    onCopy: { message in
+                        copyToPasteboard(message.text)
+                        showToast("Copied to clipboard", duration: 1)
+                    },
+                    onRetry: { message in
+                        viewModel.retryAssistantResponse(message)
+                    },
+                    onBranchChange: { message, delta in
+                        viewModel.changeBranch(for: message, delta: delta)
                     }
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .overlay(alignment: .bottom) {
+                    let shouldAutoFocus = viewModel.isModelDownloaded
+                        && !viewModel.isDownloading
+                        && !viewModel.isGenerating
+                        && !didAutoFocusInput
+                        && !isDrawerOpen
+                        && !didDismissKeyboard
+                        && !showSettings
+                        && !showDeveloperSettings
 
-                    if !showDownloadOnboarding {
-                        let shouldAutoFocus = viewModel.isModelDownloaded && !viewModel.isDownloading && !viewModel.isGenerating && !didAutoFocusInput && !isDrawerOpen
-
-                        MessageInputView(
-                            text: $viewModel.draftText,
-                            attachments: $viewModel.draftAttachments,
-                            isGenerating: viewModel.isGenerating,
-                            isDownloading: viewModel.isDownloading,
-                            editingMessage: editingMessage,
-                            isProcessingAttachments: viewModel.isProcessingAttachments,
-                            isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
-                            focusRequestId: focusRequestId,
-                            dismissKeyboardId: dismissKeyboardId,
-                            onSend: {
-                                viewModel.sendDraft()
-                            },
-                            onStop: {
-                                viewModel.stopGenerating()
-                            },
-                            onCancelEdit: {
-                                viewModel.cancelEditing()
-                            },
-                            onAddImage: { data, name in
-                                viewModel.addImageAttachment(data: data, fileName: name)
-                            },
-                            onAddDocument: { url in
-                                viewModel.addDocumentAttachment(url: url)
-                            },
-                            onRemoveAttachment: { attachment in
-                                viewModel.removeAttachment(attachment)
-                            }
-                        )
-                        .onAppear {
-                            if shouldAutoFocus {
-                                focusRequestId += 1
-                                didAutoFocusInput = true
-                            }
+                    MessageInputView(
+                        text: $viewModel.draftText,
+                        attachments: $viewModel.draftAttachments,
+                        isGenerating: viewModel.isGenerating,
+                        isDownloading: viewModel.isDownloading,
+                        editingMessage: editingMessage,
+                        isProcessingAttachments: viewModel.isProcessingAttachments,
+                        isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
+                        focusRequestId: focusRequestId,
+                        dismissKeyboardId: dismissKeyboardId,
+                        onSend: {
+                            viewModel.sendDraft()
+                        },
+                        onStop: {
+                            viewModel.stopGenerating()
+                        },
+                        onCancelEdit: {
+                            viewModel.cancelEditing()
+                        },
+                        onAddImage: { data, name in
+                            viewModel.addImageAttachment(data: data, fileName: name)
+                        },
+                        onAddDocument: { url in
+                            viewModel.addDocumentAttachment(url: url)
+                        },
+                        onRemoveAttachment: { attachment in
+                            viewModel.removeAttachment(attachment)
+                        },
+                        onUserFocus: {
+                            didDismissKeyboard = false
+                        },
+                        onDismissKeyboard: {
+                            didDismissKeyboard = true
                         }
-                        .onChange(of: shouldAutoFocus) { newValue in
-                            if newValue {
-                                focusRequestId += 1
-                                didAutoFocusInput = true
-                            }
+                    )
+                    .onPreferenceChange(InputBarHeightKey.self) { newValue in
+                        inputBarHeight = newValue
+                    }
+                    .onAppear {
+                        if shouldAutoFocus {
+                            focusRequestId += 1
+                            didAutoFocusInput = true
+                            didDismissKeyboard = false
+                        }
+                    }
+                    .onChange(of: shouldAutoFocus) { newValue in
+                        if newValue {
+                            focusRequestId += 1
+                            didAutoFocusInput = true
+                            didDismissKeyboard = false
                         }
                     }
                 }
@@ -272,17 +292,6 @@ struct ChatView: View {
                 }
                 .onChange(of: viewModel.messages.count) { _ in
                     viewModel.autoStartModelDownloadIfNeeded()
-                }
-
-                if let downloadToast = viewModel.downloadToast, !showDownloadOnboarding, downloadToast.phase != .loading {
-                    DownloadToastView(state: downloadToast) {
-                        viewModel.downloadToast = nil
-                    } onRetry: {
-                        viewModel.retryDownload()
-                    } onCancel: {
-                        viewModel.cancelDownload()
-                    }
-                    .padding(.top, EnsuSpacing.lg)
                 }
             }
         }
@@ -559,7 +568,7 @@ private struct ChatAppBar: View {
     private var modelProgressState: DownloadToastState? {
         guard let modelDownloadState else { return nil }
         switch modelDownloadState.phase {
-        case .loading:
+        case .loading, .downloading:
             return modelDownloadState
         default:
             return nil

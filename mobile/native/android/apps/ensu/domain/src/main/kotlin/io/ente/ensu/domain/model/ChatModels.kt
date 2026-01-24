@@ -41,10 +41,17 @@ data class Attachment(
     val isUploading: Boolean = false
 )
 
-const val SessionTitleMaxLength = 50
+const val SessionTitleMaxLength = 40
+
+private fun sanitizeTitleText(text: String): String {
+    return text
+        .replace(Regex("[\r\n\t]+"), " ")
+        .replace(Regex("\\s+"), " ")
+        .trim()
+}
 
 fun sessionTitleFromText(text: String, fallback: String = "New Chat"): String {
-    val trimmed = text.trim()
+    val trimmed = sanitizeTitleText(text)
     if (trimmed.isBlank()) return fallback
     return if (trimmed.length <= SessionTitleMaxLength) {
         trimmed

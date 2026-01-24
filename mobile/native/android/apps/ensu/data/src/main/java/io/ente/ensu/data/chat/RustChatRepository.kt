@@ -38,9 +38,11 @@ class RustChatRepository(
             val messages = runCatching { db.getMessages(session.uuid) }.getOrNull().orEmpty()
             val firstMessage = messages.firstOrNull()?.text.orEmpty()
             val lastMessage = messages.lastOrNull()?.text
+            val isPlaceholder = session.title.isBlank() || session.title.equals("New Chat", ignoreCase = true)
+            val seedTitle = if (isPlaceholder) firstMessage else session.title
             ChatSession(
                 id = session.uuid,
-                title = sessionTitleFromText(firstMessage, fallback = session.title),
+                title = sessionTitleFromText(seedTitle, fallback = session.title),
                 lastMessagePreview = lastMessage,
                 updatedAtMillis = session.updatedAtUs / 1000
             )
@@ -130,6 +132,10 @@ class RustChatRepository(
 
     override fun updateMessageText(messageId: String, text: String) = withDbRecovery {
         db.updateMessageText(messageId, text)
+    }
+
+    override fun updateSessionTitle(sessionId: String, title: String) = withDbRecovery {
+        db.updateSessionTitle(sessionId, title)
     }
 
     private fun openDb(): LlmChatDb {

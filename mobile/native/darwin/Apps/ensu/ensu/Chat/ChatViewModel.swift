@@ -462,6 +462,7 @@ final class ChatViewModel: ObservableObject {
     @Published var currentSessionMissingAttachments: [AttachmentDownloadItem] = []
     @Published var syncErrorMessage: String?
     @Published var syncSuccessMessage: String?
+    @Published var generationErrorMessage: String?
 
     private let provider: InferenceRsProvider
     private let chatDb: LlmChatDb
@@ -490,7 +491,9 @@ final class ChatViewModel: ObservableObject {
 
     init() {
         logger.info("Initializing")
-        let summaries = Self.loadSessionSummaries()
+        let summaries = Self.loadSessionSummaries().reduce(into: [String: String]()) { result, item in
+            result[item.key.lowercased()] = item.value
+        }
         let baseDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
 
@@ -542,8 +545,10 @@ final class ChatViewModel: ObservableObject {
             let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
             let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
             let lastMessage = sortedMessages.last?.text ?? ""
-            let summary = summaries[session.uuid]
-            let seedTitle = summary ?? firstUserMessage
+            let summary = summaries[session.uuid.lowercased()]
+            let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                session.title.caseInsensitiveCompare("New chat") == .orderedSame
+            let seedTitle = summary ?? (isPlaceholderTitle ? firstUserMessage : session.title)
             let title = Self.sessionTitle(from: seedTitle, fallback: session.title)
             return ChatSession(
                 id: id,
@@ -673,8 +678,15 @@ final class ChatViewModel: ObservableObject {
             streamingParentId = nil
             downloadToast = nil
         }
+
+        if let nodes = messageStore[session.id] {
+            for node in nodes {
+                logger.info("Message deleted", details: "id=\(node.id.uuidString) session=\(session.id.uuidString) role=\(node.role.rawValue)")
+            }
+        }
+        logger.info("Session deleted", details: "id=\(session.id.uuidString)")
         try? chatDb.deleteSession(uuid: session.id.uuidString)
-        sessionSummaries.removeValue(forKey: session.id.uuidString)
+        sessionSummaries.removeValue(forKey: sessionSummaryKey(session.id))
         persistSessionSummaries()
 
         sessions.removeAll { $0.id == session.id }
@@ -716,7 +728,6 @@ final class ChatViewModel: ObservableObject {
     private func performSync(showErrors: Bool, showSuccess: Bool) {
         let log = logger
         guard let auth = buildSyncAuth() else {
-            log.warning("Sync skipped", details: "not logged in")
             if showErrors {
                 syncErrorMessage = "Sync failed: Sign in to sync"
             }
@@ -825,11 +836,6 @@ final class ChatViewModel: ObservableObject {
         let attachments = draftAttachments
         guard !trimmed.isEmpty || !attachments.isEmpty else { return }
 
-        logger.info(
-            "Sent message",
-            details: "len=\(trimmed.count) attachments=\(attachments.count) edited=\(editingMessageId != nil)"
-        )
-
         let sessionId = currentSessionId ?? createSessionForDraft()
 
         if !missingAttachments(for: sessionId).isEmpty {
@@ -863,6 +869,11 @@ final class ChatViewModel: ObservableObject {
         ), let messageId = UUID(uuidString: inserted.uuid) else {
             return
         }
+
+        logger.info(
+            "Sent message",
+            details: "id=\(messageId.uuidString) session=\(sessionId.uuidString) len=\(trimmed.count) attachments=\(attachments.count) edited=\(editingMessageId != nil)"
+        )
 
         let timestamp = Date(timeIntervalSince1970: Double(inserted.createdAtUs) / 1_000_000.0)
 
@@ -963,12 +974,38 @@ final class ChatViewModel: ObservableObject {
     }
 
     func autoStartModelDownloadIfNeeded() {
-        guard hasRequestedModelDownload else { return }
         guard !isDownloading && !isGenerating else { return }
-        if isModelDownloaded {
+        let target = modelSettings.currentTarget()
+        let isDownloaded = provider.isModelDownloaded(target: target)
+        isModelDownloaded = isDownloaded
+        if !isDownloaded {
             return
         }
-        startModelDownload(userInitiated: false)
+        modelDownloadSizeBytes = nil
+        modelDownloadTask?.cancel()
+        modelDownloadTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.provider.ensureModelReady(target: target) { progress in
+                    Task { @MainActor in
+                        self.handleProgress(progress)
+                    }
+                }
+            } catch {
+                if self.isCancellation(error) {
+                    return
+                }
+                await MainActor.run {
+                    self.downloadToast = DownloadToastState(
+                        phase: .errorLoad,
+                        percent: -1,
+                        status: error.localizedDescription,
+                        offerRetryDownload: true
+                    )
+                    self.isDownloading = false
+                }
+            }
+        }
     }
 
     func cancelDownload() {
@@ -1032,6 +1069,7 @@ final class ChatViewModel: ObservableObject {
         let sessionId = created.flatMap { UUID(uuidString: $0.uuid) } ?? UUID()
         let updatedAt = created.map { Date(timeIntervalSince1970: Double($0.updatedAtUs) / 1_000_000.0) } ?? Date()
 
+        logger.info("Session created", details: "id=\(sessionId.uuidString)")
         let session = ChatSession(id: sessionId, title: created?.title ?? "New chat", lastMessage: "", updatedAt: updatedAt)
         sessions.insert(session, at: 0)
         currentSessionId = session.id
@@ -1122,15 +1160,27 @@ final class ChatViewModel: ObservableObject {
 
                 finishGeneration(parent: userNode, response: buffer, tokenCount: tokenCount, totalTimeMs: summary.totalTimeMs, interrupted: false, generationId: generationId)
             } catch {
-                let interrupted = stopRequested || error.localizedDescription.lowercased().contains("cancel")
-                finishGeneration(parent: userNode, response: buffer, tokenCount: tokenCount, totalTimeMs: nil, interrupted: interrupted, generationId: generationId)
+                let wasCancelled = stopRequested || isCancellation(error)
+                if activeGenerationId == generationId && !wasCancelled {
+                    let details = "session=\(userNode.sessionId.uuidString) promptLen=\(prompt.text.count) responseLen=\(buffer.count) tokens=\(tokenCount)"
+                    logger.error("Generation failed", error, details: details)
+                    generationErrorMessage = "Response failed. Try again."
+                }
+                finishGeneration(parent: userNode, response: buffer, tokenCount: tokenCount, totalTimeMs: nil, interrupted: true, generationId: generationId)
             }
         }
     }
 
     private func finishGeneration(parent: MessageNode, response: String, tokenCount: Int, totalTimeMs: Int64?, interrupted: Bool, generationId: UUID) {
         let trimmed = response.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty {
+        let isActiveGeneration = activeGenerationId == generationId
+        if trimmed.isEmpty {
+            if isActiveGeneration && !interrupted && generationErrorMessage == nil {
+                let details = "session=\(parent.sessionId.uuidString) promptLen=\(parent.text.count)"
+                logger.warning("Generation returned empty response", details: details)
+                generationErrorMessage = "No response from model. Try again."
+            }
+        } else {
             let tokensPerSecond: Double? = {
                 guard let totalTimeMs, totalTimeMs > 0 else { return nil }
                 return Double(tokenCount) / (Double(totalTimeMs) / 1000.0)
@@ -1144,6 +1194,7 @@ final class ChatViewModel: ObservableObject {
                 parentMessageUuid: parent.id.uuidString,
                 attachments: meta
             ), let assistantId = UUID(uuidString: inserted.uuid) {
+                logger.info("Message created", details: "id=\(assistantId.uuidString) session=\(parent.sessionId.uuidString) role=assistant")
                 let timestamp = Date(timeIntervalSince1970: Double(inserted.createdAtUs) / 1_000_000.0)
                 let assistant = MessageNode(
                     id: assistantId,
@@ -1163,7 +1214,7 @@ final class ChatViewModel: ObservableObject {
             }
         }
 
-        if activeGenerationId == generationId {
+        if isActiveGeneration {
             isGenerating = false
             isDownloading = false
             streamingResponse = ""
@@ -1411,8 +1462,11 @@ final class ChatViewModel: ObservableObject {
             let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
             let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
             let lastMessage = sortedMessages.last?.text ?? ""
-            let summary = sessionSummaries[session.uuid]
-            let title = summary ?? Self.sessionTitle(from: firstUserMessage, fallback: session.title)
+            let summary = sessionSummaries[sessionSummaryKey(session.uuid)]
+            let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                session.title.caseInsensitiveCompare("New chat") == .orderedSame
+            let seedTitle = summary ?? (isPlaceholderTitle ? firstUserMessage : session.title)
+            let title = Self.sessionTitle(from: seedTitle, fallback: session.title)
             return ChatSession(
                 id: id,
                 title: title,
@@ -1609,7 +1663,11 @@ final class ChatViewModel: ObservableObject {
             let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                 session.title.caseInsensitiveCompare("New chat") == .orderedSame
             if isPlaceholderTitle {
-                updated.title = Self.sessionTitle(from: preview, fallback: session.title)
+                let updatedTitle = Self.sessionTitle(from: preview, fallback: session.title)
+                if updatedTitle != session.title {
+                    _ = try? chatDb.updateSessionTitle(uuid: sessionId.uuidString, title: updatedTitle)
+                }
+                updated.title = updatedTitle
             }
             updated.lastMessage = preview
             updated.updatedAt = date
@@ -1619,9 +1677,10 @@ final class ChatViewModel: ObservableObject {
 
     private func scheduleSessionSummary(for sessionId: UUID) {
         sessionSummaryTask?.cancel()
-        guard sessionSummaries[sessionId.uuidString] == nil else { return }
+        let summaryKey = sessionSummaryKey(sessionId)
+        guard sessionSummaries[summaryKey] == nil else { return }
         guard let summaryInput = buildSessionSummaryInput(sessionId: sessionId) else { return }
-        let existingSummary = sessionSummaries[sessionId.uuidString]
+        let existingSummary = sessionSummaries[summaryKey]
         let target = modelSettings.currentTarget()
         let provider = provider
 
@@ -1653,10 +1712,7 @@ final class ChatViewModel: ObservableObject {
         guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return nil }
         let sorted = nodes.sorted(by: { $0.timestamp < $1.timestamp })
         guard let firstUser = sorted.first(where: { $0.role == .user }) else { return nil }
-        let assistants = sorted.filter { $0.role == .assistant }
-        guard assistants.count == 1, let firstAssistant = assistants.first else { return nil }
-
-        let input = "User: \(firstUser.text)\nAssistant: \(firstAssistant.text)"
+        let input = "User: \(firstUser.text)"
         let fallback = Self.summarizeQuestion(firstUser.text)
         return (text: input, fallback: fallback)
     }
@@ -1664,9 +1720,11 @@ final class ChatViewModel: ObservableObject {
     private func applySessionSummary(sessionId: UUID, summary: String) {
         let sanitized = Self.sessionTitle(from: summary, fallback: "New chat")
         guard !sanitized.isEmpty else { return }
-        if sessionSummaries[sessionId.uuidString] == sanitized { return }
-        sessionSummaries[sessionId.uuidString] = sanitized
+        let summaryKey = sessionSummaryKey(sessionId)
+        if sessionSummaries[summaryKey] == sanitized { return }
+        sessionSummaries[summaryKey] = sanitized
         persistSessionSummaries()
+        _ = try? chatDb.updateSessionTitle(uuid: sessionId.uuidString, title: sanitized)
         sessions = sessions.map { session in
             guard session.id == sessionId else { return session }
             var updated = session
@@ -1678,6 +1736,14 @@ final class ChatViewModel: ObservableObject {
     private func persistSessionSummaries() {
         guard let data = try? JSONEncoder().encode(sessionSummaries) else { return }
         UserDefaults.standard.set(data, forKey: Self.sessionSummaryStoreKey)
+    }
+
+    private func sessionSummaryKey(_ id: UUID) -> String {
+        id.uuidString.lowercased()
+    }
+
+    private func sessionSummaryKey(_ id: String) -> String {
+        id.lowercased()
     }
 
     private static func loadSessionSummaries() -> [String: String] {

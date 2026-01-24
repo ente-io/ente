@@ -21,4 +21,5 @@ interface ChatRepository {
     ): ChatMessage
 
     fun updateMessageText(messageId: String, text: String)
+    fun updateSessionTitle(sessionId: String, title: String)
 }
