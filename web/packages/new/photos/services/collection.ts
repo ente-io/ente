@@ -68,6 +68,16 @@ export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
 
 /**
+ * Create a new hidden album on remote, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param albumName The name to use for the new hidden album.
+ */
+export const createHiddenAlbum = (albumName: string) =>
+    createCollection(albumName, "album", { visibility: ItemVisibility.hidden });
+
+/**
  * Create a new collection on remote, and return its local representation.
  *
  * Remote only, does not modify local state.
