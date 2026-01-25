@@ -66,7 +66,9 @@ import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/do
 import {
     createAlbum,
     createHiddenAlbum,
+    isHiddenCollection,
     savedAllCollections,
+    savedHiddenCollections,
     savedNormalCollections,
 } from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
@@ -671,12 +673,16 @@ export const Upload: React.FC<UploadProps> = ({
         const collections: Collection[] = [];
         try {
             await onRemoteFilesPull!();
-            // Include hidden collections when syncing from watch folders so
-            // that new files go to the existing hidden album instead of
-            // creating a new visible album with the same name.
-            const existingCollections = includeHiddenCollections
-                ? await savedAllCollections()
-                : await savedNormalCollections();
+            // When uploading to hidden section (createHidden), only search
+            // hidden collections. When syncing from watch folders
+            // (includeHiddenCollections), search all collections so files go
+            // to existing albums regardless of visibility. Otherwise, search
+            // only normal (visible) collections.
+            const existingCollections = createHidden
+                ? await savedHiddenCollections()
+                : includeHiddenCollections
+                  ? await savedAllCollections()
+                  : await savedNormalCollections();
             let index = 0;
             for (const [
                 collectionName,
@@ -1077,6 +1083,10 @@ const matchExistingOrCreateAlbum = async (
     createHidden?: boolean,
 ) => {
     for (const collection of existingCollections) {
+        // When creating a hidden album, only match hidden collections.
+        // This prevents hidden uploads from going to visible albums.
+        if (createHidden && !isHiddenCollection(collection)) continue;
+
         if (
             // Name matches
             collection.name == albumName &&
