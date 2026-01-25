@@ -9,16 +9,34 @@ CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_sync_uniffi"
 # Note: Older builds used to patch llama-cpp sources; this repo no longer ships that patch script.
 PATCH_SCRIPT=""
 OUT_DIR="$ROOT/src/main/jniLibs"
-NDK_VERSION="27.0.12077973"
-NDK_ROOT_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}/ndk/$NDK_VERSION"
+SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+NDK_VERSION="${NDK_VERSION:-}"
+NDK_ROOT_PATH=""
 
-if [[ -z "${ANDROID_HOME:-}" && -z "${ANDROID_SDK_ROOT:-}" ]]; then
-  echo "ANDROID_HOME or ANDROID_SDK_ROOT must be set" >&2
+if [[ -z "$SDK_ROOT" ]]; then
+  for candidate in "$HOME/Library/Android/sdk" "$HOME/Android/Sdk" "$HOME/Android/sdk"; do
+    if [[ -d "$candidate" ]]; then
+      SDK_ROOT="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$SDK_ROOT" ]]; then
+  echo "Android SDK not found. Set ANDROID_HOME or ANDROID_SDK_ROOT to your SDK path." >&2
   exit 1
 fi
 
-if [[ ! -d "$NDK_ROOT_PATH" ]]; then
-  echo "Android NDK not found at $NDK_ROOT_PATH" >&2
+if [[ -n "$NDK_VERSION" ]]; then
+  NDK_ROOT_PATH="$SDK_ROOT/ndk/$NDK_VERSION"
+elif [[ -d "$SDK_ROOT/ndk" ]]; then
+  NDK_ROOT_PATH="$(ls -1d "$SDK_ROOT/ndk/"* 2>/dev/null | sort -V | tail -n 1)"
+elif [[ -d "$SDK_ROOT/ndk-bundle" ]]; then
+  NDK_ROOT_PATH="$SDK_ROOT/ndk-bundle"
+fi
+
+if [[ -z "$NDK_ROOT_PATH" || ! -d "$NDK_ROOT_PATH" ]]; then
+  echo "Android NDK not found. Install an NDK under $SDK_ROOT/ndk or set NDK_VERSION to a specific version." >&2
   exit 1
 fi
 

@@ -4,14 +4,15 @@
 
 - Android Studio or command-line tools
 - JDK 17
-- Android SDK with API level 34
-- Rust toolchain (for building native libraries)
+- Android SDK with API level 35 (install in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT`)
+- Android NDK (install via `sdkmanager "ndk;<version>"`; optionally set `NDK_VERSION` to select a specific version)
+- Rust toolchain and `cargo-ndk` (`cargo install cargo-ndk`)
 
 ## Building
 
 ### 1. Build Rust Libraries
 
-Before building the Android app, compile the Rust native libraries:
+Before building the Android app, compile the Rust native libraries. Ensure the SDK is installed in a default location or set `ANDROID_HOME`/`ANDROID_SDK_ROOT` to the SDK containing an NDK. Optionally set `NDK_VERSION` to select a specific version.
 
 ```bash
 cd mobile/native/android/packages/rust/tool
