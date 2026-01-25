@@ -6,8 +6,9 @@ REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
 INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/inference_rs_uniffi"
 CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_db_uniffi"
 CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_sync_uniffi"
-# Note: Older builds used to patch llama-cpp sources; this repo no longer ships that patch script.
-PATCH_SCRIPT=""
+# Patch llama.cpp mtmd sources so mmproj models load correctly.
+PATCH_SCRIPT="$REPO_ROOT/rust/inference_rs/tool/patch_llama_mtmd.sh"
+APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 OUT_DIR="$ROOT/src/main/jniLibs"
 SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 NDK_VERSION="${NDK_VERSION:-}"
@@ -40,6 +41,14 @@ if [[ -z "$NDK_ROOT_PATH" || ! -d "$NDK_ROOT_PATH" ]]; then
   exit 1
 fi
 
+if [[ "$APPLY_LLAMA_MTMD_PATCH" != "0" && -f "$PATCH_SCRIPT" ]]; then
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required to apply the llama mtmd patch." >&2
+    exit 1
+  fi
+  echo "Applying llama mtmd patch..."
+  bash "$PATCH_SCRIPT"
+fi
 
 export ANDROID_NDK="$NDK_ROOT_PATH"
 export ANDROID_NDK_ROOT="$NDK_ROOT_PATH"

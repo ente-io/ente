@@ -6,9 +6,17 @@ REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
 RUST_DIR="$ROOT/rust"
 CORE_ROOT="$REPO_ROOT/rust/inference_rs"
 PATCH_SCRIPT="$CORE_ROOT/tool/patch_llama_mtmd.sh"
+APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 LIB_NAME="libinference_rs_uniffi.a"
 
-"$PATCH_SCRIPT"
+if [[ "$APPLY_LLAMA_MTMD_PATCH" != "0" && -f "$PATCH_SCRIPT" ]]; then
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required to apply the llama mtmd patch." >&2
+    exit 1
+  fi
+  echo "Applying llama mtmd patch..."
+  bash "$PATCH_SCRIPT"
+fi
 
 "$ROOT/tool/generate_bindings.sh"
 

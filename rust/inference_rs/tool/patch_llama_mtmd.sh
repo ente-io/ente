@@ -2,12 +2,38 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION=$(grep -E "llama-cpp-2" "$ROOT/Cargo.toml" | head -n 1 | grep -Eo 'version *= *"[^"]+"|"[0-9]+\.[0-9]+\.[0-9]+"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
-CRATE_DIR=$(ls -d "$HOME/.cargo/registry/src/"*/llama-cpp-sys-2-$VERSION 2>/dev/null | head -n 1 || true)
+CRATE_DIR="$(
+  python3 - <<PY
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+root = os.path.abspath("${ROOT}")
+try:
+    meta = subprocess.check_output(["cargo", "metadata", "--format-version", "1"], cwd=root)
+except Exception:
+    sys.exit(1)
+
+data = json.loads(meta)
+for pkg in data.get("packages", []):
+    if pkg.get("name") == "llama-cpp-sys-2":
+        print(Path(pkg["manifest_path"]).parent)
+        sys.exit(0)
+
+sys.exit(1)
+PY
+)" || true
 
 if [[ -z "$CRATE_DIR" ]]; then
-  echo "llama-cpp-sys-2 $VERSION not found in cargo registry" >&2
-  exit 0
+  VERSION=$(grep -E "llama-cpp-2" "$ROOT/Cargo.toml" | head -n 1 | grep -Eo 'version *= *"[^"]+"|"[0-9]+\.[0-9]+\.[0-9]+"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/' | sed -E 's/^=//')
+  CRATE_DIR=$(ls -d "$HOME/.cargo/registry/src/"*/llama-cpp-sys-2-$VERSION 2>/dev/null | head -n 1 || true)
+fi
+
+if [[ -z "$CRATE_DIR" ]]; then
+  echo "llama-cpp-sys-2 not found in cargo metadata or registry. Run 'cargo fetch' in $ROOT and try again." >&2
+  exit 1
 fi
 
 TOOLS_DIR="$CRATE_DIR/llama.cpp/tools"
@@ -46,6 +72,8 @@ CLIP_CPP="$MTMD_DIR/clip.cpp"
 if [[ -f "$CLIP_CPP" ]]; then
   python3 - <<PY
 from pathlib import Path
+import sys
+
 path = Path("$CLIP_CPP")
 text = path.read_text()
 
@@ -57,10 +85,37 @@ replacements = {
 }
 
 updated = text
+applied = []
+missing = []
+
 for old, new in replacements.items():
-    updated = updated.replace(old, new)
+    if old in text:
+        updated = updated.replace(old, new)
+        applied.append(old)
+    elif new in text:
+        continue
+    else:
+        missing.append(old)
 
 if updated != text:
     path.write_text(updated)
+
+if missing:
+    sys.stderr.write("mtmd clip.cpp patch patterns not found; llama.cpp may have changed.\n")
+    sys.stderr.write(f"File: {path}\n")
+    sys.exit(1)
+
+marker = Path("$CRATE_DIR") / "llama.cpp" / "CMakeMtmdPatch.txt"
+needs_rebuild = applied or not marker.exists()
+if needs_rebuild:
+    marker.write_text("# mtmd patch applied\n")
+    cmake_root = Path("$CRATE_DIR") / "llama.cpp" / "CMakeLists.txt"
+    if cmake_root.exists():
+        cmake_root.touch()
+
+if applied:
+    print(f"Patched mtmd clip.cpp ({len(applied)} replacements).")
+else:
+    print("mtmd clip.cpp already patched.")
 PY
 fi

@@ -14,6 +14,9 @@ cd swift
 This writes the Swift sources plus the UniFFI header/modulemap into
 `swift/Sources/InferenceRS`.
 
+Note: The script applies the llama.cpp mtmd patch (requires `python3`). Set
+`APPLY_LLAMA_MTMD_PATCH=0` to skip it.
+
 ## Build the xcframework
 
 From the repo root:
@@ -25,6 +28,9 @@ cd swift
 
 This produces `swift/InferenceRSFFI.xcframework`, which the Swift package
 references as a binary target.
+
+Note: The build applies the llama.cpp mtmd patch (requires `python3`). Set
+`APPLY_LLAMA_MTMD_PATCH=0` to skip it.
 
 ## Use in an app (SwiftPM)
 
