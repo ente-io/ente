@@ -83,9 +83,11 @@ Duplicates can occur:
 5. Import Google Takeout using Ente desktop app.
 6. After successful import, enable desired photo folder backup on Ente mobile app.
 
-Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
-
 **If duplicates still arise after migration and upload:**
 
 - Use the [Remove duplicates](/photos/features/albums-and-organization/storage-optimization#remove-exact-duplicates) option.
 - Use the [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) option. (Ensure Machine Learning is enabled in Settings for similar-image detection)
+
+> [!TIP]
+>
+> Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
