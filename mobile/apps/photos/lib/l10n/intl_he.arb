@@ -283,8 +283,6 @@
   "claimFreeStorage": "תבע מקום אחסון בחינם",
   "inviteYourFriends": "הזמן את חברייך",
   "failedToFetchReferralDetails": "אחזור פרטי ההפניה נכשל. אנא נסה שוב מאוחר יותר.",
-  "referralStep2": "2. הם נרשמים עבור תוכנית בתשלום",
-  "referralStep3": "3. שניכים מקבלים {storageInGB} GB* בחינם",
   "referralsAreCurrentlyPaused": "הפניות כרגע מושהות",
   "claimedStorageSoFar": "{isFamilyMember, select, true {קיבלת {storageAmountInGb} GB עד כה} false {קיבלת {storageAmountInGb} GB עד כה} other {קיבלת {storageAmountInGb} GB עד כה!}}",
   "@claimedStorageSoFar": {

@@ -291,12 +291,9 @@
   "claimMore": "Løs inn mer!",
   "theyAlsoGetXGb": "De får også {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB hver gang noen melder seg på en betalt plan og bruker koden din",
-  "shareTextReferralCode": "Gi vervekode: {referralCode} \n\nBruk den i Innstillinger → General → Verving for å få {referralStorageInGB} GB gratis etter at du har registrert deg for en betalt plan\n\nhttps://ente.io",
   "claimFreeStorage": "Få gratis lagring",
   "inviteYourFriends": "Inviter vennene dine",
   "failedToFetchReferralDetails": "Kan ikke hente vervedetaljer. Prøv igjen senere.",
-  "referralStep2": "De registrerer seg for en betalt plan",
-  "referralStep3": "3. Begge dere får {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Vervinger er for øyeblikket satt på pause",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Familien din har gjort krav på {storageAmountInGb} GB så langt} false {Du har gjort krav på {storageAmountInGb} GB så langt} other {Du har gjort krav på {storageAmountInGb} GB så langt!}}\n",
   "@claimedStorageSoFar": {
@@ -1727,11 +1724,5 @@
   "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
-  "pastYearsMemories": "Tidligere års minner",
-  "cLTitle1": "Designendringer",
-  "cLDesc1": "Innstillingsskjermen og søkeresultatsiden har blitt redesignet. Søkefeltet er flyttet til toppen.",
-  "cLTitle2": "Forbedringer",
-  "cLDesc2": "Knip for å zoome på video. Raskere lasting av søkefanen. Administratorer og albumeiere kan slette kommentarer. Forhåndsvisning for formater som ikke støttes. Søk i oppdagelse, sted, personer og filtype. Tilpasset sortering på personsiden. En bedre flyt for sammenslåing av personer. Vis alle ignorerte personer. Konsekvent kontaktsortering.",
-  "cLTitle3": "Feilrettinger",
-  "cLDesc3": "Fikset at musikk pauset ved appåpning. Fikset sveip-for-å-velge på Samsung S-enheter. Fikset bildefrekvens-problem på infobladet. Fikset galleriproblemer på nettbrett og i liggende modus. Fikset ukategorisert side som ikke oppdaterte etter flytting."
+  "pastYearsMemories": "Tidligere års minner"
 }

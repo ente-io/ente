@@ -321,12 +321,9 @@
   "claimMore": "Zdobądź więcej!",
   "theyAlsoGetXGb": "Oni również otrzymują {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB za każdym razem, gdy ktoś zarejestruje się w płatnym planie i użyje twojego kodu",
-  "shareTextReferralCode": "Kod polecający: {referralCode} \n\nZastosuj go w: Ustawienia → Ogólne → Polecanie, aby otrzymać {referralStorageInGB} GB za darmo po zarejestrowaniu się w płatnym planie\n\nhttps://ente.io",
   "claimFreeStorage": "Odbierz bezpłatną przestrzeń dyskową",
   "inviteYourFriends": "Zaproś znajomych",
   "failedToFetchReferralDetails": "Nie można pobrać szczegółów polecenia. Spróbuj ponownie później.",
-  "referralStep2": "2. Wykupują płatny plan",
-  "referralStep3": "3. Oboje otrzymujecie {storageInGB} GB* za darmo",
   "referralsAreCurrentlyPaused": "Wysyłanie poleceń jest obecnie wstrzymane",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Twoja rodzina odebrała {storageAmountInGb} GB do tej pory} false {Odebrałeś {storageAmountInGb} GB do tej pory} other {Odebrałeś {storageAmountInGb} GB do tej pory!}}",
   "@claimedStorageSoFar": {
@@ -1891,11 +1888,5 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Zmiany w wyglądzie",
-  "cLDesc1": "Ekran ustawień i strona wyników wyszukiwania zostały przeprojektowane. Pasek wyszukiwania przesunął się na górę.",
-  "cLTitle2": "Ulepszenia",
-  "cLDesc2": "Ściąganie do powiększania wideo. Szybsze ładowanie karty wyszukiwania. Administratorzy i właściciele albumów mogą usuwać komentarze. Podgląd dla niewspieranych formatów. Wyszukiwanie w odkrywaniu, lokalizacji, osobach i typie pliku. Niestandardowe sortowanie na stronie osób. Lepszy przepływ łączenia osób. Zobacz wszystkie ignorowane osoby. Spójne sortowanie kontaktów.",
-  "cLTitle3": "Poprawki błędów",
-  "cLDesc3": "Naprawiono pauzowanie muzyki przy otwieraniu aplikacji. Naprawiono przeciągnięcie do wyboru na urządzeniach Samsung S. Naprawiono problem z liczbą klatek na arkuszu informacyjnym. Naprawiono problemy z galerią na tabletach i w trybie poziomym. Naprawiono stronę niekategoryzowanych, która nie aktualizowała się po przeniesieniu."
+  "deletingDash": "Usuwanie - "
 }

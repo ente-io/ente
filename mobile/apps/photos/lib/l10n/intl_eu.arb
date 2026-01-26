@@ -290,12 +290,9 @@
   "claimMore": "Eskatu gehiago!",
   "theyAlsoGetXGb": "Haiek ere lortuko dute {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB norbaitek ordainpeko plan batean sartzen denean zure kodea aplikatzen badu",
-  "shareTextReferralCode": "Sartu erreferentzia kodea: {referralCode}\n\nAplikatu hemen: Ezarpenak → Orokorra→ Erreferentziak, {referralStorageInGB} GB dohainik izateko ordainpeko plan batean \n\nhttps://ente.io",
   "claimFreeStorage": "Eskatu debaldeko biltegiratzea",
   "inviteYourFriends": "Gonbidatu zure lagunak",
   "failedToFetchReferralDetails": "Ezin dugu zure erreferentziaren detailerik lortu. Mesedez, saiatu berriro geroago.",
-  "referralStep2": "2. Haiek ordainpeko plan batean sinatu behar dute",
-  "referralStep3": "3. Bai zuk bai haiek {storageInGB} GB* dohainik izango duzue",
   "referralsAreCurrentlyPaused": "Erreferentziak momentuz geldituta daude",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Zure familiak {storageAmountInGb} GB eskatu du dagoeneko} false {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko} other {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko!}}",
   "@claimedStorageSoFar": {

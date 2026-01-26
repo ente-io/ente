@@ -290,12 +290,9 @@
   "claimMore": "Revendicați mai multe!",
   "theyAlsoGetXGb": "De asemenea, va primii {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB de fiecare dată când cineva se înscrie pentru un plan plătit și aplică codul dvs.",
-  "shareTextReferralCode": "Codul de recomandare Ente: {referralCode}\n\nAplică-l în Setări → General → Recomandări pentru a obține {referralStorageInGB} GB gratuit după ce te înscrii pentru un plan plătit\n\nhttps://ente.io",
   "claimFreeStorage": "Revendică spațiul gratuit",
   "inviteYourFriends": "Invitați-vă prietenii",
   "failedToFetchReferralDetails": "Nu se pot obține detaliile recomandării. Vă rugăm să încercați din nou mai târziu.",
-  "referralStep2": "2. Aceștia se înscriu la un plan cu plată",
-  "referralStep3": "3. Amândoi primiți {storageInGB} GB* gratuit",
   "referralsAreCurrentlyPaused": "Recomandările sunt momentan întrerupte",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Familia dvs. a revendicat {storageAmountInGb} GB până acum} false {Ați revendicat {storageAmountInGb} GB până acum} other {Ați revendicat {storageAmountInGb} de GB până acum!}}",
   "@claimedStorageSoFar": {
@@ -1512,11 +1509,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "cLTitle1": "Modificări de design",
-  "cLDesc1": "Ecranul de setări și pagina cu rezultatele căutării au fost redesenate. Bara de căutare a fost mutată în partea de sus.",
-  "cLTitle2": "Îmbunătățiri",
-  "cLDesc2": "Ciupiți pentru a mări videoclipurile. Încărcare mai rapidă a filei de căutare. Administratorii și proprietarii de albume pot șterge comentariile. Previzualizare pentru formatele neacceptate. Căutare în descoperire, locație, persoane și tip de fișier. Sortare personalizată pe pagina persoanelor. Un flux mai bun pentru unirea persoanelor. Vizualizați toate persoanele ignorate. Sortare consistentă a contactelor.",
-  "cLTitle3": "Remedieri de erori",
-  "cLDesc3": "Remediat problema muzicii care se oprea la deschiderea aplicației. Remediat glisarea pentru a selecta pe dispozitivele Samsung S. Remediat problema cu rata de cadre pe fișa de informații. Remediat problemele galeriei pe tablete și în modul peisaj. Remediat pagina necategorizată care nu se actualiza după mutări."
+  "join": "Alăturare"
 }

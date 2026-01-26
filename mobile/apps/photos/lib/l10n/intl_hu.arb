@@ -290,12 +290,9 @@
   "claimMore": "Igényelj többet!",
   "theyAlsoGetXGb": "Emellett {storageAmountInGB} GB-ot kapnak",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB minden alkalommal, amikor valaki fizetős csomagra fizet elő és felhasználja a kódodat",
-  "shareTextReferralCode": "Add meg a következő ajánlási kódot: {referralCode}\n\nAlkalmazd a Beállítások → Általános → Ajánlások menüpontban, hogy {referralStorageInGB} GB ingyenes tárhelyet kapj, miután regisztráltál egy fizetős csomagra\n\nhttps://ente.io",
   "claimFreeStorage": "Igényeljen ingyenes tárhelyet",
   "inviteYourFriends": "Hívd meg a barátaidat",
   "failedToFetchReferralDetails": "Nem sikerült lekérni a hivatkozási adatokat. Kérjük, próbálja meg később.",
-  "referralStep2": "2. Fizetős csomagra fizetnek elő",
-  "referralStep3": "3. Mindketten {storageInGB} GB* ingyenes tárhelyet kaptok",
   "referralsAreCurrentlyPaused": "Az ajánlások jelenleg szünetelnek",
   "claimedStorageSoFar": "{isFamilyMember, select, true {A családod eddig {storageAmountInGb} GB tárhelyet igényelt} false {Eddig {storageAmountInGb} GB tárhelyet igényelt} other {Eddig {storageAmountInGb} GB tárhelyet igényelt!}}",
   "@claimedStorageSoFar": {

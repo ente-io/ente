@@ -288,8 +288,6 @@
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ сваки пут када се неко претплати на неку од наших понуда и при том унесе ваш код",
   "claimFreeStorage": "Освоји бесплатан простор на диску",
   "inviteYourFriends": "Позови своје пријатеље",
-  "referralStep2": "2. Они се претплате на понуду која се плаћа",
-  "referralStep3": "3. Обоје добијате {storageInGB} ГБ* бесплатно",
   "referralsAreCurrentlyPaused": "Препоручивање је тренутно паузирано",
   "faq": "Честа питања",
   "help": "Помоћ",

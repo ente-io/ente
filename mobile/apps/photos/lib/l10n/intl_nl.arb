@@ -309,12 +309,9 @@
   "claimMore": "Claim meer!",
   "theyAlsoGetXGb": "Zij krijgen ook {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB telkens als iemand zich aanmeldt voor een betaald abonnement en je code toepast",
-  "shareTextReferralCode": "Ente verwijzingscode: {referralCode} \n\nPas het toe bij Instellingen → Algemeen → Verwijzingen om {referralStorageInGB} GB gratis te krijgen nadat je je hebt aangemeld voor een betaald abonnement\n\nhttps://ente.io",
   "claimFreeStorage": "Claim gratis opslag",
   "inviteYourFriends": "Vrienden uitnodigen",
   "failedToFetchReferralDetails": "Kan geen verwijzingsgegevens ophalen. Probeer het later nog eens.",
-  "referralStep2": "2. Ze registreren voor een betaald plan",
-  "referralStep3": "Jullie krijgen allebei {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Verwijzingen zijn momenteel gepauzeerd",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jouw familie heeft {storageAmountInGb} GB geclaimd tot nu toe} false {Je hebt {storageAmountInGb} GB geclaimd tot nu toe} other {Je hebt {storageAmountInGb} GB geclaimd tot nu toe!}}",
   "@claimedStorageSoFar": {
@@ -1953,11 +1950,5 @@
   "streetFood": "Street food bites",
   "riverCruises": "Uitzichten vanaf de cruise",
   "playfulKids": "Spelende kinderen",
-  "coastalCliffs": "Kliffen bij de zee",
-  "cLTitle1": "Ontwerpwijzigingen",
-  "cLDesc1": "Het instellingenscherm en de zoekresultatenpagina zijn opnieuw ontworpen. De zoekbalk is naar boven verplaatst.",
-  "cLTitle2": "Verbeteringen",
-  "cLDesc2": "Knijpen om te zoomen op video. Sneller laden van zoektab. Beheerders en albumeigenaren kunnen reacties verwijderen. Voorvertoning voor niet-ondersteunde formaten. Zoeken binnen ontdekken, locatie, personen en bestandstype. Aangepaste sortering op personenpagina. Een betere workflow voor het samenvoegen van personen. Bekijk alle genegeerde personen. Consistente contactsortering.",
-  "cLTitle3": "Bugfixes",
-  "cLDesc3": "Muziek pauzeerde niet meer bij het openen van de app. Veeg-om-te-selecteren op Samsung S-apparaten opgelost. Framerate-probleem op info-blad opgelost. Galerijproblemen op tablets en in landschapsmodus opgelost. Ongecategoriseerde pagina die niet bijwerkte na verplaatsingen opgelost."
+  "coastalCliffs": "Kliffen bij de zee"
 }

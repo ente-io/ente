@@ -325,7 +325,7 @@
   "claimMore": "Réclamez plus !",
   "theyAlsoGetXGb": "Ils obtiennent aussi {storageAmountInGB} Go",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} Go chaque fois que quelqu'un s'inscrit à une offre payante et applique votre code",
-  "shareTextReferralCode": "Code de parrainage Ente : {referralCode} \n\nValidez-le dans Paramètres → Général → Références pour obtenir {referralStorageInGB} Go gratuitement après votre inscription à un plan payant\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos est un endroit privé et sécurisé pour vos photos\n* Téléchargez des photos Ente à partir de https://ente. o/app\n* Créez un compte\n* Appliquez le code de parrainage {referralCode} dans Paramètres->Parrainage\n* Obtennez {referralStorageInGB}Go gratuitement lorsque vous passez à une offre payante",
   "claimFreeStorage": "Obtenez du stockage gratuit",
   "inviteYourFriends": "Parrainez vos ami·e·s",
   "earnFreeStorage": "Obtenez du stockage gratuit",
@@ -333,9 +333,9 @@
   "youBothGet": "Vous obtenez les deux",
   "free": "gratuit",
   "failedToFetchReferralDetails": "Impossible de récupérer les détails du parrainage. Veuillez réessayer plus tard.",
-  "referralStep1": "1. Personnalisez et partagez votre code avec vos amis.",
-  "referralStep2": "2. Ils souscrivent à une offre payante",
-  "referralStep3": "3. Vous recevez tous les deux {storageInGB} Go* gratuits",
+  "referralStep1": "1. Personnalisez et partagez votre code.",
+  "referralStep2": "2. Ils se sont inscrits à Ente en utilisant votre code.",
+  "referralStep3": "3. {storageInGB}Go gratuit pour eux + {storageInGB}Go gratuit pour vous lorsqu'ils passent sur un plan payant.",
   "referralsAreCurrentlyPaused": "Les recommandations sont actuellement en pause",
   "youCanAtMaxDoubleYourStorage": "Vous pouvez au maximum doubler votre espace de stockage",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Votre famille a obtenu {storageAmountInGb} Go jusqu'à présent} false {Vous avez obtenu {storageAmountInGb} Go jusqu'à présent} other {Vous avez obtenu {storageAmountInGb} Go jusqu'à présent !}}",
@@ -379,6 +379,8 @@
   "subscribeToChangeLinkSetting": "Vous avez besoin d'un abonnement payant pour modifier le paramètre de ce lien.",
   "subscribe": "S'abonner",
   "canOnlyRemoveFilesOwnedByYou": "Vous ne pouvez supprimer que les fichiers que vous possédez",
+  "cannotMoveToSharedAlbums": "Impossible de déplacer vers les albums partagés",
+  "cannotMoveToSharedAlbumsMessage": "Les éléments peuvent être ajoutés qu'aux albums partagés, et non déplacés. Voulez-vous ajouter à la place ?",
   "deleteSharedAlbum": "Supprimer l'album partagé ?",
   "deleteAlbum": "Supprimer l'album",
   "deleteAlbumDialog": "Supprimer aussi les photos (et vidéos) présentes dans cet album de <bold>tous</bold> les autres albums dont elles font partie ?",
@@ -471,6 +473,10 @@
   "mlConsentPrivacy": "Veuillez cliquer ici pour plus de détails sur cette fonctionnalité dans notre politique de confidentialité",
   "mlConsentConfirmation": "Je comprends et je souhaite activer l'apprentissage automatique",
   "magicSearch": "Recherche magique",
+  "magic": "Magique",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Découverte",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -817,6 +823,7 @@
   "name": "Nom",
   "newest": "Le plus récent",
   "lastUpdated": "Dernière mise à jour",
+  "updated": "Mis à jour",
   "deleteEmptyAlbums": "Supprimer les albums vides",
   "deleteEmptyAlbumsWithQuestionMark": "Supprimer les albums vides ?",
   "deleteAlbumsDialogBody": "Ceci supprimera tous les albums vides. Ceci est utile lorsque vous voulez réduire l'encombrement dans votre liste d'albums.",
@@ -1110,6 +1117,46 @@
   "loadMessage8": "web.ente.io dispose d'un outil de téléchargement facile à utiliser",
   "loadMessage9": "Nous utilisons Xchacha20Poly1305 pour chiffrer vos données en toute sécurité",
   "photoDescriptions": "Descriptions de la photo",
+  "searchResultFileName": "Nom du fichier",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Description",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Type",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Extension du fichier",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Personne",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Partagé",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Déposé par",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Marque de l'appareil",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Modèle de l'appareil",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Fichiers",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Types et noms de fichiers",
   "location": "Lieu",
   "moments": "Souvenirs",
@@ -1259,6 +1306,7 @@
   "visibility": "Visibilité",
   "hideFromMemories": "Masquer des souvenirs",
   "showInMemories": "Afficher dans les souvenirs",
+  "showIgnored": "Afficher les ignorés",
   "create": "Créer",
   "viewAll": "Tout afficher",
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
@@ -1423,6 +1471,7 @@
   "enterPin": "Saisir le code PIN",
   "setNewPin": "Définir un nouveau code PIN",
   "appLock": "Verrouillage de l'application",
+  "lockScreenType": "Mode de verrouillage",
   "noSystemLockFound": "Aucun verrou système trouvé",
   "tapToUnlock": "Appuyer pour déverrouiller",
   "tooManyIncorrectAttempts": "Trop de tentatives incorrectes",
@@ -1508,6 +1557,26 @@
   "addNewPerson": "Ajouter une nouvelle personne",
   "addNameOrMerge": "Ajouter un nom ou fusionner",
   "mergeWithExisting": "Fusionner avec existant",
+  "mergeWithPersonTitle": "Fusionner sous le nom {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Toutes les photos des deux groupes de visage seront fusionnées sous {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Nouvelle personne",
   "addName": "Ajouter un nom",
   "add": "Ajouter",
@@ -2083,6 +2152,7 @@
     }
   },
   "size": "Taille",
+  "closest": "Le plus proche",
   "similarity": "Similitude",
   "analyzingPhotosLocally": "Analyse de vos photos en local ...",
   "lookingForVisualSimilarities": "Recherche de ressemblances visuelles...",
@@ -2099,12 +2169,12 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Changements de design",
-  "cLDesc1": "L'écran des paramètres et la page des résultats de recherche ont été redessinés. La barre de recherche a été déplacée en haut.",
+  "cLTitle1": "Changement de design",
+  "cLDesc1": "L'écran des paramètres et la page des résultats de recherche ont été retravaillés. La barre de recherche a été déplacée vers le haut.",
   "cLTitle2": "Améliorations",
-  "cLDesc2": "Pincer pour zoomer sur les vidéos. Chargement plus rapide de l'onglet de recherche. Les administrateurs et propriétaires d'albums peuvent supprimer les commentaires. Aperçu pour les formats non pris en charge. Recherche dans découverte, lieu, personnes et type de fichier. Tri personnalisé sur la page des personnes. Un meilleur flux de fusion de personnes. Voir toutes les personnes ignorées. Tri cohérent des contacts.",
+  "cLDesc2": "Pincez pour zoomer sur la vidéo. Chargez plus rapidement l'onglet de recherche. Les administrateurs et les propriétaires d'albums peuvent supprimer les commentaires. Aperçu du rendu pour les formats non pris en charge. Rechercher par la découverte, l'emplacement, les personnes et le type de fichier. Tri personnalisé sur la page des personnes. Un meilleur flux de fusionnement des personnes. Voir toute personne ignorée. Tri cohérent des contacts.",
   "cLTitle3": "Corrections de bugs",
-  "cLDesc3": "Correction de la musique qui se mettait en pause à l'ouverture de l'app. Correction du glisser pour sélectionner sur les appareils Samsung S. Correction du problème de fréquence d'images sur la fiche d'informations. Correction des problèmes de galerie sur les tablettes et en mode paysage. Correction de la page non catégorisée qui ne se mettait pas à jour après les déplacements.",
+  "cLDesc3": "Correction de l'interruption de la musique à l'ouverture de l'application. Correction d'un glisser-sélectionner sur les appareils Samsung S. Problème de fréquence d'images fixe sur la fiche d'information. Correction des problèmes de galerie sur les tablettes et en vue paysage. Correction de la page hors catégorie qui ne se met pas à jour après des déplacements",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2430,5 +2500,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Paramètres de recherche",
+  "suggestions": "Suggestions"
 }

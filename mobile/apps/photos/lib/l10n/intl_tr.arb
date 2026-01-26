@@ -172,6 +172,11 @@
   "confirmYourRecoveryKey": "Kurtarma anahtarını doğrulayın",
   "addViewer": "Görüntüleyici ekle",
   "addCollaborator": "Düzenleyici ekle",
+  "admin": "Yönetici",
+  "admins": "Yöneticiler",
+  "addAdmin": "Yönetici ekle",
+  "addMoreAdmins": "Daha fazla yönetici ekle",
+  "adminsAndCollaboratorsCanAddPhotosDescription": "Yöneticiler ve işbirlikçiler fotoğraf ekleyebilir. Yöneticiler ayrıca fotoğrafları ve katılımcıları da yönetebilir.",
   "addANewEmail": "Yeni e-posta ekle",
   "orPickAnExistingOne": "Veya mevcut birini seçiniz",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Düzenleyiciler, paylaşılan albüme fotoğraf ve videolar ekleyebilir.",
@@ -203,6 +208,7 @@
   },
   "allowJoiningAlbum": "Albüme katılmaya izin ver",
   "allowAddPhotosDescription": "Bağlantıya sahip olan kişilerin paylaşılan albüme fotoğraf eklemelerine izin ver.",
+  "enableComment": "Yorumlar ve tepkiler",
   "passwordLock": "Şifre kilidi",
   "canNotOpenTitle": "Albüm açılamadı",
   "canNotOpenBody": "Üzgünüz, Bu albüm uygulama içinde açılamadı.",
@@ -258,6 +264,7 @@
   "shareWithNonenteUsers": "Ente kullanıcısı olmayanlar için paylaş",
   "createPublicLink": "Herkese açık bir bağlantı oluştur",
   "sendLink": "Bağlantıyı gönder",
+  "qrCode": "QR Kod",
   "sendQrCode": "QR kod gönder",
   "copyLink": "Bağlantıyı kopyala",
   "copyEmbedHtml": "Kopyalanmış Html ekle",
@@ -299,9 +306,13 @@
   "enterCodeDescription": "İkiniz için de ücretsiz depolama alanı talep etmek için arkadaşınız tarafından sağlanan kodu girin",
   "apply": "Uygula",
   "failedToApplyCode": "Uygulanırken hata oluştu",
+  "invalidReferralCode": "Geçersiz kod",
   "enterReferralCode": "Davet kodunuzu girin",
   "codeAppliedPageTitle": "Kod kabul edildi",
+  "changeYourReferralCode": "Kodu değiştir",
   "change": "Değiştir",
+  "saveCode": "Kodu kaydet",
+  "referralCodeHint": "Bu kodu en fazla 3 kez özelleştirebilirsiniz",
   "unavailableReferralCode": "Üzgünüz, bu kod mevcut değil.",
   "codeChangeLimitReached": "Üzgünüz, kod değişikliklerinin sınırına ulaştınız.",
   "onlyFamilyAdminCanChangeCode": "Kodunuzu değiştirmek için lütfen {familyAdminEmail} ile iletişime geçin.",
@@ -312,14 +323,12 @@
   },
   "details": "Ayrıntılar",
   "claimMore": "Arttır!",
+  "earnMoreSpace": "Daha fazla depolama alanı kazanın!",
   "theyAlsoGetXGb": "Aynı zamanda {storageAmountInGB} GB alıyorlar",
   "freeStorageOnReferralSuccess": "Birisinin davet kodunuzu uygulayıp ücretli hesap açtığı her seferede {storageAmountInGB} GB",
-  "shareTextReferralCode": "Ente davet kodu: {referralCode} \n\nÜcretli hesaba başvurduktan sonra {referralStorageInGB} GB bedava almak için \nAyarlar → Genel → Davetlerde bu kodu girin\n\nhttps://ente.io",
   "claimFreeStorage": "Bedava alan kazanın",
   "inviteYourFriends": "Arkadaşlarını davet et",
   "failedToFetchReferralDetails": "Davet ayrıntıları çekilemedi. Iütfen daha sonra deneyin.",
-  "referralStep2": "2. Ücretli bir plan için kaydolsunlar",
-  "referralStep3": "3. İkinizde bedava {storageInGB} GB alın",
   "referralsAreCurrentlyPaused": "Davetler şu anda durmuş durumda",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Şu ana kadar aileniz {storageAmountInGb} GB aldı} false {Şu ana kadar {storageAmountInGb} GB aldınız} other {Şu ana kadar {storageAmountInGb} GB aldınız!}}",
   "@claimedStorageSoFar": {
@@ -373,10 +382,10 @@
   "createAlbumActionHint": "Fotoğrafları seçmek için uzun basın ve + düğmesine tıklayarak bir albüm oluşturun",
   "importing": "İçeri aktarılıyor....",
   "failedToLoadAlbums": "Albüm yüklenirken hata oluştu",
-  "hidden": "Gizle",
+  "hidden": "Gizli",
   "authToViewYourHiddenFiles": "Gizli dosyalarınızı görüntülemek için kimlik doğrulama yapınız",
   "authToViewTrashedFiles": "Çöp dosyalarınızı görüntülemek için lütfen kimlik doğrulaması yapın",
-  "trash": "Cöp kutusu",
+  "trash": "Çöp kutusu",
   "uncategorized": "Kategorisiz",
   "videoSmallCase": "video",
   "photoSmallCase": "fotoğraf",
@@ -386,7 +395,7 @@
   "singleFileDeleteFromDevice": "Bu {fileType}, cihazınızdan silinecek.",
   "deleteFromEnte": "Ente'den Sil",
   "yesDelete": "Evet, sil",
-  "movedToTrash": "Cöp kutusuna taşı",
+  "movedToTrash": "Çöp kutusuna taşındı",
   "deleteFromDevice": "Cihazınızdan silin",
   "deleteFromBoth": "Her ikisinden de sil",
   "newAlbum": "Yeni albüm",
@@ -470,15 +479,29 @@
   "waitingForWifi": "WiFi bekleniyor...",
   "status": "Durum",
   "indexedItems": "Dizinlenmiş öğeler",
-  "pendingItems": "Bekleyen Öğeler",
+  "pendingItems": "Bekleyen öğeler",
   "clearIndexes": "Dizinleri temizle",
   "selectFoldersForBackup": "Yedekleme için klasörleri seçin",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Seçilen klasörler şifrelenecek ve yedeklenecektir",
   "unselectAll": "Tümünün seçimini kaldır",
   "selectAll": "Hepsini seç",
   "skip": "Geç",
+  "backupOnlyNewPhotos": "Yalnızca yeni fotoğrafları yedekle",
+  "backupOnlyNewPhotosAllFoldersSelected": "Tüm klasörler şu anda yedekleme için seçili durumdadır.\n\nŞimdilik devam edebilir veya seçili klasörleri güncelleyebilirsiniz.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Şu anda yedekleme için seçili klasör bulunmamaktadır.\n\nŞimdilik devam edebilir veya seçili klasörleri güncelleyebilirsiniz.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Yedekleme için şu anda hiçbir klasör seçili değildir.\n\nDevam etmek için lütfen klasör seçin.",
+  "backupOnlyNewPhotosWarningBody": "Şu anda {formattedDate} tarihinden itibaren fotoğrafları yedekliyorsunuz. Tüm fotoğrafları yedeklemek için ayarlarınızı güncelleyin.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
   "updatingFolderSelection": "Klasör seçimi güncelleniyor...",
-  "itemCount": "{count,plural, one{{count} öğe} other{{count} öğeler}}",
+  "itemCount": "{count,plural, one{{count} öğe} other{{count} öğe}}",
   "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
   "duplicateItemsGroup": "{count} dosyalar, {formattedSize} her biri",
   "@duplicateItemsGroup": {
@@ -513,13 +536,13 @@
   "checking": "Kontrol ediliyor...",
   "youAreOnTheLatestVersion": "En son sürüme sahipsiniz",
   "account": "Hesap",
-  "manageSubscription": "Abonelikleri yönet",
+  "manageSubscription": "Aboneliği yönet",
   "authToChangeYourEmail": "E-postanızı değiştirmek için lütfen kimlik doğrulaması yapın",
   "changePassword": "Şifrenizi değiştirin",
   "authToChangeYourPassword": "Şifrenizi değiştirmek için lütfen kimlik doğrulaması yapın",
   "emailVerificationToggle": "E-posta doğrulama",
   "authToChangeEmailVerificationSetting": "E-posta doğrulamasını değiştirmek için lütfen kimlik doğrulaması yapın",
-  "exportYourData": "Veriyi dışarı aktar",
+  "exportYourData": "Verilerini dışa aktar",
   "logout": "Çıkış yap",
   "authToInitiateAccountDeletion": "Hesap silme işlemini başlatmak için lütfen kimlik doğrulaması yapın",
   "areYouSureYouWantToLogout": "Çıkış yapmak istediğinize emin misiniz?",
@@ -610,6 +633,7 @@
   "reportBug": "Hata bildir",
   "suggestFeatures": "Özellik önerin",
   "support": "Destek",
+  "appearance": "Görünüm",
   "theme": "Tema",
   "lightTheme": "Aydınlık",
   "darkTheme": "Karanlık",
@@ -767,6 +791,7 @@
   "name": "İsim",
   "newest": "En yeni",
   "lastUpdated": "En son güncellenen",
+  "updated": "Güncellendi",
   "deleteEmptyAlbums": "Boş albümleri sil",
   "deleteEmptyAlbumsWithQuestionMark": "Boş albümler silinsin mi?",
   "deleteAlbumsDialogBody": "Bu, tüm boş albümleri silecektir. Bu, albüm listenizdeki dağınıklığı azaltmak istediğinizde kullanışlıdır.",
@@ -1059,6 +1084,30 @@
   "loadMessage8": "web.ente.io'nun mükemmel bir yükleyicisi var",
   "loadMessage9": "Verilerinizi güvenli bir şekilde şifrelemek için Xchacha20Poly1305 kullanıyoruz",
   "photoDescriptions": "Fotoğraf Açıklaması",
+  "searchResultFileName": "Dosya adı",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Açıklama",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Tür",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultPerson": "Kişi",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultUploadedBy": "Yükleyen",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraModel": "Kamera modeli",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
   "fileTypesAndNames": "Dosya türleri ve adları",
   "location": "Konum",
   "moments": "Anlar",
@@ -1117,7 +1166,8 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "availableStorageSpace": "{freeAmount} {storageUnit} ücretsiz",
+  "availableStorageSpace": "{freeAmount} {storageUnit} boş alan",
+  "appVersion": "Sürüm {versionValue}",
   "verifyIDLabel": "Doğrula",
   "fileInfoAddDescHint": "Bir açıklama ekle...",
   "editLocationTagTitle": "Konumu düzenle",
@@ -1199,6 +1249,13 @@
   "noImagesWithLocation": "Konum içeren resim yok",
   "unpinAlbum": "Albümün sabitlemesini kaldır",
   "pinAlbum": "Albümü sabitle",
+  "pin": "Sabitle",
+  "pinPerson": "Kişiyi sabitle",
+  "pinToTop": "Üste sabitle",
+  "unpin": "Sabitlemeyi kaldır",
+  "unpinPerson": "Kişinin sabitlemesini kaldır",
+  "hideFromMemories": "Anılardan gizle",
+  "showInMemories": "Anılarda göster",
   "create": "Oluştur",
   "viewAll": "Tümünü görüntüle",
   "nothingSharedWithYouYet": "Henüz sizinle paylaşılan bir şey yok",
@@ -1235,7 +1292,7 @@
   "searchHint4": "Konum",
   "searchHint5": "Çok yakında: Yüzler ve sihirli arama ✨",
   "addYourPhotosNow": "Fotoğraflarınızı şimdi ekleyin",
-  "searchResultCount": "{count, plural, one{{count} yıl önce} other{{count} yıl önce}}",
+  "searchResultCount": "{count, plural, one{{count} sonuç bulundu} other{{count} sonuç bulundu}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1310,6 +1367,7 @@
   "enterDateOfBirth": "Doğum Günü (isteğe bağlı)",
   "birthday": "Doğum Günü",
   "removePersonLabel": "Kişi etiketini kaldırın",
+  "areYouSureRemoveThisPersonTag": "Bu kişi etiketini kaldırmak istediğinizden emin misiniz?",
   "autoPairDesc": "Otomatik eşleştirme yalnızca Chromecast destekleyen cihazlarla çalışır.",
   "manualPairDesc": "PIN ile eşleştirme, albümünüzü görüntülemek istediğiniz herhangi bir ekranla çalışır.",
   "connectToDevice": "Cihaza bağlanın",
@@ -1361,6 +1419,7 @@
   "enterPin": "PIN Girin",
   "setNewPin": "Yeni PIN belirleyin",
   "appLock": "Uygulama kilidi",
+  "lockScreenType": "Kilit tipi",
   "noSystemLockFound": "Sistem kilidi bulunamadı",
   "tapToUnlock": "Açmak için dokun",
   "tooManyIncorrectAttempts": "Çok fazla hatalı deneme",
@@ -1392,6 +1451,14 @@
   "loadingYourPhotos": "Fotoğraflarınız yükleniyor...",
   "processingImport": "İşleniyor {folderName}...",
   "personName": "Kişi Adı",
+  "addPerson": "Kişi ekle",
+  "@addPerson": {
+    "description": "Title for the manual tagging flow where user selects a person to tag files with."
+  },
+  "noFacesDetectedTapToAdd": "Yüz algılanmadı, eklemek için dokunun.",
+  "@noFacesDetectedTapToAdd": {
+    "description": "Shown in file details when no faces are detected, but manual tagging is available."
+  },
   "addNewPerson": "Yeni kişi ekle",
   "addNameOrMerge": "İsim ekleyin veya birleştirin",
   "mergeWithExisting": "Var olan ile birleştir.",
@@ -1439,6 +1506,7 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsCanManagePhotosAndParticipants": "Yöneticiler fotoğrafları ve katılımcıları yönetebilir.",
   "accountIsAlreadyConfigured": "Hesap zaten yapılandırılmıştır.",
   "sessionIdMismatch": "Oturum kimliği uyuşmazlığı",
   "@sessionIdMismatch": {
@@ -1797,6 +1865,10 @@
   "thisMonth": "Bu ay",
   "thisYear": "Bu yıl",
   "groupBy": "Gruplama",
+  "groupByDay": "Gün",
+  "groupByWeek": "Hafta",
+  "groupByMonth": "Ay",
+  "groupByYear": "Yıl",
   "faceThumbnailGenerationFailed": "Küçük yüz resimleri oluşturulamıyor",
   "fileAnalysisFailed": "Dosya gözlemlenemiyor",
   "editAutoAddPeople": "Otomatik olarak kişi eklemeyi düzenle",
@@ -1824,20 +1896,110 @@
   "videosProcessed": "",
   "totalVideos": "Toplam videolar",
   "addedToQueue": "Sıraya ekle",
+  "noSimilarImagesFound": "Benzer görsel bulunamadı",
+  "yourPhotosLookUnique": "Fotoğraflarınız eşsiz görünüyor",
+  "similarGroupsFound": "{count, plural, =1{{count} grup bulundu} other{{count} grup bulundu}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "clearSelection": "Seçimi temizle",
+  "areYouSureDeleteFiles": "Bu dosyaları silmek istediğinizden emin misiniz?",
   "greatJob": "Harika iş!",
   "size": "Boyut",
+  "analyzingPhotosLocally": "Fotoğraflarınız yerel olarak analiz ediliyor...",
+  "lookingForVisualSimilarities": "Görsel benzerlikler aranıyor...",
+  "comparingImageDetails": "Görüntü ayrıntıları karşılaştırılıyor...",
   "almostDone": "Neredeyse tamam...",
+  "processingLocally": "Yerel olarak işleniyor",
   "all": "Hepsi",
   "hoorayyyy": "Hoorayyyy!",
   "closeBy": "Kapat",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   },
-  "cLTitle1": "Tasarım değişiklikleri",
-  "cLDesc1": "Ayarlar ekranı ve arama sonuçları sayfası yeniden tasarlandı. Arama çubuğu üste taşındı.",
-  "cLTitle2": "İyileştirmeler",
-  "cLDesc2": "Videoda yakınlaştırmak için sıkıştırın. Arama sekmesi daha hızlı yükleniyor. Yöneticiler ve albüm sahipleri yorumları silebilir. Desteklenmeyen formatlar için önizleme. Keşif, konum, kişiler ve dosya türü içinde arama. Kişiler sayfasında özel sıralama. Daha iyi bir kişi birleştirme akışı. Tüm yoksayılan kişileri görüntüle. Tutarlı kişi sıralaması.",
-  "cLTitle3": "Hata düzeltmeleri",
-  "cLDesc3": "Uygulama açılırken müziğin duraklaması düzeltildi. Samsung S cihazlarında kaydırarak seçme düzeltildi. Bilgi sayfasında kare hızı sorunu düzeltildi. Tabletlerde ve yatay modda galeri sorunları düzeltildi. Taşımalardan sonra güncellenmeyen kategorize edilmemiş sayfa düzeltildi."
+  "facesTimelineShareComingSoon": "Video paylaşımı yakında geliyor",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Önceki",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Sonraki",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Oynat",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Durdur",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "ritualsTitle": "Ritüeller",
+  "ritualAddTooltip": "Ritüel ekle",
+  "ritualShareUnavailable": "Şu anda paylaşılamıyor. Lütfen tekrar deneyin.",
+  "ritualCameraNotFound": "Bu cihazda kamera bulunamadı.",
+  "ritualCameraStartError": "Kamera başlatılamıyor. Lütfen izinleri kontrol edin.",
+  "ritualDayLabel": "Gün",
+  "ritualAlbumLabel": "Albüm",
+  "ritualSave": "Ritüel kaydet",
+  "ritualCreateAction": "Ritüel oluştur",
+  "ritualUpdate": "Ritüel güncelle",
+  "feed": "Akış",
+  "comments": "Yorumlar",
+  "reply": "Yanıtla",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "Emin misiniz?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Yorumu sil",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "couldNotLoadLikes": "Beğeniler yüklenemedi",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "Beğeniler güncellenemedi",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "couldNotLoadAlbums": "Albümler yüklenemedi",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 albüm} other{{count} albüm}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Hepsini beğen",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "failedToLikeComment": "Yorum beğenilemedi",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "Yorum silinemedi",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(silindi)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  }
 }
