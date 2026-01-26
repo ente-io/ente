@@ -57,3 +57,13 @@ This usually occurs due to a network connectivity issue:
 - On desktop/web, try disabling "Faster uploads" in Settings > Preferences > Advanced
 
 For more check: [Troubleshooting](https://ente.io/help/photos/faq/troubleshooting#desktop-app-issues)
+
+### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
+
+Yes, you can start fresh.
+
+- Open home gallery view and press Ctrl + A to select everything, then delete all items.
+- After that, open Trash. It may take a little while for all deleted items to sync into Trash.
+- Once synced, empty Trash to permanently remove all items from your account.
+
+Once this is done, you can reupload your entire Google Takeout folder again using the desktop app.
