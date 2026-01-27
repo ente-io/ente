@@ -1087,9 +1087,6 @@ class RemoteSyncService {
 
   /// Syncs social data and triggers notifications if needed.
   Future<void> _socialSync() async {
-    if (isProcessBg) {
-      return;
-    }
     try {
       _logger.info("Starting social sync");
       await SocialSyncService.instance.syncAllSharedCollections();
