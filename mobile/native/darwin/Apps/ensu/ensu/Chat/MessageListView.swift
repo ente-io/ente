@@ -202,7 +202,6 @@ struct MessageListView: View {
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
             .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
-            .animation(isGenerating ? .easeOut(duration: 0.18) : nil, value: streamingResponse)
 
             Color.clear
                 .frame(height: contentBottomPadding)
@@ -487,7 +486,6 @@ private struct StreamingBubbleView: View {
                 }
                 .padding(.vertical, EnsuSpacing.md)
                 .padding(.horizontal, EnsuSpacing.sm)
-                .animation(.easeOut(duration: 0.18), value: text)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -503,7 +501,7 @@ private struct LoadingDotsView: View {
             let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 3
             Text(phrase + dots(for: phase))
                 .font(EnsuTypography.message)
-                .foregroundStyle(EnsuColor.textPrimary)
+                .foregroundStyle(EnsuColor.textMuted)
         }
     }
 
@@ -729,7 +727,7 @@ private struct ThinkSectionView: View {
             } else if isStreaming {
                 Text("…" + content)
                     .font(EnsuFont.code(size: 12.5, weight: .regular))
-                    .foregroundStyle(EnsuColor.textPrimary)
+                    .foregroundStyle(EnsuColor.textMuted)
                     .lineLimit(4)
             }
         }

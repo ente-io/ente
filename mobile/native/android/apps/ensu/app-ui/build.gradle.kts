@@ -47,7 +47,7 @@ android {
         applicationId = "io.ente.ensu"
         minSdk = 23
         targetSdk = 35
-        versionCode = 7
+        versionCode = 10
         versionName = "0.1.2"
         buildConfigField("String", "API_ENDPOINT", "\"$apiEndpointOverride\"")
     }
