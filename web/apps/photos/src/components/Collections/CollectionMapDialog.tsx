@@ -19,13 +19,13 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { getKV, setKV } from "ente-base/kv";
 import { downloadManager } from "ente-gallery/services/download";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
     fileCreationTime,
-    fileFileName,
     fileLocation,
     ItemVisibility,
 } from "ente-media/file-metadata";
@@ -43,27 +43,22 @@ import {
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
 import { t } from "i18next";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet/dist/leaflet.css";
 import type { Dispatch, SetStateAction } from "react";
 import React, {
+    startTransition,
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState,
 } from "react";
+import Supercluster from "supercluster";
 import type { SelectedState } from "utils/file";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
 import { calculateOptimalZoom, getMapCenter } from "../TripLayout/mapHelpers";
 import type { JourneyPoint } from "../TripLayout/types";
-import { generateNeededThumbnails } from "../TripLayout/utils/dataProcessing";
-
-// ============================================================================
-// Types
-// ============================================================================
 
 interface CollectionMapDialogProps
     extends ModalVisibilityProps,
@@ -84,14 +79,28 @@ interface CollectionMapDialogProps
     onRemotePull?: (opts?: RemotePullOpts) => Promise<void>;
 }
 
+// Describes all map-related state used in the dialog:
+// - mapCenter: current map center, typically derived from the latest file with location
+// - mapIndex/mapPoints/latestFileId: spatial index and its source points, plus the newest file id
+// - filesByID/thumbByFileID: cached file metadata and lazily-fetched thumbnails
+// - isLoading/error: loading/error flags for map data fetches
+
 interface MapDataState {
     mapCenter: [number, number] | null;
-    mapPhotos: JourneyPoint[];
+    mapIndex: MapIndex | null;
+    mapPoints: MapIndexPoint[];
+    latestFileId: number | undefined;
     filesByID: Map<number, EnteFile>;
     thumbByFileID: Map<number, string>;
     isLoading: boolean;
     error: string | null;
 }
+
+/**
+ * When files are being opened from the the Sidebar, there is ablity to add them as favoriate,
+ * archive them or unarchieve them and this interface is for facilitating that. Where the favoruteFileIds
+ * hols the existing favorites, pending holds the ones which are in progress for respective ones
+ */
 
 interface FavoritesState {
     favoriteFileIDs: Set<number>;
@@ -99,25 +108,165 @@ interface FavoritesState {
     pendingVisibilityUpdates: Set<number>;
 }
 
+/**
+ * Extension of MapDataState that adds mutation functions for map data management.
+ * - removeFiles: Removes files from the map index when deleted from FileListWithViewer
+ * - updateFileVisibility: Updates file visibility state and removes hidden files from the map
+ * - queueThumbnailFetch: Batches and fetches thumbnails on demand for visible files
+ */
+
 interface MapDataResult extends MapDataState {
     removeFiles: (fileIDs: number[]) => void;
     updateFileVisibility: (file: EnteFile, visibility: ItemVisibility) => void;
+    queueThumbnailFetch: (fileIDs: number[]) => void;
 }
 
 /**
- * Dynamically loaded map components to avoid SSR issues with Leaflet
+ * Dynamically loaded map components to avoid SSR issues with Leaflet. Normal imports actually caused
+ * the app to break in some instances, thus dynamically loading them instead.
+ * Loaded lazily in useMapComponents() hook when the dialog opens to ensure window exists.
  */
 interface MapComponents {
     MapContainer: typeof import("react-leaflet").MapContainer;
     TileLayer: typeof import("react-leaflet").TileLayer;
     Marker: typeof import("react-leaflet").Marker;
     useMap: typeof import("react-leaflet").useMap;
-    MarkerClusterGroup: typeof import("react-leaflet-cluster").default;
 }
 
-// ============================================================================
-// Custom Hooks
-// ============================================================================
+/**
+ * Represents a geotagged photo point stored in the map spatial index.
+ * Each point corresponds to a photo with location metadata.
+ * - fileId: Unique identifier for the photo file
+ * - lat: Latitude coordinate of the photo location
+ * - lng: Longitude coordinate of the photo location
+ * - timestamp: Unix timestamp (milliseconds) of when the photo was created
+ */
+
+interface MapIndexPoint {
+    fileId: number;
+    lat: number;
+    lng: number;
+    timestamp: number;
+}
+
+/**
+ * Along with the GeoTagged photos we are also storing a metadata, which changes
+ * only when there is change in the stored values, to prevent this from updating
+ * each time when there is change. Currently fileCount and updationTime are the
+ * two metrics kept to analyse this change.
+ */
+
+interface MapIndexMeta {
+    fileCount: number;
+    updationTime: number | null;
+}
+/**
+ * Structure of the data stored in IndexedDB for the map view.
+ * - meta: Metadata tracking file count and last update time for cache validation
+ * - points: Array of geotagged photo locations with timestamps
+ * - latestFileId: ID of the most recently created file, used for cover image caching optimization
+ */
+
+interface MapIndexStorage {
+    meta: MapIndexMeta;
+    points: MapIndexPoint[];
+    latestFileId?: number;
+}
+
+/**
+ * The small payload we attach to a point: fileId points to the photo, and timestamp keeps
+ * enough context for sorting or choosing the freshest item in a cluster.
+ */
+interface MapPointProperties {
+    fileId: number;
+    timestamp: number;
+}
+
+/**
+ * A GeoJSON feature for a single photo point. GeoJSON is the small, common shape most map
+ * libraries expect for geographic data, so we stick with it even when we only need a
+ * couple of fields. type stays "Feature" because that is the GeoJSON spec's envelope for
+ * real-world points; it does not change our logic, but it keeps the data recognizable to
+ * tooling like Supercluster. properties carry the fileId and timestamp (and keep cluster
+ * as false), and geometry stores the point in [lng, lat] order for map libs.
+ */
+interface MapPointFeature {
+    type: "Feature";
+    properties: MapPointProperties & { cluster?: false };
+    geometry: { type: "Point"; coordinates: [number, number] };
+}
+
+/**
+ * Summary info for a cluster: latestTimestamp and latestFileId keep track of the freshest
+ * photo inside the cluster so we can choose a representative cover.
+ */
+interface MapClusterProperties {
+    latestTimestamp: number;
+    latestFileId: number;
+}
+
+/**
+ * A GeoJSON feature that represents a cluster instead of a single point. properties mark
+ * it as a cluster, carry cluster_id for expansion, point_count for the raw size, and
+ * point_count_abbreviated for a compact label, while geometry still gives the centroid.
+ */
+interface MapClusterFeature {
+    type: "Feature";
+    properties: MapClusterProperties & {
+        cluster: true;
+        cluster_id: number;
+        point_count: number;
+        point_count_abbreviated?: number | string;
+    };
+    geometry: { type: "Point"; coordinates: [number, number] };
+}
+
+/**
+ * Convenience union so callers can handle clusters and single points together.
+ */
+type MapFeature = MapClusterFeature | MapPointFeature;
+
+/**
+ * The small contract we rely on from Supercluster: load ingests points, getClusters
+ * returns mixed clusters/points for bounds and zoom, getLeaves expands a cluster into
+ * its points, and getClusterExpansionZoom tells us how far to zoom to break it apart.
+ */
+interface MapIndex {
+    load(points: MapPointFeature[]): MapIndex;
+    getClusters(
+        bbox: [number, number, number, number],
+        zoom: number,
+    ): MapFeature[];
+    getLeaves(
+        clusterId: number,
+        limit: number,
+        offset: number,
+    ): MapPointFeature[];
+    getClusterExpansionZoom(clusterId: number): number;
+}
+
+/**
+ * Tuning knobs for building the index: radius controls cluster size in pixels, maxZoom
+ * caps clustering depth, map shapes point data into the cluster properties we track,
+ * and reduce merges those properties as clusters grow.
+ */
+interface MapClusterOptions {
+    radius?: number;
+    maxZoom?: number;
+    map?: (props: MapPointProperties) => MapClusterProperties;
+    reduce?: (
+        accumulated: MapClusterProperties,
+        props: MapClusterProperties,
+    ) => void;
+}
+
+type SuperclusterConstructor = new (options?: MapClusterOptions) => MapIndex;
+
+//Prefix for storing the map view data specific to the current active collection, so they aren't recomputed when reopend
+const MAP_INDEX_KEY_PREFIX = "photos-map-index-v1";
+const MAX_MAP_ZOOM = 19;
+const PREFETCH_BOUNDS_PADDING = 0.15;
+const THUMBNAIL_BATCH_SIZE = 40;
 
 /**
  * Dynamically loads map-related React components (Leaflet) to avoid SSR issues
@@ -132,17 +281,13 @@ function useMapComponents() {
         // Only load on client-side where window exists
         if (typeof window === "undefined") return;
 
-        void Promise.all([
-            import("react-leaflet"),
-            import("react-leaflet-cluster"),
-        ])
-            .then(([leaflet, cluster]) =>
+        void import("react-leaflet")
+            .then((leaflet) =>
                 setMapComponents({
                     MapContainer: leaflet.MapContainer,
                     TileLayer: leaflet.TileLayer,
                     Marker: leaflet.Marker,
                     useMap: leaflet.useMap,
-                    MarkerClusterGroup: cluster.default,
                 }),
             )
             .catch((e: unknown) => {
@@ -167,9 +312,96 @@ function useCurrentUser() {
     }, []);
 }
 
+const mapIndexKey = (collectionSummary: CollectionSummary) =>
+    `${MAP_INDEX_KEY_PREFIX}:${collectionSummary.type}:${collectionSummary.id}`;
+
+const toMapIndexMeta = (
+    collectionSummary: CollectionSummary,
+): MapIndexMeta => ({
+    fileCount: collectionSummary.fileCount,
+    updationTime: collectionSummary.updationTime ?? null,
+});
+
+const isStoredMapIndexValid = (
+    stored: unknown,
+    meta: MapIndexMeta,
+): stored is MapIndexStorage => {
+    if (!stored || typeof stored !== "object") return false;
+    const candidate = stored as Partial<MapIndexStorage>;
+    if (!candidate.meta || !Array.isArray(candidate.points)) return false;
+    return (
+        candidate.meta.fileCount === meta.fileCount &&
+        candidate.meta.updationTime === meta.updationTime
+    );
+};
+
+const buildMapIndexPoints = async (files: EnteFile[]) => {
+    const points: MapIndexPoint[] = [];
+    let latestTimestamp = -1;
+    let latestFileId: number | undefined;
+
+    for (let index = 0; index < files.length; index += 1) {
+        const file = files[index];
+        if (!file) continue;
+        const loc = fileLocation(file);
+        if (!loc) continue;
+
+        const timestamp = fileCreationTime(file);
+        points.push({
+            fileId: file.id,
+            lat: loc.latitude,
+            lng: loc.longitude,
+            timestamp,
+        });
+
+        if (timestamp > latestTimestamp) {
+            latestTimestamp = timestamp;
+            latestFileId = file.id;
+        }
+
+        if (index % 5000 === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 0));
+        }
+    }
+
+    return { points, latestFileId };
+};
+
+const buildClusterIndex = (points: MapIndexPoint[]): MapIndex => {
+    const options: MapClusterOptions = {
+        radius: 80,
+        maxZoom: MAX_MAP_ZOOM,
+        map: (props) => ({
+            latestTimestamp: props.timestamp,
+            latestFileId: props.fileId,
+        }),
+        reduce: (accumulated, props) => {
+            if (props.latestTimestamp > accumulated.latestTimestamp) {
+                accumulated.latestTimestamp = props.latestTimestamp;
+                accumulated.latestFileId = props.latestFileId;
+            }
+        },
+    };
+
+    const SuperclusterCtor = Supercluster as unknown as SuperclusterConstructor;
+    const index = new SuperclusterCtor(options);
+
+    const features: MapPointFeature[] = points.map((point) => ({
+        type: "Feature" as const,
+        properties: { fileId: point.fileId, timestamp: point.timestamp },
+        geometry: {
+            type: "Point" as const,
+            coordinates: [point.lng, point.lat] as [number, number],
+        },
+    }));
+
+    index.load(features);
+    return index;
+};
+
 /**
- * Loads and manages map data including photos, locations, and thumbnails
- * Responsibility: Fetch collection files, extract locations, generate thumbnails
+ * Loads and manages map data including index, files, and thumbnails.
+ * Responsibility: Fetch collection files, build/persist spatial index, prefetch thumbnails on demand.
  */
 function useMapData(
     open: boolean,
@@ -179,12 +411,19 @@ function useMapData(
 ): MapDataResult {
     const [state, setState] = useState<MapDataState>({
         mapCenter: null,
-        mapPhotos: [],
+        mapIndex: null,
+        mapPoints: [],
+        latestFileId: undefined,
         filesByID: new Map(),
         thumbByFileID: new Map(),
         isLoading: false,
         error: null,
     });
+
+    const filesByIDRef = useRef<Map<number, EnteFile>>(new Map());
+    const thumbsByFileIDRef = useRef<Map<number, string>>(new Map());
+    const pendingThumbsRef = useRef<Set<number>>(new Set());
+    const isThumbnailWorkerRunningRef = useRef(false);
 
     // Track which collection we've loaded to avoid unnecessary reloads
     // Include fileCount to detect when collection content changes
@@ -192,45 +431,81 @@ function useMapData(
         summaryId: number;
         collectionId: number | undefined;
         fileCount: number;
+        updationTime: number | null;
     } | null>(null);
 
-    const loadAllThumbs = useCallback(
-        async (points: JourneyPoint[], files: EnteFile[]) => {
-            // Build a Map for O(1) file lookup instead of O(n) find
-            const filesById = new Map(files.map((f) => [f.id, f]));
+    useEffect(() => {
+        filesByIDRef.current = state.filesByID;
+    }, [state.filesByID]);
 
-            const entries = await Promise.all(
-                points.map(async (p) => {
-                    if (p.image) return [p.fileId, p.image] as const;
-                    const file = filesById.get(p.fileId);
-                    if (!file) return [p.fileId, undefined] as const;
-                    try {
-                        const thumb =
-                            await downloadManager.renderableThumbnailURL(file);
-                        return [p.fileId, thumb] as const;
-                    } catch {
-                        return [p.fileId, undefined] as const;
-                    }
-                }),
-            );
+    useEffect(() => {
+        thumbsByFileIDRef.current = state.thumbByFileID;
+    }, [state.thumbByFileID]);
 
-            setState((prev) => ({
-                ...prev,
-                thumbByFileID: new Map(
-                    entries.filter(([, t]) => t !== undefined) as [
-                        number,
-                        string,
-                    ][],
-                ),
-            }));
-        },
-        [],
-    );
+    const queueThumbnailFetch = useCallback((fileIDs: number[]) => {
+        if (!fileIDs.length) return;
+
+        const pending = pendingThumbsRef.current;
+        const existingThumbs = thumbsByFileIDRef.current;
+        const filesByID = filesByIDRef.current;
+
+        for (const fileId of fileIDs) {
+            if (existingThumbs.has(fileId)) continue;
+            if (!filesByID.has(fileId)) continue;
+            pending.add(fileId);
+        }
+
+        if (isThumbnailWorkerRunningRef.current) return;
+        isThumbnailWorkerRunningRef.current = true;
+
+        void (async () => {
+            while (pendingThumbsRef.current.size > 0) {
+                const batchIds = Array.from(pendingThumbsRef.current).slice(
+                    0,
+                    THUMBNAIL_BATCH_SIZE,
+                );
+                batchIds.forEach((id) => pendingThumbsRef.current.delete(id));
+
+                const entries = await Promise.all(
+                    batchIds.map(async (fileId) => {
+                        const file = filesByIDRef.current.get(fileId);
+                        if (!file) return [fileId, undefined] as const;
+                        try {
+                            const thumb =
+                                await downloadManager.renderableThumbnailURL(
+                                    file,
+                                );
+                            return [fileId, thumb] as const;
+                        } catch {
+                            return [fileId, undefined] as const;
+                        }
+                    }),
+                );
+
+                setState((prev) => {
+                    const nextThumbs = new Map(prev.thumbByFileID);
+                    entries.forEach(([fileId, thumb]) => {
+                        if (!thumb || nextThumbs.has(fileId)) return;
+                        nextThumbs.set(fileId, thumb);
+                    });
+                    return nextThumbs.size > prev.thumbByFileID.size
+                        ? { ...prev, thumbByFileID: nextThumbs }
+                        : prev;
+                });
+
+                await new Promise((resolve) => setTimeout(resolve, 0));
+            }
+
+            isThumbnailWorkerRunningRef.current = false;
+        })();
+    }, []);
 
     // Clear loaded ref when dialog closes so we reload fresh data next time.
     useEffect(() => {
         if (!open) {
             loadedCollectionRef.current = null;
+            pendingThumbsRef.current.clear();
+            isThumbnailWorkerRunningRef.current = false;
         }
     }, [open]);
 
@@ -241,17 +516,20 @@ function useMapData(
         const currentSummaryId = collectionSummary.id;
         const currentCollectionId = activeCollection?.id;
         const currentFileCount = collectionSummary.fileCount;
+        const currentUpdationTime = collectionSummary.updationTime ?? null;
         const loaded = loadedCollectionRef.current;
         if (
             loaded &&
             loaded.summaryId === currentSummaryId &&
             loaded.collectionId === currentCollectionId &&
-            loaded.fileCount === currentFileCount
+            loaded.fileCount === currentFileCount &&
+            loaded.updationTime === currentUpdationTime
         ) {
             return;
         }
 
         const loadMapData = async () => {
+            pendingThumbsRef.current.clear();
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
             try {
@@ -259,58 +537,94 @@ function useMapData(
                     collectionSummary,
                     activeCollection,
                 );
-                const locationPoints = extractLocationPoints(files); // transforms the files into JourneyData[]
+                const filesByID = new Map(files.map((file) => [file.id, file]));
+                filesByIDRef.current = filesByID;
 
-                if (locationPoints.length) {
-                    const sortedPoints = sortPhotosByTimestamp(locationPoints);
+                const meta = toMapIndexMeta(collectionSummary);
+                const indexKey = mapIndexKey(collectionSummary);
 
-                    const { thumbnailUpdates } = await generateNeededThumbnails(
-                        { photoClusters: [sortedPoints], files },
-                    );
+                console.log(indexKey);
 
-                    const pointsWithThumbs = sortedPoints.map((point) => {
-                        const thumb = thumbnailUpdates.get(point.fileId);
-                        return thumb ? { ...point, image: thumb } : point;
-                    });
+                let points: MapIndexPoint[] | undefined;
+                let latestFileId: number | undefined;
 
-                    setState({
-                        filesByID: new Map(
-                            files.map((file) => [file.id, file]),
-                        ),
-                        mapCenter: getMapCenter([], pointsWithThumbs),
-                        mapPhotos: pointsWithThumbs,
-                        thumbByFileID: new Map(),
-                        isLoading: false,
-                        error: null,
-                    });
-
-                    // Mark this collection as loaded
-                    loadedCollectionRef.current = {
-                        summaryId: currentSummaryId,
-                        collectionId: currentCollectionId,
-                        fileCount: currentFileCount,
-                    };
-
-                    void loadAllThumbs(pointsWithThumbs, files);
-                    return;
+                try {
+                    const stored = await getKV(indexKey);
+                    if (isStoredMapIndexValid(stored, meta)) {
+                        points = stored.points;
+                        latestFileId = stored.latestFileId;
+                    }
+                } catch {
+                    // Ignore index read errors and rebuild
                 }
 
-                // Reset state when no geotagged locations exist to avoid showing stale data
+                if (!points) {
+                    const built = await buildMapIndexPoints(files);
+                    points = built.points;
+                    latestFileId = built.latestFileId;
+                    try {
+                        await setKV(indexKey, { meta, points, latestFileId });
+                    } catch {
+                        // Ignore index persistence errors
+                    }
+                }
+
+                if (latestFileId === undefined && points.length > 0) {
+                    let latestTimestamp = -1;
+                    points.forEach((point) => {
+                        if (point.timestamp > latestTimestamp) {
+                            latestTimestamp = point.timestamp;
+                            latestFileId = point.fileId;
+                        }
+                    });
+                }
+
+                const mapIndex =
+                    points.length > 0 ? buildClusterIndex(points) : null;
+                const latestPoint =
+                    latestFileId !== undefined
+                        ? points.find((point) => point.fileId === latestFileId)
+                        : points[0];
+                const mapCenter = latestPoint
+                    ? getMapCenter(
+                          [],
+                          [
+                              {
+                                  lat: latestPoint.lat,
+                                  lng: latestPoint.lng,
+                                  name: "",
+                                  country: "",
+                                  timestamp: "",
+                                  image: "",
+                                  fileId: latestPoint.fileId,
+                              },
+                          ],
+                      )
+                    : null;
+
                 setState({
-                    filesByID: new Map(),
-                    mapCenter: null,
-                    mapPhotos: [],
+                    filesByID,
+                    mapCenter,
+                    mapIndex,
+                    mapPoints: points,
+                    latestFileId,
                     thumbByFileID: new Map(),
                     isLoading: false,
                     error: null,
                 });
 
-                // Mark this collection as loaded (even with no photos)
+                // Mark this collection as loaded
                 loadedCollectionRef.current = {
                     summaryId: currentSummaryId,
                     collectionId: currentCollectionId,
                     fileCount: currentFileCount,
+                    updationTime: currentUpdationTime,
                 };
+
+                const coverId = collectionSummary.coverFile?.id ?? latestFileId;
+                if (coverId !== undefined) {
+                    queueThumbnailFetch([coverId]);
+                }
 
                 return;
             } catch (e) {
@@ -334,7 +648,7 @@ function useMapData(
         collectionSummary,
         activeCollection,
         onGenericError,
-        loadAllThumbs,
+        queueThumbnailFetch,
     ]);
 
     const removeFiles = useCallback((fileIDs: number[]) => {
@@ -347,15 +661,32 @@ function useMapData(
                 filesByID.delete(id);
                 thumbByFileID.delete(id);
             });
-            const mapPhotos = prev.mapPhotos.filter(
-                (photo) => !ids.has(photo.fileId),
+            const mapPoints = prev.mapPoints.filter(
+                (point) => !ids.has(point.fileId),
             );
+            const mapIndex =
+                mapPoints.length > 0 ? buildClusterIndex(mapPoints) : null;
+
+            let latestFileId = prev.latestFileId;
+            if (latestFileId && ids.has(latestFileId)) {
+                let latestTimestamp = -1;
+                let nextLatestFileId: number | undefined;
+                mapPoints.forEach((point) => {
+                    if (point.timestamp > latestTimestamp) {
+                        latestTimestamp = point.timestamp;
+                        nextLatestFileId = point.fileId;
+                    }
+                });
+                latestFileId = nextLatestFileId;
+            }
             return {
                 ...prev,
                 filesByID,
                 thumbByFileID,
-                mapPhotos,
-                mapCenter: mapPhotos.length ? prev.mapCenter : null,
+                mapIndex,
+                mapPoints,
+                latestFileId,
+                mapCenter: mapPoints.length ? prev.mapCenter : null,
             };
         });
     }, []);
@@ -377,13 +708,88 @@ function useMapData(
                 };
                 const filesByID = new Map(prev.filesByID);
                 filesByID.set(file.id, updatedFile);
-                return { ...prev, filesByID };
+
+                let mapPoints = prev.mapPoints;
+                let mapIndex = prev.mapIndex;
+                let latestFileId = prev.latestFileId;
+
+                if (visibility !== ItemVisibility.visible) {
+                    const filtered = prev.mapPoints.filter(
+                        (point) => point.fileId !== file.id,
+                    );
+                    if (filtered.length !== prev.mapPoints.length) {
+                        mapPoints = filtered;
+                        mapIndex =
+                            mapPoints.length > 0
+                                ? buildClusterIndex(mapPoints)
+                                : null;
+                        if (latestFileId === file.id) {
+                            let latestTimestamp = -1;
+                            let nextLatestFileId: number | undefined;
+                            mapPoints.forEach((point) => {
+                                if (point.timestamp > latestTimestamp) {
+                                    latestTimestamp = point.timestamp;
+                                    nextLatestFileId = point.fileId;
+                                }
+                            });
+                            latestFileId = nextLatestFileId;
+                        }
+                    }
+                } else if (!prev.mapPoints.some((p) => p.fileId === file.id)) {
+                    const loc = fileLocation(file);
+                    if (loc) {
+                        const timestamp = fileCreationTime(file);
+                        mapPoints = [
+                            ...prev.mapPoints,
+                            {
+                                fileId: file.id,
+                                lat: loc.latitude,
+                                lng: loc.longitude,
+                                timestamp,
+                            },
+                        ];
+                        mapIndex = buildClusterIndex(mapPoints);
+                        const currentLatestTimestamp =
+                            latestFileId !== undefined
+                                ? (prev.mapPoints.find(
+                                      (p) => p.fileId === latestFileId,
+                                  )?.timestamp ?? -1)
+                                : -1;
+                        if (timestamp > currentLatestTimestamp) {
+                            latestFileId = file.id;
+                        }
+                    }
+                }
+
+                let mapCenter = prev.mapCenter;
+                if (!mapPoints.length) {
+                    mapCenter = null;
+                } else if (!mapCenter) {
+                    const centerPoint =
+                        latestFileId !== undefined
+                            ? mapPoints.find(
+                                  (point) => point.fileId === latestFileId,
+                              )
+                            : mapPoints[0];
+                    if (centerPoint) {
+                        mapCenter = [centerPoint.lat, centerPoint.lng];
+                    }
+                }
+
+                return {
+                    ...prev,
+                    filesByID,
+                    mapPoints,
+                    mapIndex,
+                    latestFileId,
+                    mapCenter,
+                };
             });
         },
         [],
     );
 
-    return { ...state, removeFiles, updateFileVisibility };
+    return { ...state, removeFiles, updateFileVisibility, queueThumbnailFetch };
 }
 
 /**
@@ -512,8 +918,15 @@ function useFavorites(
  */
 function useVisiblePhotos() {
     const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
+    const [isVisiblePhotosUpdating, setIsVisiblePhotosUpdating] =
+        useState(false);
 
-    return { visiblePhotos, setVisiblePhotos };
+    return {
+        visiblePhotos,
+        setVisiblePhotos,
+        isVisiblePhotosUpdating,
+        setIsVisiblePhotosUpdating,
+    };
 }
 
 /**
@@ -598,6 +1011,7 @@ function createClusterIcon(
     imageSrc: string,
     size: number,
     clusterCount: number,
+    interactive = true,
 ): import("leaflet").DivIcon | null {
     if (typeof window === "undefined") return null;
 
@@ -614,6 +1028,10 @@ function createClusterIcon(
     const outerBorderRadius = 16;
     const innerBorderRadius = 12;
 
+    const hoverHandlers = interactive
+        ? "onmouseover=\"this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.parentElement.querySelector('.triangle').style.borderTopColor='#22c55e';\" onmouseout=\"this.style.background='white'; this.style.borderColor='#ffffff'; this.parentElement.querySelector('.triangle').style.borderTopColor='white';\""
+        : "";
+
     const badgeLabel =
         clusterCount >= 2000
             ? `${Math.floor((clusterCount - 1) / 1000)}K+`
@@ -629,7 +1047,7 @@ function createClusterIcon(
                 width: ${pinSize}px;
                 height: ${pinHeight}px;
                 position: relative;
-                cursor: pointer;
+                cursor: ${interactive ? "pointer" : "default"};
                 transition: all 0.3s ease;
                 overflow: visible;
                 filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
@@ -645,8 +1063,7 @@ function createClusterIcon(
                   overflow: hidden;
                   transition: background-color 0.3s ease, border-color 0.3s ease;
               "
-              onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.parentElement.querySelector('.triangle').style.borderTopColor='#22c55e';"
-              onmouseout="this.style.background='white'; this.style.borderColor='#ffffff'; this.parentElement.querySelector('.triangle').style.borderTopColor='white';"
+              ${hoverHandlers}
               >
                 ${
                     hasImage
@@ -695,76 +1112,9 @@ function createClusterIcon(
     });
 }
 
-/**
- * Creates custom icons for map marker clusters with thumbnails
- * Responsibility: Generate cluster icons showing photo thumbnail and count
- */
-function useClusterIcon(
-    mapPhotos: JourneyPoint[],
-    thumbByFileID: Map<number, string>,
-) {
-    const photosByPosition = useMemo(() => {
-        const map = new Map<string, JourneyPoint>();
-        mapPhotos.forEach((photo) => {
-            map.set(`${photo.lat},${photo.lng}`, photo);
-        });
-        return map;
-    }, [mapPhotos]);
-
-    return useCallback(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (cluster: any) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            const count: number = cluster.getChildCount();
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            const childMarkers = cluster.getAllChildMarkers();
-
-            let thumbnailUrl = "";
-            for (const marker of childMarkers) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-                const latlng = marker.getLatLng();
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                const key = `${latlng.lat},${latlng.lng}`;
-                const photo = photosByPosition.get(key);
-                if (photo) {
-                    const thumb = getPhotoThumbnail(photo, thumbByFileID);
-                    if (thumb) {
-                        thumbnailUrl = thumb;
-                        break;
-                    }
-                }
-            }
-
-            return createClusterIcon(thumbnailUrl, 68, count);
-        },
-        [photosByPosition, thumbByFileID],
-    );
-}
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * Extracts thumbnail URL - prioritizes photo.image (loaded first with mapPhotos),
- * then falls back to thumbByFileID (loaded afterward with higher quality thumbs)
- */
-function getPhotoThumbnail(
-    photo: JourneyPoint,
-    thumbByFileID: Map<number, string>,
-): string | undefined {
-    return photo.image || thumbByFileID.get(photo.fileId);
-}
-
-/**
- * Sorts journey points by timestamp in descending order (newest first)
- */
-function sortPhotosByTimestamp(photos: JourneyPoint[]): JourneyPoint[] {
-    return [...photos].sort(
-        (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
-}
 
 /**
  * Returns true if the file is visible (not archived or hidden).
@@ -830,28 +1180,6 @@ async function getFilesForCollection(
     return uniqueFilesByID(filtered);
 }
 
-function extractLocationPoints(files: EnteFile[]): JourneyPoint[] {
-    const points: JourneyPoint[] = [];
-
-    for (const file of files) {
-        const loc = fileLocation(file);
-        if (!loc) continue;
-        if (loc.latitude === 0 && loc.longitude === 0) continue; // Ignore invalid default coordinates
-
-        points.push({
-            lat: loc.latitude,
-            lng: loc.longitude,
-            name: fileFileName(file),
-            country: "",
-            timestamp: new Date(fileCreationTime(file) / 1000).toISOString(),
-            image: "",
-            fileId: file.id,
-        });
-    }
-
-    return points;
-}
-
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -884,16 +1212,24 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
     const {
         mapCenter,
-        mapPhotos,
+        mapIndex,
+        mapPoints,
+        latestFileId,
         filesByID,
         thumbByFileID,
         isLoading,
         error,
         removeFiles: removeFilesFromMap,
         updateFileVisibility,
+        queueThumbnailFetch,
     } = useMapData(open, collectionSummary, activeCollection, onGenericError);
 
-    const { visiblePhotos, setVisiblePhotos } = useVisiblePhotos();
+    const {
+        visiblePhotos,
+        setVisiblePhotos,
+        isVisiblePhotosUpdating,
+        setIsVisiblePhotosUpdating,
+    } = useVisiblePhotos();
 
     const {
         favoriteFileIDs,
@@ -903,7 +1239,11 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         handleFileVisibilityUpdate,
     } = useFavorites(open, user);
 
-    const createClusterCustomIcon = useClusterIcon(mapPhotos, thumbByFileID);
+    useEffect(() => {
+        if (!open) {
+            setIsVisiblePhotosUpdating(false);
+        }
+    }, [open, setIsVisiblePhotosUpdating]);
 
     const handleSetFileViewerOpen: Dispatch<SetStateAction<boolean>> =
         useCallback(
@@ -1003,7 +1343,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             );
         }
 
-        if (!mapPhotos.length || !mapCenter) {
+        if (!mapPoints.length || !mapCenter || !mapIndex) {
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
@@ -1018,14 +1358,17 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 collectionSummary={collectionSummary}
                 visiblePhotos={visiblePhotos}
                 visibleFiles={visibleFiles}
-                mapPhotos={mapPhotos}
+                mapIndex={mapIndex}
+                latestFileId={latestFileId}
                 thumbByFileID={thumbByFileID}
                 mapComponents={mapComponents}
                 mapCenter={mapCenter}
                 optimalZoom={optimalZoom}
-                createClusterCustomIcon={createClusterCustomIcon}
                 onClose={onClose}
                 onVisiblePhotosChange={setVisiblePhotos}
+                onVisiblePhotosLoadingChange={setIsVisiblePhotosUpdating}
+                visiblePhotosUpdating={isVisiblePhotosUpdating}
+                onPrefetchThumbnails={queueThumbnailFetch}
                 user={user}
                 favoriteFileIDs={favoriteFileIDs}
                 pendingFavoriteUpdates={pendingFavoriteUpdates}
@@ -1051,7 +1394,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         );
     }, [
         collectionSummary,
-        createClusterCustomIcon,
         emptySelected,
         error,
         favoriteFileIDs,
@@ -1062,7 +1404,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         isLoading,
         mapCenter,
         mapComponents,
-        mapPhotos,
+        mapIndex,
+        mapPoints,
+        latestFileId,
         noOpSetSelected,
         optimalZoom,
         onAddFileToCollection,
@@ -1070,6 +1414,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         onRemoteFilesPull,
         pendingFavoriteUpdates,
         pendingVisibilityUpdates,
+        setIsVisiblePhotosUpdating,
         setVisiblePhotos,
         collectionNameByID,
         fileNormalCollectionIDs,
@@ -1077,9 +1422,11 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         onSelectCollection,
         onSelectPerson,
         thumbByFileID,
+        queueThumbnailFetch,
         user,
         visibleFiles,
         visiblePhotos,
+        isVisiblePhotosUpdating,
         onClose,
         handleSetFileViewerOpen,
     ]);
@@ -1129,14 +1476,17 @@ interface MapLayoutProps {
     collectionSummary: CollectionSummary;
     visiblePhotos: JourneyPoint[];
     visibleFiles: EnteFile[];
-    mapPhotos: JourneyPoint[];
+    visiblePhotosUpdating: boolean;
+    mapIndex: MapIndex | null;
+    latestFileId: number | undefined;
     thumbByFileID: Map<number, string>;
     mapComponents: MapComponents;
     mapCenter: [number, number];
     optimalZoom: number;
-    createClusterCustomIcon: (cluster: unknown) => unknown;
     onClose: () => void;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosLoadingChange: (loading: boolean) => void;
+    onPrefetchThumbnails: (fileIDs: number[]) => void;
     user: ReturnType<typeof useCurrentUser>;
     favoriteFileIDs: Set<number>;
     pendingFavoriteUpdates: Set<number>;
@@ -1165,14 +1515,17 @@ function MapLayout({
     collectionSummary,
     visiblePhotos,
     visibleFiles,
-    mapPhotos,
+    visiblePhotosUpdating,
+    mapIndex,
+    latestFileId,
     thumbByFileID,
     mapComponents,
     mapCenter,
     optimalZoom,
-    createClusterCustomIcon,
     onClose,
     onVisiblePhotosChange,
+    onVisiblePhotosLoadingChange,
+    onPrefetchThumbnails,
     user,
     favoriteFileIDs,
     pendingFavoriteUpdates,
@@ -1199,7 +1552,8 @@ function MapLayout({
                 collectionSummary={collectionSummary}
                 visibleCount={visiblePhotos.length}
                 visibleFiles={visibleFiles}
-                mapPhotos={mapPhotos}
+                isVisiblePhotosUpdating={visiblePhotosUpdating}
+                latestFileId={latestFileId}
                 thumbByFileID={thumbByFileID}
                 onClose={onClose}
                 user={user}
@@ -1226,11 +1580,12 @@ function MapLayout({
                 <MapCanvas
                     mapComponents={mapComponents}
                     mapCenter={mapCenter}
-                    mapPhotos={mapPhotos}
+                    mapIndex={mapIndex}
                     optimalZoom={optimalZoom}
                     thumbByFileID={thumbByFileID}
-                    createClusterCustomIcon={createClusterCustomIcon}
                     onVisiblePhotosChange={onVisiblePhotosChange}
+                    onVisiblePhotosLoadingChange={onVisiblePhotosLoadingChange}
+                    onPrefetchThumbnails={onPrefetchThumbnails}
                 />
             </Box>
         </Box>
@@ -1249,7 +1604,8 @@ interface CollectionSidebarProps {
     collectionSummary: CollectionSummary;
     visibleCount: number;
     visibleFiles: EnteFile[];
-    mapPhotos: JourneyPoint[];
+    isVisiblePhotosUpdating: boolean;
+    latestFileId: number | undefined;
     thumbByFileID: Map<number, string>;
     onClose: () => void;
     user: ReturnType<typeof useCurrentUser>;
@@ -1286,7 +1642,8 @@ const COVER_HEADER_HEIGHT = COVER_IMAGE_HEIGHT + 34;
 function CollectionSidebar({
     collectionSummary,
     visibleFiles,
-    mapPhotos,
+    isVisiblePhotosUpdating,
+    latestFileId,
     thumbByFileID,
     onClose,
     user,
@@ -1324,11 +1681,9 @@ function CollectionSidebar({
         const coverThumb = coverFile && thumbByFileID.get(coverFile.id);
         if (coverThumb) return coverThumb;
 
-        const fallbackPhoto = mapPhotos[0];
-        return fallbackPhoto
-            ? getPhotoThumbnail(fallbackPhoto, thumbByFileID)
-            : undefined;
-    }, [coverFile, mapPhotos, thumbByFileID]);
+        const fallbackId = latestFileId;
+        return fallbackId ? thumbByFileID.get(fallbackId) : undefined;
+    }, [coverFile, latestFileId, thumbByFileID]);
 
     // Create header component for FileListWithViewer (cover scrolls with content)
     const coverHeader = useMemo(() => {
@@ -1420,6 +1775,14 @@ function CollectionSidebar({
                     </Box>
                 </StickyDateHeader>
                 <FileListContainer>
+                    {isVisiblePhotosUpdating ? (
+                        <SidebarLoadingOverlay>
+                            <ActivityIndicator size="24px" />
+                            <Typography variant="small">
+                                {t("loading")}
+                            </Typography>
+                        </SidebarLoadingOverlay>
+                    ) : null}
                     {visibleFiles.length > 0 ? (
                         <FileListWithViewer
                             files={visibleFiles}
@@ -1450,7 +1813,7 @@ function CollectionSidebar({
                             onScroll={handleScroll}
                             onVisibleDateChange={handleVisibleDateChange}
                         />
-                    ) : (
+                    ) : isVisiblePhotosUpdating ? null : (
                         <EmptyState>
                             {shouldShowCover && (
                                 <MapCover
@@ -1494,35 +1857,25 @@ function CollectionSidebar({
 interface MapCanvasProps {
     mapComponents: MapComponents;
     mapCenter: [number, number];
-    mapPhotos: JourneyPoint[];
+    mapIndex: MapIndex | null;
     optimalZoom: number;
     thumbByFileID: Map<number, string>;
-    createClusterCustomIcon: (cluster: unknown) => unknown;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosLoadingChange: (loading: boolean) => void;
+    onPrefetchThumbnails: (fileIDs: number[]) => void;
 }
 
 const MapCanvas = React.memo(function MapCanvas({
     mapComponents,
     mapCenter,
-    mapPhotos,
+    mapIndex,
     optimalZoom,
     thumbByFileID,
-    createClusterCustomIcon,
     onVisiblePhotosChange,
+    onVisiblePhotosLoadingChange,
+    onPrefetchThumbnails,
 }: MapCanvasProps) {
-    const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
-        mapComponents;
-
-    // Memoize marker icons to prevent recreation on every render
-    // Key: fileId, Value: Leaflet icon instance
-    const markerIcons = useMemo(() => {
-        const icons = new Map<number, ReturnType<typeof createMarkerIcon>>();
-        for (const photo of mapPhotos) {
-            const thumbnail = getPhotoThumbnail(photo, thumbByFileID);
-            icons.set(photo.fileId, createMarkerIcon(thumbnail ?? "", 68));
-        }
-        return icons;
-    }, [mapPhotos, thumbByFileID]);
+    const { MapContainer, TileLayer, Marker, useMap } = mapComponents;
 
     return (
         <MapContainer
@@ -1535,35 +1888,21 @@ const MapCanvas = React.memo(function MapCanvas({
             <TileLayer
                 attribution=""
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maxZoom={19}
+                maxZoom={MAX_MAP_ZOOM}
                 updateWhenZooming
             />
             <MapControls useMap={useMap} />
-            <MapViewportListener
-                useMap={useMap}
-                photos={mapPhotos}
-                onVisiblePhotosChange={onVisiblePhotosChange}
-            />
-            <MarkerClusterGroup
-                key={thumbByFileID.size}
-                chunkedLoading
-                iconCreateFunction={createClusterCustomIcon}
-                maxClusterRadius={80}
-                spiderfyOnMaxZoom
-                showCoverageOnHover={false}
-                zoomToBoundsOnClick
-                animate={false}
-                animateAddingMarkers={false}
-                spiderfyDistanceMultiplier={1.5}
-            >
-                {mapPhotos.map((photo) => (
-                    <Marker
-                        key={photo.fileId}
-                        position={[photo.lat, photo.lng]}
-                        icon={markerIcons.get(photo.fileId) ?? undefined}
-                    />
-                ))}
-            </MarkerClusterGroup>
+            {mapIndex && (
+                <MapClusters
+                    useMap={useMap}
+                    mapIndex={mapIndex}
+                    thumbByFileID={thumbByFileID}
+                    onVisiblePhotosChange={onVisiblePhotosChange}
+                    onVisiblePhotosLoadingChange={onVisiblePhotosLoadingChange}
+                    onPrefetchThumbnails={onPrefetchThumbnails}
+                    Marker={Marker}
+                />
+            )}
         </MapContainer>
     );
 });
@@ -1747,77 +2086,289 @@ const AttributionPopup = styled(Box)(({ theme }) => ({
     "& a": { textDecoration: "underline", "&:hover": { opacity: 0.8 } },
 }));
 
-/**
- * Listens to map viewport changes and updates visible photos
- * Responsibility: Track map bounds and notify parent of visible photos when viewport changes
- */
-interface MapViewportListenerProps {
+interface MapClustersProps {
     useMap: typeof import("react-leaflet").useMap;
-    photos: JourneyPoint[];
+    mapIndex: MapIndex;
+    thumbByFileID: Map<number, string>;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onVisiblePhotosLoadingChange: (loading: boolean) => void;
+    onPrefetchThumbnails: (fileIDs: number[]) => void;
+    Marker: typeof import("react-leaflet").Marker;
 }
 
-function MapViewportListener({
+const MapClusters = React.memo(function MapClusters({
     useMap,
-    photos,
+    mapIndex,
+    thumbByFileID,
     onVisiblePhotosChange,
-}: MapViewportListenerProps) {
+    onVisiblePhotosLoadingChange,
+    onPrefetchThumbnails,
+    Marker,
+}: MapClustersProps) {
     const map = useMap();
+    const [features, setFeatures] = useState<MapFeature[]>([]);
     const previousVisibleIdsRef = useRef<Set<number>>(new Set());
-    const previousClusterCountRef = useRef<number>(0);
+    const visibleRequestIdRef = useRef(0);
+    const iconCacheRef = useRef(
+        new Map<string, ReturnType<typeof createMarkerIcon>>(),
+    );
 
-    // Cache cluster count query result to avoid repeated DOM queries
-    const getClusterCount = useCallback(
-        () => map.getContainer().querySelectorAll(".marker-cluster").length,
+    const isClusterFeature = useCallback(
+        (feature: MapFeature): feature is MapClusterFeature =>
+            feature.properties.cluster === true,
+        [],
+    );
+
+    const updateVisibleLeaves = useCallback(
+        async (
+            requestId: number,
+            clusters: MapFeature[],
+            bounds: { contains: (latlng: [number, number]) => boolean },
+        ) => {
+            if (requestId !== visibleRequestIdRef.current) return;
+            onVisiblePhotosLoadingChange(true);
+
+            const inBounds = (lat: number, lng: number) =>
+                bounds.contains([lat, lng]);
+
+            const leaves: MapPointFeature[] = [];
+            let processedClusters = 0;
+
+            for (const feature of clusters) {
+                if (requestId !== visibleRequestIdRef.current) return;
+
+                if (isClusterFeature(feature)) {
+                    const clusterProps = feature.properties;
+                    const totalLeaves = clusterProps.point_count;
+                    const batchSize = 1000;
+                    for (
+                        let offset = 0;
+                        offset < totalLeaves;
+                        offset += batchSize
+                    ) {
+                        if (requestId !== visibleRequestIdRef.current) return;
+                        const clusterLeaves = mapIndex.getLeaves(
+                            clusterProps.cluster_id,
+                            batchSize,
+                            offset,
+                        );
+                        clusterLeaves.forEach((leaf) => {
+                            const [lng, lat] = leaf.geometry.coordinates;
+                            if (inBounds(lat, lng)) {
+                                leaves.push(leaf);
+                            }
+                        });
+                        await new Promise((resolve) => setTimeout(resolve, 0));
+                    }
+                    processedClusters += 1;
+                    if (processedClusters % 5 === 0) {
+                        await new Promise((resolve) => setTimeout(resolve, 0));
+                    }
+                } else {
+                    const [lng, lat] = feature.geometry.coordinates;
+                    if (inBounds(lat, lng)) {
+                        leaves.push(feature);
+                    }
+                }
+            }
+
+            if (requestId !== visibleRequestIdRef.current) return;
+
+            leaves.sort(
+                (a, b) => b.properties.timestamp - a.properties.timestamp,
+            );
+
+            const visibleIds = new Set(
+                leaves.map((leaf) => leaf.properties.fileId),
+            );
+            const previousIds = previousVisibleIdsRef.current;
+            const idsChanged =
+                visibleIds.size !== previousIds.size ||
+                [...visibleIds].some((id) => !previousIds.has(id));
+
+            if (idsChanged) {
+                previousVisibleIdsRef.current = visibleIds;
+                const nextVisiblePhotos = leaves.map((leaf) => {
+                    const [lng, lat] = leaf.geometry.coordinates;
+                    return {
+                        lat,
+                        lng,
+                        name: "",
+                        country: "",
+                        timestamp: new Date(
+                            leaf.properties.timestamp / 1000,
+                        ).toISOString(),
+                        image: "",
+                        fileId: leaf.properties.fileId,
+                    };
+                });
+                startTransition(() => {
+                    onVisiblePhotosChange(nextVisiblePhotos);
+                });
+            }
+
+            if (requestId === visibleRequestIdRef.current) {
+                onVisiblePhotosLoadingChange(false);
+            }
+        },
+        [
+            isClusterFeature,
+            mapIndex,
+            onVisiblePhotosChange,
+            onVisiblePhotosLoadingChange,
+        ],
+    );
+
+    const updateClusters = useCallback(() => {
+        const bounds = map.getBounds();
+        const zoom = Math.round(map.getZoom());
+        const bbox: [number, number, number, number] = [
+            bounds.getWest(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getNorth(),
+        ];
+
+        const nextZoom = Math.min(zoom + 1, MAX_MAP_ZOOM);
+        const clusters = mapIndex.getClusters(bbox, zoom);
+        setFeatures(clusters);
+
+        const requestId = ++visibleRequestIdRef.current;
+        void updateVisibleLeaves(requestId, clusters, bounds);
+
+        const prefetchBounds = bounds.pad(PREFETCH_BOUNDS_PADDING);
+        const prefetchBbox: [number, number, number, number] = [
+            prefetchBounds.getWest(),
+            prefetchBounds.getSouth(),
+            prefetchBounds.getEast(),
+            prefetchBounds.getNorth(),
+        ];
+
+        const prefetchTargets = new Set<number>();
+        const collectTargets = (items: MapFeature[]) => {
+            items.forEach((feature) => {
+                if (isClusterFeature(feature)) {
+                    prefetchTargets.add(feature.properties.latestFileId);
+                } else {
+                    prefetchTargets.add(feature.properties.fileId);
+                }
+            });
+        };
+
+        collectTargets(clusters);
+        collectTargets(mapIndex.getClusters(prefetchBbox, nextZoom));
+
+        if (prefetchTargets.size > 0) {
+            onPrefetchThumbnails(Array.from(prefetchTargets));
+        }
+    }, [
+        isClusterFeature,
+        map,
+        mapIndex,
+        onPrefetchThumbnails,
+        updateVisibleLeaves,
+    ]);
+
+    useEffect(() => {
+        iconCacheRef.current.clear();
+        previousVisibleIdsRef.current = new Set();
+        visibleRequestIdRef.current += 1;
+    }, [mapIndex]);
+
+    const handleClusterClick = useCallback(
+        (lat: number, lng: number, expansionZoom: number) => {
+            map.setView([lat, lng], expansionZoom, { animate: true });
+        },
         [map],
     );
 
-    const updateVisiblePhotos = useCallback(() => {
-        const bounds = map.getBounds();
-        const inView = photos.filter((p) => bounds.contains([p.lat, p.lng]));
-
-        // Use Set comparison instead of string join for O(n) vs O(n log n + n)
-        const currentIds = new Set(inView.map((p) => p.fileId));
-        const previousIds = previousVisibleIdsRef.current;
-
-        const clusterCount = getClusterCount();
-        const clusterChanged = previousClusterCountRef.current !== clusterCount;
-
-        // Check if sets are equal (same size and all elements match)
-        const setsEqual =
-            currentIds.size === previousIds.size &&
-            [...currentIds].every((id) => previousIds.has(id));
-
-        if (setsEqual && !clusterChanged) {
-            return;
-        }
-
-        previousVisibleIdsRef.current = currentIds;
-        previousClusterCountRef.current = clusterCount;
-        onVisiblePhotosChange(inView);
-    }, [getClusterCount, map, onVisiblePhotosChange, photos]);
+    useEffect(() => {
+        updateClusters();
+    }, [updateClusters]);
 
     useEffect(() => {
-        if (!photos.length) {
-            previousVisibleIdsRef.current = new Set();
-            previousClusterCountRef.current = getClusterCount();
-            onVisiblePhotosChange([]);
-            return;
-        }
-        updateVisiblePhotos();
-    }, [getClusterCount, photos, onVisiblePhotosChange, updateVisiblePhotos]);
-
-    useEffect(() => {
-        map.on("moveend", updateVisiblePhotos);
-        map.on("zoomend", updateVisiblePhotos);
+        map.on("moveend", updateClusters);
+        map.on("zoomend", updateClusters);
         return () => {
-            map.off("moveend", updateVisiblePhotos);
-            map.off("zoomend", updateVisiblePhotos);
+            map.off("moveend", updateClusters);
+            map.off("zoomend", updateClusters);
         };
-    }, [map, updateVisiblePhotos]);
+    }, [map, updateClusters]);
 
-    return null;
-}
+    const currentZoom = Math.round(map.getZoom());
+
+    return (
+        <>
+            {features.map((feature) => {
+                const [lng, lat] = feature.geometry.coordinates;
+                const isCluster = isClusterFeature(feature);
+
+                if (isCluster) {
+                    const clusterProps = feature.properties;
+                    const clusterId = clusterProps.cluster_id;
+                    const count = clusterProps.point_count;
+                    const expansionZoom = Math.min(
+                        mapIndex.getClusterExpansionZoom(clusterId),
+                        MAX_MAP_ZOOM,
+                    );
+                    const isInteractive = expansionZoom > currentZoom;
+                    const thumb =
+                        thumbByFileID.get(clusterProps.latestFileId) ?? "";
+                    const cacheKey = `cluster-${clusterId}-${count}-${thumb}-${isInteractive ? "i" : "n"}`;
+                    let icon = iconCacheRef.current.get(cacheKey);
+                    if (!icon) {
+                        icon = createClusterIcon(
+                            thumb,
+                            68,
+                            count,
+                            isInteractive,
+                        );
+                        if (icon) {
+                            iconCacheRef.current.set(cacheKey, icon);
+                        }
+                    }
+                    return (
+                        <Marker
+                            key={`cluster-${clusterId}`}
+                            position={[lat, lng]}
+                            icon={icon ?? undefined}
+                            eventHandlers={
+                                isInteractive
+                                    ? {
+                                          click: () =>
+                                              handleClusterClick(
+                                                  lat,
+                                                  lng,
+                                                  expansionZoom,
+                                              ),
+                                      }
+                                    : undefined
+                            }
+                        />
+                    );
+                }
+
+                const fileId = feature.properties.fileId;
+                const thumb = thumbByFileID.get(fileId) ?? "";
+                const cacheKey = `point-${fileId}-${thumb}`;
+                let icon = iconCacheRef.current.get(cacheKey);
+                if (!icon) {
+                    icon = createMarkerIcon(thumb, 68);
+                    if (icon) {
+                        iconCacheRef.current.set(cacheKey, icon);
+                    }
+                }
+                return (
+                    <Marker
+                        key={`point-${fileId}`}
+                        position={[lat, lng]}
+                        icon={icon ?? undefined}
+                    />
+                );
+            })}
+        </>
+    );
+});
 
 // ============================================================================
 // UI Components
@@ -2061,6 +2612,7 @@ const SidebarGradient = styled(Box)(({ theme }) => ({
 const FileListContainer = styled(Box)(({ theme }) => ({
     flex: 1,
     minHeight: 0,
+    position: "relative",
     display: "flex",
     flexDirection: "column",
     paddingLeft: "8px",
@@ -2073,6 +2625,25 @@ const FileListContainer = styled(Box)(({ theme }) => ({
         paddingRight: "16px",
         paddingBottom: "18px",
     },
+}));
+
+const SidebarLoadingOverlay = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    inset: 0,
+    zIndex: 2,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: theme.spacing(1),
+    textAlign: "center",
+    color: theme.vars.palette.text.primary,
+    backgroundColor:
+        theme.palette.mode === "dark"
+            ? "rgba(0, 0, 0, 0.45)"
+            : "rgba(255, 255, 255, 0.75)",
+    backdropFilter: "blur(2px)",
+    pointerEvents: "auto",
 }));
 
 const StickyDateHeader = styled(Box)<{
