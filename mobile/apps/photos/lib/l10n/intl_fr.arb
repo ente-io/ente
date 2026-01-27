@@ -2104,7 +2104,11 @@
   "cLTitle2": "Améliorations",
   "cLDesc2": "Pincer pour zoomer sur les vidéos. Chargement plus rapide de l'onglet de recherche. Les administrateurs et propriétaires d'albums peuvent supprimer les commentaires. Aperçu pour les formats non pris en charge. Recherche dans découverte, lieu, personnes et type de fichier. Tri personnalisé sur la page des personnes. Un meilleur flux de fusion de personnes. Voir toutes les personnes ignorées. Tri cohérent des contacts.",
   "cLTitle3": "Corrections de bugs",
-  "cLDesc3": "Correction de la musique qui se mettait en pause à l'ouverture de l'app. Correction du glisser pour sélectionner sur les appareils Samsung S. Correction du problème de fréquence d'images sur la fiche d'informations. Correction des problèmes de galerie sur les tablettes et en mode paysage. Correction de la page non catégorisée qui ne se mettait pas à jour après les déplacements.",
+  "cLDesc3Item1": "La musique ne se met plus en pause à l'ouverture de l'application",
+  "cLDesc3Item2": "Le balayage pour sélectionner fonctionne désormais sur les appareils Samsung S",
+  "cLDesc3Item3": "Amélioration du taux de rafraîchissement sur la fiche d'informations",
+  "cLDesc3Item4": "La galerie n'est plus coupée sur les tablettes en mode paysage",
+  "cLDesc3Item5": "La page non catégorisée se met maintenant à jour après les déplacements",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

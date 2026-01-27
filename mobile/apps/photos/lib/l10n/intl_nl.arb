@@ -1959,5 +1959,9 @@
   "cLTitle2": "Verbeteringen",
   "cLDesc2": "Knijpen om te zoomen op video. Sneller laden van zoektab. Beheerders en albumeigenaren kunnen reacties verwijderen. Voorvertoning voor niet-ondersteunde formaten. Zoeken binnen ontdekken, locatie, personen en bestandstype. Aangepaste sortering op personenpagina. Een betere workflow voor het samenvoegen van personen. Bekijk alle genegeerde personen. Consistente contactsortering.",
   "cLTitle3": "Bugfixes",
-  "cLDesc3": "Muziek pauzeerde niet meer bij het openen van de app. Veeg-om-te-selecteren op Samsung S-apparaten opgelost. Framerate-probleem op info-blad opgelost. Galerijproblemen op tablets en in landschapsmodus opgelost. Ongecategoriseerde pagina die niet bijwerkte na verplaatsingen opgelost."
+  "cLDesc3Item1": "Muziek pauzeert niet meer bij openen van de app",
+  "cLDesc3Item2": "Vegen om te selecteren werkt nu op Samsung S-apparaten",
+  "cLDesc3Item3": "Verbeterde framesnelheid op informatieblad",
+  "cLDesc3Item4": "Galerij wordt niet meer afgesneden op tablets in liggende modus",
+  "cLDesc3Item5": "Niet-gecategoriseerde pagina wordt nu bijgewerkt na verplaatsingen"
 }

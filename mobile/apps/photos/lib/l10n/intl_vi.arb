@@ -2104,7 +2104,11 @@
   "cLTitle2": "Cải tiến",
   "cLDesc2": "Chụm để phóng to video. Tải tab tìm kiếm nhanh hơn. Quản trị viên và chủ album có thể xóa bình luận. Xem trước cho các định dạng không được hỗ trợ. Tìm kiếm trong khám phá, địa điểm, người và loại tệp. Sắp xếp tùy chỉnh trên trang người. Quy trình hợp nhất người tốt hơn. Xem tất cả người bị bỏ qua. Sắp xếp danh bạ nhất quán.",
   "cLTitle3": "Sửa lỗi",
-  "cLDesc3": "Đã sửa lỗi nhạc bị tạm dừng khi mở ứng dụng. Đã sửa lỗi vuốt để chọn trên thiết bị Samsung S. Đã sửa lỗi tốc độ khung hình trên bảng thông tin. Đã sửa lỗi thư viện trên máy tính bảng và chế độ ngang. Đã sửa trang chưa phân loại không cập nhật sau khi di chuyển.",
+  "cLDesc3Item1": "Nhạc không còn bị tạm dừng khi mở ứng dụng",
+  "cLDesc3Item2": "Vuốt để chọn giờ đã hoạt động trên các thiết bị Samsung S",
+  "cLDesc3Item3": "Cải thiện tốc độ khung hình trên bảng thông tin",
+  "cLDesc3Item4": "Thư viện không còn bị cắt trên máy tính bảng ở chế độ ngang",
+  "cLDesc3Item5": "Trang chưa phân loại giờ đã cập nhật sau khi di chuyển",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

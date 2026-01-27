@@ -1733,5 +1733,9 @@
   "cLTitle2": "Forbedringer",
   "cLDesc2": "Knip for å zoome på video. Raskere lasting av søkefanen. Administratorer og albumeiere kan slette kommentarer. Forhåndsvisning for formater som ikke støttes. Søk i oppdagelse, sted, personer og filtype. Tilpasset sortering på personsiden. En bedre flyt for sammenslåing av personer. Vis alle ignorerte personer. Konsekvent kontaktsortering.",
   "cLTitle3": "Feilrettinger",
-  "cLDesc3": "Fikset at musikk pauset ved appåpning. Fikset sveip-for-å-velge på Samsung S-enheter. Fikset bildefrekvens-problem på infobladet. Fikset galleriproblemer på nettbrett og i liggende modus. Fikset ukategorisert side som ikke oppdaterte etter flytting."
+  "cLDesc3Item1": "Musikk pauser ikke lenger ved åpning av appen",
+  "cLDesc3Item2": "Sveip-for-å-velge fungerer nå på Samsung S-enheter",
+  "cLDesc3Item3": "Forbedret bildefrekvens på infopanelet",
+  "cLDesc3Item4": "Galleriet kuttes ikke lenger av på nettbrett i liggende modus",
+  "cLDesc3Item5": "Ukategorisert-siden oppdateres nå etter flyttinger"
 }

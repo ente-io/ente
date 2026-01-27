@@ -2104,7 +2104,11 @@
   "cLTitle2": "Mejoras",
   "cLDesc2": "Pellizcar para hacer zoom en vídeos. Carga más rápida de la pestaña de búsqueda. Los administradores y propietarios de álbumes pueden eliminar comentarios. Vista previa para formatos no compatibles. Búsqueda en descubrimiento, ubicación, personas y tipo de archivo. Ordenación personalizada en la página de personas. Un mejor flujo para fusionar personas. Ver todas las personas ignoradas. Ordenación consistente de contactos.",
   "cLTitle3": "Corrección de errores",
-  "cLDesc3": "Corregido el problema de la música pausándose al abrir la app. Corregido el deslizar para seleccionar en dispositivos Samsung S. Corregido el problema de frecuencia de cuadros en la hoja de información. Corregidos problemas de la galería en tablets y en horizontal. Corregida la página de no categorizados que no se actualizaba después de mover.",
+  "cLDesc3Item1": "La música ya no se pausa al abrir la aplicación",
+  "cLDesc3Item2": "Deslizar para seleccionar ahora funciona en dispositivos Samsung S",
+  "cLDesc3Item3": "Mejora en la tasa de fotogramas en la hoja de información",
+  "cLDesc3Item4": "La galería ya no se corta en tabletas en modo horizontal",
+  "cLDesc3Item5": "La página sin categoría ahora se actualiza después de mover",
   "closeBy": "Cerrar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

@@ -1897,5 +1897,9 @@
   "cLTitle2": "Ulepszenia",
   "cLDesc2": "Ściąganie do powiększania wideo. Szybsze ładowanie karty wyszukiwania. Administratorzy i właściciele albumów mogą usuwać komentarze. Podgląd dla niewspieranych formatów. Wyszukiwanie w odkrywaniu, lokalizacji, osobach i typie pliku. Niestandardowe sortowanie na stronie osób. Lepszy przepływ łączenia osób. Zobacz wszystkie ignorowane osoby. Spójne sortowanie kontaktów.",
   "cLTitle3": "Poprawki błędów",
-  "cLDesc3": "Naprawiono pauzowanie muzyki przy otwieraniu aplikacji. Naprawiono przeciągnięcie do wyboru na urządzeniach Samsung S. Naprawiono problem z liczbą klatek na arkuszu informacyjnym. Naprawiono problemy z galerią na tabletach i w trybie poziomym. Naprawiono stronę niekategoryzowanych, która nie aktualizowała się po przeniesieniu."
+  "cLDesc3Item1": "Muzyka nie zatrzymuje się już przy otwieraniu aplikacji",
+  "cLDesc3Item2": "Zaznaczanie przesunięciem działa teraz na urządzeniach Samsung S",
+  "cLDesc3Item3": "Poprawiono płynność animacji na panelu informacyjnym",
+  "cLDesc3Item4": "Galeria nie jest już przycinana na tabletach w trybie poziomym",
+  "cLDesc3Item5": "Strona bez kategorii teraz aktualizuje się po przeniesieniach"
 }

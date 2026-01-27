@@ -2086,7 +2086,11 @@
   "cLTitle2": "Verbesserungen",
   "cLDesc2": "Pinch-to-Zoom bei Videos. Schnelleres Laden des Such-Tabs. Admins und Albumbesitzer können Kommentare löschen. Vorschau für nicht unterstützte Formate. Suche in Entdecken, Orten, Personen und Dateitypen. Benutzerdefinierte Sortierung auf der Personen-Seite. Ein besserer Personen-Zusammenführungsablauf. Alle ignorierten Personen anzeigen. Konsistente Kontaktsortierung.",
   "cLTitle3": "Fehlerbehebungen",
-  "cLDesc3": "Musik wird beim Öffnen der App nicht mehr pausiert. Wisch-zum-Auswählen auf Samsung S-Geräten behoben. Bildfrequenz-Problem im Info-Bereich behoben. Galerie-Probleme auf Tablets und im Querformat behoben. Nicht kategorisierte Seite wurde nach Verschiebungen nicht aktualisiert - behoben.",
+  "cLDesc3Item1": "Musik wird beim Öffnen der App nicht mehr pausiert",
+  "cLDesc3Item2": "Wischen zum Auswählen funktioniert jetzt auf Samsung S-Geräten",
+  "cLDesc3Item3": "Verbesserte Bildrate im Info-Bereich",
+  "cLDesc3Item4": "Galerie wird auf Tablets im Querformat nicht mehr abgeschnitten",
+  "cLDesc3Item5": "Die Seite ohne Kategorie wird jetzt nach dem Verschieben aktualisiert",
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

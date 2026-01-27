@@ -1839,5 +1839,9 @@
   "cLTitle2": "İyileştirmeler",
   "cLDesc2": "Videoda yakınlaştırmak için sıkıştırın. Arama sekmesi daha hızlı yükleniyor. Yöneticiler ve albüm sahipleri yorumları silebilir. Desteklenmeyen formatlar için önizleme. Keşif, konum, kişiler ve dosya türü içinde arama. Kişiler sayfasında özel sıralama. Daha iyi bir kişi birleştirme akışı. Tüm yoksayılan kişileri görüntüle. Tutarlı kişi sıralaması.",
   "cLTitle3": "Hata düzeltmeleri",
-  "cLDesc3": "Uygulama açılırken müziğin duraklaması düzeltildi. Samsung S cihazlarında kaydırarak seçme düzeltildi. Bilgi sayfasında kare hızı sorunu düzeltildi. Tabletlerde ve yatay modda galeri sorunları düzeltildi. Taşımalardan sonra güncellenmeyen kategorize edilmemiş sayfa düzeltildi."
+  "cLDesc3Item1": "Uygulama açılırken müzik artık duraklamıyor",
+  "cLDesc3Item2": "Kaydırarak seçme artık Samsung S cihazlarında çalışıyor",
+  "cLDesc3Item3": "Bilgi sayfasında kare hızı iyileştirildi",
+  "cLDesc3Item4": "Galeri artık tabletlerde yatay modda kesilmiyor",
+  "cLDesc3Item5": "Kategorize edilmemiş sayfası artık taşımalardan sonra güncelleniyor"
 }

@@ -2104,7 +2104,11 @@
   "cLTitle2": "Vylepšení",
   "cLDesc2": "Přiblížení a oddálení u videa. Rychlejší načítání karty vyhledávání. Správci a vlastníci alb mohou mazat komentáře. Náhled pro nepodporované formáty. Vyhledávání v objevování, místech, osobách a typu souboru. Vlastní řazení na stránce osob. Lepší proces sloučení osob. Zobrazení všech ignorovaných osob. Konzistentní řazení kontaktů.",
   "cLTitle3": "Opravy chyb",
-  "cLDesc3": "Opraveno pozastavování hudby při otevření aplikace. Opraven výběr přejetím na zařízeních Samsung S. Opraven problém s frekvencí snímků na informačním panelu. Opraveny problémy s galerií na tabletech a v režimu na šířku. Opravena stránka nekategorizovaných položek, která se neaktualizovala po přesunu.",
+  "cLDesc3Item1": "Hudba se již nepozastavuje při otevření aplikace",
+  "cLDesc3Item2": "Výběr přejetím nyní funguje na zařízeních Samsung S",
+  "cLDesc3Item3": "Vylepšená snímková frekvence na informačním panelu",
+  "cLDesc3Item4": "Galerie se již neořezává na tabletech v režimu na šířku",
+  "cLDesc3Item5": "Stránka bez kategorie se nyní aktualizuje po přesunech",
   "closeBy": "Zavřít",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
