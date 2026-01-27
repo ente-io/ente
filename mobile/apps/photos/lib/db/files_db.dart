@@ -1744,6 +1744,34 @@ class FilesDB with SqlDbBase {
     return results.map((row) => row[columnCollectionID] as int).toSet();
   }
 
+  /// Returns files from [collectionID] whose uploadedFileID also exists
+  /// in any of [otherCollectionIDs]. Efficient SQL-based intersection.
+  Future<List<EnteFile>> getFilesInCollectionOverlappingWith(
+    int collectionID,
+    Set<int> otherCollectionIDs,
+  ) async {
+    if (otherCollectionIDs.isEmpty) return [];
+
+    final db = await instance.sqliteAsyncDB;
+    final inParam = otherCollectionIDs.join(',');
+    final results = await db.getAll(
+      '''
+    SELECT * FROM $filesTable
+    WHERE $columnCollectionID = ?
+    AND $columnUploadedFileID IS NOT NULL
+    AND $columnUploadedFileID != -1
+    AND $columnUploadedFileID IN (
+      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
+      WHERE $columnCollectionID IN ($inParam)
+      AND $columnUploadedFileID IS NOT NULL
+      AND $columnUploadedFileID != -1
+    )
+    ''',
+      [collectionID],
+    );
+    return convertToFiles(results);
+  }
+
   List<EnteFile> convertToFilesForIsolate(Map args) {
     final List<EnteFile> files = [];
     for (final result in args["result"]) {

@@ -580,4 +580,48 @@ extension HiddenService on CollectionsService {
       await showGenericErrorDialog(context: context, error: e);
     }
   }
+
+  /// Moves files from default hidden to uncategorized if they also exist
+  /// in the given collection IDs.
+  /// Should be called after albums are successfully unhidden.
+  /// Silently logs errors without throwing - unhide should not fail due to this.
+  Future<void> moveOverlappingFilesToUncategorized(
+    List<int> unhiddenCollectionIDs,
+  ) async {
+    if (unhiddenCollectionIDs.isEmpty) return;
+
+    try {
+      // Get default hidden collection (return early if doesn't exist)
+      final defaultHidden = cachedDefaultHiddenCollection;
+      if (defaultHidden == null) return;
+
+      // Find files in default hidden that overlap with unhidden albums
+      final overlappingFiles =
+          await filesDB.getFilesInCollectionOverlappingWith(
+        defaultHidden.id,
+        unhiddenCollectionIDs.toSet(),
+      );
+
+      if (overlappingFiles.isEmpty) return;
+
+      // Move from default hidden to uncategorized
+      final uncategorized = await getUncategorizedCollection();
+      await CollectionsService.instance.move(
+        overlappingFiles,
+        toCollectionID: uncategorized.id,
+        fromCollectionID: defaultHidden.id,
+      );
+
+      _logger.info(
+        'Moved ${overlappingFiles.length} files from default hidden to uncategorized',
+      );
+    } catch (e, s) {
+      // Log but don't throw - this is a best-effort cleanup operation
+      _logger.warning(
+        'Failed to move overlapping files to uncategorized',
+        e,
+        s,
+      );
+    }
+  }
 }

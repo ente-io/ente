@@ -16,6 +16,7 @@ import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -98,6 +99,12 @@ Future<void> changeCollectionVisibility(
           visibilityAction,
         ),
       );
+    }
+
+    if (newVisibility == visibleVisibility &&
+        prevVisibility == hiddenVisibility) {
+      await CollectionsService.instance
+          .moveOverlappingFilesToUncategorized([collection.id]);
     }
 
     await dialog?.hide();

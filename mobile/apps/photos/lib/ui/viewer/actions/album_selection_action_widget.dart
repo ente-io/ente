@@ -385,6 +385,7 @@ class _AlbumSelectionActionWidgetState
           showProgressDialog: false,
         );
       }
+
       showShortToast(
         context,
         isUnhiding
