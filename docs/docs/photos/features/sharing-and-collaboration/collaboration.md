@@ -163,6 +163,8 @@ Collect links are public links with the "Allow adding photos" option enabled. An
 
 Anyone with the link can view existing photos and add their own through their web browser. They can also download photos if you haven't disabled downloads.
 
+If a public link has been enabled for the album previously, it can be turned into a collect link via "Manage link" > Enable "Allow adding photos".
+
 ### Storage for collected photos
 
 All photos added to your album through a collect link count towards **your storage quota** as the album owner.
