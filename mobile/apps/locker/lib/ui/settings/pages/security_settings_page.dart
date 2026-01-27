@@ -119,8 +119,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     return SettingsItem(
       title: l10n.viewActiveSessions,
       onTap: () async {
-        final hasAuthenticated =
-            await LocalAuthenticationService.instance.requestLocalAuthentication(
+        final hasAuthenticated = await LocalAuthenticationService.instance
+            .requestLocalAuthentication(
           context,
           l10n.authToViewYourActiveSessions,
         );
@@ -214,7 +214,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       final UserDetails details =
           await UserService.instance.getUserDetailsV2(memoryCount: false);
       if ((details.profileData?.canDisableEmailMFA ?? false) == false) {
-        await Navigator.of(context).push(
+        final result = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return RequestPasswordVerificationPage(
@@ -228,6 +228,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             },
           ),
         );
+        if (result != true) {
+          return;
+        }
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
