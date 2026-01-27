@@ -116,7 +116,7 @@ struct MessageInputView: View {
                             }
                         }
 
-                    if editingMessage == nil {
+                    if EnsuFeatureFlags.enableImageUploads && editingMessage == nil {
                         PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                             Image("Upload01Icon")
                                 .resizable()

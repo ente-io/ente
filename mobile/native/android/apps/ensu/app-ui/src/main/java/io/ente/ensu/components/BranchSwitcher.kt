@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuTypography
+import io.ente.ensu.utils.rememberEnsuHaptics
 
 @Composable
 fun BranchSwitcher(
@@ -25,11 +25,11 @@ fun BranchSwitcher(
 ) {
     if (totalCount <= 1) return
 
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextButton(
             onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                haptic.perform(HapticFeedbackType.TextHandleMove)
                 onPrevious()
             },
             enabled = currentIndex > 1,
@@ -47,7 +47,7 @@ fun BranchSwitcher(
         Spacer(modifier = Modifier.width(4.dp))
         TextButton(
             onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                haptic.perform(HapticFeedbackType.TextHandleMove)
                 onNext()
             },
             enabled = currentIndex < totalCount,

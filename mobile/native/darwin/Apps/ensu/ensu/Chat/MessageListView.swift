@@ -69,7 +69,7 @@ struct MessageListView: View {
                     isAtBottom = distanceToBottom <= threshold
                 }
                 .onChange(of: messages.count) { _ in
-                    scrollToBottom(scrollProxy)
+                    scrollToBottom(scrollProxy, animated: isGenerating)
                 }
                 .onChange(of: sessionId) { _ in
                     autoScrollEnabled = true
@@ -174,6 +174,7 @@ struct MessageListView: View {
                             onOpenAttachment: openAttachment
                         )
                         .id(message.id)
+                        .transition(messageTransition)
                     } else {
                         AssistantMessageBubbleView(
                             message: message,
@@ -183,6 +184,7 @@ struct MessageListView: View {
                             onOpenAttachment: openAttachment
                         )
                         .id(message.id)
+                        .transition(messageTransition)
                     }
 
                     if isGenerating, streamingParentId == message.id {
@@ -199,6 +201,8 @@ struct MessageListView: View {
             .padding(.horizontal, EnsuSpacing.pageHorizontal)
             .padding(.top, EnsuSpacing.lg)
             .padding(.bottom, EnsuSpacing.lg)
+            .animation(isGenerating ? .spring(response: 0.35, dampingFraction: 0.86) : nil, value: messages.count)
+            .animation(isGenerating ? .easeOut(duration: 0.18) : nil, value: streamingResponse)
 
             Color.clear
                 .frame(height: contentBottomPadding)
@@ -210,6 +214,10 @@ struct MessageListView: View {
                     }
                 )
         }
+    }
+
+    private var messageTransition: AnyTransition {
+        .move(edge: .bottom).combined(with: .opacity)
     }
 
     private var contentBottomPadding: CGFloat {
@@ -479,9 +487,11 @@ private struct StreamingBubbleView: View {
                 }
                 .padding(.vertical, EnsuSpacing.md)
                 .padding(.horizontal, EnsuSpacing.sm)
+                .animation(.easeOut(duration: 0.18), value: text)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .foregroundStyle(EnsuColor.textPrimary)
     }
 }
 
@@ -493,7 +503,7 @@ private struct LoadingDotsView: View {
             let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 3
             Text(phrase + dots(for: phase))
                 .font(EnsuTypography.message)
-                .foregroundStyle(EnsuColor.textMuted)
+                .foregroundStyle(EnsuColor.textPrimary)
         }
     }
 
@@ -719,7 +729,7 @@ private struct ThinkSectionView: View {
             } else if isStreaming {
                 Text("…" + content)
                     .font(EnsuFont.code(size: 12.5, weight: .regular))
-                    .foregroundStyle(EnsuColor.textMuted)
+                    .foregroundStyle(EnsuColor.textPrimary)
                     .lineLimit(4)
             }
         }

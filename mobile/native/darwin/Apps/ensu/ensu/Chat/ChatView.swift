@@ -19,11 +19,13 @@ struct ChatView: View {
     @State private var showDeveloperAlert = false
     @State private var showDeveloperSettings = false
     @State private var showAttachmentDownloads = false
+    @State private var showSignInComingSoon = false
     @State private var didAutoFocusInput = false
     @FocusState private var isInputFocused: Bool
     @State private var inputBarHeight: CGFloat = 0
     @State private var wasDrawerOpen = false
     @State private var didDismissKeyboard = false
+    @State private var sessionTransitionId = UUID()
 
     private var editingMessage: ChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
@@ -150,10 +152,7 @@ struct ChatView: View {
                     isDrawerOpen = false
                 },
                 onSignIn: {
-                    showSettings = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                        isShowingAuth = true
-                    }
+                    handleSignInRequest()
                 }
             )
         }
@@ -170,6 +169,11 @@ struct ChatView: View {
                 onCancel: { viewModel.cancelAttachmentDownload($0) },
                 onDismiss: { showAttachmentDownloads = false }
             )
+        }
+        .sheet(isPresented: $showSignInComingSoon) {
+            ComingSoonSheet(title: "Sign in", message: "Coming soon") {
+                showSignInComingSoon = false
+            }
         }
         .platformFullScreenCover(isPresented: $showDeveloperSettings) {
             DeveloperSettingsView { message in
@@ -217,7 +221,9 @@ struct ChatView: View {
                 attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
                 modelDownloadState: viewModel.downloadToast,
                 onMenu: { isDrawerOpen.toggle() },
-                onSignIn: { isShowingAuth = true },
+                onSignIn: {
+                    handleSignInRequest()
+                },
                 onAttachmentDownloads: {
                     showAttachmentDownloads = true
                 }
@@ -225,6 +231,11 @@ struct ChatView: View {
 
             Divider()
                 .background(EnsuColor.border)
+
+            let sessionTransition = AnyTransition.asymmetric(
+                insertion: .move(edge: .bottom).combined(with: .opacity),
+                removal: .move(edge: .top).combined(with: .opacity)
+            )
 
             ZStack(alignment: .top) {
                 let shouldShowDownloadOnboarding = !viewModel.isModelDownloaded
@@ -322,6 +333,8 @@ struct ChatView: View {
                         }
                     }
                 }
+                .id(sessionTransitionId)
+                .transition(sessionTransition)
                 .onAppear {
                     viewModel.autoStartModelDownloadIfNeeded()
                 }
@@ -343,8 +356,14 @@ struct ChatView: View {
                     .background(EnsuColor.backgroundBase)
                 }
             }
+            .animation(.easeOut(duration: 0.25), value: sessionTransitionId)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .onChange(of: viewModel.currentSessionId) { _ in
+            withAnimation(.easeOut(duration: 0.25)) {
+                sessionTransitionId = UUID()
+            }
+        }
     }
 
     @ViewBuilder
@@ -401,6 +420,14 @@ struct ChatView: View {
     private func requestInputFocus() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             isInputFocused = true
+        }
+    }
+
+    private func handleSignInRequest() {
+        if EnsuFeatureFlags.enableSignIn {
+            isShowingAuth = true
+        } else {
+            showSignInComingSoon = true
         }
     }
 
@@ -513,6 +540,43 @@ private struct DownloadOnboardingView: View {
 private struct ToastMessage: Identifiable {
     let id = UUID()
     let text: String
+}
+
+private struct ComingSoonSheet: View {
+    let title: String
+    let message: String
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: EnsuSpacing.lg) {
+            RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous)
+                .fill(EnsuColor.fillFaint)
+                .frame(height: 180)
+                .overlay(
+                    Text("Illustration")
+                        .font(EnsuTypography.small)
+                        .foregroundStyle(EnsuColor.textMuted)
+                )
+
+            Text(title)
+                .font(EnsuTypography.large)
+                .foregroundStyle(EnsuColor.textPrimary)
+
+            Text(message)
+                .font(EnsuTypography.body)
+                .foregroundStyle(EnsuColor.textMuted)
+                .multilineTextAlignment(.center)
+
+            Button("Got it") {
+                onDismiss()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(EnsuColor.accent)
+        }
+        .padding(EnsuSpacing.xl)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(EnsuColor.backgroundBase)
+    }
 }
 
 private struct AttachmentDownloadsSheet: View {

@@ -1,5 +1,16 @@
 package io.ente.ensu.chat
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -64,7 +75,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Surface
 import androidx.compose.ui.text.AnnotatedString
@@ -83,6 +93,8 @@ import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.domain.model.Attachment
+import io.ente.ensu.utils.EnsuFeatureFlags
+import io.ente.ensu.utils.rememberEnsuHaptics
 import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.MessageAuthor
@@ -160,60 +172,79 @@ fun ChatView(
         }
     }
 
+    val sessionKey = chatState.currentSessionId ?: "new-session"
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize().imePadding()) {
-            MessageList(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(
-                        start = EnsuSpacing.pageHorizontal.dp,
-                        end = EnsuSpacing.pageHorizontal.dp
-                    ),
-                messages = chatState.messages,
-                streamingResponse = chatState.streamingResponse,
-                streamingParentId = chatState.streamingParentId,
-                isGenerating = chatState.isGenerating,
-                isModelDownloaded = chatState.isModelDownloaded,
-                isDownloading = chatState.isDownloading,
-                downloadPercent = chatState.downloadPercent,
-                downloadStatus = chatState.downloadStatus,
-                modelDownloadSizeBytes = chatState.modelDownloadSizeBytes,
-                branchSelections = chatState.branchSelections,
-                imePadding = imePadding,
-                onEditMessage = onEditMessage,
-                onRetryMessage = onRetryMessage,
-                onBranchChange = onBranchChange,
-                onOpenAttachment = onOpenAttachment,
-                onStartDownload = onStartDownload
-            )
-
-            val editingMessage = chatState.editingMessageId?.let { editingId ->
-                chatState.messages.firstOrNull { it.id == editingId }
-            }
-
-            if (!showDownloadOnboarding) {
-                MessageInput(
+        AnimatedContent(
+            targetState = sessionKey,
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding(),
+            transitionSpec = {
+                val enter = fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                    slideInVertically(
+                        animationSpec = tween(220, easing = FastOutSlowInEasing)
+                    ) { it / 14 }
+                val exit = fadeOut(animationSpec = tween(180)) +
+                    slideOutVertically(animationSpec = tween(180)) { -it / 14 }
+                enter.togetherWith(exit)
+            },
+            label = "session-change"
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                MessageList(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .background(EnsuColor.backgroundBase()),
-                    messageText = chatState.messageText,
-                    attachments = chatState.attachments,
-                    editingMessage = editingMessage,
-                    isProcessingAttachments = chatState.isProcessingAttachments,
+                        .weight(1f)
+                        .padding(
+                            start = EnsuSpacing.pageHorizontal.dp,
+                            end = EnsuSpacing.pageHorizontal.dp
+                        ),
+                    messages = chatState.messages,
+                    streamingResponse = chatState.streamingResponse,
+                    streamingParentId = chatState.streamingParentId,
                     isGenerating = chatState.isGenerating,
+                    isModelDownloaded = chatState.isModelDownloaded,
                     isDownloading = chatState.isDownloading,
                     downloadPercent = chatState.downloadPercent,
-                    isAttachmentDownloadBlocked = chatState.isAttachmentDownloadBlocked,
-                    attachmentDownloadPercent = chatState.attachmentDownloadProgress,
-                    onMessageChange = onMessageChange,
-                    onSend = onSend,
-                    onStop = onStop,
-                    onAttachmentSelected = onAttachmentSelected,
-                    onRemoveAttachment = onRemoveAttachment,
-                    onCancelEdit = onCancelEdit,
-                    focusRequestId = focusRequestId
+                    downloadStatus = chatState.downloadStatus,
+                    modelDownloadSizeBytes = chatState.modelDownloadSizeBytes,
+                    branchSelections = chatState.branchSelections,
+                    imePadding = imePadding,
+                    onEditMessage = onEditMessage,
+                    onRetryMessage = onRetryMessage,
+                    onBranchChange = onBranchChange,
+                    onOpenAttachment = onOpenAttachment,
+                    onStartDownload = onStartDownload
                 )
+
+                val editingMessage = chatState.editingMessageId?.let { editingId ->
+                    chatState.messages.firstOrNull { it.id == editingId }
+                }
+
+                if (!showDownloadOnboarding) {
+                    MessageInput(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .background(EnsuColor.backgroundBase()),
+                        messageText = chatState.messageText,
+                        attachments = chatState.attachments,
+                        editingMessage = editingMessage,
+                        isProcessingAttachments = chatState.isProcessingAttachments,
+                        isGenerating = chatState.isGenerating,
+                        isDownloading = chatState.isDownloading,
+                        downloadPercent = chatState.downloadPercent,
+                        isAttachmentDownloadBlocked = chatState.isAttachmentDownloadBlocked,
+                        attachmentDownloadPercent = chatState.attachmentDownloadProgress,
+                        onMessageChange = onMessageChange,
+                        onSend = onSend,
+                        onStop = onStop,
+                        onAttachmentSelected = onAttachmentSelected,
+                        onRemoveAttachment = onRemoveAttachment,
+                        onCancelEdit = onCancelEdit,
+                        focusRequestId = focusRequestId
+                    )
+                }
             }
         }
 
@@ -275,7 +306,7 @@ private fun MessageList(
     }
 
     val listState = rememberLazyListState()
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     var autoScrollEnabled by remember { mutableStateOf(true) }
     var lastHapticLength by remember { mutableStateOf(0) }
     var shouldJumpToBottomOnLoad by remember { mutableStateOf(true) }
@@ -328,7 +359,7 @@ private fun MessageList(
         if (!isGenerating) return@LaunchedEffect
         val length = streamingResponse.length
         if (length > lastHapticLength) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptic.perform(HapticFeedbackType.TextHandleMove)
             lastHapticLength = length
         }
     }
@@ -337,7 +368,11 @@ private fun MessageList(
         if (!autoScrollEnabled) return@LaunchedEffect
         val targetIndex = messages.size
         if (targetIndex >= 0) {
-            listState.animateScrollToItem(targetIndex)
+            if (isGenerating) {
+                listState.animateScrollToItem(targetIndex)
+            } else {
+                listState.scrollToItem(targetIndex)
+            }
         }
     }
 
@@ -366,34 +401,39 @@ private fun MessageList(
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
     ) {
         items(messages, key = { it.id }) { message ->
-            when (message.author) {
-                MessageAuthor.User -> {
-                    UserMessageBubble(
-                        message = message,
-                        branchSelections = branchSelections,
-                        onEdit = { onEditMessage(message) },
-                        onBranchChange = onBranchChange,
-                        onOpenAttachment = onOpenAttachment
-                    )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                when (message.author) {
+                    MessageAuthor.User -> {
+                        UserMessageBubble(
+                            message = message,
+                            branchSelections = branchSelections,
+                            onEdit = { onEditMessage(message) },
+                            onBranchChange = onBranchChange,
+                            onOpenAttachment = onOpenAttachment
+                        )
+                    }
+                    MessageAuthor.Assistant -> {
+                        AssistantMessageBubble(
+                            message = message,
+                            branchSelections = branchSelections,
+                            onRetry = { onRetryMessage(message) },
+                            onBranchChange = onBranchChange
+                        )
+                    }
                 }
-                MessageAuthor.Assistant -> {
-                    AssistantMessageBubble(
-                        message = message,
-                        branchSelections = branchSelections,
-                        onRetry = { onRetryMessage(message) },
-                        onBranchChange = onBranchChange
-                    )
-                }
-            }
 
-            if (isGenerating && streamingParentId == message.id) {
-                Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                StreamingMessageBubble(text = streamingResponse)
+                if (isGenerating && streamingParentId == message.id) {
+                    Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
+                    StreamingMessageBubble(text = streamingResponse)
+                }
             }
         }
 
         if (isGenerating && streamingParentId == null) {
-            items(1) {
+            item(key = "streaming") {
                 StreamingMessageBubble(text = streamingResponse)
             }
         }
@@ -443,7 +483,7 @@ private fun DownloadOnboarding(
     modelDownloadSizeBytes: Long?,
     onDownload: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     val sizeText = modelDownloadSizeBytes?.let { "Approx. ${formatBytes(it)}" } ?: "Approx. size varies by model"
     Box(
         modifier = modifier.fillMaxSize(),
@@ -496,7 +536,7 @@ private fun DownloadOnboarding(
             } else {
                 Button(
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
                         onDownload()
                     },
                     shape = RoundedCornerShape(EnsuCornerRadius.button.dp),
@@ -525,7 +565,7 @@ private fun UserMessageBubble(
     onOpenAttachment: (Attachment) -> Unit
 ) {
     val clipboard = LocalClipboardManager.current
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     val bubbleShape = RoundedCornerShape(18.dp)
@@ -563,7 +603,7 @@ private fun UserMessageBubble(
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { offset ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                haptic.perform(HapticFeedbackType.LongPress)
                                 pressOffset = offset
                                 showMenu = true
                             }
@@ -585,11 +625,11 @@ private fun UserMessageBubble(
                 onDismiss = { showMenu = false },
                 actions = listOf(
                     MessageAction("Edit", HugeIcons.Edit01Icon) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
                         onEdit()
                     },
                     MessageAction("Copy", HugeIcons.Copy01Icon) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
                         clipboard.setText(AnnotatedString(message.text))
                     }
                 )
@@ -628,7 +668,7 @@ private fun AssistantMessageBubble(
     onBranchChange: (String, Int) -> Unit
 ) {
     val clipboard = LocalClipboardManager.current
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     var showMenu by remember { mutableStateOf(false) }
     var pressOffset by remember { mutableStateOf(Offset.Zero) }
     Column(
@@ -641,7 +681,7 @@ private fun AssistantMessageBubble(
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = { offset ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                haptic.perform(HapticFeedbackType.LongPress)
                                 pressOffset = offset
                                 showMenu = true
                             }
@@ -667,11 +707,11 @@ private fun AssistantMessageBubble(
                 onDismiss = { showMenu = false },
                 actions = listOf(
                     MessageAction("Copy", HugeIcons.Copy01Icon) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
                         clipboard.setText(AnnotatedString(message.text))
                     },
                     MessageAction("Retry", HugeIcons.RepeatIcon) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        haptic.perform(HapticFeedbackType.TextHandleMove)
                         onRetry()
                     }
                 )
@@ -764,17 +804,39 @@ private fun MessageActionsMenu(
 
 @Composable
 private fun StreamingMessageBubble(text: String) {
+    var showCursor by remember { mutableStateOf(true) }
+    val shouldBlink = text.isNotBlank()
+
+    LaunchedEffect(shouldBlink) {
+        if (!shouldBlink) {
+            showCursor = true
+            return@LaunchedEffect
+        }
+        while (true) {
+            delay(520)
+            showCursor = !showCursor
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
+            modifier = Modifier
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = 0.9f,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                )
+                .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
         ) {
             if (text.isBlank()) {
                 LoadingDotsText()
             } else {
-                MarkdownView(markdown = text, enableSelection = false)
+                val displayText = if (showCursor) "$text▍" else text
+                MarkdownView(markdown = displayText, enableSelection = false)
             }
         }
     }
@@ -795,7 +857,7 @@ private fun LoadingDotsText() {
     Text(
         text = phrase + ".".repeat(dotCount),
         style = EnsuTypography.message,
-        color = EnsuColor.textMuted()
+        color = EnsuColor.textPrimary()
     )
 }
 
@@ -844,7 +906,7 @@ private fun DownloadToastOverlay(
     isLoading: Boolean,
     onCancel: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -865,7 +927,7 @@ private fun DownloadToastOverlay(
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        haptic.perform(HapticFeedbackType.LongPress)
                         onCancel()
                     },
                     modifier = Modifier.size(28.dp)
@@ -913,7 +975,7 @@ private fun TimestampText(timestampMillis: Long) {
 
 @Composable
 private fun EditBanner(message: ChatMessage, onCancelEdit: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -956,7 +1018,7 @@ private fun EditBanner(message: ChatMessage, onCancelEdit: () -> Unit) {
             )
             IconButton(
                 onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    haptic.perform(HapticFeedbackType.TextHandleMove)
                     onCancelEdit()
                 },
                 modifier = Modifier.size(24.dp)
@@ -992,7 +1054,7 @@ private fun MessageInput(
     onCancelEdit: () -> Unit,
     focusRequestId: Int
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     val placeholder = when {
         isAttachmentDownloadBlocked -> {
             val percent = attachmentDownloadPercent?.let { " ($it%)" } ?: ""
@@ -1099,10 +1161,10 @@ private fun MessageInput(
 
                 Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
 
-                if (editingMessage == null) {
+                if (EnsuFeatureFlags.enableImageUploads && editingMessage == null) {
                     IconButton(
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            haptic.perform(HapticFeedbackType.TextHandleMove)
                             onAttachmentSelected(AttachmentType.Image)
                         },
                         enabled = !isGenerating && !isDownloading && !isAttachmentDownloadBlocked,
@@ -1121,10 +1183,10 @@ private fun MessageInput(
                 IconButton(
                     onClick = {
                         if (isGenerating) {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            haptic.perform(HapticFeedbackType.LongPress)
                             onStop()
                         } else {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            haptic.perform(HapticFeedbackType.TextHandleMove)
                             onSend()
                         }
                     },

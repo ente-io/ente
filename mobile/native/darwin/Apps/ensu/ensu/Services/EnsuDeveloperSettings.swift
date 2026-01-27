@@ -19,8 +19,8 @@ enum EnsuDeveloperSettings {
     private static let endpointKey = "ensu.customEndpoint"
 
     static var currentEndpoint: URL? {
-        if let buildEndpoint = endpointURL(from: BuildEndpointConfig.endpoint) {
-            return buildEndpoint
+        if let envEndpoint = endpointURL(from: ProcessInfo.processInfo.environment["ENTE_API_ENDPOINT"]) {
+            return envEndpoint
         }
         if let storedEndpoint = endpointURL(from: UserDefaults.standard.string(forKey: endpointKey)) {
             return storedEndpoint

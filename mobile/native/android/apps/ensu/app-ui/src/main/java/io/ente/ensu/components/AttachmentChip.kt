@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,6 +27,7 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
+import io.ente.ensu.utils.rememberEnsuHaptics
 
 @Composable
 fun AttachmentChip(
@@ -38,10 +38,10 @@ fun AttachmentChip(
     onDelete: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     val clickModifier = if (onClick != null) {
         Modifier.clickable {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptic.perform(HapticFeedbackType.TextHandleMove)
             onClick()
         }
     } else {
@@ -93,7 +93,7 @@ fun AttachmentChip(
             Spacer(modifier = Modifier.width(EnsuSpacing.xs.dp))
             IconButton(
                 onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    haptic.perform(HapticFeedbackType.LongPress)
                     onDelete()
                 },
                 modifier = Modifier.size(24.dp)

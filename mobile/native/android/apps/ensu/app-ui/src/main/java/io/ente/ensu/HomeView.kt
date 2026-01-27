@@ -32,6 +32,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -78,6 +79,7 @@ import io.ente.ensu.components.EnsuLogo
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
 import io.ente.ensu.designsystem.EnsuColor
+import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
@@ -92,6 +94,7 @@ import io.ente.ensu.modelsettings.ModelSettingsScreen
 import io.ente.ensu.settings.DeveloperSettingsScreen
 import io.ente.ensu.settings.LogViewerScreen
 import io.ente.ensu.settings.SettingsScreen
+import io.ente.ensu.utils.EnsuFeatureFlags
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.File
@@ -122,10 +125,19 @@ fun HomeView(
     var showAttachmentDownloads by remember { mutableStateOf(false) }
     var deleteSessionTarget by remember { mutableStateOf<io.ente.ensu.domain.model.ChatSession?>(null) }
     var showLogShareDialog by remember { mutableStateOf(false) }
+    var showSignInComingSoon by remember { mutableStateOf(false) }
 
     var developerTapCount by remember { mutableStateOf(0) }
     var lastDeveloperTapAt by remember { mutableStateOf<Long?>(null) }
     var showDeveloperDialog by remember { mutableStateOf(false) }
+
+    val handleSignInRequest: () -> Unit = {
+        if (EnsuFeatureFlags.enableSignIn) {
+            isShowingAuth = true
+        } else {
+            showSignInComingSoon = true
+        }
+    }
 
     val handleDeveloperTap: () -> Unit = handle@{
         // Don't allow switching endpoints for logged-in users.
@@ -273,7 +285,7 @@ fun HomeView(
                                 modelDownloadStatus = appState.chat.downloadStatus,
                                 modelDownloadPercent = appState.chat.downloadPercent,
                                 onOpenDrawer = { scope.launch { drawerState.open() } },
-                                onSignIn = { isShowingAuth = true },
+                                onSignIn = handleSignInRequest,
                                 onAttachmentDownloads = { showAttachmentDownloads = true }
                             )
                             androidx.compose.material3.HorizontalDivider(color = EnsuColor.border())
@@ -359,7 +371,7 @@ fun HomeView(
                             userEmail = appState.auth.email,
                             onOpenLogs = { navController.navigate(HomeRoute.Logs) },
                             onSignOut = { isShowingSignOutDialog = true },
-                            onSignIn = { isShowingAuth = true },
+                            onSignIn = handleSignInRequest,
                             onDeleteAccount = { openDeleteAccountEmail(context) }
                         )
                     }
@@ -479,6 +491,14 @@ fun HomeView(
                 isShowingAuth = false
             },
             onDismiss = { isShowingAuth = false }
+        )
+    }
+
+    if (showSignInComingSoon) {
+        ComingSoonDialog(
+            title = "Sign in",
+            message = "Coming soon",
+            onDismiss = { showSignInComingSoon = false }
         )
     }
 
@@ -733,6 +753,46 @@ private fun ModelProgressIndicator(
             strokeWidth = 2.dp
         )
     }
+}
+
+@Composable
+private fun ComingSoonDialog(
+    title: String,
+    message: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = title, style = EnsuTypography.h3Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .background(
+                            EnsuColor.fillFaint(),
+                            RoundedCornerShape(EnsuCornerRadius.card.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Illustration", style = EnsuTypography.small, color = EnsuColor.textMuted())
+                }
+                Text(text = message, style = EnsuTypography.body, color = EnsuColor.textMuted())
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = EnsuColor.textPrimary())
+            ) {
+                Text(text = "Got it")
+            }
+        },
+        containerColor = EnsuColor.backgroundBase()
+    )
 }
 
 @Composable

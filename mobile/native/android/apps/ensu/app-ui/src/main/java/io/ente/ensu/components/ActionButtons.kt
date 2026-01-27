@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuTypography
+import io.ente.ensu.utils.rememberEnsuHaptics
 
 @Composable
 fun ActionButton(
@@ -24,10 +24,10 @@ fun ActionButton(
     contentDescription: String,
     color: Color = EnsuColor.textMuted()
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     IconButton(
         onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptic.perform(HapticFeedbackType.TextHandleMove)
             onTap()
         },
         modifier = Modifier.size(36.dp),
@@ -48,10 +48,10 @@ fun ActionButton(
     contentDescription: String,
     color: Color = EnsuColor.textMuted()
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     IconButton(
         onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            haptic.perform(HapticFeedbackType.TextHandleMove)
             onTap()
         },
         modifier = Modifier.size(36.dp),
@@ -70,9 +70,9 @@ fun TextActionButton(
     text: String,
     onTap: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = rememberEnsuHaptics()
     TextButton(onClick = {
-        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        haptic.perform(HapticFeedbackType.TextHandleMove)
         onTap()
     }) {
         Text(text = text, style = EnsuTypography.small, color = EnsuColor.textMuted())
