@@ -109,6 +109,11 @@ class DownloadManager {
      */
     publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     /**
+     * Access token for downloading files when we're in the context of a
+     * public memory share.
+     */
+    publicMemoryAccessToken: string | undefined;
+    /**
      * Local cache for thumbnail blobs.
      *
      * `undefined` indicates that the cache has not yet been initialized. It is
@@ -187,6 +192,7 @@ class DownloadManager {
      */
     logout() {
         this.publicAlbumsCredentials = undefined;
+        this.publicMemoryAccessToken = undefined;
         this.thumbnailURLPromises.clear();
         this.fileURLPromises.clear();
         this.renderableSourceURLPromises.clear();
@@ -202,6 +208,14 @@ class DownloadManager {
         credentials: PublicAlbumsCredentials | undefined,
     ) {
         this.publicAlbumsCredentials = credentials;
+    }
+
+    /**
+     * Set the access token for downloading files when we're running in the
+     * context of a public memory share.
+     */
+    setPublicMemoryCredentials(accessToken: string | undefined) {
+        this.publicMemoryAccessToken = accessToken;
     }
 
     /**
@@ -302,7 +316,12 @@ class DownloadManager {
     };
 
     private async _downloadThumbnail(file: EnteFile) {
-        if (this.publicAlbumsCredentials) {
+        if (this.publicMemoryAccessToken) {
+            return publicMemory_downloadThumbnail(
+                file,
+                this.publicMemoryAccessToken,
+            );
+        } else if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadThumbnail(
                 file,
                 this.publicAlbumsCredentials,
@@ -840,4 +859,37 @@ const publicAlbums_downloadFile = async (
     };
 
     return retryEnsuringHTTPOk(getFile);
+};
+
+/**
+ * The publicMemory_* helpers are used for thumbnail fetches when we're
+ * running in the context of a public memory share page.
+ */
+const publicMemory_downloadThumbnail = async (
+    file: EnteFile,
+    accessToken: string,
+) => {
+    const customOrigin = await customAPIOrigin();
+
+    const getThumbnail = async () => {
+        if (customOrigin) {
+            const params = new URLSearchParams({ accessToken });
+            return fetch(
+                `${customOrigin}/public-memory/files/preview/${file.id}?${params.toString()}`,
+                { headers: publicRequestHeaders() },
+            );
+        } else {
+            return fetch(
+                await apiURL(`/public-memory/files/preview/${file.id}`),
+                {
+                    headers: authenticatedPublicAlbumsRequestHeaders({
+                        accessToken,
+                    }),
+                },
+            );
+        }
+    };
+
+    const res = await retryEnsuringHTTPOk(getThumbnail);
+    return new Uint8Array(await res.arrayBuffer());
 };

@@ -25,6 +25,8 @@
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn build:wasm && yarn workspace photos next dev -p 3000",
         "dev:share": "yarn build:wasm && yarn workspace share next dev -p 3005",
+        "dev:memories": "yarn build:wasm && yarn workspace memories next dev -p 3007",
+        "build:memories": "yarn build:wasm && yarn workspace memories next build && yarn workspace memories build:post",
         "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint\" \"yarn workspaces run tsc\"",
         "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\"",
         "test": "yarn workspace ente-wasm test",

@@ -1,0 +1,13 @@
+{
+    "extends": "ente-build-config/tsconfig-next.json",
+    "compilerOptions": {
+        /* Set the base directory from which to resolve bare module names. */
+        "baseUrl": "./src"
+    },
+    "include": [
+        "src",
+        "next-env.d.ts",
+        "../../packages/base/global-electron.d.ts",
+        "../../packages/base/components/utils/mui-theme.d.ts"
+    ]
+}

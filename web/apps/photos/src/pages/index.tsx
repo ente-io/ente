@@ -113,7 +113,8 @@ const Page: React.FC = () => {
             if (
                 (shouldOnlyServeAlbumsApp ||
                     currentURL.host == albumsURL.host) &&
-                currentURL.pathname != "/shared-albums"
+                currentURL.pathname != "/shared-albums" &&
+                currentURL.pathname != "/memory"
             ) {
                 const end = currentURL.hash.lastIndexOf("&");
                 const hash = currentURL.hash.slice(
