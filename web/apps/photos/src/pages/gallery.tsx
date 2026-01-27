@@ -2,9 +2,10 @@
 // the file it depends on have been audited and their interfaces fixed).
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Upload01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
 import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
@@ -1569,7 +1570,11 @@ const Page: React.FC = () => {
                 open={openCollectionSelector}
                 onClose={handleCloseCollectionSelector}
                 attributes={collectionSelectorAttributes}
-                collectionSummaries={normalCollectionSummaries}
+                collectionSummaries={
+                    collectionSelectorAttributes?.showHiddenCollections
+                        ? state.hiddenCollectionSummaries
+                        : normalCollectionSummaries
+                }
                 collectionForCollectionSummaryID={(id) =>
                     findCollectionCreatingUncategorizedIfNeeded(
                         state.collections,
@@ -1631,6 +1636,7 @@ const Page: React.FC = () => {
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
                         onBack={() => dispatch({ type: "showAlbums" })}
+                        onUpload={openUploader}
                     />
                 ) : (
                     <NormalNavbarContents
@@ -1709,6 +1715,7 @@ const Page: React.FC = () => {
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
                 onShowSessionExpiredDialog={showSessionExpiredDialog}
+                isInHiddenSection={barMode == "hidden-albums"}
             />
             <Sidebar
                 {...sidebarVisibilityProps}
@@ -1898,7 +1905,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <FileUploadOutlinedIcon />;
+    const icon = <HugeiconsIcon icon={Upload01Icon} size={20} />;
 
     return (
         <>
@@ -1908,6 +1915,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
                     {t("upload")}
@@ -1919,11 +1927,12 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
 
 interface HiddenSectionNavbarContentsProps {
     onBack: () => void;
+    onUpload: () => void;
 }
 
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
-> = ({ onBack }) => (
+> = ({ onBack, onUpload }) => (
     <Stack
         direction="row"
         sx={(theme) => ({
@@ -1937,6 +1946,7 @@ const HiddenSectionNavbarContents: React.FC<
             <ArrowBackIcon />
         </IconButton>
         <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
+        <UploadButton onClick={onUpload} />
     </Stack>
 );
 
