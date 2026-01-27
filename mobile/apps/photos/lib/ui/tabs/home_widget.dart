@@ -150,6 +150,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
+      final previousTabIndex = _selectedTabIndex;
       _selectedTabIndex = event.selectedIndex;
 
       if (event.selectedIndex == 3) {
@@ -159,14 +160,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       if (event.source != TabChangedEventSource.pageView) {
         debugPrint(
-          "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
+          "TabChange going from $previousTabIndex to ${event.selectedIndex} source: ${event.source}",
         );
         if (_pageController.hasClients) {
-          _pageController.animateToPage(
-            event.selectedIndex,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeIn,
-          );
+          final pageDelta = (event.selectedIndex - previousTabIndex).abs();
+          if (pageDelta <= 1) {
+            _pageController.animateToPage(
+              event.selectedIndex,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeIn,
+            );
+          } else {
+            _pageController.jumpToPage(event.selectedIndex);
+          }
         }
       }
     });
