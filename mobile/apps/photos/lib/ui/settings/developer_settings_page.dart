@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/app_mode.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/ui/common/gradient_button.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -50,6 +52,18 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
               onTap: () async {
                 final url = _urlController.text;
                 _logger.info("Entered endpoint: $url");
+                if (url == "localMode") {
+                  await localSettings.setAppMode(AppMode.offline);
+                  showToast(context, "App mode set to offline");
+                  Navigator.of(context).pop();
+                  return;
+                }
+                if (url == "onlineMode") {
+                  await localSettings.setAppMode(AppMode.online);
+                  showToast(context, "App mode set to online");
+                  Navigator.of(context).pop();
+                  return;
+                }
                 try {
                   final uri = Uri.parse(url);
                   if ((uri.scheme == "http" || uri.scheme == "https")) {

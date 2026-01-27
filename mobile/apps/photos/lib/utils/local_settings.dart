@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:photos/app_mode.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -66,8 +66,12 @@ class LocalSettings {
   static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
   static const _kDefaultClusteringDistanceOverride =
       "ml_debug.default_clustering_distance";
+  static const _kAppMode = "ls.app_mode";
+  static const _kAppModeEnvKey = "app_mode";
 
   final SharedPreferences _prefs;
+
+  AppMode? _cachedAppMode;
 
   LocalSettings(this._prefs);
 
@@ -376,5 +380,27 @@ class LocalSettings {
 
   Future<void> setChristmasBannerEnabled(bool value) async {
     await _prefs.setBool(_kChristmasBannerEnabled, value);
+  }
+
+  AppMode get appMode {
+    if (_cachedAppMode != null) return _cachedAppMode!;
+
+    final savedIndex = _prefs.getInt(_kAppMode);
+    if (savedIndex != null &&
+        savedIndex >= 0 &&
+        savedIndex < AppMode.values.length) {
+      _cachedAppMode = AppMode.values[savedIndex];
+      return _cachedAppMode!;
+    }
+
+    const envValue =
+        String.fromEnvironment(_kAppModeEnvKey, defaultValue: "online");
+    _cachedAppMode = envValue == "offline" ? AppMode.offline : AppMode.online;
+    return _cachedAppMode!;
+  }
+
+  Future<void> setAppMode(AppMode mode) async {
+    await _prefs.setInt(_kAppMode, mode.index);
+    _cachedAppMode = mode;
   }
 }
