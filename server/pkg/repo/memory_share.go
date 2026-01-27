@@ -14,25 +14,25 @@ import (
 
 // MemoryShareRepository is an implementation of the repository for memory shares
 type MemoryShareRepository struct {
-	DB        *sql.DB
-	albumHost string
+	DB         *sql.DB
+	memoryHost string
 }
 
 // NewMemoryShareRepository creates a new MemoryShareRepository
 func NewMemoryShareRepository(db *sql.DB) *MemoryShareRepository {
-	albumHost := viper.GetString("apps.public-albums")
-	if albumHost == "" {
-		albumHost = "https://albums.ente.io"
+	memoryHost := viper.GetString("apps.public-memories")
+	if memoryHost == "" {
+		memoryHost = "https://memories.ente.io"
 	}
 	return &MemoryShareRepository{
-		DB:        db,
-		albumHost: albumHost,
+		DB:         db,
+		memoryHost: memoryHost,
 	}
 }
 
 // GetMemoryShareURL returns the public URL for a memory share
 func (r *MemoryShareRepository) GetMemoryShareURL(accessToken string) string {
-	return fmt.Sprintf("%s/memory?t=%s", r.albumHost, accessToken)
+	return fmt.Sprintf("%s/%s", r.memoryHost, accessToken)
 }
 
 // Create creates a new memory share and returns it with the generated ID
