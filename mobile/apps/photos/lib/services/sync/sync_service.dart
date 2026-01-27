@@ -131,6 +131,7 @@ class SyncService {
         if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.sendTimeout ||
             e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionError ||
             e.type == DioExceptionType.unknown) {
           Bus.instance.fire(
             SyncStatusUpdate(
