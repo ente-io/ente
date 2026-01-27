@@ -14,6 +14,7 @@ import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_emoji_icon.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/rituals/start_new_ritual_card.dart";
 
 class RitualsBanner extends StatelessWidget {
@@ -102,12 +103,9 @@ class RitualsBanner extends StatelessWidget {
       }
     }
     if (createdRitual == null) return;
-    unawaited(
-      routeToPage(
-        context,
-        RitualPage(ritualId: createdRitual.id),
-      ),
-    );
+    final canOpen = await requestHiddenRitualAccess(context, createdRitual);
+    if (!context.mounted || !canOpen) return;
+    unawaited(routeToPage(context, RitualPage(ritualId: createdRitual.id)));
   }
 
   List<Widget> _buildRowItems(
@@ -204,11 +202,10 @@ class _RitualSummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(_cardRadius),
         child: InkWell(
           borderRadius: BorderRadius.circular(_cardRadius),
-          onTap: () {
-            routeToPage(
-              context,
-              RitualPage(ritualId: ritual.id),
-            );
+          onTap: () async {
+            final canOpen = await requestHiddenRitualAccess(context, ritual);
+            if (!context.mounted || !canOpen) return;
+            unawaited(routeToPage(context, RitualPage(ritualId: ritual.id)));
           },
           child: Container(
             decoration: BoxDecoration(
