@@ -98,6 +98,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         items: [
           context.l10n.cLDesc1Item1,
           context.l10n.cLDesc1Item2,
+          context.l10n.cLDesc1Item3,
         ],
         isFeature: true,
       ),
@@ -113,6 +114,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
           context.l10n.cLDesc2Item7,
           context.l10n.cLDesc2Item8,
           context.l10n.cLDesc2Item9,
+          context.l10n.cLDesc2Item10,
+          context.l10n.cLDesc2Item11,
+          context.l10n.cLDesc2Item12,
         ],
         isFeature: true,
       ),
