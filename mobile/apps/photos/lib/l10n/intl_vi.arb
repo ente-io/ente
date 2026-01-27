@@ -321,11 +321,14 @@
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
+  "storageClaimed": "{storageAmountInGB} GB đã nhận!",
   "details": "Chi tiết",
   "claimMore": "Nhận thêm!",
+  "earnMoreSpace": "Nhận thêm dung lượng!",
   "theyAlsoGetXGb": "Họ cũng nhận được {storageAmountInGB} GB",
+  "referralStorageForBoth": "{storageAmountInGB} GB cho họ + {storageAmountInGB} GB cho bạn khi nâng cấp.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB mỗi khi ai đó đăng ký gói trả phí và áp dụng mã của bạn",
-  "shareTextReferralCode": "Mã giới thiệu Ente: {referralCode} \n\nÁp dụng nó trong Cài đặt → Chung → Giới thiệu để nhận thêm {referralStorageInGB} GB miễn phí sau khi bạn đăng ký gói trả phí\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos là nơi lưu trữ ảnh riêng tư và an toàn của bạn\n* Tải xuống Ente Photos từ https://ente.io/app\n* Tạo tài khoản\n* Áp mã giới thiệu {referralCode} trong Cài đặt->Giới thiệu bạn bè\n* Nhận {referralStorageInGB}GB thêm khi nâng cấp gói trả phí",
   "claimFreeStorage": "Nhận thêm dung lượng",
   "inviteYourFriends": "Mời bạn bè của bạn",
   "earnFreeStorage": "Nhận thêm dung lượng",
@@ -333,9 +336,9 @@
   "youBothGet": "Cả hai nhận",
   "free": "miễn phí",
   "failedToFetchReferralDetails": "Không thể lấy thông tin giới thiệu. Vui lòng thử lại sau.",
-  "referralStep1": "1. Tùy chỉnh và chia sẻ mã của bạn với bạn bè.",
-  "referralStep2": "2. Họ đăng ký gói trả phí",
-  "referralStep3": "3. Cả hai nhận thêm {storageInGB} GB* miễn phí",
+  "referralStep1": "1. Tùy chỉnh và chia sẻ mã của bạn.",
+  "referralStep2": "2. Họ đăng ký Ente bằng mã của bạn.",
+  "referralStep3": "3. {storageInGB}GB miễn phí cho họ + {storageInGB}GB cho bjan khi bạn nâng cấp.",
   "referralsAreCurrentlyPaused": "Giới thiệu hiện đang tạm dừng",
   "youCanAtMaxDoubleYourStorage": "Bạn có thể tối đa ×2 dung lượng của mình",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Gia đình bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} false {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} other {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại!}}",
@@ -379,6 +382,8 @@
   "subscribeToChangeLinkSetting": "Bạn cần mua gói trả phí để thay đổi cài đặt liên kết này.",
   "subscribe": "Đăng ký gói",
   "canOnlyRemoveFilesOwnedByYou": "Chỉ có thể xóa các tệp thuộc sở hữu của bạn",
+  "cannotMoveToSharedAlbums": "Không thể chuyển vào album đã chia sẻ",
+  "cannotMoveToSharedAlbumsMessage": "Bạn chỉ có thể thêm mục vào album đã chia sẻ, không thể di chuyển. Bạn có muốn thêm thay vì di chuyển?",
   "deleteSharedAlbum": "Xóa album chia sẻ?",
   "deleteAlbum": "Xóa album",
   "deleteAlbumDialog": "Xóa luôn ảnh (và video) có trong album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
@@ -471,6 +476,10 @@
   "mlConsentPrivacy": "Vui lòng nhấn vào đây để biết thêm chi tiết về tính năng này trong chính sách quyền riêng tư của chúng tôi",
   "mlConsentConfirmation": "Tôi hiểu và muốn bật học máy",
   "magicSearch": "Tìm kiếm vi diệu",
+  "magic": "Phép màu",
+  "@magic": {
+    "description": "Section header for magic search results"
+  },
   "discover": "Khám phá",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
@@ -817,6 +826,7 @@
   "name": "Tên",
   "newest": "Mới nhất",
   "lastUpdated": "Mới cập nhật",
+  "updated": "Đã cập nhật",
   "deleteEmptyAlbums": "Xóa album trống",
   "deleteEmptyAlbumsWithQuestionMark": "Xóa album trống?",
   "deleteAlbumsDialogBody": "Tất cả album trống sẽ bị xóa. Sẽ hữu ích khi bạn muốn giảm bớt sự lộn xộn trong danh sách album của mình.",
@@ -1110,6 +1120,46 @@
   "loadMessage8": "web.ente.io có một trình tải lên mượt mà",
   "loadMessage9": "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn",
   "photoDescriptions": "Mô tả ảnh",
+  "searchResultFileName": "Tên tệp",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Mô tả",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Loại",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Định dạng",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultPerson": "Người",
+  "@searchResultPerson": {
+    "description": "Search result subtitle label for person results"
+  },
+  "searchResultShared": "Đã chia sẻ",
+  "@searchResultShared": {
+    "description": "Search result subtitle label for shared-with-you results"
+  },
+  "searchResultUploadedBy": "Tải lên bởi",
+  "@searchResultUploadedBy": {
+    "description": "Search result subtitle label for uploader results"
+  },
+  "searchResultCameraMake": "Hãng máy ảnh",
+  "@searchResultCameraMake": {
+    "description": "Search result subtitle label for camera make matches"
+  },
+  "searchResultCameraModel": "Dòng máy ảnh",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Tệp",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Loại tệp và tên",
   "location": "Vị trí",
   "moments": "Khoảnh khắc",
@@ -1259,6 +1309,7 @@
   "visibility": "Hiển thị",
   "hideFromMemories": "Ẩn khỏi kỷ niệm",
   "showInMemories": "Hiện trong kỷ niệm",
+  "showIgnored": "Hiện những bỏ qua",
   "create": "Tạo",
   "viewAll": "Xem tất cả",
   "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
@@ -1423,6 +1474,7 @@
   "enterPin": "Nhập PIN",
   "setNewPin": "Đặt PIN mới",
   "appLock": "Khóa ứng dụng",
+  "lockScreenType": "Kiểu khóa",
   "noSystemLockFound": "Không tìm thấy khóa hệ thống",
   "tapToUnlock": "Nhấn để mở khóa",
   "tooManyIncorrectAttempts": "Thử sai nhiều lần",
@@ -1508,6 +1560,26 @@
   "addNewPerson": "Thêm người mới",
   "addNameOrMerge": "Thêm tên hoặc hợp nhất",
   "mergeWithExisting": "Hợp nhất với người đã có",
+  "mergeWithPersonTitle": "Gộp với {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "Tất cả ảnh từ cả hai nhóm khuôn mặt sẽ được gộp lại thành {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "Người mới",
   "addName": "Thêm tên",
   "add": "Thêm",
@@ -2083,6 +2155,7 @@
     }
   },
   "size": "Dung lượng",
+  "closest": "Gần nhất",
   "similarity": "Sự giống nhau",
   "analyzingPhotosLocally": "Phân tích ảnh của bạn trên thiết bị...",
   "lookingForVisualSimilarities": "Tìm theo sự tương đồng thị giác...",
@@ -2099,12 +2172,12 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Thay đổi thiết kế",
-  "cLDesc1": "Màn hình cài đặt và trang kết quả tìm kiếm đã được thiết kế lại. Thanh tìm kiếm đã được chuyển lên trên cùng.",
+  "cLTitle1": "Thay đổi thiết kế",
+  "cLDesc1": "Màn hình cài đặt và trang kết quả tìm kiếm đã được thiết kế lại. Thanh tìm kiếm đã được chuyển lên đầu trang.",
   "cLTitle2": "Cải tiến",
-  "cLDesc2": "Chụm để phóng to video. Tải tab tìm kiếm nhanh hơn. Quản trị viên và chủ album có thể xóa bình luận. Xem trước cho các định dạng không được hỗ trợ. Tìm kiếm trong khám phá, địa điểm, người và loại tệp. Sắp xếp tùy chỉnh trên trang người. Quy trình hợp nhất người tốt hơn. Xem tất cả người bị bỏ qua. Sắp xếp danh bạ nhất quán.",
+  "cLDesc2": "Chụm hai ngón tay để phóng to video. Tải tab tìm kiếm nhanh hơn. Quản trị viên và chủ sở hữu album có thể xóa bình luận. Xem trước nội dung cho các định dạng không được hỗ trợ. Tìm kiếm trong khám phá, vị trí, người dùng và loại tệp. Sắp xếp tùy chỉnh trên trang người dùng. Quy trình hợp nhất người dùng được cải thiện. Xem tất cả người dùng đã bị bỏ qua. Sắp xếp liên hệ nhất quán.",
   "cLTitle3": "Sửa lỗi",
-  "cLDesc3": "Đã sửa lỗi nhạc bị tạm dừng khi mở ứng dụng. Đã sửa lỗi vuốt để chọn trên thiết bị Samsung S. Đã sửa lỗi tốc độ khung hình trên bảng thông tin. Đã sửa lỗi thư viện trên máy tính bảng và chế độ ngang. Đã sửa trang chưa phân loại không cập nhật sau khi di chuyển.",
+  "cLDesc3": "Đã khắc phục lỗi tạm dừng nhạc khi mở ứng dụng. Đã khắc phục lỗi vuốt để chọn trên các thiết bị Samsung S. Đã khắc phục sự cố tốc độ khung hình trên trang thông tin. Đã khắc phục sự cố thư viện ảnh trên máy tính bảng và ở chế độ ngang. Đã khắc phục lỗi trang chưa được phân loại không cập nhật sau khi di chuyển.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2430,5 +2503,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Tìm kiếm cài đặt",
+  "suggestions": "Đề xuất"
 }

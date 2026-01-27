@@ -246,12 +246,9 @@
   "claimMore": "Κερδίστε περισσότερα!",
   "theyAlsoGetXGb": "Κερδίζουν και εκείνοι {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB κάθε φορά που κάποιος ξεκινά μία συνδρομή επί πληρωμή και εφαρμόζει τον κωδικό σας",
-  "shareTextReferralCode": "Προωθητικό κωδικός Ente: {referralCode} \n\nΕφαρμόστε το στις Ρυθμίσεις → Γενικές → Παραπομπές για να πάρετε {referralStorageInGB} GB δωρεάν μετά την εγγραφή σας για μία συνδρομή επί πληρωμή\n\nhttps://ente.io",
   "claimFreeStorage": "Κερδίστε δωρεάν χώρο αποθήκευσης",
   "inviteYourFriends": "Προσκαλέστε τους φίλους σας",
   "failedToFetchReferralDetails": "Δεν είναι δυνατή η λήψη λεπτομερειών σχετικά με τον προώθησης. Παρακαλώ προσπαθήστε ξανά αργότερα.",
-  "referralStep2": "2. Ξεκινούν μία συνδρομή επί πληρωμή",
-  "referralStep3": "3. Και οι δύο κερδίζετε {storageInGB} GB* δωρεάν",
   "referralsAreCurrentlyPaused": "Οι παραπομπές είναι σε παύση αυτή τη στιγμή",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Η οικογένειά σας έχει κερδίσει {storageAmountInGb} GB μέχρι τώρα} false {Έχετε κερδίσει {storageAmountInGb} GB μέχρι τώρα} other {Έχετε κερδίσει {storageAmountInGb} GB μέχρι τώρα!}}",
   "@claimedStorageSoFar": {

@@ -291,12 +291,9 @@
   "claimMore": "Reclamar mais!",
   "theyAlsoGetXGb": "Eles também recebem {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB sempre que alguém se inscreve num plano pago e aplica o seu código",
-  "shareTextReferralCode": "Insira o código de referência: {referralCode} \n\nAplique-o em Configurações → Geral → Indicações para obter {referralStorageInGB} GB gratuitamente após a sua inscrição para um plano pago\n\nhttps://ente.io",
   "claimFreeStorage": "Solicitar armazenamento gratuito",
   "inviteYourFriends": "Convide os seus amigos",
   "failedToFetchReferralDetails": "Não foi possível obter detalhes de indicação. Por favor, tente novamente mais tarde.",
-  "referralStep2": "2. Eles se inscrevem em um plano pago",
-  "referralStep3": "3. Ambos ganham {storageInGB} GB* grátis",
   "referralsAreCurrentlyPaused": "As referências estão atualmente em pausa",
   "claimedStorageSoFar": "{isFamilyMember, select,true {Sua família reinvidicou {storageAmountInGb} GB até então}false {Você reinvindicou {storageAmountInGb} GB até então}other {Você reinvindicou {storageAmountInGb} GB até então!}}",
   "@claimedStorageSoFar": {
@@ -1809,11 +1806,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Alterações de design",
-  "cLDesc1": "O ecrã de definições e a página de resultados de pesquisa foram redesenhados. A barra de pesquisa foi movida para o topo.",
-  "cLTitle2": "Melhorias",
-  "cLDesc2": "Pinçar para ampliar em vídeos. Carregamento mais rápido do separador de pesquisa. Administradores e proprietários de álbuns podem eliminar comentários. Pré-visualização para formatos não suportados. Pesquisa em descoberta, localização, pessoas e tipo de ficheiro. Ordenação personalizada na página de pessoas. Um melhor fluxo de fusão de pessoas. Ver todas as pessoas ignoradas. Ordenação consistente de contactos.",
-  "cLTitle3": "Correções de erros",
-  "cLDesc3": "Corrigido o problema de música a pausar ao abrir a app. Corrigido o deslizar para selecionar em dispositivos Samsung S. Corrigido o problema de taxa de fotogramas na ficha de informações. Corrigidos problemas de galeria em tablets e em modo paisagem. Corrigida a página de não categorizados que não atualizava após movimentações."
+  }
 }

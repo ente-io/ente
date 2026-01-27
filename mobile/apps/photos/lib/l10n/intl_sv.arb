@@ -325,7 +325,6 @@
   "claimMore": "Begär mer!",
   "theyAlsoGetXGb": "De får också {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB varje gång någon registrerar sig för en betalplan och tillämpar din kod",
-  "shareTextReferralCode": "Ente värvningskod: {referralCode} \n\nTillämpa den i Inställningar → Allmänt → Hänvisningar för att få {referralStorageInGB} GB gratis när du registrerar dig för en betalplan\n\nhttps://ente.io",
   "claimFreeStorage": "Hämta kostnadsfri lagring",
   "inviteYourFriends": "Bjud in dina vänner",
   "earnFreeStorage": "Tjäna gratis lagringsutrymme",
@@ -333,8 +332,6 @@
   "youBothGet": "Ni får båda",
   "free": "gratis",
   "failedToFetchReferralDetails": "Det gick inte att hämta hänvisningsdetaljer. Försök igen senare.",
-  "referralStep2": "2. De registrerar sig för en betalplan",
-  "referralStep3": "3. Ni får båda {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Hänvisningar är för närvarande pausade",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Din familj har begärt {storageAmountInGb} GB} false {{storageAmountInGb}} other {Du har begärt {storageAmountInGb} GB!}}",
   "@claimedStorageSoFar": {

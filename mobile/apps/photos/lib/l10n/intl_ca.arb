@@ -321,12 +321,9 @@
   "claimMore": "Reclama més!",
   "theyAlsoGetXGb": "Ells també obtenen {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vegada que algú es registra per a un pla de pagament i aplica el teu codi",
-  "shareTextReferralCode": "Codi de referència d'Ente: {referralCode} \n\nAplica'l a Configuració → General → Referències per obtenir {referralStorageInGB} GB gratis després de registrar-te per a un pla de pagament\n\nhttps://ente.io",
   "claimFreeStorage": "Reclama emmagatzematge gratuït",
   "inviteYourFriends": "Convida els teus amics",
   "failedToFetchReferralDetails": "No s'han pogut obtenir els detalls de la referència. Si us plau, torna-ho a provar més tard.",
-  "referralStep2": "2. Es registren per a un pla de pagament",
-  "referralStep3": "3. Tots dos obteniu {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Les referències estan actualment en pausa",
   "claimedStorageSoFar": "{isFamilyMember, select, true {La teva família ha reclamat {storageAmountInGb} GB fins ara} false {Has reclamat {storageAmountInGb} GB fins ara} other {Has reclamat {storageAmountInGb} GB fins ara!}}",
   "@claimedStorageSoFar": {
@@ -2081,10 +2078,6 @@
   "hoorayyyy": "Viscaaaa!",
   "nothingToTidyUpHere": "Res a endreçar aquí",
   "deletingDash": "Esborrant - ",
-  "cLTitle1": "Comentaris i reaccions",
-  "cLDesc1": "Estem introduint comentaris i reaccions a les fotos compartides. Pots reaccionar o comentar una foto obrint-la i utilitzant les accions a la part inferior. Tots els comentaris i reaccions entrants seran visibles a la pestanya Compartit.",
-  "cLTitle2": "Administrador d'àlbums",
-  "cLDesc2": "Ara pots assignar un altre usuari d'Ente com a administrador del teu àlbum. Amb això, podran afegir altres espectadors i col·laboradors, eliminar fotos dels àlbums, i fins i tot suggerir als participants que eliminin les seves fotos.",
   "closeBy": "A prop",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

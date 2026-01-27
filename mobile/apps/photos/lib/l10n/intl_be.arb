@@ -315,12 +315,9 @@
   "claimMore": "Атрымайце больш!",
   "theyAlsoGetXGb": "Яны таксама атрымаць {storageAmountInGB} ГБ",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} ГБ кожны раз, калі нехта стварае падпіску на платны тарыфны план і ўжывае ваш код",
-  "shareTextReferralCode": "Рэферальны код Ente: {referralCode}\n\nУжыць яго можна ў раздзеле Налады → Агульныя → Рэфералы, каб атрымаць {referralStorageInGB} ГБ бясплатнай прасторы пасля пераходу на платны тарыфны план",
   "claimFreeStorage": "Атрымаць бясплатнае сховішча",
   "inviteYourFriends": "Запрасіце сваіх сяброў",
   "failedToFetchReferralDetails": "Немагчыма атрымаць падрабязнасці аб рэфералах. Паспрабуйце яшчэ раз пазней.",
-  "referralStep2": "2. Яны падпісваюцца на платны тарыфны план",
-  "referralStep3": "3. Вы абодва атрымаеце {storageInGB} ГБ* бясплатнага сховішча",
   "referralsAreCurrentlyPaused": "Рэфералы ў цяперашні момант прыпынены",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сям'я атрымала {storageAmountInGb} ГБ} false {Вы атрымалі {storageAmountInGb} ГБ} other {У дадзены момант вы атрымалі {storageAmountInGb} ГБ!}}",
   "@claimedStorageSoFar": {
