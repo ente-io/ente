@@ -1,21 +1,21 @@
-import 'dart:async';
+import "dart:async";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
-import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
+import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
-import 'package:photos/core/event_bus.dart';
+import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
-import 'package:photos/events/collection_updated_event.dart';
+import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/favorites_service_init_complete_event.dart";
-import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection/collection.dart';
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/collections_service.dart';
+import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
@@ -25,13 +25,13 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/device/device_folders_grid_view.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
-import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/offline/empty/on_ente.dart";
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
-import "package:photos/ui/offline/empty/on_ente.dart";
 
 class UserCollectionsTab extends StatefulWidget {
   const UserCollectionsTab({super.key, this.selectedAlbums});

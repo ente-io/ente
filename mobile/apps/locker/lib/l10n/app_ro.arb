@@ -20,47 +20,195 @@
   "pleaseWait": "Vă rugăm așteptați...",
   "downloading": "Se descarcă...",
   "downloadingProgress": "Se descarca... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "Descărcarea nu a reușit",
   "failedToDownloadOrDecrypt": "Descarcare element esuata",
   "errorOpeningFile": "Eroare la deschiderea elementului",
   "errorOpeningFileMessage": "Eroare la deschiderea elementului: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "Nu s-a putut deschide elementul: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "acum {minutes}m",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "acum {hours}h",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "Ieri",
   "daysAgo": "acum {days}z",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "Colectie redenumita cu succes",
   "failedToRenameCollection": "Redenumire colectie esuata: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "Aceasta colectie nu poate fi stearsa",
   "collectionCannotBeEdited": "Aceasta colectie nu poate fi editata",
   "collectionCannotBeShared": "Aceasta colectie nu poate fi partajata",
   "deleteCollection": "Sterge colectia",
   "deleteCollectionConfirmation": "Sunteti sigur ca doriti sa stergeti \"{collectionName}\"?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "Anulare",
   "collectionDeletedSuccessfully": "Colectie stearsa cu succes",
   "failedToDeleteCollection": "Stergere colectie esuata: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "Colectii",
   "retry": "Încercați din nou",
   "failedToSyncTrash": "Sincronizare cos de gunoi esuata: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "Va rugam selectati cel putin o colectie",
   "unknownItemType": "Tip element necunoscut",
   "fileDeletedSuccessfully": "Element sters cu succes",
   "failedToDeleteFile": "Stergere element esuata: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "Element actualizat cu succes!",
   "failedToUpdateFile": "Actualizare element esuata: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "Nu au fost facute modificari",
   "noCollectionsAvailableForRestore": "Nu exista colectii disponibile pentru restaurare",
   "trashClearedSuccessfully": "Cos de gunoi golit cu succes",
   "failedToClearTrash": "Golire cos de gunoi esuata: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "Coș de gunoi",
   "deletedPermanently": "\"{fileName}\" sters definitiv",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "Restaurare \"{fileName}\" esuata: {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "Creaza colectie noua",
   "create": "Creare",
   "renameCollection": "Redenumeste colectia",
   "save": "Salvare",
   "deleteFile": "Sterge element",
   "deleteFileConfirmation": "Sunteti sigur ca doriti sa stergeti \"{fileName}\"?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "Nu au fost gasite colectii",
   "createYourFirstCollection": "Creati prima colectie pentru a incepe",
   "createCollection": "Creaza colectie",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "Apasati butonul + pentru a incepe",
   "uploadDocument": "Incarca document",
   "items": "{count} elemente",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{niciun element} =1{1 element} few{{count} elemente} other{{count} de elemente}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "Creaza colectie",
   "uploadDocumentTooltip": "Incarca document",
   "restore": "Restaurare",
   "restoreFile": "Restaureaza {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "Nu exista colectii disponibile",
   "emptyTrash": "Goleste cosul de gunoi",
   "emptyTrashTooltip": "Goleste cosul de gunoi",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "Nu s-au gasit rezultate",
   "searchEmptyDescription": "Incercati sa cautati altceva.",
   "searchEverywhereTitle": "Cauta peste tot \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "Cauta in toate colectiile si fisierele.",
   "noCollectionsFoundForQuery": "Nu s-au gasit colectii pentru \"{query}\"",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "Necategorisite",
   "syncingTrash": "Se sincronizeaza cosul de gunoi...",
   "restoring": "Se restaureaza...",
   "restoredFileToCollection": "\"{fileName}\" restaurat in \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "Se goleste cosul de gunoi...",
   "trashIsEmpty": "Cosul de gunoi este gol",
   "share": "Distribuire",
@@ -121,7 +327,6 @@
   "changePasswordTitle": "Schimbați parola",
   "authToChangeYourPassword": "Vă rugăm să vă autentificați pentru a vă schimba parola",
   "recoveryKey": "Cheie de recuperare",
-  "ok": "Ok",
   "logout": "Deconectare",
   "deleteAccount": "Ștergere cont",
   "areYouSureYouWantToLogout": "Sunteți sigur că doriți să vă deconectați?",
@@ -157,30 +362,34 @@
   "reportABug": "Raportați o eroare",
   "reportBug": "Raportare eroare",
   "logsDialogBodyLocker": "Aceasta va trimite jurnale pentru a ne ajuta sa depistam problema dumneavoastra.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Rețele socializare",
   "rateUsOnStore": "Evaluați-ne pe {storeName}",
-  "blog": "Blog",
   "merchandise": "Produse",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "Informatii",
   "saveInformation": "Salveaza informatii",
   "saveToLocker": "Salveaza in Locker",
-  "saveDocumentTitle": "Document",
   "saveDocumentDescription": "Incarcati documente importante.",
   "informationDescription": "Salvati si partajati informatii cu cei dragi.",
   "personalNote": "Nota",
   "personalNoteDescription": "Notati ganduri si instructiuni.",
   "physicalRecords": "Obiect",
   "physicalRecordsDescription": "Salvati locatiile obiectelor din lumea reala.",
-  "accountCredentials": "Secret",
   "accountCredentialsDescription": "Pastreaza credentialele conturilor.",
   "editSecret": "Editeaza secret",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "Editare locaţie",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "Editeaza nota",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Contact de urgenta",
   "emergencyContactDescription": "Pastrati informatii de contact pentru persoane cheie in situatii de criza.",
   "noteName": "Titlu",
@@ -259,6 +468,14 @@
   "expiredLinkInfo": "Acest link a expirat. Vă rugăm să selectați un nou termen de expirare sau să dezactivați expirarea linkului.",
   "linkExpiresOn": "Linkul va expira pe {expiryTime}",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Distribuiți cu anumite persoane} =1 {Distribuit cu o persoană} other {Distribuit cu {numberOfPeople} de persoane}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "Linkul a expirat",
   "publicLinkEnabled": "Link public activat",
   "shareALink": "Distribuiți un link",
@@ -273,7 +490,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "Colaboratorii pot adauga elemente in colectia partajata.",
   "enterEmail": "Introduceți e-mailul",
   "viewersSuccessfullyAdded": "{count, plural, =0{0 vizualizatori adaugati} =1{1 vizualizator adaugat} few{{count} vizualizatori adaugati} other{{count} de vizualizatori adaugati}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0{0 colaboratori adaugati} =1{1 colaborator adaugat} few{{count} colaboratori adaugati} other{{count} de colaboratori adaugati}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, =0{Adauga vizualizator} =1{Adauga vizualizator} few{Adauga vizualizatori} other{Adauga vizualizatori}}",
   "addCollaborators": "{count, plural, =0{Adauga colaborator} =1{Adauga colaborator} few{Adauga colaboratori} other{Adauga colaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Apăsați lung un e-mail pentru a verifica criptarea integrală.",
@@ -291,6 +526,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Cineva care distribuie albume cu dvs. ar trebui să vadă același ID pe dispozitivul său.",
   "howToViewShareeVerificationID": "Rugați-i să țină apăsat pe adresa de e-mail din ecranul de setări și să verifice dacă ID-urile de pe ambele dispozitive se potrivesc.",
   "thisIsPersonVerificationId": "Acesta este ID-ul de verificare al {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "ID de verificare",
   "verifyEmailID": "Verificare {email}",
   "emailNoEnteAccount": "{email} nu are un cont Ente.\n\nTrimite-i o invitatie pentru a partaja elemente.",
@@ -303,6 +546,15 @@
   "yesConvertToViewer": "Da, covertiți la observator",
   "changePermissions": "Schimba permisiunile",
   "cannotAddMoreFilesAfterBecomingViewer": "{name} nu va mai putea adauga elemente in colectie dupa ce devine vizualizator.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "Eliminați?",
   "removeParticipantBody": "{userEmail} va fi eliminat din aceasta colectie partajata\n\nOrice elemente adaugate de ei vor fi de asemenea eliminate din colectie",
   "yesRemove": "Da, elimină",
@@ -311,10 +563,27 @@
   "collaborator": "Colaborator",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Colaboratorii pot adauga elemente in colectia partajata.",
   "albumParticipantsCount": "{count, plural, =0 {Fără participanți} =1 {1 participant} other {{count} de participanți}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "Adăugați mai mulți",
   "you": "Dvs.",
   "albumOwner": "Proprietar",
   "typeOfCollectionTypeIsNotSupportedForRename": "Tipul colectiei {collectionType} nu este suportat pentru redenumire",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "Paraseste colectia",
   "filesAddedByYouWillBeRemovedFromTheCollection": "Elementele adaugate de dumneavoastra vor fi eliminate din colectie",
   "leaveSharedCollection": "Parasiti colectia partajata?",
@@ -324,20 +593,79 @@
   "authToManageLegacy": "Vă rugăm să vă autentificați pentru a gestiona contactele de încredere",
   "uploadError": "Eroare la incarcare",
   "uploadStorageLimitErrorTitle": "Limita de stocare atinsa",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "Ati ramas fara spatiu de stocare. Eliberati spatiu pentru a continua incarcarea.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "Limita de fisiere atinsa",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "Ati atins limita de fisiere. Faceti upgrade la un plan platit pentru mai mult spatiu de stocare.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "Actiune esuata. Ati atins limita de fisiere.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "Fisier prea mare",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "Acest fisier este mai mare decat dimensiunea maxima de incarcare suportata de 10GB.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Incercati sa ajustati cautarea",
   "noFilesFoundForQuery": "Nu s-au gasit elemente pentru \"{query}\"",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "Deselectare totală",
   "selectAll": "Selectare totală",
   "unnamedCollection": "Colectie fara nume",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "{completed}/{total} elemente incarcate...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "{completed}/{total} elemente incarcate... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "Nu exista colectii disponibile",
   "createCollectionButton": "Creaza colectie",
   "collectionButtonLabel": "Colectie",
@@ -352,6 +680,15 @@
   "saveDocument": "Salveaza document",
   "uploadFiles": "Incarca elemente",
   "filesSelected": "{count, plural, =0{Niciun element selectat} =1{1 element selectat} few{{count} elemente selectate} other{{count} de elemente selectate}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "Adauga la colectie",
   "newCollection": "Colectie noua",
   "title": "Titlu",
@@ -360,11 +697,50 @@
   "backToView": "Inapoi la vizualizare",
   "back": "Înapoi",
   "failedToLoadCollections": "Incarcare colectii esuata: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "Informatii",
   "recordSavedToMultipleCollections": "Inregistrare salvata cu succes in {count, plural, =1{1 colectie} few{{count} colectii} other{{count} de colectii}}",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "{fieldName} copiat in clipboard",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "{count, plural, =1{1 rezultat} few{{count} rezultate} other{{count} de rezultate}} pentru \"{query}\"",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Autentificati-va in contul Ente",
   "unlockLockerNewUserTitle": "Alaturati-va Ente pentru a folosi Locker",
   "unlockLockerNewUserBody": "Locker este disponibil momentan doar pentru utilizatorii Ente existenti. Puteti crea un cont pe Ente Photos pentru a folosi Locker.",
@@ -399,23 +775,96 @@
   "yesDeleteCollection": "Da, sterge colectia",
   "yesDeleteFile": "Da, sterge elementul",
   "deleteCollectionDialogBody": "{collectionName} va fi stearsa definitiv.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 colectie} few{{count} colectii} other{{count} de colectii}} vor fi sterse definitiv.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1 element} few{{count} elemente} other{{count} de elemente}} vor fi sterse definitiv.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "De asemenea, sterge elementele de peste tot",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Da, sterge {count, plural, =1{colectia} few{colectiile} other{colectiile}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "Da, sterge {count, plural, =1{elementul} few{elementele} other{elementele}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "Utilizare",
-  "fileCount": "{used} / {max}",
-  "important": "Important",
   "unimportant": "Neimportant",
   "removingFromImportant": "Se elimina din importante...",
   "markingAsImportant": "Se marcheaza ca important...",
   "fileMarkedAsImportant": "Element marcat ca important",
   "fileRemovedFromImportant": "Element eliminat din importante",
   "filesMarkedAsImportant": "{count, plural, =1{1 element marcat ca important} few{{count} elemente marcate ca importante} other{{count} de elemente marcate ca importante}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "Toate elementele sunt deja marcate ca importante",
   "failedToMarkFilesAsImportant": "Marcare elemente ca importante esuata: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "Actualizare status important esuata: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Ne pare rău",
   "subscribe": "Abonare",
   "sharedWith": "Partajat cu",
@@ -434,6 +883,5 @@
   "seeAllCollections": "Vezi toate colectiile",
   "clearAllFilters": "Sterge toate filtrele",
   "selectLanguage": "Selectare limbă",
-  "general": "General",
   "language": "Limbă"
 }

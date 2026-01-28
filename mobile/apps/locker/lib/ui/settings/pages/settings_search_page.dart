@@ -94,7 +94,22 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
+          title: l10n.emailVerificationToggle,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
+          title: l10n.passkey,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
           title: l10n.appLock,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
+          title: l10n.viewActiveSessions,
           category: l10n.security,
           page: const SecuritySettingsPage(),
         ),
