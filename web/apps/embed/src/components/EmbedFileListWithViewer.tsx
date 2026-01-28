@@ -1,4 +1,4 @@
-import { styled, Typography } from "@mui/material";
+import { styled, Typography, Box } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { SpacedRow } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
@@ -75,28 +75,28 @@ export const EmbedFileListWithViewer: React.FC<
                             alignItems: "flex-end",
                             marginRight: "4px",
                             fontSize: "0.8em",
-                            "&:hover .powered-text": {
-                                color: "text.base",
-                                cursor: "pointer",
-                            },
-                            "&:hover .ente-logo": {
-                                color: "#1db954",
-                                cursor: "pointer",
-                            },
                         }}
                     >
-                        <span
-                            className="powered-text"
-                            style={{ transition: "color 0.2s ease" }}
-                        >
-                            powered by
-                        </span>
-                        <span
-                            className="ente-logo"
-                            style={{ transition: "color 0.2s ease" }}
+                        <span>powered by</span>
+                        <Box
+                            component="a"
+                            href="https://ente.io"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                                transition: "color 0.2s ease",
+                                color: "inherit",
+                                textDecoration: "none",
+                                "&:visited": {
+                                    color: "inherit",
+                                },
+                                "&:hover": {
+                                    color: "#1db954",
+                                },
+                            }}
                         >
                             <EnteLogo height={14} />
-                        </span>
+                        </Box>
                     </Typography>
                 </SpacedRow>
             </GalleryItemsHeaderAdapter>
