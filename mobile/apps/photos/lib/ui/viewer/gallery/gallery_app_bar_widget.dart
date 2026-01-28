@@ -836,9 +836,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> showOnMap() async {
-    if (!flagService.mapEnabled) {
+    if (!mapEnabled) {
       try {
-        await flagService.setMapEnabled(true);
+        await setMapEnabled(true);
       } catch (e) {
         showShortToast(
           context,

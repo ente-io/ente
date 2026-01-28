@@ -93,6 +93,21 @@ Future<void> setMLConsent(bool enabled) async {
   await flagService.setMLConsent(enabled);
 }
 
+bool get mapEnabled {
+  if (isOfflineMode) {
+    return localSettings.offlineMapEnabled;
+  }
+  return flagService.mapEnabled;
+}
+
+Future<void> setMapEnabled(bool enabled) async {
+  if (isOfflineMode) {
+    await localSettings.setOfflineMapEnabled(enabled);
+    return;
+  }
+  await flagService.setMapEnabled(enabled);
+}
+
 BackupPreferenceService? _backupPreferenceService;
 BackupPreferenceService get backupPreferenceService {
   _backupPreferenceService ??= BackupPreferenceService(
