@@ -195,6 +195,9 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
+    if (isOfflineMode) {
+      return <AlbumSearchResult>[];
+    }
     final List<Collection> collections = _collectionService.getCollectionsForUI(
       includedShared: true,
     );
@@ -224,6 +227,9 @@ class SearchService {
     int? limit,
   ) async {
     try {
+      if (isOfflineMode) {
+        return <AlbumSearchResult>[];
+      }
       final List<Collection> collections =
           _collectionService.getCollectionsForUI(
         includedShared: true,
@@ -1443,6 +1449,9 @@ class SearchService {
   Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
+    if (isOfflineMode) {
+      return <GenericSearchResult>[];
+    }
     final int ownerID = Configuration.instance.getUserID()!;
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];

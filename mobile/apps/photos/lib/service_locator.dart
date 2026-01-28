@@ -3,6 +3,7 @@ import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:photos/app_mode.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
@@ -73,6 +74,23 @@ LocalSettings? _localSettings;
 LocalSettings get localSettings {
   _localSettings ??= LocalSettings(ServiceLocator.instance.prefs);
   return _localSettings!;
+}
+
+bool get isOfflineMode => localSettings.appMode == AppMode.offline;
+
+bool get hasGrantedMLConsent {
+  if (isOfflineMode) {
+    return localSettings.offlineMLConsent;
+  }
+  return flagService.hasGrantedMLConsent;
+}
+
+Future<void> setMLConsent(bool enabled) async {
+  if (isOfflineMode) {
+    await localSettings.setOfflineMLConsent(enabled);
+    return;
+  }
+  await flagService.setMLConsent(enabled);
 }
 
 BackupPreferenceService? _backupPreferenceService;

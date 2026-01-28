@@ -32,6 +32,8 @@ class LocalSettings {
   static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
+  static const _kOfflineMLConsent = "ls.offline_ml_consent";
+  static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
   static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
@@ -204,8 +206,18 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isMLLocalIndexingEnabled =>
-      _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
+  bool get offlineMLConsent => _prefs.getBool(_kOfflineMLConsent) ?? false;
+
+  Future<void> setOfflineMLConsent(bool value) async {
+    await _prefs.setBool(_kOfflineMLConsent, value);
+  }
+
+  bool get isMLLocalIndexingEnabled {
+    final key = appMode == AppMode.offline
+        ? _kOfflineMLLocalIndexingEnabled
+        : _kisMLLocalIndexingEnabled;
+    return _prefs.getBool(key) ?? enoughRamForLocalIndexing;
+  }
 
   bool get isSmartMemoriesEnabled =>
       _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
@@ -263,8 +275,12 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    await _prefs.setBool(_kisMLLocalIndexingEnabled, !isMLLocalIndexingEnabled);
-    return isMLLocalIndexingEnabled;
+    final key = appMode == AppMode.offline
+        ? _kOfflineMLLocalIndexingEnabled
+        : _kisMLLocalIndexingEnabled;
+    final nextValue = !(_prefs.getBool(key) ?? enoughRamForLocalIndexing);
+    await _prefs.setBool(key, nextValue);
+    return nextValue;
   }
 
   bool get hasSeenMLEnablingBanner =>
