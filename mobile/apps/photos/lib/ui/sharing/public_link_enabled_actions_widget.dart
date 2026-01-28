@@ -103,7 +103,6 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
           leadingIcon: Icons.qr_code_outlined,
           menuItemColor: enteColorScheme.fillFaint,
           onTap: () async {
-            final enteColorScheme = getEnteColorScheme(context);
             await showDialog<void>(
               context: context,
               builder: (BuildContext dialogContext) {
