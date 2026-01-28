@@ -54,14 +54,12 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 _logger.info("Entered endpoint: $url");
                 if (url == "localMode") {
                   await localSettings.setAppMode(AppMode.offline);
-                  showToast(context, "App mode set to offline");
-                  Navigator.of(context).pop();
+                  await _showRestartDialog(context, "offline");
                   return;
                 }
                 if (url == "onlineMode") {
                   await localSettings.setAppMode(AppMode.online);
-                  showToast(context, "App mode set to online");
-                  Navigator.of(context).pop();
+                  await _showRestartDialog(context, "online");
                   return;
                 }
                 try {
@@ -93,6 +91,15 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showRestartDialog(BuildContext context, String mode) async {
+    await showInfoDialog(
+      context,
+      title: "App mode set to $mode",
+      body: "Please kill and restart the app for the changes to take effect.",
+      isDismissable: false,
     );
   }
 
