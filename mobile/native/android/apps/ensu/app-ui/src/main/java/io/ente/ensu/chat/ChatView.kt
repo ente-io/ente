@@ -14,6 +14,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,15 +24,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -63,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -104,6 +103,8 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToLong
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun ChatView(
@@ -122,7 +123,6 @@ fun ChatView(
     onOpenAttachment: (Attachment) -> Unit,
     onStartDownload: (Boolean) -> Unit
 ) {
-    val imePadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val showDownloadOnboarding = !chatState.isModelDownloaded &&
         chatState.messages.isEmpty() &&
         !chatState.isGenerating
@@ -175,26 +175,31 @@ fun ChatView(
     val sessionKey = chatState.currentSessionId ?: "new-session"
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedContent(
-            targetState = sessionKey,
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding(),
-            transitionSpec = {
-                val enter = fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                    slideInVertically(
-                        animationSpec = tween(220, easing = FastOutSlowInEasing)
-                    ) { it / 14 }
-                val exit = fadeOut(animationSpec = tween(180)) +
-                    slideOutVertically(animationSpec = tween(180)) { -it / 14 }
-                enter.togetherWith(exit)
-            },
-            label = "session-change"
+                .imePadding()
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            AnimatedContent(
+                targetState = sessionKey,
+                modifier = Modifier
+                    .weight(1f),
+                transitionSpec = {
+                    val enter = fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        slideInVertically(animationSpec = tween(320, easing = FastOutSlowInEasing)) {
+                            it / 12
+                        }
+                    val exit = fadeOut(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        slideOutVertically(animationSpec = tween(320, easing = FastOutSlowInEasing)) {
+                            -it / 12
+                        }
+                    enter.togetherWith(exit)
+                },
+                label = "session-change"
+            ) {
                 MessageList(
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxSize()
                         .padding(
                             start = EnsuSpacing.pageHorizontal.dp,
                             end = EnsuSpacing.pageHorizontal.dp
@@ -209,42 +214,44 @@ fun ChatView(
                     downloadStatus = chatState.downloadStatus,
                     modelDownloadSizeBytes = chatState.modelDownloadSizeBytes,
                     branchSelections = chatState.branchSelections,
-                    imePadding = imePadding,
                     onEditMessage = onEditMessage,
                     onRetryMessage = onRetryMessage,
                     onBranchChange = onBranchChange,
                     onOpenAttachment = onOpenAttachment,
                     onStartDownload = onStartDownload
                 )
+            }
 
-                val editingMessage = chatState.editingMessageId?.let { editingId ->
-                    chatState.messages.firstOrNull { it.id == editingId }
-                }
+            val editingMessage = chatState.editingMessageId?.let { editingId ->
+                chatState.messages.firstOrNull { it.id == editingId }
+            }
 
-                if (!showDownloadOnboarding) {
-                    MessageInput(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .background(EnsuColor.backgroundBase()),
-                        messageText = chatState.messageText,
-                        attachments = chatState.attachments,
-                        editingMessage = editingMessage,
-                        isProcessingAttachments = chatState.isProcessingAttachments,
-                        isGenerating = chatState.isGenerating,
-                        isDownloading = chatState.isDownloading,
-                        downloadPercent = chatState.downloadPercent,
-                        isAttachmentDownloadBlocked = chatState.isAttachmentDownloadBlocked,
-                        attachmentDownloadPercent = chatState.attachmentDownloadProgress,
-                        onMessageChange = onMessageChange,
-                        onSend = onSend,
-                        onStop = onStop,
-                        onAttachmentSelected = onAttachmentSelected,
-                        onRemoveAttachment = onRemoveAttachment,
-                        onCancelEdit = onCancelEdit,
-                        focusRequestId = focusRequestId
-                    )
-                }
+            if (!showDownloadOnboarding) {
+                MessageInput(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .background(EnsuColor.backgroundBase()),
+                    messageText = chatState.messageText,
+                    attachments = chatState.attachments,
+                    editingMessage = editingMessage,
+                    isProcessingAttachments = chatState.isProcessingAttachments,
+                    isGenerating = chatState.isGenerating,
+                    isDownloading = chatState.isDownloading,
+                    downloadPercent = chatState.downloadPercent,
+                    isAttachmentDownloadBlocked = chatState.isAttachmentDownloadBlocked,
+                    attachmentDownloadPercent = chatState.attachmentDownloadProgress,
+                    onMessageChange = onMessageChange,
+                    onSend = {
+                        focusManager.clearFocus()
+                        onSend()
+                    },
+                    onStop = onStop,
+                    onAttachmentSelected = onAttachmentSelected,
+                    onRemoveAttachment = onRemoveAttachment,
+                    onCancelEdit = onCancelEdit,
+                    focusRequestId = focusRequestId
+                )
             }
         }
 
@@ -278,7 +285,6 @@ private fun MessageList(
     downloadStatus: String?,
     modelDownloadSizeBytes: Long?,
     branchSelections: Map<String, Int>,
-    imePadding: androidx.compose.ui.unit.Dp,
     onEditMessage: (ChatMessage) -> Unit,
     onRetryMessage: (ChatMessage) -> Unit,
     onBranchChange: (String, Int) -> Unit,
@@ -305,23 +311,20 @@ private fun MessageList(
         return
     }
 
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = if (messages.isNotEmpty()) messages.size else 0
+    )
     val haptic = rememberEnsuHaptics()
     var autoScrollEnabled by remember { mutableStateOf(true) }
+    var isAutoScrolling by remember { mutableStateOf(false) }
     var lastHapticLength by remember { mutableStateOf(0) }
     var shouldJumpToBottomOnLoad by remember { mutableStateOf(true) }
-    var lastIsAtBottom by remember { mutableStateOf(true) }
-    var wasAtBottomBeforeIme by remember { mutableStateOf(false) }
+    var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
+    var lastViewportHeight by remember { mutableStateOf(0) }
+    var lastUserMessageId by remember { mutableStateOf<String?>(null) }
     val isAtBottom by remember {
         derivedStateOf {
-            val layoutInfo = listState.layoutInfo
-            val totalItems = layoutInfo.totalItemsCount
-            if (totalItems == 0) {
-                true
-            } else {
-                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                lastVisible >= totalItems - 1
-            }
+            !listState.canScrollForward
         }
     }
 
@@ -332,21 +335,33 @@ private fun MessageList(
         }
     }
 
+    val lastMessage = messages.lastOrNull()
+    LaunchedEffect(lastMessage?.id) {
+        if (lastMessage == null) {
+            lastUserMessageId = null
+            return@LaunchedEffect
+        }
+        if (lastMessage.author == MessageAuthor.User && lastMessage.id != lastUserMessageId) {
+            lastUserMessageId = lastMessage.id
+            if (!listState.isScrollInProgress || isAtBottom) {
+                autoScrollEnabled = true
+            }
+        }
+    }
+
     LaunchedEffect(messages.size) {
         if (shouldJumpToBottomOnLoad && messages.isNotEmpty()) {
-            listState.scrollToItem(messages.size)
+            if (listState.firstVisibleItemIndex != messages.size) {
+                listState.scrollToItem(messages.size)
+            }
             shouldJumpToBottomOnLoad = false
         }
     }
 
-    LaunchedEffect(listState.isScrollInProgress, isAtBottom) {
-        if (listState.isScrollInProgress && !isAtBottom) {
+    LaunchedEffect(listState.isScrollInProgress, isAtBottom, isAutoScrolling) {
+        if (listState.isScrollInProgress && !isAtBottom && !isAutoScrolling) {
             autoScrollEnabled = false
         }
-    }
-
-    LaunchedEffect(isAtBottom) {
-        lastIsAtBottom = isAtBottom
     }
 
     LaunchedEffect(isAtBottom, isGenerating) {
@@ -368,27 +383,57 @@ private fun MessageList(
         if (!autoScrollEnabled) return@LaunchedEffect
         val targetIndex = messages.size
         if (targetIndex >= 0) {
-            if (isGenerating) {
-                listState.animateScrollToItem(targetIndex)
-            } else {
-                listState.scrollToItem(targetIndex)
+            isAutoScrolling = true
+            try {
+                if (isGenerating) {
+                    listState.animateScrollToItem(targetIndex)
+                } else {
+                    listState.scrollToItem(targetIndex)
+                }
+            } finally {
+                isAutoScrolling = false
             }
         }
     }
 
-    LaunchedEffect(imePadding) {
-        if (imePadding > 0.dp) {
-            wasAtBottomBeforeIme = lastIsAtBottom
-            if (wasAtBottomBeforeIme) {
-                delay(120)
-                val targetIndex = messages.size
-                if (targetIndex >= 0) {
-                    listState.scrollToItem(targetIndex)
-                }
-            }
-        } else {
-            wasAtBottomBeforeIme = false
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+            viewportHeight to isAtBottom
         }
+            .distinctUntilChanged()
+            .collect { (viewportHeight, atBottom) ->
+                if (viewportHeight <= 0) {
+                    return@collect
+                }
+                if (lastViewportHeight != 0 && viewportHeight != lastViewportHeight) {
+                    if (wasAtBottomBeforeResize) {
+                        val totalItems = listState.layoutInfo.totalItemsCount
+                        if (totalItems > 0) {
+                            isAutoScrolling = true
+                            try {
+                                listState.scrollToItem(totalItems - 1)
+                            } finally {
+                                isAutoScrolling = false
+                            }
+                        }
+                    } else if (viewportHeight < lastViewportHeight) {
+                        val deltaPx = (lastViewportHeight - viewportHeight).toFloat()
+                        if (deltaPx > 0f) {
+                            autoScrollEnabled = false
+                            isAutoScrolling = true
+                            try {
+                                listState.scrollBy(deltaPx)
+                            } finally {
+                                isAutoScrolling = false
+                            }
+                        }
+                    }
+                }
+                lastViewportHeight = viewportHeight
+                wasAtBottomBeforeResize = atBottom
+            }
     }
 
     LazyColumn(
@@ -857,7 +902,7 @@ private fun LoadingDotsText() {
     Text(
         text = phrase + ".".repeat(dotCount),
         style = EnsuTypography.message,
-        color = EnsuColor.textPrimary()
+        color = EnsuColor.textMuted()
     )
 }
 

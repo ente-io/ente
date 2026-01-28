@@ -142,6 +142,7 @@ final class InferenceRsProvider {
         guard let context = contextHandle else {
             throw NSError(domain: "InferenceRsProvider", code: -1, userInfo: [NSLocalizedDescriptionKey: "Model not loaded"])
         }
+        currentJobId = nil
 
         let nativeMessages = messages.map {
             InferenceRS.ChatMessage(role: $0.role.roleString, content: $0.text)
@@ -177,8 +178,9 @@ final class InferenceRsProvider {
                 self.currentJobId = jobId
                 onToken(text)
             case .done:
-                break
+                self.currentJobId = nil
             case let .error(_, message):
+                self.currentJobId = nil
                 lock.lock()
                 error = NSError(domain: "InferenceRsProvider", code: -2, userInfo: [NSLocalizedDescriptionKey: message])
                 lock.unlock()
@@ -213,6 +215,8 @@ final class InferenceRsProvider {
     func stopGeneration() {
         if let jobId = currentJobId {
             cancel(jobId: jobId)
+        } else {
+            cancel(jobId: 0)
         }
     }
 

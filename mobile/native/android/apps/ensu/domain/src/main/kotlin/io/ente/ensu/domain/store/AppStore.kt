@@ -63,8 +63,8 @@ class AppStore(
     private var pendingSyncSuccessHandler: (() -> Unit)? = null
 
     private val sessionSummarySystemPrompt =
-        "You are a title generator. Rewrite the message in 4-5 words for a chat title. Reply with only the title, no quotes."
-    private val sessionSummaryMaxWords = 5
+        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title."
+    private val sessionSummaryMaxWords = 7
 
     private val attachmentDownloads = mutableMapOf<String, AttachmentDownloadItem>()
     private val attachmentDownloadQueue = ArrayDeque<String>()
@@ -287,6 +287,9 @@ class AppStore(
     }
 
     fun updateBranchSelection(messageId: String, selectedIndex: Int) {
+        if (_state.value.chat.isGenerating) {
+            stopGeneration()
+        }
         val sessionId = _state.value.chat.currentSessionId ?: return
         val messages = messageStore[sessionId].orEmpty()
         val byId = messages.associateBy { it.id }
@@ -487,6 +490,9 @@ class AppStore(
     }
 
     fun retryAssistantMessage(messageId: String) {
+        if (_state.value.chat.isGenerating) {
+            stopGeneration()
+        }
         val sessionId = _state.value.chat.currentSessionId ?: return
         val message = messageStore[sessionId]?.firstOrNull { it.id == messageId } ?: return
         if (message.author != MessageAuthor.Assistant) return
@@ -1485,6 +1491,6 @@ class AppStore(
         private const val MEDIA_MARKER = "<__media__>"
         private const val DEFAULT_TEMPERATURE = 0.7f
         private const val SYSTEM_PROMPT =
-            "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points."
+            "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$"
     }
 }

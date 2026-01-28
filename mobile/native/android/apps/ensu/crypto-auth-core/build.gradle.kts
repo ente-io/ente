@@ -8,7 +8,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 24
     }
 
     sourceSets["main"].jniLibs.srcDir("src/main/jniLibs")

@@ -127,6 +127,7 @@ class InferenceRsProvider(
         onToken: (String) -> Unit
     ): GenerationSummary = withContext(ioDispatcher) {
         val context = contextHandle ?: throw IllegalStateException("Model context not loaded")
+        currentJobId = null
         val mmprojPath = if (imageFiles.isEmpty()) null else mmprojPathFor(target)?.absolutePath
 
         val request = GenerateChatRequest(
@@ -185,7 +186,12 @@ class InferenceRsProvider(
     }
 
     override fun stopGeneration() {
-        currentJobId?.let { cancel(it) }
+        val jobId = currentJobId
+        if (jobId != null) {
+            cancel(jobId)
+        } else {
+            cancel(0)
+        }
     }
 
     override fun resetContext() {
@@ -428,8 +434,11 @@ class InferenceRsProvider(
                             onToken(event.text)
                         }
                     }
-                    is GenerateEvent.Done -> Unit
+                    is GenerateEvent.Done -> {
+                        currentJobId = null
+                    }
                     is GenerateEvent.Error -> {
+                        currentJobId = null
                         error = InferenceException.Message(event.message)
                     }
                 }

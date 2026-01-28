@@ -503,7 +503,7 @@ private struct LoadingDotsView: View {
             let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 3
             Text(phrase + dots(for: phase))
                 .font(EnsuTypography.message)
-                .foregroundStyle(EnsuColor.textPrimary)
+                .foregroundStyle(EnsuColor.textMuted)
         }
     }
 
@@ -812,6 +812,8 @@ private struct MarkdownView: View {
                     BlockQuoteView(text: text)
                 case .code(let code):
                     CodeBlockView(code: code)
+                case .math(let text):
+                    MathBlockView(text: text)
                 case .list(let items):
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(items, id: \.self) { item in
@@ -858,6 +860,7 @@ private enum MarkdownBlock: Identifiable {
     case paragraph(text: String)
     case blockquote(text: String)
     case code(text: String)
+    case math(text: String)
     case list(items: [String])
     case divider
 
@@ -888,6 +891,8 @@ private enum MarkdownParser {
         var blocks: [MarkdownBlock] = []
         var paragraph: [String] = []
         var listItems: [String] = []
+        var mathLines: [String] = []
+        var mathEndDelimiter: String? = nil
 
         func flushParagraph() {
             if !paragraph.isEmpty {
@@ -903,8 +908,89 @@ private enum MarkdownParser {
             }
         }
 
+        func flushMath() {
+            if mathEndDelimiter != nil {
+                if !mathLines.isEmpty {
+                    blocks.append(.math(text: mathLines.joined(separator: "\n")))
+                }
+                mathLines.removeAll()
+                mathEndDelimiter = nil
+            }
+        }
+
+        func startMath(endDelimiter: String, initialContent: String? = nil) {
+            flushParagraph()
+            flushList()
+            mathEndDelimiter = endDelimiter
+            mathLines.removeAll()
+            if let initial = initialContent?.trimmingCharacters(in: .whitespacesAndNewlines), !initial.isEmpty {
+                mathLines.append(initial)
+            }
+        }
+
+        func isBracketMathLine(_ trimmed: String) -> Bool {
+            guard trimmed.hasPrefix("["), trimmed.hasSuffix("]"), trimmed.count > 2 else {
+                return false
+            }
+            if trimmed.contains("](") || trimmed.contains("]:") {
+                return false
+            }
+            return true
+        }
+
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
+
+            if let endDelimiter = mathEndDelimiter {
+                if trimmed == endDelimiter {
+                    flushMath()
+                    continue
+                }
+                if endDelimiter != "]" && trimmed.hasSuffix(endDelimiter) {
+                    let content = String(trimmed.dropLast(endDelimiter.count)).trimmingCharacters(in: .whitespaces)
+                    if !content.isEmpty {
+                        mathLines.append(content)
+                    }
+                    flushMath()
+                    continue
+                }
+                mathLines.append(line)
+                continue
+            }
+
+            if trimmed == "\\[" || trimmed == "$$" || trimmed == "[" {
+                let endDelimiter = trimmed == "\\[" ? "\\]" : (trimmed == "$$" ? "$$" : "]")
+                startMath(endDelimiter: endDelimiter)
+                continue
+            }
+
+            if trimmed.hasPrefix("\\[") {
+                let content = String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                if content.hasSuffix("\\]") {
+                    let inner = String(content.dropLast(2)).trimmingCharacters(in: .whitespaces)
+                    blocks.append(.math(text: inner))
+                } else {
+                    startMath(endDelimiter: "\\]", initialContent: content)
+                }
+                continue
+            }
+
+            if trimmed.hasPrefix("$$") {
+                let content = String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                if content.hasSuffix("$$") {
+                    let inner = String(content.dropLast(2)).trimmingCharacters(in: .whitespaces)
+                    blocks.append(.math(text: inner))
+                } else {
+                    startMath(endDelimiter: "$$", initialContent: content)
+                }
+                continue
+            }
+
+            if isBracketMathLine(trimmed) {
+                let inner = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
+                blocks.append(.math(text: inner))
+                continue
+            }
 
             if trimmed.isEmpty {
                 flushParagraph()
@@ -956,6 +1042,7 @@ private enum MarkdownParser {
 
         flushParagraph()
         flushList()
+        flushMath()
         return blocks
     }
 }
@@ -995,6 +1082,21 @@ private struct CodeBlockView: View {
                 .stroke(EnsuColor.border, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.codeBlock, style: .continuous))
+    }
+}
+
+private struct MathBlockView: View {
+    let text: String
+
+    var body: some View {
+        LaTeXView(latex: text)
+            .frame(minHeight: 48)
+            .background(EnsuColor.fillFaint)
+            .overlay(
+                RoundedRectangle(cornerRadius: EnsuCornerRadius.codeBlock)
+                    .stroke(EnsuColor.border, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.codeBlock, style: .continuous))
     }
 }
 

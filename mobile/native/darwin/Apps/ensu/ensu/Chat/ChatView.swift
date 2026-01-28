@@ -236,8 +236,9 @@ struct ChatView: View {
                 insertion: .move(edge: .bottom).combined(with: .opacity),
                 removal: .move(edge: .top).combined(with: .opacity)
             )
+            .animation(.easeInOut(duration: 0.32))
 
-            ZStack(alignment: .top) {
+            ZStack(alignment: .bottom) {
                 let shouldShowDownloadOnboarding = !viewModel.isModelDownloaded
 
                 MessageListView(
@@ -269,70 +270,6 @@ struct ChatView: View {
                     }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .overlay(alignment: .bottom) {
-                    if viewModel.isModelDownloaded {
-                        let shouldAutoFocus = viewModel.isModelDownloaded
-                            && !viewModel.isDownloading
-                            && !viewModel.isGenerating
-                            && !didAutoFocusInput
-                            && !isDrawerOpen
-                            && !didDismissKeyboard
-                            && !showSettings
-                            && !showDeveloperSettings
-
-                        MessageInputView(
-                            text: $viewModel.draftText,
-                            attachments: $viewModel.draftAttachments,
-                            isGenerating: viewModel.isGenerating,
-                            isDownloading: viewModel.isDownloading,
-                            editingMessage: editingMessage,
-                            isProcessingAttachments: viewModel.isProcessingAttachments,
-                            isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
-                            onSend: {
-                                viewModel.sendDraft()
-                            },
-                            onStop: {
-                                viewModel.stopGenerating()
-                            },
-                            onCancelEdit: {
-                                viewModel.cancelEditing()
-                            },
-                            onAddImage: { data, name in
-                                viewModel.addImageAttachment(data: data, fileName: name)
-                            },
-                            onAddDocument: { url in
-                                viewModel.addDocumentAttachment(url: url)
-                            },
-                            onRemoveAttachment: { attachment in
-                                viewModel.removeAttachment(attachment)
-                            },
-                            onUserFocus: {
-                                didDismissKeyboard = false
-                            },
-                            onDismissKeyboard: {
-                                didDismissKeyboard = true
-                            },
-                            isFocused: $isInputFocused
-                        )
-                        .onPreferenceChange(InputBarHeightKey.self) { newValue in
-                            inputBarHeight = newValue
-                        }
-                        .onAppear {
-                            if shouldAutoFocus {
-                                requestInputFocus()
-                                didAutoFocusInput = true
-                                didDismissKeyboard = false
-                            }
-                        }
-                        .onChange(of: shouldAutoFocus) { newValue in
-                            if newValue {
-                                requestInputFocus()
-                                didAutoFocusInput = true
-                                didDismissKeyboard = false
-                            }
-                        }
-                    }
-                }
                 .id(sessionTransitionId)
                 .transition(sessionTransition)
                 .onAppear {
@@ -340,6 +277,73 @@ struct ChatView: View {
                 }
                 .onChange(of: viewModel.messages.count) { _ in
                     viewModel.autoStartModelDownloadIfNeeded()
+                }
+                .zIndex(0)
+
+                if viewModel.isModelDownloaded {
+                    let shouldAutoFocus = viewModel.isModelDownloaded
+                        && !viewModel.isDownloading
+                        && !viewModel.isGenerating
+                        && !didAutoFocusInput
+                        && !isDrawerOpen
+                        && !didDismissKeyboard
+                        && !showSettings
+                        && !showDeveloperSettings
+
+                    MessageInputView(
+                        text: $viewModel.draftText,
+                        attachments: $viewModel.draftAttachments,
+                        isGenerating: viewModel.isGenerating,
+                        isDownloading: viewModel.isDownloading,
+                        editingMessage: editingMessage,
+                        isProcessingAttachments: viewModel.isProcessingAttachments,
+                        isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
+                        onSend: {
+                            didDismissKeyboard = true
+                            isInputFocused = false
+                            viewModel.sendDraft()
+                        },
+                        onStop: {
+                            viewModel.stopGenerating()
+                        },
+                        onCancelEdit: {
+                            viewModel.cancelEditing()
+                        },
+                        onAddImage: { data, name in
+                            viewModel.addImageAttachment(data: data, fileName: name)
+                        },
+                        onAddDocument: { url in
+                            viewModel.addDocumentAttachment(url: url)
+                        },
+                        onRemoveAttachment: { attachment in
+                            viewModel.removeAttachment(attachment)
+                        },
+                        onUserFocus: {
+                            didDismissKeyboard = false
+                        },
+                        onDismissKeyboard: {
+                            didDismissKeyboard = true
+                        },
+                        isFocused: $isInputFocused
+                    )
+                    .onPreferenceChange(InputBarHeightKey.self) { newValue in
+                        inputBarHeight = newValue
+                    }
+                    .onAppear {
+                        if shouldAutoFocus {
+                            requestInputFocus()
+                            didAutoFocusInput = true
+                            didDismissKeyboard = false
+                        }
+                    }
+                    .onChange(of: shouldAutoFocus) { newValue in
+                        if newValue {
+                            requestInputFocus()
+                            didAutoFocusInput = true
+                            didDismissKeyboard = false
+                        }
+                    }
+                    .zIndex(1)
                 }
 
                 if shouldShowDownloadOnboarding {
@@ -353,14 +357,16 @@ struct ChatView: View {
                             viewModel.startModelDownload(userInitiated: true)
                         }
                     )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(EnsuColor.backgroundBase)
+                    .zIndex(2)
                 }
             }
-            .animation(.easeOut(duration: 0.25), value: sessionTransitionId)
+            .animation(.easeInOut(duration: 0.32), value: sessionTransitionId)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onChange(of: viewModel.currentSessionId) { _ in
-            withAnimation(.easeOut(duration: 0.25)) {
+            withAnimation(.easeInOut(duration: 0.32)) {
                 sessionTransitionId = UUID()
             }
         }

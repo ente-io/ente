@@ -70,6 +70,9 @@ fun MarkdownView(markdown: String, enableSelection: Boolean = true) {
                     is MarkdownBlock.Code -> {
                         CodeBlockView(code = block.text)
                     }
+                    is MarkdownBlock.Math -> {
+                        MathBlockView(text = block.text)
+                    }
                     is MarkdownBlock.ListItems -> {
                         Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.xs.dp)) {
                             block.items.forEach { item ->
@@ -168,6 +171,21 @@ private fun CodeBlockView(code: String) {
     }
 }
 
+@Composable
+private fun MathBlockView(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(EnsuColor.fillFaint(), RoundedCornerShape(EnsuCornerRadius.codeBlock.dp))
+            .border(1.dp, EnsuColor.border(), RoundedCornerShape(EnsuCornerRadius.codeBlock.dp))
+    ) {
+        LaTeXView(
+            latex = text,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
 private fun headingStyle(level: Int): TextStyle {
     val size = when (level) {
         1 -> 20.sp
@@ -219,6 +237,7 @@ private sealed class MarkdownBlock {
     data class Paragraph(val text: String) : MarkdownBlock()
     data class BlockQuote(val text: String) : MarkdownBlock()
     data class Code(val text: String) : MarkdownBlock()
+    data class Math(val text: String) : MarkdownBlock()
     data class ListItems(val items: List<String>) : MarkdownBlock()
     data object Divider : MarkdownBlock()
 }
@@ -245,6 +264,8 @@ private object MarkdownParser {
         val blocks = mutableListOf<MarkdownBlock>()
         val paragraph = mutableListOf<String>()
         val listItems = mutableListOf<String>()
+        val mathLines = mutableListOf<String>()
+        var mathEndDelimiter: String? = null
 
         fun flushParagraph() {
             if (paragraph.isNotEmpty()) {
@@ -260,8 +281,95 @@ private object MarkdownParser {
             }
         }
 
+        fun flushMath() {
+            if (mathEndDelimiter != null) {
+                if (mathLines.isNotEmpty()) {
+                    blocks.add(MarkdownBlock.Math(mathLines.joinToString("\n")))
+                }
+                mathLines.clear()
+                mathEndDelimiter = null
+            }
+        }
+
+        fun startMath(endDelimiter: String, initialContent: String? = null) {
+            flushParagraph()
+            flushList()
+            mathEndDelimiter = endDelimiter
+            mathLines.clear()
+            if (!initialContent.isNullOrBlank()) {
+                mathLines.add(initialContent)
+            }
+        }
+
+        fun isBracketMathLine(trimmed: String): Boolean {
+            if (!trimmed.startsWith("[") || !trimmed.endsWith("]") || trimmed.length <= 2) {
+                return false
+            }
+            if (trimmed.contains("](") || trimmed.contains("]:")) {
+                return false
+            }
+            return true
+        }
+
         for (line in lines) {
             val trimmed = line.trim()
+
+            if (mathEndDelimiter != null) {
+                val endDelimiter = mathEndDelimiter!!
+                if (trimmed == endDelimiter) {
+                    flushMath()
+                    continue
+                }
+                if (endDelimiter != "]" && trimmed.endsWith(endDelimiter)) {
+                    val content = trimmed.removeSuffix(endDelimiter).trimEnd()
+                    if (content.isNotEmpty()) {
+                        mathLines.add(content)
+                    }
+                    flushMath()
+                    continue
+                }
+                mathLines.add(line)
+                continue
+            }
+
+            if (trimmed == "\\[" || trimmed == "$$" || trimmed == "[") {
+                val endDelimiter = when (trimmed) {
+                    "\\[" -> "\\]"
+                    "$$" -> "$$"
+                    else -> "]"
+                }
+                startMath(endDelimiter)
+                continue
+            }
+
+            if (trimmed.startsWith("\\[")) {
+                val content = trimmed.removePrefix("\\[").trimStart()
+                if (content.endsWith("\\]")) {
+                    val inner = content.removeSuffix("\\]").trim()
+                    blocks.add(MarkdownBlock.Math(inner))
+                } else {
+                    startMath("\\]", content)
+                }
+                continue
+            }
+
+            if (trimmed.startsWith("$$")) {
+                val content = trimmed.removePrefix("$$").trimStart()
+                if (content.endsWith("$$")) {
+                    val inner = content.removeSuffix("$$").trim()
+                    blocks.add(MarkdownBlock.Math(inner))
+                } else {
+                    startMath("$$", content)
+                }
+                continue
+            }
+
+            if (isBracketMathLine(trimmed)) {
+                val inner = trimmed.removePrefix("[").removeSuffix("]").trim()
+                blocks.add(MarkdownBlock.Math(inner))
+                continue
+            }
+
             if (trimmed.isEmpty()) {
                 flushParagraph()
                 flushList()
@@ -310,6 +418,7 @@ private object MarkdownParser {
 
         flushParagraph()
         flushList()
+        flushMath()
         return blocks
     }
 }

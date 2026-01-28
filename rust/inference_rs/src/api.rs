@@ -44,6 +44,8 @@ static CANCEL_FLAGS: OnceLock<Mutex<HashMap<JobId, Arc<AtomicBool>>>> = OnceLock
 static MTMD_LOG_BUFFER: OnceLock<Mutex<String>> = OnceLock::new();
 static MTMD_LOG_HOOK: OnceLock<()> = OnceLock::new();
 
+const CANCEL_MESSAGE: &str = "Generation cancelled";
+
 fn backend() -> Result<&'static LlamaBackend, String> {
     match BACKEND.get_or_init(|| LlamaBackend::init().map_err(|err| err.to_string())) {
         Ok(backend) => Ok(backend),
@@ -102,6 +104,19 @@ fn register_job() -> (JobId, Arc<AtomicBool>) {
     (job_id, flag)
 }
 
+fn cancel_all() {
+    for flag in cancel_flags().lock().values() {
+        flag.store(true, Ordering::Relaxed);
+    }
+}
+
+fn check_cancelled(cancel_flag: &AtomicBool) -> Result<(), String> {
+    if cancel_flag.load(Ordering::Relaxed) {
+        Err(CANCEL_MESSAGE.to_string())
+    } else {
+        Ok(())
+    }
+}
 
 struct JobGuard(JobId);
 
@@ -826,6 +841,7 @@ pub fn generate_chat_stream(
                 let mut token_offset = 0usize;
                 let mut logits_index: i32 = 0;
                 while token_offset < prompt_tokens.len() {
+                    check_cancelled(&cancel_flag)?;
                     let end = (token_offset + n_batch).min(prompt_tokens.len());
                     let chunk = &prompt_tokens[token_offset..end];
                     let mut batch = LlamaBatch::new(chunk.len(), 1);
@@ -899,6 +915,7 @@ pub fn generate_chat_stream(
 
             let mut bitmaps = Vec::with_capacity(image_paths.len());
             for image_path in &image_paths {
+                check_cancelled(&cancel_flag)?;
                 if !Path::new(image_path).exists() {
                     return Err(format!("Image file not found at {image_path}"));
                 }
@@ -944,10 +961,12 @@ pub fn generate_chat_stream(
             }
 
             ctx.clear_kv_cache();
+            check_cancelled(&cancel_flag)?;
 
             let n_past = chunks
                 .eval_chunks(&mtmd_ctx, ctx, 0, 0, n_batch, true)
                 .map_err(|err| format_error("Failed to evaluate multimodal prompt", err))?;
+            check_cancelled(&cancel_flag)?;
 
             let mut sampler = build_sampler(ctx.model, &sampler_request)?;
             let mut prompt_tokens = Vec::new();
@@ -1059,6 +1078,7 @@ pub fn generate_stream(
             let mut token_offset = 0usize;
             let mut logits_index: i32 = 0;
             while token_offset < prompt_tokens.len() {
+                check_cancelled(&cancel_flag)?;
                 let end = (token_offset + n_batch).min(prompt_tokens.len());
                 let chunk = &prompt_tokens[token_offset..end];
                 let mut batch = LlamaBatch::new(chunk.len(), 1);
@@ -1124,6 +1144,10 @@ pub fn generate_stream(
 }
 
 pub fn cancel(job_id: JobId) -> Result<(), String> {
+    if job_id <= 0 {
+        cancel_all();
+        return Ok(());
+    }
     if let Some(flag) = cancel_flags().lock().get(&job_id) {
         flag.store(true, Ordering::Relaxed);
     }

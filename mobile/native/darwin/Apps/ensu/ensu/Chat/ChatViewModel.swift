@@ -261,6 +261,10 @@ final class LlmChatDb {
     func createSession(title: String) throws -> LlmChatSession {
         LlmChatSession(uuid: UUID().uuidString, title: title, updatedAtUs: Int64(Date().timeIntervalSince1970 * 1_000_000))
     }
+
+    func updateSessionTitle(uuid: String, title: String) throws {
+        _ = (uuid, title)
+    }
 }
 
 final class LlmChatSync {
@@ -417,11 +421,11 @@ struct DownloadToastState: Identifiable, Equatable {
 @MainActor
 final class ChatViewModel: ObservableObject {
     private static let defaultTemperature: Float = 0.7
-    private static let systemPrompt = "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points."
+    private static let systemPrompt = "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$"
     private static let sessionTitleMaxLength = 40
-    private static let sessionSummaryMaxWords = 5
+    private static let sessionSummaryMaxWords = 7
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
-    private static let sessionSummarySystemPrompt = "You are a title generator. Rewrite the message in 4-5 words for a chat title. Reply with only the title, no quotes."
+    private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title."
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
 
@@ -1035,6 +1039,9 @@ final class ChatViewModel: ObservableObject {
 
     func retryAssistantResponse(_ message: ChatMessage) {
         guard message.role == .assistant else { return }
+        if isGenerating {
+            stopGenerating()
+        }
         guard let sessionId = currentSessionId else { return }
         guard let parent = messageStore[sessionId]?.first(where: { $0.id == message.id })?.parentId,
               let userNode = messageStore[sessionId]?.first(where: { $0.id == parent }) else {
@@ -1050,6 +1057,9 @@ final class ChatViewModel: ObservableObject {
     }
 
     func changeBranch(for message: ChatMessage, delta: Int) {
+        if isGenerating {
+            stopGenerating()
+        }
         guard let sessionId = currentSessionId else { return }
         guard let node = messageStore[sessionId]?.first(where: { $0.id == message.id }) else { return }
         let parentKey = node.parentId?.uuidString ?? "__root__"

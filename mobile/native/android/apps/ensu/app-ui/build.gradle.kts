@@ -5,6 +5,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+configurations.configureEach {
+    exclude(group = "com.google.guava", module = "listenablefuture")
+}
+
 val apiEndpointOverride = (System.getenv("ENTE_API_ENDPOINT")
     ?: project.findProperty("ENTE_API_ENDPOINT") as? String)
     ?.trim()
@@ -45,7 +49,7 @@ android {
 
     defaultConfig {
         applicationId = "io.ente.ensu"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 35
         versionCode = 7
         versionName = "0.1.2"
@@ -70,6 +74,14 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            pickFirsts += setOf(
+                "lib/arm64-v8a/libc++_shared.so",
+                "lib/armeabi-v7a/libc++_shared.so",
+                "lib/x86/libc++_shared.so",
+                "lib/x86_64/libc++_shared.so"
+            )
         }
     }
 
@@ -107,6 +119,10 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(project(":crypto-auth-core"))
+
+    implementation("com.github.gregcockroft:AndroidMath:v1.1.0") {
+        exclude(group = "com.google.guava", module = "listenablefuture")
+    }
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
