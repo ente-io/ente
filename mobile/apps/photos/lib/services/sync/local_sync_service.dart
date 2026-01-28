@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/cache/lru_map.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/user_config.dart";
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/common/conflict_algo.dart";
@@ -85,7 +86,7 @@ class LocalSyncService {
       return _existingSync!.future;
     }
     _existingSync = Completer<void>();
-    final int ownerID = Configuration.instance.getUserID()!;
+    final int ownerID = Configuration.instance.getUserIDV2();
 
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
@@ -177,7 +178,7 @@ class LocalSyncService {
     _logger.info(
       "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
     );
-    final int ownerID = Configuration.instance.getUserID()!;
+    final int ownerID = Configuration.instance.getUserIDV2();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();

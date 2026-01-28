@@ -26,6 +26,7 @@ import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
+import "package:photos/ui/offline/empty/share.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search_tab/contacts_section.dart";
@@ -116,9 +117,19 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(CollectionsService.instance.getSharedCollections()),
+      future: isOfflineMode
+          ? Future.value(SharedCollections.empty())
+          : Future.value(CollectionsService.instance.getSharedCollections()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          if (isOfflineMode) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: EmptySharedSection(collections: snapshot.data!),
+              ),
+            );
+          }
           if ((snapshot.data?.incoming.length ?? 0) == 0 &&
               (snapshot.data?.quickLinks.length ?? 0) == 0 &&
               (snapshot.data?.outgoing.length ?? 0) == 0) {

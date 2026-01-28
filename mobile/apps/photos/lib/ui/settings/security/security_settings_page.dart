@@ -16,6 +16,7 @@ import "package:photos/models/user_details.dart";
 import "package:photos/services/account/passkey_service.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/local_authentication_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/request_pwd_verification_page.dart";
 import "package:photos/ui/account/sessions_page.dart";
@@ -61,6 +62,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final showAccountSecurity =
+        _config.hasConfiguredAccount() && !isOfflineMode;
 
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
@@ -92,7 +95,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      if (_config.hasConfiguredAccount()) ...[
+                      if (showAccountSecurity) ...[
                         MenuItemWidgetNew(
                           title: AppLocalizations.of(context).twofactor,
                           leadingIconWidget: _buildIconWidget(
@@ -143,17 +146,18 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         onTap: () async => _onAppLockTap(context),
                       ),
                       const SizedBox(height: 8),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).activeSessions,
-                        leadingIconWidget: _buildIconWidget(
-                          context,
-                          HugeIcons.strokeRoundedComputerPhoneSync,
+                      if (showAccountSecurity)
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).activeSessions,
+                          leadingIconWidget: _buildIconWidget(
+                            context,
+                            HugeIcons.strokeRoundedComputerPhoneSync,
+                          ),
+                          trailingIcon: Icons.chevron_right_outlined,
+                          trailingIconIsMuted: true,
+                          showOnlyLoadingState: true,
+                          onTap: () async => _onActiveSessionsTap(context),
                         ),
-                        trailingIcon: Icons.chevron_right_outlined,
-                        trailingIconIsMuted: true,
-                        showOnlyLoadingState: true,
-                        onTap: () async => _onActiveSessionsTap(context),
-                      ),
                     ],
                   ),
                 ),

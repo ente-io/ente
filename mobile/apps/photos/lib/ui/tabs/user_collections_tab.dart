@@ -31,6 +31,7 @@ import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
+import "package:photos/ui/offline/empty/on_ente.dart";
 
 class UserCollectionsTab extends StatefulWidget {
   const UserCollectionsTab({super.key, this.selectedAlbums});
@@ -111,7 +112,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
     return FutureBuilder<List<Collection>>(
-      future: CollectionsService.instance.getCollectionForOnEnteSection(),
+      future: isOfflineMode
+          ? Future.value(<Collection>[])
+          : CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getCollectionsGalleryWidget(snapshot.data!);
@@ -203,29 +206,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             const SliverToBoxAdapter(child: DeviceFoldersGridView()),
             SliverToBoxAdapter(
               child: SectionOptions(
-                onTap: () {
-                  unawaited(
-                    routeToPage(
-                      context,
-                      CollectionListPage(
-                        collections,
-                        sectionType: UISectionType.homeCollections,
-                        appTitle: SectionTitle(
-                          titleWithBrand: getOnEnteSection(context),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButtonWidget(
-                      icon: Icons.search,
-                      iconButtonType: IconButtonType.secondary,
-                      iconColor: colorScheme.blurStrokePressed,
-                      onTap: () {
+                onTap: isOfflineMode
+                    ? null
+                    : () {
                         unawaited(
                           routeToPage(
                             context,
@@ -235,54 +218,84 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                               appTitle: SectionTitle(
                                 titleWithBrand: getOnEnteSection(context),
                               ),
-                              startInSearchMode: true,
                             ),
                           ),
                         );
                       },
-                    ),
-                    IconButtonWidget(
-                      icon: Icons.chevron_right,
-                      iconButtonType: IconButtonType.secondary,
-                      iconColor: colorScheme.blurStrokePressed,
-                    ),
-                  ],
-                ),
+                SectionTitle(titleWithBrand: getOnEnteSection(context)),
+                trailingWidget: isOfflineMode
+                    ? null
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButtonWidget(
+                            icon: Icons.search,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                            onTap: () {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  CollectionListPage(
+                                    collections,
+                                    sectionType: UISectionType.homeCollections,
+                                    appTitle: SectionTitle(
+                                      titleWithBrand: getOnEnteSection(context),
+                                    ),
+                                    startInSearchMode: true,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButtonWidget(
+                            icon: Icons.chevron_right,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokePressed,
+                          ),
+                        ],
+                      ),
               ),
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
-            Configuration.instance.hasConfiguredAccount()
-                ? CollectionsFlexiGridViewWidget(
-                    collections,
-                    displayLimitCount: _kOnEnteItemLimitCount,
-                    selectedAlbums: widget.selectedAlbums,
-                    shrinkWrap: true,
-                    shouldShowCreateAlbum: true,
-                    enableSelectionMode: true,
+            isOfflineMode
+                ? SliverToBoxAdapter(
+                    child: EmptyOnEnteSection(collections: collections),
                   )
-                : const SliverToBoxAdapter(child: EmptyState()),
-            SliverToBoxAdapter(
-              child: Divider(
-                color: colorScheme.strokeFaint,
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  children: [
-                    UnCategorizedCollections(trashAndHiddenTextStyle),
-                    const SizedBox(height: 12),
-                    ArchivedCollectionsButton(trashAndHiddenTextStyle),
-                    const SizedBox(height: 12),
-                    HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
-                    const SizedBox(height: 12),
-                    TrashSectionButton(trashAndHiddenTextStyle),
-                  ],
+                : Configuration.instance.hasConfiguredAccount()
+                    ? CollectionsFlexiGridViewWidget(
+                        collections,
+                        displayLimitCount: _kOnEnteItemLimitCount,
+                        selectedAlbums: widget.selectedAlbums,
+                        shrinkWrap: true,
+                        shouldShowCreateAlbum: true,
+                        enableSelectionMode: true,
+                      )
+                    : const SliverToBoxAdapter(child: EmptyState()),
+            if (!isOfflineMode) ...[
+              SliverToBoxAdapter(
+                child: Divider(
+                  color: colorScheme.strokeFaint,
                 ),
               ),
-            ),
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    children: [
+                      UnCategorizedCollections(trashAndHiddenTextStyle),
+                      const SizedBox(height: 12),
+                      ArchivedCollectionsButton(trashAndHiddenTextStyle),
+                      const SizedBox(height: 12),
+                      HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
+                      const SizedBox(height: 12),
+                      TrashSectionButton(trashAndHiddenTextStyle),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             SliverToBoxAdapter(
               child:
                   SizedBox(height: 64 + MediaQuery.paddingOf(context).bottom),

@@ -184,7 +184,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
       // fetch user flags on login
-      flagService.flags;
+      if (!isOfflineMode) {
+        flagService.flags;
+      }
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -811,9 +813,16 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      return const LandingPageWidget();
+      if (offlineMode) {
+        if (_shouldShowPermissionWidget()) {
+          return const GrantPermissionsWidget();
+        }
+      } else {
+        return const LandingPageWidget();
+      }
     }
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
@@ -1109,6 +1118,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowLoadingWidget() {
+    if (isOfflineMode) {
+      return false;
+    }
     if (flagService.enableOnlyBackupFuturePhotos) {
       if (!permissionService.hasGrantedPermissions()) {
         return false;
@@ -1120,6 +1132,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowBackupHook() {
+    if (isOfflineMode) {
+      return false;
+    }
     final bool noFoldersSelected =
         !backupPreferenceService.hasSelectedAnyBackupFolder;
     final bool hasLimitedPermission =
@@ -1134,6 +1149,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (_personSyncTriggered) {
       return;
     }
+    if (isOfflineMode) {
+      return;
+    }
     _personSyncTriggered = true;
     entityService.syncEntities().then((_) {
       PersonService.instance.refreshPersonCache();
@@ -1142,6 +1160,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _ensureCollectionsSync() {
     if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (isOfflineMode) {
       return;
     }
     if (!(backupPreferenceService.hasSkippedOnboardingPermission ||
