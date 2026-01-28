@@ -109,7 +109,7 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
                 return QrCodeDialog(
                   data: url,
                   title: collection.displayName,
-                  accentColor: enteColorScheme.primary500,
+                  accentColor: const Color(0xFF08C225),
                   shareFileName: 'ente_qr_${collection.displayName}.png',
                   shareText:
                       'Scan this QR code to view my ${collection.displayName} album on ente',
@@ -120,7 +120,8 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
                     text: 'ente',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Montserrat',
                     ),
                   ),
                 );
