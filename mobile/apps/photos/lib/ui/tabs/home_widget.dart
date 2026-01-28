@@ -150,6 +150,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
+      final previousTabIndex = _selectedTabIndex;
       _selectedTabIndex = event.selectedIndex;
 
       if (event.selectedIndex == 3) {
@@ -159,14 +160,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
       if (event.source != TabChangedEventSource.pageView) {
         debugPrint(
-          "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
+          "TabChange going from $previousTabIndex to ${event.selectedIndex} source: ${event.source}",
         );
         if (_pageController.hasClients) {
-          _pageController.animateToPage(
-            event.selectedIndex,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeIn,
-          );
+          final pageDelta = (event.selectedIndex - previousTabIndex).abs();
+          if (pageDelta <= 1) {
+            _pageController.animateToPage(
+              event.selectedIndex,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeIn,
+            );
+          } else {
+            _pageController.jumpToPage(event.selectedIndex);
+          }
         }
       }
     });
@@ -178,7 +184,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
       // fetch user flags on login
-      flagService.flags;
+      if (!isOfflineMode) {
+        flagService.flags;
+      }
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -805,9 +813,16 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      return const LandingPageWidget();
+      if (offlineMode) {
+        if (_shouldShowPermissionWidget()) {
+          return const GrantPermissionsWidget();
+        }
+      } else {
+        return const LandingPageWidget();
+      }
     }
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
@@ -1103,6 +1118,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowLoadingWidget() {
+    if (isOfflineMode) {
+      return false;
+    }
     if (flagService.enableOnlyBackupFuturePhotos) {
       if (!permissionService.hasGrantedPermissions()) {
         return false;
@@ -1114,6 +1132,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowBackupHook() {
+    if (isOfflineMode) {
+      return false;
+    }
     final bool noFoldersSelected =
         !backupPreferenceService.hasSelectedAnyBackupFolder;
     final bool hasLimitedPermission =
@@ -1128,6 +1149,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (_personSyncTriggered) {
       return;
     }
+    if (isOfflineMode) {
+      return;
+    }
     _personSyncTriggered = true;
     entityService.syncEntities().then((_) {
       PersonService.instance.refreshPersonCache();
@@ -1136,6 +1160,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _ensureCollectionsSync() {
     if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (isOfflineMode) {
       return;
     }
     if (!(backupPreferenceService.hasSkippedOnboardingPermission ||

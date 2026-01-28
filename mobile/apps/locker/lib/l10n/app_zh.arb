@@ -20,47 +20,195 @@
   "pleaseWait": "请稍候...",
   "downloading": "正在下载...",
   "downloadingProgress": "正在下载... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "下載失敗",
   "failedToDownloadOrDecrypt": "下载项目失败",
   "errorOpeningFile": "打开项目时出错",
   "errorOpeningFileMessage": "打开项目时出错：{error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "无法打开项目：{error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes}分钟前",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours}小时前",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "昨天",
   "daysAgo": "{days}天前",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "集合重命名成功",
   "failedToRenameCollection": "重命名集合失败：{error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "此集合无法删除",
   "collectionCannotBeEdited": "此集合无法编辑",
   "collectionCannotBeShared": "此集合无法共享",
   "deleteCollection": "删除集合",
   "deleteCollectionConfirmation": "您确定要删除\"{collectionName}\"吗？",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "取消",
   "collectionDeletedSuccessfully": "集合删除成功",
   "failedToDeleteCollection": "删除集合失败：{error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "集合",
   "retry": "重试",
   "failedToSyncTrash": "同步回收站失败：{error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "请至少选择一个集合",
   "unknownItemType": "未知项目类型",
   "fileDeletedSuccessfully": "项目删除成功",
   "failedToDeleteFile": "删除项目失败：{error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "项目更新成功！",
   "failedToUpdateFile": "更新项目失败：{error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "未做任何更改",
   "noCollectionsAvailableForRestore": "没有可用于恢复的集合",
   "trashClearedSuccessfully": "回收站已清空",
   "failedToClearTrash": "清空回收站失败：{error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "回收站",
   "deletedPermanently": "已永久删除\"{fileName}\"",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "恢复\"{fileName}\"失败：{error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "创建新集合",
   "create": "创建",
   "renameCollection": "重命名集合",
   "save": "保存",
   "deleteFile": "删除项目",
   "deleteFileConfirmation": "您确定要删除\"{fileName}\"吗？",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "未找到集合",
   "createYourFirstCollection": "创建您的第一个集合以开始使用",
   "createCollection": "创建集合",
@@ -74,11 +222,28 @@
   "homeLockerEmptySubtitle": "点击 + 按钮开始使用",
   "uploadDocument": "上传文档",
   "items": "{count} 个项目",
-  "files": "{count} 个项目",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "创建集合",
   "uploadDocumentTooltip": "上传文档",
   "restore": "恢复",
   "restoreFile": "恢复 {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "没有可用的集合",
   "emptyTrash": "清空回收站",
   "emptyTrashTooltip": "清空回收站",
@@ -92,12 +257,43 @@
   "searchEmptyTitle": "未找到匹配项",
   "searchEmptyDescription": "请尝试搜索其他内容。",
   "searchEverywhereTitle": "在所有位置搜索\"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "在所有集合和文件中搜索。",
   "noCollectionsFoundForQuery": "未找到\"{query}\"的相关集合",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "未分类的",
   "syncingTrash": "正在同步回收站...",
   "restoring": "正在恢复...",
   "restoredFileToCollection": "已将\"{fileName}\"恢复到\"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "正在清空回收站...",
   "trashIsEmpty": "回收站是空的",
   "share": "分享",
@@ -121,7 +317,6 @@
   "changePasswordTitle": "修改密码",
   "authToChangeYourPassword": "请验证以更改密码",
   "recoveryKey": "恢复密钥",
-  "ok": "Ok",
   "logout": "退出登录",
   "deleteAccount": "删除账户",
   "areYouSureYouWantToLogout": "您确定要退出登录吗？",
@@ -157,15 +352,13 @@
   "reportABug": "报告错误",
   "reportBug": "报告错误",
   "logsDialogBodyLocker": "这将发送日志以帮助我们调试您的问题。",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "社交",
   "rateUsOnStore": "在 {storeName} 上给我们评分",
   "blog": "博客",
   "merchandise": "商品",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "信息",
   "saveInformation": "保存信息",
   "saveToLocker": "保存到 Locker",
@@ -179,8 +372,17 @@
   "accountCredentials": "密钥",
   "accountCredentialsDescription": "保存账户凭据。",
   "editSecret": "编辑密钥",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "编辑位置",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "编辑笔记",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "紧急联系人",
   "emergencyContactDescription": "保存危机时刻关键人物的联系信息。",
   "noteName": "标题",
@@ -259,6 +461,14 @@
   "expiredLinkInfo": "此链接已过期。请选择新的过期时间或禁用链接有效期。",
   "linkExpiresOn": "链接将在 {expiryTime} 过期",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {与特定人员共享} =1 {与 1 人共享} other {与 {numberOfPeople} 人共享}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "链接已过期",
   "publicLinkEnabled": "公开链接已启用",
   "shareALink": "分享链接",
@@ -273,7 +483,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "协作者可以向共享集合添加项目。",
   "enterEmail": "输入电子邮件",
   "viewersSuccessfullyAdded": "{count, plural, =0 {已添加0个查看者} =1 {已添加1个查看者} other {已添加 {count} 个查看者}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {已添加 0 位协作者} =1 {已添加 1 位协作者} other {已添加 {count} 位协作者}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, =0 {添加查看者} =1 {添加查看者r} other {添加数个查看者}}",
   "addCollaborators": "{count, plural, =0 {添加协作者} =1 {添加协作者} other {添加数个协作者}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。",
@@ -291,6 +519,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "与您共享相册的人应该会在他们的设备上看到相同的 ID。",
   "howToViewShareeVerificationID": "请让他们在设置屏幕上长按他们的电子邮件地址，并验证两台设备上的 ID 是否匹配。",
   "thisIsPersonVerificationId": "这是 {email} 的验证ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "验证 ID",
   "verifyEmailID": "验证 {email}",
   "emailNoEnteAccount": "{email} 没有 Ente 账户。\n\n发送邀请以共享项目。",
@@ -303,6 +539,15 @@
   "yesConvertToViewer": "是的，转换为查看者",
   "changePermissions": "更改权限",
   "cannotAddMoreFilesAfterBecomingViewer": "{name} 成为查看者后将无法再向集合添加项目。",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "要移除吗?",
   "removeParticipantBody": "{userEmail} 将被从此共享集合中移除\n\n他们添加的所有项目也将从集合中移除",
   "yesRemove": "是，移除",
@@ -311,10 +556,27 @@
   "collaborator": "协作者",
   "collaboratorsCanAddFilesToTheSharedAlbum": "协作者可以向共享集合添加项目。",
   "albumParticipantsCount": "{count, plural, =0 {无参与者} =1 {1个参与者} other {{count} 个参与者}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "添加更多",
   "you": "您",
   "albumOwner": "所有者",
   "typeOfCollectionTypeIsNotSupportedForRename": "集合类型 {collectionType} 不支持重命名",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "离开集合",
   "filesAddedByYouWillBeRemovedFromTheCollection": "您添加的项目将从集合中移除",
   "leaveSharedCollection": "离开共享集合？",
@@ -324,20 +586,79 @@
   "authToManageLegacy": "请验证身份以管理您的可信联系人",
   "uploadError": "上传错误",
   "uploadStorageLimitErrorTitle": "已达存储上限",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "您的存储空间已用完。请释放空间以继续上传。",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "已达文件上限",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "您已达到文件数量上限。升级到付费计划可获得更多存储空间。",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "操作失败。您已达到文件数量上限。",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "文件过大",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "此文件大于支持的最大上传大小 10GB。",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "请尝试调整您的搜索条件",
   "noFilesFoundForQuery": "未找到\"{query}\"的相关项目",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "取消全选",
   "selectAll": "全选",
   "unnamedCollection": "未命名集合",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "已上传 {completed}/{total} 个项目...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "已上传 {completed}/{total} 个项目...（{error}）",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "没有可用的集合",
   "createCollectionButton": "创建集合",
   "collectionButtonLabel": "集合",
@@ -351,7 +672,6 @@
   "clickHereToUpload": "点击此处上传",
   "saveDocument": "保存文档",
   "uploadFiles": "上传项目",
-  "filesSelected": "{count, plural, =0{未选择项目} other{已选择 {count} 个项目}}",
   "addToCollection": "添加到集合",
   "newCollection": "新建集合",
   "title": "标题",
@@ -360,11 +680,26 @@
   "backToView": "返回查看",
   "back": "返回",
   "failedToLoadCollections": "加载集合失败：{error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "信息",
-  "recordSavedToMultipleCollections": "记录已成功保存到 {count, plural, other{{count} 个集合}}",
   "copiedToClipboard": "{fieldName} 已复制到剪贴板",
-  "searchResultsCount": "\"{query}\"的 {count, plural, other{{count} 个结果}}",
-  "locker": "Locker",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "loginToEnteAccount": "登录您的 Ente 账户",
   "unlockLockerNewUserTitle": "加入 Ente 以使用 Locker",
   "unlockLockerNewUserBody": "Locker 目前仅对现有 Ente 用户开放。您可以在 Ente Photos 上创建账户以使用 Locker。",
@@ -399,23 +734,47 @@
   "yesDeleteCollection": "是的，删除集合",
   "yesDeleteFile": "是的，删除项目",
   "deleteCollectionDialogBody": "\"{collectionName}\"将被永久删除。",
-  "deleteMultipleCollectionsDialogBody": "{count, plural, other{{count} 个集合}}将被永久删除。",
-  "deleteMultipleFilesDialogBody": "{count, plural, other{{count} 个项目}}将被永久删除。",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "同时从所有位置删除项目",
-  "yesDeleteCollections": "是的，删除{count, plural, other{集合}}",
-  "yesDeleteFiles": "是的，删除{count, plural, other{项目}}",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "usage": "用量",
-  "fileCount": "{used} / {max}",
   "important": "重要",
   "unimportant": "不重要",
   "removingFromImportant": "正在从重要项目中移除...",
   "markingAsImportant": "正在标记为重要...",
   "fileMarkedAsImportant": "项目已标记为重要",
   "fileRemovedFromImportant": "项目已从重要项目中移除",
-  "filesMarkedAsImportant": "{count, plural, other{{count} 个项目已标记为重要}}",
   "allFilesAlreadyMarkedAsImportant": "所有项目已标记为重要",
   "failedToMarkFilesAsImportant": "标记项目为重要失败：{error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "更新重要状态失败：{error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "抱歉",
   "subscribe": "订阅",
   "sharedWith": "共享给",

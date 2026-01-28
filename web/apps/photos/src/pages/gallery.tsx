@@ -1570,7 +1570,11 @@ const Page: React.FC = () => {
                 open={openCollectionSelector}
                 onClose={handleCloseCollectionSelector}
                 attributes={collectionSelectorAttributes}
-                collectionSummaries={normalCollectionSummaries}
+                collectionSummaries={
+                    collectionSelectorAttributes?.showHiddenCollections
+                        ? state.hiddenCollectionSummaries
+                        : normalCollectionSummaries
+                }
                 collectionForCollectionSummaryID={(id) =>
                     findCollectionCreatingUncategorizedIfNeeded(
                         state.collections,
@@ -1632,6 +1636,7 @@ const Page: React.FC = () => {
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
                         onBack={() => dispatch({ type: "showAlbums" })}
+                        onUpload={openUploader}
                     />
                 ) : (
                     <NormalNavbarContents
@@ -1710,6 +1715,7 @@ const Page: React.FC = () => {
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
                 onShowSessionExpiredDialog={showSessionExpiredDialog}
+                isInHiddenSection={barMode == "hidden-albums"}
             />
             <Sidebar
                 {...sidebarVisibilityProps}
@@ -1909,6 +1915,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
                     {t("upload")}
@@ -1920,11 +1927,12 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
 
 interface HiddenSectionNavbarContentsProps {
     onBack: () => void;
+    onUpload: () => void;
 }
 
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
-> = ({ onBack }) => (
+> = ({ onBack, onUpload }) => (
     <Stack
         direction="row"
         sx={(theme) => ({
@@ -1938,6 +1946,7 @@ const HiddenSectionNavbarContents: React.FC<
             <ArrowBackIcon />
         </IconButton>
         <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
+        <UploadButton onClick={onUpload} />
     </Stack>
 );
 
