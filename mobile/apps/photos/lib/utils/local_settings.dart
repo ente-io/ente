@@ -34,6 +34,7 @@ class LocalSettings {
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
   static const _kOfflineMLConsent = "ls.offline_ml_consent";
   static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
+  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
   static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
@@ -210,6 +211,12 @@ class LocalSettings {
 
   Future<void> setOfflineMLConsent(bool value) async {
     await _prefs.setBool(_kOfflineMLConsent, value);
+  }
+
+  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? false;
+
+  Future<void> setOfflineMapEnabled(bool value) async {
+    await _prefs.setBool(_kOfflineMapEnabled, value);
   }
 
   bool get isMLLocalIndexingEnabled {

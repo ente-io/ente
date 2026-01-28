@@ -111,6 +111,8 @@ class _SettingsBody extends StatelessWidget {
                 if (isOfflineMode) ...[
                   _buildMachineLearningCard(context, colorScheme),
                   const SizedBox(height: 8),
+                  _buildOfflineFeaturesCard(context, colorScheme),
+                  const SizedBox(height: 8),
                 ],
                 if (hasLoggedIn && !isOfflineMode) ...[
                   _buildPersonalFeaturesCard(context, colorScheme),
@@ -311,6 +313,43 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
+  Widget _buildOfflineFeaturesCard(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+  ) {
+    return SettingsGroupedCard(
+      children: [
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).notifications,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedNotification01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const NotificationSettingsScreen());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).widgets,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedAlignBoxBottomRight,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const WidgetSettingsScreen());
+          },
+        ),
+        _buildMapsMenuItem(context, colorScheme),
+      ],
+    );
+  }
+
   Widget _buildSecurityCard(BuildContext context, EnteColorScheme colorScheme) {
     return MenuItemWidgetNew(
       title: AppLocalizations.of(context).security,
@@ -496,30 +535,34 @@ class _SettingsBody extends StatelessWidget {
             await routeToPage(context, const VideoStreamingSettingsPage());
           },
         ),
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).maps,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedMaping,
-            colorScheme,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => flagService.mapEnabled,
-            onChanged: () async {
-              final isEnabled = flagService.mapEnabled;
-              try {
-                await flagService.setMapEnabled(!isEnabled);
-              } catch (e) {
-                showShortToast(
-                  context,
-                  AppLocalizations.of(context).somethingWentWrong,
-                );
-                rethrow;
-              }
-            },
-          ),
-        ),
+        _buildMapsMenuItem(context, colorScheme),
       ],
+    );
+  }
+
+  Widget _buildMapsMenuItem(BuildContext context, EnteColorScheme colorScheme) {
+    return MenuItemWidgetNew(
+      title: AppLocalizations.of(context).maps,
+      borderRadius: 0,
+      leadingIconWidget: _buildIconWidget(
+        HugeIcons.strokeRoundedMaping,
+        colorScheme,
+      ),
+      trailingWidget: ToggleSwitchWidget(
+        value: () => mapEnabled,
+        onChanged: () async {
+          final isEnabled = mapEnabled;
+          try {
+            await setMapEnabled(!isEnabled);
+          } catch (e) {
+            showShortToast(
+              context,
+              AppLocalizations.of(context).somethingWentWrong,
+            );
+            rethrow;
+          }
+        },
+      ),
     );
   }
 
