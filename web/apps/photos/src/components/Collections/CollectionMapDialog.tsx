@@ -264,11 +264,15 @@ type SuperclusterConstructor = new (options?: MapClusterOptions) => MapIndex;
 
 //Prefix for storing the map view data specific to the current active collection, so they aren't recomputed when reopend
 const MAP_INDEX_KEY_PREFIX = "photos-map-index-v1";
+//OpenStreetMap only supports clustering till this zoom level and this tell the supercluster what the max limit is for the zoom.
 const MAX_MAP_ZOOM = 19;
-const PREFETCH_BOUNDS_PADDING = 0.15;
+//Instead of loading just the tiles which are in view, we're actually loading the 15% of the surrounding zone as well for smoother experience
+const PREFETCH_BOUNDS_PADDING = 15;
+//This count controls how many thumbnails are fetched in each batch when loading images for the markers
 const THUMBNAIL_BATCH_SIZE = 40;
 
 /**
+ * This is the first hook which is being loaded when the CollectionMapDialog is mounted
  * Dynamically loads map-related React components (Leaflet) to avoid SSR issues
  * Responsibility: Lazy load map dependencies only when needed (window must exist)
  */
@@ -278,7 +282,7 @@ function useMapComponents() {
     );
 
     useEffect(() => {
-        // Only load on client-side where window exists
+        // Only load on client-side where window exists, and updates the state with the components.
         if (typeof window === "undefined") return;
 
         void import("react-leaflet")
@@ -299,7 +303,7 @@ function useMapComponents() {
 }
 
 /**
- * Retrieves the current authenticated user
+ * Retrieves the current authenticated user data and throws error if the user is not loggedIn.
  * Responsibility: Provide user context for favorite/visibility operations
  */
 function useCurrentUser() {
@@ -312,9 +316,14 @@ function useCurrentUser() {
     }, []);
 }
 
+// Utility function to create an unique Key for each collection to map the cache in the IndexedDB
 const mapIndexKey = (collectionSummary: CollectionSummary) =>
     `${MAP_INDEX_KEY_PREFIX}:${collectionSummary.type}:${collectionSummary.id}`;
 
+/**
+ * Utility function to create a lightweight cache fingerprint. Used in caching the computed values in the IndexedDB.
+ * Stored along with the points in MapIndexStorage
+ */
 const toMapIndexMeta = (
     collectionSummary: CollectionSummary,
 ): MapIndexMeta => ({
@@ -335,11 +344,25 @@ const isStoredMapIndexValid = (
     );
 };
 
+/**
+ *
+ * @param files
+ * @returns points, latestFileId
+ *
+ * This function create the inital mapIndexPoint any collection,
+ * if there is no cached data for the same. It's later this points
+ * that is being given to the supercluster for the mapping and indexing.
+ *
+ * This function loops over the entire files which is suspect is not EFFICENT
+ * but currently it loads about 1,00,000 images seamlessly which is far better
+ * than the earlier implementation we had.
+ */
 const buildMapIndexPoints = async (files: EnteFile[]) => {
     const points: MapIndexPoint[] = [];
     let latestTimestamp = -1;
     let latestFileId: number | undefined;
 
+    //looping over each file to extract their time and location to create the point
     for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
         if (!file) continue;
@@ -359,7 +382,12 @@ const buildMapIndexPoints = async (files: EnteFile[]) => {
             latestFileId = file.id;
         }
 
-        if (index % 5000 === 0) {
+        /**
+         * This pauses the event loop briefly, so the main thead is not blocked if there are mutliple so many files.
+         * This doesn't change the complexisty of this loop, just keep the thread responsive for UI updates, input and rendering.
+         */
+
+        if (index > 0 && index % 5000 === 0) {
             await new Promise((resolve) => setTimeout(resolve, 0));
         }
     }
@@ -367,7 +395,24 @@ const buildMapIndexPoints = async (files: EnteFile[]) => {
     return { points, latestFileId };
 };
 
+/**
+ *
+ * @param points
+ * @returns a SuperCluster Spatial Index, using which we can retrive (1)the clusters/points for a particular bbox + zoom level
+ * (2) all leaves under a cluster. (3) the maximum zoom for a particular cluster
+ *
+ * This function converts every MapIndexPoint to a GeoJSON Feature(required for rendering
+ * using supercluster)[type MapPointFeature]. NOTE this index is not presisted only the points are cached.
+ */
 const buildClusterIndex = (points: MapIndexPoint[]): MapIndex => {
+    /**
+     *   - For every point we load, Supercluster calls map(props) once to decide what
+     *      cluster metadata that point contributes.
+     *
+     *   - When multiple points are to begrouped into a cluster, Supercluster repeatedly calls
+     *      reduce(accumulated, props) to merge those per‑point metadata objects into a single cluster summary.
+     */
+
     const options: MapClusterOptions = {
         radius: 80,
         maxZoom: MAX_MAP_ZOOM,
@@ -386,6 +431,7 @@ const buildClusterIndex = (points: MapIndexPoint[]): MapIndex => {
     const SuperclusterCtor = Supercluster as unknown as SuperclusterConstructor;
     const index = new SuperclusterCtor(options);
 
+    // converting MapIndexPoint -> MapPointFeature
     const features: MapPointFeature[] = points.map((point) => ({
         type: "Feature" as const,
         properties: { fileId: point.fileId, timestamp: point.timestamp },
@@ -395,9 +441,45 @@ const buildClusterIndex = (points: MapIndexPoint[]): MapIndex => {
         },
     }));
 
+    //builds the spaital cluster hierachy across various zoom level
     index.load(features);
     return index;
 };
+
+const buildMapIndex = (points: MapIndexPoint[]) =>
+    points.length > 0 ? buildClusterIndex(points) : null;
+
+const getPointByFileId = (
+    points: MapIndexPoint[],
+    fileId: number | undefined,
+) => {
+    if (fileId === undefined) return undefined;
+    return points.find((point) => point.fileId === fileId);
+};
+
+/**
+ *
+ * @param points
+ * @returns MapIndexPoint
+ *
+ * Though we are computing the latestFile while loadMapData(), sometimes
+ * if this latestFile is deleted or archieved by the user then we need
+ * to compute a new latestFile, this is the purpose this fn serves.
+ */
+const getLatestPointByTimestamp = (
+    points: MapIndexPoint[],
+): MapIndexPoint | undefined => {
+    let latest: MapIndexPoint | undefined;
+    for (const point of points) {
+        if (!latest || point.timestamp > latest.timestamp) {
+            latest = point;
+        }
+    }
+    return latest;
+};
+
+const getLatestFileIdFromPoints = (points: MapIndexPoint[]) =>
+    getLatestPointByTimestamp(points)?.fileId;
 
 /**
  * Loads and manages map data including index, files, and thumbnails.
@@ -420,8 +502,11 @@ function useMapData(
         error: null,
     });
 
+    //Ref mirroring the filesByID(state) to prevent the stale closure issue with the queueThumbnailFetch useCallback fn().
     const filesByIDRef = useRef<Map<number, EnteFile>>(new Map());
+    //Ref mirroring the thumbByFileID state to prevent the same issue as above
     const thumbsByFileIDRef = useRef<Map<number, string>>(new Map());
+    //A work queue with the list of fileIDs waiting to have their thumbs fetched.
     const pendingThumbsRef = useRef<Set<number>>(new Set());
     const isThumbnailWorkerRunningRef = useRef(false);
 
@@ -434,6 +519,7 @@ function useMapData(
         updationTime: number | null;
     } | null>(null);
 
+    //Syncing the refs with the state for the stale closure prevention.
     useEffect(() => {
         filesByIDRef.current = state.filesByID;
     }, [state.filesByID]);
@@ -518,6 +604,8 @@ function useMapData(
         const currentFileCount = collectionSummary.fileCount;
         const currentUpdationTime = collectionSummary.updationTime ?? null;
         const loaded = loadedCollectionRef.current;
+
+        //preventing reloading of the data if it's already loaded.
         if (
             loaded &&
             loaded.summaryId === currentSummaryId &&
@@ -529,6 +617,7 @@ function useMapData(
         }
 
         const loadMapData = async () => {
+            //In this ref we are actually setting a new Set() so clearing that before any compute happens.
             pendingThumbsRef.current.clear();
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
@@ -537,13 +626,19 @@ function useMapData(
                     collectionSummary,
                     activeCollection,
                 );
+
+                //Creating a id <- file mapping to drive renders and update the UI, changes to this will result in UI re-renders
                 const filesByID = new Map(files.map((file) => [file.id, file]));
+                //ref mirrow for using in the useCallbacks
                 filesByIDRef.current = filesByID;
 
                 const meta = toMapIndexMeta(collectionSummary);
                 const indexKey = mapIndexKey(collectionSummary);
 
-                console.log(indexKey);
+                /**
+                 * for storing the cached geotagged points(if any). This list is the RAW input to
+                 * buildMapIndex(points)[Supercluster] for clustering and rendering points.
+                 */
 
                 let points: MapIndexPoint[] | undefined;
                 let latestFileId: number | undefined;
@@ -558,6 +653,10 @@ function useMapData(
                     // Ignore index read errors and rebuild
                 }
 
+                /**
+                 * if there is no cached data then building it and then updating
+                 * the indexedDB for the future use cases.
+                 */
                 if (!points) {
                     const built = await buildMapIndexPoints(files);
                     points = built.points;
@@ -569,22 +668,12 @@ function useMapData(
                     }
                 }
 
-                if (latestFileId === undefined && points.length > 0) {
-                    let latestTimestamp = -1;
-                    points.forEach((point) => {
-                        if (point.timestamp > latestTimestamp) {
-                            latestTimestamp = point.timestamp;
-                            latestFileId = point.fileId;
-                        }
-                    });
-                }
+                //mapIndex has the SuperCluster Spatial Index
+                const mapIndex = buildMapIndex(points);
 
-                const mapIndex =
-                    points.length > 0 ? buildClusterIndex(points) : null;
                 const latestPoint =
-                    latestFileId !== undefined
-                        ? points.find((point) => point.fileId === latestFileId)
-                        : points[0];
+                    getPointByFileId(points, latestFileId) ?? points[0];
+
                 const mapCenter = latestPoint
                     ? getMapCenter(
                           [],
@@ -664,20 +753,11 @@ function useMapData(
             const mapPoints = prev.mapPoints.filter(
                 (point) => !ids.has(point.fileId),
             );
-            const mapIndex =
-                mapPoints.length > 0 ? buildClusterIndex(mapPoints) : null;
+            const mapIndex = buildMapIndex(mapPoints);
 
             let latestFileId = prev.latestFileId;
             if (latestFileId && ids.has(latestFileId)) {
-                let latestTimestamp = -1;
-                let nextLatestFileId: number | undefined;
-                mapPoints.forEach((point) => {
-                    if (point.timestamp > latestTimestamp) {
-                        latestTimestamp = point.timestamp;
-                        nextLatestFileId = point.fileId;
-                    }
-                });
-                latestFileId = nextLatestFileId;
+                latestFileId = getLatestFileIdFromPoints(mapPoints);
             }
             return {
                 ...prev,
@@ -719,20 +799,9 @@ function useMapData(
                     );
                     if (filtered.length !== prev.mapPoints.length) {
                         mapPoints = filtered;
-                        mapIndex =
-                            mapPoints.length > 0
-                                ? buildClusterIndex(mapPoints)
-                                : null;
+                        mapIndex = buildMapIndex(mapPoints);
                         if (latestFileId === file.id) {
-                            let latestTimestamp = -1;
-                            let nextLatestFileId: number | undefined;
-                            mapPoints.forEach((point) => {
-                                if (point.timestamp > latestTimestamp) {
-                                    latestTimestamp = point.timestamp;
-                                    nextLatestFileId = point.fileId;
-                                }
-                            });
-                            latestFileId = nextLatestFileId;
+                            latestFileId = getLatestFileIdFromPoints(mapPoints);
                         }
                     }
                 } else if (!prev.mapPoints.some((p) => p.fileId === file.id)) {
@@ -748,11 +817,12 @@ function useMapData(
                                 timestamp,
                             },
                         ];
-                        mapIndex = buildClusterIndex(mapPoints);
+                        mapIndex = buildMapIndex(mapPoints);
                         const currentLatestTimestamp =
                             latestFileId !== undefined
-                                ? (prev.mapPoints.find(
-                                      (p) => p.fileId === latestFileId,
+                                ? (getPointByFileId(
+                                      prev.mapPoints,
+                                      latestFileId,
                                   )?.timestamp ?? -1)
                                 : -1;
                         if (timestamp > currentLatestTimestamp) {
