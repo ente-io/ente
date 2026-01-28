@@ -266,10 +266,17 @@ class SuperLogging {
             return event;
           };
         },
-        appRunner: () => _runWithUnhandledErrorLogging(appConfig!.body!),
+        appRunner: () => kDebugMode
+            ? _runWithUnhandledErrorLogging(appConfig!.body!)
+            : appConfig!.body!(),
       );
     } else {
-      await _runWithUnhandledErrorLogging(appConfig.body!);
+      if (kDebugMode) {
+        // Keep debug-only until we're sure this doesn't cause regressions.
+        await _runWithUnhandledErrorLogging(appConfig.body!);
+      } else {
+        await appConfig.body!();
+      }
     }
   }
 
