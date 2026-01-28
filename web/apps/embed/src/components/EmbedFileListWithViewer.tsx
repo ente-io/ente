@@ -77,7 +77,7 @@ export const EmbedFileListWithViewer: React.FC<
                             fontSize: "0.8em",
                         }}
                     >
-                        <span>powered by</span>
+                        <span style={{ whiteSpace: "nowrap" }}>powered by</span>
                         <Box
                             component="a"
                             href="https://ente.io"
