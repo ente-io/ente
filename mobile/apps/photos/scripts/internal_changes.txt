@@ -1,3 +1,4 @@
+- Neeraj: Show on device albums in search result
 - Ashil: Scroll to parent comment on tapping it in reply bubble
 - Ashil: (i)QOL: Support for hiding incoming shared albums
 - Neeraj: Searchable settings
