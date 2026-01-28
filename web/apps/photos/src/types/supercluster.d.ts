@@ -6,9 +6,7 @@ declare module "supercluster" {
         coordinates: [number, number];
     }
 
-    export interface PointFeature<
-        TPointProperties = Record<string, unknown>,
-    > {
+    export interface PointFeature<TPointProperties = Record<string, unknown>> {
         type: "Feature";
         properties: TPointProperties;
         geometry: PointGeometry;
@@ -79,11 +77,11 @@ declare module "supercluster" {
             x: number,
             y: number,
         ): {
-            features: Array<{
+            features: {
                 type: "Feature";
                 geometry: { type: "Point"; coordinates: [number, number] };
                 properties: Record<string, unknown>;
-            }>;
+            }[];
         } | null;
     }
 }
