@@ -8,6 +8,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/enc_file_data.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/filedata/model/response.dart";
@@ -122,6 +123,10 @@ class FileDataService {
   }
 
   Future<void> syncFDStatus() async {
+    if (isOfflineMode) {
+      _logger.fine("Skipping file data sync in offline mode");
+      return;
+    }
     try {
       bool hasMoreData = false;
       do {
