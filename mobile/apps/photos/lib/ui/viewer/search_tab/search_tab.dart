@@ -117,7 +117,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 .allSectionsExamplesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                if (snapshot.data!.every((element) => element.isEmpty)) {
+                // In offline mode, skip the empty state check since DeviceAlbumsSection
+                // fetches its own data and may have albums to show
+                if (!isOfflineMode &&
+                    snapshot.data!.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
                     child: SearchTabEmptyState(),
