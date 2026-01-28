@@ -266,11 +266,39 @@ class SuperLogging {
             return event;
           };
         },
-        appRunner: () => appConfig!.body!(),
+        appRunner: () => _runWithUnhandledErrorLogging(appConfig!.body!),
       );
     } else {
-      await appConfig.body!();
+      await _runWithUnhandledErrorLogging(appConfig.body!);
     }
+  }
+
+  static Future<void> _runWithUnhandledErrorLogging(
+    FutureOrVoidCallback body,
+  ) async {
+    final previousFlutterError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      previousFlutterError?.call(details);
+      $.severe(
+        "Unhandled Flutter error",
+        details.exception,
+        details.stack,
+      );
+    };
+    WidgetsBinding.instance.platformDispatcher.onError = (
+      Object error,
+      StackTrace stack,
+    ) {
+      $.severe("Unhandled platform error", error, stack);
+      return false;
+    };
+
+    await runZonedGuarded(
+      () async => body(),
+      (Object error, StackTrace stack) {
+        $.severe("Unhandled zone error", error, stack);
+      },
+    );
   }
 
   static Future<void> setUserID(String userID) async {
