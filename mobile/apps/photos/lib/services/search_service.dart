@@ -224,6 +224,9 @@ class SearchService {
     int? limit,
   ) async {
     try {
+      if (isOfflineMode) {
+        return <AlbumSearchResult>[];
+      }
       final List<Collection> collections =
           _collectionService.getCollectionsForUI(
         includedShared: true,
