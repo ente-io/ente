@@ -238,7 +238,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
-    if (widget.shouldShowSyncStatus && !widget.file.isUploaded) {
+    if (widget.shouldShowSyncStatus &&
+        !widget.file.isUploaded &&
+        !isOfflineMode) {
       viewChildren.add(const UnSyncedIcon());
     }
 
