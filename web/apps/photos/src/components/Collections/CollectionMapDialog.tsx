@@ -57,7 +57,7 @@ import Supercluster from "supercluster";
 import type { SelectedState } from "utils/file";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
-import { calculateOptimalZoom, getMapCenter } from "../TripLayout/mapHelpers";
+import { calculateOptimalZoom } from "../TripLayout/mapHelpers";
 import type { JourneyPoint } from "../TripLayout/types";
 
 interface CollectionMapDialogProps
@@ -535,6 +535,13 @@ function useMapData(
         const existingThumbs = thumbsByFileIDRef.current;
         const filesByID = filesByIDRef.current;
 
+        /**
+         * Loops through the fileIds for which thumbnails are to fetched,
+         * and if thumbs are already generated or that fileId doesn't exist
+         * then skipping it.
+         *
+         * Otherwise adding it to the ref for the fetching process
+         */
         for (const fileId of fileIDs) {
             if (existingThumbs.has(fileId)) continue;
             if (!filesByID.has(fileId)) continue;
@@ -546,6 +553,11 @@ function useMapData(
 
         void (async () => {
             while (pendingThumbsRef.current.size > 0) {
+                /**
+                 * Since we're fetching in a batched manner, slicing the THUMBNAIL_BATCH_SIZE for fetching and
+                 * removing these from the pending list.
+                 */
+
                 const batchIds = Array.from(pendingThumbsRef.current).slice(
                     0,
                     THUMBNAIL_BATCH_SIZE,
@@ -568,17 +580,22 @@ function useMapData(
                     }),
                 );
 
+                /**
+                 * Updating the existing state with the newly fetched thumbnails.
+                 */
                 setState((prev) => {
-                    const nextThumbs = new Map(prev.thumbByFileID);
-                    entries.forEach(([fileId, thumb]) => {
-                        if (!thumb || nextThumbs.has(fileId)) return;
-                        nextThumbs.set(fileId, thumb);
+                    const updatedThumbMap = new Map(prev.thumbByFileID);
+                    entries.forEach(([fileId, thumbnailUrl]) => {
+                        if (!thumbnailUrl || updatedThumbMap.has(fileId))
+                            return;
+                        updatedThumbMap.set(fileId, thumbnailUrl);
                     });
-                    return nextThumbs.size > prev.thumbByFileID.size
-                        ? { ...prev, thumbByFileID: nextThumbs }
+                    return updatedThumbMap.size > prev.thumbByFileID.size
+                        ? { ...prev, thumbByFileID: updatedThumbMap }
                         : prev;
                 });
 
+                //To yield control between batches os the UI stays responsive
                 await new Promise((resolve) => setTimeout(resolve, 0));
             }
 
@@ -674,21 +691,8 @@ function useMapData(
                 const latestPoint =
                     getPointByFileId(points, latestFileId) ?? points[0];
 
-                const mapCenter = latestPoint
-                    ? getMapCenter(
-                          [],
-                          [
-                              {
-                                  lat: latestPoint.lat,
-                                  lng: latestPoint.lng,
-                                  name: "",
-                                  country: "",
-                                  timestamp: "",
-                                  image: "",
-                                  fileId: latestPoint.fileId,
-                              },
-                          ],
-                      )
+                const mapCenter: [number, number] | null = latestPoint
+                    ? [latestPoint.lat, latestPoint.lng]
                     : null;
 
                 setState({
@@ -740,6 +744,11 @@ function useMapData(
         queueThumbnailFetch,
     ]);
 
+    /**
+     * This function is used to update the map view, after a file has been
+     * deleted by the user. The deleted file is removed from the mapPoints
+     * and then a new mapIndex is built
+     */
     const removeFiles = useCallback((fileIDs: number[]) => {
         if (!fileIDs.length) return;
         setState((prev) => {
@@ -753,6 +762,7 @@ function useMapData(
             const mapPoints = prev.mapPoints.filter(
                 (point) => !ids.has(point.fileId),
             );
+            //Rebuilding the mapIndex after removing the point from the mapPoints
             const mapIndex = buildMapIndex(mapPoints);
 
             let latestFileId = prev.latestFileId;
@@ -771,9 +781,14 @@ function useMapData(
         });
     }, []);
 
+    /**
+     * This function is used to update the visiblity of a file from
+     * archive to unarchive or vice-versa.
+     */
     const updateFileVisibility = useCallback(
         (file: EnteFile, visibility: ItemVisibility) => {
             setState((prev) => {
+                //If the file ID is not in the fileByID or the magicMetadata for the file doesn't exist then return prev state
                 if (!prev.filesByID.has(file.id)) return prev;
                 if (!file.magicMetadata) return prev;
 
@@ -793,6 +808,7 @@ function useMapData(
                 let mapIndex = prev.mapIndex;
                 let latestFileId = prev.latestFileId;
 
+                //If the file is not visible then removing it from the mapPoints and creating a new Supercluster Spatial Mapping
                 if (visibility !== ItemVisibility.visible) {
                     const filtered = prev.mapPoints.filter(
                         (point) => point.fileId !== file.id,
@@ -805,6 +821,7 @@ function useMapData(
                         }
                     }
                 } else if (!prev.mapPoints.some((p) => p.fileId === file.id)) {
+                    //If the file was previously hidden then adding it back to the existing list.
                     const loc = fileLocation(file);
                     if (loc) {
                         const timestamp = fileCreationTime(file);
@@ -817,20 +834,20 @@ function useMapData(
                                 timestamp,
                             },
                         ];
+
+                        //Recomputing the latest file, since there are possiblities of change
                         mapIndex = buildMapIndex(mapPoints);
-                        const currentLatestTimestamp =
+                        const latestPoint =
                             latestFileId !== undefined
-                                ? (getPointByFileId(
-                                      prev.mapPoints,
-                                      latestFileId,
-                                  )?.timestamp ?? -1)
-                                : -1;
-                        if (timestamp > currentLatestTimestamp) {
+                                ? getPointByFileId(prev.mapPoints, latestFileId)
+                                : undefined;
+                        if (!latestPoint || timestamp > latestPoint.timestamp) {
                             latestFileId = file.id;
                         }
                     }
                 }
 
+                //Recomputing the map center in case the latestFile has changed.
                 let mapCenter = prev.mapCenter;
                 if (!mapPoints.length) {
                     mapCenter = null;
@@ -876,12 +893,15 @@ function useFavorites(
         visibility: ItemVisibility,
     ) => Promise<void>;
 } {
+    //Set to store the ids of files which are currenly favorited
     const [favoriteFileIDs, setFavoriteFileIDs] = useState<Set<number>>(
         new Set(),
     );
+    //Set to store the IDs of the files which are in-flight for updation(favorite/unfavorite)
     const [pendingFavoriteUpdates, setPendingFavoriteUpdates] = useState<
         Set<number>
     >(new Set());
+    //Set to store the IDs of the files which are in-flight for updation(archive/unarchive)
     const [pendingVisibilityUpdates, setPendingVisibilityUpdates] = useState<
         Set<number>
     >(new Set());
@@ -889,6 +909,11 @@ function useFavorites(
     useEffect(() => {
         if (!open || !user) return;
 
+        /**
+         * Each collectionFile has a collectionID associated with them, checking whether
+         * that id matches with the id of each collectionFiles and if so then adding it to the
+         * favoriteFileIDs.
+         */
         const loadFavorites = async () => {
             const collections = await savedCollections();
             const collectionFiles = await savedCollectionFiles();
@@ -983,6 +1008,7 @@ function useFavorites(
  * Manages the lifecycle of the currently visible journey photos.
  *
  * Tracks the ordered list of visible photos and exposes a setter to update them.
+ * It's the visiblePhotos that are being shown in the Sidebar to the left of the map
  *
  * @returns An object containing the visible photos array and setter.
  */
@@ -1351,13 +1377,22 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         }),
         [activeCollection?.id, collectionSummary.id],
     );
+
+    /**
+     * Since the map view actually doesn't support the selecting from the sidebar
+     * adding a empty function, other wise the setSelection must be made optional
+     * which is a more system wide change and unncessary.
+     */
     const noOpSetSelected = useCallback(() => {
         /* no-op */
     }, []);
 
     const handleMarkTempDeleted = useCallback(
         (files: EnteFile[]) => {
+            //Triggering the gallery reducer's markTempDeleted
             onMarkTempDeleted?.(files);
+
+            //remove the deleted files from the visible photos which are shown in the sidebar
             const idsToRemove = new Set(files.map((file) => file.id));
             setVisiblePhotos((prev) =>
                 prev.filter((photo) => !idsToRemove.has(photo.fileId)),
