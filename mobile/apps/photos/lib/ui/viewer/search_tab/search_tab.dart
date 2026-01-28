@@ -149,11 +149,17 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
+                        if (isOfflineMode) {
+                          return const SizedBox.shrink();
+                        }
                         return AlbumsSection(
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.ritual:
+                        if (isOfflineMode) {
+                          return const SizedBox.shrink();
+                        }
                         return const _RitualsDiscoverySection();
                       case SectionType.wrapped:
                         return ValueListenableBuilder<WrappedEntryState>(
