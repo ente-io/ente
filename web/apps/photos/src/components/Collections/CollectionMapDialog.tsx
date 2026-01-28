@@ -266,8 +266,9 @@ type SuperclusterConstructor = new (options?: MapClusterOptions) => MapIndex;
 const MAP_INDEX_KEY_PREFIX = "photos-map-index-v1";
 //OpenStreetMap only supports clustering till this zoom level and this tell the supercluster what the max limit is for the zoom.
 const MAX_MAP_ZOOM = 19;
-//Instead of loading just the tiles which are in view, we're actually loading the 15% of the surrounding zone as well for smoother experience
-const PREFETCH_BOUNDS_PADDING = 15;
+//Instead of loading just the tiles which are in view, we're actually loading the 15% of the surrounding zone as well for smoother experience.
+//Leaflet LatLngBounds.pad expects a ratio (0.15 = 15%).
+const PREFETCH_BOUNDS_PADDING = 0.15;
 //This count controls how many thumbnails are fetched in each batch when loading images for the markers
 const THUMBNAIL_BATCH_SIZE = 40;
 
