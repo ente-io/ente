@@ -869,7 +869,11 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                 <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ alignItems: "center" }}
+                    sx={{
+                        alignItems: "center",
+                        mr: -1.5,
+                        "@media (width < 720px)": { mr: -1 },
+                    }}
                 >
                     {onShowFeed && !hasSelection && (
                         <IconButton onClick={onShowFeed}>
