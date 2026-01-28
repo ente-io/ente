@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/app_mode.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/common/gradient_button.dart";
@@ -54,12 +56,16 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 _logger.info("Entered endpoint: $url");
                 if (url == "localMode") {
                   await localSettings.setAppMode(AppMode.offline);
-                  await _showRestartDialog(context, "offline");
+                  Bus.instance.fire(AppModeChangedEvent());
+                  showToast(context, "App mode set to offline");
+                  Navigator.of(context).pop();
                   return;
                 }
                 if (url == "onlineMode") {
                   await localSettings.setAppMode(AppMode.online);
-                  await _showRestartDialog(context, "online");
+                  Bus.instance.fire(AppModeChangedEvent());
+                  showToast(context, "App mode set to online");
+                  Navigator.of(context).pop();
                   return;
                 }
                 try {
@@ -91,15 +97,6 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> _showRestartDialog(BuildContext context, String mode) async {
-    await showInfoDialog(
-      context,
-      title: "App mode set to $mode",
-      body: "Please kill and restart the app for the changes to take effect.",
-      isDismissable: false,
     );
   }
 
