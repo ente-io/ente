@@ -19,6 +19,7 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/cleanup_hidden_files_widget.dart";
+import "package:photos/ui/viewer/gallery/cleanup_hidden_from_device_widget.dart";
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -46,6 +47,7 @@ class _HiddenPageState extends State<HiddenPage> {
   int? _defaultHiddenCollectionId;
   final _hiddenCollectionsExcludingDefault = <Collection>[];
   bool _hasFilesNeedingCleanup = false;
+  bool _hasHiddenFilesOnDevice = false;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
 
@@ -58,9 +60,11 @@ class _HiddenPageState extends State<HiddenPage> {
         getHiddenCollections();
       });
       _checkForCleanupNeeded();
+      _checkForDeviceCleanupNeeded();
     });
     getHiddenCollections();
     _checkForCleanupNeeded();
+    _checkForDeviceCleanupNeeded();
   }
 
   Future<void> _checkForCleanupNeeded() async {
@@ -69,6 +73,16 @@ class _HiddenPageState extends State<HiddenPage> {
     if (mounted && hasCleanup != _hasFilesNeedingCleanup) {
       setState(() {
         _hasFilesNeedingCleanup = hasCleanup;
+      });
+    }
+  }
+
+  Future<void> _checkForDeviceCleanupNeeded() async {
+    final hasDeviceFiles =
+        await CollectionsService.instance.hasHiddenFilesOnDevice();
+    if (mounted && hasDeviceFiles != _hasHiddenFilesOnDevice) {
+      setState(() {
+        _hasHiddenFilesOnDevice = hasDeviceFiles;
       });
     }
   }
@@ -154,6 +168,21 @@ class _HiddenPageState extends State<HiddenPage> {
               ),
               secondChild: const SizedBox(width: double.infinity),
               crossFadeState: _hasFilesNeedingCleanup
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 750),
+            ),
+          ),
+          RepaintBoundary(
+            child: AnimatedCrossFade(
+              firstCurve: Curves.easeInOutQuart,
+              secondCurve: Curves.easeInOutQuart,
+              sizeCurve: Curves.easeInOutQuart,
+              firstChild: CleanupHiddenFromDeviceWidget(
+                onCleanupComplete: () => _checkForDeviceCleanupNeeded(),
+              ),
+              secondChild: const SizedBox(width: double.infinity),
+              crossFadeState: _hasHiddenFilesOnDevice
                   ? CrossFadeState.showFirst
                   : CrossFadeState.showSecond,
               duration: const Duration(milliseconds: 750),

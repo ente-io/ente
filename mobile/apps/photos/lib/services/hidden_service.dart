@@ -395,6 +395,35 @@ extension HiddenService on CollectionsService {
     return createRequest;
   }
 
+  /// Returns true if there are hidden files with local copies on device.
+  /// Uses an efficient LIMIT 1 query instead of loading all files.
+  Future<bool> hasHiddenFilesOnDevice() async {
+    final userID = config.getUserID();
+    if (userID == null) {
+      return false;
+    }
+    final hiddenCollectionIds = getHiddenCollectionIds();
+    if (hiddenCollectionIds.isEmpty) {
+      return false;
+    }
+    return filesDB.hasHiddenFilesWithLocalCopy(hiddenCollectionIds, userID);
+  }
+
+  /// Gets hidden files that have local copies, deduplicated by uploadedFileID.
+  /// Only returns files owned by the current user from any hidden collection
+  /// (owned or shared).
+  Future<List<EnteFile>> getHiddenFilesOnDevice() async {
+    final userID = config.getUserID();
+    if (userID == null) {
+      return [];
+    }
+    final hiddenCollectionIds = getHiddenCollectionIds();
+    if (hiddenCollectionIds.isEmpty) {
+      return [];
+    }
+    return filesDB.getHiddenFilesWithLocalCopy(hiddenCollectionIds, userID);
+  }
+
   /// Checks if there are hidden files that also exist in non-hidden collections.
   /// Only considers files owned by the user.
   Future<bool> hasFilesNeedingHiddenCleanup() async {

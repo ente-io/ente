@@ -1901,13 +1901,87 @@ class FilesDB with SqlDbBase {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll('''
       SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1    
+      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
     ''');
     final ids = <int>{};
     for (final result in results) {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids.length;
+  }
+
+  /// Returns hidden files that have local copies on the device.
+  /// Only returns files owned by [ownerID] from the specified
+  /// [hiddenCollectionIds].
+  /// Results are deduplicated by uploadedFileID to avoid showing the same
+  /// file multiple times if it exists in multiple hidden collections.
+  Future<List<EnteFile>> getHiddenFilesWithLocalCopy(
+    Set<int> hiddenCollectionIds,
+    int ownerID,
+  ) async {
+    if (hiddenCollectionIds.isEmpty) {
+      return [];
+    }
+    final db = await instance.sqliteAsyncDB;
+    final inParam = hiddenCollectionIds.join(',');
+    final results = await db.getAll(
+      '''
+      SELECT * FROM $filesTable
+      WHERE $columnCollectionID IN ($inParam)
+      AND $columnOwnerID = ?
+      AND $columnLocalID IS NOT NULL AND $columnLocalID != ''
+      AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1
+      GROUP BY $columnUploadedFileID
+      ORDER BY $columnCreationTime DESC
+      ''',
+      [ownerID],
+    );
+    return convertToFiles(results);
+  }
+
+  /// Returns true if there are any hidden files with local copies on the device.
+  /// More efficient than loading all files when only checking for existence.
+  Future<bool> hasHiddenFilesWithLocalCopy(
+    Set<int> hiddenCollectionIds,
+    int ownerID,
+  ) async {
+    if (hiddenCollectionIds.isEmpty) {
+      return false;
+    }
+    final db = await instance.sqliteAsyncDB;
+    final inParam = hiddenCollectionIds.join(',');
+    final results = await db.getAll(
+      '''
+      SELECT 1 FROM $filesTable
+      WHERE $columnCollectionID IN ($inParam)
+      AND $columnOwnerID = ?
+      AND $columnLocalID IS NOT NULL AND $columnLocalID != ''
+      AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1
+      LIMIT 1
+      ''',
+      [ownerID],
+    );
+    return results.isNotEmpty;
+  }
+
+  /// Clears localID for all rows matching any of the given uploadedFileIDs.
+  /// This is used when deleting files from device to ensure all collection
+  /// entries for the same file have their localID cleared.
+  Future<void> clearLocalIDsForUploadedFileIDs(
+    List<int> uploadedFileIDs,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return;
+    }
+    final db = await instance.sqliteAsyncDB;
+    final inParam = uploadedFileIDs.join(',');
+    await db.execute(
+      '''
+      UPDATE $filesTable
+      SET $columnLocalID = NULL
+      WHERE $columnUploadedFileID IN ($inParam)
+      ''',
+    );
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
