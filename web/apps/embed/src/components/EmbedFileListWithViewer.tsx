@@ -1,4 +1,4 @@
-import { styled, Typography, Box } from "@mui/material";
+import { Box, styled, Typography } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { SpacedRow } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
@@ -87,12 +87,8 @@ export const EmbedFileListWithViewer: React.FC<
                                 transition: "color 0.2s ease",
                                 color: "inherit",
                                 textDecoration: "none",
-                                "&:visited": {
-                                    color: "inherit",
-                                },
-                                "&:hover": {
-                                    color: "#1db954",
-                                },
+                                "&:visited": { color: "inherit" },
+                                "&:hover": { color: "#1db954" },
                             }}
                         >
                             <EnteLogo height={14} />
