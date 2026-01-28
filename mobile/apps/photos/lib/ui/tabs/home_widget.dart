@@ -1051,8 +1051,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (!Configuration.instance.isLoggedIn()) {
           return;
         }
+        final target = FeedNavigationTarget.fromUri(uri);
         // ignore: unawaited_futures
-        routeToPage(context, const FeedScreen());
+        routeToPage(
+          context,
+          FeedScreen(
+            initialTarget: target,
+          ),
+        );
         return;
       }
       if (payload.toLowerCase().contains("onthisday")) {

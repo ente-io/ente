@@ -2373,6 +2373,14 @@
   "ritualEmojiUseAction": "Use",
   "ritualSearchEmpty": "Build a ritual to keep your photo habit going.",
   "feed": "Feed",
+  "newCommentNotificationTitle": "You got a comment",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "You got a like",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
   "likedYourPhoto": "Liked a photo",
   "commentedOnYourPhoto": "Commented on a photo",
   "repliedToYourComment": "Replied to a comment",

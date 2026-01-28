@@ -1078,9 +1078,6 @@ class RemoteSyncService {
     if (!_shouldShowSocialNotifications()) {
       return;
     }
-    if (!flagService.internalUser) {
-      return;
-    }
     if (!flagService.isSocialEnabled) {
       return;
     }
@@ -1138,6 +1135,8 @@ class RemoteSyncService {
           type: FeedItemType.comment,
           collectionID: comment.collectionID,
           fileID: comment.fileID,
+          commentID: comment.id,
+          commentText: comment.data,
           createdAt: comment.createdAt,
         ),
       );
@@ -1152,6 +1151,8 @@ class RemoteSyncService {
           type: FeedItemType.reply,
           collectionID: reply.collectionID,
           fileID: reply.fileID,
+          commentID: reply.id,
+          commentText: reply.data,
           createdAt: reply.createdAt,
         ),
       );
@@ -1166,6 +1167,7 @@ class RemoteSyncService {
           type: FeedItemType.commentLike,
           collectionID: reaction.collectionID,
           fileID: reaction.fileID,
+          commentID: reaction.commentID,
           createdAt: reaction.createdAt,
         ),
       );
@@ -1180,6 +1182,7 @@ class RemoteSyncService {
           type: FeedItemType.replyLike,
           collectionID: reaction.collectionID,
           fileID: reaction.fileID,
+          commentID: reaction.commentID,
           createdAt: reaction.createdAt,
         ),
       );
@@ -1190,18 +1193,15 @@ class RemoteSyncService {
     }
 
     final s = await LanguageService.locals;
-    final message = _getSocialNotificationMessage(latest!.type, s);
-    final collection = _collectionsService.getCollectionByID(
-      latest!.collectionID,
-    );
-    final title = collection?.displayName ?? "ente";
+    final title = _getSocialNotificationTitle(latest!.type, s);
+    final message = _getSocialNotificationBody(latest!, s);
 
     await NotificationService.instance.showNotification(
       title,
       message,
       channelID: "social_activity",
       channelName: "Activity",
-      payload: "ente://feed",
+      payload: _buildSocialNotificationPayload(latest!),
     );
     await _prefs.setInt(
       kLastSocialActivityNotificationTime,
@@ -1216,7 +1216,33 @@ class RemoteSyncService {
         !AppLifecycleService.instance.isForeground;
   }
 
-  String _getSocialNotificationMessage(
+  String _getSocialNotificationTitle(FeedItemType type, AppLocalizations s) {
+    switch (type) {
+      case FeedItemType.comment:
+      case FeedItemType.reply:
+        return s.newCommentNotificationTitle;
+      case FeedItemType.photoLike:
+      case FeedItemType.commentLike:
+      case FeedItemType.replyLike:
+        return s.newLikeNotificationTitle;
+    }
+  }
+
+  String _getSocialNotificationBody(
+    _SocialActivityCandidate candidate,
+    AppLocalizations s,
+  ) {
+    if (candidate.type == FeedItemType.comment ||
+        candidate.type == FeedItemType.reply) {
+      final snippet = _sanitizeCommentSnippet(candidate.commentText ?? "");
+      if (snippet.isNotEmpty) {
+        return snippet;
+      }
+    }
+    return _getSocialNotificationDetail(candidate.type, s);
+  }
+
+  String _getSocialNotificationDetail(
     FeedItemType type,
     AppLocalizations s,
   ) {
@@ -1233,12 +1259,44 @@ class RemoteSyncService {
         return s.likedYourReply;
     }
   }
+
+  String _buildSocialNotificationPayload(_SocialActivityCandidate candidate) {
+    final params = <String, String>{
+      'type': candidate.type.name,
+      'collectionID': candidate.collectionID.toString(),
+    };
+    if (candidate.fileID != null) {
+      params['fileID'] = candidate.fileID.toString();
+    }
+    if (candidate.commentID != null) {
+      params['commentID'] = candidate.commentID!;
+    }
+    return Uri(
+      scheme: 'ente',
+      host: 'feed',
+      queryParameters: params,
+    ).toString();
+  }
+
+  String _sanitizeCommentSnippet(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return '';
+    final collapsed = trimmed.replaceAll(RegExp(r'\s+'), ' ');
+    const maxLength = 140;
+    if (collapsed.length <= maxLength) {
+      return collapsed;
+    }
+    final truncated = collapsed.substring(0, maxLength - 3).trimRight();
+    return '$truncated...';
+  }
 }
 
 class _SocialActivityCandidate {
   final FeedItemType type;
   final int collectionID;
   final int? fileID;
+  final String? commentID;
+  final String? commentText;
   final int createdAt;
 
   _SocialActivityCandidate({
@@ -1246,5 +1304,7 @@ class _SocialActivityCandidate {
     required this.collectionID,
     required this.createdAt,
     this.fileID,
+    this.commentID,
+    this.commentText,
   });
 }
