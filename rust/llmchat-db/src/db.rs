@@ -87,6 +87,47 @@ impl<B: Backend> ChatDb<B> {
         row.map(|row| self.session_from_row(&row)).transpose()
     }
 
+    pub fn upsert_session(
+        &self,
+        uuid: Uuid,
+        title: &str,
+        created_at: i64,
+        updated_at: i64,
+        remote_id: Option<String>,
+        needs_sync: bool,
+        deleted_at: Option<i64>,
+    ) -> Result<Session> {
+        let encrypted_title = crypto::encrypt_string(title, &self.key)?;
+        let needs_sync_flag = bool_to_i64(needs_sync);
+        self.backend.execute(
+            "INSERT INTO sessions (session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at) \
+             VALUES (?, ?, ?, ?, ?, ?, ?) \
+             ON CONFLICT(session_uuid) DO UPDATE SET title = excluded.title, created_at = excluded.created_at, updated_at = excluded.updated_at, remote_id = excluded.remote_id, needs_sync = excluded.needs_sync, deleted_at = excluded.deleted_at",
+            &[
+                Value::Text(uuid.to_string()),
+                Value::Blob(encrypted_title),
+                Value::Integer(created_at),
+                Value::Integer(updated_at),
+                remote_id
+                    .as_ref()
+                    .map(|value| Value::Text(value.to_string()))
+                    .unwrap_or(Value::Null),
+                Value::Integer(needs_sync_flag),
+                deleted_at.map(Value::Integer).unwrap_or(Value::Null),
+            ],
+        )?;
+
+        Ok(Session {
+            uuid,
+            title: title.to_string(),
+            created_at,
+            updated_at,
+            remote_id,
+            needs_sync,
+            deleted_at,
+        })
+    }
+
     pub fn list_sessions(&self) -> Result<Vec<Session>> {
         let rows = self.backend.query(
             "SELECT session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at \
@@ -119,8 +160,12 @@ impl<B: Backend> ChatDb<B> {
                 &[Value::Integer(now), Value::Text(uuid.to_string())],
             )?;
             let affected = tx.execute(
-                "UPDATE sessions SET deleted_at = ? WHERE session_uuid = ? AND deleted_at IS NULL",
-                &[Value::Integer(now), Value::Text(uuid.to_string())],
+                "UPDATE sessions SET deleted_at = ?, updated_at = ?, needs_sync = 1 WHERE session_uuid = ? AND deleted_at IS NULL",
+                &[
+                    Value::Integer(now),
+                    Value::Integer(now),
+                    Value::Text(uuid.to_string()),
+                ],
             )?;
             ensure_row_updated(affected, EntityType::Session, uuid)
         })
@@ -185,12 +230,107 @@ impl<B: Backend> ChatDb<B> {
     }
 
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
-        let rows = self.backend.query(
+        self.get_messages_for_sync(session_uuid, false)
+    }
+
+    pub fn get_messages_for_sync(
+        &self,
+        session_uuid: Uuid,
+        include_deleted: bool,
+    ) -> Result<Vec<Message>> {
+        let query = if include_deleted {
             "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at \
-             FROM messages WHERE session_uuid = ? AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC",
-            &[Value::Text(session_uuid.to_string())],
-        )?;
+             FROM messages WHERE session_uuid = ? ORDER BY created_at ASC, message_uuid ASC"
+        } else {
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at \
+             FROM messages WHERE session_uuid = ? AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC"
+        };
+        let rows = self.backend.query(query, &[Value::Text(session_uuid.to_string())])?;
         rows.iter().map(|row| self.message_from_row(row)).collect()
+    }
+
+    pub fn get_message(&self, uuid: Uuid) -> Result<Option<Message>> {
+        let row = self.backend.query_row(
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at \
+             FROM messages WHERE message_uuid = ?",
+            &[Value::Text(uuid.to_string())],
+        )?;
+        row.map(|row| self.message_from_row(&row)).transpose()
+    }
+
+    pub fn insert_message_with_uuid(
+        &self,
+        message_uuid: Uuid,
+        session_uuid: Uuid,
+        sender: &str,
+        text: &str,
+        parent: Option<Uuid>,
+        attachments: Vec<Attachment>,
+        created_at: i64,
+        deleted_at: Option<i64>,
+    ) -> Result<Message> {
+        let sender: Sender = sender.parse()?;
+        let encrypted_text = crypto::encrypt_string(text, &self.key)?;
+        let attachments_json = self.serialize_attachments(&attachments)?;
+
+        let affected = self.backend.execute(
+            "INSERT OR IGNORE INTO messages (message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at) \
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            &[
+                Value::Text(message_uuid.to_string()),
+                Value::Text(session_uuid.to_string()),
+                parent
+                    .map(|value| Value::Text(value.to_string()))
+                    .unwrap_or(Value::Null),
+                Value::Text(sender.as_str().to_string()),
+                Value::Blob(encrypted_text),
+                attachments_json
+                    .map(Value::Text)
+                    .unwrap_or(Value::Null),
+                Value::Integer(created_at),
+                deleted_at.map(Value::Integer).unwrap_or(Value::Null),
+            ],
+        )?;
+
+        if affected == 0 {
+            return self.get_message(message_uuid)?.ok_or(Error::NotFound {
+                entity: EntityType::Message,
+                id: message_uuid,
+            });
+        }
+
+        Ok(Message {
+            uuid: message_uuid,
+            session_uuid,
+            parent_message_uuid: parent,
+            sender,
+            text: text.to_string(),
+            attachments,
+            created_at,
+            deleted_at,
+        })
+    }
+
+    pub fn set_session_deleted_at(&self, uuid: Uuid, deleted_at: i64) -> Result<()> {
+        self.backend.transaction(|tx| {
+            tx.execute(
+                "UPDATE messages SET deleted_at = ? WHERE session_uuid = ? AND deleted_at IS NULL",
+                &[Value::Integer(deleted_at), Value::Text(uuid.to_string())],
+            )?;
+            let affected = tx.execute(
+                "UPDATE sessions SET deleted_at = ?, needs_sync = 0 WHERE session_uuid = ?",
+                &[Value::Integer(deleted_at), Value::Text(uuid.to_string())],
+            )?;
+            ensure_row_updated(affected, EntityType::Session, uuid)
+        })
+    }
+
+    pub fn set_message_deleted_at(&self, uuid: Uuid, deleted_at: i64) -> Result<()> {
+        let affected = self.backend.execute(
+            "UPDATE messages SET deleted_at = ? WHERE message_uuid = ?",
+            &[Value::Integer(deleted_at), Value::Text(uuid.to_string())],
+        )?;
+        ensure_row_updated(affected, EntityType::Message, uuid)
     }
 
     pub fn update_message_text(&self, uuid: Uuid, text: &str) -> Result<()> {
@@ -316,7 +456,7 @@ impl<B: Backend> ChatDb<B> {
 
     pub fn get_pending_deletions(&self) -> Result<Vec<(EntityType, Uuid)>> {
         let session_rows = self.backend.query(
-            "SELECT session_uuid FROM sessions WHERE remote_id IS NOT NULL AND deleted_at IS NOT NULL ORDER BY deleted_at ASC",
+            "SELECT session_uuid FROM sessions WHERE remote_id IS NOT NULL AND deleted_at IS NOT NULL AND needs_sync = 1 ORDER BY deleted_at ASC",
             &[],
         )?;
 
@@ -333,6 +473,7 @@ impl<B: Backend> ChatDb<B> {
              WHERE messages.deleted_at IS NOT NULL \
                AND sessions.remote_id IS NOT NULL \
                AND sessions.deleted_at IS NULL \
+               AND sessions.needs_sync = 1 \
              ORDER BY messages.deleted_at ASC",
             &[],
         )?;
@@ -504,6 +645,14 @@ fn bool_from_i64(value: i64) -> Result<bool> {
         0 => Ok(false),
         1 => Ok(true),
         other => Err(Error::Row(format!("invalid bool value {other}"))),
+    }
+}
+
+fn bool_to_i64(value: bool) -> i64 {
+    if value {
+        1
+    } else {
+        0
     }
 }
 

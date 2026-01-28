@@ -5,6 +5,7 @@ import "@fontsource/cormorant-garamond/600.css";
 import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/source-serif-4/400.css";
 import "@fontsource/source-serif-4/600.css";
+import "katex/dist/katex.min.css";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
@@ -37,6 +38,36 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const isTauri =
+            "__TAURI__" in window || "__TAURI_IPC__" in window;
+        if (!isTauri) return;
+        const isEditableTarget = (target: EventTarget | null) => {
+            if (!(target instanceof HTMLElement)) return false;
+            const tag = target.tagName.toLowerCase();
+            if (tag === "input" || tag === "textarea") return true;
+            if (target.isContentEditable) return true;
+            return !!target.closest('[contenteditable="true"]');
+        };
+
+        const hasSelection = () => {
+            const selection = window.getSelection();
+            return !!selection && selection.toString().trim().length > 0;
+        };
+
+        const handleContextMenu = (event: MouseEvent) => {
+            if (isEditableTarget(event.target) || hasSelection()) {
+                return;
+            }
+            event.preventDefault();
+        };
+        window.addEventListener("contextmenu", handleContextMenu);
+        return () => {
+            window.removeEventListener("contextmenu", handleContextMenu);
+        };
     }, []);
 
     const logout = useCallback(() => {

@@ -1,3 +1,4 @@
+import log from "ente-base/log";
 import { createInferenceBackend } from "./inference";
 import type {
     DownloadProgress,
@@ -60,6 +61,10 @@ export class LlmProvider {
         return this.backend.kind;
     }
 
+    public getCurrentMmprojPath() {
+        return this.currentMmprojPath;
+    }
+
     public resolveRuntimeSettings(settings: ModelSettings) {
         const model = this.resolveTargetModel(settings);
         const contextSize =
@@ -72,6 +77,36 @@ export class LlmProvider {
             model,
             contextSize,
             maxTokens: Math.min(maxTokens, contextSize),
+        };
+    }
+
+    public async checkModelAvailability(settings: ModelSettings) {
+        await this.initialize();
+        const { model, contextSize } = this.resolveRuntimeSettings(settings);
+        const contextKey = JSON.stringify({ contextSize });
+
+        const modelPath = await this.resolveModelPath(model, settings);
+        const mmprojUrl =
+            this.backend.kind === "tauri"
+                ? this.resolveMmprojUrl(model, settings)
+                : undefined;
+        const mmprojPath =
+            this.backend.kind === "tauri" && mmprojUrl
+                ? await this.resolveAuxModelPath(mmprojUrl, settings)
+                : undefined;
+
+        const modelAvailable = await this.backend.isModelAvailable(modelPath);
+        const mmprojAvailable = mmprojPath
+            ? await this.backend.isModelAvailable(mmprojPath)
+            : undefined;
+
+        return {
+            model,
+            modelPath,
+            mmprojPath,
+            contextKey,
+            modelAvailable,
+            mmprojAvailable,
         };
     }
 
@@ -90,18 +125,28 @@ export class LlmProvider {
                 ? await this.resolveAuxModelPath(mmprojUrl, settings)
                 : undefined;
 
+        log.info("LLM ensureModelReady", {
+            backend: this.backend.kind,
+            modelId: model.id,
+            modelPath,
+            mmprojPath,
+            contextKey,
+        });
+
         if (
             this.currentModel?.id === model.id &&
             this.currentModelPath === modelPath &&
             this.currentContextKey === contextKey &&
             this.currentMmprojPath === mmprojPath
         ) {
+            log.info("LLM model already ready", { modelId: model.id });
             this.modelReady = true;
             this.emitProgress({ percent: 100, status: "Ready" });
             return;
         }
 
         this.modelReady = false;
+        log.info("LLM resetting backend", { modelId: this.currentModel?.id });
         await this.backend.freeContext();
         await this.backend.freeModel();
         this.currentModel = undefined;
@@ -115,7 +160,8 @@ export class LlmProvider {
                 path: string;
                 label: string;
             }> = [];
-            const installed = await this.modelExists(modelPath);
+            const installed = await this.backend.isModelAvailable(modelPath);
+            log.info("LLM model installed", { modelPath, installed });
             if (!installed) {
                 downloads.push({
                     url: model.url,
@@ -124,7 +170,12 @@ export class LlmProvider {
                 });
             }
             if (mmprojUrl && mmprojPath) {
-                const mmprojInstalled = await this.modelExists(mmprojPath);
+                const mmprojInstalled =
+                    await this.backend.isModelAvailable(mmprojPath);
+                log.info("LLM mmproj installed", {
+                    mmprojPath,
+                    mmprojInstalled,
+                });
                 if (!mmprojInstalled) {
                     downloads.push({
                         url: mmprojUrl,
@@ -133,6 +184,14 @@ export class LlmProvider {
                     });
                 }
             }
+
+            log.info("LLM download plan", {
+                downloads: downloads.map((download) => ({
+                    url: download.url,
+                    path: download.path,
+                    label: download.label,
+                })),
+            });
 
             if (downloads.length === 1) {
                 const download = downloads[0];
@@ -145,7 +204,9 @@ export class LlmProvider {
         }
 
         this.emitProgress({ percent: 100, status: "Loading model..." });
+        log.info("LLM load model", { modelPath });
         await this.backend.loadModel({ modelPath });
+        log.info("LLM create context", { modelPath, contextSize });
         await this.backend.createContext({ modelPath }, { contextSize });
 
         this.currentModel = model;
@@ -153,6 +214,7 @@ export class LlmProvider {
         this.currentMmprojPath = mmprojPath;
         this.currentContextKey = contextKey;
         this.modelReady = true;
+        log.info("LLM ready", { modelId: model.id, modelPath });
         this.emitProgress({ percent: 100, status: "Ready" });
     }
 
@@ -184,7 +246,7 @@ export class LlmProvider {
 
     public cancelDownload() {
         if (this.downloadAbort) {
-            this.downloadAbort.abort();
+            this.downloadAbort.abort("cancelled");
             this.downloadAbort = undefined;
         }
         this.emitProgress({ percent: -1, status: "Cancelled" });
@@ -230,8 +292,12 @@ export class LlmProvider {
     }
 
     private resolveMmprojUrl(model: ModelInfo, settings: ModelSettings) {
+        const override = settings.mmprojUrl;
         if (settings.useCustomModel) {
-            return settings.mmprojUrl;
+            return override && override.trim() ? override : undefined;
+        }
+        if (override !== undefined) {
+            return override && override.trim() ? override : undefined;
         }
         return model.mmprojUrl;
     }
@@ -278,10 +344,6 @@ export class LlmProvider {
         return join(modelsDir, filename);
     }
 
-    private async modelExists(path: string) {
-        const { exists } = await import("@tauri-apps/api/fs");
-        return exists(path);
-    }
 
     private async downloadModelsCombined(
         downloads: Array<{ url: string; path: string; label: string }>,
@@ -310,6 +372,20 @@ export class LlmProvider {
                 totalBytes: totalBytes || undefined,
             });
         };
+
+        this.emitProgress({ percent: 0, status: "Preparing downloads..." });
+
+        for (const download of downloads) {
+            const size = await fetchRemoteSize(download.url);
+            if (size !== undefined) {
+                totals.set(download.label, size);
+            }
+            if (!loaded.has(download.label)) {
+                loaded.set(download.label, 0);
+            }
+        }
+
+        emitCombined();
 
         for (const download of downloads) {
             const progressHandler = (progress: DownloadProgress) => {
@@ -343,99 +419,334 @@ export class LlmProvider {
             totalBytes: 0,
         });
 
-        const { createDir, removeFile, renameFile, writeBinaryFile } =
+        const { createDir, exists, removeFile, renameFile } =
             await import("@tauri-apps/api/fs");
+        const { invoke } = await import("@tauri-apps/api/tauri");
         const { dirname } = await import("@tauri-apps/api/path");
+
+        log.info("LLM download start", { url, destPath });
 
         const dir = await dirname(destPath);
         await createDir(dir, { recursive: true });
 
         const tmpPath = `${destPath}.tmp`;
-        try {
-            await removeFile(tmpPath);
-        } catch {
-            // ignore missing tmp
-        }
+        const maxAttempts = 3;
+        const stallTimeoutMs = 30_000;
 
-        const controller = new AbortController();
-        this.downloadAbort = controller;
+        const delay = (ms: number) =>
+            new Promise<void>((resolve) => {
+                window.setTimeout(resolve, ms);
+            });
 
-        let downloaded = 0;
-        let totalBytes = 0;
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+            let downloaded = 0;
+            let totalBytes = 0;
+            const controller = new AbortController();
+            this.downloadAbort = controller;
 
-        try {
-            const res = await fetch(url, { signal: controller.signal });
-            if (!res.ok || !res.body) {
-                throw new Error(`Failed to download model (${res.status})`);
-            }
-
-            totalBytes = Number(res.headers.get("Content-Length") ?? 0);
-            const reader = res.body.getReader();
-
-            let headerBytes: Uint8Array | null = null;
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                if (!value) continue;
-
-                if (!headerBytes) {
-                    headerBytes = value.slice(0, 4);
+            let stallTimer: number | null = null;
+            const resetStallTimer = () => {
+                if (stallTimer) {
+                    window.clearTimeout(stallTimer);
                 }
-
-                await writeBinaryFile(
-                    { path: tmpPath, contents: value },
-                    { append: true },
-                );
-
-                downloaded += value.length;
-                const percent = totalBytes
-                    ? Math.min(99, Math.round((downloaded / totalBytes) * 100))
-                    : 0;
-                emit({
-                    percent,
-                    status: `Downloading... ${formatBytes(downloaded)} / ${
-                        totalBytes ? formatBytes(totalBytes) : "?"
-                    }`,
-                    bytesDownloaded: downloaded,
-                    totalBytes,
-                });
-            }
-
-            if (!headerBytes || !isGgufHeader(headerBytes)) {
-                await removeFile(tmpPath);
-                emit({
-                    percent: -1,
-                    status: "Downloaded file is not GGUF",
-                    bytesDownloaded: downloaded,
-                    totalBytes,
-                });
-                throw new Error("Downloaded file is not GGUF");
-            }
-
-            if (downloaded < MIN_GGUF_BYTES) {
-                await removeFile(tmpPath);
-                emit({
-                    percent: -1,
-                    status: "Downloaded file too small",
-                    bytesDownloaded: downloaded,
-                    totalBytes,
-                });
-                throw new Error("Downloaded file too small");
-            }
+                stallTimer = window.setTimeout(() => {
+                    if (!controller.signal.aborted) {
+                        controller.abort("stall");
+                    }
+                }, stallTimeoutMs);
+            };
 
             try {
-                await removeFile(destPath);
-            } catch {
-                // ignore missing dest
-            }
+                if (await exists(tmpPath)) {
+                    try {
+                        const size = await invoke<number | null>(
+                            "fs_file_size",
+                            {
+                                path: tmpPath,
+                            },
+                        );
+                        downloaded = size ?? 0;
+                        if (downloaded > 0) {
+                            const head = await invoke<number[]>(
+                                "fs_read_head",
+                                {
+                                    path: tmpPath,
+                                    length: 4,
+                                },
+                            );
+                            if (!isGgufHeader(new Uint8Array(head))) {
+                                log.warn(
+                                    "LLM resume header invalid, restarting",
+                                    {
+                                        tmpPath,
+                                    },
+                                );
+                                await removeFile(tmpPath);
+                                downloaded = 0;
+                            }
+                        }
+                    } catch {
+                        downloaded = 0;
+                    }
+                }
 
-            await renameFile(tmpPath, destPath);
-        } finally {
-            this.downloadAbort = undefined;
+                emit({
+                    percent: 0,
+                    status:
+                        downloaded > 0
+                            ? "Resuming download..."
+                            : "Starting download...",
+                    bytesDownloaded: downloaded,
+                    totalBytes: 0,
+                });
+
+                if (downloaded > 0) {
+                    log.info("LLM download resume", { destPath, downloaded });
+                }
+
+                resetStallTimer();
+
+                const headers: HeadersInit | undefined = downloaded
+                    ? { Range: `bytes=${downloaded}-` }
+                    : undefined;
+                let res = await fetch(url, {
+                    signal: controller.signal,
+                    headers,
+                });
+                log.info("LLM download response", {
+                    url,
+                    status: res.status,
+                    contentLength: res.headers.get("Content-Length"),
+                    contentRange: res.headers.get("Content-Range"),
+                });
+                if (!res.ok || !res.body) {
+                    throw new Error(`Failed to download model (${res.status})`);
+                }
+
+                if (downloaded > 0 && res.status === 200) {
+                    downloaded = 0;
+                    try {
+                        await removeFile(tmpPath);
+                    } catch {
+                        // ignore missing tmp
+                    }
+                    res = await fetch(url, { signal: controller.signal });
+                    log.info("LLM download restart", {
+                        url,
+                        status: res.status,
+                        contentLength: res.headers.get("Content-Length"),
+                        contentRange: res.headers.get("Content-Range"),
+                    });
+                    if (!res.ok || !res.body) {
+                        throw new Error(
+                            `Failed to download model (${res.status})`,
+                        );
+                    }
+                }
+
+                const contentRangeTotal = parseContentRangeTotal(
+                    res.headers.get("Content-Range"),
+                );
+                const contentLength = Number(
+                    res.headers.get("Content-Length") ?? 0,
+                );
+                totalBytes =
+                    contentRangeTotal ??
+                    (contentLength ? contentLength + downloaded : 0);
+
+                const reader = res.body.getReader();
+                let headerBytes: Uint8Array | null = null;
+                const maxChunkSize = 1024 * 1024;
+                const yieldAfterBytes = 4 * 1024 * 1024;
+                let bytesSinceYield = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    if (!value) continue;
+
+                    resetStallTimer();
+
+                    for (
+                        let offset = 0;
+                        offset < value.length;
+                        offset += maxChunkSize
+                    ) {
+                        const chunk = value.subarray(
+                            offset,
+                            Math.min(offset + maxChunkSize, value.length),
+                        );
+
+                        if (!headerBytes && downloaded === 0) {
+                            headerBytes = chunk.slice(0, 4);
+                        }
+
+                        await invoke("fs_append_bytes", {
+                            path: tmpPath,
+                            bytes: Array.from(chunk),
+                        });
+
+                        downloaded += chunk.length;
+                        bytesSinceYield += chunk.length;
+
+                        const percent = totalBytes
+                            ? Math.min(
+                                  99,
+                                  Math.round(
+                                      (downloaded / totalBytes) * 100,
+                                  ),
+                              )
+                            : 0;
+                        emit({
+                            percent,
+                            status: `Downloading... ${formatBytes(downloaded)} / ${
+                                totalBytes ? formatBytes(totalBytes) : "?"
+                            }`,
+                            bytesDownloaded: downloaded,
+                            totalBytes,
+                        });
+
+                        if (bytesSinceYield >= yieldAfterBytes) {
+                            bytesSinceYield = 0;
+                            await delay(0);
+                            resetStallTimer();
+                        }
+                    }
+                }
+
+                if (stallTimer) {
+                    window.clearTimeout(stallTimer);
+                    stallTimer = null;
+                }
+
+                if (headerBytes && !isGgufHeader(headerBytes)) {
+                    await removeFile(tmpPath);
+                    emit({
+                        percent: -1,
+                        status: "Downloaded file is not GGUF",
+                        bytesDownloaded: downloaded,
+                        totalBytes,
+                    });
+                    throw new Error("Downloaded file is not GGUF");
+                }
+
+                if (downloaded < MIN_GGUF_BYTES) {
+                    await removeFile(tmpPath);
+                    emit({
+                        percent: -1,
+                        status: "Downloaded file too small",
+                        bytesDownloaded: downloaded,
+                        totalBytes,
+                    });
+                    throw new Error("Downloaded file too small");
+                }
+
+                try {
+                    await removeFile(destPath);
+                } catch {
+                    // ignore missing dest
+                }
+
+                await renameFile(tmpPath, destPath);
+
+                const finalSize = await invoke<number | null>(
+                    "fs_file_size",
+                    {
+                        path: destPath,
+                    },
+                );
+                if (finalSize !== null && finalSize !== downloaded) {
+                    await removeFile(destPath);
+                    throw new Error(
+                        `Downloaded file size mismatch (${finalSize} != ${downloaded})`,
+                    );
+                }
+
+                const head = await invoke<number[]>("fs_read_head", {
+                    path: destPath,
+                    length: 4,
+                });
+                if (!isGgufHeader(new Uint8Array(head))) {
+                    await removeFile(destPath);
+                    throw new Error("Downloaded file header is not GGUF");
+                }
+
+                log.info("LLM download complete", {
+                    destPath,
+                    bytesDownloaded: downloaded,
+                    totalBytes,
+                });
+
+                return;
+            } catch (error) {
+                if (stallTimer) {
+                    window.clearTimeout(stallTimer);
+                    stallTimer = null;
+                }
+
+                const aborted = controller.signal.aborted;
+                const reason = controller.signal.reason;
+                if (aborted && reason === "cancelled") {
+                    throw new Error("Download cancelled");
+                }
+
+                if (attempt >= maxAttempts) {
+                    log.error("LLM download failed", { url, destPath, error });
+                    throw error;
+                }
+
+                log.warn("LLM download retry", {
+                    url,
+                    destPath,
+                    attempt,
+                    error,
+                });
+                await delay(1500 * attempt);
+            } finally {
+                if (this.downloadAbort === controller) {
+                    this.downloadAbort = undefined;
+                }
+            }
         }
     }
 }
+
+const parseContentRangeTotal = (header: string | null) => {
+    if (!header) return undefined;
+    const match = header.match(/\/(\d+)/);
+    if (!match) return undefined;
+    const total = Number(match[1]);
+    return Number.isFinite(total) ? total : undefined;
+};
+
+const fetchRemoteSize = async (url: string): Promise<number | undefined> => {
+    try {
+        const head = await fetch(url, { method: "HEAD" });
+        if (head.ok) {
+            const length = Number(head.headers.get("Content-Length") ?? 0);
+            if (length > 0) return length;
+            const range = parseContentRangeTotal(
+                head.headers.get("Content-Range"),
+            );
+            if (range) return range;
+        }
+    } catch {
+        // ignore head failures
+    }
+
+    try {
+        const res = await fetch(url, {
+            headers: { Range: "bytes=0-0" },
+        });
+        if (!res.ok) return undefined;
+        const range = parseContentRangeTotal(res.headers.get("Content-Range"));
+        if (range) return range;
+        const length = Number(res.headers.get("Content-Length") ?? 0);
+        return length > 0 ? length : undefined;
+    } catch {
+        return undefined;
+    }
+};
 
 const filenameFromUrl = (url: string) => {
     try {

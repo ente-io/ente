@@ -8,15 +8,27 @@ const LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY = "ensu.chatKey.local";
  * Return the cached chat key (base64), if present.
  */
 export const cachedChatKey = (): string | undefined => {
+    if (typeof localStorage === "undefined") return undefined;
     const value = localStorage.getItem(CHAT_KEY_LOCAL_STORAGE_KEY);
     return value ?? undefined;
 };
 
+/**
+ * Return the cached local-only chat key (base64), if present.
+ */
+export const cachedLocalChatKey = (): string | undefined => {
+    if (typeof localStorage === "undefined") return undefined;
+    const value = localStorage.getItem(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+    return value ?? undefined;
+};
+
 export const clearCachedChatKey = () => {
+    if (typeof localStorage === "undefined") return;
     localStorage.removeItem(CHAT_KEY_LOCAL_STORAGE_KEY);
 };
 
 export const clearLocalChatKey = () => {
+    if (typeof localStorage === "undefined") return;
     localStorage.removeItem(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
 };
 
@@ -57,12 +69,14 @@ export const getOrCreateChatKey = async (masterKeyB64: string) => {
  * Get or create a local-only chat key (used when the user is not signed in).
  */
 export const getOrCreateLocalChatKey = async () => {
-    const cached = localStorage.getItem(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY);
+    const cached = cachedLocalChatKey();
     if (cached) return cached;
 
     await ensureCryptoInit();
     const wasm = await enteWasm();
     const chatKey = await wasm.crypto_generate_key();
-    localStorage.setItem(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY, chatKey);
+    if (typeof localStorage !== "undefined") {
+        localStorage.setItem(LOCAL_CHAT_KEY_LOCAL_STORAGE_KEY, chatKey);
+    }
     return chatKey;
 };

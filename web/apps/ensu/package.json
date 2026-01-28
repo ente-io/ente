@@ -14,7 +14,12 @@
         "ente-base": "*",
         "ente-new": "*",
         "ente-wasm": "*",
-        "idb": "^8.0.3"
+        "idb": "^8.0.3",
+        "katex": "^0.16.28",
+        "react-markdown": "^9.1.0",
+        "rehype-katex": "^7.0.1",
+        "remark-gfm": "^4.0.1",
+        "remark-math": "^6.0.0"
     },
     "devDependencies": {
         "ente-build-config": "*"

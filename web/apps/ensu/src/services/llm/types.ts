@@ -52,6 +52,9 @@ export interface GenerateChatRequest {
     messages: LlmMessage[];
     templateOverride?: string;
     addAssistant?: boolean;
+    imagePaths?: string[];
+    mmprojPath?: string;
+    mediaMarker?: string;
     maxTokens?: number;
     temperature?: number;
     topP?: number;

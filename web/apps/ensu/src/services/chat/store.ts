@@ -1,9 +1,38 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 import log from "ente-base/log";
-import { decryptChatPayload, encryptChatPayload } from "./crypto";
+import {
+    decryptChatField,
+    decryptChatPayload,
+    encryptChatField,
+    encryptChatPayload,
+} from "./crypto";
+import {
+    decryptAttachmentBytes,
+    encryptAttachmentBytes,
+} from "./attachments";
+import { cachedLocalChatKey } from "./chatKey";
 
 const DB_NAME = "ensu.chat.db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+
+export type AttachmentKind = "image" | "document";
+
+export interface ChatAttachment {
+    id: string;
+    kind: AttachmentKind;
+    name: string;
+    size: number;
+    encryptedName?: string;
+    uploadedAt?: number;
+}
+
+interface StoredAttachment {
+    id: string;
+    kind: AttachmentKind;
+    size: number;
+    encryptedName: string;
+    uploadedAt?: number | null;
+}
 
 interface StoredSession {
     sessionUuid: string;
@@ -11,6 +40,9 @@ interface StoredSession {
     updatedAt: number;
     encryptedData: string;
     header: string;
+    remoteId?: string | null;
+    needsSync?: boolean;
+    deletedAt?: number | null;
     isDeleted?: boolean;
 }
 
@@ -22,7 +54,14 @@ interface StoredMessage {
     createdAt: number;
     encryptedData: string;
     header: string;
+    attachments?: StoredAttachment[];
+    deletedAt?: number | null;
     isDeleted?: boolean;
+}
+
+interface StoredAttachmentBytes {
+    id: string;
+    data: Uint8Array;
 }
 
 interface ChatDbSchema extends DBSchema {
@@ -33,6 +72,10 @@ interface ChatDbSchema extends DBSchema {
     messages: {
         key: string;
         value: StoredMessage;
+    };
+    attachmentBytes: {
+        key: string;
+        value: StoredAttachmentBytes;
     };
 }
 
@@ -53,7 +96,34 @@ export interface ChatMessage {
     sender: "self" | "assistant";
     text: string;
     createdAt: number;
+    attachments?: ChatAttachment[];
 }
+
+export interface LocalSessionRecord {
+    sessionUuid: string;
+    title: string;
+    createdAt: number;
+    updatedAt: number;
+    remoteId?: string | null;
+    needsSync: boolean;
+    deletedAt?: number | null;
+}
+
+export interface LocalMessageRecord {
+    messageUuid: string;
+    sessionUuid: string;
+    parentMessageUuid?: string | null;
+    sender: "self" | "assistant";
+    text: string;
+    createdAt: number;
+    attachments?: ChatAttachment[];
+    deletedAt?: number | null;
+}
+
+export type SyncDeletion = {
+    type: "session" | "message";
+    uuid: string;
+};
 
 interface NativeSession {
     sessionUuid: string;
@@ -65,6 +135,14 @@ interface NativeSession {
     deletedAt?: number | null;
 }
 
+interface NativeAttachment {
+    id: string;
+    kind: AttachmentKind;
+    name: string;
+    size: number;
+    uploadedAt?: number | null;
+}
+
 interface NativeMessage {
     messageUuid: string;
     sessionUuid: string;
@@ -72,6 +150,7 @@ interface NativeMessage {
     sender: "self" | "assistant";
     text: string;
     createdAt: number;
+    attachments?: NativeAttachment[];
     deletedAt?: number | null;
 }
 
@@ -85,12 +164,39 @@ let _chatDb: Promise<IDBPDatabase<ChatDbSchema>> | undefined;
 
 const openChatDb = async () => {
     const db = await openDB<ChatDbSchema>(DB_NAME, DB_VERSION, {
-        upgrade(db) {
+        upgrade: async (db, oldVersion, _newVersion, transaction) => {
             if (!db.objectStoreNames.contains("sessions")) {
                 db.createObjectStore("sessions", { keyPath: "sessionUuid" });
             }
             if (!db.objectStoreNames.contains("messages")) {
                 db.createObjectStore("messages", { keyPath: "messageUuid" });
+            }
+            if (!db.objectStoreNames.contains("attachmentBytes")) {
+                db.createObjectStore("attachmentBytes", { keyPath: "id" });
+            }
+
+            if (oldVersion < 2 && transaction) {
+                const now = Date.now() * 1000;
+                const sessionStore = transaction.objectStore("sessions");
+                const sessions = await sessionStore.getAll();
+                for (const session of sessions) {
+                    session.needsSync = session.needsSync ?? true;
+                    session.remoteId = session.remoteId ?? null;
+                    session.deletedAt =
+                        session.deletedAt ??
+                        (session.isDeleted ? now : null);
+                    await sessionStore.put(session);
+                }
+
+                const messageStore = transaction.objectStore("messages");
+                const messages = await messageStore.getAll();
+                for (const message of messages) {
+                    message.attachments = message.attachments ?? [];
+                    message.deletedAt =
+                        message.deletedAt ??
+                        (message.isDeleted ? now : null);
+                    await messageStore.put(message);
+                }
             }
         },
         blocking() {
@@ -112,9 +218,21 @@ const openChatDb = async () => {
 
 const chatDb = () => (_chatDb ??= openChatDb());
 
+const normalizeTitleText = (value: string) => value.replace(/\s+/g, " ").trim();
+
+export const sessionTitleFromText = (
+    value: string,
+    fallback = "New chat",
+) => {
+    const normalized = normalizeTitleText(value);
+    if (!normalized) return fallback;
+    if (normalized.length <= 40) return normalized;
+    return `${normalized.slice(0, 39)}…`;
+};
+
 const safeTitle = (value: unknown) =>
-    typeof value === "string" && value.trim().length
-        ? value.trim()
+    typeof value === "string"
+        ? sessionTitleFromText(value, "New chat")
         : "New chat";
 
 const decryptSessionTitle = async (session: StoredSession, chatKey: string) => {
@@ -143,6 +261,84 @@ const decryptMessageText = async (message: StoredMessage, chatKey: string) => {
     }
 };
 
+const serializeAttachments = async (
+    attachments: ChatAttachment[] = [],
+    chatKey: string,
+): Promise<StoredAttachment[]> => {
+    if (!attachments.length) return [];
+    return Promise.all(
+        attachments.map(async (attachment) => ({
+            id: attachment.id,
+            kind: attachment.kind,
+            size: attachment.size,
+            encryptedName:
+                attachment.encryptedName ??
+                (await encryptChatField(attachment.name, chatKey)),
+            uploadedAt: attachment.uploadedAt ?? null,
+        })),
+    );
+};
+
+const deserializeAttachments = async (
+    attachments: StoredAttachment[] | undefined,
+    chatKey: string,
+): Promise<ChatAttachment[]> => {
+    if (!attachments?.length) return [];
+
+    const localKey = cachedLocalChatKey();
+
+    return Promise.all(
+        attachments.map(async (attachment) => {
+            try {
+                const name = await decryptChatField(
+                    attachment.encryptedName,
+                    chatKey,
+                );
+                return {
+                    id: attachment.id,
+                    kind: attachment.kind,
+                    size: attachment.size,
+                    name,
+                    encryptedName: attachment.encryptedName,
+                    uploadedAt: attachment.uploadedAt ?? undefined,
+                } satisfies ChatAttachment;
+            } catch (error) {
+                if (localKey && localKey !== chatKey) {
+                    try {
+                        const name = await decryptChatField(
+                            attachment.encryptedName,
+                            localKey,
+                        );
+                        return {
+                            id: attachment.id,
+                            kind: attachment.kind,
+                            size: attachment.size,
+                            name,
+                            encryptedName: undefined,
+                            uploadedAt: attachment.uploadedAt ?? undefined,
+                        } satisfies ChatAttachment;
+                    } catch (innerError) {
+                        log.error(
+                            "Failed to decrypt attachment name with local key",
+                            innerError,
+                        );
+                    }
+                }
+
+                log.error("Failed to decrypt attachment name", error);
+                return {
+                    id: attachment.id,
+                    kind: attachment.kind,
+                    size: attachment.size,
+                    name: "Attachment",
+                    encryptedName: attachment.encryptedName,
+                    uploadedAt: attachment.uploadedAt ?? undefined,
+                } satisfies ChatAttachment;
+            }
+        }),
+    );
+};
+
 const fetchStore = async () => {
     const db = await chatDb();
     const [sessions, messages] = await Promise.all([
@@ -162,14 +358,17 @@ const listSessionsNative = async (chatKey: string): Promise<ChatSession[]> => {
         keyB64: chatKey,
     });
 
+    const activeSessions = sessions.filter((session) => !session.deletedAt);
+
     const previews = await Promise.all(
-        sessions.map(async (session) => {
+        activeSessions.map(async (session) => {
             try {
                 const messages = await invokeChat<NativeMessage[]>(
                     "chat_db_get_messages",
                     { keyB64: chatKey, sessionUuid: session.sessionUuid },
                 );
-                const latest = messages[messages.length - 1];
+                const active = messages.filter((message) => !message.deletedAt);
+                const latest = active[active.length - 1];
                 return latest?.text;
             } catch (error) {
                 log.error("Failed to load native messages", error);
@@ -178,7 +377,7 @@ const listSessionsNative = async (chatKey: string): Promise<ChatSession[]> => {
         }),
     );
 
-    return sessions.map((session, idx) => ({
+    return activeSessions.map((session, idx) => ({
         sessionUuid: session.sessionUuid,
         rootSessionUuid: session.sessionUuid,
         branchFromMessageUuid: undefined,
@@ -198,14 +397,23 @@ const listMessagesNative = async (
         sessionUuid,
     });
 
-    return messages.map((message) => ({
-        messageUuid: message.messageUuid,
-        sessionUuid: message.sessionUuid,
-        parentMessageUuid: message.parentMessageUuid ?? undefined,
-        sender: message.sender,
-        text: message.text,
-        createdAt: message.createdAt,
-    }));
+    return messages
+        .filter((message) => !message.deletedAt)
+        .map((message) => ({
+            messageUuid: message.messageUuid,
+            sessionUuid: message.sessionUuid,
+            parentMessageUuid: message.parentMessageUuid ?? undefined,
+            sender: message.sender,
+            text: message.text,
+            createdAt: message.createdAt,
+            attachments: message.attachments?.map((attachment) => ({
+                id: attachment.id,
+                kind: attachment.kind,
+                name: attachment.name,
+                size: attachment.size,
+                uploadedAt: attachment.uploadedAt ?? undefined,
+            })),
+        }));
 };
 
 const createSessionNative = async (chatKey: string) => {
@@ -234,6 +442,7 @@ const addMessageNative = async (
     text: string,
     chatKey: string,
     parentMessageUuid?: string,
+    attachments: ChatAttachment[] = [],
 ) => {
     const message = await invokeChat<NativeMessage>("chat_db_insert_message", {
         keyB64: chatKey,
@@ -242,6 +451,13 @@ const addMessageNative = async (
             sender,
             text,
             parentMessageUuid,
+            attachments: attachments.map((attachment) => ({
+                id: attachment.id,
+                kind: attachment.kind,
+                name: attachment.name,
+                size: attachment.size,
+                uploadedAt: attachment.uploadedAt ?? null,
+            })),
         },
     });
 
@@ -251,10 +467,11 @@ const addMessageNative = async (
                 "chat_db_get_session",
                 { keyB64: chatKey, sessionUuid },
             );
-            if (session && safeTitle(session.title) === "New chat") {
-                const trimmed = text.trim();
-                const title =
-                    trimmed.length > 0 ? trimmed.slice(0, 40) : "New chat";
+            if (
+                session &&
+                safeTitle(session.title).toLowerCase() === "new chat"
+            ) {
+                const title = sessionTitleFromText(text, "New chat");
                 await updateSessionTitleNative(chatKey, sessionUuid, title);
             }
         } catch (error) {
@@ -298,12 +515,12 @@ export const listSessions = async (chatKey: string): Promise<ChatSession[]> => {
         const { sessions, messages } = await fetchStore();
 
         const activeSessions = sessions
-            .filter((session) => !session.isDeleted)
+            .filter((session) => !session.deletedAt && !session.isDeleted)
             .sort((a, b) => b.updatedAt - a.updatedAt);
 
         const bySession = new Map<string, StoredMessage[]>();
         for (const message of messages) {
-            if (message.isDeleted) continue;
+            if (message.deletedAt || message.isDeleted) continue;
             const list = bySession.get(message.sessionUuid) ?? [];
             list.push(message);
             bySession.set(message.sessionUuid, list);
@@ -356,7 +573,9 @@ export const listMessages = async (
         const sessionMessages = messages
             .filter(
                 (message) =>
-                    message.sessionUuid === sessionUuid && !message.isDeleted,
+                    message.sessionUuid === sessionUuid &&
+                    !message.deletedAt &&
+                    !message.isDeleted,
             )
             .sort((a, b) => a.createdAt - b.createdAt);
 
@@ -368,6 +587,10 @@ export const listMessages = async (
                 sender: message.sender,
                 createdAt: message.createdAt,
                 text: await decryptMessageText(message, chatKey),
+                attachments: await deserializeAttachments(
+                    message.attachments,
+                    chatKey,
+                ),
             })),
         );
     } catch (error) {
@@ -393,6 +616,9 @@ export const createSession = async (chatKey: string) => {
         updatedAt: now,
         encryptedData: encrypted.encryptedData,
         header: encrypted.header,
+        remoteId: null,
+        needsSync: true,
+        deletedAt: null,
     };
 
     await db.put("sessions", session);
@@ -405,6 +631,7 @@ export const addMessage = async (
     text: string,
     chatKey: string,
     parentMessageUuid?: string,
+    attachments: ChatAttachment[] = [],
 ) => {
     if (isTauriRuntime()) {
         return addMessageNative(
@@ -413,6 +640,7 @@ export const addMessage = async (
             text,
             chatKey,
             parentMessageUuid,
+            attachments,
         );
     }
 
@@ -421,6 +649,7 @@ export const addMessage = async (
     const messageUuid = crypto.randomUUID();
 
     const encrypted = await encryptChatPayload({ text }, chatKey);
+    const storedAttachments = await serializeAttachments(attachments, chatKey);
 
     const message: StoredMessage = {
         messageUuid,
@@ -430,6 +659,8 @@ export const addMessage = async (
         createdAt: now,
         encryptedData: encrypted.encryptedData,
         header: encrypted.header,
+        attachments: storedAttachments,
+        deletedAt: null,
     };
 
     const tx = db.transaction(["sessions", "messages"], "readwrite");
@@ -439,11 +670,14 @@ export const addMessage = async (
     const session = await sessionStore.get(sessionUuid);
     if (session) {
         session.updatedAt = now;
+        session.needsSync = true;
 
         const currentTitle = await decryptSessionTitle(session, chatKey);
-        if (currentTitle === "New chat" && sender === "self") {
-            const trimmed = text.trim();
-            const title = trimmed.length > 0 ? trimmed.slice(0, 40) : "New chat";
+        if (
+            sender === "self" &&
+            currentTitle.toLowerCase() === "new chat"
+        ) {
+            const title = sessionTitleFromText(text, "New chat");
             const updated = await encryptChatPayload({ title }, chatKey);
             session.encryptedData = updated.encryptedData;
             session.header = updated.header;
@@ -454,6 +688,29 @@ export const addMessage = async (
 
     await tx.done;
     return messageUuid;
+};
+
+export const updateSessionTitle = async (
+    sessionUuid: string,
+    title: string,
+    chatKey: string,
+) => {
+    const safe = sessionTitleFromText(title, "New chat");
+    if (isTauriRuntime()) {
+        await updateSessionTitleNative(chatKey, sessionUuid, safe);
+        return;
+    }
+
+    const db = await chatDb();
+    const session = await db.get("sessions", sessionUuid);
+    if (!session) return;
+
+    const updated = await encryptChatPayload({ title: safe }, chatKey);
+    session.encryptedData = updated.encryptedData;
+    session.header = updated.header;
+    session.updatedAt = nowMicros();
+    session.needsSync = true;
+    await db.put("sessions", session);
 };
 
 export const updateMessage = async (
@@ -484,6 +741,7 @@ export const updateMessage = async (
     const session = await sessionStore.get(message.sessionUuid);
     if (session) {
         session.updatedAt = nowMicros();
+        session.needsSync = true;
         await sessionStore.put(session);
     }
 
@@ -514,6 +772,37 @@ export const getBranchSelections = (rootSessionUuid: string) => {
     return store[rootSessionUuid] ?? {};
 };
 
+export const resetChatStore = async () => {
+    if (typeof window === "undefined") return;
+
+    localStorage.removeItem(BRANCH_SELECTIONS_KEY);
+
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_reset");
+        return;
+    }
+
+    if (typeof indexedDB === "undefined") return;
+
+    try {
+        if (_chatDb) {
+            const db = await _chatDb;
+            db.close();
+        }
+    } catch (error) {
+        log.error("Failed to close chat DB", error);
+    }
+
+    _chatDb = undefined;
+
+    await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.deleteDatabase(DB_NAME);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => resolve();
+    });
+};
+
 export const setBranchSelection = (
     rootSessionUuid: string,
     selectionKey: string,
@@ -540,17 +829,611 @@ export const deleteSession = async (sessionUuid: string, chatKey: string) => {
     }
 
     const db = await chatDb();
+    const now = nowMicros();
     const tx = db.transaction(["sessions", "messages"], "readwrite");
-    await tx.objectStore("sessions").delete(sessionUuid);
+
+    const sessionStore = tx.objectStore("sessions");
+    const session = await sessionStore.get(sessionUuid);
+    if (session) {
+        session.deletedAt = now;
+        session.needsSync = true;
+        await sessionStore.put(session);
+    }
 
     const messageStore = tx.objectStore("messages");
     const messages = await messageStore.getAll();
     await Promise.all(
         messages
             .filter((message) => message.sessionUuid === sessionUuid)
-            .map((message) => messageStore.delete(message.messageUuid)),
+            .map((message) => {
+                message.deletedAt = now;
+                return messageStore.put(message);
+            }),
     );
 
     await tx.done;
     deleteBranchSelections(sessionUuid);
+};
+
+let _attachmentDir: Promise<string> | undefined;
+
+const attachmentDir = async () => {
+    if (!isTauriRuntime()) {
+        return "";
+    }
+
+    _attachmentDir ??= (async () => {
+        const { appDataDir, join } = await import("@tauri-apps/api/path");
+        const { createDir } = await import("@tauri-apps/api/fs");
+        const root = await appDataDir();
+        const dir = await join(root, "ensu_llmchat_attachments");
+        await createDir(dir, { recursive: true });
+        return dir;
+    })();
+
+    return _attachmentDir;
+};
+
+const attachmentPath = async (id: string) => {
+    const { join } = await import("@tauri-apps/api/path");
+    const dir = await attachmentDir();
+    return join(dir, id);
+};
+
+export const writeAttachmentBytes = async (id: string, data: Uint8Array) => {
+    if (isTauriRuntime()) {
+        const { writeBinaryFile } = await import("@tauri-apps/api/fs");
+        const path = await attachmentPath(id);
+        await writeBinaryFile({ path, contents: data });
+        return;
+    }
+
+    const db = await chatDb();
+    await db.put("attachmentBytes", { id, data });
+};
+
+export const storeEncryptedAttachmentBytes = async (
+    id: string,
+    data: Uint8Array,
+    chatKey: string,
+    sessionUuid: string,
+) => {
+    const encrypted = await encryptAttachmentBytes(data, chatKey, sessionUuid);
+    await writeAttachmentBytes(id, encrypted);
+};
+
+export const readAttachmentBytes = async (id: string): Promise<Uint8Array> => {
+    if (isTauriRuntime()) {
+        const { readBinaryFile } = await import("@tauri-apps/api/fs");
+        const path = await attachmentPath(id);
+        return readBinaryFile(path);
+    }
+
+    const db = await chatDb();
+    const entry = await db.get("attachmentBytes", id);
+    if (!entry) {
+        throw new Error(`Attachment bytes not found: ${id}`);
+    }
+    return entry.data instanceof Uint8Array
+        ? entry.data
+        : new Uint8Array(entry.data);
+};
+
+export const readDecryptedAttachmentBytes = async (
+    id: string,
+    chatKey: string,
+    sessionUuid: string,
+): Promise<Uint8Array> => {
+    const encrypted = await readAttachmentBytes(id);
+    try {
+        return await decryptAttachmentBytes(encrypted, chatKey, sessionUuid);
+    } catch (error) {
+        const localKey = cachedLocalChatKey();
+        if (!localKey || localKey === chatKey) {
+            throw error;
+        }
+        return decryptAttachmentBytes(encrypted, localKey, sessionUuid);
+    }
+};
+
+export const attachmentBytesExists = async (id: string): Promise<boolean> => {
+    if (isTauriRuntime()) {
+        const { exists } = await import("@tauri-apps/api/fs");
+        const path = await attachmentPath(id);
+        return exists(path);
+    }
+
+    const db = await chatDb();
+    const entry = await db.get("attachmentBytes", id);
+    return !!entry;
+};
+
+export const deleteAttachmentBytes = async (id: string) => {
+    if (isTauriRuntime()) {
+        const { removeFile } = await import("@tauri-apps/api/fs");
+        const path = await attachmentPath(id);
+        try {
+            await removeFile(path);
+        } catch {
+            // ignore missing files
+        }
+        return;
+    }
+
+    const db = await chatDb();
+    await db.delete("attachmentBytes", id);
+};
+
+export const getSessionRecord = async (
+    sessionUuid: string,
+    chatKey: string,
+): Promise<LocalSessionRecord | null> => {
+    if (isTauriRuntime()) {
+        const session = await invokeChat<NativeSession | null>(
+            "chat_db_get_session",
+            { keyB64: chatKey, sessionUuid },
+        );
+        if (!session) return null;
+        return {
+            sessionUuid: session.sessionUuid,
+            title: session.title,
+            createdAt: session.createdAt,
+            updatedAt: session.updatedAt,
+            remoteId: session.remoteId ?? null,
+            needsSync: session.needsSync ?? false,
+            deletedAt: session.deletedAt ?? null,
+        };
+    }
+
+    const db = await chatDb();
+    const session = await db.get("sessions", sessionUuid);
+    if (!session) return null;
+
+    return {
+        sessionUuid: session.sessionUuid,
+        title: await decryptSessionTitle(session, chatKey),
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        remoteId: session.remoteId ?? null,
+        needsSync: session.needsSync ?? false,
+        deletedAt: session.deletedAt ?? null,
+    };
+};
+
+export const listSessionsForSync = async (
+    chatKey: string,
+): Promise<LocalSessionRecord[]> => {
+    if (isTauriRuntime()) {
+        const sessions = await invokeChat<NativeSession[]>(
+            "chat_db_list_sessions_for_sync",
+            { keyB64: chatKey },
+        );
+        return sessions
+            .filter((session) => !session.deletedAt)
+            .map((session) => ({
+                sessionUuid: session.sessionUuid,
+                title: session.title,
+                createdAt: session.createdAt,
+                updatedAt: session.updatedAt,
+                remoteId: session.remoteId ?? null,
+                needsSync: session.needsSync ?? false,
+                deletedAt: session.deletedAt ?? null,
+            }));
+    }
+
+    const db = await chatDb();
+    const sessions = await db.getAll("sessions");
+    const active = sessions.filter(
+        (session) => session.needsSync && !session.deletedAt,
+    );
+
+    return Promise.all(
+        active.map(async (session) => ({
+            sessionUuid: session.sessionUuid,
+            title: await decryptSessionTitle(session, chatKey),
+            createdAt: session.createdAt,
+            updatedAt: session.updatedAt,
+            remoteId: session.remoteId ?? null,
+            needsSync: session.needsSync ?? false,
+            deletedAt: session.deletedAt ?? null,
+        })),
+    );
+};
+
+export const listMessagesForSessionSync = async (
+    sessionUuid: string,
+    chatKey: string,
+    options: { includeDeleted?: boolean } = {},
+): Promise<LocalMessageRecord[]> => {
+    const includeDeleted = options.includeDeleted ?? false;
+
+    if (isTauriRuntime()) {
+        const messages = await invokeChat<NativeMessage[]>(
+            "chat_db_get_messages_for_sync",
+            { keyB64: chatKey, sessionUuid, includeDeleted },
+        );
+        return messages
+            .filter((message) => includeDeleted || !message.deletedAt)
+            .map((message) => ({
+                messageUuid: message.messageUuid,
+                sessionUuid: message.sessionUuid,
+                parentMessageUuid: message.parentMessageUuid ?? null,
+                sender: message.sender,
+                text: message.text,
+                createdAt: message.createdAt,
+                deletedAt: message.deletedAt ?? null,
+                attachments: message.attachments?.map((attachment) => ({
+                    id: attachment.id,
+                    kind: attachment.kind,
+                    name: attachment.name,
+                    size: attachment.size,
+                    uploadedAt: attachment.uploadedAt ?? undefined,
+                })),
+            }));
+    }
+
+    const db = await chatDb();
+    const messages = await db.getAll("messages");
+    const scoped = messages
+        .filter((message) => message.sessionUuid === sessionUuid)
+        .filter((message) => includeDeleted || !message.deletedAt);
+
+    return Promise.all(
+        scoped.map(async (message) => ({
+            messageUuid: message.messageUuid,
+            sessionUuid: message.sessionUuid,
+            parentMessageUuid: message.parentMessageUuid ?? null,
+            sender: message.sender,
+            text: await decryptMessageText(message, chatKey),
+            createdAt: message.createdAt,
+            deletedAt: message.deletedAt ?? null,
+            attachments: await deserializeAttachments(
+                message.attachments,
+                chatKey,
+            ),
+        })),
+    );
+};
+
+export const upsertSessionRecord = async (
+    input: LocalSessionRecord,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_upsert_session", {
+            keyB64: chatKey,
+            input: {
+                sessionUuid: input.sessionUuid,
+                title: input.title,
+                createdAt: input.createdAt,
+                updatedAt: input.updatedAt,
+                remoteId: input.remoteId ?? null,
+                needsSync: input.needsSync,
+                deletedAt: input.deletedAt ?? null,
+            },
+        });
+        return;
+    }
+
+    const db = await chatDb();
+    const encrypted = await encryptChatPayload(
+        { title: input.title },
+        chatKey,
+    );
+
+    const session: StoredSession = {
+        sessionUuid: input.sessionUuid,
+        createdAt: input.createdAt,
+        updatedAt: input.updatedAt,
+        encryptedData: encrypted.encryptedData,
+        header: encrypted.header,
+        remoteId: input.remoteId ?? null,
+        needsSync: input.needsSync,
+        deletedAt: input.deletedAt ?? null,
+    };
+
+    await db.put("sessions", session);
+};
+
+export const insertMessageFromRemote = async (
+    input: LocalMessageRecord,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_insert_message_with_uuid", {
+            keyB64: chatKey,
+            input: {
+                messageUuid: input.messageUuid,
+                sessionUuid: input.sessionUuid,
+                parentMessageUuid: input.parentMessageUuid ?? null,
+                sender: input.sender,
+                text: input.text,
+                createdAt: input.createdAt,
+                deletedAt: input.deletedAt ?? null,
+                attachments: input.attachments?.map((attachment) => ({
+                    id: attachment.id,
+                    kind: attachment.kind,
+                    name: attachment.name,
+                    size: attachment.size,
+                    uploadedAt: attachment.uploadedAt ?? null,
+                })),
+            },
+        });
+        return;
+    }
+
+    const db = await chatDb();
+    const existing = await db.get("messages", input.messageUuid);
+    if (existing) return;
+
+    const encrypted = await encryptChatPayload({ text: input.text }, chatKey);
+    const storedAttachments = await serializeAttachments(
+        input.attachments ?? [],
+        chatKey,
+    );
+
+    const message: StoredMessage = {
+        messageUuid: input.messageUuid,
+        sessionUuid: input.sessionUuid,
+        parentMessageUuid: input.parentMessageUuid ?? undefined,
+        sender: input.sender,
+        createdAt: input.createdAt,
+        encryptedData: encrypted.encryptedData,
+        header: encrypted.header,
+        attachments: storedAttachments,
+        deletedAt: input.deletedAt ?? null,
+    };
+
+    await db.put("messages", message);
+};
+
+export const markSessionSynced = async (
+    sessionUuid: string,
+    remoteId: string,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_mark_session_synced", {
+            keyB64: chatKey,
+            sessionUuid,
+            remoteId,
+        });
+        return;
+    }
+
+    const db = await chatDb();
+    const session = await db.get("sessions", sessionUuid);
+    if (!session) return;
+    session.remoteId = remoteId;
+    session.needsSync = false;
+    await db.put("sessions", session);
+};
+
+export const markSessionDeletedAt = async (
+    sessionUuid: string,
+    deletedAt: number,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_mark_session_deleted", {
+            keyB64: chatKey,
+            sessionUuid,
+            deletedAt,
+        });
+        deleteBranchSelections(sessionUuid);
+        return;
+    }
+
+    const db = await chatDb();
+    const tx = db.transaction(["sessions", "messages"], "readwrite");
+    const sessionStore = tx.objectStore("sessions");
+    const session = await sessionStore.get(sessionUuid);
+    if (session) {
+        session.deletedAt = deletedAt;
+        session.needsSync = false;
+        await sessionStore.put(session);
+    }
+
+    const messageStore = tx.objectStore("messages");
+    const messages = await messageStore.getAll();
+    await Promise.all(
+        messages
+            .filter((message) => message.sessionUuid === sessionUuid)
+            .map((message) => {
+                message.deletedAt = deletedAt;
+                return messageStore.put(message);
+            }),
+    );
+
+    await tx.done;
+    deleteBranchSelections(sessionUuid);
+};
+
+export const markMessageDeletedAt = async (
+    messageUuid: string,
+    deletedAt: number,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_mark_message_deleted", {
+            keyB64: chatKey,
+            messageUuid,
+            deletedAt,
+        });
+        return;
+    }
+
+    const db = await chatDb();
+    const message = await db.get("messages", messageUuid);
+    if (!message) return;
+    message.deletedAt = deletedAt;
+    await db.put("messages", message);
+};
+
+export const markAttachmentUploaded = async (
+    messageUuid: string,
+    attachmentId: string,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        await invokeChat("chat_db_mark_attachment_uploaded", {
+            keyB64: chatKey,
+            messageUuid,
+            attachmentId,
+        });
+        return;
+    }
+
+    const db = await chatDb();
+    const message = await db.get("messages", messageUuid);
+    if (!message?.attachments) return;
+
+    let updated = false;
+    const updatedAttachments = message.attachments.map((attachment) => {
+        if (attachment.id === attachmentId) {
+            if (!attachment.uploadedAt) {
+                attachment.uploadedAt = nowMicros();
+            }
+            updated = true;
+        }
+        return attachment;
+    });
+
+    if (updated) {
+        message.attachments = updatedAttachments;
+        await db.put("messages", message);
+    }
+};
+
+export const getPendingDeletions = async (
+    chatKey: string,
+): Promise<SyncDeletion[]> => {
+    if (isTauriRuntime()) {
+        const deletions = await invokeChat<
+            { entityType: string; uuid: string }[]
+        >("chat_db_get_pending_deletions", { keyB64: chatKey });
+        return deletions.map((deletion) => ({
+            type: deletion.entityType === "message" ? "message" : "session",
+            uuid: deletion.uuid,
+        }));
+    }
+
+    const db = await chatDb();
+    const [sessions, messages] = await Promise.all([
+        db.getAll("sessions"),
+        db.getAll("messages"),
+    ]);
+
+    const sessionsById = new Map(
+        sessions.map((session) => [session.sessionUuid, session]),
+    );
+
+    const deletions: SyncDeletion[] = [];
+    for (const session of sessions) {
+        if (
+            session.deletedAt &&
+            session.remoteId &&
+            session.needsSync
+        ) {
+            deletions.push({ type: "session", uuid: session.sessionUuid });
+        }
+    }
+
+    for (const message of messages) {
+        if (!message.deletedAt) continue;
+        const session = sessionsById.get(message.sessionUuid);
+        if (!session?.remoteId || !session.needsSync) continue;
+        deletions.push({ type: "message", uuid: message.messageUuid });
+    }
+
+    return deletions;
+};
+
+export const hardDeleteEntity = async (
+    deletion: SyncDeletion,
+    chatKey: string,
+) => {
+    if (isTauriRuntime()) {
+        try {
+            if (deletion.type === "session") {
+                const messages = await invokeChat<NativeMessage[]>(
+                    "chat_db_get_messages_for_sync",
+                    {
+                        keyB64: chatKey,
+                        sessionUuid: deletion.uuid,
+                        includeDeleted: true,
+                    },
+                );
+                await Promise.all(
+                    messages.flatMap((message) =>
+                        (message.attachments ?? []).map((attachment) =>
+                            deleteAttachmentBytes(attachment.id),
+                        ),
+                    ),
+                );
+            } else {
+                const message = await invokeChat<NativeMessage | null>(
+                    "chat_db_get_message",
+                    { keyB64: chatKey, messageUuid: deletion.uuid },
+                );
+                if (message?.attachments?.length) {
+                    await Promise.all(
+                        message.attachments.map((attachment) =>
+                            deleteAttachmentBytes(attachment.id),
+                        ),
+                    );
+                }
+            }
+        } catch (error) {
+            log.error("Failed to clean up attachment bytes", error);
+        }
+
+        await invokeChat("chat_db_hard_delete", {
+            keyB64: chatKey,
+            entityType: deletion.type,
+            uuid: deletion.uuid,
+        });
+        if (deletion.type === "session") {
+            deleteBranchSelections(deletion.uuid);
+        }
+        return;
+    }
+
+    const db = await chatDb();
+    if (deletion.type === "session") {
+        const tx = db.transaction(["sessions", "messages"], "readwrite");
+        await tx.objectStore("sessions").delete(deletion.uuid);
+        const messageStore = tx.objectStore("messages");
+        const messages = await messageStore.getAll();
+        const sessionMessages = messages.filter(
+            (message) => message.sessionUuid === deletion.uuid,
+        );
+        await Promise.all(
+            sessionMessages.map((message) =>
+                messageStore.delete(message.messageUuid),
+            ),
+        );
+        await tx.done;
+
+        await Promise.all(
+            sessionMessages.flatMap((message) =>
+                (message.attachments ?? []).map((attachment) =>
+                    deleteAttachmentBytes(attachment.id),
+                ),
+            ),
+        );
+
+        deleteBranchSelections(deletion.uuid);
+        return;
+    }
+
+    const message = await db.get("messages", deletion.uuid);
+    if (message?.attachments?.length) {
+        await Promise.all(
+            message.attachments.map((attachment) =>
+                deleteAttachmentBytes(attachment.id),
+            ),
+        );
+    }
+    await db.delete("messages", deletion.uuid);
 };

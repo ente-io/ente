@@ -164,5 +164,19 @@ const dedupeSiblingDuplicates = (messages: ChatMessage[]) => {
 const isDuplicate = (a: ChatMessage, b: ChatMessage) => {
     if (a.sender !== b.sender) return false;
     if (a.text !== b.text) return false;
+
+    const aAttachments = a.attachments ?? [];
+    const bAttachments = b.attachments ?? [];
+    if (aAttachments.length !== bAttachments.length) return false;
+
+    const serialize = (attachments: ChatMessage["attachments"]) =>
+        (attachments ?? [])
+            .slice()
+            .sort((left, right) => left.id.localeCompare(right.id))
+            .map((attachment) => `${attachment.id}:${attachment.name}`)
+            .join("|");
+
+    if (serialize(aAttachments) !== serialize(bAttachments)) return false;
+
     return Math.abs(a.createdAt - b.createdAt) <= DEDUPE_WINDOW_US;
 };

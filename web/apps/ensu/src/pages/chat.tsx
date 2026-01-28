@@ -3,20 +3,21 @@ import {
     PlusSignIcon,
     ArrowLeft01Icon,
     ArrowRight01Icon,
-    ArrowRight02Icon,
+    ArrowReloadHorizontalIcon,
     Attachment01Icon,
     Bug01Icon,
     Cancel01Icon,
     Copy01Icon,
     Delete01Icon,
     Edit01Icon,
+    Login01Icon,
     Menu01Icon,
-    RefreshIcon,
+    Navigation06Icon,
     RepeatIcon,
     Search01Icon,
     Settings01Icon,
     SlidersHorizontalIcon,
-    StopCircleIcon,
+    Upload01Icon,
 } from "@hugeicons/core-free-icons";
 import {
     Box,
@@ -40,16 +41,24 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { AccountsPageTitle } from "ente-accounts/components/layouts/centered-paper";
+import { getLuminance, useTheme } from "@mui/material/styles";
+import { save } from "@tauri-apps/api/dialog";
+import { writeTextFile } from "@tauri-apps/api/fs";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { savedAuthToken } from "ente-base/token";
-import { saveStringAsFile } from "ente-base/utils/web";
+import {
+    saveAsFileAndRevokeObjectURL,
+    saveStringAsFile,
+} from "ente-base/utils/web";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
+import {
+    Notification,
+    type NotificationAttributes,
+} from "ente-new/photos/components/Notification";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import { useRouter } from "next/router";
 import React, {
@@ -59,7 +68,10 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { MarkdownRenderer } from "components/MarkdownRenderer";
 import {
+    cachedChatKey,
+    cachedLocalChatKey,
     getOrCreateChatKey,
     getOrCreateLocalChatKey,
 } from "services/chat/chatKey";
@@ -70,10 +82,16 @@ import {
     getBranchSelections,
     listMessages,
     listSessions,
+    readDecryptedAttachmentBytes,
+    sessionTitleFromText,
     setBranchSelection,
+    storeEncryptedAttachmentBytes,
+    updateSessionTitle,
+    type ChatAttachment,
     type ChatMessage,
     type ChatSession,
 } from "services/chat/store";
+import { downloadAttachment, syncChat, ChatSyncLimitError } from "services/chat/sync";
 import {
     buildSelectedPath,
     ROOT_SELECTION_KEY,
@@ -88,6 +106,11 @@ import type {
     ModelSettings,
 } from "services/llm/types";
 import { masterKeyFromSession } from "services/session";
+import {
+    DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
+    DEVELOPER_SETTINGS_ENABLED,
+    SIGN_IN_ENABLED,
+} from "services/featureFlags";
 
 const formatTime = (timestamp: number) => {
     const date = new Date(Math.floor(timestamp / 1000));
@@ -98,11 +121,80 @@ const formatTime = (timestamp: number) => {
     return `${hour12}:${minute} ${period}`;
 };
 
+const loadingPhraseVerbs = [
+    "Generating",
+    "Thinking through",
+    "Assembling",
+    "Drafting",
+    "Composing",
+    "Crunching",
+    "Exploring",
+    "Piecing together",
+    "Reviewing",
+    "Organizing",
+    "Synthesizing",
+    "Sketching",
+    "Refining",
+    "Shaping",
+];
+
+const loadingPhraseTargets = [
+    "your reply",
+    "an answer",
+    "ideas",
+    "context",
+    "details",
+    "the response",
+    "the next steps",
+    "a solution",
+    "the summary",
+    "insights",
+    "the draft",
+    "the explanation",
+];
+
+const randomLoadingPhrase = () => {
+    const verb =
+        loadingPhraseVerbs[
+            Math.floor(Math.random() * loadingPhraseVerbs.length)
+        ] ?? "Generating";
+    const target =
+        loadingPhraseTargets[
+            Math.floor(Math.random() * loadingPhraseTargets.length)
+        ] ?? "your reply";
+    return `${verb} ${target}`;
+};
+
+const MEDIA_MARKER = "<__media__>";
+
+const buildPromptWithImages = (text: string, imageCount: number) => {
+    if (imageCount <= 0) return text;
+    let prompt = text;
+    prompt += `\n\n[${imageCount} image attachment${imageCount === 1 ? "" : "s"} provided]`;
+    for (let index = 0; index < imageCount; index += 1) {
+        prompt += `\n${MEDIA_MARKER}`;
+    }
+    return prompt;
+};
+
+const CHAT_SYSTEM_PROMPT =
+    "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$";
+
+const SESSION_TITLE_PROMPT =
+    "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title.";
+
 type DocumentAttachment = {
     id: string;
     name: string;
     text: string;
     size: number;
+};
+
+type ImageAttachment = {
+    id: string;
+    name: string;
+    size: number;
+    file: File;
 };
 
 const createDocumentBlockRegex = () =>
@@ -114,6 +206,8 @@ const createDocumentId = () => {
     }
     return `doc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 };
+
+const createAttachmentId = () => createDocumentId();
 
 const parseDocumentBlocks = (text: string) => {
     const normalized = text.replace(/\r\n/g, "\n");
@@ -243,7 +337,120 @@ const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
     const theme = useTheme();
     const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-    const sentColor = "text.base";
+    const assetBasePath = router.basePath ?? "";
+    const logoSrc = `${assetBasePath}/images/ensu-logo.svg`;
+    const [isDarkMode, setIsDarkMode] = useState(
+        theme.palette.mode === "dark",
+    );
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const updateMode = () => {
+            const value = getComputedStyle(document.documentElement)
+                .getPropertyValue("--mui-palette-background-default")
+                .trim();
+            const resolved =
+                value && !value.startsWith("var(")
+                    ? value
+                    : theme.palette.background.default;
+            try {
+                setIsDarkMode(getLuminance(resolved) < 0.5);
+            } catch {
+                setIsDarkMode(theme.palette.mode === "dark");
+            }
+        };
+
+        updateMode();
+        const observer = new MutationObserver(updateMode);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class", "style"],
+        });
+        return () => observer.disconnect();
+    }, [theme.palette.background.default, theme.palette.mode]);
+
+    const logoFilter = isDarkMode ? "none" : "invert(1)";
+    const userBubbleBackground = isDarkMode
+        ? "fill.faintHover"
+        : "fill.faint";
+    const messageTypographySx = {
+        fontSize: "15px",
+        lineHeight: "26px",
+        fontWeight: 400,
+    } as const;
+    const userMessageTextSx = {
+        ...messageTypographySx,
+        color: "text.base",
+        textAlign: "right",
+        whiteSpace: "pre-wrap",
+        fontFamily: '"Inter", sans-serif',
+    } as const;
+    const assistantTextSx = {
+        ...messageTypographySx,
+        color: "text.base",
+        textAlign: "left",
+        whiteSpace: "pre-wrap",
+        fontFamily: '"Inter", sans-serif',
+    } as const;
+    const assistantMarkdownSx = {
+        ...messageTypographySx,
+        color: "text.base",
+        fontFamily: '"Inter", sans-serif',
+        "& p": { margin: 0 },
+        "& p + p": { marginTop: "12px" },
+        "& ul, & ol": { paddingLeft: "24px", margin: "12px 0 0" },
+        "& li": { marginBottom: "4px" },
+        "& code": {
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: "0.95em",
+        },
+        "& pre": {
+            margin: "12px 0 0",
+            padding: "12px",
+            borderRadius: 12,
+            backgroundColor: isDarkMode
+                ? "rgba(255, 255, 255, 0.06)"
+                : "rgba(0, 0, 0, 0.04)",
+            overflowX: "auto",
+        },
+        "& pre code": {
+            fontFamily: '"JetBrains Mono", monospace',
+        },
+        "& blockquote": {
+            margin: "12px 0 0",
+            paddingLeft: "12px",
+            borderLeft: "3px solid",
+            borderLeftColor: "divider",
+            color: "text.muted",
+        },
+        "& .katex-display": {
+            margin: "12px 0 0",
+            padding: "12px",
+            borderRadius: 12,
+            backgroundColor:
+                theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.06)"
+                    : "rgba(0, 0, 0, 0.04)",
+            overflowX: "auto",
+        },
+        "& .katex": {
+            color: "text.base",
+        },
+        "& a": { color: "accent.main" },
+    };
+    const streamingMessageSx = {
+        transition: "all 0.2s ease",
+    } as const;
+    const cursorSx = {
+        display: "inline-block",
+        width: "0.6ch",
+        marginLeft: "2px",
+        animation: "ensu-blink 1s steps(1, end) infinite",
+        "@keyframes ensu-blink": {
+            "0%, 50%": { opacity: 1 },
+            "50.01%, 100%": { opacity: 0 },
+        },
+    } as const;
     const actionButtonSx = {
         width: 36,
         height: 36,
@@ -262,6 +469,22 @@ const Page: React.FC = () => {
     const smallIconProps = { size: 24, strokeWidth: 2 } as const;
     const actionIconProps = { size: 24, strokeWidth: 2 } as const;
     const compactIconProps = { size: 18, strokeWidth: 2 } as const;
+    const tinyIconProps = { size: 16, strokeWidth: 2 } as const;
+    const dialogTitleSx = {
+        fontFamily: '"DM Serif Text", serif',
+        fontWeight: 400,
+    } as const;
+    const settingsItemSx = {
+        alignItems: "center",
+        gap: 1,
+        px: 2,
+        py: 1.25,
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "fill.faint",
+        "&:hover": { bgcolor: "fill.faintHover" },
+    } as const;
 
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -281,11 +504,16 @@ const Page: React.FC = () => {
     const [input, setInput] = useState("");
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerCollapsed, setDrawerCollapsed] = useState(false);
-    const [drawerView, setDrawerView] = useState<"sessions" | "settings">(
-        "sessions",
+    const [chatViewportWidth, setChatViewportWidth] = useState(() =>
+        typeof window !== "undefined" ? window.innerWidth : 0,
     );
     const [sessionSearch, setSessionSearch] = useState("");
-    const [settingsSearch, setSettingsSearch] = useState("");
+    const [showSessionSearch, setShowSessionSearch] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [showDeveloperMenu, setShowDeveloperMenu] = useState(false);
+    const [showComingSoon, setShowComingSoon] = useState(false);
+    const [isDraftSession, setIsDraftSession] = useState(false);
+    const [stickToBottom, setStickToBottom] = useState(true);
     const [showDevSettings, setShowDevSettings] = useState(false);
     const [showModelSettings, setShowModelSettings] = useState(false);
     const [useCustomModel, setUseCustomModel] = useState(false);
@@ -304,20 +532,68 @@ const Page: React.FC = () => {
     const [pendingDocuments, setPendingDocuments] = useState<
         DocumentAttachment[]
     >([]);
+    const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
     const [attachmentAnchor, setAttachmentAnchor] =
         useState<HTMLElement | null>(null);
+    const [syncNotification, setSyncNotification] = useState<
+        NotificationAttributes | undefined
+    >(undefined);
+    const [syncNotificationOpen, setSyncNotificationOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [loadingPhrase, setLoadingPhrase] = useState<string | null>(null);
+    const [loadingDots, setLoadingDots] = useState(1);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [attachmentPreviews, setAttachmentPreviews] = useState<
+        Record<string, string>
+    >({});
+    const [pendingImagePreviews, setPendingImagePreviews] = useState<
+        Record<string, string>
+    >({});
     const [downloadStatus, setDownloadStatus] = useState<
         DownloadProgress | null
     >(null);
     const [loadedModelName, setLoadedModelName] = useState<string | null>(null);
+    const [modelGateStatus, setModelGateStatus] = useState<
+        | "checking"
+        | "missing"
+        | "preloading"
+        | "downloading"
+        | "ready"
+        | "error"
+    >("checking");
+    const [modelGateError, setModelGateError] = useState<string | null>(null);
     const [isTauriRuntime, setIsTauriRuntime] = useState(false);
     const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
+
+    const allowMmproj = isTauriRuntime;
 
     const providerRef = useRef<LlmProvider | null>(null);
     const currentJobIdRef = useRef<number | null>(null);
     const pendingCancelRef = useRef(false);
+    const stopRequestedRef = useRef(false);
+    const generationTokenRef = useRef(0);
+    const lastGenerationRef = useRef<
+        | { parentMessageUuid: string; previousSelection?: string | null }
+        | null
+    >(null);
+    const sessionSummaryInFlightRef = useRef(false);
+    const inputRef = useRef<HTMLTextAreaElement | null>(null);
+    const attachmentPreviewUrlsRef = useRef<Record<string, string>>({});
+    const pendingPreviewUrlsRef = useRef<Record<string, string>>({});
+    const chatViewportRef = useRef<HTMLDivElement | null>(null);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const lastScrollTopRef = useRef(0);
+    const userScrollIntentRef = useRef(false);
+    const userScrollTimeoutRef = useRef<number | null>(null);
+    const currentSessionIdRef = useRef<string | undefined>(undefined);
+    const isDraftSessionRef = useRef(false);
+    const logoClickCountRef = useRef(0);
+    const logoClickTimeoutRef = useRef<number | null>(null);
+    const streamingBufferRef = useRef("");
+    const streamingFlushTimerRef = useRef<number | null>(null);
+    const lastDownloadProgressRef = useRef(0);
+    const pendingDownloadProgressRef = useRef<DownloadProgress | null>(null);
+    const downloadProgressTimerRef = useRef<number | null>(null);
 
     const authRefreshCancelledRef = useRef(false);
     const authRetryCancelledRef = useRef(false);
@@ -334,7 +610,6 @@ const Page: React.FC = () => {
         at: number;
     }>({ sessionId: undefined, at: 0 });
     const routeInitializedRef = useRef(false);
-    const sessionSeededRef = useRef(false);
 
     const updateRouteSession = useCallback(
         (sessionId: string | undefined, replace = false) => {
@@ -366,24 +641,66 @@ const Page: React.FC = () => {
 
     const refreshAuthState = useCallback(async () => {
         const token = await savedAuthToken();
-        setIsLoggedIn(!!token);
+        const hasToken = !!token;
+        setIsLoggedIn(hasToken);
 
-        if (token) {
-            const masterKey = await masterKeyFromSession();
-            if (masterKey) {
-                setChatKey(await getOrCreateChatKey(masterKey));
+        log.info("Refreshing auth state", { hasToken });
+
+        if (hasToken) {
+            const cachedRemote = cachedChatKey();
+            if (cachedRemote) {
+                log.info("Using cached remote chat key");
+                setChatKey(cachedRemote);
+            }
+
+            try {
+                const masterKey = await masterKeyFromSession();
+                if (masterKey) {
+                    log.info("Found master key in session, deriving chat key");
+                    const remoteKey = await getOrCreateChatKey(masterKey);
+                    setChatKey(remoteKey);
+                    return;
+                } else {
+                    log.warn("No master key found in session storage");
+                }
+            } catch (error) {
+                log.error("Failed to derive chat key", error);
+            }
+
+            if (cachedRemote) {
                 return;
             }
         }
 
-        setChatKey(await getOrCreateLocalChatKey());
-    }, []);
+        const cachedLocal = cachedLocalChatKey();
+        if (cachedLocal) {
+            log.info("Falling back to cached local chat key");
+            setChatKey(cachedLocal);
+            return;
+        }
+
+        try {
+            log.info("Generating new local chat key");
+            setChatKey(await getOrCreateLocalChatKey());
+        } catch (error) {
+            log.error("Failed to initialize local chat key", error);
+            showMiniDialog({
+                title: "Encryption error",
+                message:
+                    "We could not initialize encryption. Please refresh the page.",
+            });
+        }
+    }, [showMiniDialog]);
 
     useEffect(() => {
         authRefreshCancelledRef.current = false;
 
         void (async () => {
-            await refreshAuthState();
+            try {
+                await refreshAuthState();
+            } catch (error) {
+                log.error("Failed to refresh auth state", error);
+            }
             if (!authRefreshCancelledRef.current) setLoading(false);
         })();
 
@@ -394,33 +711,14 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         routeInitializedRef.current = false;
-        sessionSeededRef.current = false;
     }, [chatKey]);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        const handleFocus = () => {
-            void refreshAuthState();
-        };
-
-        const handleVisibility = () => {
-            if (!document.hidden) {
-                void refreshAuthState();
-            }
-        };
-
-        window.addEventListener("focus", handleFocus);
-        document.addEventListener("visibilitychange", handleVisibility);
-
-        return () => {
-            window.removeEventListener("focus", handleFocus);
-            document.removeEventListener("visibilitychange", handleVisibility);
-        };
-    }, [refreshAuthState]);
+        isDraftSessionRef.current = isDraftSession;
+    }, [isDraftSession]);
 
     useEffect(() => {
-        if (typeof window === "undefined" || isLoggedIn) return;
+        if (typeof window === "undefined") return;
 
         authRetryCancelledRef.current = false;
         let attempts = 0;
@@ -429,24 +727,36 @@ const Page: React.FC = () => {
         const retry = async () => {
             if (authRetryCancelledRef.current) return;
             const token = await savedAuthToken();
-            if (token) {
+            const masterKey = await masterKeyFromSession();
+            const remoteKey = cachedChatKey();
+
+            // If we are logged in, we want to wait for either the master key to
+            // appear in session storage, or for a previously cached remote key
+            // to be available.
+            if (token && (masterKey || remoteKey)) {
                 await refreshAuthState();
                 return;
             }
 
+            // If we're not logged in, we just retry a few times to see if a
+            // login token appears (e.g. from a recent redirect).
+            if (!token && attempts >= 5) {
+                return;
+            }
+
             attempts += 1;
-            if (attempts < 5) {
-                timeoutId = window.setTimeout(retry, 400);
+            if (attempts < 15) {
+                timeoutId = window.setTimeout(retry, 600);
             }
         };
 
-        timeoutId = window.setTimeout(retry, 400);
+        timeoutId = window.setTimeout(retry, 600);
 
         return () => {
             authRetryCancelledRef.current = true;
             if (timeoutId) window.clearTimeout(timeoutId);
         };
-    }, [isLoggedIn, refreshAuthState]);
+    }, [refreshAuthState]);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -484,6 +794,28 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        if (loading || typeof window === "undefined") return;
+        const element = chatViewportRef.current;
+        if (!element) return;
+
+        const updateWidth = () => {
+            setChatViewportWidth(element.getBoundingClientRect().width);
+        };
+
+        updateWidth();
+
+        if (typeof ResizeObserver === "undefined") {
+            const handleResize = () => updateWidth();
+            window.addEventListener("resize", handleResize);
+            return () => window.removeEventListener("resize", handleResize);
+        }
+
+        const observer = new ResizeObserver(() => updateWidth());
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, [loading]);
+
+    useEffect(() => {
         if (typeof window === "undefined") return;
         const raw = window.localStorage.getItem("ensu.modelSettings");
         if (!raw) return;
@@ -497,15 +829,15 @@ const Page: React.FC = () => {
             };
             setUseCustomModel(!!parsed.useCustomModel);
             setModelUrl(parsed.modelUrl ?? "");
-            setMmprojUrl(parsed.mmprojUrl ?? "");
+            setMmprojUrl(allowMmproj ? parsed.mmprojUrl ?? "" : "");
             setContextLength(parsed.contextLength ?? "");
             setMaxTokens(parsed.maxTokens ?? "");
         } catch (error) {
             log.error("Failed to read model settings", error);
         }
-    }, []);
+    }, [allowMmproj]);
 
-    const handleDownloadProgress = useCallback((progress: DownloadProgress) => {
+    const applyDownloadProgress = useCallback((progress: DownloadProgress) => {
         setDownloadStatus(progress);
         const status = progress.status?.toLowerCase() ?? "";
         if (progress.percent < 0) {
@@ -518,6 +850,49 @@ const Page: React.FC = () => {
         }
         setIsDownloading(true);
     }, []);
+
+    const handleDownloadProgress = useCallback(
+        (progress: DownloadProgress) => {
+            const status = progress.status?.toLowerCase() ?? "";
+            const isTerminal =
+                progress.percent < 0 ||
+                progress.percent >= 100 ||
+                status.includes("ready");
+
+            if (isTerminal) {
+                if (downloadProgressTimerRef.current) {
+                    window.clearTimeout(downloadProgressTimerRef.current);
+                    downloadProgressTimerRef.current = null;
+                }
+                pendingDownloadProgressRef.current = null;
+                lastDownloadProgressRef.current = Date.now();
+                applyDownloadProgress(progress);
+                return;
+            }
+
+            const now = Date.now();
+            const elapsed = now - lastDownloadProgressRef.current;
+            if (elapsed >= 120) {
+                lastDownloadProgressRef.current = now;
+                applyDownloadProgress(progress);
+                return;
+            }
+
+            pendingDownloadProgressRef.current = progress;
+            if (!downloadProgressTimerRef.current) {
+                downloadProgressTimerRef.current = window.setTimeout(() => {
+                    const pending = pendingDownloadProgressRef.current;
+                    if (pending) {
+                        applyDownloadProgress(pending);
+                        lastDownloadProgressRef.current = Date.now();
+                        pendingDownloadProgressRef.current = null;
+                    }
+                    downloadProgressTimerRef.current = null;
+                }, Math.max(20, 120 - elapsed));
+            }
+        },
+        [applyDownloadProgress],
+    );
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -534,54 +909,186 @@ const Page: React.FC = () => {
 
     const refreshSessions = useCallback(async () => {
         if (!chatKey) return;
-        const loaded = await listSessions(chatKey);
-        if (loaded.length === 0) {
-            if (sessionSeededRef.current) {
-                return;
-            }
-            sessionSeededRef.current = true;
-            const sessionId = await createSession(chatKey);
-            const refreshed = await listSessions(chatKey);
-            setSessions(refreshed);
-            setCurrentSessionId(sessionId);
-            if (!routeInitializedRef.current) {
-                updateRouteSession(sessionId, true);
-                routeInitializedRef.current = true;
-            }
-            return;
-        }
-
-        sessionSeededRef.current = false;
-        setSessions(loaded);
-
-        const hasQuerySession =
-            sessionFromQuery &&
-            loaded.some((session) => session.sessionUuid === sessionFromQuery);
-        const nextSessionId = hasQuerySession
-            ? sessionFromQuery
-            : (currentSessionId ?? loaded[0]?.sessionUuid);
-
-        if (nextSessionId) {
-            setCurrentSessionId(nextSessionId);
-            if (nextSessionId !== sessionFromQuery) {
+        try {
+            const loaded = await listSessions(chatKey);
+            if (loaded.length === 0) {
+                setSessions([]);
+                setCurrentSessionId(undefined);
+                setAllMessages([]);
                 if (!routeInitializedRef.current) {
-                    updateRouteSession(nextSessionId, true);
+                    updateRouteSession(undefined, true);
                     routeInitializedRef.current = true;
                 }
-            } else {
-                routeInitializedRef.current = true;
+                return;
             }
-        }
-    }, [chatKey, currentSessionId, sessionFromQuery, updateRouteSession]);
 
-    const refreshMessages = useCallback(async () => {
-        if (!chatKey || !currentSessionId) {
-            setAllMessages([]);
-            return;
+            setSessions(loaded);
+
+            if (isDraftSessionRef.current && !currentSessionIdRef.current) {
+                if (!routeInitializedRef.current) {
+                    updateRouteSession(undefined, true);
+                    routeInitializedRef.current = true;
+                }
+                return;
+            }
+
+            const hasQuerySession =
+                sessionFromQuery &&
+                loaded.some(
+                    (session) => session.sessionUuid === sessionFromQuery,
+                );
+
+            const nextSessionId = hasQuerySession
+                ? sessionFromQuery
+                : (currentSessionId ?? loaded[0]?.sessionUuid);
+
+            if (nextSessionId) {
+                setCurrentSessionId(nextSessionId);
+                currentSessionIdRef.current = nextSessionId;
+                setIsDraftSession(false);
+                isDraftSessionRef.current = false;
+                if (nextSessionId !== sessionFromQuery) {
+                    if (!routeInitializedRef.current) {
+                        updateRouteSession(nextSessionId, true);
+                        routeInitializedRef.current = true;
+                    }
+                } else {
+                    routeInitializedRef.current = true;
+                }
+            }
+        } catch (error) {
+            log.error("Failed to refresh sessions", error);
+            showMiniDialog({
+                title: "Chat unavailable",
+                message:
+                    "We could not load your chat data. Please refresh the page.",
+            });
         }
-        const loaded = await listMessages(currentSessionId, chatKey);
-        setAllMessages(loaded);
-    }, [chatKey, currentSessionId]);
+    }, [
+        chatKey,
+        currentSessionId,
+        isDraftSession,
+        sessionFromQuery,
+        updateRouteSession,
+        showMiniDialog,
+    ]);
+
+    const refreshMessages = useCallback(
+        async (sessionId: string | undefined = currentSessionId) => {
+            if (!chatKey || !sessionId) {
+                setAllMessages([]);
+                return;
+            }
+            const activeSessionId = sessionId;
+            const loaded = await listMessages(activeSessionId, chatKey);
+            if (currentSessionIdRef.current !== activeSessionId) return;
+            setAllMessages(loaded);
+        },
+        [chatKey, currentSessionId],
+    );
+
+    const syncNow = useCallback(
+        async ({ showToast = false }: { showToast?: boolean } = {}) => {
+            if (!chatKey) return;
+            const remoteKey = cachedChatKey();
+            const canSync =
+                isLoggedIn && !!remoteKey && remoteKey === chatKey;
+
+            if (canSync) {
+                try {
+                    await syncChat(chatKey);
+                    if (showToast) {
+                        setSyncNotification({
+                            title: "Sync complete",
+                            caption: "Your chats are up to date.",
+                            color: "accent",
+                            autoHideDuration: 3000,
+                        });
+                        setSyncNotificationOpen(true);
+                    }
+                } catch (error) {
+                    log.error("Chat sync failed", error);
+                    if (showToast) {
+                        setSyncNotification({
+                            title: "Sync failed",
+                            caption:
+                                error instanceof ChatSyncLimitError
+                                    ? error.message
+                                    : "We could not sync right now.",
+                            color: "critical",
+                            autoHideDuration: 4000,
+                        });
+                        setSyncNotificationOpen(true);
+                    }
+                    if (error instanceof ChatSyncLimitError) {
+                        showMiniDialog({
+                            title: "Sync limit reached",
+                            message: error.message,
+                        });
+                    }
+                }
+            } else if (showToast) {
+                setSyncNotification({
+                    title: "Sync unavailable",
+                    caption: "Encryption is still initializing.",
+                    color: "critical",
+                    autoHideDuration: 3000,
+                });
+                setSyncNotificationOpen(true);
+            }
+
+            await refreshSessions();
+            await refreshMessages();
+        },
+        [
+            chatKey,
+            isLoggedIn,
+            refreshMessages,
+            refreshSessions,
+            showMiniDialog,
+            setSyncNotification,
+            setSyncNotificationOpen,
+        ],
+    );
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (!chatKey || !isLoggedIn) return;
+        const intervalId = window.setInterval(() => {
+            void syncNow();
+        }, 60_000);
+        return () => {
+            window.clearInterval(intervalId);
+        };
+    }, [chatKey, isLoggedIn, syncNow]);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const handleFocus = () => {
+            void refreshAuthState();
+            if (chatKey && isLoggedIn) {
+                void syncNow();
+            }
+        };
+
+        const handleVisibility = () => {
+            if (!document.hidden) {
+                void refreshAuthState();
+                if (chatKey && isLoggedIn) {
+                    void syncNow();
+                }
+            }
+        };
+
+        window.addEventListener("focus", handleFocus);
+        document.addEventListener("visibilitychange", handleVisibility);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+            document.removeEventListener("visibilitychange", handleVisibility);
+        };
+    }, [chatKey, isLoggedIn, refreshAuthState, syncNow]);
 
     const deleteSessionTarget = useMemo(
         () =>
@@ -602,14 +1109,22 @@ const Page: React.FC = () => {
     }, [deleteSessionTarget]);
 
     useEffect(() => {
+        if (!chatKey) return;
+        if (isLoggedIn) {
+            void syncNow();
+            return;
+        }
         void refreshSessions();
-    }, [refreshSessions]);
+    }, [chatKey, isLoggedIn, refreshSessions, syncNow]);
 
     useEffect(() => {
+        currentSessionIdRef.current = currentSessionId;
         void refreshMessages();
-    }, [refreshMessages]);
+    }, [currentSessionId, refreshMessages]);
+
 
     useEffect(() => {
+        if (isDraftSession) return;
         if (!sessionFromQuery || sessions.length === 0) return;
         if (
             sessionFromQuery !== currentSessionId &&
@@ -617,16 +1132,77 @@ const Page: React.FC = () => {
         ) {
             setCurrentSessionId(sessionFromQuery);
         }
-    }, [currentSessionId, sessionFromQuery, sessions]);
+    }, [currentSessionId, isDraftSession, sessionFromQuery, sessions]);
 
     useEffect(() => {
         setStreamingParentId(null);
         setStreamingText("");
         setIsGenerating(false);
         setPendingDocuments([]);
+        setPendingImages([]);
+        setStickToBottom(true);
         currentJobIdRef.current = null;
         pendingCancelRef.current = false;
     }, [currentSessionId]);
+
+    useEffect(() => {
+        if (!isGenerating || streamingText.trim().length > 0) {
+            setLoadingPhrase(null);
+            setLoadingDots(1);
+            return;
+        }
+
+        setLoadingPhrase((prev) => prev ?? randomLoadingPhrase());
+        const timer = window.setInterval(() => {
+            setLoadingDots((prev) => (prev % 3) + 1);
+        }, 450);
+
+        return () => {
+            window.clearInterval(timer);
+        };
+    }, [isGenerating, streamingText]);
+
+    const inferImageMime = useCallback((name: string) => {
+        const extension = name.split(".").pop()?.toLowerCase();
+        switch (extension) {
+            case "png":
+                return "image/png";
+            case "webp":
+                return "image/webp";
+            case "gif":
+                return "image/gif";
+            case "jpeg":
+            case "jpg":
+                return "image/jpeg";
+            default:
+                return "image/*";
+        }
+    }, []);
+
+    useEffect(() => {
+        const next = { ...pendingPreviewUrlsRef.current };
+        const activeIds = new Set(pendingImages.map((image) => image.id));
+
+        Object.keys(next).forEach((id) => {
+            if (!activeIds.has(id)) {
+                const url = next[id];
+                if (url) {
+                    URL.revokeObjectURL(url);
+                }
+                delete next[id];
+            }
+        });
+
+        pendingImages.forEach((image) => {
+            if (!next[image.id]) {
+                next[image.id] = URL.createObjectURL(image.file);
+            }
+        });
+
+        pendingPreviewUrlsRef.current = next;
+        setPendingImagePreviews(next);
+    }, [pendingImages]);
+
 
     const currentSession = useMemo(
         () => sessions.find((s) => s.sessionUuid === currentSessionId),
@@ -707,17 +1283,164 @@ const Page: React.FC = () => {
 
     const branchSwitchers = messageState.switchers;
 
-    const isDrawerVisible = isSmall ? drawerOpen : !drawerCollapsed;
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container || !stickToBottom) return;
+        container.scrollTo({ top: container.scrollHeight, behavior: "auto" });
+    }, [displayMessages.length, streamingText, isGenerating, stickToBottom]);
+
+    useEffect(() => {
+        if (!chatKey) return;
+        let cancelled = false;
+        const activeIds = new Set<string>();
+
+        displayMessages.forEach((message) => {
+            (message.attachments ?? []).forEach((attachment) => {
+                if (attachment.kind === "image") {
+                    activeIds.add(attachment.id);
+                }
+            });
+        });
+
+        setAttachmentPreviews((prev) => {
+            const next = { ...prev };
+            Object.keys(next).forEach((id) => {
+                if (!activeIds.has(id)) {
+                    const url = next[id];
+                    if (url) {
+                        URL.revokeObjectURL(url);
+                    }
+                    delete next[id];
+                }
+            });
+            attachmentPreviewUrlsRef.current = next;
+            return next;
+        });
+
+        const toLoad: Array<{ id: string; sessionUuid: string; name: string }> = [];
+        displayMessages.forEach((message) => {
+            (message.attachments ?? []).forEach((attachment) => {
+                if (
+                    attachment.kind === "image" &&
+                    !attachmentPreviewUrlsRef.current[attachment.id]
+                ) {
+                    toLoad.push({
+                        id: attachment.id,
+                        sessionUuid: message.sessionUuid,
+                        name: attachment.name,
+                    });
+                }
+            });
+        });
+
+        if (toLoad.length === 0) return;
+
+        void (async () => {
+            const results = await Promise.all(
+                toLoad.map(async (item) => {
+                    try {
+                        await downloadAttachment(item.id);
+                        const bytes = await readDecryptedAttachmentBytes(
+                            item.id,
+                            chatKey,
+                            item.sessionUuid,
+                        );
+                        const blob = new Blob([bytes], {
+                            type: inferImageMime(item.name),
+                        });
+                        const url = URL.createObjectURL(blob);
+                        return { id: item.id, url };
+                    } catch (error) {
+                        log.error("Failed to load image preview", error);
+                        return null;
+                    }
+                }),
+            );
+
+            if (cancelled) {
+                results.forEach((result) => {
+                    if (result?.url) {
+                        URL.revokeObjectURL(result.url);
+                    }
+                });
+                return;
+            }
+
+            setAttachmentPreviews((prev) => {
+                const next = { ...prev };
+                results.forEach((result) => {
+                    if (result?.url) {
+                        next[result.id] = result.url;
+                    }
+                });
+                attachmentPreviewUrlsRef.current = next;
+                return next;
+            });
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [
+        chatKey,
+        displayMessages,
+        downloadAttachment,
+        inferImageMime,
+        readDecryptedAttachmentBytes,
+    ]);
+
     const showDrawerToggle = isSmall || drawerCollapsed;
     const drawerWidth = isSmall ? 300 : drawerCollapsed ? 0 : 320;
+    const desktopBreakpoint = theme.breakpoints.values.lg ?? 1200;
+    const isDesktopOverlay =
+        !isSmall && chatViewportWidth >= desktopBreakpoint;
+    const showAttachmentPicker = isTauriRuntime;
+    const showImageAttachment =
+        showAttachmentPicker && DESKTOP_IMAGE_ATTACHMENTS_ENABLED;
+    const showDownloadProgress =
+        !!downloadStatus?.status && downloadStatus.status !== "Ready";
+    const showModelGate =
+        modelGateStatus === "missing" ||
+        modelGateStatus === "error" ||
+        modelGateStatus === "downloading";
 
-    const appBarTitle =
-        currentSession?.title && currentSession.title !== "New chat"
-            ? currentSession.title
-            : !isDrawerVisible
-              ? "ensu"
-              : "";
-    const isEnsuTitle = appBarTitle.trim().toLowerCase() === "ensu";
+    const downloadSizeLabel = useMemo(() => {
+        if (useCustomModel) {
+            return "Approx. size varies by model";
+        }
+        return DEFAULT_MODEL.sizeHuman
+            ? `Approx. ${DEFAULT_MODEL.sizeHuman}`
+            : "Approx. size varies by model";
+    }, [useCustomModel]);
+
+    const downloadStatusLabel = useMemo(() => {
+        if (!showDownloadProgress) return null;
+        const status = downloadStatus?.status ?? "";
+        if (status.toLowerCase().includes("loading")) {
+            return status;
+        }
+        if (downloadStatus?.totalBytes && downloadStatus.percent >= 0) {
+            const downloaded = downloadStatus.bytesDownloaded ?? 0;
+            return `Downloading... ${formatBytes(downloaded)} / ${formatBytes(downloadStatus.totalBytes)}`;
+        }
+        if (status) return status;
+        return "Downloading...";
+    }, [downloadStatus, showDownloadProgress]);
+
+    const focusInput = useCallback(() => {
+        if (showModelGate) return;
+        if (typeof window === "undefined") return;
+        const target = inputRef.current;
+        if (!target) return;
+        window.requestAnimationFrame(() => {
+            target.focus();
+        });
+    }, [showModelGate]);
+
+    useEffect(() => {
+        if (showSessionSearch) return;
+        focusInput();
+    }, [currentSessionId, isDraftSession, showModelGate, showSessionSearch, focusInput]);
 
     const ensureProvider = useCallback(async () => {
         if (!providerRef.current) {
@@ -732,13 +1455,270 @@ const Page: React.FC = () => {
             useCustomModel,
             modelUrl: modelUrl.trim() ? modelUrl.trim() : undefined,
             mmprojUrl:
-                isTauriRuntime && mmprojUrl.trim()
+                allowMmproj && mmprojUrl.trim()
                     ? mmprojUrl.trim()
                     : undefined,
             contextLength: contextLength ? Number(contextLength) : undefined,
             maxTokens: maxTokens ? Number(maxTokens) : undefined,
         };
-    }, [useCustomModel, modelUrl, mmprojUrl, contextLength, maxTokens, isTauriRuntime]);
+    }, [useCustomModel, modelUrl, mmprojUrl, contextLength, maxTokens, allowMmproj]);
+
+    const modelSettingsKey = useMemo(
+        () => JSON.stringify(getModelSettings()),
+        [getModelSettings],
+    );
+
+    const formatErrorMessage = useCallback((error: unknown) => {
+        if (error instanceof Error) return error.message;
+        if (typeof error === "string") return error;
+        if (error && typeof error === "object") {
+            const maybeMessage = (error as { message?: unknown }).message;
+            if (typeof maybeMessage === "string" && maybeMessage.trim()) {
+                return maybeMessage;
+            }
+            if ("__wbg_ptr" in error) {
+                return "Model failed to start. Please refresh and try again.";
+            }
+            const text = String(error);
+            if (text && text !== "[object Object]") {
+                return text;
+            }
+        }
+        try {
+            return JSON.stringify(error);
+        } catch {
+            return String(error);
+        }
+    }, []);
+
+    const trimToWords = useCallback((text: string, maxWords: number) => {
+        const normalized = text.replace(/\u0000/g, "").replace(/\s+/g, " ").trim();
+        if (!normalized) return "";
+        const words = normalized.split(" ").filter(Boolean);
+        return words.slice(0, maxWords).join(" ");
+    }, []);
+
+    const writeInferenceImages = useCallback(
+        async (images: ImageAttachment[]) => {
+            if (!isTauriRuntime || images.length === 0) return [] as string[];
+            const { appDataDir, join } = await import("@tauri-apps/api/path");
+            const { createDir, writeBinaryFile } = await import(
+                "@tauri-apps/api/fs"
+            );
+            const root = await appDataDir();
+            const dir = await join(root, "ensu_llmchat_inference_images");
+            await createDir(dir, { recursive: true });
+
+            const paths = await Promise.all(
+                images.map(async (image) => {
+                    const extension = image.name.split(".").pop();
+                    const suffix = extension ? `.${extension}` : ".jpg";
+                    const path = await join(dir, `${image.id}${suffix}`);
+                    const bytes = new Uint8Array(
+                        await image.file.arrayBuffer(),
+                    );
+                    await writeBinaryFile({ path, contents: bytes });
+                    return path;
+                }),
+            );
+
+            return paths;
+        },
+        [isTauriRuntime],
+    );
+
+    const cleanupInferenceImages = useCallback(async (paths: string[]) => {
+        if (!isTauriRuntime || paths.length === 0) return;
+        const { removeFile } = await import("@tauri-apps/api/fs");
+        await Promise.all(
+            paths.map(async (path) => {
+                try {
+                    await removeFile(path);
+                } catch {
+                    // ignore cleanup failures
+                }
+            }),
+        );
+    }, [isTauriRuntime]);
+
+    const generateSessionSummary = useCallback(
+        async (input: string) => {
+            const provider = await ensureProvider();
+            const settings = getModelSettings();
+            const availability = await provider.checkModelAvailability(settings);
+            const mmprojReady =
+                availability.mmprojAvailable === undefined ||
+                availability.mmprojAvailable;
+
+            if (!availability.modelAvailable || !mmprojReady) {
+                return null;
+            }
+
+            await provider.ensureModelReady(settings);
+
+            let summary = "";
+            let errorMessage: string | null = null;
+
+            await provider.generateChatStream(
+                {
+                    messages: [
+                        { role: "system", content: SESSION_TITLE_PROMPT },
+                        { role: "user", content: input },
+                    ],
+                    maxTokens: 64,
+                    temperature: 0.2,
+                    topP: 0.9,
+                },
+                (event) => {
+                    if (event.type === "text") {
+                        summary += event.text;
+                        return;
+                    }
+                    if (event.type === "error") {
+                        errorMessage = event.message;
+                    }
+                },
+            );
+
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+
+            return summary;
+        },
+        [ensureProvider, getModelSettings],
+    );
+
+    const maybeGenerateSessionTitle = useCallback(
+        async ({
+            sessionUuid,
+            assistantMessageUuid,
+            wasInterrupted,
+        }: {
+            sessionUuid: string;
+            assistantMessageUuid: string;
+            wasInterrupted: boolean;
+        }) => {
+            if (!chatKey || wasInterrupted) return;
+            if (sessionSummaryInFlightRef.current) return;
+            sessionSummaryInFlightRef.current = true;
+
+            try {
+                const messages = await listMessages(sessionUuid, chatKey);
+                const assistantMessages = messages.filter(
+                    (message) => message.sender === "assistant",
+                );
+                if (assistantMessages.length !== 1) return;
+
+                const firstAssistant = assistantMessages[0];
+                if (!firstAssistant) return;
+                if (firstAssistant.messageUuid !== assistantMessageUuid) return;
+
+                const firstUser = messages.find(
+                    (message) => message.sender === "self",
+                );
+                if (!firstUser) return;
+
+                const userText = parseDocumentBlocks(firstUser.text).text;
+                const assistantText = stripHiddenParts(firstAssistant.text);
+
+                const fallbackSeed =
+                    trimToWords(userText, 7) || "New chat";
+                const fallbackTitle = sessionTitleFromText(
+                    fallbackSeed,
+                    "New chat",
+                );
+
+                const summaryInput = `User: ${userText}\nAssistant: ${assistantText}`;
+                const summary = await generateSessionSummary(summaryInput);
+                const summarySeed = summary
+                    ? trimToWords(summary, 7)
+                    : "";
+                const title = summarySeed
+                    ? sessionTitleFromText(summarySeed, fallbackTitle)
+                    : fallbackTitle;
+
+                await updateSessionTitle(sessionUuid, title, chatKey);
+                await refreshSessions();
+            } catch (error) {
+                log.error("Failed to generate session title", error);
+            } finally {
+                sessionSummaryInFlightRef.current = false;
+            }
+        },
+        [
+            chatKey,
+            generateSessionSummary,
+            refreshSessions,
+            trimToWords,
+        ],
+    );
+
+    const preloadModelIfAvailable = useCallback(async () => {
+        setModelGateError(null);
+        setModelGateStatus("checking");
+
+        try {
+            const provider = await ensureProvider();
+            const settings = getModelSettings();
+            const availability = await provider.checkModelAvailability(settings);
+            const mmprojReady =
+                availability.mmprojAvailable === undefined ||
+                availability.mmprojAvailable;
+
+            if (!availability.modelAvailable || !mmprojReady) {
+                setModelGateStatus("missing");
+                return;
+            }
+
+            setModelGateStatus("preloading");
+            setDownloadStatus({ percent: 0, status: "Loading model..." });
+            setIsDownloading(true);
+
+            await provider.ensureModelReady(settings);
+            setLoadedModelName(provider.getCurrentModel()?.name ?? null);
+            setIsDownloading(false);
+            setDownloadStatus({ percent: 100, status: "Ready" });
+            setModelGateStatus("ready");
+        } catch (error) {
+            const message = formatErrorMessage(error);
+            log.error("Failed to preload model", error);
+            setModelGateError(message);
+            setIsDownloading(false);
+            setModelGateStatus("error");
+        }
+    }, [ensureProvider, formatErrorMessage, getModelSettings]);
+
+    const handleDownloadModel = useCallback(async () => {
+        setModelGateError(null);
+        setModelGateStatus("downloading");
+        setDownloadStatus({ percent: 0, status: "Preparing download..." });
+        setIsDownloading(true);
+
+        try {
+            const provider = await ensureProvider();
+            const settings = getModelSettings();
+            await provider.ensureModelReady(settings);
+            setLoadedModelName(provider.getCurrentModel()?.name ?? null);
+            setIsDownloading(false);
+            setDownloadStatus({ percent: 100, status: "Ready" });
+            setModelGateStatus("ready");
+        } catch (error) {
+            const message = formatErrorMessage(error);
+            log.error("Failed to prepare model", error);
+            setModelGateError(message);
+            setIsDownloading(false);
+            setModelGateStatus("error");
+            showMiniDialog({
+                title: "Model error",
+                message,
+            });
+        }
+    }, [ensureProvider, formatErrorMessage, getModelSettings, showMiniDialog]);
+
+    useEffect(() => {
+        void preloadModelIfAvailable();
+    }, [modelSettingsKey, preloadModelIfAvailable]);
 
     const updateBranchSelectionState = useCallback(
         (selectionKey: string, selectedMessageUuid: string, persist = true) => {
@@ -778,6 +1758,7 @@ const Page: React.FC = () => {
 
     const stripHiddenParts = useCallback((text: string) => {
         return text
+            .replace(/\u0000/g, "")
             .replace(/<think>[\s\S]*?<\/think>/g, "")
             .replace(/<todo_list>[\s\S]*?<\/todo_list>/g, "")
             .trim();
@@ -788,14 +1769,49 @@ const Page: React.FC = () => {
         return Math.ceil(text.length / 4);
     }, []);
 
+    const loadMessageDocuments = useCallback(
+        async (message: ChatMessage): Promise<DocumentAttachment[]> => {
+            if (!chatKey) return [];
+            const attachments = (message.attachments ?? []).filter(
+                (attachment) => attachment.kind === "document",
+            );
+            if (attachments.length === 0) return [];
+
+            try {
+                const docs = await Promise.all(
+                    attachments.map(async (attachment) => {
+                        await downloadAttachment(attachment.id);
+                        const bytes = await readDecryptedAttachmentBytes(
+                            attachment.id,
+                            chatKey,
+                            message.sessionUuid,
+                        );
+                        const text = new TextDecoder().decode(bytes);
+                        return {
+                            id: attachment.id,
+                            name: attachment.name,
+                            text: text.replace(/\u0000/g, ""),
+                            size: bytes.length,
+                        } satisfies DocumentAttachment;
+                    }),
+                );
+                return docs;
+            } catch (error) {
+                log.error("Failed to load attachment contents", error);
+                return [];
+            }
+        },
+        [chatKey, downloadAttachment, readDecryptedAttachmentBytes],
+    );
+
     const buildHistory = useCallback(
-        (
+        async (
             path: ChatMessage[],
             promptText: string,
             contextSize: number,
             maxTokensCount: number,
             stopAtMessageUuid?: string | null,
-        ): LlmMessage[] => {
+        ): Promise<LlmMessage[]> => {
             const candidates = slicePathUntil(path, stopAtMessageUuid);
             const lastCandidate = candidates[candidates.length - 1];
             const trimmedCandidates =
@@ -818,9 +1834,25 @@ const Page: React.FC = () => {
                 const message = trimmedCandidates[idx];
                 if (!message) continue;
                 const isUser = message.sender === "self";
-                const text = isUser
-                    ? message.text
-                    : stripHiddenParts(message.text);
+                let text = isUser ? message.text : stripHiddenParts(message.text);
+
+                if (isUser) {
+                    const parsed = parseDocumentBlocks(text);
+                    if (parsed.documents.length === 0) {
+                        const docs = await loadMessageDocuments(message);
+                        if (docs.length > 0) {
+                            text = buildPromptWithDocuments(text, docs);
+                        }
+                    }
+
+                    const imageCount = (message.attachments ?? []).filter(
+                        (attachment) => attachment.kind === "image",
+                    ).length;
+                    if (imageCount > 0) {
+                        text += `\n\n[${imageCount} attachment${imageCount === 1 ? "" : "s"} attached]`;
+                    }
+                }
+
                 const cost = approxTokens(text);
 
                 if (used + cost > budget) {
@@ -844,25 +1876,44 @@ const Page: React.FC = () => {
 
             return selected.reverse();
         },
-        [approxTokens, slicePathUntil, stripHiddenParts],
+        [
+            approxTokens,
+            loadMessageDocuments,
+            slicePathUntil,
+            stripHiddenParts,
+        ],
     );
 
-    const handleNewChat = useCallback(async () => {
-        if (!chatKey) return;
-        const sessionId = await createSession(chatKey);
-        await refreshSessions();
-        setCurrentSessionId(sessionId);
-        updateRouteSession(sessionId);
+
+    const handleNewChat = useCallback(() => {
+        setCurrentSessionId(undefined);
+        currentSessionIdRef.current = undefined;
+        setAllMessages([]);
+        setInput("");
+        setEditingMessage(null);
+        setPendingDocuments([]);
+        setPendingImages([]);
+        setStreamingParentId(null);
+        setStreamingText("");
+        setIsGenerating(false);
+        setIsDraftSession(true);
+        isDraftSessionRef.current = true;
+        updateRouteSession(undefined, true);
         if (isSmall) setDrawerOpen(false);
-    }, [chatKey, refreshSessions, isSmall, updateRouteSession]);
+        focusInput();
+    }, [focusInput, isSmall, updateRouteSession]);
 
     const handleSelectSession = useCallback(
         (sessionId: string) => {
             setCurrentSessionId(sessionId);
+            currentSessionIdRef.current = sessionId;
+            setIsDraftSession(false);
+            isDraftSessionRef.current = false;
             updateRouteSession(sessionId);
             if (isSmall) setDrawerOpen(false);
+            focusInput();
         },
-        [isSmall, updateRouteSession],
+        [focusInput, isSmall, updateRouteSession],
     );
 
     const handleDeleteSession = useCallback(
@@ -870,6 +1921,7 @@ const Page: React.FC = () => {
             if (!chatKey) return;
             await deleteSession(sessionId, chatKey);
             await refreshSessions();
+            void syncChat(chatKey);
             if (sessionId === currentSessionId) {
                 const refreshed = await listSessions(chatKey);
                 const nextSession = refreshed[0];
@@ -877,13 +1929,19 @@ const Page: React.FC = () => {
                     setCurrentSessionId(nextSession.sessionUuid);
                     updateRouteSession(nextSession.sessionUuid, true);
                 } else {
-                    const newSessionId = await createSession(chatKey);
-                    setCurrentSessionId(newSessionId);
-                    updateRouteSession(newSessionId, true);
+                    setCurrentSessionId(undefined);
+                    setAllMessages([]);
+                    updateRouteSession(undefined, true);
                 }
             }
         },
-        [chatKey, currentSessionId, refreshSessions, updateRouteSession],
+        [
+            chatKey,
+            currentSessionId,
+            refreshSessions,
+            syncChat,
+            updateRouteSession,
+        ],
     );
 
     const requestDeleteSession = useCallback((sessionId: string) => {
@@ -900,36 +1958,197 @@ const Page: React.FC = () => {
         setDeleteSessionId(null);
     }, []);
 
-    const handleEditMessage = useCallback((message: ChatMessage) => {
-        const parsed = parseDocumentBlocks(message.text);
-        setEditingMessage(message);
-        setInput(parsed.text);
-        setPendingDocuments(parsed.documents);
-    }, []);
+    const handleEditMessage = useCallback(
+        async (message: ChatMessage) => {
+            const parsed = parseDocumentBlocks(message.text);
+            setEditingMessage(message);
+            setInput(parsed.text);
+
+            if (parsed.documents.length > 0) {
+                setPendingDocuments(parsed.documents);
+                return;
+            }
+
+            const attachments = message.attachments ?? [];
+            if (attachments.length === 0) {
+                setPendingDocuments([]);
+                return;
+            }
+
+            if (!chatKey) {
+                showMiniDialog({
+                    title: "Attachment error",
+                    message:
+                        "Attachments are unavailable until encryption is ready.",
+                });
+                setPendingDocuments([]);
+                return;
+            }
+
+            try {
+                const docs = await Promise.all(
+                    attachments.map(async (attachment) => {
+                        await downloadAttachment(attachment.id);
+                        const bytes = await readDecryptedAttachmentBytes(
+                            attachment.id,
+                            chatKey,
+                            message.sessionUuid,
+                        );
+                        return {
+                            id: attachment.id,
+                            name: attachment.name,
+                            text: new TextDecoder().decode(bytes),
+                            size: bytes.length,
+                        } satisfies DocumentAttachment;
+                    }),
+                );
+                setPendingDocuments(docs);
+            } catch (error) {
+                log.error("Failed to load attachment contents", error);
+                showMiniDialog({
+                    title: "Attachment error",
+                    message:
+                        "We could not load attachment contents for editing.",
+                });
+                setPendingDocuments([]);
+            }
+        },
+        [
+            chatKey,
+            downloadAttachment,
+            readDecryptedAttachmentBytes,
+            showMiniDialog,
+        ],
+    );
 
     const handleCancelEdit = useCallback(() => {
         setEditingMessage(null);
         setInput("");
         setPendingDocuments([]);
+        setPendingImages([]);
     }, []);
 
-    const handleCopyMessage = useCallback(async (text: string) => {
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch (error) {
-            log.error("Failed to copy message", error);
+    const showToast = useCallback((attributes: NotificationAttributes) => {
+        setSyncNotification(attributes);
+        setSyncNotificationOpen(true);
+    }, []);
+
+    const handleCopyMessage = useCallback(
+        async (text: string) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast({
+                    title: "Copied to clipboard.",
+                    color: "inherit",
+                    autoHideDuration: 2000,
+                });
+            } catch (error) {
+                log.error("Failed to copy message", error);
+                showToast({
+                    title: "Copy failed.",
+                    color: "inherit",
+                    autoHideDuration: 3000,
+                });
+            }
+        },
+        [showToast],
+    );
+
+    const handleDownloadAttachment = useCallback(
+        async (message: ChatMessage, attachment: ChatAttachment) => {
+            if (!chatKey) return;
+
+            try {
+                await downloadAttachment(attachment.id);
+                const bytes = await readDecryptedAttachmentBytes(
+                    attachment.id,
+                    chatKey,
+                    message.sessionUuid,
+                );
+
+                const filename =
+                    attachment.name || `attachment-${attachment.id}`;
+
+                if (attachment.kind === "document") {
+                    const text = new TextDecoder().decode(bytes);
+                    saveStringAsFile(text, filename);
+                    return;
+                }
+
+                const blob = new Blob([bytes]);
+                const url = URL.createObjectURL(blob);
+                saveAsFileAndRevokeObjectURL(url, filename);
+            } catch (error) {
+                log.error("Failed to download attachment", error);
+                showMiniDialog({
+                    title: "Attachment download failed",
+                    message:
+                        "We could not download this attachment. Please try again.",
+                });
+            }
+        },
+        [
+            chatKey,
+            downloadAttachment,
+            readDecryptedAttachmentBytes,
+            saveAsFileAndRevokeObjectURL,
+            saveStringAsFile,
+            showMiniDialog,
+        ],
+    );
+
+    const flushStreamingText = useCallback(() => {
+        if (streamingFlushTimerRef.current) {
+            window.clearTimeout(streamingFlushTimerRef.current);
+            streamingFlushTimerRef.current = null;
         }
+        setStreamingText(streamingBufferRef.current);
+    }, []);
+
+    const scheduleStreamingFlush = useCallback(() => {
+        if (streamingFlushTimerRef.current) return;
+        streamingFlushTimerRef.current = window.setTimeout(() => {
+            setStreamingText(streamingBufferRef.current);
+            streamingFlushTimerRef.current = null;
+        }, 50);
     }, []);
 
     const handleStopGeneration = useCallback(() => {
-        const provider = providerRef.current;
         const jobId = currentJobIdRef.current;
-        if (provider && jobId) {
-            provider.cancelGeneration(jobId);
-        } else {
-            pendingCancelRef.current = true;
+        pendingCancelRef.current = true;
+        stopRequestedRef.current = true;
+        generationTokenRef.current += 1;
+
+        const last = lastGenerationRef.current;
+        if (last?.previousSelection) {
+            updateBranchSelectionState(
+                last.parentMessageUuid,
+                last.previousSelection,
+            );
         }
-    }, []);
+
+        setIsGenerating(false);
+        setIsDownloading(false);
+        setStreamingParentId(null);
+        streamingBufferRef.current = "";
+        setStreamingText("");
+        currentJobIdRef.current = null;
+
+        const provider = providerRef.current;
+        if (provider) {
+            provider.cancelGeneration(jobId ?? -1);
+            return;
+        }
+
+        void (async () => {
+            try {
+                const ensured = await ensureProvider();
+                ensured.cancelGeneration(jobId ?? -1);
+            } catch (error) {
+                log.error("Failed to cancel generation", error);
+            }
+        })();
+    }, [ensureProvider, updateBranchSelectionState]);
 
     const startGeneration = useCallback(
         async ({
@@ -938,21 +2157,49 @@ const Page: React.FC = () => {
             historyPath,
             stopAtMessageUuid,
             resetContext = false,
+            sessionUuid,
+            imagePaths,
+            mediaMarker,
         }: {
             promptText: string;
             parentMessageUuid: string;
             historyPath: ChatMessage[];
             stopAtMessageUuid?: string | null;
             resetContext?: boolean;
+            sessionUuid?: string;
+            imagePaths?: string[];
+            mediaMarker?: string;
         }) => {
-            if (!chatKey || !currentSessionId) return;
+            const activeSessionId =
+                sessionUuid ?? currentSessionIdRef.current ?? currentSessionId;
+            if (!chatKey || !activeSessionId) return;
+
+            if (pendingCancelRef.current) {
+                pendingCancelRef.current = false;
+            }
+            stopRequestedRef.current = false;
+
+            const generationToken = generationTokenRef.current + 1;
+            generationTokenRef.current = generationToken;
+
+            const isActiveGeneration = () =>
+                generationTokenRef.current === generationToken &&
+                currentSessionIdRef.current === activeSessionId;
 
             const provider = await ensureProvider();
             const settings = getModelSettings();
             const { contextSize, maxTokens } =
                 provider.resolveRuntimeSettings(settings);
 
+            if (!isActiveGeneration()) {
+                return;
+            }
+
             const previousSelection = branchSelections[parentMessageUuid];
+            lastGenerationRef.current = {
+                parentMessageUuid,
+                previousSelection,
+            };
 
             updateBranchSelectionState(
                 parentMessageUuid,
@@ -961,9 +2208,9 @@ const Page: React.FC = () => {
             );
             setStreamingParentId(parentMessageUuid);
             setStreamingText("");
+            streamingBufferRef.current = "";
             setIsGenerating(true);
             currentJobIdRef.current = null;
-            pendingCancelRef.current = false;
 
             let buffer = "";
             let errorMessage: string | null = null;
@@ -974,41 +2221,86 @@ const Page: React.FC = () => {
                 setIsDownloading(false);
                 setDownloadStatus({ percent: 100, status: "Ready" });
 
+                if (!isActiveGeneration()) {
+                    return;
+                }
+
                 if (resetContext) {
                     await provider.resetContext(contextSize);
                 }
 
                 const history =
-                    buildHistory(
+                    (await buildHistory(
                         historyPath,
                         promptText,
                         contextSize,
                         maxTokens,
                         stopAtMessageUuid,
-                    ) ?? [];
+                    )) ?? [];
 
                 const messages: LlmMessage[] = [
+                    { role: "system", content: CHAT_SYSTEM_PROMPT },
                     ...history,
                     { role: "user", content: promptText },
                 ];
 
+                if (pendingCancelRef.current || stopRequestedRef.current) {
+                    pendingCancelRef.current = false;
+                    stopRequestedRef.current = false;
+                    provider.cancelGeneration(-1);
+                    if (previousSelection) {
+                        updateBranchSelectionState(
+                            parentMessageUuid,
+                            previousSelection,
+                        );
+                    }
+                    setIsGenerating(false);
+                    setIsDownloading(false);
+                    setStreamingParentId(null);
+                    streamingBufferRef.current = "";
+                    setStreamingText("");
+                    currentJobIdRef.current = null;
+                    return;
+                }
+
+                const hasImages =
+                    (imagePaths?.length ?? 0) > 0 &&
+                    provider.getBackendKind() === "tauri";
+                const mmprojPath = hasImages
+                    ? provider.getCurrentMmprojPath()
+                    : undefined;
+                if (hasImages && !mmprojPath) {
+                    throw new Error("MMProj model not available");
+                }
+
                 await provider.generateChatStream(
                     {
                         messages,
+                        imagePaths: hasImages ? imagePaths : undefined,
+                        mmprojPath,
+                        mediaMarker: hasImages
+                            ? mediaMarker ?? MEDIA_MARKER
+                            : undefined,
                         maxTokens,
                         temperature: 0.7,
                         topP: 0.9,
                     },
                     (event: GenerateEvent) => {
+                        if (!isActiveGeneration()) {
+                            return;
+                        }
                         if (event.type === "text") {
                             if (!currentJobIdRef.current) {
                                 currentJobIdRef.current = event.job_id;
                                 if (pendingCancelRef.current) {
+                                    pendingCancelRef.current = false;
                                     provider.cancelGeneration(event.job_id);
+                                    return;
                                 }
                             }
                             buffer += event.text;
-                            setStreamingText(buffer);
+                            streamingBufferRef.current = buffer;
+                            scheduleStreamingFlush();
                         } else if (event.type === "error") {
                             errorMessage = event.message;
                         } else if (event.type === "done") {
@@ -1016,6 +2308,12 @@ const Page: React.FC = () => {
                         }
                     },
                 );
+
+                if (!isActiveGeneration()) {
+                    return;
+                }
+
+                flushStreamingText();
 
                 if (!buffer.trim()) {
                     if (errorMessage) {
@@ -1034,9 +2332,9 @@ const Page: React.FC = () => {
                 }
 
                 const assistantUuid = await addMessage(
-                    currentSessionId,
+                    activeSessionId,
                     "assistant",
-                    buffer,
+                    buffer.replace(/\u0000/g, ""),
                     chatKey,
                     parentMessageUuid,
                 );
@@ -1044,10 +2342,18 @@ const Page: React.FC = () => {
                 updateBranchSelectionState(parentMessageUuid, assistantUuid);
 
                 await refreshSessions();
-                await refreshMessages();
+                await refreshMessages(activeSessionId);
+                void syncChat(chatKey);
+                void maybeGenerateSessionTitle({
+                    sessionUuid: activeSessionId,
+                    assistantMessageUuid: assistantUuid,
+                    wasInterrupted: !!errorMessage,
+                });
             } catch (error) {
-                const message =
-                    error instanceof Error ? error.message : String(error);
+                if (!isActiveGeneration()) {
+                    return;
+                }
+                const message = formatErrorMessage(error);
                 showMiniDialog({
                     title: "Model error",
                     message,
@@ -1059,9 +2365,13 @@ const Page: React.FC = () => {
                     );
                 }
             } finally {
+                if (!isActiveGeneration()) {
+                    return;
+                }
                 setIsGenerating(false);
                 setIsDownloading(false);
                 setStreamingParentId(null);
+                streamingBufferRef.current = "";
                 setStreamingText("");
                 currentJobIdRef.current = null;
                 pendingCancelRef.current = false;
@@ -1078,6 +2388,10 @@ const Page: React.FC = () => {
             refreshMessages,
             refreshSessions,
             showMiniDialog,
+            syncChat,
+            scheduleStreamingFlush,
+            flushStreamingText,
+            maybeGenerateSessionTitle,
         ],
     );
 
@@ -1124,6 +2438,7 @@ const Page: React.FC = () => {
                 historyPath,
                 stopAtMessageUuid: parentUuid,
                 resetContext: true,
+                sessionUuid: currentSessionId ?? undefined,
             });
         },
         [
@@ -1163,15 +2478,6 @@ const Page: React.FC = () => {
         [updateBranchSelectionState],
     );
 
-    const openSettingsPage = useCallback(
-        () => setDrawerView("settings"),
-        [],
-    );
-    const closeSettingsPage = useCallback(
-        () => setDrawerView("sessions"),
-        [],
-    );
-
     const handleOpenDrawer = useCallback(() => {
         if (isSmall) {
             setDrawerOpen(true);
@@ -1186,36 +2492,131 @@ const Page: React.FC = () => {
         } else {
             setDrawerCollapsed(true);
         }
-        setDrawerView("sessions");
     }, [isSmall]);
 
     const handleCollapseDrawer = useCallback(() => {
         handleCloseDrawer();
     }, [handleCloseDrawer]);
 
-    const openDevSettings = useCallback(() => setShowDevSettings(true), []);
-    const closeDevSettings = useCallback(() => setShowDevSettings(false), []);
+    const openSettingsModal = useCallback(
+        () => setShowSettingsModal(true),
+        [],
+    );
+    const closeSettingsModal = useCallback(
+        () => setShowSettingsModal(false),
+        [],
+    );
 
-    const viewLogs = useCallback(async () => {
-        log.info("Viewing logs");
-        const electron = globalThis.electron;
-        if (electron) {
-            await electron.openLogDirectory();
-        } else {
-            saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+    const openDeveloperMenu = useCallback(() => {
+        if (!DEVELOPER_SETTINGS_ENABLED) return;
+        setShowDeveloperMenu(true);
+    }, []);
+    const closeDeveloperMenu = useCallback(
+        () => setShowDeveloperMenu(false),
+        [],
+    );
+
+    const handleLogoClick = useCallback(() => {
+        if (typeof window === "undefined") return;
+        if (!DEVELOPER_SETTINGS_ENABLED) return;
+        if (logoClickTimeoutRef.current) {
+            window.clearTimeout(logoClickTimeoutRef.current);
+        }
+        logoClickCountRef.current += 1;
+        if (logoClickCountRef.current >= 5) {
+            logoClickCountRef.current = 0;
+            openDeveloperMenu();
+            return;
+        }
+        logoClickTimeoutRef.current = window.setTimeout(() => {
+            logoClickCountRef.current = 0;
+        }, 1500);
+    }, [openDeveloperMenu]);
+
+    const markUserScrollIntent = useCallback(() => {
+        userScrollIntentRef.current = true;
+        if (userScrollTimeoutRef.current) {
+            window.clearTimeout(userScrollTimeoutRef.current);
+        }
+        userScrollTimeoutRef.current = window.setTimeout(() => {
+            userScrollIntentRef.current = false;
+            userScrollTimeoutRef.current = null;
+        }, 200);
+    }, []);
+
+    const handleScroll = useCallback(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+        const distance =
+            container.scrollHeight -
+            container.scrollTop -
+            container.clientHeight;
+        const atBottom = distance <= 120;
+        const previousTop = lastScrollTopRef.current;
+        const currentTop = container.scrollTop;
+        lastScrollTopRef.current = currentTop;
+
+        if (
+            currentTop < previousTop - 4 &&
+            userScrollIntentRef.current &&
+            !atBottom
+        ) {
+            setStickToBottom(false);
+            return;
+        }
+
+        if (atBottom) {
+            setStickToBottom(true);
         }
     }, []);
 
-    const confirmViewLogs = useCallback(
-        () =>
-            showMiniDialog({
-                title: "View logs",
-                message:
-                    "This will download the debug logs that you can share with support.",
-                continue: { text: "View logs", action: viewLogs },
-            }),
-        [showMiniDialog, viewLogs],
-    );
+    const handleOpenSessionSearch = useCallback(() => {
+        setShowSessionSearch(true);
+    }, []);
+    const handleCloseSessionSearch = useCallback(() => {
+        setSessionSearch("");
+        setShowSessionSearch(false);
+    }, []);
+
+    const openDevSettings = useCallback(() => setShowDevSettings(true), []);
+    const closeDevSettings = useCallback(() => setShowDevSettings(false), []);
+
+    const saveLogs = useCallback(async () => {
+        log.info("Saving logs");
+        const electron = globalThis.electron;
+        if (electron) {
+            await electron.openLogDirectory();
+            return;
+        }
+
+        if (isTauriRuntime) {
+            try {
+                const filename = `ensu-web-logs-${Date.now()}.txt`;
+                const path = await save({
+                    defaultPath: filename,
+                    filters: [
+                        {
+                            name: "Logs",
+                            extensions: ["txt"],
+                        },
+                    ],
+                });
+                if (!path) return;
+                await writeTextFile({ path, contents: savedLogs() });
+                return;
+            } catch (error) {
+                log.error("Failed to export logs", error);
+                showMiniDialog({
+                    title: "Save logs failed",
+                    message:
+                        "We could not save the log file. Please check the console for errors.",
+                });
+                return;
+            }
+        }
+
+        saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+    }, [isTauriRuntime, showMiniDialog]);
 
     const openModelSettings = useCallback(() => setShowModelSettings(true), []);
     const closeModelSettings = useCallback(
@@ -1347,18 +2748,11 @@ const Page: React.FC = () => {
     const handleFillSuggestion = useCallback(
         (url: string, mmproj?: string) => {
             setModelUrl(url);
-            setMmprojUrl(isTauriRuntime ? mmproj ?? "" : "");
+            setMmprojUrl(allowMmproj ? mmproj ?? "" : "");
             setModelUrlError(null);
             setMmprojError(null);
         },
-        [isTauriRuntime],
-    );
-
-    const openAttachmentMenu = useCallback(
-        (event: React.MouseEvent<HTMLElement>) => {
-            setAttachmentAnchor(event.currentTarget);
-        },
-        [],
+        [allowMmproj],
     );
 
     const closeAttachmentMenu = useCallback(() => {
@@ -1415,24 +2809,64 @@ const Page: React.FC = () => {
         onCancel: handleDocumentCancel,
     });
 
+    const handleImageSelect = useCallback(
+        (files: File[]) => {
+            closeAttachmentMenu();
+            const images = files.map((file) => ({
+                id: createAttachmentId(),
+                name: file.name,
+                size: file.size,
+                file,
+            }));
+            if (images.length) {
+                setPendingImages((prev) => [...prev, ...images]);
+            }
+        },
+        [closeAttachmentMenu],
+    );
+
+    const handleImageCancel = useCallback(() => {
+        closeAttachmentMenu();
+    }, [closeAttachmentMenu]);
+
+    const {
+        getInputProps: getImageInputProps,
+        openSelector: openImageSelector,
+    } = useFileInput({
+        directory: false,
+        accept: "image/*",
+        onSelect: handleImageSelect,
+        onCancel: handleImageCancel,
+    });
+
+    const openAttachmentMenu = useCallback(() => {
+        closeAttachmentMenu();
+        if (showImageAttachment) {
+            openImageSelector();
+            return;
+        }
+        openDocumentSelector();
+    }, [closeAttachmentMenu, openDocumentSelector, openImageSelector, showImageAttachment]);
+
     const handleAttachmentChoice = useCallback(
         (choice: "image" | "document") => {
             if (choice === "image") {
-                showMiniDialog({
-                    title: "Images not supported",
-                    message:
-                        "Image attachments are not supported in Ensu web yet.",
-                });
+                closeAttachmentMenu();
+                openImageSelector();
             } else {
                 closeAttachmentMenu();
                 openDocumentSelector();
             }
         },
-        [closeAttachmentMenu, openDocumentSelector, showMiniDialog],
+        [closeAttachmentMenu, openDocumentSelector, openImageSelector],
     );
 
     const removePendingDocument = useCallback((id: string) => {
         setPendingDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    }, []);
+
+    const removePendingImage = useCallback((id: string) => {
+        setPendingImages((prev) => prev.filter((img) => img.id !== id));
     }, []);
 
     const handleLogout = useCallback(
@@ -1451,13 +2885,26 @@ const Page: React.FC = () => {
     );
 
     const openLoginFromChat = useCallback(() => {
+        if (!SIGN_IN_ENABLED) {
+            setShowComingSoon(true);
+            return;
+        }
         void router.push("/login");
     }, [router]);
 
     const handleSend = useCallback(async () => {
         const trimmed = input.trim();
         const hasDocuments = pendingDocuments.length > 0;
-        if ((!trimmed && !hasDocuments) || !chatKey || !currentSessionId) {
+        const hasImages = pendingImages.length > 0;
+        if (!chatKey) {
+            showMiniDialog({
+                title: "Chat unavailable",
+                message:
+                    "Encryption is still initializing. Please try again in a moment.",
+            });
+            return;
+        }
+        if (!trimmed && !hasDocuments && !hasImages) {
             return;
         }
         if (isDownloading) {
@@ -1475,9 +2922,97 @@ const Page: React.FC = () => {
             return;
         }
 
+        const container = scrollContainerRef.current;
+        if (container) {
+            setStickToBottom(true);
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: "auto",
+            });
+        } else {
+            setStickToBottom(true);
+        }
+
+        let activeSessionId = currentSessionId;
+        if (!activeSessionId) {
+            activeSessionId = await createSession(chatKey);
+            setCurrentSessionId(activeSessionId);
+            currentSessionIdRef.current = activeSessionId;
+            setIsDraftSession(false);
+            isDraftSessionRef.current = false;
+            updateRouteSession(activeSessionId, true);
+            await refreshSessions();
+        }
+
         const messageText = buildPromptWithDocuments(
-            trimmed,
+            trimmed.replace(/\u0000/g, ""),
             pendingDocuments,
+        );
+
+        let attachments: ChatAttachment[] = [];
+        if (pendingDocuments.length > 0 || pendingImages.length > 0) {
+            try {
+                const encoder = new TextEncoder();
+                const documentAttachments = await Promise.all(
+                    pendingDocuments.map(async (doc) => {
+                        const bytes = encoder.encode(doc.text);
+                        await storeEncryptedAttachmentBytes(
+                            doc.id,
+                            bytes,
+                            chatKey,
+                            activeSessionId,
+                        );
+                        return {
+                            id: doc.id,
+                            kind: "document",
+                            name: doc.name,
+                            size: bytes.length,
+                        } satisfies ChatAttachment;
+                    }),
+                );
+                const imageAttachments = await Promise.all(
+                    pendingImages.map(async (img) => {
+                        const bytes = new Uint8Array(
+                            await img.file.arrayBuffer(),
+                        );
+                        await storeEncryptedAttachmentBytes(
+                            img.id,
+                            bytes,
+                            chatKey,
+                            activeSessionId,
+                        );
+                        const previewUrl = URL.createObjectURL(
+                            new Blob([bytes]),
+                        );
+                        attachmentPreviewUrlsRef.current[img.id] = previewUrl;
+                        setAttachmentPreviews((prev) => ({
+                            ...prev,
+                            [img.id]: previewUrl,
+                        }));
+                        return {
+                            id: img.id,
+                            kind: "image",
+                            name: img.name,
+                            size: img.size,
+                        } satisfies ChatAttachment;
+                    }),
+                );
+                attachments = [...documentAttachments, ...imageAttachments];
+            } catch (error) {
+                log.error("Failed to store attachments", error);
+                showMiniDialog({
+                    title: "Attachment error",
+                    message:
+                        "We could not attach the files. Please try again.",
+                });
+                return;
+            }
+        }
+
+        const inferenceImagePaths = await writeInferenceImages(pendingImages);
+        const inferencePromptText = buildPromptWithImages(
+            messageText,
+            inferenceImagePaths.length,
         );
 
         setInput("");
@@ -1491,24 +3026,34 @@ const Page: React.FC = () => {
                     : [];
 
                 const newUserUuid = await addMessage(
-                    currentSessionId,
+                    activeSessionId,
                     "self",
                     messageText,
                     chatKey,
                     parentUuid,
+                    attachments,
                 );
 
                 updateBranchSelectionState(selectionKey, newUserUuid);
                 setEditingMessage(null);
                 setPendingDocuments([]);
+                setPendingImages([]);
 
-                await refreshMessages();
+                await refreshMessages(activeSessionId);
+                void syncChat(chatKey);
 
-                await startGeneration({
-                    promptText: messageText,
-                    parentMessageUuid: newUserUuid,
-                    historyPath,
-                });
+                try {
+                    await startGeneration({
+                        promptText: inferencePromptText,
+                        parentMessageUuid: newUserUuid,
+                        historyPath,
+                        sessionUuid: activeSessionId,
+                        imagePaths: inferenceImagePaths,
+                        mediaMarker: MEDIA_MARKER,
+                    });
+                } finally {
+                    void cleanupInferenceImages(inferenceImagePaths);
+                }
                 return;
             }
 
@@ -1518,23 +3063,33 @@ const Page: React.FC = () => {
             const selectionKey = parentUuid ?? ROOT_SELECTION_KEY;
 
             const userUuid = await addMessage(
-                currentSessionId,
+                activeSessionId,
                 "self",
                 messageText,
                 chatKey,
                 parentUuid,
+                attachments,
             );
 
             updateBranchSelectionState(selectionKey, userUuid);
             setPendingDocuments([]);
+            setPendingImages([]);
 
-            await refreshMessages();
+            await refreshMessages(activeSessionId);
+            void syncChat(chatKey);
 
-            await startGeneration({
-                promptText: messageText,
-                parentMessageUuid: userUuid,
-                historyPath: basePath,
-            });
+            try {
+                await startGeneration({
+                    promptText: inferencePromptText,
+                    parentMessageUuid: userUuid,
+                    historyPath: basePath,
+                    sessionUuid: activeSessionId,
+                    imagePaths: inferenceImagePaths,
+                    mediaMarker: MEDIA_MARKER,
+                });
+            } finally {
+                void cleanupInferenceImages(inferenceImagePaths);
+            }
         } catch (error) {
             log.error("Failed to store chat message", error);
         }
@@ -1549,105 +3104,84 @@ const Page: React.FC = () => {
         isGenerating,
         messageState.path,
         pendingDocuments,
+        pendingImages,
         refreshMessages,
         refreshSessions,
         showMiniDialog,
         slicePathUntil,
         startGeneration,
+        storeEncryptedAttachmentBytes,
+        syncChat,
         updateBranchSelectionState,
+        updateRouteSession,
+        formatErrorMessage,
+        writeInferenceImages,
+        cleanupInferenceImages,
     ]);
 
-    const settingsItems = useMemo(
-        () => [
-            {
-                key: "model",
-                label: "Model settings",
-                icon: Settings01Icon,
-                onClick: openModelSettings,
-            },
-            {
-                key: "developer",
-                label: "Developer settings",
-                icon: SlidersHorizontalIcon,
-                onClick: openDevSettings,
-            },
-            {
-                key: "logs",
-                label: "Log viewer",
-                icon: Bug01Icon,
-                onClick: confirmViewLogs,
-            },
-        ],
-        [confirmViewLogs, openDevSettings, openModelSettings],
-    );
-
-    const filteredSettingsItems = useMemo(() => {
-        const query = settingsSearch.trim().toLowerCase();
-        if (!query) return settingsItems;
-        return settingsItems.filter((item) =>
-            item.label.toLowerCase().includes(query),
-        );
-    }, [settingsItems, settingsSearch]);
+    useEffect(() => {
+        return () => {
+            if (streamingFlushTimerRef.current) {
+                window.clearTimeout(streamingFlushTimerRef.current);
+            }
+            if (downloadProgressTimerRef.current) {
+                window.clearTimeout(downloadProgressTimerRef.current);
+            }
+            if (userScrollTimeoutRef.current) {
+                window.clearTimeout(userScrollTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const sidebar = (
         <Stack
-            sx={{ width: "100%", height: "100%", bgcolor: "background.paper" }}
+            sx={{ width: "100%", height: "100%", bgcolor: "background.default" }}
         >
-            <Box sx={{ px: 2.5, pt: 2.5, pb: 2 }}>
-                <Stack direction="row" sx={{ gap: 1, alignItems: "flex-start" }}>
+            <Box
+                sx={{
+                    px: 2.5,
+                    height: 64,
+                    minHeight: 64,
+                    display: "flex",
+                    alignItems: "center",
+                }}
+            >
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 1,
+                        alignItems: "center",
+                        width: "100%",
+                    }}
+                >
                     <Stack sx={{ flex: 1, gap: 1 }}>
                         <Typography
+                            component="button"
+                            onClick={handleNewChat}
                             variant="h2"
                             sx={{
-                                fontFamily: '"Cormorant Garamond", serif',
+                                fontFamily: '"Montserrat", sans-serif',
                                 fontWeight: 600,
                                 letterSpacing: "1px",
                                 textTransform: "lowercase",
+                                border: "none",
+                                padding: 0,
+                                background: "transparent",
+                                cursor: "pointer",
+                                color: "inherit",
+                                textAlign: "left",
+                                alignSelf: "flex-start",
+                                userSelect: "none",
+                                WebkitUserSelect: "none",
+                                MozUserSelect: "none",
+                                msUserSelect: "none",
+                                outline: "none",
                             }}
                         >
-                            ensu
+                            e
                         </Typography>
-                        {isLoggedIn && (
-                            <Box
-                                sx={{
-                                    px: 1.5,
-                                    py: 0.75,
-                                    borderRadius: 1,
-                                    bgcolor: "fill.faint",
-                                }}
-                            >
-                                <Typography
-                                    variant="mini"
-                                    sx={{ color: "text.muted" }}
-                                >
-                                    {savedLocalUser()?.email ?? ""}
-                                </Typography>
-                            </Box>
-                        )}
                     </Stack>
                     <Stack direction="row" sx={{ gap: 0.5 }}>
-                        <IconButton
-                            aria-label={
-                                drawerView === "settings"
-                                    ? "Close settings"
-                                    : "Open settings"
-                            }
-                            sx={drawerIconButtonSx}
-                            onClick={
-                                drawerView === "settings"
-                                    ? closeSettingsPage
-                                    : openSettingsPage
-                            }
-                        >
-                            <HugeiconsIcon
-                                icon={
-                                    drawerView === "settings"
-                                        ? Cancel01Icon
-                                        : Settings01Icon
-                                }
-                                {...compactIconProps}
-                            />
-                        </IconButton>
                         <IconButton
                             aria-label={
                                 drawerCollapsed
@@ -1676,86 +3210,6 @@ const Page: React.FC = () => {
 
             <Divider />
 
-            {drawerView === "settings" ? (
-                <List
-                    sx={{
-                        flex: 1,
-                        overflowY: "auto",
-                        px: 1,
-                        overscrollBehaviorY: "contain",
-                    }}
-                >
-                    <Box sx={{ pt: 1 }}>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                                px: 1.5,
-                                py: 1,
-                                borderRadius: 2,
-                                bgcolor: "fill.faint",
-                            }}
-                        >
-                            <HugeiconsIcon
-                                icon={Search01Icon}
-                                {...compactIconProps}
-                            />
-                            <InputBase
-                                placeholder="Search settings"
-                                value={settingsSearch}
-                                onChange={(event) =>
-                                    setSettingsSearch(event.target.value)
-                                }
-                                sx={{
-                                    flex: 1,
-                                    color: "text.base",
-                                    fontFamily:
-                                        '"Source Serif 4", serif',
-                                    fontSize: "14px",
-                                }}
-                            />
-                        </Box>
-                    </Box>
-                    <Typography
-                        variant="mini"
-                        sx={{
-                            px: 1,
-                            pt: 2,
-                            pb: 1,
-                            letterSpacing: "0.12em",
-                            color: "text.muted",
-                        }}
-                    >
-                        SETTINGS
-                    </Typography>
-                    {filteredSettingsItems.map((item) => (
-                        <ListItemButton
-                            key={item.key}
-                            onClick={item.onClick}
-                            sx={{
-                                alignItems: "center",
-                                gap: 1,
-                                py: 1.25,
-                                borderRadius: 2,
-                                my: 0.5,
-                                "&:hover": {
-                                    backgroundColor: "fill.faintHover",
-                                },
-                            }}
-                        >
-                            <HugeiconsIcon
-                                icon={item.icon}
-                                {...compactIconProps}
-                            />
-                            <Typography variant="small">
-                                {item.label}
-                            </Typography>
-                        </ListItemButton>
-                    ))}
-                </List>
-            ) : (
-                <>
                     <List
                         sx={{
                             flex: 1,
@@ -1764,79 +3218,191 @@ const Page: React.FC = () => {
                             overscrollBehaviorY: "contain",
                         }}
                     >
-                        <Box sx={{ pt: 1 }}>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    px: 1.5,
-                                    py: 1,
-                                    borderRadius: 2,
-                                    bgcolor: "fill.faint",
-                                }}
-                            >
-                                <HugeiconsIcon
-                                    icon={Search01Icon}
-                                    {...compactIconProps}
-                                />
-                                <InputBase
-                                    placeholder="Search chats"
-                                    value={sessionSearch}
-                                    onChange={(event) =>
-                                        setSessionSearch(event.target.value)
-                                    }
-                                    sx={{
-                                        flex: 1,
-                                        color: "text.base",
-                                        fontFamily:
-                                            '"Source Serif 4", serif',
-                                        fontSize: "14px",
-                                    }}
-                                />
-                            </Box>
-                        </Box>
                         <Stack
                             direction="row"
-                            sx={{ alignItems: "center", gap: 1, my: 1 }}
+                            sx={{
+                                alignItems: "center",
+                                justifyContent: "flex-start",
+                                gap: 1,
+                                my: 1,
+                                px: 1,
+                                width: "100%",
+                            }}
                         >
-                            <ListItemButton
-                                onClick={handleNewChat}
-                                sx={{
-                                    flex: 1,
-                                    alignItems: "center",
-                                    gap: 1,
-                                    py: 1.25,
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        backgroundColor: "fill.faintHover",
-                                    },
-                                }}
-                            >
-                                <HugeiconsIcon
-                                    icon={PlusSignIcon}
-                                    {...compactIconProps}
-                                />
-                                <Typography variant="small">New Chat</Typography>
-                            </ListItemButton>
-                            <Tooltip title="Sync">
-                                <IconButton
-                                    aria-label="Sync"
-                                    onClick={() => {
-                                        if (isLoggedIn) {
-                                            void refreshSessions();
-                                        } else {
-                                            openLoginFromChat();
+                            {showSessionSearch ? (
+                                <>
+                                    <Box
+                                        sx={{
+                                            flex: 1,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "flex-start",
+                                            gap: 1,
+                                            px: 1.5,
+                                            height: 40,
+                                            borderRadius: 2,
+                                            bgcolor: "fill.faint",
+                                            textAlign: "left",
+                                        }}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Search01Icon}
+                                            {...tinyIconProps}
+                                        />
+                                        <InputBase
+                                            placeholder="Search chats"
+                                            autoFocus
+                                            value={sessionSearch}
+                                            onChange={(event) =>
+                                                setSessionSearch(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            inputProps={{
+                                                style: { textAlign: "left" },
+                                            }}
+                                            sx={{
+                                                flex: 1,
+                                                color: "text.base",
+                                                fontFamily:
+                                                    '"Inter", sans-serif',
+                                                fontSize: "13px",
+                                                textAlign: "left",
+                                                "& input": {
+                                                    textAlign: "left",
+                                                },
+                                            }}
+                                        />
+                                    </Box>
+                                    <IconButton
+                                        aria-label="Close search"
+                                        sx={drawerIconButtonSx}
+                                        onClick={handleCloseSessionSearch}
+                                    >
+                                        <HugeiconsIcon
+                                            icon={Cancel01Icon}
+                                            {...tinyIconProps}
+                                        />
+                                    </IconButton>
+                                </>
+                            ) : (
+                                <>
+                                    <Button
+                                        onClick={handleOpenSessionSearch}
+                                        variant="outlined"
+                                        startIcon={
+                                            <HugeiconsIcon
+                                                icon={Search01Icon}
+                                                {...tinyIconProps}
+                                            />
                                         }
-                                    }}
-                                    sx={actionButtonSx}
-                                >
-                                    <HugeiconsIcon
-                                        icon={RefreshIcon}
-                                        {...actionIconProps}
-                                    />
-                                </IconButton>
-                            </Tooltip>
+                                        sx={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            height: 40,
+                                            minHeight: 40,
+                                            px: 1.5,
+                                            textTransform: "none",
+                                            fontWeight: 600,
+                                            fontSize: "13px",
+                                            whiteSpace: "nowrap",
+                                            textOverflow: "ellipsis",
+                                            overflow: "hidden",
+                                            borderRadius: 2,
+                                            borderColor: "divider",
+                                            color: "text.base",
+                                            bgcolor: "fill.faint",
+                                            flexWrap: "nowrap",
+                                            justifyContent: "flex-start",
+                                            textAlign: "left",
+                                            "& .MuiButton-startIcon": {
+                                                marginRight: 0.75,
+                                                marginLeft: 0,
+                                            },
+                                            "&:hover": {
+                                                bgcolor: "fill.faintHover",
+                                                borderColor: "divider",
+                                            },
+                                        }}
+                                    >
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                            }}
+                                        >
+                                            Search
+                                        </Box>
+                                    </Button>
+                                    {isLoggedIn && (
+                                        <Button
+                                            onClick={() => {
+                                                void syncNow({
+                                                    showToast: true,
+                                                });
+                                            }}
+                                            variant="outlined"
+                                            startIcon={
+                                                <HugeiconsIcon
+                                                    icon={ArrowReloadHorizontalIcon}
+                                                    {...tinyIconProps}
+                                                />
+                                            }
+                                            sx={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                height: 40,
+                                                minHeight: 40,
+                                                px: 1.5,
+                                                textTransform: "none",
+                                                fontWeight: 600,
+                                                fontSize: "13px",
+                                                whiteSpace: "nowrap",
+                                                textOverflow: "ellipsis",
+                                                overflow: "hidden",
+                                                borderRadius: 2,
+                                                borderColor: "divider",
+                                                color: "text.base",
+                                                bgcolor: "fill.faint",
+                                                flexWrap: "nowrap",
+                                                "& .MuiButton-startIcon": {
+                                                    marginRight: 0.75,
+                                                    marginLeft: 0,
+                                                },
+                                                "&:hover": {
+                                                    bgcolor: "fill.faintHover",
+                                                    borderColor: "divider",
+                                                },
+                                            }}
+                                        >
+                                            <Box
+                                                component="span"
+                                                sx={{
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                }}
+                                            >
+                                                Sync
+                                            </Box>
+                                        </Button>
+                                    )}
+                                    <Tooltip title="New Chat">
+                                        <IconButton
+                                            aria-label="New Chat"
+                                            onClick={handleNewChat}
+                                            sx={drawerIconButtonSx}
+                                        >
+                                            <HugeiconsIcon
+                                                icon={PlusSignIcon}
+                                                {...tinyIconProps}
+                                            />
+                                        </IconButton>
+                                    </Tooltip>
+                                </>
+                            )}
                         </Stack>
 
                         {groupedSessions.map(([label, group]) => (
@@ -1897,7 +3463,7 @@ const Page: React.FC = () => {
                                                     sx={{
                                                         fontWeight: 600,
                                                         fontFamily:
-                                                            '"Source Serif 4", serif',
+                                                            '"Inter", sans-serif',
                                                     }}
                                                 >
                                                     {session.title}
@@ -1907,7 +3473,7 @@ const Page: React.FC = () => {
                                                     sx={{
                                                         color: "text.muted",
                                                         fontFamily:
-                                                            '"Source Serif 4", serif',
+                                                            '"Inter", sans-serif',
                                                         display: "-webkit-box",
                                                         WebkitLineClamp: 1,
                                                         WebkitBoxOrient:
@@ -1916,7 +3482,7 @@ const Page: React.FC = () => {
                                                     }}
                                                 >
                                                     {session.lastMessagePreview ??
-                                                        ""}
+                                                        "Nothing here"}
                                                 </Typography>
                                             </Box>
                                             <IconButton
@@ -1942,46 +3508,41 @@ const Page: React.FC = () => {
                     </List>
 
                     {!drawerCollapsed && (
-                        <>
-                            <Divider />
-                            <Stack sx={{ p: 1 }}>
-                                <ListItemButton
-                                    onClick={
-                                        isLoggedIn
-                                            ? handleLogout
-                                            : openLoginFromChat
-                                    }
-                                    sx={{
-                                        alignItems: "center",
-                                        gap: 1,
-                                        px: 1.5,
-                                        py: 1,
-                                        width: "100%",
-                                        borderRadius: 2,
-                                        "&:hover": {
-                                            backgroundColor:
-                                                "fill.faintHover",
-                                        },
-                                    }}
+                        <Stack sx={{ p: 1 }}>
+                            <ListItemButton
+                                onClick={openSettingsModal}
+                                sx={{
+                                    alignItems: "center",
+                                    gap: 1,
+                                    px: 2,
+                                    py: 1.25,
+                                    width: "100%",
+                                    borderRadius: 2,
+                                    border: "1px solid",
+                                    borderColor: "divider",
+                                    bgcolor: "background.paper",
+                                    boxShadow:
+                                        "0px 10px 24px rgba(0, 0, 0, 0.08)",
+                                    "&:hover": {
+                                        backgroundColor: "fill.faintHover",
+                                    },
+                                }}
+                            >
+                                <Typography
+                                    variant="small"
+                                    sx={{ flex: 1, fontWeight: 600 }}
                                 >
-                                    <Typography
-                                        variant="small"
-                                        sx={{ flex: 1 }}
-                                    >
-                                        {isLoggedIn
-                                            ? "Sign out"
-                                            : "Sign in to backup"}
-                                    </Typography>
-                                    <HugeiconsIcon
-                                        icon={ArrowRight01Icon}
-                                        {...smallIconProps}
-                                    />
-                                </ListItemButton>
-                            </Stack>
-                        </>
+                                    {isLoggedIn
+                                        ? savedLocalUser()?.email ?? "Account"
+                                        : "Settings"}
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+                        </Stack>
                     )}
-                </>
-            )}
         </Stack>
     );
 
@@ -1994,6 +3555,7 @@ const Page: React.FC = () => {
                     display: "flex",
                     height: "100svh",
                     bgcolor: "background.default",
+                    fontFamily: '"Inter", sans-serif',
                 }}
             >
                 <Drawer
@@ -2015,7 +3577,7 @@ const Page: React.FC = () => {
                     slotProps={{
                         paper: {
                             sx: {
-                                backgroundColor: "background.paper",
+                                backgroundColor: "background.default",
                                 borderRightColor: drawerCollapsed
                                     ? "transparent"
                                     : "divider",
@@ -2027,18 +3589,30 @@ const Page: React.FC = () => {
                 </Drawer>
 
                 <Box
+                    ref={chatViewportRef}
                     sx={{
                         flex: 1,
                         display: "flex",
                         flexDirection: "column",
                         height: "100%",
+                        position: "relative",
                     }}
                 >
                     <NavbarBase
                         sx={{
                             justifyContent: "space-between",
                             px: 2,
-                            bgcolor: "background.paper",
+                            height: 64,
+                            minHeight: 64,
+                            bgcolor: isDesktopOverlay
+                                ? "transparent"
+                                : "background.paper",
+                            borderBottom: isDesktopOverlay ? "none" : undefined,
+                            position: isDesktopOverlay ? "absolute" : "relative",
+                            top: isDesktopOverlay ? 0 : undefined,
+                            left: isDesktopOverlay ? 0 : undefined,
+                            right: isDesktopOverlay ? 0 : undefined,
+                            zIndex: isDesktopOverlay ? 10 : undefined,
                         }}
                     >
                         <Stack
@@ -2054,29 +3628,42 @@ const Page: React.FC = () => {
                                     <HugeiconsIcon icon={Menu01Icon} {...smallIconProps} />
                                 </IconButton>
                             )}
-                            <Stack
-                                sx={{ gap: !isDrawerVisible ? 0.25 : 0 }}
-                            >
-                                {!isDrawerVisible && !isEnsuTitle && (
-                                    <Typography
-                                        variant="mini"
+                            <Stack sx={{ gap: 0 }}>
+                                <Box
+                                    component="button"
+                                    onClick={handleLogoClick}
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onDoubleClick={(event) => event.preventDefault()}
+                                    onPointerDown={(event) => event.preventDefault()}
+                                    sx={{
+                                        border: "none",
+                                        padding: 0,
+                                        background: "transparent",
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        userSelect: "none",
+                                        WebkitUserSelect: "none",
+                                        MozUserSelect: "none",
+                                        msUserSelect: "none",
+                                        outline: "none",
+                                    }}
+                                >
+                                    <Box
+                                        component="img"
+                                        src={logoSrc}
+                                        alt="ensu"
+                                        draggable={false}
                                         sx={{
-                                            color: "text.muted",
-                                            letterSpacing: "0.12em",
-                                            textTransform: "lowercase",
+                                            height: 16,
+                                            width: "auto",
+                                            filter: logoFilter,
                                         }}
-                                    >
-                                        ensu
-                                    </Typography>
-                                )}
-                                {appBarTitle && (
-                                    <AccountsPageTitle>
-                                        {appBarTitle}
-                                    </AccountsPageTitle>
-                                )}
+                                    />
+                                </Box>
                             </Stack>
                         </Stack>
-                        {!isLoggedIn && !isDrawerVisible && (
+                        {!isLoggedIn && (
                             <Button
                                 onClick={openLoginFromChat}
                                 color="inherit"
@@ -2084,7 +3671,9 @@ const Page: React.FC = () => {
                                 sx={{
                                     textTransform: "none",
                                     fontWeight: 600,
+                                    fontSize: "13px",
                                     color: "text.base",
+                                    py: 0.75,
                                 }}
                             >
                                 Sign In
@@ -2093,36 +3682,51 @@ const Page: React.FC = () => {
                     </NavbarBase>
 
                     <Box
+                        ref={scrollContainerRef}
+                        onScroll={handleScroll}
+                        onWheel={markUserScrollIntent}
+                        onTouchMove={markUserScrollIntent}
                         sx={{
                             flex: 1,
                             overflowY: "auto",
                             px: { xs: 2, md: 4 },
-                            py: 3,
-                            bgcolor: "background.default",
+                            pt: isDesktopOverlay
+                                ? "calc(64px + 16px)"
+                                : 2,
+                            pb: 12,
+                            bgcolor: "background.paper",
                             overscrollBehaviorY: "contain",
                         }}
                     >
-                        {displayMessages.length === 0 ? (
-                            <Stack
-                                sx={{
-                                    gap: 2,
-                                    height: "100%",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    textAlign: "center",
-                                }}
-                            >
-                                <Typography
-                                    variant="small"
-                                    sx={{ color: "text.muted" }}
+                        <Box
+                            sx={{
+                                width: "100%",
+                                maxWidth: 900,
+                                mx: "auto",
+                            }}
+                        >
+                            {displayMessages.length === 0 ? (
+                                <Stack
+                                    sx={{
+                                        gap: 1,
+                                        height: "100%",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        textAlign: "center",
+                                    }}
                                 >
-                                    Start typing to begin a conversation.
-                                </Typography>
-                            </Stack>
-                        ) : (
-                            <Stack sx={{ gap: 3 }}>
-                                {displayMessages.map((message) => {
-                                    const isSelf = message.sender === "self";
+                                    <Typography variant="h2">Welcome</Typography>
+                                    <Typography
+                                        variant="small"
+                                        sx={{ color: "text.muted" }}
+                                    >
+                                        Type a message to start chatting
+                                    </Typography>
+                                </Stack>
+                            ) : (
+                                <Stack sx={{ gap: 3 }}>
+                                    {displayMessages.map((message) => {
+                                        const isSelf = message.sender === "self";
                                     const isStreaming =
                                         message.messageUuid ===
                                         STREAMING_SELECTION_KEY;
@@ -2133,20 +3737,61 @@ const Page: React.FC = () => {
                                     const timestamp = formatTime(
                                         message.createdAt,
                                     );
+                                    const attachments =
+                                        message.attachments ?? [];
+                                    const imageAttachments = attachments.filter(
+                                        (attachment) =>
+                                            attachment.kind === "image",
+                                    );
+                                    const documentAttachments =
+                                        attachments.filter(
+                                            (attachment) =>
+                                                attachment.kind ===
+                                                "document",
+                                        );
                                     const parsedDocuments = isSelf
                                         ? parseDocumentBlocks(message.text)
                                         : { text: message.text, documents: [] };
                                     const documentCount =
-                                        parsedDocuments.documents.length;
+                                        documentAttachments.length > 0
+                                            ? documentAttachments.length
+                                            : parsedDocuments.documents.length;
+                                    const imageCount = imageAttachments.length;
+                                    const fallbackText = imageCount
+                                        ? "Attached images"
+                                        : documentCount > 0
+                                            ? "Attached documents"
+                                            : "";
                                     const displayText = isSelf
-                                        ? parsedDocuments.text ||
-                                          (documentCount > 0
-                                              ? "Attached documents"
-                                              : "")
-                                        : message.text;
+                                        ? parsedDocuments.text || fallbackText
+                                        : message.text || fallbackText;
                                     const copyText = isSelf
                                         ? displayText
                                         : stripHiddenParts(message.text);
+                                    const showAttachments =
+                                        !isStreaming &&
+                                        documentAttachments.length > 0;
+                                    const imagePreviewItems =
+                                        imageAttachments
+                                            .map((attachment) => ({
+                                                attachment,
+                                                url: attachmentPreviews[
+                                                    attachment.id
+                                                ],
+                                            }))
+                                            .filter(
+                                                (item): item is {
+                                                    attachment: ChatAttachment;
+                                                    url: string;
+                                                } =>
+                                                    typeof item.url ===
+                                                    "string",
+                                            );
+                                    const showLoadingPlaceholder =
+                                        !isSelf &&
+                                        isStreaming &&
+                                        !displayText.trim();
+                                    const dots = ".".repeat(loadingDots);
                                     return (
                                         <Box
                                             key={message.messageUuid}
@@ -2155,12 +3800,8 @@ const Page: React.FC = () => {
                                                 justifyContent: isSelf
                                                     ? "flex-end"
                                                     : "flex-start",
-                                                pl: isSelf
-                                                    ? { xs: 6, md: 10 }
-                                                    : 0,
-                                                pr: isSelf
-                                                    ? 0
-                                                    : { xs: 6, md: 10 },
+                                                pl: isSelf ? "80px" : 0,
+                                                pr: isSelf ? 0 : "80px",
                                             }}
                                         >
                                             <Stack
@@ -2171,20 +3812,184 @@ const Page: React.FC = () => {
                                                         : "flex-start",
                                                 }}
                                             >
-                                                <Typography
-                                                    variant="message"
-                                                    sx={{
-                                                        color: isSelf
-                                                            ? sentColor
-                                                            : "text.base",
-                                                        textAlign: isSelf
-                                                            ? "right"
-                                                            : "left",
-                                                        whiteSpace: "pre-wrap",
-                                                    }}
-                                                >
-                                                    {displayText}
-                                                </Typography>
+                                                {isSelf ? (
+                                                    <Box
+                                                        sx={{
+                                                            bgcolor: userBubbleBackground,
+                                                            borderRadius: "18px",
+                                                            px: "12px",
+                                                            py: "12px",
+                                                            alignSelf:
+                                                                "flex-end",
+                                                            maxWidth: "100%",
+                                                        }}
+                                                    >
+                                                        {imagePreviewItems.length > 0 && (
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        "grid",
+                                                                    gridTemplateColumns:
+                                                                        "repeat(2, minmax(0, 1fr))",
+                                                                    gap: 1,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                {imagePreviewItems.map(
+                                                                    ({
+                                                                        attachment,
+                                                                        url,
+                                                                    }) => (
+                                                                        <Box
+                                                                            key={attachment.id}
+                                                                            component="img"
+                                                                            src={url}
+                                                                            alt={
+                                                                                attachment.name ??
+                                                                                "Image"
+                                                                            }
+                                                                            sx={{
+                                                                                width: "100%",
+                                                                                height: 140,
+                                                                                objectFit:
+                                                                                    "cover",
+                                                                                borderRadius: 2,
+                                                                                cursor:
+                                                                                    "pointer",
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                void handleDownloadAttachment(
+                                                                                    message,
+                                                                                    attachment,
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    ),
+                                                                )}
+                                                            </Box>
+                                                        )}
+                                                        <Typography
+                                                            variant="message"
+                                                            sx={userMessageTextSx}
+                                                        >
+                                                            {displayText}
+                                                        </Typography>
+                                                    </Box>
+                                                ) : (
+                                                    <Box
+                                                        sx={{
+                                                            px: "8px",
+                                                            py: "12px",
+                                                            alignSelf:
+                                                                "stretch",
+                                                            width: "100%",
+                                                            ...(isStreaming
+                                                                ? streamingMessageSx
+                                                                : {}),
+                                                        }}
+                                                    >
+                                                        {imagePreviewItems.length > 0 && (
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        "grid",
+                                                                    gridTemplateColumns:
+                                                                        "repeat(2, minmax(0, 1fr))",
+                                                                    gap: 1,
+                                                                    mb: 1,
+                                                                }}
+                                                            >
+                                                                {imagePreviewItems.map(
+                                                                    ({
+                                                                        attachment,
+                                                                        url,
+                                                                    }) => (
+                                                                        <Box
+                                                                            key={attachment.id}
+                                                                            component="img"
+                                                                            src={url}
+                                                                            alt={
+                                                                                attachment.name ??
+                                                                                "Image"
+                                                                            }
+                                                                            sx={{
+                                                                                width: "100%",
+                                                                                height: 160,
+                                                                                objectFit:
+                                                                                    "cover",
+                                                                                borderRadius: 2,
+                                                                                cursor:
+                                                                                    "pointer",
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                void handleDownloadAttachment(
+                                                                                    message,
+                                                                                    attachment,
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    ),
+                                                                )}
+                                                            </Box>
+                                                        )}
+                                                        {isStreaming ? (
+                                                            showLoadingPlaceholder ? (
+                                                                <Typography
+                                                                    variant="message"
+                                                                    sx={{
+                                                                        ...assistantTextSx,
+                                                                        color: "text.muted",
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        loadingPhrase ??
+                                                                        "Generating your reply"
+                                                                    }
+                                                                    <Box
+                                                                        component="span"
+                                                                        sx={{
+                                                                            color: "text.muted",
+                                                                        }}
+                                                                    >
+                                                                        {dots}
+                                                                    </Box>
+                                                                </Typography>
+                                                            ) : (
+                                                                <Box
+                                                                    sx={
+                                                                        assistantMarkdownSx
+                                                                    }
+                                                                >
+                                                                    <MarkdownRenderer
+                                                                        content={
+                                                                            displayText
+                                                                        }
+                                                                        className="markdown-content"
+                                                                    />
+                                                                    <Box
+                                                                        component="span"
+                                                                        sx={cursorSx}
+                                                                    >
+                                                                        ▍
+                                                                    </Box>
+                                                                </Box>
+                                                            )
+                                                        ) : (
+                                                            <Box
+                                                                sx={
+                                                                    assistantMarkdownSx
+                                                                }
+                                                            >
+                                                                <MarkdownRenderer
+                                                                    content={
+                                                                        displayText
+                                                                    }
+                                                                    className="markdown-content"
+                                                                />
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                )}
 
                                                 {isSelf && documentCount > 0 && (
                                                     <Typography
@@ -2199,6 +4004,88 @@ const Page: React.FC = () => {
                                                             ? ""
                                                             : "s"} attached
                                                     </Typography>
+                                                )}
+
+                                                {showAttachments && (
+                                                    <Stack
+                                                        sx={{
+                                                            mt: 1,
+                                                            gap: 0.5,
+                                                            alignSelf: isSelf
+                                                                ? "flex-end"
+                                                                : "flex-start",
+                                                        }}
+                                                    >
+                                                        {documentAttachments.map(
+                                                            (attachment) => (
+                                                                <Box
+                                                                    key={
+                                                                        attachment.id
+                                                                    }
+                                                                    sx={{
+                                                                        display:
+                                                                            "flex",
+                                                                        alignItems:
+                                                                            "center",
+                                                                        gap: 1,
+                                                                        px: 1.5,
+                                                                        py: 0.75,
+                                                                        borderRadius:
+                                                                            1.5,
+                                                                        bgcolor:
+                                                                            "fill.faint",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="mini"
+                                                                        sx={{
+                                                                            flex: 1,
+                                                                            color: "text.base",
+                                                                            overflow:
+                                                                                "hidden",
+                                                                            textOverflow:
+                                                                                "ellipsis",
+                                                                            whiteSpace:
+                                                                                "nowrap",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            attachment.name
+                                                                        }
+                                                                    </Typography>
+                                                                    <Typography
+                                                                        variant="mini"
+                                                                        sx={{
+                                                                            color: "text.muted",
+                                                                        }}
+                                                                    >
+                                                                        {formatBytes(
+                                                                            attachment.size,
+                                                                        )}
+                                                                    </Typography>
+                                                                    <IconButton
+                                                                        aria-label="Download attachment"
+                                                                        sx={
+                                                                            actionButtonSx
+                                                                        }
+                                                                        onClick={() =>
+                                                                            void handleDownloadAttachment(
+                                                                                message,
+                                                                                attachment,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <HugeiconsIcon
+                                                                            icon={
+                                                                                Attachment01Icon
+                                                                            }
+                                                                            {...smallIconProps}
+                                                                        />
+                                                                    </IconButton>
+                                                                </Box>
+                                                            ),
+                                                        )}
+                                                    </Stack>
                                                 )}
 
                                                 <Stack
@@ -2219,7 +4106,7 @@ const Page: React.FC = () => {
                                                                     actionButtonSx
                                                                 }
                                                                 onClick={() =>
-                                                                    handleEditMessage(
+                                                                    void handleEditMessage(
                                                                         message,
                                                                     )
                                                                 }
@@ -2441,94 +4328,226 @@ const Page: React.FC = () => {
                             </Stack>
                         )}
                     </Box>
+                </Box>
 
+                <Box
+                    sx={{
+                        px: { xs: 2, md: 4 },
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: 16,
+                        zIndex: 5,
+                        pointerEvents: "none",
+                    }}
+                >
                     <Box
-                        sx={{
-                            borderTop: "1px solid",
-                            borderColor: "divider",
-                            bgcolor: "background.paper",
-                        }}
+                        sx={{ maxWidth: 900, mx: "auto", pointerEvents: "auto" }}
                     >
-                        <Stack sx={{ px: 2, py: 2, gap: 1 }}>
-                            {editingMessage && (
-                                <Box
+                        {showModelGate ? (
+                            <>
+                                {showDownloadProgress &&
+                                    downloadStatus?.totalBytes && (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                                mb: 1,
+                                                px: 1,
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="mini"
+                                                sx={{
+                                                    color: "text.muted",
+                                                    fontVariantNumeric:
+                                                        "tabular-nums",
+                                                }}
+                                            >
+                                                {formatBytes(
+                                                    downloadStatus.bytesDownloaded ??
+                                                        0,
+                                                )} / {formatBytes(downloadStatus.totalBytes)}
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                <Stack
                                     sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1,
-                                        px: 1.5,
-                                        py: 0.5,
+                                        px: 0,
+                                        py: 0,
+                                        gap: 0.5,
                                         borderRadius: 2,
-                                        bgcolor: "fill.faint",
-                                        borderLeft: "3px solid",
-                                        borderLeftColor: "accent.main",
+                                        bgcolor: "background.paper",
+                                        border: "1px solid",
+                                        borderColor: "divider",
+                                        boxShadow:
+                                            "0px 12px 32px rgba(0, 0, 0, 0.12)",
+                                        position: "relative",
+                                        overflow: "hidden",
                                     }}
                                 >
-                                    <HugeiconsIcon icon={Edit01Icon} {...compactIconProps} />
-                                    <Typography
-                                        variant="mini"
-                                        sx={{ color: "text.muted" }}
-                                    >
-                                        Editing:
-                                    </Typography>
-                                    <Typography
-                                        variant="mini"
+                                    {showDownloadProgress && (
+                                        <LinearProgress
+                                            variant={
+                                                downloadStatus?.totalBytes
+                                                    ? "determinate"
+                                                    : "indeterminate"
+                                            }
+                                            value={
+                                                downloadStatus?.totalBytes
+                                                    ? downloadStatus.percent
+                                                    : undefined
+                                            }
+                                            sx={{
+                                                position: "absolute",
+                                                top: 0,
+                                                left: 0,
+                                                right: 0,
+                                                height: 3,
+                                                borderRadius:
+                                                    "8px 8px 0 0",
+                                                pointerEvents: "none",
+                                            }}
+                                        />
+                                    )}
+                                    <Stack sx={{ px: 2, py: 2, gap: 1.5 }}>
+                                        <Typography variant="h3">
+                                            Download to begin using the Chat
+                                        </Typography>
+                                        <Typography
+                                            variant="small"
+                                            sx={{ color: "text.muted" }}
+                                        >
+                                            {downloadStatusLabel ??
+                                                (modelGateStatus === "error"
+                                                    ? "We couldn't load the model. Try downloading again."
+                                                    : downloadSizeLabel)}
+                                        </Typography>
+                                        {modelGateError && (
+                                            <Typography
+                                                variant="mini"
+                                                sx={{ color: "critical.main" }}
+                                            >
+                                                {modelGateError}
+                                            </Typography>
+                                        )}
+                                        <Button
+                                            variant="contained"
+                                            color="accent"
+                                            disabled={
+                                                modelGateStatus === "downloading" ||
+                                                isDownloading
+                                            }
+                                            onClick={() =>
+                                                void handleDownloadModel()
+                                            }
+                                        >
+                                            {modelGateStatus === "downloading" ||
+                                            isDownloading
+                                                ? "Downloading..."
+                                                : "Download"}
+                                        </Button>
+                                    </Stack>
+                                </Stack>
+                            </>
+                        ) : (
+                            <Stack
+                                sx={{
+                                    px: 0,
+                                    py: 0,
+                                    gap: 0.5,
+                                    borderRadius: 2,
+                                    bgcolor: "background.paper",
+                                    border: "1px solid",
+                                    borderColor: "divider",
+                                    boxShadow:
+                                        "0px 12px 32px rgba(0, 0, 0, 0.12)",
+                                    position: "relative",
+                                    overflow: "hidden",
+                                }}
+                            >
+                                {showDownloadProgress && (
+                                    <LinearProgress
+                                        variant={
+                                            downloadStatus?.totalBytes
+                                                ? "determinate"
+                                                : "indeterminate"
+                                        }
+                                        value={
+                                            downloadStatus?.totalBytes
+                                                ? downloadStatus.percent
+                                                : undefined
+                                        }
                                         sx={{
-                                            color: "text.base",
-                                            flex: 1,
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
+                                            position: "absolute",
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: 3,
+                                            borderRadius:
+                                                "8px 8px 0 0",
+                                            pointerEvents: "none",
+                                        }}
+                                    />
+                                )}
+                                {editingMessage && (
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 1,
+                                            px: 1.5,
+                                            py: 0.5,
+                                            borderRadius: 2,
+                                            bgcolor: "fill.faint",
+                                            borderLeft: "3px solid",
+                                            borderLeftColor: "accent.main",
                                         }}
                                     >
-                                        {editingMessage.text}
-                                    </Typography>
-                                    <IconButton
-                                        aria-label="Cancel edit"
-                                        sx={actionButtonSx}
-                                        onClick={handleCancelEdit}
-                                    >
-                                        <HugeiconsIcon icon={Cancel01Icon} {...smallIconProps} />
-                                    </IconButton>
-                                </Box>
-                            )}
-
-                            {downloadStatus?.status &&
-                                downloadStatus.status !== "Ready" && (
-                                    <Stack sx={{ gap: 0.5 }}>
+                                        <HugeiconsIcon
+                                            icon={Edit01Icon}
+                                            {...compactIconProps}
+                                        />
                                         <Typography
                                             variant="mini"
                                             sx={{ color: "text.muted" }}
                                         >
-                                            {downloadStatus.status}
+                                            Editing:
                                         </Typography>
-                                        {downloadStatus.percent >= 0 &&
-                                            downloadStatus.percent < 100 && (
-                                                <LinearProgress
-                                                    variant={
-                                                        downloadStatus.totalBytes
-                                                            ? "determinate"
-                                                            : "indeterminate"
-                                                    }
-                                                    value={
-                                                        downloadStatus.totalBytes
-                                                            ? downloadStatus.percent
-                                                            : undefined
-                                                    }
-                                                />
-                                            )}
-                                    </Stack>
+                                        <Typography
+                                            variant="mini"
+                                            sx={{
+                                                color: "text.base",
+                                                flex: 1,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {editingMessage.text}
+                                        </Typography>
+                                        <IconButton
+                                            aria-label="Cancel edit"
+                                            sx={actionButtonSx}
+                                            onClick={handleCancelEdit}
+                                        >
+                                            <HugeiconsIcon
+                                                icon={Cancel01Icon}
+                                                {...smallIconProps}
+                                            />
+                                        </IconButton>
+                                    </Box>
                                 )}
 
-                            {pendingDocuments.length > 0 && (
-                                <Stack sx={{ gap: 0.5 }}>
-                                    <Typography
-                                        variant="mini"
-                                        sx={{ color: "text.muted" }}
+                                {pendingDocuments.length > 0 && (
+                                    <Box
+                                        sx={{
+                                            display: "grid",
+                                            gridTemplateColumns:
+                                                "repeat(2, minmax(0, 1fr))",
+                                            gap: 0.5,
+                                        }}
                                     >
-                                        Documents
-                                    </Typography>
-                                    <Stack sx={{ gap: 0.5 }}>
                                         {pendingDocuments.map((doc) => (
                                             <Box
                                                 key={doc.id}
@@ -2540,6 +4559,7 @@ const Page: React.FC = () => {
                                                     py: 0.75,
                                                     borderRadius: 1.5,
                                                     bgcolor: "fill.faint",
+                                                    minWidth: 0,
                                                 }}
                                             >
                                                 <Typography
@@ -2548,8 +4568,7 @@ const Page: React.FC = () => {
                                                         flex: 1,
                                                         color: "text.base",
                                                         overflow: "hidden",
-                                                        textOverflow:
-                                                            "ellipsis",
+                                                        textOverflow: "ellipsis",
                                                         whiteSpace: "nowrap",
                                                     }}
                                                 >
@@ -2557,7 +4576,9 @@ const Page: React.FC = () => {
                                                 </Typography>
                                                 <Typography
                                                     variant="mini"
-                                                    sx={{ color: "text.muted" }}
+                                                    sx={{
+                                                        color: "text.muted",
+                                                    }}
                                                 >
                                                     {formatBytes(doc.size)}
                                                 </Typography>
@@ -2577,101 +4598,488 @@ const Page: React.FC = () => {
                                                 </IconButton>
                                             </Box>
                                         ))}
-                                    </Stack>
-                                </Stack>
-                            )}
+                                    </Box>
+                                )}
 
-                            <Stack
-                                direction="row"
-                                sx={{ gap: 1, alignItems: "center" }}
-                            >
-                                <InputBase
-                                    multiline
-                                    maxRows={5}
-                                    placeholder={
-                                        isDownloading
-                                            ? "Downloading model..."
-                                            : "Compose your message..."
-                                    }
-                                    value={input}
-                                    onChange={(event) =>
-                                        setInput(event.target.value)
-                                    }
-                                    onKeyDown={(event) => {
-                                        if (
-                                            event.key === "Enter" &&
-                                            !event.shiftKey
-                                        ) {
-                                            event.preventDefault();
-                                            void handleSend();
-                                        }
-                                    }}
+                                {pendingImages.length > 0 && (
+                                    <Box
+                                        sx={{
+                                            display: "grid",
+                                            gridTemplateColumns:
+                                                "repeat(2, minmax(0, 1fr))",
+                                            gap: 0.5,
+                                        }}
+                                    >
+                                        {pendingImages.map((img) => {
+                                            const preview =
+                                                pendingImagePreviews[img.id];
+                                            return (
+                                                <Box
+                                                    key={img.id}
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: 1,
+                                                        px: 1,
+                                                        py: 0.75,
+                                                        borderRadius: 1.5,
+                                                        bgcolor: "fill.faint",
+                                                        minWidth: 0,
+                                                    }}
+                                                >
+                                                    {preview && (
+                                                        <Box
+                                                            component="img"
+                                                            src={preview}
+                                                            alt={img.name}
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40,
+                                                                borderRadius: 1,
+                                                                objectFit:
+                                                                    "cover",
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <Box
+                                                        sx={{
+                                                            flex: 1,
+                                                            minWidth: 0,
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant="mini"
+                                                            sx={{
+                                                                color: "text.base",
+                                                                overflow:
+                                                                    "hidden",
+                                                                textOverflow:
+                                                                    "ellipsis",
+                                                                whiteSpace:
+                                                                    "nowrap",
+                                                            }}
+                                                        >
+                                                            {img.name}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="mini"
+                                                            sx={{
+                                                                color: "text.muted",
+                                                            }}
+                                                        >
+                                                            {formatBytes(
+                                                                img.size,
+                                                            )}
+                                                        </Typography>
+                                                    </Box>
+                                                    <IconButton
+                                                        aria-label="Remove image"
+                                                        sx={actionButtonSx}
+                                                        onClick={() =>
+                                                            removePendingImage(
+                                                                img.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        <HugeiconsIcon
+                                                            icon={Cancel01Icon}
+                                                            {...smallIconProps}
+                                                        />
+                                                    </IconButton>
+                                                </Box>
+                                            );
+                                        })}
+                                    </Box>
+                                )}
+
+                                <Box
                                     sx={{
-                                        flex: 1,
-                                        bgcolor: "fill.faint",
-                                        borderRadius: 2,
-                                        px: 2,
-                                        py: 2,
-                                        minHeight: 52,
                                         display: "flex",
                                         alignItems: "center",
-                                        fontFamily: '"Source Serif 4", serif',
-                                        fontSize: "15px",
-                                        lineHeight: 1.7,
-                                        color: "text.base",
-                                        "& textarea": { padding: 0, margin: 0 },
-                                    }}
-                                />
-                                <IconButton
-                                    aria-label="Add attachment"
-                                    sx={drawerIconButtonSx}
-                                    disabled={isGenerating || isDownloading}
-                                    onClick={openAttachmentMenu}
-                                >
-                                    <HugeiconsIcon icon={Attachment01Icon} {...actionIconProps} />
-                                </IconButton>
-                                <IconButton
-                                    aria-label={
-                                        isGenerating ? "Stop" : "Send message"
-                                    }
-                                    onClick={
-                                        isGenerating
-                                            ? handleStopGeneration
-                                            : () => void handleSend()
-                                    }
-                                    disabled={
-                                        isDownloading ||
-                                        (!isGenerating &&
-                                            !input.trim() &&
-                                            pendingDocuments.length === 0)
-                                    }
-                                    sx={{
-                                        width: 44,
-                                        height: 44,
+                                        gap: 1,
+                                        px: 1,
+                                        py: 0.75,
                                         borderRadius: 2,
-                                        bgcolor: "fill.faint",
-                                        color: isGenerating
-                                            ? "critical.main"
-                                            : "text.muted",
-                                        "&:hover": {
-                                            bgcolor: "fill.faintHover",
-                                        },
-                                        "&.Mui-disabled": {
-                                            color: "text.faint",
-                                        },
+                                        bgcolor:
+                                            "color-mix(in srgb, var(--mui-palette-background-default) 45%, var(--mui-palette-background-paper) 55%)",
                                     }}
                                 >
-                                    {isGenerating ? (
-                                        <HugeiconsIcon icon={StopCircleIcon} {...actionIconProps} />
-                                    ) : (
-                                        <HugeiconsIcon icon={ArrowRight02Icon} {...actionIconProps} />
+                                    <InputBase
+                                        multiline
+                                        maxRows={5}
+                                        inputRef={inputRef}
+                                        placeholder={
+                                            isDownloading
+                                                ? "Downloading model..."
+                                                : "Write a message..."
+                                        }
+                                        value={input}
+                                        onChange={(event) =>
+                                            setInput(event.target.value)
+                                        }
+                                        onKeyDown={(event) => {
+                                            if (
+                                                event.key === "Enter" &&
+                                                !event.shiftKey
+                                            ) {
+                                                event.preventDefault();
+                                                void handleSend();
+                                            }
+                                        }}
+                                        sx={{
+                                            flex: 1,
+                                            bgcolor: "transparent",
+                                            borderRadius: 2,
+                                            px: 1.5,
+                                            py: 1.5,
+                                            minHeight: 48,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            fontFamily: '"Inter", sans-serif',
+                                            fontSize: "15px",
+                                            lineHeight: 1.7,
+                                            color: "text.base",
+                                            "& textarea": {
+                                                padding: 0,
+                                                margin: 0,
+                                            },
+                                            "& code": {
+                                                fontFamily:
+                                                    '"JetBrains Mono", monospace',
+                                            },
+                                        }}
+                                    />
+                                    {showAttachmentPicker && (
+                                        <IconButton
+                                            aria-label="Add attachment"
+                                            sx={drawerIconButtonSx}
+                                            disabled={
+                                                isGenerating || isDownloading
+                                            }
+                                            onClick={openAttachmentMenu}
+                                        >
+                                            <HugeiconsIcon
+                                                icon={Upload01Icon}
+                                                {...actionIconProps}
+                                            />
+                                        </IconButton>
                                     )}
-                                </IconButton>
+                                    <IconButton
+                                        aria-label={
+                                            isGenerating
+                                                ? "Stop"
+                                                : "Send message"
+                                        }
+                                        onClick={
+                                            isGenerating
+                                                ? handleStopGeneration
+                                                : () => void handleSend()
+                                        }
+                                        disabled={
+                                            isDownloading ||
+                                            (!isGenerating &&
+                                                !input.trim() &&
+                                                pendingDocuments.length === 0 &&
+                                                pendingImages.length === 0)
+                                        }
+                                        sx={{
+                                            width: 44,
+                                            height: 44,
+                                            borderRadius: 2,
+                                            bgcolor: "transparent",
+                                            color: isGenerating
+                                                ? "critical.main"
+                                                : "text.muted",
+                                            "&:hover": {
+                                                bgcolor: "fill.faint",
+                                            },
+                                            "&.Mui-disabled": {
+                                                color: "text.faint",
+                                            },
+                                        }}
+                                    >
+                                        {isGenerating ? (
+                                            <Box
+                                                sx={{
+                                                    width: 22,
+                                                    height: 22,
+                                                    minWidth: 22,
+                                                    minHeight: 22,
+                                                    borderRadius: "999px",
+                                                    bgcolor: "#ffffff",
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Box
+                                                    component="svg"
+                                                    viewBox="0 0 24 24"
+                                                    sx={{
+                                                        width: 12,
+                                                        height: 12,
+                                                        display: "block",
+                                                    }}
+                                                >
+                                                    <path
+                                                        d="M4 12C4 8.72077 4 7.08116 4.81382 5.91891C5.1149 5.48891 5.48891 5.1149 5.91891 4.81382C7.08116 4 8.72077 4 12 4C15.2792 4 16.9188 4 18.0811 4.81382C18.5111 5.1149 18.8851 5.48891 19.1862 5.91891C20 7.08116 20 8.72077 20 12C20 15.2792 20 16.9188 19.1862 18.0811C18.8851 18.5111 18.5111 18.8851 18.0811 19.1862C16.9188 20 15.2792 20 12 20C8.72077 20 7.08116 20 5.91891 19.1862C5.48891 18.8851 5.1149 18.5111 4.81382 18.0811C4 16.9188 4 15.2792 4 12Z"
+                                                        fill={
+                                                            theme.palette.error
+                                                                .main
+                                                        }
+                                                    />
+                                                </Box>
+                                            </Box>
+                                        ) : (
+                                            <Box
+                                                sx={{
+                                                    transform: "rotate(90deg)",
+                                                    display: "flex",
+                                                }}
+                                            >
+                                                <HugeiconsIcon
+                                                    icon={Navigation06Icon}
+                                                    {...actionIconProps}
+                                                />
+                                            </Box>
+                                        )}
+                                    </IconButton>
+                                </Box>
                             </Stack>
-                        </Stack>
+                        )}
                     </Box>
                 </Box>
+                </Box>
             </Box>
+
+            {showAttachmentPicker && (
+                <>
+                    <input {...getDocumentInputProps()} />
+                    <input {...getImageInputProps()} />
+                    <Menu
+                        anchorEl={attachmentAnchor}
+                        open={Boolean(attachmentAnchor)}
+                        onClose={closeAttachmentMenu}
+                        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                        transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    >
+                        {showImageAttachment && (
+                            <MenuItem
+                                onClick={() => handleAttachmentChoice("image")}
+                            >
+                                Image
+                            </MenuItem>
+                        )}
+                        <MenuItem
+                            onClick={() => handleAttachmentChoice("document")}
+                        >
+                            Document
+                        </MenuItem>
+                    </Menu>
+                </>
+            )}
+
+            <Dialog
+                open={showSettingsModal}
+                onClose={closeSettingsModal}
+                fullScreen={isSmall}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle sx={dialogTitleSx}>Settings</DialogTitle>
+                <DialogContent>
+                    <Stack sx={{ gap: 2 }}>
+                        {isLoggedIn && (
+                            <Box
+                                sx={{
+                                    px: 2,
+                                    py: 1.5,
+                                    borderRadius: 2,
+                                    border: "1px solid",
+                                    borderColor: "divider",
+                                    bgcolor: "background.default",
+                                }}
+                            >
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    Signed in as
+                                </Typography>
+                                <Typography variant="small">
+                                    {savedLocalUser()?.email ?? ""}
+                                </Typography>
+                            </Box>
+                        )}
+
+                        <Stack sx={{ gap: 1 }}>
+                            <ListItemButton
+                                onClick={() => {
+                                    closeSettingsModal();
+                                    void saveLogs();
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={Bug01Icon}
+                                    {...compactIconProps}
+                                />
+                                <Typography
+                                    variant="small"
+                                    sx={{ flex: 1 }}
+                                >
+                                    Save logs
+                                </Typography>
+                            </ListItemButton>
+                            {isLoggedIn ? (
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        handleLogout();
+                                    }}
+                                    sx={{
+                                        ...settingsItemSx,
+                                        color: "critical.main",
+                                    }}
+                                >
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1, fontWeight: 600 }}
+                                    >
+                                        Sign Out
+                                    </Typography>
+                                </ListItemButton>
+                            ) : (
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        openLoginFromChat();
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Login01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1, fontWeight: 600 }}
+                                    >
+                                        Sign In to Backup
+                                    </Typography>
+                                </ListItemButton>
+                            )}
+                        </Stack>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={showComingSoon}
+                onClose={() => setShowComingSoon(false)}
+                fullScreen={isSmall}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogContent>
+                    <Stack sx={{ alignItems: "center", gap: 2, py: 2 }}>
+                        <Box
+                            component="img"
+                            src={logoSrc}
+                            alt="Coming soon"
+                            sx={{
+                                height: 48,
+                                width: "auto",
+                                filter: logoFilter,
+                            }}
+                        />
+                        <Typography variant="h2" sx={dialogTitleSx}>
+                            Sign in
+                        </Typography>
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted", textAlign: "center" }}
+                        >
+                            Coming soon
+                        </Typography>
+                    </Stack>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
+                    <Button
+                        variant="contained"
+                        color="accent"
+                        fullWidth
+                        onClick={() => setShowComingSoon(false)}
+                    >
+                        Got it
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {DEVELOPER_SETTINGS_ENABLED && (
+                <Dialog
+                    open={showDeveloperMenu}
+                    onClose={closeDeveloperMenu}
+                    fullScreen={isSmall}
+                    maxWidth="xs"
+                    fullWidth
+                >
+                    <DialogTitle sx={dialogTitleSx}>
+                        Developer Settings
+                    </DialogTitle>
+                    <DialogContent>
+                        <Stack sx={{ gap: 1 }}>
+                            <ListItemButton
+                                onClick={() => {
+                                    closeDeveloperMenu();
+                                    openModelSettings();
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={Settings01Icon}
+                                    {...compactIconProps}
+                                />
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    Model settings
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+                            <ListItemButton
+                                onClick={() => {
+                                    closeDeveloperMenu();
+                                    openDevSettings();
+                                }}
+                                sx={settingsItemSx}
+                            >
+                                <HugeiconsIcon
+                                    icon={SlidersHorizontalIcon}
+                                    {...compactIconProps}
+                                />
+                                <Typography variant="small" sx={{ flex: 1 }}>
+                                    Server endpoint
+                                </Typography>
+                                <HugeiconsIcon
+                                    icon={ArrowRight01Icon}
+                                    {...smallIconProps}
+                                />
+                            </ListItemButton>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Button
+                            onClick={closeDeveloperMenu}
+                            color="secondary"
+                            fullWidth
+                        >
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
 
             <Dialog
                 open={Boolean(deleteSessionId)}
@@ -2680,7 +5088,7 @@ const Page: React.FC = () => {
                 maxWidth="xs"
                 fullWidth
             >
-                <DialogTitle>Delete chat?</DialogTitle>
+                <DialogTitle sx={dialogTitleSx}>Delete chat?</DialogTitle>
                 <DialogContent>
                     <Typography variant="body" sx={{ color: "text.muted" }}>
                         Delete {deleteSessionLabel}? This cannot be undone.
@@ -2692,7 +5100,7 @@ const Page: React.FC = () => {
                     </Button>
                     <Button
                         variant="contained"
-                        color="error"
+                        color="critical"
                         onClick={handleConfirmDeleteSession}
                     >
                         Delete
@@ -2707,7 +5115,7 @@ const Page: React.FC = () => {
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle>Model Settings</DialogTitle>
+                <DialogTitle sx={dialogTitleSx}>Model Settings</DialogTitle>
                 <DialogContent>
                     <Stack sx={{ gap: 3 }}>
                         <Stack sx={{ gap: 0.5 }}>
@@ -2753,7 +5161,7 @@ const Page: React.FC = () => {
                                 error={!!modelUrlError}
                                 helperText={modelUrlError ?? " "}
                             />
-                            {isTauriRuntime && (
+                            {allowMmproj && (
                                 <TextField
                                     fullWidth
                                     label="mmproj .gguf file URL"
@@ -2885,25 +5293,48 @@ const Page: React.FC = () => {
                     </Stack>
                 </DialogActions>
             </Dialog>
+            <Notification
+                open={syncNotificationOpen}
+                onClose={() => setSyncNotificationOpen(false)}
+                attributes={syncNotification}
+                horizontal="right"
+                vertical="bottom"
+                sx={{
+                    width: "fit-content",
+                    maxWidth: "min(360px, 100vw)",
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                    "& .MuiButtonBase-root": {
+                        padding: "4px 8px",
+                        borderRadius: "999px",
+                        minHeight: 0,
+                        bgcolor: "background.paper",
+                        color: "text.base",
+                        boxShadow: "none",
+                    },
+                    "& .MuiStack-root": {
+                        gap: 1,
+                    },
+                    "& .MuiStack-root svg": {
+                        fontSize: "18px",
+                    },
+                    "& .MuiTypography-root": {
+                        fontSize: "13px",
+                        lineHeight: "18px",
+                    },
+                    "& .MuiIconButton-root": {
+                        padding: 0,
+                        bgcolor: "transparent",
+                    },
+                }}
+            />
 
-            <input {...getDocumentInputProps()} />
-
-            <Menu
-                anchorEl={attachmentAnchor}
-                open={Boolean(attachmentAnchor)}
-                onClose={closeAttachmentMenu}
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                transformOrigin={{ vertical: "bottom", horizontal: "right" }}
-            >
-                <MenuItem onClick={() => handleAttachmentChoice("image")}>
-                    Image
-                </MenuItem>
-                <MenuItem onClick={() => handleAttachmentChoice("document")}>
-                    Document
-                </MenuItem>
-            </Menu>
-
-            <DevSettings open={showDevSettings} onClose={closeDevSettings} />
+            {DEVELOPER_SETTINGS_ENABLED && (
+                <DevSettings
+                    open={showDevSettings}
+                    onClose={closeDevSettings}
+                />
+            )}
         </>
     );
 };

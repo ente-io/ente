@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::fs;
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::sync::Mutex;
 
@@ -437,6 +439,68 @@ impl From<llmchat_db::Session> for ChatSessionDto {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatAttachmentDto {
+    id: String,
+    kind: String,
+    size: i64,
+    name: String,
+    uploaded_at: Option<i64>,
+}
+
+impl From<llmchat_db::Attachment> for ChatAttachmentDto {
+    fn from(attachment: llmchat_db::Attachment) -> Self {
+        let kind = match attachment.kind {
+            llmchat_db::AttachmentKind::Image => "image",
+            llmchat_db::AttachmentKind::Document => "document",
+        };
+
+        Self {
+            id: attachment.id,
+            kind: kind.to_string(),
+            size: attachment.size,
+            name: attachment.name,
+            uploaded_at: attachment.uploaded_at,
+        }
+    }
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatAttachmentInput {
+    id: String,
+    kind: String,
+    size: i64,
+    name: String,
+    uploaded_at: Option<i64>,
+}
+
+impl TryFrom<ChatAttachmentInput> for llmchat_db::Attachment {
+    type Error = ApiError;
+
+    fn try_from(value: ChatAttachmentInput) -> Result<Self, Self::Error> {
+        let kind = match value.kind.as_str() {
+            "image" => llmchat_db::AttachmentKind::Image,
+            "document" => llmchat_db::AttachmentKind::Document,
+            other => {
+                return Err(ApiError::new(
+                    "db_invalid_attachment_kind",
+                    format!("Unsupported attachment kind: {other}"),
+                ));
+            }
+        };
+
+        Ok(Self {
+            id: value.id,
+            kind,
+            size: value.size,
+            name: value.name,
+            uploaded_at: value.uploaded_at,
+        })
+    }
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChatMessageDto {
@@ -446,6 +510,7 @@ pub struct ChatMessageDto {
     sender: String,
     text: String,
     created_at: i64,
+    attachments: Vec<ChatAttachmentDto>,
     deleted_at: Option<i64>,
 }
 
@@ -463,6 +528,11 @@ impl From<llmchat_db::Message> for ChatMessageDto {
             sender: sender.to_string(),
             text: message.text,
             created_at: message.created_at,
+            attachments: message
+                .attachments
+                .into_iter()
+                .map(ChatAttachmentDto::from)
+                .collect(),
             deleted_at: message.deleted_at,
         }
     }
@@ -475,6 +545,39 @@ pub struct ChatMessageInsertInput {
     sender: String,
     text: String,
     parent_message_uuid: Option<String>,
+    attachments: Option<Vec<ChatAttachmentInput>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatSessionUpsertInput {
+    session_uuid: String,
+    title: String,
+    created_at: i64,
+    updated_at: i64,
+    remote_id: Option<String>,
+    needs_sync: bool,
+    deleted_at: Option<i64>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatMessageUpsertInput {
+    message_uuid: String,
+    session_uuid: String,
+    parent_message_uuid: Option<String>,
+    sender: String,
+    text: String,
+    created_at: i64,
+    deleted_at: Option<i64>,
+    attachments: Option<Vec<ChatAttachmentInput>>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatDeletionDto {
+    entity_type: String,
+    uuid: String,
 }
 
 #[tauri::command]
@@ -502,6 +605,19 @@ pub fn chat_db_get_session(
     let uuid = parse_uuid(&session_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
         Ok(db.get_session(uuid)?.map(ChatSessionDto::from))
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_get_message(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    message_uuid: String,
+) -> Result<Option<ChatMessageDto>, ApiError> {
+    let uuid = parse_uuid(&message_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        Ok(db.get_message(uuid)?.map(ChatMessageDto::from))
     })
 }
 
@@ -565,6 +681,24 @@ pub fn chat_db_get_messages(
 }
 
 #[tauri::command]
+pub fn chat_db_get_messages_for_sync(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+    include_deleted: bool,
+) -> Result<Vec<ChatMessageDto>, ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        Ok(db
+            .get_messages_for_sync(uuid, include_deleted)?
+            .into_iter()
+            .map(ChatMessageDto::from)
+            .collect())
+    })
+}
+
+#[tauri::command]
 pub fn chat_db_insert_message(
     state: State<ChatDbState>,
     app: AppHandle,
@@ -579,9 +713,16 @@ pub fn chat_db_insert_message(
         .transpose()?;
     let sender = normalize_sender(&input.sender)?;
     let text = input.text;
+    let attachments = input
+        .attachments
+        .unwrap_or_default()
+        .into_iter()
+        .map(llmchat_db::Attachment::try_from)
+        .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db(&state, &app, &key_b64, move |db| {
-        let message = db.insert_message(session_uuid, sender, &text, parent, Vec::new())?;
+        let message =
+            db.insert_message(session_uuid, sender, &text, parent, attachments)?;
         Ok(ChatMessageDto::from(message))
     })
 }
@@ -599,6 +740,201 @@ pub fn chat_db_update_message_text(
         db.update_message_text(uuid, &text)?;
         Ok(())
     })
+}
+
+#[tauri::command]
+pub fn chat_db_list_sessions_for_sync(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+) -> Result<Vec<ChatSessionDto>, ApiError> {
+    with_chat_db(&state, &app, &key_b64, |db| {
+        Ok(db
+            .get_sessions_needing_sync()?
+            .into_iter()
+            .map(ChatSessionDto::from)
+            .collect())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_upsert_session(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    input: ChatSessionUpsertInput,
+) -> Result<ChatSessionDto, ApiError> {
+    let uuid = parse_uuid(&input.session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        let session = db.upsert_session(
+            uuid,
+            &input.title,
+            input.created_at,
+            input.updated_at,
+            input.remote_id.clone(),
+            input.needs_sync,
+            input.deleted_at,
+        )?;
+        Ok(ChatSessionDto::from(session))
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_insert_message_with_uuid(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    input: ChatMessageUpsertInput,
+) -> Result<ChatMessageDto, ApiError> {
+    let message_uuid = parse_uuid(&input.message_uuid)?;
+    let session_uuid = parse_uuid(&input.session_uuid)?;
+    let parent = input
+        .parent_message_uuid
+        .as_deref()
+        .map(parse_uuid)
+        .transpose()?;
+    let sender = normalize_sender(&input.sender)?;
+    let attachments = input
+        .attachments
+        .unwrap_or_default()
+        .into_iter()
+        .map(llmchat_db::Attachment::try_from)
+        .collect::<Result<Vec<_>, ApiError>>()?;
+
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        let message = db.insert_message_with_uuid(
+            message_uuid,
+            session_uuid,
+            sender,
+            &input.text,
+            parent,
+            attachments,
+            input.created_at,
+            input.deleted_at,
+        )?;
+        Ok(ChatMessageDto::from(message))
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_mark_session_synced(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+    remote_id: String,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.mark_session_synced(uuid, &remote_id)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_mark_session_deleted(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    session_uuid: String,
+    deleted_at: i64,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&session_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.set_session_deleted_at(uuid, deleted_at)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_mark_message_deleted(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    message_uuid: String,
+    deleted_at: i64,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&message_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.set_message_deleted_at(uuid, deleted_at)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_mark_attachment_uploaded(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    message_uuid: String,
+    attachment_id: String,
+) -> Result<(), ApiError> {
+    let uuid = parse_uuid(&message_uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.mark_attachment_uploaded(uuid, &attachment_id)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_get_pending_deletions(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+) -> Result<Vec<ChatDeletionDto>, ApiError> {
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        let deletions = db.get_pending_deletions()?;
+        Ok(deletions
+            .into_iter()
+            .map(|(entity, uuid)| ChatDeletionDto {
+                entity_type: match entity {
+                    llmchat_db::EntityType::Session => "session".to_string(),
+                    llmchat_db::EntityType::Message => "message".to_string(),
+                },
+                uuid: uuid.to_string(),
+            })
+            .collect())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_hard_delete(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+    entity_type: String,
+    uuid: String,
+) -> Result<(), ApiError> {
+    let entity_type = parse_entity_type(&entity_type)?;
+    let uuid = parse_uuid(&uuid)?;
+    with_chat_db(&state, &app, &key_b64, move |db| {
+        db.hard_delete(entity_type, uuid)?;
+        Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn chat_db_reset(state: State<ChatDbState>, app: AppHandle) -> Result<(), ApiError> {
+    {
+        let mut guard = state
+            .inner
+            .lock()
+            .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
+        *guard = None;
+    }
+
+    let path = chat_db_path(&app)?;
+    let wal_path = PathBuf::from(format!("{}-wal", path.display()));
+    let shm_path = PathBuf::from(format!("{}-shm", path.display()));
+
+    for candidate in [path, wal_path, shm_path] {
+        if candidate.exists() {
+            fs::remove_file(&candidate)
+                .map_err(|err| ApiError::new("io", err.to_string()))?;
+        }
+    }
+
+    Ok(())
 }
 
 #[derive(Serialize, Clone)]
@@ -749,6 +1085,44 @@ pub fn llm_cancel(job_id: i64) -> Result<(), ApiError> {
     llm::cancel(job_id).map_err(llm_error)
 }
 
+#[tauri::command]
+pub fn fs_file_size(path: String) -> Result<Option<u64>, ApiError> {
+    match fs::metadata(&path) {
+        Ok(metadata) => Ok(Some(metadata.len())),
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(err) => Err(ApiError::new("io", err.to_string())),
+    }
+}
+
+#[tauri::command]
+pub fn fs_read_head(path: String, length: usize) -> Result<Vec<u8>, ApiError> {
+    if length == 0 {
+        return Ok(Vec::new());
+    }
+    let mut file = fs::File::open(&path).map_err(|err| ApiError::new("io", err.to_string()))?;
+    let mut buffer = vec![0u8; length];
+    let bytes_read = file
+        .read(&mut buffer)
+        .map_err(|err| ApiError::new("io", err.to_string()))?;
+    buffer.truncate(bytes_read);
+    Ok(buffer)
+}
+
+#[tauri::command]
+pub fn fs_append_bytes(path: String, bytes: Vec<u8>) -> Result<(), ApiError> {
+    if bytes.is_empty() {
+        return Ok(());
+    }
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .map_err(|err| ApiError::new("io", err.to_string()))?;
+    file.write_all(&bytes)
+        .map_err(|err| ApiError::new("io", err.to_string()))?;
+    Ok(())
+}
+
 fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
     match sender {
         "self" => Ok("self"),
@@ -756,6 +1130,17 @@ fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
         _ => Err(ApiError::new(
             "db_invalid_sender",
             format!("Unsupported sender: {sender}"),
+        )),
+    }
+}
+
+fn parse_entity_type(value: &str) -> Result<llmchat_db::EntityType, ApiError> {
+    match value {
+        "session" => Ok(llmchat_db::EntityType::Session),
+        "message" => Ok(llmchat_db::EntityType::Message),
+        other => Err(ApiError::new(
+            "db_invalid_entity_type",
+            format!("Unsupported entity type: {other}"),
         )),
     }
 }

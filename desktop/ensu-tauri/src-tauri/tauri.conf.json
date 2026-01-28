@@ -1,9 +1,9 @@
 {
   "build": {
     "beforeDevCommand": "cd ../../web && yarn build:wasm && yarn workspace ensu next dev -p 3010",
-    "beforeBuildCommand": "cd ../../web && ENTE_TAURI=1 yarn build:ensu && ENTE_TAURI=1 yarn workspace ensu next export",
+    "beforeBuildCommand": "cd ../../web && ENTE_TAURI=1 yarn build:ensu",
     "devPath": "http://localhost:3010",
-    "distDir": "../../web/apps/ensu/out"
+    "distDir": "../../../web/apps/ensu/out"
   },
   "package": {
     "productName": "Ensu",
@@ -22,8 +22,9 @@
     ],
     "bundle": {
       "active": true,
+      "targets": ["app"],
       "identifier": "io.ente.ensu",
-      "icon": ["icons/icon.png"]
+      "icon": ["icons/icon.icns", "icons/icon.png"]
     },
     "allowlist": {
       "all": false,
@@ -31,9 +32,21 @@
         "all": false,
         "open": true
       },
+      "dialog": {
+        "all": false,
+        "open": true,
+        "save": true
+      },
       "fs": {
         "all": true,
-        "scope": ["$APPDATA", "$APPDATA/*", "$APPDATA/**"]
+        "scope": [
+          "$APPDATA",
+          "$APPDATA/*",
+          "$APPDATA/**",
+          "$DOCUMENT",
+          "$DOCUMENT/*",
+          "$DOCUMENT/**"
+        ]
       },
       "path": {
         "all": true

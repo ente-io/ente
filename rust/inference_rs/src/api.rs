@@ -9,7 +9,8 @@ use llama_cpp_2::mtmd::{
 use llama_cpp_2::sampling::LlamaSampler;
 use llama_cpp_2::token::LlamaToken;
 use llama_cpp_sys_2::{
-    GGML_LOG_LEVEL_ERROR, GGML_LOG_LEVEL_WARN, ggml_log_level, mtmd_helper_log_set,
+    GGML_LOG_LEVEL_ERROR, GGML_LOG_LEVEL_WARN, ggml_log_level, ggml_log_set,
+    mtmd_helper_log_set,
 };
 use parking_lot::Mutex;
 use self_cell::self_cell;
@@ -41,8 +42,13 @@ where
 static BACKEND: OnceLock<Result<LlamaBackend, String>> = OnceLock::new();
 static JOB_COUNTER: AtomicI64 = AtomicI64::new(1);
 static CANCEL_FLAGS: OnceLock<Mutex<HashMap<JobId, Arc<AtomicBool>>>> = OnceLock::new();
+static CANCEL_ALL_REQUESTED: AtomicBool = AtomicBool::new(false);
 static MTMD_LOG_BUFFER: OnceLock<Mutex<String>> = OnceLock::new();
 static MTMD_LOG_HOOK: OnceLock<()> = OnceLock::new();
+static LLAMA_LOG_BUFFER: OnceLock<Mutex<String>> = OnceLock::new();
+static LLAMA_LOG_HOOK: OnceLock<()> = OnceLock::new();
+
+const CANCEL_MESSAGE: &str = "Generation cancelled";
 
 fn backend() -> Result<&'static LlamaBackend, String> {
     match BACKEND.get_or_init(|| LlamaBackend::init().map_err(|err| err.to_string())) {
@@ -57,6 +63,10 @@ fn cancel_flags() -> &'static Mutex<HashMap<JobId, Arc<AtomicBool>>> {
 
 fn mtmd_log_buffer() -> &'static Mutex<String> {
     MTMD_LOG_BUFFER.get_or_init(|| Mutex::new(String::new()))
+}
+
+fn llama_log_buffer() -> &'static Mutex<String> {
+    LLAMA_LOG_BUFFER.get_or_init(|| Mutex::new(String::new()))
 }
 
 unsafe extern "C" fn mtmd_log_callback(
@@ -82,9 +92,38 @@ unsafe extern "C" fn mtmd_log_callback(
     }
 }
 
+unsafe extern "C" fn llama_log_callback(
+    level: ggml_log_level,
+    text: *const ::std::os::raw::c_char,
+    _user_data: *mut ::std::os::raw::c_void,
+) {
+    if text.is_null() {
+        return;
+    }
+    if level != GGML_LOG_LEVEL_WARN && level != GGML_LOG_LEVEL_ERROR {
+        return;
+    }
+    let cstr = unsafe { CStr::from_ptr(text) };
+    if let Ok(message) = cstr.to_str() {
+        let mut guard = llama_log_buffer().lock();
+        guard.push_str(message);
+        const MAX_LEN: usize = 8192;
+        if guard.len() > MAX_LEN {
+            let drain = guard.len() - MAX_LEN;
+            guard.drain(..drain);
+        }
+    }
+}
+
 fn init_mtmd_logging() {
     MTMD_LOG_HOOK.get_or_init(|| unsafe {
         mtmd_helper_log_set(Some(mtmd_log_callback), std::ptr::null_mut());
+    });
+}
+
+fn init_llama_logging() {
+    LLAMA_LOG_HOOK.get_or_init(|| unsafe {
+        ggml_log_set(Some(llama_log_callback), std::ptr::null_mut());
     });
 }
 
@@ -95,11 +134,41 @@ fn take_mtmd_logs() -> String {
     logs
 }
 
+fn take_llama_logs() -> String {
+    let mut guard = llama_log_buffer().lock();
+    let logs = guard.clone();
+    guard.clear();
+    logs
+}
+
 fn register_job() -> (JobId, Arc<AtomicBool>) {
     let job_id = JOB_COUNTER.fetch_add(1, Ordering::Relaxed);
     let flag = Arc::new(AtomicBool::new(false));
+    if CANCEL_ALL_REQUESTED.swap(false, Ordering::Relaxed) {
+        flag.store(true, Ordering::Relaxed);
+    }
     cancel_flags().lock().insert(job_id, flag.clone());
     (job_id, flag)
+}
+
+fn cancel_all() {
+    let mut guard = cancel_flags().lock();
+    if guard.is_empty() {
+        CANCEL_ALL_REQUESTED.store(true, Ordering::Relaxed);
+    } else {
+        CANCEL_ALL_REQUESTED.store(false, Ordering::Relaxed);
+    }
+    for flag in guard.values() {
+        flag.store(true, Ordering::Relaxed);
+    }
+}
+
+fn check_cancelled(cancel_flag: &AtomicBool) -> Result<(), String> {
+    if cancel_flag.load(Ordering::Relaxed) {
+        Err(CANCEL_MESSAGE.to_string())
+    } else {
+        Ok(())
+    }
 }
 
 struct JobGuard(JobId);
@@ -172,6 +241,109 @@ fn find_stop_index(text: &str, stop_sequences: &[String], start: usize) -> Optio
     found
 }
 
+fn drain_utf8(pending: &mut Vec<u8>) -> String {
+    let mut output = String::new();
+    loop {
+        match std::str::from_utf8(pending) {
+            Ok(text) => {
+                output.push_str(text);
+                pending.clear();
+                break;
+            }
+            Err(err) => {
+                let valid_up_to = err.valid_up_to();
+                if valid_up_to > 0 {
+                    let valid = std::str::from_utf8(&pending[..valid_up_to])
+                        .expect("valid UTF-8 prefix");
+                    output.push_str(valid);
+                    pending.drain(..valid_up_to);
+                }
+
+                match err.error_len() {
+                    None => break,
+                    Some(len) => {
+                        let len = len.min(pending.len());
+                        let lossy = String::from_utf8_lossy(&pending[..len]);
+                        output.push_str(&lossy);
+                        pending.drain(..len);
+                    }
+                }
+            }
+        }
+    }
+    output
+}
+
+struct DecodeStep {
+    text: Option<String>,
+    stop: bool,
+}
+
+/// Incremental UTF-8 streaming decoder with stop-sequence handling.
+struct StreamDecoder {
+    generated_text: String,
+    pending_bytes: Vec<u8>,
+    stop_sequences: Vec<String>,
+    max_stop_len: usize,
+}
+
+impl StreamDecoder {
+    fn new(stop_sequences: &[String]) -> Self {
+        let max_stop_len = stop_sequences.iter().map(|s| s.len()).max().unwrap_or(0);
+        Self {
+            generated_text: String::new(),
+            pending_bytes: Vec::new(),
+            stop_sequences: stop_sequences.to_vec(),
+            max_stop_len,
+        }
+    }
+
+    fn push_bytes(&mut self, bytes: &[u8]) -> DecodeStep {
+        if !bytes.is_empty() {
+            self.pending_bytes.extend_from_slice(bytes);
+        }
+        let piece = drain_utf8(&mut self.pending_bytes);
+        self.push_text(piece)
+    }
+
+    fn flush(&mut self) -> DecodeStep {
+        if self.pending_bytes.is_empty() {
+            return DecodeStep { text: None, stop: false };
+        }
+        let piece = String::from_utf8_lossy(&self.pending_bytes).to_string();
+        self.pending_bytes.clear();
+        self.push_text(piece)
+    }
+
+    fn push_text(&mut self, piece: String) -> DecodeStep {
+        if piece.is_empty() {
+            return DecodeStep { text: None, stop: false };
+        }
+
+        let prev_len = self.generated_text.len();
+        self.generated_text.push_str(&piece);
+
+        if self.max_stop_len > 0 {
+            let search_start = prev_len.saturating_sub(self.max_stop_len);
+            if let Some(stop_index) =
+                find_stop_index(&self.generated_text, &self.stop_sequences, search_start)
+            {
+                let new_piece = self.generated_text[prev_len..stop_index].to_string();
+                self.generated_text.truncate(stop_index);
+                return DecodeStep {
+                    text: if new_piece.is_empty() { None } else { Some(new_piece) },
+                    stop: true,
+                };
+            }
+        }
+
+        DecodeStep {
+            text: Some(piece),
+            stop: false,
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn run_generation_loop(
     ctx: &mut LlamaContext,
@@ -181,12 +353,12 @@ fn run_generation_loop(
     job_id: JobId,
     max_tokens: usize,
     stop_sequences: &[String],
-    max_stop_len: usize,
     generated_tokens_count: &mut i32,
     mut pos: i32,
     mut logits_index: i32,
 ) -> Result<(), String> {
-    let mut generated_text = String::new();
+    let mut decoder = StreamDecoder::new(stop_sequences);
+    let mut stop_triggered = false;
     let n_ctx = ctx.n_ctx();
 
     for _ in 0..max_tokens {
@@ -205,38 +377,23 @@ fn run_generation_loop(
             break;
         }
 
-        let piece = ctx
+        let bytes = ctx
             .model
-            .token_to_str(token, Special::Tokenize)
+            .token_to_bytes(token, Special::Tokenize)
             .map_err(|err| format_error("Detokenize failed", err))?;
+        let step = decoder.push_bytes(&bytes);
 
-        if !piece.is_empty() {
-            let prev_len = generated_text.len();
-            generated_text.push_str(&piece);
-
-            if max_stop_len > 0 {
-                let search_start = prev_len.saturating_sub(max_stop_len);
-                if let Some(stop_index) =
-                    find_stop_index(&generated_text, stop_sequences, search_start)
-                {
-                    let new_piece = &generated_text[prev_len..stop_index];
-                    if !new_piece.is_empty() {
-                        sink.add(GenerateEvent::Text {
-                            job_id,
-                            text: new_piece.to_string(),
-                            token_id: Some(token.0),
-                        });
-                    }
-                    generated_text.truncate(stop_index);
-                    break;
-                }
-            }
-
+        if let Some(text) = step.text {
             sink.add(GenerateEvent::Text {
                 job_id,
-                text: piece,
+                text,
                 token_id: Some(token.0),
             });
+        }
+
+        if step.stop {
+            stop_triggered = true;
+            break;
         }
 
         let mut step_batch = LlamaBatch::new(1, 1);
@@ -248,6 +405,17 @@ fn run_generation_loop(
 
         logits_index = 0;
         pos += 1;
+    }
+
+    if !stop_triggered {
+        let step = decoder.flush();
+        if let Some(text) = step.text {
+            sink.add(GenerateEvent::Text {
+                job_id,
+                text,
+                token_id: None,
+            });
+        }
     }
 
     Ok(())
@@ -467,8 +635,18 @@ pub fn load_model(params: ModelLoadParams) -> Result<ModelHandleRef, String> {
         model_params = model_params.with_use_mlock(use_mlock);
     }
 
+    init_llama_logging();
+    take_llama_logs();
+
     let model = LlamaModel::load_from_file(backend, Path::new(&params.model_path), &model_params)
-        .map_err(|err| format_error("Failed to load model", err))?;
+        .map_err(|err| {
+            let logs = take_llama_logs();
+            if logs.trim().is_empty() {
+                format_error("Failed to load model", err)
+            } else {
+                format!("Failed to load model: {err}. Logs: {logs}")
+            }
+        })?;
 
     Ok(Arc::new(ModelHandle { model }))
 }
@@ -626,10 +804,15 @@ pub fn generate_chat_stream(
     let _job_guard = JobGuard(job_id);
     let start = Instant::now();
 
+    sink.add(GenerateEvent::Text {
+        job_id,
+        text: String::new(),
+        token_id: None,
+    });
+
     let max_tokens = max_tokens.unwrap_or(128);
     let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
     let stop_sequences = stop_sequences.unwrap_or_default();
-    let max_stop_len = stop_sequences.iter().map(|s| s.len()).max().unwrap_or(0);
 
     let mut prompt_tokens_count: i32 = 0;
     let mut generated_tokens_count: i32 = 0;
@@ -721,6 +904,7 @@ pub fn generate_chat_stream(
                 let mut token_offset = 0usize;
                 let mut logits_index: i32 = 0;
                 while token_offset < prompt_tokens.len() {
+                    check_cancelled(&cancel_flag)?;
                     let end = (token_offset + n_batch).min(prompt_tokens.len());
                     let chunk = &prompt_tokens[token_offset..end];
                     let mut batch = LlamaBatch::new(chunk.len(), 1);
@@ -751,7 +935,6 @@ pub fn generate_chat_stream(
                     job_id,
                     max_tokens,
                     &stop_sequences,
-                    max_stop_len,
                     &mut generated_tokens_count,
                     pos,
                     logits_index,
@@ -795,6 +978,7 @@ pub fn generate_chat_stream(
 
             let mut bitmaps = Vec::with_capacity(image_paths.len());
             for image_path in &image_paths {
+                check_cancelled(&cancel_flag)?;
                 if !Path::new(image_path).exists() {
                     return Err(format!("Image file not found at {image_path}"));
                 }
@@ -840,10 +1024,12 @@ pub fn generate_chat_stream(
             }
 
             ctx.clear_kv_cache();
+            check_cancelled(&cancel_flag)?;
 
             let n_past = chunks
                 .eval_chunks(&mtmd_ctx, ctx, 0, 0, n_batch, true)
                 .map_err(|err| format_error("Failed to evaluate multimodal prompt", err))?;
+            check_cancelled(&cancel_flag)?;
 
             let mut sampler = build_sampler(ctx.model, &sampler_request)?;
             let mut prompt_tokens = Vec::new();
@@ -864,7 +1050,6 @@ pub fn generate_chat_stream(
                 job_id,
                 max_tokens,
                 &stop_sequences,
-                max_stop_len,
                 &mut generated_tokens_count,
                 n_past,
                 -1,
@@ -908,10 +1093,15 @@ pub fn generate_stream(
     let _job_guard = JobGuard(job_id);
     let start = Instant::now();
 
+    sink.add(GenerateEvent::Text {
+        job_id,
+        text: String::new(),
+        token_id: None,
+    });
+
     let max_tokens = request.max_tokens.unwrap_or(128);
     let max_tokens = usize::try_from(max_tokens.max(0)).unwrap_or(0);
     let stop_sequences = request.stop_sequences.clone().unwrap_or_default();
-    let max_stop_len = stop_sequences.iter().map(|s| s.len()).max().unwrap_or(0);
 
     let mut prompt_tokens_count: i32 = 0;
     let mut generated_tokens_count: i32 = 0;
@@ -951,6 +1141,7 @@ pub fn generate_stream(
             let mut token_offset = 0usize;
             let mut logits_index: i32 = 0;
             while token_offset < prompt_tokens.len() {
+                check_cancelled(&cancel_flag)?;
                 let end = (token_offset + n_batch).min(prompt_tokens.len());
                 let chunk = &prompt_tokens[token_offset..end];
                 let mut batch = LlamaBatch::new(chunk.len(), 1);
@@ -981,7 +1172,6 @@ pub fn generate_stream(
                 job_id,
                 max_tokens,
                 &stop_sequences,
-                max_stop_len,
                 &mut generated_tokens_count,
                 pos,
                 logits_index,
@@ -1017,8 +1207,29 @@ pub fn generate_stream(
 }
 
 pub fn cancel(job_id: JobId) -> Result<(), String> {
+    if job_id <= 0 {
+        cancel_all();
+        return Ok(());
+    }
     if let Some(flag) = cancel_flags().lock().get(&job_id) {
         flag.store(true, Ordering::Relaxed);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::StreamDecoder;
+
+    #[test]
+    fn stream_decoder_emits_complete_utf8() {
+        let mut decoder = StreamDecoder::new(&[]);
+        let step = decoder.push_bytes(&[0xF0, 0x9F]);
+        assert!(step.text.is_none());
+        assert!(!step.stop);
+
+        let step = decoder.push_bytes(&[0x99, 0x82]);
+        assert_eq!(step.text.as_deref(), Some("🙂"));
+        assert!(!step.stop);
+    }
 }
