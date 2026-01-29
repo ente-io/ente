@@ -1,21 +1,19 @@
 import "dart:io";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
+import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/lock_screen_settings.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -24,24 +22,23 @@ class LockScreenOptions extends StatefulWidget {
   State<LockScreenOptions> createState() => _LockScreenOptionsState();
 }
 
+enum LockType { device, pin, password }
+
 class _LockScreenOptionsState extends State<LockScreenOptions> {
   final Configuration _configuration = Configuration.instance;
+  final LocalSettings _localSettings = localSettings;
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   late bool appLock;
-  bool isPinEnabled = false;
-  bool isPasswordEnabled = false;
-  late int autoLockTimeInMilliseconds;
   late bool hideAppContent;
+  LockType _currentLockType = LockType.device;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     hideAppContent = _lockscreenSetting.getShouldHideAppContent();
-    autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
+    appLock = _localSettings.appLockEnabledCached;
     _initializeSettings();
-    appLock = isPinEnabled ||
-        isPasswordEnabled ||
-        _configuration.shouldShowSystemLockScreen();
   }
 
   Future<void> _initializeSettings() async {
@@ -49,73 +46,91 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
     final bool shouldShowAppContent =
         _lockscreenSetting.getShouldHideAppContent();
+
+    LockType lockType = LockType.device;
+    if (pinEnabled) {
+      lockType = LockType.pin;
+    } else if (passwordEnabled) {
+      lockType = LockType.password;
+    }
+
+    final bool isAppLockEnabled = pinEnabled ||
+        passwordEnabled ||
+        _configuration.shouldShowSystemLockScreen();
+
     setState(() {
-      isPasswordEnabled = passwordEnabled;
-      isPinEnabled = pinEnabled;
       hideAppContent = shouldShowAppContent;
+      _currentLockType = lockType;
+      appLock = isAppLockEnabled;
+      _isInitialized = true;
     });
-  }
-
-  Future<void> _deviceLock() async {
-    await _lockscreenSetting.removePinAndPassword();
-    await _initializeSettings();
-  }
-
-  Future<void> _pinLock() async {
-    final bool result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return const LockScreenPin();
-        },
-      ),
-    );
-    setState(() {
-      _initializeSettings();
-      if (result) {
-        appLock = isPinEnabled ||
-            isPasswordEnabled ||
-            _configuration.shouldShowSystemLockScreen();
-      }
-    });
-  }
-
-  Future<void> _passwordLock() async {
-    final bool result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return const LockScreenPassword();
-        },
-      ),
-    );
-    setState(() {
-      _initializeSettings();
-      if (result) {
-        appLock = isPinEnabled ||
-            isPasswordEnabled ||
-            _configuration.shouldShowSystemLockScreen();
-      }
-    });
-  }
-
-  Future<void> _onAutolock() async {
-    await routeToPage(
-      context,
-      const LockScreenAutoLock(),
-    ).then((value) {
-      setState(() {
-        autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
-      });
-    });
+    await _localSettings.setAppLockEnabledCached(isAppLockEnabled);
   }
 
   Future<void> _onToggleSwitch() async {
-    AppLock.of(context)!.setEnabled(!appLock);
-    await _configuration.setSystemLockScreen(!appLock);
+    if (appLock) {
+      // Turning off app lock
+      AppLock.of(context)!.setEnabled(false);
+      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.removePinAndPassword();
+      setState(() {
+        appLock = false;
+        _currentLockType = LockType.device;
+      });
+    } else {
+      // Turning on app lock - default to device lock
+      AppLock.of(context)!.setEnabled(true);
+      await _configuration.setSystemLockScreen(true);
+      setState(() {
+        appLock = true;
+        _currentLockType = LockType.device;
+      });
+    }
+    await _initializeSettings();
+  }
+
+  Future<void> _onSelectDeviceLock() async {
+    // Remove any existing PIN/password and use device lock
     await _lockscreenSetting.removePinAndPassword();
+    await _configuration.setSystemLockScreen(true);
+    AppLock.of(context)!.setEnabled(true);
     setState(() {
-      _initializeSettings();
-      appLock = !appLock;
+      _currentLockType = LockType.device;
     });
+    await _initializeSettings();
+  }
+
+  Future<void> _onSelectPinLock() async {
+    final result = await routeToPage(
+      context,
+      const LockScreenPin(),
+    );
+    if (result == true) {
+      await _configuration.setSystemLockScreen(false);
+      setState(() {
+        _currentLockType = LockType.pin;
+      });
+    }
+    await _initializeSettings();
+  }
+
+  Future<void> _onSelectPasswordLock() async {
+    final result = await routeToPage(
+      context,
+      const LockScreenPassword(),
+    );
+    if (result == true) {
+      await _configuration.setSystemLockScreen(false);
+      setState(() {
+        _currentLockType = LockType.password;
+      });
+    }
+    await _initializeSettings();
+  }
+
+  Future<void> _onAutoLockTap() async {
+    await routeToPage(context, const LockScreenAutoLock());
+    setState(() {});
   }
 
   Future<void> _tapHideContent() async {
@@ -127,13 +142,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     );
   }
 
-  String _formatTime(Duration duration) {
-    if (duration.inHours != 0) {
-      return "in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}";
-    } else if (duration.inMinutes != 0) {
-      return "in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}";
-    } else if (duration.inSeconds != 0) {
-      return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
+  String _formatAutoLockTime(int milliseconds) {
+    final duration = Duration(milliseconds: milliseconds);
+    if (duration.inMinutes >= 1) {
+      return "${duration.inMinutes}m";
+    } else if (duration.inSeconds >= 1) {
+      return "${duration.inSeconds}s";
     } else {
       return AppLocalizations.of(context).immediately;
     }
@@ -141,211 +155,160 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Figma colors: Light #FAFAFA, Dark #161616
+    final pageBackgroundColor =
+        isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).appLock,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Column(
-                          children: [
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: AppLocalizations.of(context).appLock,
-                              ),
-                              alignCaptionedTextToLeft: true,
-                              singleBorderRadius: 8,
-                              menuItemColor: colorTheme.fillFaint,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => appLock,
-                                onChanged: () => _onToggleSwitch(),
-                              ),
-                            ),
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 210),
-                              switchInCurve: Curves.easeOut,
-                              switchOutCurve: Curves.easeIn,
-                              child: !appLock
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 14,
-                                        left: 14,
-                                        right: 12,
-                                      ),
-                                      child: Text(
-                                        AppLocalizations.of(context)
-                                            .appLockDescriptions,
-                                        style: textTheme.miniFaint,
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    )
-                                  : const SizedBox(),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(top: 24),
-                            ),
-                          ],
+      backgroundColor: pageBackgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: colorScheme.strokeBase,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context).appLock,
+                style: textTheme.body.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).appLock,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => appLock,
+                          onChanged: () => _onToggleSwitch(),
                         ),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 210),
-                          switchInCurve: Curves.easeOut,
-                          switchOutCurve: Curves.easeIn,
-                          child: appLock
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: AppLocalizations.of(context)
-                                            .deviceLock,
-                                      ),
-                                      alignCaptionedTextToLeft: true,
-                                      isTopBorderRadiusRemoved: false,
-                                      isBottomBorderRadiusRemoved: true,
-                                      menuItemColor: colorTheme.fillFaint,
-                                      trailingIcon:
-                                          !(isPasswordEnabled || isPinEnabled)
-                                              ? Icons.check
-                                              : null,
-                                      trailingIconColor: colorTheme.tabIcon,
-                                      onTap: () => _deviceLock(),
-                                    ),
-                                    DividerWidget(
-                                      dividerType: DividerType.menuNoIcon,
-                                      bgColor: colorTheme.fillFaint,
-                                    ),
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: AppLocalizations.of(context)
-                                            .pinLock,
-                                      ),
-                                      alignCaptionedTextToLeft: true,
-                                      isTopBorderRadiusRemoved: true,
-                                      isBottomBorderRadiusRemoved: true,
-                                      menuItemColor: colorTheme.fillFaint,
-                                      trailingIcon:
-                                          isPinEnabled ? Icons.check : null,
-                                      trailingIconColor: colorTheme.tabIcon,
-                                      onTap: () => _pinLock(),
-                                    ),
-                                    DividerWidget(
-                                      dividerType: DividerType.menuNoIcon,
-                                      bgColor: colorTheme.fillFaint,
-                                    ),
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: AppLocalizations.of(context)
-                                            .passwordLock,
-                                      ),
-                                      alignCaptionedTextToLeft: true,
-                                      isTopBorderRadiusRemoved: true,
-                                      isBottomBorderRadiusRemoved: false,
-                                      menuItemColor: colorTheme.fillFaint,
-                                      trailingIcon: isPasswordEnabled
-                                          ? Icons.check
-                                          : null,
-                                      trailingIconColor: colorTheme.tabIcon,
-                                      onTap: () => _passwordLock(),
-                                    ),
-                                    const SizedBox(
-                                      height: 24,
-                                    ),
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: AppLocalizations.of(context)
-                                            .autoLock,
-                                        subTitle: _formatTime(
-                                          Duration(
-                                            milliseconds:
-                                                autoLockTimeInMilliseconds,
-                                          ),
-                                        ),
-                                      ),
-                                      trailingIcon:
-                                          Icons.chevron_right_outlined,
-                                      trailingIconIsMuted: true,
-                                      alignCaptionedTextToLeft: true,
-                                      singleBorderRadius: 8,
-                                      menuItemColor: colorTheme.fillFaint,
-                                      trailingIconColor: colorTheme.tabIcon,
-                                      onTap: () => _onAutolock(),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 14,
-                                        left: 14,
-                                        right: 12,
-                                      ),
-                                      child: Text(
-                                        AppLocalizations.of(context)
-                                            .autoLockFeatureDescription,
-                                        style: textTheme.miniFaint,
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Container(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          AppLocalizations.of(context).appLockDescriptions,
+                          style: textTheme.mini.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: appLock ? 24 : 8),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: AppLocalizations.of(context).hideContent,
+                      ),
+                      if (appLock && _isInitialized) ...[
+                        const SizedBox(height: 16),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MenuItemWidgetNew(
+                                title: AppLocalizations.of(context).deviceLock,
+                                borderRadius: 0,
+                                trailingIcon:
+                                    _currentLockType == LockType.device
+                                        ? Icons.check
+                                        : null,
+                                onTap: () async => _onSelectDeviceLock(),
                               ),
-                              alignCaptionedTextToLeft: true,
-                              singleBorderRadius: 8,
-                              menuItemColor: colorTheme.fillFaint,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => hideAppContent,
-                                onChanged: () => _tapHideContent(),
+                              MenuItemWidgetNew(
+                                title: AppLocalizations.of(context).pinLock,
+                                borderRadius: 0,
+                                trailingIcon: _currentLockType == LockType.pin
+                                    ? Icons.check
+                                    : null,
+                                onTap: () async => _onSelectPinLock(),
                               ),
-                              trailingIconColor: colorTheme.tabIcon,
+                              MenuItemWidgetNew(
+                                title:
+                                    AppLocalizations.of(context).passwordLock,
+                                borderRadius: 0,
+                                trailingIcon:
+                                    _currentLockType == LockType.password
+                                        ? Icons.check
+                                        : null,
+                                onTap: () async => _onSelectPasswordLock(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        MenuItemWidgetNew(
+                          title: AppLocalizations.of(context).autoLock,
+                          trailingWidget: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _formatAutoLockTime(
+                                  _lockscreenSetting.getAutoLockTime(),
+                                ),
+                                style: textTheme.small.copyWith(
+                                  color: colorScheme.textMuted,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.chevron_right,
+                                color: colorScheme.strokeMuted,
+                              ),
+                            ],
+                          ),
+                          onTap: () async => _onAutoLockTap(),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .autoLockFeatureDescription,
+                            style: textTheme.mini.copyWith(
+                              color: colorScheme.textMuted,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: 14,
-                                left: 14,
-                                right: 12,
-                              ),
-                              child: Text(
-                                Platform.isAndroid
-                                    ? AppLocalizations.of(context)
-                                        .hideContentDescriptionAndroid
-                                    : AppLocalizations.of(context)
-                                        .hideContentDescriptionIos,
-                                style: textTheme.miniFaint,
-                                textAlign: TextAlign.left,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
-                    ),
+                      const SizedBox(height: 16),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).hideContent,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () => hideAppContent,
+                          onChanged: () => _tapHideContent(),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          Platform.isAndroid
+                              ? AppLocalizations.of(context)
+                                  .hideContentDescriptionAndroid
+                              : AppLocalizations.of(context)
+                                  .hideContentDescriptionIos,
+                          style: textTheme.mini.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-              childCount: 1,
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

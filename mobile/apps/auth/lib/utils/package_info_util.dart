@@ -1,4 +1,4 @@
-import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class PackageInfoUtil {
@@ -11,7 +11,7 @@ class PackageInfoUtil {
   }
 
   String getPackageName(PackageInfo info) {
-    if (PlatformUtil.isMobile()) {
+    if (PlatformDetector.isMobile()) {
       return info.packageName;
     } else {
       return 'io.ente.auth';

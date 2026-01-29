@@ -6,9 +6,10 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_accounts/services/user_service.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:locker/core/constants.dart';
 import 'package:locker/core/errors.dart';
@@ -22,7 +23,6 @@ import 'package:locker/services/files/upload/models/backup_item.dart';
 import 'package:locker/services/files/upload/models/backup_item_status.dart';
 import 'package:locker/services/files/upload/models/upload_url.dart';
 import "package:locker/utils/crypto_helper.dart";
-import 'package:locker/utils/data_util.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
@@ -101,6 +101,8 @@ class FileUploader {
   ) async {
     try {
       _logger.info('Starting upload of info file');
+
+      _checkIfWithinFileCountLimit();
 
       // Generate a file key for encryption
       final fileKey = CryptoUtil.generateKey();
@@ -240,7 +242,7 @@ class FileUploader {
           await _tryToUpload(file, collection, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
-          final message = "Upload timed out for file";
+          const message = "Upload timed out for file";
           _logger.warning(message);
           throw TimeoutException(message);
         },
@@ -334,10 +336,11 @@ class FileUploader {
       }
       _logger.info('Source file size: $sourceFileSize bytes');
 
+      _checkIfWithinFileCountLimit();
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
-      final fileAttributes = await CryptoUtil.encryptFileWithMD5(
+      final fileAttributes = await CryptoUtil.encryptFileWithMd5(
         file.path,
         encryptedFilePath,
         key: key,
@@ -408,10 +411,9 @@ class FileUploader {
 
       final encryptedMetadataResult = await CryptoUtil.encryptData(
         utf8.encode(jsonEncode(enteFile.metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+      final fileDecryptionHeader = CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -420,7 +422,7 @@ class FileUploader {
       final metadataDecryptionHeader =
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
       final encryptedFileKeyData = CryptoUtil.encryptSync(
-        fileAttributes.key!,
+        fileAttributes.key,
         CryptoHelper.instance.getCollectionKey(collection),
       );
       final encryptedKey =
@@ -434,7 +436,7 @@ class FileUploader {
         pubMetadataRequest = await getPubMetadataRequest(
           enteFile,
           pubMetadata,
-          fileAttributes.key!,
+          fileAttributes.key,
         );
       }
       final remoteFile = await _uploadFile(
@@ -461,7 +463,8 @@ class FileUploader {
           e is WiFiUnavailableError ||
           e is SilentlyCancelUploadsError ||
           e is InvalidFileError ||
-          e is FileTooLargeForPlanError)) {
+          e is FileTooLargeForPlanError ||
+          e is FileLimitReachedError)) {
         _logger.severe("File upload failed", e, s);
       }
       if (e is InvalidFileError) {
@@ -469,7 +472,8 @@ class FileUploader {
       }
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||
-          e is NoActiveSubscriptionError)) {
+          e is NoActiveSubscriptionError ||
+          e is FileLimitReachedError)) {
         // file upload can not be retried in such cases without user intervention
         uploadHardFailure = true;
       }
@@ -528,6 +532,40 @@ class FileUploader {
   }
 
   /*
+  _checkIfWithinFileCountLimit verifies if the user has reached their file count
+   limit. It throws FileLimitReachedError if the limit is reached. For family
+   plan users, it checks the combined family file count against the shared limit.
+   This check is best effort and may not be completely accurate due to UserDetail
+   cache.
+   */
+  void _checkIfWithinFileCountLimit() {
+    try {
+      final userDetails = UserService.instance.getCachedUserDetails();
+      if (userDetails == null) {
+        return;
+      }
+      final maxFileCount = userDetails.getLockerFileLimit();
+      final currentFileCount =
+          userDetails.isPartOfFamily() && userDetails.lockerFamilyUsage != null
+              ? userDetails.lockerFamilyUsage!.familyFileCount
+              : userDetails.fileCount;
+      if (currentFileCount >= maxFileCount) {
+        _logger.warning(
+          'File count limit reached: currentFileCount $currentFileCount, '
+          'maxFileCount $maxFileCount',
+        );
+        throw FileLimitReachedError();
+      }
+    } catch (e) {
+      if (e is FileLimitReachedError) {
+        rethrow;
+      } else {
+        _logger.severe('Error checking file count limit', e);
+      }
+    }
+  }
+
+  /*
   _checkIfWithinStorageLimit verifies if the file size for encryption and upload
    is within the storage limit. It throws StorageLimitExceededError if the limit
     is exceeded. This check is best effort and may not be completely accurate
@@ -546,8 +584,9 @@ class FileUploader {
       final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
       final num fileSize = await fileToBeUploaded.length();
       if (fileSize > freeStorage) {
-        _logger.warning('Storage limit exceeded fileSize $fileSize and '
-            'freeStorage $freeStorage');
+        _logger.warning(
+          'Storage limit exceeded fileSize $fileSize and freeStorage $freeStorage',
+        );
         throw StorageLimitExceededError();
       }
       if (fileSize > kMaxFileSize10Gib) {

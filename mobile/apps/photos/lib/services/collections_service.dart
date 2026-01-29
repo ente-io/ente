@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -23,8 +24,6 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/extensions/list.dart';
-import 'package:photos/extensions/stop_watch.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/collection_file_item.dart';
 import 'package:photos/models/api/collection/create_request.dart';
@@ -331,15 +330,12 @@ class CollectionsService {
   List<Collection> getHiddenCollections({bool includeDefaultHidden = true}) {
     if (includeDefaultHidden) {
       return _collectionIDToCollections.values
-          .toList()
-          .where((element) => element.isHidden())
+          .where((c) => c.isHidden())
           .toList();
     } else {
       return _collectionIDToCollections.values
-          .toList()
           .where(
-            (element) => (element.isHidden() &&
-                element.id != cachedDefaultHiddenCollection?.id),
+            (c) => c.isHidden() && c.id != cachedDefaultHiddenCollection?.id,
           )
           .toList();
     }
@@ -347,21 +343,14 @@ class CollectionsService {
 
   Set<int> getHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.isHidden())
+        .where((c) => c.isHidden())
         .map((e) => e.id)
         .toSet();
   }
 
   Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) =>
-              element.hasShareeArchived() ||
-              element.isHidden() ||
-              element.isArchived(),
-        )
+        .where((c) => c.isArchived() || c.isHidden())
         .map((e) => e.id)
         .toSet();
   }

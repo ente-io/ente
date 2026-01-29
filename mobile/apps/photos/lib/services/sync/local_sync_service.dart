@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -16,7 +17,6 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
@@ -25,7 +25,6 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/import/diff.dart";
 import "package:photos/services/sync/import/local_assets.dart";
 import "package:photos/services/sync/import/model.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
@@ -318,16 +317,17 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      _checkAndFireLocalAssetUpdateEvent(allFiles, files.isNotEmpty);
+      _checkAndFireLocalAssetUpdateEvent(allFiles, files);
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
 
   void _checkAndFireLocalAssetUpdateEvent(
     List<EnteFile> allFiles,
-    bool discoveredNewFiles,
+    List<EnteFile> newlyInsertedFiles,
   ) {
     if (allFiles.isEmpty) return;
+    final bool discoveredNewFiles = newlyInsertedFiles.isNotEmpty;
     if (!discoveredNewFiles) {
       allFiles.removeWhere(
         (file) =>
@@ -338,8 +338,24 @@ class LocalSyncService {
         return;
       }
     }
+
+    // Check if any NEWLY INSERTED files were created in the last 7 days
+    bool hasRecentNewLocalDiscovery = false;
+    if (discoveredNewFiles) {
+      final sevenDaysAgo = DateTime.now()
+          .subtract(const Duration(days: 7))
+          .microsecondsSinceEpoch;
+      hasRecentNewLocalDiscovery = newlyInsertedFiles.any(
+        (file) => (file.creationTime ?? 0) > sevenDaysAgo,
+      );
+    }
+
     Bus.instance.fire(
-      LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+      LocalPhotosUpdatedEvent(
+        allFiles,
+        source: "loadedPhoto",
+        hasRecentNewLocalDiscovery: hasRecentNewLocalDiscovery,
+      ),
     );
   }
 

@@ -75,7 +75,7 @@ Open `Settings > Backup > Free up space > Remove duplicates`, review the duplica
 
 **On desktop:**
 
-Open `Settings > Deduplicate files`, review the duplicates found, and confirm to remove them.
+Open `Settings > Free up space > Deduplicate files`, review the duplicates found, and confirm to remove them.
 
 ### What happens during deduplication
 
@@ -109,7 +109,7 @@ Open `Settings > Backup > Free up space > Similar images`, review each group of 
 
 **On desktop:**
 
-The "Similar images" feature is currently only available on mobile. Desktop only supports exact duplicate detection via `Settings > Deduplicate files`.
+The "Similar images" feature is currently only available on mobile. Desktop only supports exact duplicate detection via `Settings > Free up space > Deduplicate files`.
 
 ### Album-linked similarity management
 
@@ -129,6 +129,85 @@ The similar images feature requires:
 - Available on mobile and desktop apps
 
 Learn more about [Machine learning](/photos/features/search-and-discovery/machine-learning).
+
+## View large files
+
+If you want to identify which photos and videos are consuming the most storage in your Ente cloud, the large files tool helps you find and review them. This is useful for freeing up storage quota by deleting or managing files you may not need.
+
+### How it works
+
+The large files feature:
+
+1. Scans your entire Ente library for files larger than 10 MB
+2. Sorts files by size (largest first)
+3. Lets you filter by type: All, Photos, or Videos
+4. Allows you to select and delete files to free up cloud storage
+
+### Using the large files tool
+
+**On mobile:**
+
+Open `Settings > Backup > Free up space > Large files` to see your largest files sorted by size.
+
+**On desktop:**
+
+Open `Settings > Free up space > Large files` to see your largest files sorted by size.
+
+From here you can:
+
+- Review which files are taking up the most space
+- Filter by photos or videos using the filter chips at the top
+- Select individual files or multiple files
+- Delete selected files to free up your Ente storage quota
+
+Deleting files moves them to Trash (recoverable for 30 days) before permanent deletion
+
+### What counts as a large file
+
+Files are shown if they:
+
+- Are larger than 10 MB in size
+- Have been uploaded to Ente
+- Are owned by you (not shared files from others)
+
+## Delete suggestions
+
+If you participate in shared albums, album owners or admins may suggest that certain photos be deleted. These suggestions appear in your Delete Suggestions queue for you to review.
+
+### What are delete suggestions?
+
+When an album owner or admin wants to help curate a shared album, they can suggest that participants delete specific photos. This is common after group trips or events when someone helps filter out blurry, duplicate, or unwanted shots.
+
+When a suggestion is made:
+
+- The photo is removed from the shared album
+- You receive a delete suggestion to review
+- You decide whether to delete or keep the photo
+
+### Reviewing delete suggestions
+
+**On mobile:**
+
+Open `Settings > Backup > Free up space > Delete suggestions` to see photos that have been suggested for deletion.
+
+For each suggestion, you can:
+
+- **Accept**: Move the photo to Trash (can be recovered within 30 days)
+- **Reject**: Keep the photo and dismiss the suggestion
+
+### Why review suggestions?
+
+Accepting suggestions helps you:
+
+- Free up storage space
+- Remove photos you might have forgotten about
+- Keep your library clean based on feedback from album curators
+
+Rejecting suggestions keeps the photo in your account. The photo was already removed from the shared album when the suggestion was made.
+
+> **Note**: Delete suggestions is currently available on mobile apps only.
+
+Learn more about [suggest deletion](/photos/features/sharing-and-collaboration/collaboration#suggest-deletion) in the collaboration guide.
 
 ## Understanding storage in Ente
 
@@ -170,3 +249,4 @@ Learn more in [deletion feature guide](/photos/features/albums-and-organization/
 - [How can I remove duplicate photos?](/photos/faq/albums-and-organization#remove-duplicates)
 - [What's the difference between duplicates and similar images?](/photos/faq/albums-and-organization#duplicates-vs-similar)
 - [Does removing duplicates affect automatic duplicate detection?](/photos/faq/albums-and-organization#manual-vs-auto-dedup)
+- [How do I review delete suggestions?](/photos/faq/sharing-and-collaboration#review-delete-suggestions)

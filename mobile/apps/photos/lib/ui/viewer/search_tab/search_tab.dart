@@ -12,10 +12,12 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/rituals/rituals_banner.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
+import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 import "package:photos/ui/viewer/search_tab/albums_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
@@ -57,17 +59,36 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    return AllSectionsExamplesProvider(
-      child: FadeIndexedStack(
-        lazy: false,
-        duration: const Duration(milliseconds: 150),
-        index: index,
-        children: const [
-          AllSearchSections(),
-          SearchSuggestionsWidget(),
-          NoResultWidget(),
-        ],
-      ),
+    final colorScheme = getEnteColorScheme(context);
+    final resultsBackground = EnteTheme.isDark(context)
+        ? const Color.fromRGBO(22, 22, 22, 1)
+        : colorScheme.backgroundElevated2;
+    final headerColor =
+        index == 1 ? resultsBackground : colorScheme.backgroundBase;
+    return Column(
+      children: [
+        ColoredBox(
+          color: headerColor,
+          child: const SafeArea(
+            bottom: false,
+            child: SearchWidget(),
+          ),
+        ),
+        Expanded(
+          child: AllSectionsExamplesProvider(
+            child: FadeIndexedStack(
+              lazy: false,
+              duration: const Duration(milliseconds: 150),
+              index: index,
+              children: const [
+                AllSearchSections(),
+                SearchSuggestionsWidget(),
+                NoResultWidget(),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -87,7 +108,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     final searchTypes = SectionType.values.toList(growable: true);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 4),
       child: Stack(
         children: [
           FutureBuilder<List<List<SearchResult>>>(
@@ -206,17 +227,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   child: EnteLoadingWidget(),
                 );
               }
-            },
-          ),
-          ValueListenableBuilder(
-            valueListenable:
-                InheritedAllSectionsExamples.of(context).isDebouncingNotifier,
-            builder: (context, value, _) {
-              return value
-                  ? const EnteLoadingWidget(
-                      alignment: Alignment.topRight,
-                    )
-                  : const SizedBox.shrink();
             },
           ),
         ],

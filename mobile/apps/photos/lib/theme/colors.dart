@@ -58,6 +58,9 @@ class EnteColorScheme {
   final Color tabIcon;
   final List<Color> avatarColors;
 
+  // Menu item icon stroke color
+  final Color menuItemIconStroke;
+
   const EnteColorScheme(
     this.backgroundBase,
     this.backgroundElevated,
@@ -84,7 +87,8 @@ class EnteColorScheme {
     this.blurStrokeFaint,
     this.blurStrokePressed,
     this.tabIcon,
-    this.avatarColors, {
+    this.avatarColors,
+    this.menuItemIconStroke, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -126,6 +130,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurStrokePressedLight,
   tabIconLight,
   avatarLight,
+  menuItemIconStrokeLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -155,6 +160,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokePressedDark,
   tabIconDark,
   avatarDark,
+  menuItemIconStrokeDark,
 );
 
 // Background Colors
@@ -223,6 +229,10 @@ const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 // Other colors
 const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);
 const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
+
+// Menu item icon stroke colors
+const Color menuItemIconStrokeLight = Color(0xFF979797);
+const Color menuItemIconStrokeDark = Color.fromRGBO(255, 255, 255, 1);
 
 // Fixed Colors
 

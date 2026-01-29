@@ -5,12 +5,14 @@ description: Automatic syncing of selected folders using the Ente Photos desktop
 
 # Watch folders
 
-The Ente desktop app allows you to "watch" a folder on your computer for any
-changes, creating a one-way background sync from folders on your computer to
-Ente albums. This is intended to automate your photo management and backup.
+The Ente desktop app allows you to "watch" a folder on your computer for new
+files and deletions, creating a one-way background sync from folders on your
+computer to Ente albums. This is intended to automate your photo management and
+backup.
 
 By using the "Watch folders" option in the sidebar, you can tell the desktop app
-which are the folders that you want to watch for changes. The app will then
+which are the folders that you want to watch for new files and deletions. The
+app will then
 automatically upload new files added to these folders to the corresponding ente
 album (it will also upload them initially). And if a file is deleted locally,
 then the corresponding Ente file will also be automatically moved to
@@ -25,16 +27,16 @@ allows you to automate backups to ente's cloud.
    where you can add and remove watched folders.
 
 2. To start watching a folder, press the **Add folder** button and select the
-   folder on your system that you want to watch for any changes. You can also
-   drag and drop the folder here.
+   folder on your system that you want to watch for new files and deletions.
+   You can also drag and drop the folder here.
 
 3. If the folder has nesting, you will see two options - **A single album** and
    **Separate albums**. This work similarly to the
    [options you see when you drag and drop a folder with nested folders](/photos/features/albums-and-organization/albums#preserving-folder-structure).
 
 4. After choosing any of the above options, the folder will be initially synced
-   to Ente's cloud and monitored for any changes. You can now close the dialog
-   and the sync will continue in background.
+   to Ente's cloud and monitored for new files and deletions. You can now close
+   the dialog and the sync will continue in background.
 
 5. When the app is syncing in the background it'll show a small progress status
    in the bottom right. You can expand it to see more details if needed.

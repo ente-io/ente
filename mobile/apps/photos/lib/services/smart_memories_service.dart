@@ -3,6 +3,7 @@ import "dart:developer" as dev show log;
 import "dart:math" show Random, max, min;
 
 import "package:computer/computer.dart";
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
@@ -13,7 +14,6 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
@@ -53,9 +53,10 @@ class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
   final _memoriesDB = MemoriesDB.instance;
 
-  static const _clipSimilarImageThreshold = 0.75;
-  static const _clipActivityQueryThreshold = 0.25;
-  static const _clipMemoryTypeQueryThreshold = 0.25;
+  static const _clipSimilarImageThreshold = 0.80;
+  static const _clipActivityQueryThreshold = 0.20;
+  static const _clipMemoryTypeQueryThreshold = 0.225;
+  static const _minimumMemoryTimeGap = Duration(minutes: 10);
 
   static const yearsBefore = 30;
 
@@ -184,6 +185,149 @@ class SmartMemoriesService {
       if (embedding != null) embeddings.add(embedding);
     }
     return embeddings;
+  }
+
+  static bool _isNearDuplicate(
+    int fileID,
+    Iterable<int> selectedFileIDs,
+    Map<int, EmbeddingVector> fileIDToImageEmbedding, {
+    double similarityThreshold = _clipSimilarImageThreshold,
+  }) {
+    final candidate = fileIDToImageEmbedding[fileID];
+    if (candidate == null) return false;
+    for (final selectedID in selectedFileIDs) {
+      final selected = fileIDToImageEmbedding[selectedID];
+      if (selected == null) continue;
+      final similarity = candidate.vector.dot(selected.vector);
+      if (similarity > similarityThreshold) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool _isTooCloseInTime(
+    int? creationTime,
+    Iterable<int> selectedCreationTimes, {
+    Duration minGap = _minimumMemoryTimeGap,
+  }) {
+    if (creationTime == null) return false;
+    final minGapMicroseconds = minGap.inMicroseconds;
+    for (final selectedTime in selectedCreationTimes) {
+      if ((creationTime - selectedTime).abs() < minGapMicroseconds) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static List<Memory> _filterNearDuplicates(
+    List<Memory> memories,
+    Map<int, EmbeddingVector> fileIDToImageEmbedding, {
+    int? minKeep,
+    double similarityThreshold = _clipSimilarImageThreshold,
+  }) {
+    if (memories.length < 2) return memories;
+    final filtered = <Memory>[];
+    final selectedFileIDs = <int>[];
+    int skipped = 0;
+    final total = memories.length;
+    for (final mem in memories) {
+      final fileID = mem.file.uploadedFileID;
+      final bool shouldSkip = fileID != null &&
+          _isNearDuplicate(
+            fileID,
+            selectedFileIDs,
+            fileIDToImageEmbedding,
+            similarityThreshold: similarityThreshold,
+          ) &&
+          (minKeep == null || (total - skipped) > minKeep);
+      if (shouldSkip) {
+        skipped++;
+        continue;
+      }
+      filtered.add(mem);
+      if (fileID != null) {
+        selectedFileIDs.add(fileID);
+      }
+    }
+    return filtered;
+  }
+
+  static List<Memory> _excludeNearDuplicates(
+    List<Memory> candidates,
+    List<Memory> selected,
+    Map<int, EmbeddingVector> fileIDToImageEmbedding, {
+    double similarityThreshold = _clipSimilarImageThreshold,
+  }) {
+    if (selected.isEmpty || candidates.isEmpty) return candidates;
+    final selectedFileIDs = selected
+        .map((mem) => mem.file.uploadedFileID)
+        .whereType<int>()
+        .toList(growable: false);
+    if (selectedFileIDs.isEmpty) return candidates;
+    final filtered = <Memory>[];
+    for (final candidate in candidates) {
+      final fileID = candidate.file.uploadedFileID;
+      if (fileID == null ||
+          !_isNearDuplicate(
+            fileID,
+            selectedFileIDs,
+            fileIDToImageEmbedding,
+            similarityThreshold: similarityThreshold,
+          )) {
+        filtered.add(candidate);
+      }
+    }
+    return filtered;
+  }
+
+  static List<Memory> _filterByTimeSpacing(
+    List<Memory> memories, {
+    Duration minGap = _minimumMemoryTimeGap,
+  }) {
+    if (memories.length < 2) return memories;
+    final filtered = <Memory>[];
+    final selectedCreationTimes = <int>[];
+    for (final mem in memories) {
+      final creationTime = mem.file.creationTime;
+      if (_isTooCloseInTime(
+        creationTime,
+        selectedCreationTimes,
+        minGap: minGap,
+      )) {
+        continue;
+      }
+      filtered.add(mem);
+      if (creationTime != null) {
+        selectedCreationTimes.add(creationTime);
+      }
+    }
+    return filtered;
+  }
+
+  static List<Memory> _excludeTooCloseInTime(
+    List<Memory> candidates,
+    List<Memory> selected, {
+    Duration minGap = _minimumMemoryTimeGap,
+  }) {
+    if (selected.isEmpty || candidates.isEmpty) return candidates;
+    final selectedTimes = selected
+        .map((mem) => mem.file.creationTime)
+        .whereType<int>()
+        .toList(growable: false);
+    if (selectedTimes.isEmpty) return candidates;
+    final filtered = <Memory>[];
+    for (final candidate in candidates) {
+      if (!_isTooCloseInTime(
+        candidate.file.creationTime,
+        selectedTimes,
+        minGap: minGap,
+      )) {
+        filtered.add(candidate);
+      }
+    }
+    return filtered;
   }
 
   Future<(Set<EnteFile>, Map<int, EnteFile>)>
@@ -652,7 +796,18 @@ class SmartMemoriesService {
       if (longAgo && lastTimeYouSawThemFiles.length >= 2 && meID != personID) {
         final lastTimeMemories = lastTimeYouSawThemFiles
             .map((f) => Memory.fromFile(f, seenTimes))
-            .toList(growable: false);
+            .toList();
+        lastTimeMemories.sort(
+          (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+        );
+        final filteredLastTimeMemories = _filterNearDuplicates(
+          lastTimeMemories,
+          fileIDToImageEmbedding,
+          minKeep: 2,
+        );
+        final spacedLastTimeMemories = _filterByTimeSpacing(
+          filteredLastTimeMemories,
+        );
         final lastTimeList =
             personToCandidates.putIfAbsent(personID, () => {}).putIfAbsent(
                   PeopleMemoryType.lastTimeYouSawThem,
@@ -663,7 +818,7 @@ class SmartMemoriesService {
             personID: personID,
             personName: personName,
             type: PeopleMemoryType.lastTimeYouSawThem,
-            rawMemories: lastTimeMemories,
+            rawMemories: spacedLastTimeMemories,
             firstDateToShow: nowInMicroseconds,
             lastDateToShow: windowEnd,
             lastCreationTime: lastCreationTime,
@@ -899,7 +1054,36 @@ class SmartMemoriesService {
       final int limit = min(clipFiles.length, 50);
       final List<EnteFile> topCandidates = clipFiles.take(limit).toList();
       topCandidates.shuffle(Random());
-      final List<EnteFile> selected = topCandidates.take(10).toList();
+      final List<EnteFile> selected = [];
+      final selectedFileIDs = <int>[];
+      final selectedCreationTimes = <int>[];
+      int skipped = 0;
+      for (final file in topCandidates) {
+        if (selected.length >= 10) break;
+        final fileID = file.uploadedFileID!;
+        final creationTime = file.creationTime;
+        if (_isTooCloseInTime(
+          creationTime,
+          selectedCreationTimes,
+        )) {
+          skipped++;
+          continue;
+        }
+        if (_isNearDuplicate(
+              fileID,
+              selectedFileIDs,
+              fileIDToImageEmbedding,
+            ) &&
+            (topCandidates.length - skipped) > 10) {
+          skipped++;
+          continue;
+        }
+        selected.add(file);
+        selectedFileIDs.add(fileID);
+        if (creationTime != null) {
+          selectedCreationTimes.add(creationTime);
+        }
+      }
       selected.sort((a, b) {
         final int bFileID = b.uploadedFileID!;
         final int aFileID = a.uploadedFileID!;
@@ -1998,17 +2182,36 @@ class SmartMemoriesService {
           dev.log('No nostalgic photos in bucket');
         }
 
+        var candidates = mostNostalgic;
+        if (finalSelection.isNotEmpty) {
+          final filteredCandidates = _excludeNearDuplicates(
+            mostNostalgic,
+            finalSelection,
+            fileIDToImageEmbedding,
+          );
+          if (filteredCandidates.isNotEmpty) {
+            candidates = filteredCandidates;
+          }
+          candidates = _excludeTooCloseInTime(
+            candidates,
+            finalSelection,
+          );
+        }
+        if (candidates.isEmpty) {
+          continue;
+        }
+
         // If no selection yet, take the most nostalgic photo
         if (finalSelection.isEmpty) {
-          finalSelection.add(mostNostalgic.first);
+          finalSelection.add(candidates.first);
           continue;
         }
 
         // From nostalgic selection, take the photo furthest away from all currently selected ones
         double globalMaxMinDistance = 0;
         int farthestDistanceIdx = 0;
-        for (var i = 0; i < mostNostalgic.length; i++) {
-          final mem = mostNostalgic[i];
+        for (var i = 0; i < candidates.length; i++) {
+          final mem = candidates[i];
           double minDistance = double.infinity;
           for (final selected in finalSelection) {
             if (selected.file.location == null || mem.file.location == null) {
@@ -2025,7 +2228,7 @@ class SmartMemoriesService {
             farthestDistanceIdx = i;
           }
         }
-        finalSelection.add(mostNostalgic[farthestDistanceIdx]);
+        finalSelection.add(candidates[farthestDistanceIdx]);
       }
 
       finalSelection
@@ -2109,10 +2312,23 @@ class SmartMemoriesService {
 
       // then filter out similar images as much as possible
       filteredMemories.add(memories.first);
+      final selectedCreationTimes = <int>[];
+      final firstCreationTime = memories.first.file.creationTime;
+      if (firstCreationTime != null) {
+        selectedCreationTimes.add(firstCreationTime);
+      }
       int skipped = 0;
       filesLoop:
       for (final mem in memories.sublist(1)) {
         if (filteredMemories.length >= targetSize) break;
+        final creationTime = mem.file.creationTime;
+        if (_isTooCloseInTime(
+          creationTime,
+          selectedCreationTimes,
+        )) {
+          skipped++;
+          continue filesLoop;
+        }
         final clip = fileIDToImageEmbedding[mem.file.uploadedFileID!];
         if (clip != null && (fileCount - skipped) > targetSize) {
           for (final filteredMem in filteredMemories) {
@@ -2127,6 +2343,9 @@ class SmartMemoriesService {
           }
         }
         filteredMemories.add(mem);
+        if (creationTime != null) {
+          selectedCreationTimes.add(creationTime);
+        }
       }
     } else {
       // Multiple years, each represented and roughly equally distributed
@@ -2163,6 +2382,7 @@ class SmartMemoriesService {
         ..sort((a, b) => b.compareTo(a)); // Recent years first
       int round = 0;
       int skipped = 0;
+      final selectedCreationTimes = <int>[];
       whileLoop:
       while (filteredMemories.length + skipped < fileCount) {
         yearLoop:
@@ -2170,6 +2390,14 @@ class SmartMemoriesService {
           final yearFiles = yearToFiles[year]!;
           if (yearFiles.isEmpty) continue;
           final newMem = yearFiles.removeAt(0);
+          final creationTime = newMem.file.creationTime;
+          if (_isTooCloseInTime(
+            creationTime,
+            selectedCreationTimes,
+          )) {
+            skipped++;
+            continue yearLoop;
+          }
           if (round != 0 && (fileCount - skipped) > targetSize) {
             // check for filtering
             final clip = fileIDToImageEmbedding[newMem.file.uploadedFileID!];
@@ -2187,6 +2415,9 @@ class SmartMemoriesService {
             }
           }
           filteredMemories.add(newMem);
+          if (creationTime != null) {
+            selectedCreationTimes.add(creationTime);
+          }
           if (filteredMemories.length >= targetSize ||
               filteredMemories.length + skipped >= fileCount) {
             break whileLoop;

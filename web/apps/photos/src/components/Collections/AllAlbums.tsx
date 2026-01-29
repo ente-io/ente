@@ -1,6 +1,7 @@
 // TODO: Audit this file.
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
@@ -14,6 +15,7 @@ import {
     Stack,
     styled,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
@@ -21,6 +23,7 @@ import { FilledIconButton } from "ente-base/components/mui";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import {
     ItemCard,
@@ -209,14 +212,20 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                                                 albumCreatedToast.albumId,
                                             );
                                         }
-                                        setAlbumCreatedToast({ open: false });
+                                        setAlbumCreatedToast((prev) => ({
+                                            ...prev,
+                                            open: false,
+                                        }));
                                     }}
                                 >
                                     <ArrowForwardIcon />
                                 </FilledIconButton>
                                 <FilledIconButton
                                     onClick={() =>
-                                        setAlbumCreatedToast({ open: false })
+                                        setAlbumCreatedToast((prev) => ({
+                                            ...prev,
+                                            open: false,
+                                        }))
                                     }
                                 >
                                     <CloseIcon />
@@ -573,18 +582,54 @@ const AlbumCard: React.FC<AlbumCardProps> = ({
     onCollectionClick,
     collectionSummary,
     isScrolling,
-}) => (
-    <ItemCard
-        TileComponent={LargeTileButton}
-        coverFile={collectionSummary.coverFile}
-        onClick={() => onCollectionClick(collectionSummary.id)}
-        isScrolling={isScrolling}
-    >
-        <LargeTileTextOverlay>
-            <Typography>{collectionSummary.name}</Typography>
-            <Typography variant="small" sx={{ opacity: 0.7 }}>
-                {t("photos_count", { count: collectionSummary.fileCount })}
-            </Typography>
-        </LargeTileTextOverlay>
-    </ItemCard>
-);
+}) => {
+    const isFavorite = collectionSummary.type === "userFavorites";
+    const isPinned = collectionSummary.attributes.has("pinned");
+
+    return (
+        <ItemCard
+            TileComponent={LargeTileButton}
+            coverFile={collectionSummary.coverFile}
+            onClick={() => onCollectionClick(collectionSummary.id)}
+            isScrolling={isScrolling}
+        >
+            <LargeTileTextOverlay>
+                <Tooltip title={collectionSummary.name} arrow>
+                    <Typography
+                        sx={{
+                            maxWidth: "130px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                        }}
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                </Tooltip>
+                <Typography variant="small" sx={{ opacity: 0.7 }}>
+                    {t("photos_count", { count: collectionSummary.fileCount })}
+                </Typography>
+            </LargeTileTextOverlay>
+            {(isFavorite || isPinned) && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        right: 8,
+                        display: "flex",
+                        gap: 0.5,
+                    }}
+                >
+                    {isFavorite && (
+                        <StarIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                    {isPinned && (
+                        <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                </Box>
+            )}
+        </ItemCard>
+    );
+};

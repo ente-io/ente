@@ -288,6 +288,9 @@
       ]
     },
     {
+      "title": "btcturk"
+    },
+    {
       "title": "Bugzilla"
     },
     {
@@ -310,6 +313,10 @@
     {
       "title": "Caltrain",
       "slug": "caltrain"
+    },
+    {
+      "title": "Canada Life",
+      "slug": "canada_life"
     },
     {
       "title": "Canva"
@@ -760,6 +767,9 @@
       "title": "Gusto"
     },
     {
+      "title": "guns.lol"
+    },
+    {
       "title": "Habbo"
     },
     {
@@ -1046,6 +1056,10 @@
         "thebrainbin",
         "gehirneimer"
       ]
+    },
+    {
+      "title": "Medeo",
+      "slug": "medeo"
     },
     {
       "title": "Memed"
@@ -1455,6 +1469,10 @@
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"
+    },
+    {
+      "title": "RedFlagDeals",
+      "slug": "redflagdeals"
     },
     {
       "title": "RedotPay",
@@ -2123,12 +2141,21 @@
       "slug": "netim"
     },
     {
+      "title": "nexo"
+    },
+    {
       "title": "Wordfence",
       "slug": "wordfence"
     },
     {
       "title": "Hytale",
       "slug": "hytale"
+    },
+    {
+      "title": "Manage My Health",
+      "name": "Manage My Health",
+      "slug": "managemyhealth",
+      "altNames": ["managemyhealth", "Manage My Health NZ"]
     }
   ]
 }

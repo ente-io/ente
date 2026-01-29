@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -20,7 +21,6 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
 enum ResultType {
@@ -289,6 +289,8 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.album:
         return [Bus.instance.on<CollectionUpdatedEvent>()];
       case SectionType.face:
+        return [Bus.instance.on<PeopleChangedEvent>()];
+      case SectionType.contacts:
         return [Bus.instance.on<PeopleChangedEvent>()];
       default:
         return [];

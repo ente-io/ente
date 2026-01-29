@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -83,13 +81,6 @@ class _NoResultWidgetState extends State<NoResultWidget> {
       },
     );
     return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          onPressed: () {
-            Bus.instance.fire(ClearAndUnfocusSearchBar());
-          },
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(

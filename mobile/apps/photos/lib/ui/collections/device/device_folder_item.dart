@@ -1,3 +1,4 @@
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -6,7 +7,6 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class DeviceFolderItem extends StatelessWidget {
   final DeviceCollection deviceCollection;

@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
-import 'package:ente_auth/models/billing_plan.dart'; 
+import 'package:ente_auth/models/billing_plan.dart';
 import 'package:ente_network/network.dart';
 import 'package:logging/logging.dart';
 

@@ -1,8 +1,8 @@
 import "dart:async";
 
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
-import "package:flutter_svg/flutter_svg.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
@@ -10,7 +10,6 @@ import "package:photos/emergency/other_contact_page.dart";
 import "package:photos/emergency/select_contact_page.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -25,7 +24,6 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class EmergencyPage extends StatefulWidget {
   const EmergencyPage({
@@ -207,13 +205,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             SizedBox(
                               height: 200,
                               width: 200,
-                              child: SvgPicture.asset(
-                                getEnteColorScheme(context).backdropBase ==
-                                        backgroundBaseDark
-                                    ? "assets/icons/legacy-light.svg"
-                                    : "assets/icons/legacy-dark.svg",
-                                width: 156,
-                                height: 152,
+                              child: Image.asset(
+                                "assets/legacy.png",
+                                width: 200,
+                                height: 200,
                               ),
                             ),
                             Text(

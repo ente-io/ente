@@ -61,6 +61,7 @@ class FileWidget extends StatelessWidget {
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
+        shouldDisableScroll: shouldDisableScroll,
         onFinalFileLoad: onFinalFileLoad,
         isFromMemories: isFromMemories ?? false,
         key: key ?? ValueKey(fileKey),

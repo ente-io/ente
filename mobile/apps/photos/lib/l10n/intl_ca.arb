@@ -208,6 +208,7 @@
   },
   "allowJoiningAlbum": "Permet unir-se a l'àlbum",
   "allowAddPhotosDescription": "Permet que les persones amb l'enllaç també afegeixin fotos a l'àlbum compartit.",
+  "enableComment": "Comentaris i reaccions",
   "passwordLock": "Bloqueig per contrasenya",
   "canNotOpenTitle": "No es pot obrir aquest àlbum",
   "canNotOpenBody": "Ho sentim, aquest àlbum no es pot obrir a l'aplicació.",
@@ -307,7 +308,6 @@
   "failedToApplyCode": "No s'ha pogut aplicar el codi",
   "enterReferralCode": "Introdueix codi de referència",
   "codeAppliedPageTitle": "Codi aplicat",
-  "changeYourReferralCode": "Canvia el teu codi de referència",
   "change": "Canvia",
   "unavailableReferralCode": "Ho sentim, aquest codi no està disponible.",
   "codeChangeLimitReached": "Ho sentim, has assolit el límit de canvis de codi.",
@@ -325,11 +325,9 @@
   "claimFreeStorage": "Reclama emmagatzematge gratuït",
   "inviteYourFriends": "Convida els teus amics",
   "failedToFetchReferralDetails": "No s'han pogut obtenir els detalls de la referència. Si us plau, torna-ho a provar més tard.",
-  "referralStep1": "1. Dona aquest codi als teus amics",
   "referralStep2": "2. Es registren per a un pla de pagament",
   "referralStep3": "3. Tots dos obteniu {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Les referències estan actualment en pausa",
-  "youCanAtMaxDoubleYourStorage": "* Pots com a màxim duplicar el teu emmagatzematge",
   "claimedStorageSoFar": "{isFamilyMember, select, true {La teva família ha reclamat {storageAmountInGb} GB fins ara} false {Has reclamat {storageAmountInGb} GB fins ara} other {Has reclamat {storageAmountInGb} GB fins ara!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -484,10 +482,29 @@
   "pendingItems": "Elements pendents",
   "clearIndexes": "Neteja índexs",
   "selectFoldersForBackup": "Selecciona carpetes per a còpia de seguretat",
+  "selectFolders": "Selecciona les carpetes",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Les carpetes seleccionades es xifraran i se'n farà còpia de seguretat",
   "unselectAll": "Deselecciona tot",
   "selectAll": "Selecciona tot",
   "skip": "Omet",
+  "chooseBackupModeHeader": "<i>Tria com </i>Ente fa una còpia de seguretat de les teves fotos",
+  "startWithLatestPhotos": "Comença amb les fotos més recents",
+  "backingUpLastSevenDaysPhotos": "Còpia de seguretat de les fotos dels darrers 7 dies",
+  "backupOnlyNewPhotos": "Còpia de seguretat només de les fotos noves",
+  "backupOnlyNewPhotosAllFoldersSelected": "Totes les carpetes estan actualment seleccionades per a la còpia de seguretat.\n\nPots continuar per ara o actualitzar les carpetes seleccionades.",
+  "backupOnlyNewPhotosNoFoldersSelectedContinue": "Actualment no hi ha cap carpeta seleccionada per a la còpia de seguretat.\n\nPots continuar per ara o actualitzar les carpetes seleccionades.",
+  "backupOnlyNewPhotosNoFoldersSelectedRequire": "Actualment no hi ha cap carpeta seleccionada per a la còpia de seguretat.\n\nSi us plau, selecciona les carpetes per continuar.",
+  "backupOnlyNewPhotosWarningBody": "Actualment estàs fent una còpia de seguretat de les fotos de {formattedDate}. Si us plau, actualitza la teva configuració per fer una còpia de seguretat de totes les fotos.",
+  "@backupOnlyNewPhotosWarningBody": {
+    "description": "Warning shown when backup-only-new is enabled and user changes folders.",
+    "placeholders": {
+      "formattedDate": {
+        "type": "String",
+        "example": "Jan 5, 2026"
+      }
+    }
+  },
+  "updateSettings": "Actualitza la configuració",
   "updatingFolderSelection": "Actualitzant selecció de carpetes...",
   "itemCount": "{count, plural, one{{count} element} other{{count} elements}}",
   "deleteItemCount": "{count, plural, =1 {Esborra {count} element} other {Esborra {count} elements}}",
@@ -555,6 +572,11 @@
   "removeDuplicatesDesc": "Revisa i elimina fitxers que són duplicats exactes.",
   "viewLargeFiles": "Fitxers grans",
   "viewLargeFilesDesc": "Veure fitxers que estan consumint la major quantitat d'emmagatzematge.",
+  "deleteSuggestions": "Eliminar els suggeriments",
+  "deleteSuggestionsDesc": "Revisa els fitxers que s'han suggerit per a la seva eliminació.",
+  "rejectSuggestions": "Rebutja les suggerències",
+  "noDeleteSuggestion": "No hi ha suggeriments d'eliminació",
+  "youHaveNoFileSuggestedForDeletion": "No tens cap fitxer que s'hagi suggerit per a la seva eliminació",
   "noDuplicates": "✨ Sense duplicats",
   "youveNoDuplicateFilesThatCanBeCleared": "No tens cap fitxer duplicat que es pugui netejar",
   "success": "Èxit",
@@ -1130,7 +1152,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} lliures",
-  "appVersion": "Versió: {versionValue}",
   "verifyIDLabel": "Verifica",
   "fileInfoAddDescHint": "Afegeix una descripció...",
   "editLocationTagTitle": "Edita ubicació",
@@ -1513,6 +1534,30 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
+  "adminsSuccessfullyAdded": "{count, plural, =0 {No s'ha afegit cap administrador} =1 {1 administrador afegit amb èxit} other {{count} administradors afegits amb èxit}}",
+  "@adminsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of admins that were successfully added to an album."
+  },
+  "addAdmins": "{count, plural, =0 {Afegeix administrador} =1 {Afegeix administrador} other {Afegeix administradors}}",
+  "@addAdmins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Button text to add admins"
+  },
+  "adminsCanManagePhotosAndParticipants": "Els administradors poden gestionar les fotos i els participants.",
+  "suggestDeletion": "Suggerir eliminació",
+  "suggestDeletionDescription": "Les fotos seleccionades seran eliminades d'aquest àlbum. Els propietaris de les fotos també rebran una suggerència per revisar i eliminar les fotos.",
+  "deleteSuggestionSent": "Suggerència d'eliminació enviada",
   "accountIsAlreadyConfigured": "El compte ja està configurat.",
   "sessionIdMismatch": "L'ID de sessió no coincideix",
   "@sessionIdMismatch": {
@@ -1679,7 +1724,6 @@
   "legacyInvite": "{email} t'ha convidat a ser un contacte de confiança",
   "authToManageLegacy": "Si us plau, autentica't per gestionar els teus contactes de confiança",
   "hideSharedItemsFromHomeGallery": "Amaga elements compartits de la galeria d'inici",
-  "swipeToSelect": "Llisca per seleccionar",
   "gallery": "Galeria",
   "joinAlbum": "Uneix-te a l'àlbum",
   "joinAlbumSubtext": "per veure i afegir les teves fotos",
@@ -1872,6 +1916,10 @@
   "thisMonth": "Aquest mes",
   "thisYear": "Aquest any",
   "groupBy": "Agrupa per",
+  "groupByDay": "Dia",
+  "groupByWeek": "Setmana",
+  "groupByMonth": "Mes",
+  "groupByYear": "Any",
   "faceThumbnailGenerationFailed": "No s'han pogut generar miniatures de cares",
   "fileAnalysisFailed": "No s'ha pogut analitzar el fitxer",
   "editAutoAddPeople": "Edita persones d'afegit automàtic",
@@ -2033,14 +2081,29 @@
   "hoorayyyy": "Viscaaaa!",
   "nothingToTidyUpHere": "Res a endreçar aquí",
   "deletingDash": "Esborrant - ",
-  "cLTitle1": "Presentant els Rituals",
-  "cLDesc1": "Planejant propòsits per al 2026? Amb Rituals, pots configurar un recordatori a Ente Photos i fer un seguiment del teu progrés fent fotos. Fes-lo servir per a entrenaments, hàbits alimentaris, moments diaris amb els éssers estimats... qualsevol cosa que vulguis convertir en un hàbit.",
-  "cLTitle2": "Enllaços públics, ara per a tothom",
-  "cLDesc2": "Tots els usuaris d'Ente amb el pla gratuït ara poden crear i compartir enllaços públics a fotos i àlbums. Per evitar abusos, els enllaços tindran límits pel que fa al nombre de persones que els podran veure.",
-  "cLTitle3": "Etiquetar manualment les persones",
-  "cLDesc3": "Ara pots etiquetar persones fins i tot quan la nostra IA del dispositiu no detecta cap cara. Pràctic per a mascotes, cares parcialment visibles o moments en què algú no surt a la foto però que hauria d'estar-hi inclòs.",
-  "cLTitle4": "I més",
-  "cLDesc4": "Ara pots fixar àlbums compartits. Els enllaços dels àlbums són visibles per als col·laboradors i els espectadors per facilitar encara més la compartició. Hem corregit alguns errors de lliscar amb el dit a iOS i hem actualitzat la vista de fotos, incloent-hi una nova icona de preferits (que fa espai per a les funcions futures).",
+  "cLTitle1": "Redisseny",
+  "cLDesc1Item1": "Redisseny de la pantalla de configuració",
+  "cLDesc1Item2": "Barra de cerca moguda a dalt",
+  "cLDesc1Item3": "Redisseny de la pàgina de resultats de cerca",
+  "cLTitle2": "Millores",
+  "cLDesc2Item1": "Cerca dins de la configuració",
+  "cLDesc2Item2": "Càrrega més ràpida de la pestanya de cerca",
+  "cLDesc2Item3": "Cerca dins de descobriment, ubicació i tipus de fitxer",
+  "cLDesc2Item4": "Permetre als administradors i propietaris d'àlbums eliminar comentaris",
+  "cLDesc2Item5": "Pessiga per fer zoom en vídeos",
+  "cLDesc2Item6": "Veure totes les persones ignorades",
+  "cLDesc2Item7": "Flux de fusió millorat",
+  "cLDesc2Item8": "Cerca i ordenació personalitzada a la pàgina de persones",
+  "cLDesc2Item9": "Ordenació consistent dels contactes",
+  "cLDesc2Item10": "Imatges de previsualització per a formats d'imatge no compatibles",
+  "cLDesc2Item11": "Intercanviar fotos i tocar per reemplaçar al creador de collages",
+  "cLDesc2Item12": "Millora de rendiment al full d'informació del fitxer",
+  "cLTitle3": "Correccions d'errors",
+  "cLDesc3Item1": "Correcció de la pausa de música en obrir l'aplicació",
+  "cLDesc3Item2": "Correcció del problema de lliscar per seleccionar en dispositius Samsung S",
+  "cLDesc3Item3": "Correcció del problema de la pantalla d'inici després de restaurar la còpia de seguretat",
+  "cLDesc3Item4": "Correcció de problemes de galeria en tauletes i mode horitzontal",
+  "cLDesc3Item5": "Correcció de la pàgina sense categoria que no s'actualitzava després de moure",
   "closeBy": "A prop",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2234,5 +2297,137 @@
   "ritualCustomKeyboardLabel": "Personalitzat (teclat)",
   "ritualEmojiKeyboardHint": "Prem per obrir el teclat d'emojis",
   "ritualEmojiUseAction": "Utilitza",
-  "ritualSearchEmpty": "Construeix un ritual per mantenir el teu hàbit de fotos."
+  "ritualSearchEmpty": "Construeix un ritual per mantenir el teu hàbit de fotos.",
+  "feed": "Canal",
+  "likedYourPhoto": "Ha donat m'agrada a una foto",
+  "commentedOnYourPhoto": "Ha comentat una foto",
+  "repliedToYourComment": "Ha contestat a un comentari",
+  "likedYourComment": "Ha donat m'agrada a un comentari",
+  "likedYourReply": "Ha donat m'agrada a una resposta",
+  "and1Other": "i 1 altre",
+  "andXOthers": "i {count} altres",
+  "@andXOthers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noActivityYet": "Encara no hi ha activitat",
+  "like": "M'agrada",
+  "comments": "Comentaris",
+  "commentHint": "Digues alguna cosa bonica!",
+  "@commentHint": {
+    "description": "Placeholder text for comment input field"
+  },
+  "reply": "Respon",
+  "@reply": {
+    "description": "Reply action button label"
+  },
+  "areYouSure": "N'esteu segur?",
+  "@areYouSure": {
+    "description": "Confirmation dialog title"
+  },
+  "deleteComment": "Esborrar comentari",
+  "@deleteComment": {
+    "description": "Delete comment button label"
+  },
+  "deleteCommentConfirmation": "El teu comentari \"{comment}\" serà eliminat permanentment",
+  "@deleteCommentConfirmation": {
+    "description": "Confirmation message when deleting a comment",
+    "placeholders": {
+      "comment": {
+        "type": "String"
+      }
+    }
+  },
+  "likesCount": "{count, plural, =1{1 m'agrada} other{{count} m'agrades}}",
+  "@likesCount": {
+    "description": "Number of likes with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noLikesYet": "Cap m'agrada encara",
+  "@noLikesYet": {
+    "description": "Empty state when no likes exist"
+  },
+  "couldNotLoadLikes": "Impossible de carregar els m'agrada",
+  "@couldNotLoadLikes": {
+    "description": "Error when likes fail to load"
+  },
+  "failedToUpdateLike": "No s'ha pogut reproduir el m'agrada",
+  "@failedToUpdateLike": {
+    "description": "Toast when like update fails"
+  },
+  "failedToLikeAlbums": "{count, plural, =1{No s'ha pogut donar m'agrada a 1 àlbum} other{No s'ha pogut fer m'agrada a {count} àlbums}}",
+  "@failedToLikeAlbums": {
+    "description": "Error when liking albums fails",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadAlbums": "No s'han pogut carregar els àlbums",
+  "@couldNotLoadAlbums": {
+    "description": "Error when albums fail to load"
+  },
+  "albumsCount": "{count, plural, =1{1 àlbum} other{{count} àlbums}}",
+  "@albumsCount": {
+    "description": "Number of albums with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "likeAll": "Donar m'agrada a tots",
+  "@likeAll": {
+    "description": "Button to like in all shared albums"
+  },
+  "selectAlbumToLikeVideo": "Selecciona l'àlbum per donar m'agrada a aquest vídeo",
+  "@selectAlbumToLikeVideo": {
+    "description": "Instruction for liking video"
+  },
+  "selectAlbumToLikePhoto": "Selecciona l'àlbum per donar m'agrada a aquesta foto",
+  "@selectAlbumToLikePhoto": {
+    "description": "Instruction for liking photo"
+  },
+  "failedToLikeComment": "No s'ha pogut donar m'agrada al comentari",
+  "@failedToLikeComment": {
+    "description": "Toast when comment like fails"
+  },
+  "failedToDeleteComment": "No s'ha pogut esborrar el comentari",
+  "@failedToDeleteComment": {
+    "description": "Toast when comment deletion fails"
+  },
+  "deletedComment": "(esborrat)",
+  "@deletedComment": {
+    "description": "Label for deleted comments"
+  },
+  "replyingToYou": "Responent-te a tu",
+  "@replyingToYou": {
+    "description": "Label when replying to own comment"
+  },
+  "replyingTo": "Responent a {name}",
+  "@replyingTo": {
+    "description": "Label when replying to someone's comment",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsCount": "{count, plural, one {}=0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
+  "@commentsCount": {
+    "description": "Number of comments with pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

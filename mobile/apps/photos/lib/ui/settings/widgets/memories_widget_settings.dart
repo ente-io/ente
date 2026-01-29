@@ -1,3 +1,4 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
@@ -11,7 +12,6 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/utils/standalone/debouncer.dart";
 
 class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});

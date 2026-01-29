@@ -1,5 +1,5 @@
 import "package:ente_ui/theme/ente_theme.dart";
-import 'package:flutter/widgets.dart'; 
+import 'package:flutter/widgets.dart';
 
 class MenuSectionTitle extends StatelessWidget {
   final String title;

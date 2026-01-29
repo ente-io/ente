@@ -1,7 +1,7 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/utils/standalone/parse.dart";
 
 class FaceWithoutEmbedding {
   final String faceID;

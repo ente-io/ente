@@ -12,11 +12,12 @@ dependencies:
     path: ../accounts
   ente_configuration:
     path: ../configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../ente_crypto_api
   ente_events:
     path: ../events
+  ente_pure_utils:
+    path: ../ente_pure_utils
   ente_strings:
     path: ../strings
   ente_ui:
@@ -37,6 +38,7 @@ dependencies:
   # Let's wait till the issue is resolved by the package maintainer.
   # If not resolved and we need to upgrade, write a migration script.
   flutter_secure_storage: 9.0.0
+  flutter_svg: ^2.0.10+1
   local_auth: ^2.3.0
   logging: ^1.1.1
   pinput: ^5.0.0
@@ -49,5 +51,3 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
-  assets:
-    - assets/

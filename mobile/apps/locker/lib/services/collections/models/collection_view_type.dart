@@ -12,6 +12,25 @@ enum CollectionViewType {
   favorite,
 }
 
+/// Extension methods to determine which actions are available for each view type
+extension CollectionViewTypeActions on CollectionViewType {
+  bool get isIncomingShare =>
+      this == CollectionViewType.sharedCollectionViewer ||
+      this == CollectionViewType.sharedCollectionCollaborator;
+
+  bool get showDownloadOption => true;
+
+  bool get showEditOption => !isIncomingShare;
+
+  bool get showDeleteOption => !isIncomingShare;
+
+  bool get showShareOption => !isIncomingShare;
+
+  bool get showAddToCollectionOption => !isIncomingShare;
+
+  bool get showMarkImportantOption => !isIncomingShare;
+}
+
 CollectionViewType getCollectionViewType(Collection c, int userID) {
   if (!c.isOwner(userID)) {
     // Check if user is collaborator or viewer

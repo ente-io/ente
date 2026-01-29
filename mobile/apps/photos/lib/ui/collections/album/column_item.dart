@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
@@ -27,6 +29,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     const sideOfThumbnail = 60.0;
     final isSelected = selectedCollections.contains(collection);
+    final isOwner = collection.isOwner(Configuration.instance.getUserID()!);
     return AnimatedContainer(
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 200),
@@ -46,29 +49,48 @@ class AlbumColumnItemWidget extends StatelessWidget {
             flex: 6,
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: SizedBox(
-                    height: sideOfThumbnail,
-                    width: sideOfThumbnail,
-                    child: FutureBuilder<EnteFile?>(
-                      future: CollectionsService.instance.getCover(collection),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final thumbnail = snapshot.data!;
+                SizedBox(
+                  height: sideOfThumbnail,
+                  width: sideOfThumbnail,
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: SizedBox(
+                          height: sideOfThumbnail,
+                          width: sideOfThumbnail,
+                          child: FutureBuilder<EnteFile?>(
+                            future: CollectionsService.instance
+                                .getCover(collection),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final thumbnail = snapshot.data!;
 
-                          return ThumbnailWidget(
-                            thumbnail,
-                            showFavForAlbumOnly: true,
-                            shouldShowOwnerAvatar: false,
-                          );
-                        } else {
-                          return const NoThumbnailWidget(
-                            addBorder: false,
-                          );
-                        }
-                      },
-                    ),
+                                return ThumbnailWidget(
+                                  thumbnail,
+                                  showFavForAlbumOnly: true,
+                                  shouldShowOwnerAvatar: false,
+                                );
+                              } else {
+                                return const NoThumbnailWidget(
+                                  addBorder: false,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      if (!isOwner)
+                        Positioned(
+                          left: 4,
+                          top: 4,
+                          child: UserAvatarWidget(
+                            collection.owner,
+                            type: AvatarType.sm,
+                            thumbnailView: true,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 12),

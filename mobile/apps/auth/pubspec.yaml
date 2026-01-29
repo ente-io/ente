@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.16+600
+version: 4.4.16+672
 publish_to: none
 
 environment:
@@ -18,10 +18,8 @@ dependencies:
   confetti: ^0.8.0
   connectivity_plus: ^6.0.5
   convert: ^3.1.1
-  device_info_plus: ^9.1.1
+  device_info_plus: ^11.5.0
   dio: ^5.8.0+1
-  dir_utils:
-    path: ../../packages/dir_utils
   dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
@@ -32,9 +30,10 @@ dependencies:
     path: ../../packages/base
   ente_configuration:
     path: ../../packages/configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../../packages/ente_crypto_api
+  ente_crypto_dart_adapter:
+    path: ../../packages/ente_crypto_dart_adapter
   ente_events:
     path: ../../packages/events
   ente_lock_screen:
@@ -43,12 +42,16 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_pure_utils:
+    path: ../../packages/ente_pure_utils
   ente_qr:
     path: plugins/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
     path: ../../packages/ui
+  ente_utils:
+    path: ../../packages/utils
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
@@ -125,6 +128,8 @@ dependencies:
   qr_flutter: ^4.1.0
   saf_stream: any
   saf_util: any
+  scoped_dir_access:
+    path: ../../packages/scoped_dir_access
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2
   share_plus: ^11.0.0

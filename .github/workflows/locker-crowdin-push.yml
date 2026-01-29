@@ -8,6 +8,8 @@ on:
             - "mobile/apps/locker/lib/l10n/app_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/locker-crowdin-push.yml"
+    # Allow manual runs from any branch (useful to push translations from a feature branch)
+    workflow_dispatch:
 
 permissions:
     contents: write
@@ -29,8 +31,7 @@ jobs:
                   upload_sources: true
                   upload_translations: false
                   download_translations: false
-                  # TODO: Replace with actual Crowdin project ID after creating the project
-                  project_id: ${{ vars.CROWDIN_LOCKER_PROJECT_ID }}
+                  project_id: 860056
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:ente_icons/ente_icons.dart';
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
@@ -46,9 +47,7 @@ import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
-import "package:photos/utils/standalone/simple_task_queue.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
   final GalleryType type;
@@ -745,14 +744,20 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
-    final hasPersons =
-        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
-    if (!mounted || !hasPersons) {
+    final namedPersons =
+        await AddFilesToPersonPage.prefetchNamedPersons(context);
+    if (!mounted) {
+      return;
+    }
+    if (namedPersons != null && namedPersons.isEmpty) {
       return;
     }
     final result = await routeToPage(
       context,
-      AddFilesToPersonPage(files: filesWithIds),
+      AddFilesToPersonPage(
+        files: filesWithIds,
+        initialPersons: namedPersons,
+      ),
       forceCustomPageRoute: true,
     );
     if (result is! ManualPersonAssignmentResult) {
@@ -1013,8 +1018,11 @@ class _FileSelectionActionsWidgetState
         _cachedCollectionForSharedLink!,
       );
       unawaited(Clipboard.setData(ClipboardData(text: url)));
-      await shareText(
+      const description =
+          'Check out, comment and react on photos privately with Ente\'s end to end encryption';
+      await shareLinkWithDescription(
         url,
+        description: description,
         context: context,
         key: sendLinkButtonKey,
       );

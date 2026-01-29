@@ -1,12 +1,14 @@
 import "dart:io";
 
-import "package:ente_lock_screen/lock_screen_config.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/custom_pin_keypad.dart";
 import "package:ente_strings/ente_strings.dart";
+import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/theme/text_style.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:pinput/pinput.dart";
 
 class LockScreenConfirmPin extends StatefulWidget {
@@ -58,13 +60,13 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final config = LockScreenConfig.current;
 
     return Scaffold(
-      backgroundColor: config.getBackgroundColor(colorTheme),
+      backgroundColor: colorTheme.backgroundBase,
       appBar: AppBar(
-        backgroundColor: config.getBackgroundColor(colorTheme),
+        backgroundColor: colorTheme.backgroundBase,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop(false);
@@ -74,43 +76,53 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             color: colorTheme.textBase,
           ),
         ),
-        centerTitle: config.showTitle,
-        title: config.titleWidget,
+        centerTitle: true,
+        title: SvgPicture.asset(
+          'assets/svg/app-logo.svg',
+          colorFilter: ColorFilter.mode(
+            colorTheme.primary700,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
       floatingActionButton: isPlatformDesktop
           ? null
           : CustomPinKeypad(controller: _confirmPinController),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
-        child: _getBody(colorTheme, textTheme, config),
+        child: _getBody(colorTheme, textTheme),
       ),
     );
   }
 
-  Widget _getBody(colorTheme, textTheme, LockScreenConfig config) {
+  Widget _getBody(EnteColorScheme colorTheme, EnteTextTheme textTheme) {
     final pinPutDecoration = PinTheme(
-      height: config.pinBoxHeight,
-      width: config.pinBoxWidth,
-      padding: config.pinBoxPadding,
+      height: 48,
+      width: 48,
+      padding: const EdgeInsets.only(top: 6.0),
       decoration: BoxDecoration(
-        color: config.getBackgroundColor(colorTheme),
+        color: colorTheme.backgroundBase,
         border: Border.all(
-          color: config.getBorderColor(colorTheme),
+          color: colorTheme.fillMuted,
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(config.pinBoxBorderRadius),
+        borderRadius: BorderRadius.circular(15.0),
       ),
     );
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: config.showTitle ? 24.0 : 0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: config.showTitle ? 40 : 0),
-            config.iconBuilder(context, _confirmPinController),
-            SizedBox(height: config.showTitle ? 24 : 0),
+            const SizedBox(height: 40),
+            Image.asset(
+              'assets/lock_screen_icon.png',
+              width: 129,
+              height: 95,
+            ),
+            const SizedBox(height: 24),
             Text(
               context.strings.reEnterPin,
               style: textTheme.bodyBold,
@@ -125,51 +137,42 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
               defaultPinTheme: pinPutDecoration.copyWith(
                 textStyle: textTheme.h3Bold,
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.getBorderColor(colorTheme),
+                    color: colorTheme.fillMuted,
                   ),
                 ),
               ),
               submittedPinTheme: pinPutDecoration.copyWith(
                 textStyle: textTheme.h3Bold.copyWith(
-                  color: config.showTitle ? colorTheme.primary700 : null,
+                  color: colorTheme.primary700,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.showTitle
-                        ? colorTheme.primary700
-                        : colorTheme.fillBase,
+                    color: colorTheme.primary700,
                   ),
                 ),
               ),
               followingPinTheme: pinPutDecoration.copyWith(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.getBorderColor(colorTheme),
+                    color: colorTheme.fillMuted,
                   ),
                 ),
               ),
               focusedPinTheme: pinPutDecoration.copyWith(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
-                    color: config.showTitle
-                        ? colorTheme.fillBase
-                        : config.getBorderColor(colorTheme),
+                    color: colorTheme.fillBase,
                   ),
                 ),
               ),
               errorPinTheme: pinPutDecoration.copyWith(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(config.pinBoxBorderRadius),
+                  borderRadius: BorderRadius.circular(15.0),
                   border: Border.all(
                     color: colorTheme.warning400,
                   ),

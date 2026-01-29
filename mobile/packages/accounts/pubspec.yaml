@@ -11,21 +11,23 @@ dependencies:
   bip39: ^1.0.6
   collection: ^1.18.0
   dio: ^5.4.0
+  dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   email_validator: ^3.0.0
   ente_base:
     path: ../base
   ente_configuration:
     path: ../configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_crypto_api:
+    path: ../ente_crypto_api
   ente_events:
     path: ../events
   ente_lock_screen:
     path: ../lock_screen
   ente_network:
     path: ../network
+  ente_pure_utils:
+    path: ../ente_pure_utils
   ente_strings:
     path: ../strings
   ente_ui:
@@ -35,6 +37,7 @@ dependencies:
   file_saver: ^0.3.0
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.10+1
   hugeicons: ^1.1.1
   logging: ^1.2.0
   password_strength: ^0.2.0

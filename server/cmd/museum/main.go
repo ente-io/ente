@@ -217,7 +217,7 @@ func main() {
 	stripeClients := billing.GetStripeClients()
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, commonBillController)
+		billingRepo, fileRepo, userRepo, remoteStoreRepository, commonBillController, discordController)
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -366,6 +366,7 @@ func main() {
 		CollectionLinkCtrl:    collectionLinkCtrl,
 		UserRepo:              userRepo,
 		FileRepo:              fileRepo,
+		TrashRepo:             trashRepo,
 		CastRepo:              &castDb,
 		BillingCtrl:           billingController,
 		QueueRepo:             queueRepo,

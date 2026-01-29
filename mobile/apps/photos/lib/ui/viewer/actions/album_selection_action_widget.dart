@@ -1,6 +1,8 @@
+import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -18,7 +20,6 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/add_participant_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
@@ -105,7 +106,7 @@ class _AlbumSelectionActionWidgetState
         SelectionActionButton(
           labelText: AppLocalizations.of(context).hide,
           icon: Icons.visibility_off_outlined,
-          onTap: _onHideClick,
+          onTap: _onHideOrUnHideClick,
         ),
       );
     }
@@ -132,7 +133,7 @@ class _AlbumSelectionActionWidgetState
         SelectionActionButton(
           labelText: AppLocalizations.of(context).unhide,
           icon: Icons.visibility_outlined,
-          onTap: _onHideClick,
+          onTap: _onHideOrUnHideClick,
         ),
       );
       items.add(
@@ -178,6 +179,18 @@ class _AlbumSelectionActionWidgetState
             icon: CupertinoIcons.pin_slash,
             onTap: _onUnpinClickForSharee,
             shouldShow: hasShareePinnedAlbum,
+          ),
+        );
+      }
+
+      // Hide option for incoming collections (uses sharee metadata)
+      // Behind internal user flag
+      if (flagService.internalUser) {
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).hide,
+            icon: Icons.visibility_off_outlined,
+            onTap: _onHideOrUnHideClick,
           ),
         );
       }
@@ -330,22 +343,61 @@ class _AlbumSelectionActionWidgetState
     widget.selectedAlbums.clearAll();
   }
 
-  Future<void> _onHideClick() async {
-    for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites) {
-        continue;
-      }
-      final isHidden = collection.isHidden();
-      final int prevVisiblity = isHidden ? hiddenVisibility : visibleVisibility;
-      final int newVisiblity = isHidden ? visibleVisibility : hiddenVisibility;
+  Future<void> _onHideOrUnHideClick() async {
+    final userID = Configuration.instance.getUserID()!;
+    final collections = widget.selectedAlbums.albums
+        .where((c) => c.type != CollectionType.favorites)
+        .toList();
 
-      await changeCollectionVisibility(
-        context,
-        collection: collection,
-        newVisibility: newVisiblity,
-        prevVisibility: prevVisiblity,
-      );
+    if (collections.isEmpty) {
+      if (hasFavorites) {
+        _showFavToast();
+      }
+      widget.selectedAlbums.clearAll();
+      return;
     }
+
+    // Determine if we're hiding or unhiding based on first collection
+    final isUnhiding = collections.first.isHidden();
+    final dialog = createProgressDialog(
+      context,
+      isUnhiding
+          ? AppLocalizations.of(context).unhiding
+          : AppLocalizations.of(context).hiding,
+    );
+    await dialog.show();
+
+    try {
+      for (final collection in collections) {
+        final isOwner = collection.isOwner(userID);
+        final isHidden = collection.isHidden();
+        final int prevVisiblity =
+            isHidden ? hiddenVisibility : visibleVisibility;
+        final int newVisiblity =
+            isHidden ? visibleVisibility : hiddenVisibility;
+
+        await changeCollectionVisibility(
+          context,
+          collection: collection,
+          newVisibility: newVisiblity,
+          prevVisibility: prevVisiblity,
+          isOwner: isOwner,
+          showProgressDialog: false,
+        );
+      }
+      showShortToast(
+        context,
+        isUnhiding
+            ? AppLocalizations.of(context).successfullyUnhid
+            : AppLocalizations.of(context).successfullyHid,
+      );
+    } catch (e, s) {
+      _logger.warning("failed to change visibility", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    } finally {
+      await dialog.hide();
+    }
+
     if (hasFavorites) {
       _showFavToast();
     }
@@ -353,44 +405,82 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _archiveClick() async {
-    for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites) {
-        continue;
-      }
-      if (widget.sectionType == UISectionType.incomingCollections) {
-        final hasShareeArchived = collection.hasShareeArchived();
-        final int prevVisiblity =
-            hasShareeArchived ? archiveVisibility : visibleVisibility;
-        final int newVisiblity =
-            hasShareeArchived ? visibleVisibility : archiveVisibility;
+    final collections = widget.selectedAlbums.albums
+        .where((c) => c.type != CollectionType.favorites)
+        .toList();
 
-        await changeCollectionVisibility(
-          context,
-          collection: collection,
-          newVisibility: newVisiblity,
-          prevVisibility: prevVisiblity,
-          isOwner: false,
-        );
-      } else {
-        final isArchived = collection.isArchived();
-        final int prevVisiblity =
-            isArchived ? archiveVisibility : visibleVisibility;
-        final int newVisiblity =
-            isArchived ? visibleVisibility : archiveVisibility;
-
-        await changeCollectionVisibility(
-          context,
-          collection: collection,
-          newVisibility: newVisiblity,
-          prevVisibility: prevVisiblity,
-        );
-      }
+    if (collections.isEmpty) {
       if (hasFavorites) {
         _showFavToast();
       }
-      if (mounted) {
-        setState(() {});
+      widget.selectedAlbums.clearAll();
+      return;
+    }
+
+    // Determine if we're archiving or unarchiving based on first collection
+    final isUnarchiving =
+        widget.sectionType == UISectionType.incomingCollections
+            ? collections.first.hasShareeArchived()
+            : collections.first.isArchived();
+    final dialog = createProgressDialog(
+      context,
+      isUnarchiving
+          ? AppLocalizations.of(context).unarchiving
+          : AppLocalizations.of(context).archiving,
+    );
+    await dialog.show();
+
+    try {
+      for (final collection in collections) {
+        if (widget.sectionType == UISectionType.incomingCollections) {
+          final hasShareeArchived = collection.hasShareeArchived();
+          final int prevVisiblity =
+              hasShareeArchived ? archiveVisibility : visibleVisibility;
+          final int newVisiblity =
+              hasShareeArchived ? visibleVisibility : archiveVisibility;
+
+          await changeCollectionVisibility(
+            context,
+            collection: collection,
+            newVisibility: newVisiblity,
+            prevVisibility: prevVisiblity,
+            isOwner: false,
+            showProgressDialog: false,
+          );
+        } else {
+          final isArchived = collection.isArchived();
+          final int prevVisiblity =
+              isArchived ? archiveVisibility : visibleVisibility;
+          final int newVisiblity =
+              isArchived ? visibleVisibility : archiveVisibility;
+
+          await changeCollectionVisibility(
+            context,
+            collection: collection,
+            newVisibility: newVisiblity,
+            prevVisibility: prevVisiblity,
+            showProgressDialog: false,
+          );
+        }
       }
+      showShortToast(
+        context,
+        isUnarchiving
+            ? AppLocalizations.of(context).successfullyUnarchived
+            : AppLocalizations.of(context).successfullyArchived,
+      );
+    } catch (e, s) {
+      _logger.warning("failed to change archive state", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    } finally {
+      await dialog.hide();
+    }
+
+    if (hasFavorites) {
+      _showFavToast();
+    }
+    if (mounted) {
+      setState(() {});
     }
     widget.selectedAlbums.clearAll();
   }

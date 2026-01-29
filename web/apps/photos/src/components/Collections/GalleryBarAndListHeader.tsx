@@ -11,9 +11,7 @@ import {
     isSaveComplete,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
-import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
-import type { EnteFile } from "ente-media/file";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -23,11 +21,11 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
-import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
     collectionsSortBy,
     haveOnlySystemCollections,
     PseudoCollectionID,
+    sortCollectionSummaries,
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
@@ -144,7 +142,7 @@ export const GalleryBarAndListHeader: React.FC<
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
                 collectionsSortBy,
-            ),
+            ).sort((a, b) => b.sortPriority - a.sortPriority),
         [collectionsSortBy, toShowCollectionSummaries],
     );
 
@@ -308,42 +306,4 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
     };
 
     return [value, setter] as const;
-};
-
-const sortCollectionSummaries = (
-    collectionSummaries: CollectionSummary[],
-    by: CollectionsSortBy,
-) =>
-    collectionSummaries
-        .sort((a, b) => {
-            switch (by) {
-                case "name":
-                    return a.name.localeCompare(b.name);
-                case "creation-time-asc":
-                    return (
-                        -1 *
-                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
-                    );
-                case "updation-time-desc":
-                    return (b.updationTime ?? 0) - (a.updationTime ?? 0);
-            }
-        })
-        .sort((a, b) => b.sortPriority - a.sortPriority);
-
-const compareCollectionsLatestFile = (
-    first: EnteFile | undefined,
-    second: EnteFile | undefined,
-) => {
-    if (!first) {
-        return 1;
-    } else if (!second) {
-        return -1;
-    } else {
-        const sortedFiles = sortFiles([first, second]);
-        if (sortedFiles[0]?.id !== first.id) {
-            return 1;
-        } else {
-            return -1;
-        }
-    }
 };

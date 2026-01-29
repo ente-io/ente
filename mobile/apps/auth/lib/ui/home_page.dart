@@ -10,7 +10,7 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
-import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
@@ -19,7 +19,6 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
@@ -51,6 +50,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1010,32 +1010,75 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
+    if (!mounted) return false;
+
+    // Always keep our pressed key state in sync.
     if (event is KeyDownEvent) {
       _pressedKeys.add(event.logicalKey);
-      bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
-          ? (_pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.meta) ||
-              _pressedKeys.contains(LogicalKeyboardKey.metaRight))
-          : (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
-              _pressedKeys.contains(LogicalKeyboardKey.control) ||
-              _pressedKeys.contains(LogicalKeyboardKey.controlRight));
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
+    }
+
+    // This handler is registered globally via ServicesBinding, so make sure we
+    // only act on shortcuts when HomePage is actually the active surface.
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      return false;
+    }
+
+    // Avoid hijacking keystrokes while the settings drawer (or any other
+    // non-home surface within HomePage) is active.
+    if (_isSettingsOpen) {
+      return false;
+    }
+
+    // If the user is typing into a text field (e.g. password fields in settings),
+    // don't treat typed characters as global shortcuts.
+    final primaryFocus = FocusManager.instance.primaryFocus;
+    final bool isEditableTextFocused =
+        primaryFocus?.context?.widget is EditableText;
+    final bool isHomeSearchFocused = searchBoxFocusNode.hasFocus;
+    if (isEditableTextFocused && !isHomeSearchFocused) {
+      return false;
+    }
+
+    if (event is KeyDownEvent) {
+      final pressed = HardwareKeyboard.instance.logicalKeysPressed;
+
+      final bool isMetaKeyPressed = Platform.isMacOS || Platform.isIOS
+          ? (pressed.contains(LogicalKeyboardKey.metaLeft) ||
+              pressed.contains(LogicalKeyboardKey.meta) ||
+              pressed.contains(LogicalKeyboardKey.metaRight))
+          : (pressed.contains(LogicalKeyboardKey.controlLeft) ||
+              pressed.contains(LogicalKeyboardKey.control) ||
+              pressed.contains(LogicalKeyboardKey.controlRight));
+
+      final bool isShiftPressed =
+          pressed.contains(LogicalKeyboardKey.shiftLeft) ||
+              pressed.contains(LogicalKeyboardKey.shiftRight) ||
+              pressed.contains(LogicalKeyboardKey.shift);
 
       if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyW) {
-        if (PlatformUtil.isDesktop()) {
+        if (PlatformDetector.isDesktop()) {
           windowManager.close();
           return true;
         }
       }
 
+      // '/' opens search. Don't trigger this on '?' (Shift + '/').
       if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) ||
-          event.logicalKey == LogicalKeyboardKey.slash) {
+          (!isHomeSearchFocused &&
+              event.logicalKey == LogicalKeyboardKey.slash &&
+              !isShiftPressed)) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
         });
         return true;
       }
-      if (event.logicalKey == LogicalKeyboardKey.escape) {
+
+      // Only use Escape for the HomePage search UI.
+      if (event.logicalKey == LogicalKeyboardKey.escape && _showSearchBox) {
         setState(() {
           _textController.clear();
           _searchText = "";
@@ -1044,8 +1087,6 @@ class _HomePageState extends State<HomePage> {
         });
         return true;
       }
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(event.logicalKey);
     }
     return false;
   }
@@ -1304,7 +1345,7 @@ class _HomePageState extends State<HomePage> {
     return ValueListenableBuilder<bool>(
       valueListenable: _codeDisplayStore.isSelectionModeActive,
       builder: (context, isSelecting, child) {
-        final bool isDesktop = PlatformUtil.isDesktop();
+        final bool isDesktop = PlatformDetector.isDesktop();
         final appBar = _buildStandardAppBar(l10n, isDesktop);
         return PopScope(
           canPop: false,
@@ -1752,14 +1793,15 @@ class _HomePageState extends State<HomePage> {
                         code,
                         isCompactMode: isCompactMode,
                         sortKey: _codeSortKey,
-                        enableDesktopContextActions: PlatformUtil.isDesktop(),
+                        enableDesktopContextActions:
+                            PlatformDetector.isDesktop(),
                         selectedCodesBuilder: _selectedCodesForContextMenu,
                       );
                     }),
                     itemCount: _filteredCodes.length + indexOffset,
                   );
 
-                  if (PlatformUtil.isDesktop() && crossAxisCount > 1) {
+                  if (PlatformDetector.isDesktop() && crossAxisCount > 1) {
                     return GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTapUp: (_) {
@@ -1802,7 +1844,7 @@ class _HomePageState extends State<HomePage> {
                             isCompactMode: isCompactMode,
                             sortKey: _codeSortKey,
                             enableDesktopContextActions:
-                                PlatformUtil.isDesktop(),
+                                PlatformDetector.isDesktop(),
                             selectedCodesBuilder: _selectedCodesForContextMenu,
                             focusNode: index == 0 ? _firstItemFocusNode : null,
                           );
@@ -2179,7 +2221,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
-    if (PlatformUtil.isDesktop()) {
+    if (PlatformDetector.isDesktop()) {
       return FloatingActionButton(
         onPressed: () => _redirectToManualEntryPage(),
         child: const Icon(Icons.add),
@@ -2215,7 +2257,7 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
-        if (PlatformUtil.isMobile())
+        if (PlatformDetector.isMobile())
           SpeedDialChild(
             child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02),
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,

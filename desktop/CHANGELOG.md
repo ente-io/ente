@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## v1.7.17 (unreleased)
+## v1.7.18 (unreleased)
+
+- Hide shared albums (remove internal flag).
+- .
+
+## v1.7.17
 
 - Map view.
 - Manually tag people in photos.

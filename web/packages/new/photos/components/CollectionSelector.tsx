@@ -1,4 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
@@ -10,12 +12,14 @@ import {
     Stack,
     styled,
     TextField,
+    Tooltip,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FilledIconButton } from "ente-base/components/mui";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
     ItemCard,
     LargeTileButton,
@@ -25,9 +29,13 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
+    collectionsSortBy,
+    sortCollectionSummaries,
+    type CollectionsSortBy,
     type CollectionSummaries,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
+import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -53,6 +61,13 @@ export interface CollectionSelectorAttributes {
      * {@link sourceCollectionID} to omit showing it in the list again.
      */
     sourceCollectionSummaryID?: number;
+    /**
+     * If set, this collection will be shown first in the list.
+     *
+     * This is useful for the "upload" action, where the user is viewing a
+     * specific collection and might want to upload to it.
+     */
+    activeCollectionID?: number;
     /**
      * Callback invoked when the user selects the option to create a new
      * collection.
@@ -121,6 +136,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] =
+        useCollectionSelectorSortByLocalState("name-asc");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -135,26 +152,42 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             return;
         }
 
-        const collections = [...collectionSummaries.values()]
-            .filter((cs) => {
+        const activeCollectionID = attributes.activeCollectionID;
+        const filteredCollections = [...collectionSummaries.values()].filter(
+            (cs) => {
                 if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(cs);
+                    return canAddToCollection(cs) && cs.type != "userFavorites";
                 } else if (attributes.action == "upload") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else if (attributes.action == "restore") {
                     return (
-                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                        (canMoveToCollection(cs) ||
+                            cs.type == "uncategorized") &&
+                        cs.type != "userFavorites"
                     );
                 } else {
-                    return canMoveToCollection(cs);
+                    // "move" and "unhide"
+                    return (
+                        canMoveToCollection(cs) && cs.type != "userFavorites"
+                    );
                 }
-            })
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .sort((a, b) => b.sortPriority - a.sortPriority);
+            },
+        );
+
+        const collections = sortCollectionSummaries(filteredCollections, sortBy)
+            .sort((a, b) => b.sortPriority - a.sortPriority)
+            .sort((a, b) => {
+                // Prioritize the active collection (if any) to appear first.
+                if (a.id === activeCollectionID) return -1;
+                if (b.id === activeCollectionID) return 1;
+                return 0;
+            });
 
         if (collections.length === 0) {
             onClose();
@@ -162,7 +195,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         setFilteredCollections(collections);
-    }, [collectionSummaries, attributes, open, onClose]);
+    }, [collectionSummaries, attributes, open, onClose, sortBy]);
 
     const searchFilteredCollections = useMemo(() => {
         if (!searchTerm.trim()) {
@@ -243,9 +276,14 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                                 </Typography>
                             </Box>
                         </Stack>
-                        <Box sx={{ margin: "-10px" }}>
-                            <DialogCloseIconButton onClose={handleClose} />
-                        </Box>
+                        <CollectionsSortOptions
+                            activeSortBy={sortBy}
+                            onChangeSortBy={setSortBy}
+                            nestedInDialog
+                        />
+                        <FilledIconButton onClick={handleClose}>
+                            <CloseIcon />
+                        </FilledIconButton>
                     </Stack>
                     <SearchField value={searchTerm} onChange={setSearchTerm} />
                 </Stack>
@@ -323,17 +361,53 @@ interface CollectionSummaryButtonProps {
 const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     collectionSummary,
     onClick,
-}) => (
-    <ItemCard
-        TileComponent={LargeTileButton}
-        coverFile={collectionSummary.coverFile}
-        onClick={() => onClick(collectionSummary.id)}
-    >
-        <LargeTileTextOverlay>
-            <Typography>{collectionSummary.name}</Typography>
-        </LargeTileTextOverlay>
-    </ItemCard>
-);
+}) => {
+    const isFavorite = collectionSummary.type === "userFavorites";
+    const isPinned = collectionSummary.attributes.has("pinned");
+
+    return (
+        <ItemCard
+            TileComponent={LargeTileButton}
+            coverFile={collectionSummary.coverFile}
+            onClick={() => onClick(collectionSummary.id)}
+        >
+            <LargeTileTextOverlay>
+                <Tooltip title={collectionSummary.name} arrow>
+                    <Typography
+                        sx={{
+                            maxWidth: "240px",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                        }}
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                </Tooltip>
+            </LargeTileTextOverlay>
+            {(isFavorite || isPinned) && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        right: 8,
+                        display: "flex",
+                        gap: 0.5,
+                    }}
+                >
+                    {isFavorite && (
+                        <FavoriteIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                    {isPinned && (
+                        <PushPinIcon sx={{ fontSize: 20, color: "white" }} />
+                    )}
+                </Box>
+            )}
+        </ItemCard>
+    );
+};
 
 interface SearchFieldProps {
     value: string;
@@ -412,4 +486,28 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
             }}
         />
     );
+};
+
+/**
+ * A hook that maintains the collection selector sort order both as in-memory
+ * and local storage state.
+ */
+const useCollectionSelectorSortByLocalState = (
+    initialValue: CollectionsSortBy,
+) => {
+    const key = "collectionSelectorSortBy";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const value = localStorage.getItem(key);
+        if (value && includes(collectionsSortBy, value)) setValue(value);
+    }, []);
+
+    const setter = (value: CollectionsSortBy) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter] as const;
 };

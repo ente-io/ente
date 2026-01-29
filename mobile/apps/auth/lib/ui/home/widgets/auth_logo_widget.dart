@@ -18,7 +18,7 @@ class AuthLogoWidget extends StatelessWidget {
     final logoColor = color ?? colorScheme.textBase;
 
     return SvgPicture.asset(
-      'assets/svg/auth-logo.svg',
+      'assets/svg/app-logo.svg',
       height: height,
       colorFilter: ColorFilter.mode(logoColor, BlendMode.srcIn),
     );

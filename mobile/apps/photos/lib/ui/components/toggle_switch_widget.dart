@@ -1,12 +1,12 @@
 import "dart:io";
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/utils/standalone/debouncer.dart';
 
 class ToggleSwitchWidget extends StatefulWidget {
   final BoolCallBack value;
@@ -30,6 +30,17 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   void initState() {
     super.initState();
     toggleValue = widget.value.call();
+  }
+
+  @override
+  void didUpdateWidget(covariant ToggleSwitchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newValue = widget.value.call();
+    if (toggleValue != newValue) {
+      setState(() {
+        toggleValue = newValue;
+      });
+    }
   }
 
   @override

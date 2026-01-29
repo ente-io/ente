@@ -1,3 +1,6 @@
+import "dart:async";
+
+import "package:ente_events/event_bus.dart";
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/colors.dart";
@@ -7,17 +10,16 @@ import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/events/collections_updated_event.dart";
 import 'package:locker/l10n/l10n.dart';
-import 'package:locker/services/collections/collections_service.dart';
-import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/models/selected_files.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/services/trash/trash_service.dart';
 import "package:locker/ui/components/delete_confirmation_sheet.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
-import 'package:locker/ui/components/file_restore_dialog.dart';
 import 'package:locker/ui/components/item_list_view.dart';
-import 'package:locker/utils/collection_list_util.dart';
+import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 
 class TrashPage extends StatefulWidget {
   final List<TrashFile> trashFiles;
@@ -32,131 +34,33 @@ class TrashPage extends StatefulWidget {
 }
 
 class _TrashPageState extends State<TrashPage> {
-  List<TrashFile> _sortedTrashFiles = [];
-  List<TrashFile> _allTrashFiles = [];
+  List<TrashFile> _trashFiles = [];
+  final SelectedFiles _selectedFiles = SelectedFiles();
+  final ScrollController _scrollController = ScrollController();
+  late StreamSubscription<CollectionsUpdatedEvent> _trashUpdateSubscription;
 
   @override
   void initState() {
     super.initState();
-    _allTrashFiles = List.from(widget.trashFiles);
-    _sortedTrashFiles = List.from(widget.trashFiles);
+    _trashFiles = List.from(widget.trashFiles);
+    _trashUpdateSubscription = Bus.instance
+        .on<CollectionsUpdatedEvent>()
+        .listen((_) => _refreshTrashFiles());
   }
 
-  List<OverflowMenuAction> _getFileOverflowActions() {
-    final colorScheme = getEnteColorScheme(context);
-    return [
-      OverflowMenuAction(
-        id: 'restore',
-        label: context.l10n.restore,
-        icon: Icon(
-          Icons.restore,
-          color: colorScheme.textBase,
-          size: 20,
-        ),
-        onTap: (context, file, collection) {
-          _restoreFile(context, file!);
-        },
-      ),
-      OverflowMenuAction(
-        id: 'delete',
-        label: context.l10n.delete,
-        icon: HugeIcon(
-          icon: HugeIcons.strokeRoundedDelete01,
-          color: colorScheme.warning500,
-          size: 20,
-        ),
-        onTap: (context, file, collection) {
-          _deleteFilePermanently(context, file!);
-        },
-        isWarning: true,
-      ),
-    ];
+  @override
+  void dispose() {
+    _trashUpdateSubscription.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
-  void _restoreFile(BuildContext context, EnteFile file) async {
-    final collections = await CollectionService.instance.getCollectionsForUI();
-
-    final availableCollections = uniqueCollectionsById(collections);
-
-    if (availableCollections.isEmpty) {
-      showToast(
-        context,
-        context.l10n.noCollectionsAvailableForRestore,
-      );
-      return;
-    }
-
-    final dialogResult = await showFileRestoreDialog(
-      context,
-      file: file,
-      collections: availableCollections,
-    );
-
-    if (dialogResult != null && dialogResult.selectedCollections.isNotEmpty) {
-      await _performRestore(
-        context,
-        file,
-        dialogResult.selectedCollections.first,
-      );
-    }
-  }
-
-  void _deleteFilePermanently(BuildContext context, EnteFile file) {
-    TrashService.instance.deleteFromTrash([file]).then((_) {
-      setState(() {
-        _sortedTrashFiles.remove(file);
-        _allTrashFiles.remove(file);
-      });
-      showToast(
-        context,
-        context.l10n.deletedPermanently(file.displayName),
-      );
-    }).catchError((error) {
-      showToast(
-        context,
-        context.l10n.failedToDeleteFile(error.toString()),
-      );
+  Future<void> _refreshTrashFiles() async {
+    final trashFiles = await TrashService.instance.getTrashFiles();
+    if (!mounted) return;
+    setState(() {
+      _trashFiles = List.from(trashFiles);
     });
-  }
-
-  Future<void> _performRestore(
-    BuildContext context,
-    EnteFile file,
-    Collection targetCollection,
-  ) async {
-    final dialog = createProgressDialog(
-      context,
-      context.l10n.restoring,
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      await TrashService.instance.restore([file], targetCollection);
-
-      setState(() {
-        _sortedTrashFiles.remove(file);
-        _allTrashFiles.remove(file);
-      });
-
-      await dialog.hide();
-
-      showToast(
-        context,
-        context.l10n.restoredFileToCollection(
-          file.displayName,
-          targetCollection.name ?? 'Unnamed Collection',
-        ),
-      );
-    } catch (error) {
-      await dialog.hide();
-
-      showToast(
-        context,
-        context.l10n.failedToRestoreFile(file.displayName, error.toString()),
-      );
-    }
   }
 
   Future<void> _emptyTrash() async {
@@ -168,7 +72,7 @@ class _TrashPageState extends State<TrashPage> {
       assetPath: "assets/collection_delete_icon.png",
     );
 
-    if (result?.buttonResult.action == ButtonAction.first && context.mounted) {
+    if (result?.buttonResult.action == ButtonAction.first && mounted) {
       await _performEmptyTrash();
     }
   }
@@ -182,9 +86,9 @@ class _TrashPageState extends State<TrashPage> {
     await dialog.show();
     try {
       await TrashService.instance.emptyTrash();
+      _selectedFiles.clearAll();
       setState(() {
-        _sortedTrashFiles.clear();
-        _allTrashFiles.clear();
+        _trashFiles.clear();
       });
       showToast(
         context,
@@ -222,7 +126,17 @@ class _TrashPageState extends State<TrashPage> {
           ),
         ),
       ),
-      body: _buildBody(context, colorScheme, textTheme),
+      body: Stack(
+        children: [
+          _buildBody(context, colorScheme, textTheme),
+          FileSelectionOverlayBar(
+            selectedFiles: _selectedFiles,
+            files: _trashFiles.cast<EnteFile>(),
+            scrollController: _scrollController,
+            isTrashMode: true,
+          ),
+        ],
+      ),
     );
   }
 
@@ -239,19 +153,17 @@ class _TrashPageState extends State<TrashPage> {
             title: context.l10n.trash,
             trailingWidgets: [
               GestureDetector(
-                onTap: () async {
-                  await _emptyTrash();
-                },
+                onTap: _emptyTrash,
                 child: Container(
-                  height: 48,
-                  width: 48,
+                  height: 44,
+                  width: 44,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: colorScheme.backdropBase,
                   ),
                   padding: const EdgeInsets.all(12),
-                  child: Icon(
-                    Icons.delete_outline,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedDelete02,
                     color: colorScheme.textBase,
                   ),
                 ),
@@ -259,19 +171,23 @@ class _TrashPageState extends State<TrashPage> {
             ],
           ),
           const SizedBox(height: 24),
-          _sortedTrashFiles.isEmpty
-              ? EmptyStateWidget(
-                  assetPath: 'assets/empty_state.png',
-                  title: context.l10n.yourTrashIsEmpty,
-                  showBorder: false,
-                )
-              : Expanded(
-                  child: ItemListView(
-                    files: _sortedTrashFiles.cast<EnteFile>(),
-                    fileOverflowActions: _getFileOverflowActions(),
+          Expanded(
+            child: _trashFiles.isEmpty
+                ? Center(
+                    child: EmptyStateWidget(
+                      assetPath: 'assets/empty_state.png',
+                      title: context.l10n.yourTrashIsEmpty,
+                      showBorder: false,
+                    ),
+                  )
+                : ItemListView(
+                    files: _trashFiles.cast<EnteFile>(),
                     physics: const BouncingScrollPhysics(),
+                    scrollController: _scrollController,
+                    selectedFiles: _selectedFiles,
+                    selectionEnabled: true,
                   ),
-                ),
+          ),
         ],
       ),
     );

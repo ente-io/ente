@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
@@ -22,7 +23,6 @@ import 'package:photos/ui/home/header_error_widget.dart';
 import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 const double kContainerHeight = 36;
 

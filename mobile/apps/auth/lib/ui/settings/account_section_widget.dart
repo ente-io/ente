@@ -1,7 +1,6 @@
 import 'package:ente_accounts/pages/change_email_dialog.dart';
 import 'package:ente_accounts/pages/delete_account_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
-import 'package:ente_accounts/pages/recovery_key_page.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -9,11 +8,12 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/components/recovery_key_sheet.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_crypto_api/ente_crypto_api.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/material.dart';
 
@@ -50,14 +50,7 @@ class AccountSectionWidget extends StatelessWidget {
           );
           if (hasAuthenticated) {
             // ignore: unawaited_futures
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return const ChangeEmailDialog();
-              },
-              barrierColor: Colors.black.withValues(alpha: 0.85),
-              barrierDismissible: false,
-            );
+            showChangeEmailDialog(context);
           }
         },
       ),
@@ -119,15 +112,9 @@ class AccountSectionWidget extends StatelessWidget {
               return;
             }
             // ignore: unawaited_futures
-            routeToPage(
+            showRecoveryKeySheet(
               context,
-              RecoveryKeyPage(
-                Configuration.instance,
-                recoveryKey,
-                l10n.ok,
-                showAppBar: true,
-                onDone: () {},
-              ),
+              recoveryKey: recoveryKey,
             );
           }
         },

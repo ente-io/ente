@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
-import 'package:photos/utils/device_info.dart';
 import "package:photos/utils/ram_check_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +19,12 @@ enum AlbumSortDirection {
 enum AlbumViewType {
   grid,
   list,
+}
+
+enum PeopleSortKey {
+  mostPhotos,
+  name,
+  lastUpdated,
 }
 
 class LocalSettings {
@@ -42,16 +47,25 @@ class LocalSettings {
       "has_configured_links_in_app_permission";
   static const _hideSharedItemsFromHomeGalleryTag =
       "hide_shared_items_from_home_gallery";
-  static const _kSwipeToSelectEnabled = "ls.swipe_to_select_enabled";
   static const kCollectionViewType = "collection_view_type";
   static const kCollectionSortDirection = "collection_sort_direction";
+  static const kPeopleSortKey = "people_sort_key";
+  static const kPeopleSortNameAscending = "people_sort_name_ascending";
+  static const kPeopleSortUpdatedAscending = "people_sort_updated_ascending";
+  static const kPeopleSortPhotosAscending = "people_sort_photos_ascending";
+  static const kPeopleSortSimilaritySelected =
+      "people_sort_similarity_selected";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
+  static const _kAppLockEnabled = "ls.app_lock_enabled";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
+  static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
+  static const _kDefaultClusteringDistanceOverride =
+      "ml_debug.default_clustering_distance";
 
   final SharedPreferences _prefs;
 
@@ -81,6 +95,52 @@ class LocalSettings {
 
   Future<bool> setAlbumSortDirection(AlbumSortDirection direction) {
     return _prefs.setInt(kCollectionSortDirection, direction.index);
+  }
+
+  PeopleSortKey peopleSortKey() {
+    final index = _prefs.getInt(kPeopleSortKey);
+    if (index == null || index < 0 || index >= PeopleSortKey.values.length) {
+      return PeopleSortKey.mostPhotos;
+    }
+    return PeopleSortKey.values[index];
+  }
+
+  Future<bool> setPeopleSortKey(PeopleSortKey key) {
+    return _prefs.setInt(kPeopleSortKey, key.index);
+  }
+
+  bool get peopleNameSortAscending =>
+      _prefs.getBool(kPeopleSortNameAscending) ?? true;
+
+  Future<void> setPeopleNameSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortNameAscending, value);
+  }
+
+  bool get peopleUpdatedSortAscending =>
+      _prefs.getBool(kPeopleSortUpdatedAscending) ?? false;
+
+  Future<void> setPeopleUpdatedSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortUpdatedAscending, value);
+  }
+
+  bool get peoplePhotosSortAscending =>
+      _prefs.getBool(kPeopleSortPhotosAscending) ?? false;
+
+  Future<void> setPeoplePhotosSortAscending(bool value) async {
+    await _prefs.setBool(kPeopleSortPhotosAscending, value);
+  }
+
+  bool get peopleSimilaritySortSelected =>
+      _prefs.getBool(kPeopleSortSimilaritySelected) ?? true;
+
+  Future<void> setPeopleSimilaritySortSelected(bool value) async {
+    await _prefs.setBool(kPeopleSortSimilaritySelected, value);
+  }
+
+  bool get appLockEnabledCached => _prefs.getBool(_kAppLockEnabled) ?? false;
+
+  Future<void> setAppLockEnabledCached(bool value) async {
+    await _prefs.setBool(_kAppLockEnabled, value);
   }
 
   GroupType getGalleryGroupType() {
@@ -145,6 +205,28 @@ class LocalSettings {
 
   bool get isSmartMemoriesEnabled =>
       _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
+
+  double? get autoMergeThresholdOverride =>
+      _prefs.getDouble(_kAutoMergeThresholdOverride);
+
+  Future<void> setAutoMergeThresholdOverride(double? value) async {
+    if (value == null) {
+      await _prefs.remove(_kAutoMergeThresholdOverride);
+      return;
+    }
+    await _prefs.setDouble(_kAutoMergeThresholdOverride, value);
+  }
+
+  double? get defaultClusteringDistanceOverride =>
+      _prefs.getDouble(_kDefaultClusteringDistanceOverride);
+
+  Future<void> setDefaultClusteringDistanceOverride(double? value) async {
+    if (value == null) {
+      await _prefs.remove(_kDefaultClusteringDistanceOverride);
+      return;
+    }
+    await _prefs.setDouble(_kDefaultClusteringDistanceOverride, value);
+  }
 
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);
@@ -247,30 +329,6 @@ class LocalSettings {
 
   bool get hideSharedItemsFromHomeGallery =>
       _prefs.getBool(_hideSharedItemsFromHomeGalleryTag) ?? false;
-
-  Future<void> setSwipeToSelectEnabled(bool value) async {
-    await _prefs.setBool(_kSwipeToSelectEnabled, value);
-  }
-
-  /// Initialize swipe-to-select default based on device type.
-  /// Sets default to disabled for Samsung S-series devices (2018+) due to
-  /// reported gesture conflicts. Only sets default if user hasn't explicitly
-  /// configured this setting.
-  Future<void> initSwipeToSelectDefault() async {
-    // Only set default if user hasn't explicitly configured this setting
-    if (_prefs.containsKey(_kSwipeToSelectEnabled)) {
-      return;
-    }
-
-    // Check if device is Samsung S-series
-    final isSamsungS = await isSamsungSSeries();
-
-    // Set default: disabled for Samsung S-series, enabled for all others
-    await _prefs.setBool(_kSwipeToSelectEnabled, !isSamsungS);
-  }
-
-  bool get isSwipeToSelectEnabled =>
-      _prefs.getBool(_kSwipeToSelectEnabled) ?? true;
 
   bool get showLocalIDOverThumbnails =>
       _prefs.getBool(kShowLocalIDOverThumbnails) ?? false;

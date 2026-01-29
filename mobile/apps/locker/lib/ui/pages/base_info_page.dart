@@ -147,8 +147,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               selectedCollectionIds: _selectedCollectionIds,
               onToggleCollection: _onToggleCollection,
               onCollectionsUpdated: _onCollectionsUpdated,
-              titleWidget:
-                  showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+              title:
+                  showCollectionSelectionTitle ? context.l10n.collections : '',
             ),
           ],
         ),

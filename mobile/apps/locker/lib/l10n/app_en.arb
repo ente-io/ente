@@ -95,6 +95,8 @@
     }
   },
   "collectionCannotBeDeleted": "This collection cannot be deleted",
+  "collectionCannotBeEdited": "This collection cannot be edited",
+  "collectionCannotBeShared": "This collection cannot be shared",
   "deleteCollection": "Delete collection",
   "deleteCollectionConfirmation": "Are you sure you want to delete \"{collectionName}\"?",
   "@deleteCollectionConfirmation": {
@@ -196,6 +198,7 @@
   "create": "Create",
   "renameCollection": "Rename collection",
   "save": "Save",
+  "download": "Download",
   "deleteFile": "Delete item",
   "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
   "@deleteFileConfirmation": {
@@ -210,6 +213,7 @@
   "noCollectionsFound": "No collections found",
   "createYourFirstCollection": "Create your first collection to get started",
   "createCollection": "Create collection",
+  "enterCollectionName": "Enter collection name",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
   "collectionEmptyStateTitle": "Nothing to see here",
@@ -285,6 +289,7 @@
     }
   },
   "uncategorized": "Uncategorized",
+  "syncing": "Syncing...",
   "syncingTrash": "Syncing trash...",
   "restoring": "Restoring...",
   "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",
@@ -344,16 +349,19 @@
   "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
   "authToViewPasskey": "Please authenticate to view passkey",
   "theme": "Theme",
+  "appearance": "Appearance",
   "lightTheme": "Light",
   "darkTheme": "Dark",
   "systemTheme": "System",
   "settings": "Settings",
   "about": "About",
+  "aboutUs": "About us",
   "weAreOpenSource": "We are open source!",
   "privacy": "Privacy",
   "terms": "Terms",
   "termsOfServicesTitle": "Terms",
   "support": "Support",
+  "helpAndSupport": "Help and Support",
   "contactSupport": "Contact support",
   "help": "Help",
   "suggestFeatures": "Suggest features",
@@ -902,7 +910,118 @@
   "subscriptionRequiredForSharing": "You need a paid subscription to share links",
   "sessionExpired": "Session expired",
   "pleaseLoginAgain": "Please login again",
-  "language": "Language",
+  "filters": "Filters",
+  "seeAllCollections": "All collections",
+  "clearAllFilters": "Clear all",
   "selectLanguage": "Select language",
-  "general": "General"
+  "general": "General",
+  "language": "Language",
+  "selectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "@selectedCount": {
+    "description": "Number of items selected",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "actionNotSupportedForSharedFiles": "{count, plural, =1{Action is not supported for 1 shared file} other{Action is not supported for {count} shared files}}",
+  "@actionNotSupportedForSharedFiles": {
+    "description": "Message when action is not supported for shared files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addTo": "Add to",
+  "shareNotSupportedForSharedFiles": "Share is not supported for shared files",
+  "editNotSupportedForSharedFiles": "Edit is not supported for shared files",
+  "deleteNotSupportedForSharedFiles": "Delete is not supported for shared files",
+  "importantNotSupportedForSharedFiles": "Important is not supported for shared files",
+  "sharingSection": "Sharing",
+  "sharingEnabledToggle": "Sharing enabled",
+  "publicLinkSection": "Public Link",
+  "linkEnabledToggle": "Link enabled",
+  "allowUploads": "Allow uploads",
+  "collectionUpdated": "Collection updated",
+  "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album",
+  "leaveCollectionSuccessfully": "Left collection successfully",
+  "leftCollectionsSuccessfully": "{count, plural, =1{Left 1 collection successfully} other{Left {count} collections successfully}}",
+  "@leftCollectionsSuccessfully": {
+    "description": "Success message when leaving collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "removePublicLink": "Remove public link",
+  "removePublicLinkConfirmation": "This will remove the public link for accessing \"{collectionName}\".",
+  "@removePublicLinkConfirmation": {
+    "description": "Confirmation message when removing public link",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
+  "collectionsDeletedSuccessfully": "{count, plural, =1{1 collection deleted successfully} other{{count} collections deleted successfully}}",
+  "@collectionsDeletedSuccessfully": {
+    "description": "Success message when collections are deleted",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "restoreToCollection": "Restore to collection",
+  "restoringFiles": "Restoring...",
+  "filesRestoredSuccessfully": "{count, plural, =1{1 item restored successfully} other{{count} items restored successfully}}",
+  "@filesRestoredSuccessfully": {
+    "description": "Success message when items are restored from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToRestoreFiles": "Failed to restore items",
+  "permanentlyDelete": "Permanently delete",
+  "permanentlyDeleteFilesBody": "{count, plural, =1{This item} other{These {count} items}} will be permanently deleted and cannot be recovered.",
+  "@permanentlyDeleteFilesBody": {
+    "description": "Confirmation body for permanent deletion from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDelete": "Yes, delete",
+  "deletingFiles": "Deleting...",
+  "filesDeletedPermanently": "{count, plural, =1{1 item deleted permanently} other{{count} items deleted permanently}}",
+  "@filesDeletedPermanently": {
+    "description": "Success message when items are permanently deleted from trash",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "failedToDeleteFiles": "Failed to delete items",
+  "itemsStored": "Items stored",
+  "of_": "of",
+  "usageYou": "You",
+  "usageFamily": "Family",
+  "searchSettings": "Search settings",
+  "suggestions": "Suggestions",
+  "noResultsFound": "No results found"
 }
