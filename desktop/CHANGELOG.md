@@ -18,6 +18,8 @@
 - Edit location
 - Better sort for albums list
 - Improved UI for login, sign-up, etc, pages
+- Public album improvements
+- Upload to hidden albums
 
 ## v1.7.17
 
