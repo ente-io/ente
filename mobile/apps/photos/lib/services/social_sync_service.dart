@@ -20,6 +20,10 @@ class SocialSyncService {
   final _logger = Logger('SocialSyncService');
   final _db = SocialDB.instance;
   final _api = SocialService.instance;
+  final Map<int, int> _commentsEqualSeenCache = {};
+  final Map<int, int> _reactionsEqualSeenCache = {};
+  final Map<int, int> _commentsEqualSyncedCache = {};
+  final Map<int, int> _reactionsEqualSyncedCache = {};
 
   bool _isSyncing = false;
 
@@ -27,8 +31,11 @@ class SocialSyncService {
   ///
   /// Uses diff-based sync with separate sinceTime for comments and reactions.
   Future<void> syncCollection(int collectionID) async {
-    int commentsSinceTime = await _db.getCommentsSyncTime(collectionID);
-    int reactionsSinceTime = await _db.getReactionsSyncTime(collectionID);
+    int normalizeSinceTime(int syncTime) => syncTime > 0 ? syncTime - 1 : 0;
+    int commentsSinceTime =
+        normalizeSinceTime(await _db.getCommentsSyncTime(collectionID));
+    int reactionsSinceTime =
+        normalizeSinceTime(await _db.getReactionsSyncTime(collectionID));
 
     int maxCommentsUpdatedAt = commentsSinceTime;
     int maxReactionsUpdatedAt = reactionsSinceTime;
@@ -188,10 +195,27 @@ class SocialSyncService {
           final localReactionsSyncTime =
               await _db.getReactionsSyncTime(update.collectionID);
 
+          final forceCommentsEqualSync = _shouldForceEqualSync(
+            _commentsEqualSeenCache,
+            _commentsEqualSyncedCache,
+            update.collectionID,
+            update.commentsUpdatedAt,
+            localCommentsSyncTime,
+          );
+          final forceReactionsEqualSync = _shouldForceEqualSync(
+            _reactionsEqualSeenCache,
+            _reactionsEqualSyncedCache,
+            update.collectionID,
+            update.reactionsUpdatedAt,
+            localReactionsSyncTime,
+          );
+
           final needsCommentsSync = update.commentsUpdatedAt != null &&
-              update.commentsUpdatedAt! > localCommentsSyncTime;
+              (update.commentsUpdatedAt! > localCommentsSyncTime ||
+                  forceCommentsEqualSync);
           final needsReactionsSync = update.reactionsUpdatedAt != null &&
-              update.reactionsUpdatedAt! > localReactionsSyncTime;
+              (update.reactionsUpdatedAt! > localReactionsSyncTime ||
+                  forceReactionsEqualSync);
 
           if (needsCommentsSync || needsReactionsSync) {
             await syncCollection(update.collectionID);
@@ -232,6 +256,32 @@ class SocialSyncService {
     } finally {
       _isSyncing = false;
     }
+  }
+
+  bool _shouldForceEqualSync(
+    Map<int, int> seenCache,
+    Map<int, int> syncedCache,
+    int collectionID,
+    int? remoteUpdatedAt,
+    int localSyncTime,
+  ) {
+    if (remoteUpdatedAt == null || remoteUpdatedAt <= 0) {
+      return false;
+    }
+    if (remoteUpdatedAt != localSyncTime) {
+      seenCache.remove(collectionID);
+      syncedCache.remove(collectionID);
+      return false;
+    }
+    if (syncedCache[collectionID] == remoteUpdatedAt) {
+      return false;
+    }
+    if (seenCache[collectionID] == remoteUpdatedAt) {
+      syncedCache[collectionID] = remoteUpdatedAt;
+      return true;
+    }
+    seenCache[collectionID] = remoteUpdatedAt;
+    return false;
   }
 
   /// Syncs anonymous profiles for a collection.

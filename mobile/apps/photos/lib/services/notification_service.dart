@@ -160,6 +160,7 @@ class NotificationService {
   Future<void> showNotification(
     String title,
     String message, {
+    int? id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
     String payload = "ente://home",
@@ -179,7 +180,7 @@ class NotificationService {
     final platformChannelSpecs =
         NotificationDetails(android: androidSpecs, iOS: iosSpecs);
     await _notificationsPlugin.show(
-      channelName.hashCode,
+      id ?? channelName.hashCode,
       title,
       message,
       platformChannelSpecs,

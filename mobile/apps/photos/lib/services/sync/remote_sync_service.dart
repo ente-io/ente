@@ -1096,8 +1096,8 @@ class RemoteSyncService {
         lastNotifiedTime > appOpenTime ? lastNotifiedTime : appOpenTime;
 
     final hiddenCollectionIds = _collectionsService.getHiddenCollectionIds();
+    final latestByKey = <String, _SocialActivityCandidate>{};
 
-    _SocialActivityCandidate? latest;
     void considerCandidate(_SocialActivityCandidate candidate) {
       if (candidate.createdAt <= cutoffTime) {
         return;
@@ -1105,17 +1105,25 @@ class RemoteSyncService {
       if (hiddenCollectionIds.contains(candidate.collectionID)) {
         return;
       }
-      if (latest == null || candidate.createdAt > latest!.createdAt) {
-        latest = candidate;
+      if (candidate.fileID == null) {
+        return;
+      }
+      final group = _notificationGroupForType(candidate.type);
+      final key =
+          '${candidate.collectionID}_${candidate.fileID}_${group.index}';
+      final existing = latestByKey[key];
+      if (existing == null || candidate.createdAt > existing.createdAt) {
+        latestByKey[key] = candidate;
       }
     }
 
     final db = SocialDB.instance;
 
-    final List<Reaction> photoLikes =
-        await db.getReactionsOnFiles(excludeUserID: userID, limit: 1);
-    if (photoLikes.isNotEmpty) {
-      final reaction = photoLikes.first;
+    final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    for (final reaction in photoLikes) {
       considerCandidate(
         _SocialActivityCandidate(
           type: FeedItemType.photoLike,
@@ -1126,10 +1134,11 @@ class RemoteSyncService {
       );
     }
 
-    final List<Comment> fileComments =
-        await db.getCommentsOnFiles(excludeUserID: userID, limit: 1);
-    if (fileComments.isNotEmpty) {
-      final comment = fileComments.first;
+    final List<Comment> fileComments = await db.getCommentsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    for (final comment in fileComments) {
       considerCandidate(
         _SocialActivityCandidate(
           type: FeedItemType.comment,
@@ -1142,10 +1151,11 @@ class RemoteSyncService {
       );
     }
 
-    final List<Comment> replies =
-        await db.getRepliesToUserComments(targetUserID: userID, limit: 1);
-    if (replies.isNotEmpty) {
-      final reply = replies.first;
+    final List<Comment> replies = await db.getRepliesToUserCommentsSince(
+      targetUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    for (final reply in replies) {
       considerCandidate(
         _SocialActivityCandidate(
           type: FeedItemType.reply,
@@ -1159,9 +1169,11 @@ class RemoteSyncService {
     }
 
     final List<Reaction> commentLikes =
-        await db.getReactionsOnUserComments(targetUserID: userID, limit: 1);
-    if (commentLikes.isNotEmpty) {
-      final reaction = commentLikes.first;
+        await db.getReactionsOnUserCommentsSince(
+      targetUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    for (final reaction in commentLikes) {
       considerCandidate(
         _SocialActivityCandidate(
           type: FeedItemType.commentLike,
@@ -1173,10 +1185,11 @@ class RemoteSyncService {
       );
     }
 
-    final List<Reaction> replyLikes =
-        await db.getReactionsOnUserReplies(targetUserID: userID, limit: 1);
-    if (replyLikes.isNotEmpty) {
-      final reaction = replyLikes.first;
+    final List<Reaction> replyLikes = await db.getReactionsOnUserRepliesSince(
+      targetUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    for (final reaction in replyLikes) {
       considerCandidate(
         _SocialActivityCandidate(
           type: FeedItemType.replyLike,
@@ -1188,24 +1201,35 @@ class RemoteSyncService {
       );
     }
 
-    if (latest == null) {
+    if (latestByKey.isEmpty) {
       return;
     }
 
+    final candidates = latestByKey.values.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final s = await LanguageService.locals;
-    final title = _getSocialNotificationTitle(latest!.type, s);
-    final message = _getSocialNotificationBody(latest!, s);
 
-    await NotificationService.instance.showNotification(
-      title,
-      message,
-      channelID: "social_activity",
-      channelName: "Activity",
-      payload: _buildSocialNotificationPayload(latest!),
-    );
+    for (final candidate in candidates) {
+      final fileID = candidate.fileID;
+      if (fileID == null) {
+        continue;
+      }
+      await NotificationService.instance.showNotification(
+        _getSocialNotificationTitle(candidate.type, s),
+        _getSocialNotificationBody(candidate, s),
+        channelID: "social_activity",
+        channelName: "Activity",
+        payload: _buildSocialNotificationPayload(candidate),
+        id: _buildSocialNotificationId(
+          candidate.collectionID,
+          fileID,
+          _notificationGroupForType(candidate.type),
+        ),
+      );
+    }
     await _prefs.setInt(
       kLastSocialActivityNotificationTime,
-      latest!.createdAt,
+      candidates.first.createdAt,
     );
   }
 
@@ -1214,6 +1238,31 @@ class RemoteSyncService {
             .shouldShowNotificationsForSharedPhotos() &&
         isFirstRemoteSyncDone() &&
         !AppLifecycleService.instance.isForeground;
+  }
+
+  _SocialNotificationGroup _notificationGroupForType(FeedItemType type) {
+    switch (type) {
+      case FeedItemType.comment:
+      case FeedItemType.reply:
+        return _SocialNotificationGroup.comment;
+      case FeedItemType.photoLike:
+      case FeedItemType.commentLike:
+      case FeedItemType.replyLike:
+        return _SocialNotificationGroup.like;
+    }
+  }
+
+  int _buildSocialNotificationId(
+    int collectionID,
+    int fileID,
+    _SocialNotificationGroup group,
+  ) {
+    const int base = 0x10000000;
+    int hash = collectionID & 0x7fffffff;
+    hash = ((hash * 31) ^ fileID) & 0x7fffffff;
+    hash = ((hash * 31) ^ (group == _SocialNotificationGroup.comment ? 1 : 0)) &
+        0x7fffffff;
+    return base | (hash & 0x0fffffff);
   }
 
   String _getSocialNotificationTitle(FeedItemType type, AppLocalizations s) {
@@ -1307,4 +1356,9 @@ class _SocialActivityCandidate {
     this.commentID,
     this.commentText,
   });
+}
+
+enum _SocialNotificationGroup {
+  comment,
+  like,
 }
