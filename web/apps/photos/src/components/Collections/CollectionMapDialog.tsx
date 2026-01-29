@@ -1867,28 +1867,28 @@ function CollectionSidebar({
                                 {visibleDate && ` · ${visibleDate}`}
                             </Typography>
                         </Box>
-                        <IconButton
-                            onClick={onClose}
-                            size="small"
+                        <Box
                             sx={{
-                                color: "text.secondary",
-                                bgcolor: "fill.faint",
-                                "&:hover": { bgcolor: "fill.muted" },
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
                             }}
                         >
-                            <CloseIcon />
-                        </IconButton>
+                            <IconButton
+                                onClick={onClose}
+                                size="small"
+                                sx={{
+                                    color: "text.secondary",
+                                    bgcolor: "fill.faint",
+                                    "&:hover": { bgcolor: "fill.muted" },
+                                }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        </Box>
                     </Box>
                 </StickyDateHeader>
                 <FileListContainer>
-                    {isVisiblePhotosUpdating ? (
-                        <SidebarLoadingOverlay>
-                            <ActivityIndicator size="24px" />
-                            <Typography variant="small">
-                                {t("loading")}
-                            </Typography>
-                        </SidebarLoadingOverlay>
-                    ) : null}
                     {visibleFiles.length > 0 ? (
                         <FileListWithViewer
                             files={visibleFiles}
@@ -2731,25 +2731,6 @@ const FileListContainer = styled(Box)(({ theme }) => ({
         paddingRight: "16px",
         paddingBottom: "18px",
     },
-}));
-
-const SidebarLoadingOverlay = styled(Box)(({ theme }) => ({
-    position: "absolute",
-    inset: 0,
-    zIndex: 2,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: theme.spacing(1),
-    textAlign: "center",
-    color: theme.vars.palette.text.primary,
-    backgroundColor:
-        theme.palette.mode === "dark"
-            ? "rgba(0, 0, 0, 0.45)"
-            : "rgba(255, 255, 255, 0.75)",
-    backdropFilter: "blur(2px)",
-    pointerEvents: "auto",
 }));
 
 const StickyDateHeader = styled(Box)<{
