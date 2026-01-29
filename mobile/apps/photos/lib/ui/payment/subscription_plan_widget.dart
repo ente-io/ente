@@ -176,15 +176,15 @@ class _Price extends StatelessWidget {
         children: [
           if (isPlayStore)
             Text(
-              currencySymbol +
-                  pricePerMonthString +
-                  ' / ' +
-                  AppLocalizations.of(context).month,
+              price + " / " + AppLocalizations.of(context).yearShort,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (isPlayStore)
             Text(
-              price + " / " + AppLocalizations.of(context).yearShort,
+              currencySymbol +
+                  pricePerMonthString +
+                  ' / ' +
+                  AppLocalizations.of(context).month,
               style: textTheme.small.copyWith(color: textFaintLight),
             ),
           if (!isPlayStore)
