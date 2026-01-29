@@ -80,7 +80,7 @@ class SmartAlbumsService {
   }
 
   Future<void> syncSmartAlbums() async {
-    final isMLEnabled = flagService.hasGrantedMLConsent;
+    final isMLEnabled = hasGrantedMLConsent;
     if (!isMLEnabled) {
       _logger.warning("ML is not enabled, skipping smart album sync");
       return;
