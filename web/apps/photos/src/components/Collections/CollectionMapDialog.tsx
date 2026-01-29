@@ -19,7 +19,6 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { getKV, setKV } from "ente-base/kv";
 import { downloadManager } from "ente-gallery/services/download";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection } from "ente-media/collection";
@@ -156,22 +155,6 @@ interface MapIndexPoint {
  * two metrics kept to analyse this change.
  */
 
-interface MapIndexMeta {
-    fileCount: number;
-    updationTime: number | null;
-}
-/**
- * Structure of the data stored in IndexedDB for the map view.
- * - meta: Metadata tracking file count and last update time for cache validation
- * - points: Array of geotagged photo locations with timestamps
- * - latestFileId: ID of the most recently created file, used for cover image caching optimization
- */
-
-interface MapIndexStorage {
-    meta: MapIndexMeta;
-    points: MapIndexPoint[];
-    latestFileId?: number;
-}
 
 /**
  * The small payload we attach to a point: fileId points to the photo, and timestamp keeps
@@ -262,8 +245,6 @@ interface MapClusterOptions {
 
 type SuperclusterConstructor = new (options?: MapClusterOptions) => MapIndex;
 
-//Prefix for storing the map view data specific to the current active collection, so they aren't recomputed when reopend
-const MAP_INDEX_KEY_PREFIX = "photos-map-index-v1";
 //OpenStreetMap only supports clustering till this zoom level and this tell the supercluster what the max limit is for the zoom.
 const MAX_MAP_ZOOM = 19;
 //Instead of loading just the tiles which are in view, we're actually loading the 15% of the surrounding zone as well for smoother experience.
@@ -317,41 +298,14 @@ function useCurrentUser() {
     }, []);
 }
 
-// Utility function to create an unique Key for each collection to map the cache in the IndexedDB
-const mapIndexKey = (collectionSummary: CollectionSummary) =>
-    `${MAP_INDEX_KEY_PREFIX}:${collectionSummary.type}:${collectionSummary.id}`;
-
-/**
- * Utility function to create a lightweight cache fingerprint. Used in caching the computed values in the IndexedDB.
- * Stored along with the points in MapIndexStorage
- */
-const toMapIndexMeta = (
-    collectionSummary: CollectionSummary,
-): MapIndexMeta => ({
-    fileCount: collectionSummary.fileCount,
-    updationTime: collectionSummary.updationTime ?? null,
-});
-
-const isStoredMapIndexValid = (
-    stored: unknown,
-    meta: MapIndexMeta,
-): stored is MapIndexStorage => {
-    if (!stored || typeof stored !== "object") return false;
-    const candidate = stored as Partial<MapIndexStorage>;
-    if (!candidate.meta || !Array.isArray(candidate.points)) return false;
-    return (
-        candidate.meta.fileCount === meta.fileCount &&
-        candidate.meta.updationTime === meta.updationTime
-    );
-};
 
 /**
  *
  * @param files
  * @returns points, latestFileId
  *
- * This function create the inital mapIndexPoint any collection,
- * if there is no cached data for the same. It's later this points
+ * This function create the inital mapIndexPoint any collection.
+ * It's later this points
  * that is being given to the supercluster for the mapping and indexing.
  *
  * This function loops over the entire files which is suspect is not EFFICENT
@@ -403,7 +357,7 @@ const buildMapIndexPoints = async (files: EnteFile[]) => {
  * (2) all leaves under a cluster. (3) the maximum zoom for a particular cluster
  *
  * This function converts every MapIndexPoint to a GeoJSON Feature(required for rendering
- * using supercluster)[type MapPointFeature]. NOTE this index is not presisted only the points are cached.
+ * using supercluster)[type MapPointFeature]. NOTE this index is not persisted.
  */
 const buildClusterIndex = (points: MapIndexPoint[]): MapIndex => {
     /**
@@ -650,41 +604,8 @@ function useMapData(
                 //ref mirrow for using in the useCallbacks
                 filesByIDRef.current = filesByID;
 
-                const meta = toMapIndexMeta(collectionSummary);
-                const indexKey = mapIndexKey(collectionSummary);
-
-                /**
-                 * for storing the cached geotagged points(if any). This list is the RAW input to
-                 * buildMapIndex(points)[Supercluster] for clustering and rendering points.
-                 */
-
-                let points: MapIndexPoint[] | undefined;
-                let latestFileId: number | undefined;
-
-                try {
-                    const stored = await getKV(indexKey);
-                    if (isStoredMapIndexValid(stored, meta)) {
-                        points = stored.points;
-                        latestFileId = stored.latestFileId;
-                    }
-                } catch {
-                    // Ignore index read errors and rebuild
-                }
-
-                /**
-                 * if there is no cached data then building it and then updating
-                 * the indexedDB for the future use cases.
-                 */
-                if (!points) {
-                    const built = await buildMapIndexPoints(files);
-                    points = built.points;
-                    latestFileId = built.latestFileId;
-                    try {
-                        await setKV(indexKey, { meta, points, latestFileId });
-                    } catch {
-                        // Ignore index persistence errors
-                    }
-                }
+                const { points, latestFileId } =
+                    await buildMapIndexPoints(files);
 
                 //mapIndex has the SuperCluster Spatial Index
                 const mapIndex = buildMapIndex(points);
@@ -1223,7 +1144,7 @@ function isFileVisible(file: EnteFile): boolean {
 }
 
 /**
- * Loads every file stored in IndexedDB, filters those belonging to the
+ * Loads every locally stored file, filters those belonging to the
  * target collection, removes duplicates by ID, filters out hidden/archived
  * files, and returns the unique set of visible files. For "All", it also
  * excludes files that belong to hidden or archived collections.
