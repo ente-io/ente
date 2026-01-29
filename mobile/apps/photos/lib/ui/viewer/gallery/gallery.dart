@@ -163,7 +163,7 @@ class GalleryState extends State<Gallery> {
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
   InheritedSearchFilterData? _inheritedSearchFilterData;
-  GalleryBoundariesProvider? _boundariesProvider;
+  InheritedGalleryBoundaries? _boundariesProvider;
 
   @override
   void initState() {
@@ -344,6 +344,7 @@ class GalleryState extends State<Gallery> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(context);
+    _boundariesProvider = GalleryBoundariesProvider.of(context);
   }
 
   void _updateGalleryGroups({bool callSetState = true}) {
@@ -559,12 +560,6 @@ class GalleryState extends State<Gallery> {
       _logger.severe("failed to load files", e, s);
       rethrow;
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _boundariesProvider = GalleryBoundariesProvider.of(context);
   }
 
   @override
