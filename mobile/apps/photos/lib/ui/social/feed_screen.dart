@@ -9,6 +9,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -98,6 +99,7 @@ class _FeedScreenState extends State<FeedScreen> {
     super.initState();
     _currentUserID = Configuration.instance.getUserID() ?? 0;
     _pendingNavigationTarget = widget.initialTarget;
+    unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
     _loadFeedItems();
   }
 

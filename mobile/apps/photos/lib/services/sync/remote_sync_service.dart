@@ -10,7 +10,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/social_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/diff_sync_complete_event.dart';
@@ -18,17 +17,11 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/extensions/user_extension.dart';
-import 'package:photos/generated/l10n.dart';
 import 'package:photos/main.dart' show isProcessBg;
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/social/comment.dart';
-import 'package:photos/models/social/feed_item.dart';
-import 'package:photos/models/social/reaction.dart';
-import 'package:photos/models/social/social_data_provider.dart';
 import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -38,6 +31,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/language_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/notification_service.dart';
+import 'package:photos/services/social_notification_coordinator.dart';
 import 'package:photos/services/social_sync_service.dart';
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -84,9 +78,6 @@ class RemoteSyncService {
   static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
   static const kMaximumPermissibleUploadsInThrottledMode = 4;
-  static const kLastSocialActivityNotificationTime =
-      "last_social_activity_notification_time";
-
   static final RemoteSyncService instance =
       RemoteSyncService._privateConstructor();
 
@@ -1099,342 +1090,11 @@ class RemoteSyncService {
     try {
       _logger.info("Starting social sync");
       await SocialSyncService.instance.syncAllSharedCollections();
-      await _notifyNewSocialActivity();
+      await SocialNotificationCoordinator.instance.notifyAfterSocialSync(
+        trigger: SocialNotificationTrigger.remoteSync,
+      );
     } catch (e) {
       _logger.severe("Social sync failed, continuing", e);
     }
   }
-
-  Future<void> _notifyNewSocialActivity() async {
-    if (!_shouldShowSocialNotifications()) {
-      return;
-    }
-    if (!flagService.isSocialEnabled) {
-      return;
-    }
-    final userID = Configuration.instance.getUserID();
-    if (userID == null) {
-      return;
-    }
-    final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
-    if (appOpenTime <= 0) {
-      return;
-    }
-
-    final lastNotifiedTime =
-        _prefs.getInt(kLastSocialActivityNotificationTime) ?? 0;
-    final cutoffTime =
-        lastNotifiedTime > appOpenTime ? lastNotifiedTime : appOpenTime;
-
-    final hiddenCollectionIds = _collectionsService.getHiddenCollectionIds();
-    final latestByKey = <String, _SocialActivityCandidate>{};
-    final bool enableCommentNotifications =
-        NotificationService.instance.shouldShowCommentNotifications();
-    final bool enableLikeNotifications =
-        NotificationService.instance.shouldShowLikeNotifications();
-    final bool enableReplyNotifications =
-        NotificationService.instance.shouldShowReplyNotifications();
-
-    void considerCandidate(_SocialActivityCandidate candidate) {
-      if (!_isSocialNotificationEnabledForType(candidate.type)) {
-        return;
-      }
-      if (candidate.createdAt <= cutoffTime) {
-        return;
-      }
-      if (hiddenCollectionIds.contains(candidate.collectionID)) {
-        return;
-      }
-      if (candidate.fileID == null) {
-        return;
-      }
-      final group = _notificationGroupForType(candidate.type);
-      final key =
-          '${candidate.collectionID}_${candidate.fileID}_${group.index}';
-      final existing = latestByKey[key];
-      if (existing == null || candidate.createdAt > existing.createdAt) {
-        latestByKey[key] = candidate;
-      }
-    }
-
-    final db = SocialDB.instance;
-
-    final List<Comment> fileComments = enableCommentNotifications
-        ? await db.getCommentsOnFilesSince(
-            excludeUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Comment>[];
-    for (final comment in fileComments) {
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.comment,
-          collectionID: comment.collectionID,
-          fileID: comment.fileID,
-          commentID: comment.id,
-          createdAt: comment.createdAt,
-          actorUserID: comment.userID,
-          actorAnonID: comment.anonUserID,
-        ),
-      );
-    }
-
-    final List<Comment> replies = enableReplyNotifications
-        ? await db.getRepliesToUserCommentsSince(
-            targetUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Comment>[];
-    final List<Reaction> photoLikes = enableLikeNotifications
-        ? await db.getReactionsOnFilesSince(
-            excludeUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Reaction>[];
-
-    final repliesNeedingOwnerCheck = <Comment>[];
-    final fileIDsNeedingOwnership = <int>{};
-
-    for (final reply in replies) {
-      if (reply.parentCommentUserID == userID) {
-        considerCandidate(
-          _SocialActivityCandidate(
-            type: FeedItemType.reply,
-            collectionID: reply.collectionID,
-            fileID: reply.fileID,
-            commentID: reply.id,
-            createdAt: reply.createdAt,
-            actorUserID: reply.userID,
-            actorAnonID: reply.anonUserID,
-          ),
-        );
-      } else if (reply.fileID != null) {
-        repliesNeedingOwnerCheck.add(reply);
-        fileIDsNeedingOwnership.add(reply.fileID!);
-      }
-    }
-
-    for (final reaction in photoLikes) {
-      if (reaction.fileID != null) {
-        fileIDsNeedingOwnership.add(reaction.fileID!);
-      }
-    }
-
-    final filesByID =
-        await _db.getFileIDToFileFromIDs(fileIDsNeedingOwnership.toList());
-
-    bool isOwnedByUser(int? fileID) {
-      if (fileID == null) {
-        return false;
-      }
-      final file = filesByID[fileID];
-      return file != null && file.ownerID == userID;
-    }
-
-    for (final reaction in photoLikes) {
-      if (!isOwnedByUser(reaction.fileID)) {
-        continue;
-      }
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.photoLike,
-          collectionID: reaction.collectionID,
-          fileID: reaction.fileID,
-          createdAt: reaction.createdAt,
-          actorUserID: reaction.userID,
-          actorAnonID: reaction.anonUserID,
-        ),
-      );
-    }
-
-    for (final reply in repliesNeedingOwnerCheck) {
-      if (!isOwnedByUser(reply.fileID)) {
-        continue;
-      }
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.reply,
-          collectionID: reply.collectionID,
-          fileID: reply.fileID,
-          commentID: reply.id,
-          createdAt: reply.createdAt,
-          actorUserID: reply.userID,
-          actorAnonID: reply.anonUserID,
-        ),
-      );
-    }
-
-    if (latestByKey.isEmpty) {
-      return;
-    }
-
-    final candidates = latestByKey.values.toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final s = await LanguageService.locals;
-
-    for (final candidate in candidates) {
-      final fileID = candidate.fileID;
-      if (fileID == null) {
-        continue;
-      }
-      try {
-        final title = await _getSocialNotificationTitle(candidate);
-        await _showNotificationSafely(
-          title: title,
-          message: _getSocialNotificationBody(candidate.type, s),
-          channelID: "social_activity",
-          channelName: "Ente Feed",
-          payload: _buildSocialNotificationPayload(candidate),
-          id: _buildSocialNotificationId(
-            candidate.collectionID,
-            fileID,
-            _notificationGroupForType(candidate.type),
-          ),
-          context:
-              'social type=${candidate.type.name} collection=${candidate.collectionID} file=$fileID',
-        );
-      } catch (e, stackTrace) {
-        _logger.severe(
-          "Failed to prepare social notification",
-          e,
-          stackTrace,
-        );
-      }
-    }
-    await _prefs.setInt(
-      kLastSocialActivityNotificationTime,
-      candidates.first.createdAt,
-    );
-  }
-
-  bool _shouldShowSocialNotifications() {
-    return isFirstRemoteSyncDone() &&
-        (NotificationService.instance.shouldShowCommentNotifications() ||
-            NotificationService.instance.shouldShowLikeNotifications() ||
-            NotificationService.instance.shouldShowReplyNotifications());
-  }
-
-  bool _isSocialNotificationEnabledForType(FeedItemType type) {
-    switch (type) {
-      case FeedItemType.comment:
-        return NotificationService.instance.shouldShowCommentNotifications();
-      case FeedItemType.reply:
-        return NotificationService.instance.shouldShowReplyNotifications();
-      case FeedItemType.photoLike:
-        return NotificationService.instance.shouldShowLikeNotifications();
-      case FeedItemType.commentLike:
-      case FeedItemType.replyLike:
-        return false; // Currently not notifying for comment/reply likes
-    }
-  }
-
-  _SocialNotificationGroup _notificationGroupForType(FeedItemType type) {
-    switch (type) {
-      case FeedItemType.comment:
-      case FeedItemType.reply:
-        return _SocialNotificationGroup.comment;
-      case FeedItemType.photoLike:
-      case FeedItemType.commentLike:
-      case FeedItemType.replyLike:
-        return _SocialNotificationGroup.like;
-    }
-  }
-
-  int _buildSocialNotificationId(
-    int collectionID,
-    int fileID,
-    _SocialNotificationGroup group,
-  ) {
-    const int base = 0x10000000;
-    int hash = collectionID & 0x7fffffff;
-    hash = ((hash * 31) ^ fileID) & 0x7fffffff;
-    hash = ((hash * 31) ^ (group == _SocialNotificationGroup.comment ? 1 : 0)) &
-        0x7fffffff;
-    return base | (hash & 0x0fffffff);
-  }
-
-  Future<String> _getSocialNotificationTitle(
-    _SocialActivityCandidate candidate,
-  ) async {
-    final userID = candidate.actorUserID;
-    final anonID = candidate.actorAnonID;
-    if (userID <= 0 && anonID != null) {
-      return SocialDataProvider.instance.getAnonDisplayName(
-        anonID,
-        candidate.collectionID,
-        fallback: anonID,
-      );
-    }
-    final user =
-        _collectionsService.getFileOwner(userID, candidate.collectionID);
-    return user.nameOrEmail;
-  }
-
-  String _getSocialNotificationBody(
-    FeedItemType type,
-    AppLocalizations s,
-  ) {
-    return _getSocialNotificationDetail(type, s);
-  }
-
-  String _getSocialNotificationDetail(
-    FeedItemType type,
-    AppLocalizations s,
-  ) {
-    switch (type) {
-      case FeedItemType.photoLike:
-        return s.likedYourPhoto;
-      case FeedItemType.comment:
-        return s.commentedOnYourPhoto;
-      case FeedItemType.reply:
-        return s.repliedToYourComment;
-      case FeedItemType.commentLike:
-        return s.likedYourComment;
-      case FeedItemType.replyLike:
-        return s.likedYourReply;
-    }
-  }
-
-  String _buildSocialNotificationPayload(_SocialActivityCandidate candidate) {
-    final params = <String, String>{
-      'type': candidate.type.name,
-      'collectionID': candidate.collectionID.toString(),
-    };
-    if (candidate.fileID != null) {
-      params['fileID'] = candidate.fileID.toString();
-    }
-    if (candidate.commentID != null) {
-      params['commentID'] = candidate.commentID!;
-    }
-    return Uri(
-      scheme: 'ente',
-      host: 'feed',
-      queryParameters: params,
-    ).toString();
-  }
-}
-
-class _SocialActivityCandidate {
-  final FeedItemType type;
-  final int collectionID;
-  final int? fileID;
-  final String? commentID;
-  final int createdAt;
-  final int actorUserID;
-  final String? actorAnonID;
-
-  _SocialActivityCandidate({
-    required this.type,
-    required this.collectionID,
-    required this.createdAt,
-    required this.actorUserID,
-    this.fileID,
-    this.commentID,
-    this.actorAnonID,
-  });
-}
-
-enum _SocialNotificationGroup {
-  comment,
-  like,
 }
