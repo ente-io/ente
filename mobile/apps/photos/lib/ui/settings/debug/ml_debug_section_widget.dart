@@ -769,7 +769,11 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               MLService.instance.debugIndexingDisabled = false;
-              unawaited(MLService.instance.fetchAndIndexAllImages());
+              unawaited(
+                MLService.instance.fetchAndIndexAllImages(
+                  mode: isOfflineMode ? MLMode.offline : MLMode.online,
+                ),
+              );
             } catch (e, s) {
               logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
