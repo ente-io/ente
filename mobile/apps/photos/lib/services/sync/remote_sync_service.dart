@@ -1248,8 +1248,7 @@ class RemoteSyncService {
   bool _shouldShowSocialNotifications() {
     return NotificationService.instance
             .shouldShowNotificationsForSharedPhotos() &&
-        isFirstRemoteSyncDone() &&
-        !AppLifecycleService.instance.isForeground;
+        isFirstRemoteSyncDone();
   }
 
   _SocialNotificationGroup _notificationGroupForType(FeedItemType type) {
