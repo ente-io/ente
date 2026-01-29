@@ -1086,7 +1086,7 @@ class RemoteSyncService {
         id: id,
       );
     } catch (e, stackTrace) {
-      _logger.warning(
+      _logger.severe(
         "Failed to show notification ($context)",
         e,
         stackTrace,
@@ -1101,7 +1101,7 @@ class RemoteSyncService {
       await SocialSyncService.instance.syncAllSharedCollections();
       await _notifyNewSocialActivity();
     } catch (e) {
-      _logger.warning("Social sync failed, continuing", e);
+      _logger.severe("Social sync failed, continuing", e);
     }
   }
 
@@ -1279,7 +1279,7 @@ class RemoteSyncService {
               'social type=${candidate.type.name} collection=${candidate.collectionID} file=$fileID',
         );
       } catch (e, stackTrace) {
-        _logger.warning(
+        _logger.severe(
           "Failed to prepare social notification",
           e,
           stackTrace,
