@@ -19,6 +19,7 @@ import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/ml_util.dart";
 
 class MLDebugSettingsPage extends StatefulWidget {
   const MLDebugSettingsPage({super.key});
@@ -586,7 +587,11 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
   Future<void> _onTriggerRunIndexing(BuildContext context) async {
     try {
       MLService.instance.debugIndexingDisabled = false;
-      unawaited(MLService.instance.fetchAndIndexAllImages());
+      unawaited(
+        MLService.instance.fetchAndIndexAllImages(
+          mode: isOfflineMode ? MLMode.offline : MLMode.online,
+        ),
+      );
       showShortToast(context, "Indexing started");
     } catch (e, s) {
       logger.warning('indexing failed ', e, s);
