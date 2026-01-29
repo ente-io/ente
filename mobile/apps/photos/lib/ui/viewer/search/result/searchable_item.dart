@@ -33,9 +33,10 @@ class SearchableItemWidget extends StatelessWidget {
     final heroTagPrefix = additionalPrefix + searchResult.heroTag();
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    final bool isCluster = searchResult.type() == ResultType.faces &&
-        searchResult is GenericSearchResult &&
-        searchResult.params.containsKey(kClusterParamId);
+    final result = searchResult;
+    final bool isCluster = result.type() == ResultType.faces &&
+        result is GenericSearchResult &&
+        result.params.containsKey(kClusterParamId);
 
     return GestureDetector(
       onTap: () {
