@@ -293,7 +293,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const shouldShowMapButton =
         modePlus !== "search" &&
         activeCollectionSummary?.type === "all" &&
-        activeCollectionSummary.fileCount > 0;
+        (activeCollectionSummary.fileCount > 0 || files.length > 0);
 
     const handleShowMap = useCallback(async () => {
         if (!activeCollectionSummary) return;
