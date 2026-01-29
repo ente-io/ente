@@ -626,48 +626,6 @@ class SocialDB {
     return rows.map(_rowToComment).toList();
   }
 
-  /// Gets all reactions on top-level comments after [sinceTime], excluding the current user.
-  /// Returns reactions sorted by created_at DESC.
-  Future<List<Reaction>> getReactionsOnUserCommentsSince({
-    required int targetUserID,
-    required int sinceTime,
-  }) async {
-    final db = await database;
-    final rows = await db.rawQuery(
-      '''
-      SELECT r.*, c.file_id AS linked_file_id FROM $_reactionsTable r
-      INNER JOIN $_commentsTable c ON r.comment_id = c.id
-      WHERE r.comment_id IS NOT NULL AND r.is_deleted = 0 AND r.user_id != ?
-        AND r.created_at > ?
-        AND c.is_deleted = 0 AND c.parent_comment_id IS NULL
-      ORDER BY r.created_at DESC
-      ''',
-      [targetUserID, sinceTime],
-    );
-    return rows.map(_rowToReactionWithLinkedFileID).toList();
-  }
-
-  /// Gets all reactions on replies after [sinceTime], excluding the current user.
-  /// Returns reactions sorted by created_at DESC.
-  Future<List<Reaction>> getReactionsOnUserRepliesSince({
-    required int targetUserID,
-    required int sinceTime,
-  }) async {
-    final db = await database;
-    final rows = await db.rawQuery(
-      '''
-      SELECT r.*, c.file_id AS linked_file_id FROM $_reactionsTable r
-      INNER JOIN $_commentsTable c ON r.comment_id = c.id
-      WHERE r.comment_id IS NOT NULL AND r.is_deleted = 0 AND r.user_id != ?
-        AND r.created_at > ?
-        AND c.is_deleted = 0 AND c.parent_comment_id IS NOT NULL
-      ORDER BY r.created_at DESC
-      ''',
-      [targetUserID, sinceTime],
-    );
-    return rows.map(_rowToReactionWithLinkedFileID).toList();
-  }
-
   // ============ Cleanup Methods ============
 
   Future<void> deleteCollectionData(int collectionID) async {
@@ -774,17 +732,6 @@ class SocialDB {
       createdAt: row['created_at'] as int,
       updatedAt: row['updated_at'] as int,
     );
-  }
-
-  Reaction _rowToReactionWithLinkedFileID(Map<String, dynamic> row) {
-    final reaction = _rowToReaction(row);
-    final linkedFileID = row['linked_file_id'] as int?;
-    if (linkedFileID == null) {
-      return reaction;
-    }
-    return reaction.fileID == null
-        ? reaction.copyWith(fileID: linkedFileID)
-        : reaction;
   }
 
   Map<String, dynamic> _anonProfileToRow(AnonProfile profile) {
