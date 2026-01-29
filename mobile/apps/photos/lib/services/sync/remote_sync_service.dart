@@ -1119,21 +1119,6 @@ class RemoteSyncService {
 
     final db = SocialDB.instance;
 
-    final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
-      excludeUserID: userID,
-      sinceTime: cutoffTime,
-    );
-    for (final reaction in photoLikes) {
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.photoLike,
-          collectionID: reaction.collectionID,
-          fileID: reaction.fileID,
-          createdAt: reaction.createdAt,
-        ),
-      );
-    }
-
     final List<Comment> fileComments = await db.getCommentsOnFilesSince(
       excludeUserID: userID,
       sinceTime: cutoffTime,
@@ -1155,7 +1140,67 @@ class RemoteSyncService {
       targetUserID: userID,
       sinceTime: cutoffTime,
     );
+    final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
+
+    final repliesNeedingOwnerCheck = <Comment>[];
+    final fileIDsNeedingOwnership = <int>{};
+
     for (final reply in replies) {
+      if (reply.parentCommentUserID == userID) {
+        considerCandidate(
+          _SocialActivityCandidate(
+            type: FeedItemType.reply,
+            collectionID: reply.collectionID,
+            fileID: reply.fileID,
+            commentID: reply.id,
+            commentText: reply.data,
+            createdAt: reply.createdAt,
+          ),
+        );
+      } else if (reply.fileID != null) {
+        repliesNeedingOwnerCheck.add(reply);
+        fileIDsNeedingOwnership.add(reply.fileID!);
+      }
+    }
+
+    for (final reaction in photoLikes) {
+      if (reaction.fileID != null) {
+        fileIDsNeedingOwnership.add(reaction.fileID!);
+      }
+    }
+
+    final filesByID =
+        await _db.getFileIDToFileFromIDs(fileIDsNeedingOwnership.toList());
+
+    bool isOwnedByUser(int? fileID) {
+      if (fileID == null) {
+        return false;
+      }
+      final file = filesByID[fileID];
+      return file != null && file.ownerID == userID;
+    }
+
+    for (final reaction in photoLikes) {
+      if (!isOwnedByUser(reaction.fileID)) {
+        continue;
+      }
+      considerCandidate(
+        _SocialActivityCandidate(
+          type: FeedItemType.photoLike,
+          collectionID: reaction.collectionID,
+          fileID: reaction.fileID,
+          createdAt: reaction.createdAt,
+        ),
+      );
+    }
+
+    for (final reply in repliesNeedingOwnerCheck) {
+      if (!isOwnedByUser(reply.fileID)) {
+        continue;
+      }
       considerCandidate(
         _SocialActivityCandidate(
           type: FeedItemType.reply,
@@ -1164,39 +1209,6 @@ class RemoteSyncService {
           commentID: reply.id,
           commentText: reply.data,
           createdAt: reply.createdAt,
-        ),
-      );
-    }
-
-    final List<Reaction> commentLikes =
-        await db.getReactionsOnUserCommentsSince(
-      targetUserID: userID,
-      sinceTime: cutoffTime,
-    );
-    for (final reaction in commentLikes) {
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.commentLike,
-          collectionID: reaction.collectionID,
-          fileID: reaction.fileID,
-          commentID: reaction.commentID,
-          createdAt: reaction.createdAt,
-        ),
-      );
-    }
-
-    final List<Reaction> replyLikes = await db.getReactionsOnUserRepliesSince(
-      targetUserID: userID,
-      sinceTime: cutoffTime,
-    );
-    for (final reaction in replyLikes) {
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.replyLike,
-          collectionID: reaction.collectionID,
-          fileID: reaction.fileID,
-          commentID: reaction.commentID,
-          createdAt: reaction.createdAt,
         ),
       );
     }
