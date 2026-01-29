@@ -248,7 +248,7 @@
   "after1Month": "Po 1 měsíci",
   "after1Year": "Po 1 roce",
   "manageParticipants": "Spravovat",
-  "albumParticipantsCount": "{count, plural, one {} few {{count} účastníci} many {{count} účastníků}=0 {Žádní účastníci} =1 {1 účastník} other {{count} účastníků}}",
+  "albumParticipantsCount": "{count, plural, =0 {Žádní účastníci} =1 {1 účastník} few {{count} účastníci} many {{count} účastníků} other {{count} účastníků}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -863,11 +863,11 @@
   "share": "Sdílet",
   "unhideToAlbum": "Odkrýt do alba",
   "restoreToAlbum": "Obnovit do alba",
-  "moveItem": "{count, plural, one {} few {Přesunout položky} many {Přesunout položky}=1 {Přesunout položku} other {Přesunout položek}}",
+  "moveItem": "{count, plural, =1 {Přesunout položku} few {Přesunout položky} many {Přesunout položky} other {Přesunout položek}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {} few {Přidat položky} many {Přidat položky}=1 {Přidat položku} other {Přidat položek}}",
+  "addItem": "{count, plural, =1 {Přidat položku} few {Přidat položky} many {Přidat položky} other {Přidat položek}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -969,7 +969,7 @@
   "authToViewYourMemories": "Pro zobrazení svých vzpomínek se prosím ověřte",
   "unlock": "Odemknout",
   "freeUpSpace": "Uvolnit místo",
-  "freeUpSpaceSaving": "{count, plural, one {} few {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}} many {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}}=1 {Může být ze zařízení odstraněno aby se uvolnilo {formattedSize}} other {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Může být ze zařízení odstraněno aby se uvolnilo {formattedSize}} few {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}} many {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}} other {Mohou být odstraněny ze zařízení aby se uvolnilo {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 soubor v tomto albu byl bezpečně zálohován} few {{formattedNumber} soubory v tomto albu byly bezpečně zálohovány} other {{formattedNumber} souborů v tomto albu bylo bezpečně zálohováno}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1347,8 +1347,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Rychlé vyhledávání osob podle jména",
-  "addViewers": "{count, plural, one {} few {Přidat diváky} many {Přidat diváků}=0 {Přidat diváků} =1 {Přidat diváka} other {Přidat diváků}}",
-  "addCollaborators": "{count, plural, one {} few {Přidejte spolupracovníky} many {Přidejte spolupracovníky}=0 {Přidejte spolupracovníka} =1 {Přidejte spolupracovníka} other {Přidejte spolupracovníků}}",
+  "addViewers": "{count, plural, =0 {Přidat diváků} =1 {Přidat diváka} few {Přidat diváky} many {Přidat diváků} other {Přidat diváků}}",
+  "addCollaborators": "{count, plural, =0 {Přidejte spolupracovníka} =1 {Přidejte spolupracovníka} few {Přidejte spolupracovníky} many {Přidejte spolupracovníky} other {Přidejte spolupracovníků}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Dlouhým stisknutím e-mailu ověříte koncové šifrování.",
   "developerSettingsWarning": "Opravdu chcete změnit nastavení pro vývojáře?",
   "developerSettings": "Nastavení pro vývojáře",
@@ -1477,7 +1477,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, one {} few {Přidány {count} soubory k osobě {personName}} many {Přidáno {count} souborů k osobě {personName}}=1 {Přidán 1 soubor k osobě {personName}} other {Přidáno {count} souborů k osobě {personName}}}",
+  "addedFilesToPerson": "{count, plural, =1 {Přidán 1 soubor k osobě {personName}} few {Přidány {count} soubory k osobě {personName}} many {Přidáno {count} souborů k osobě {personName}} other {Přidáno {count} souborů k osobě {personName}}}",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1491,7 +1491,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, one {{count} soubor je již propojen s osobou {personName}} few {{count} soubory jsou již propojeny s osobou {personName}} many {{count} souborů je již propojeno s osobou{personName}}=1 {1 soubor je již propojen s osobou {personName}} other {{count} souborů je již propojeno s osobou {personName}}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {1 soubor je již propojen s osobou {personName}} few {{count} soubory jsou již propojeny s osobou {personName}} many {{count} souborů je již propojeno s osobou{personName}} other {{count} souborů je již propojeno s osobou {personName}}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1552,7 +1552,7 @@
     },
     "description": "Number of collaborators that were successfully added to an album."
   },
-  "adminsSuccessfullyAdded": "{count, plural, one {} few {{count} správci byli úspěšně přidáni} many {{count} správci byli úspěšně přidáni}=0 {Žádní správci nebyli přidáni} =1 {1 správce byl úspěšně přidán} other {{count} správců bylo úspěšně přidáno}}",
+  "adminsSuccessfullyAdded": "{count, plural, =0 {Žádní správci nebyli přidáni} =1 {1 správce byl úspěšně přidán} few {{count} správci byli úspěšně přidáni} many {{count} správci byli úspěšně přidáni} other {{count} správců bylo úspěšně přidáno}}",
   "@adminsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1562,7 +1562,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, one {} few {Přidat správce} many {Přidat správce}=0 {Přidat správce} =1 {Přidat správce} other {Přidat správce}}",
+  "addAdmins": "{count, plural, =0 {Přidat správce} =1 {Přidat správce} few {Přidat správce} many {Přidat správce} other {Přidat správce}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -2359,7 +2359,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, one {} few {{count} se líbí} many {{count} se líbí}=1{1 se líbí} other{{count} se líbí}}",
+  "likesCount": "{count, plural, =1{1 se líbí} few {{count} se líbí} many {{count} se líbí} other{{count} se líbí}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2380,7 +2380,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, one {} few {Nepodařilo se líbit {count} alba} many {Nepodařilo se líbit {count} alba}=1{Nepodařilo se líbit 1 album} other{Nepodařilo se líbit {count} alb}}",
+  "failedToLikeAlbums": "{count, plural, =1{Nepodařilo se líbit 1 album} few {Nepodařilo se líbit {count} alba} many {Nepodařilo se líbit {count} alba} other{Nepodařilo se líbit {count} alb}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -2393,7 +2393,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, one {} few {{count} alba} many {{count} alba}=1{1 album} other{{count} alb}}",
+  "albumsCount": "{count, plural, =1{1 album} few {{count} alba} many {{count} alba} other{{count} alb}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -2439,7 +2439,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, one {} few {{count} komentáře} many {{count} komentáře}=0{Žádné komentáře} =1{1 komentář} other{{count} komentářů}}",
+  "commentsCount": "{count, plural, =0{Žádné komentáře} =1{1 komentář} few {{count} komentáře} many {{count} komentáře} other{{count} komentářů}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {
