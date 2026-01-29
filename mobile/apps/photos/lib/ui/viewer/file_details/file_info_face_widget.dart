@@ -5,11 +5,13 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/base/id.dart";
-import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
@@ -72,7 +74,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
               onTap: isEditMode
                   ? hasPerson
                       ? _onMinusIconTap
-                      : _onPlusIconTap
+                      : (isOfflineMode ? null : _onPlusIconTap)
                   : _routeToPersonOrClusterPage,
               child: Container(
                 height: thumbnailWidth,
@@ -159,8 +161,9 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   }
 
   Future<void> _routeToPersonOrClusterPage() async {
-    final mlDataDB = MLDataDB.instance;
-    if (widget.person != null) {
+    final mlDataDB =
+        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+    if (!isOfflineMode && widget.person != null) {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => PeoplePage(
@@ -171,26 +174,58 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       );
       return;
     }
-    final String? clusterID = widget.clusterID ??
-        await mlDataDB.getClusterIDForFaceID(widget.face.faceID);
+    final String? clusterID =
+        widget.clusterID ?? await mlDataDB.getClusterIDForFaceID(
+          widget.face.faceID,
+        );
     if (clusterID != null) {
       final fileIdsToClusterIds = await mlDataDB.getFileIdToClusterIds();
       final files = await SearchService.instance.getAllFilesForSearch();
-      final clusterFiles = files
-          .where(
-            (file) =>
-                fileIdsToClusterIds[file.uploadedFileID]?.contains(clusterID) ??
-                false,
-          )
-          .toList();
+      List<EnteFile> clusterFiles;
+      if (isOfflineMode) {
+        final localIntIds = fileIdsToClusterIds.keys.toSet();
+        final localIdMap =
+            await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in files) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
+          }
+        }
+        clusterFiles = [];
+        for (final entry in fileIdsToClusterIds.entries) {
+          if (!entry.value.contains(clusterID)) continue;
+          final localId = localIdMap[entry.key];
+          if (localId == null) continue;
+          final file = localIdToFile[localId];
+          if (file != null) {
+            clusterFiles.add(file);
+          }
+        }
+      } else {
+        clusterFiles = files
+            .where(
+              (file) =>
+                  fileIdsToClusterIds[file.uploadedFileID]?.contains(
+                        clusterID,
+                      ) ??
+                  false,
+            )
+            .toList();
+      }
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ClusterPage(
             clusterFiles,
             clusterID: clusterID,
+            showNamingBanner: !isOfflineMode,
           ),
         ),
       );
+      return;
+    }
+    if (isOfflineMode) {
       return;
     }
     if (widget.face.score <= kMinimumQualityFaceScore) {
