@@ -1,0 +1,115 @@
+package public
+
+import (
+	"context"
+
+	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/controller"
+	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente-io/stacktrace"
+	"github.com/gin-gonic/gin"
+)
+
+// MemoryShareController handles public memory share operations
+type MemoryShareController struct {
+	Repo           *repo.MemoryShareRepository
+	FileRepo       *repo.FileRepository
+	FileController *controller.FileController
+}
+
+// NewMemoryShareController creates a new public memory share controller
+func NewMemoryShareController(
+	repo *repo.MemoryShareRepository,
+	fileRepo *repo.FileRepository,
+	fileController *controller.FileController,
+) *MemoryShareController {
+	return &MemoryShareController{
+		Repo:           repo,
+		FileRepo:       fileRepo,
+		FileController: fileController,
+	}
+}
+
+// GetPublicMemoryShare retrieves a public memory share by access token
+func (c *MemoryShareController) GetPublicMemoryShare(ctx context.Context, accessToken string) (*ente.MemoryShare, error) {
+	share, err := c.Repo.GetByAccessToken(ctx, accessToken)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get memory share")
+	}
+	if share.IsDeleted {
+		return nil, stacktrace.Propagate(ente.ErrNotFound, "memory share is deleted")
+	}
+	return share, nil
+}
+
+// GetPublicFiles retrieves all files in a public memory share
+func (c *MemoryShareController) GetPublicFiles(ctx context.Context, shareID int64) (*ente.PublicMemoryShareFilesResponse, error) {
+	// Get memory share files
+	shareFiles, err := c.Repo.GetFiles(ctx, shareID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get memory share files")
+	}
+
+	if len(shareFiles) == 0 {
+		return &ente.PublicMemoryShareFilesResponse{Files: []ente.PublicMemoryShareFile{}}, nil
+	}
+
+	// Get file details from the files table
+	// Note: We need to get files from different owners potentially
+	publicFiles := make([]ente.PublicMemoryShareFile, 0, len(shareFiles))
+
+	for _, sf := range shareFiles {
+		file, err := c.FileRepo.GetFileAttributes(sf.FileID)
+		if err != nil {
+			// File might have been deleted, skip it
+			continue
+		}
+
+		// Check if file is deleted (metadata marker)
+		if file.Metadata.EncryptedData == "-" {
+			continue
+		}
+
+		// Strip private metadata for public access
+		file.MagicMetadata = nil
+
+		// Build public file response with re-encrypted key
+		publicFile := ente.PublicMemoryShareFile{
+			File:               *file,
+			EncryptedKey:       sf.EncryptedKey,
+			KeyDecryptionNonce: sf.KeyDecryptionNonce,
+		}
+		publicFiles = append(publicFiles, publicFile)
+	}
+
+	return &ente.PublicMemoryShareFilesResponse{Files: publicFiles}, nil
+}
+
+// GetPublicFileURL returns a signed URL for accessing a file in a public memory share
+func (c *MemoryShareController) GetPublicFileURL(ctx *gin.Context, shareID int64, fileID int64, objType ente.ObjectType) (string, error) {
+	// Verify file exists in the memory share
+	exists, _, err := c.Repo.FileExistsInShare(ctx, shareID, fileID)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to check file existence")
+	}
+	if !exists {
+		return "", stacktrace.Propagate(ente.ErrNotFound, "file not found in memory share")
+	}
+
+	// Ensure file is still available (not deleted/placeholder)
+	file, err := c.FileRepo.GetFileAttributes(fileID)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to fetch file attributes")
+	}
+	if file.Metadata.EncryptedData == "-" {
+		return "", stacktrace.Propagate(ente.ErrNotFound, "file not available")
+	}
+
+	// Get signed URL for the file
+	// The FileController.GetSignedURLForPublicFile method handles getting the URL from object storage
+	url, err := c.FileController.GetSignedURLForPublicFile(ctx, fileID, objType)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to get signed URL")
+	}
+	return url, nil
+}
