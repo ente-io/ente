@@ -1062,9 +1062,6 @@ class RemoteSyncService {
 
   /// Syncs social data and triggers notifications if needed.
   Future<void> _socialSync() async {
-    if (isProcessBg) {
-      return;
-    }
     try {
       _logger.info("Starting social sync");
       await SocialSyncService.instance.syncAllSharedCollections();
@@ -1200,7 +1197,7 @@ class RemoteSyncService {
       title,
       message,
       channelID: "social_activity",
-      channelName: "Activity",
+      channelName: "EnteFeed",
       payload: "ente://feed",
     );
     await _prefs.setInt(

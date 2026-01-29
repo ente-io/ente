@@ -234,7 +234,10 @@ export const RowButton: React.FC<RowButtonProps> = ({
                 disabled && { color: "text.muted" },
             ]}
         >
-            <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
+            <Stack
+                direction="row"
+                sx={{ py: "14px", gap: "10px", alignItems: "center" }}
+            >
                 {startIcon && startIcon}
                 <Box sx={{ px: "2px" }}>
                     {typeof label != "string" ? (

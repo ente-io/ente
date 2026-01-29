@@ -12,6 +12,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -19,6 +20,7 @@ import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -30,6 +32,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
+import 'package:photos/models/search/device_album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
@@ -195,6 +198,9 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
+    if (isOfflineMode) {
+      return <AlbumSearchResult>[];
+    }
     final List<Collection> collections = _collectionService.getCollectionsForUI(
       includedShared: true,
     );
@@ -224,6 +230,9 @@ class SearchService {
     int? limit,
   ) async {
     try {
+      if (isOfflineMode) {
+        return <AlbumSearchResult>[];
+      }
       final List<Collection> collections =
           _collectionService.getCollectionsForUI(
         includedShared: true,
@@ -246,6 +255,34 @@ class SearchService {
       return collectionSearchResults;
     } catch (e) {
       _logger.severe("error gettin allCollectionSearchResults", e);
+      return [];
+    }
+  }
+
+  Future<List<DeviceAlbumSearchResult>> getDeviceCollectionSearchResults(
+    String query,
+  ) async {
+    try {
+      final List<DeviceCollection> deviceCollections =
+          await FilesDB.instance.getDeviceCollections(
+        includeCoverThumbnail: true,
+      );
+
+      final List<DeviceAlbumSearchResult> results = [];
+
+      for (var dc in deviceCollections) {
+        if (results.length >= _maximumResultsLimit) {
+          break;
+        }
+
+        if (dc.name.toLowerCase().contains(query.toLowerCase())) {
+          results.add(DeviceAlbumSearchResult(dc));
+        }
+      }
+
+      return results;
+    } catch (e) {
+      _logger.severe("error getting deviceCollectionSearchResults", e);
       return [];
     }
   }
@@ -1443,6 +1480,9 @@ class SearchService {
   Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
+    if (isOfflineMode) {
+      return <GenericSearchResult>[];
+    }
     final int ownerID = Configuration.instance.getUserID()!;
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];

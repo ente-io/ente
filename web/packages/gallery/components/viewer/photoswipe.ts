@@ -1543,9 +1543,17 @@ export class FileViewerPhotoSwipe {
 
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
-                        const captionText = truncateCaptionIfNeeded(alt);
-                        captionEl.querySelector("p")!.innerText =
-                            captionText ?? "";
+                        const { text: captionText, wasTruncated } =
+                            truncateCaptionIfNeeded(alt);
+                        const captionP = captionEl.querySelector("p")!;
+                        captionP.innerText = captionText ?? "";
+                        if (wasTruncated) {
+                            const moreLink = document.createElement("span");
+                            moreLink.className = "pswp__caption-more";
+                            moreLink.textContent = "More";
+                            moreLink.addEventListener("click", handleViewInfo);
+                            captionP.appendChild(moreLink);
+                        }
                         captionEl.style.display = captionText
                             ? "block"
                             : "none";
@@ -2086,12 +2094,17 @@ const bottomRightControlsHTML = () => `
 
 /**
  * Truncate caption text to 154 characters.
+ *
+ * @returns An object with the (possibly truncated) text and a flag indicating
+ * whether or not the text was truncated.
  */
-const truncateCaptionIfNeeded = (text: string | undefined) => {
-    if (!text) return text;
+const truncateCaptionIfNeeded = (
+    text: string | undefined,
+): { text: string | undefined; wasTruncated: boolean } => {
+    if (!text) return { text, wasTruncated: false };
     const maxLength = 154;
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + "…";
+    if (text.length <= maxLength) return { text, wasTruncated: false };
+    return { text: text.slice(0, maxLength) + "… ", wasTruncated: true };
 };
 
 const createElementFromHTMLString = (htmlString: string) => {

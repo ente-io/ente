@@ -1886,6 +1886,9 @@ class SmartMemoriesService {
   }
 
   Future<Set<int>> getCollectionIDsToExclude() async {
+    if (isOfflineMode) {
+      return <int>{};
+    }
     final collections = CollectionsService.instance.getCollectionsForUI();
 
     // Names of collections to exclude

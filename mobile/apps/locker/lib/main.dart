@@ -100,7 +100,8 @@ Future<void> _initSystemTray() async {
 
 Future<void> _runInForeground() async {
   AppThemeConfig.initialize(EnteApp.locker);
-  final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
+  final adaptiveThemeMode = await AdaptiveTheme.getThemeMode();
+  final savedThemeMode = _themeMode(adaptiveThemeMode);
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     try {
@@ -112,7 +113,8 @@ Future<void> _runInForeground() async {
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
-        builder: (args) => App(locale: locale),
+        builder: (args) =>
+            App(locale: locale, savedThemeMode: adaptiveThemeMode),
         lockScreen: LockScreen(Configuration.instance),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,

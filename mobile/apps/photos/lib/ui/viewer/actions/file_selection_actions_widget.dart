@@ -251,7 +251,7 @@ class _FileSelectionActionsWidgetState
 
       final showUploadIcon = widget.type == GalleryType.localFolder &&
           split.ownedByCurrentUser.isEmpty;
-      if (widget.type.showAddToAlbum()) {
+      if (widget.type.showAddToAlbum() && !isOfflineMode) {
         if (showUploadIcon) {
           items.add(
             SelectionActionButton(
