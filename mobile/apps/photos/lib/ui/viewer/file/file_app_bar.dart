@@ -68,6 +68,8 @@ class FileAppBarState extends State<FileAppBar> {
   bool isGuestView = false;
   bool shouldLoopVideo = localSettings.shouldLoopVideo();
   bool _reloadActions = false;
+  bool _isMenuOpen = false;
+  bool _pendingActionsReload = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -100,19 +102,11 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   void _onSharedCollectionChanged() {
-    if (mounted) {
-      setState(() {
-        _reloadActions = true;
-      });
-    }
+    _requestActionsReload();
   }
 
   void _onThumbnailFallbackChanged() {
-    if (mounted) {
-      setState(() {
-        _reloadActions = true;
-      });
-    }
+    _requestActionsReload();
   }
 
   @override
@@ -193,6 +187,33 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       ),
     );
+  }
+
+  void _requestActionsReload() {
+    if (_isMenuOpen) {
+      _pendingActionsReload = true;
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _reloadActions = true;
+        _pendingActionsReload = false;
+      });
+    }
+  }
+
+  void _handleMenuOpened() {
+    _isMenuOpen = true;
+  }
+
+  void _handleMenuClosed() {
+    _isMenuOpen = false;
+    if (_pendingActionsReload && mounted) {
+      setState(() {
+        _reloadActions = true;
+        _pendingActionsReload = false;
+      });
+    }
   }
 
   List<Widget> _getActions() {
@@ -473,10 +494,13 @@ class FileAppBarState extends State<FileAppBar> {
       _actions.add(
         PopupMenuButton(
           tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+          onOpened: _handleMenuOpened,
           itemBuilder: (context) {
             return items;
           },
+          onCanceled: _handleMenuClosed,
           onSelected: (dynamic value) async {
+            _handleMenuClosed();
             if (value == 1) {
               await _download(widget.file);
             } else if (value == 2) {
