@@ -18,6 +18,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/extensions/user_extension.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/main.dart' show isProcessBg;
 import 'package:photos/models/device_collection.dart';
@@ -27,6 +28,7 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/social/comment.dart';
 import 'package:photos/models/social/feed_item.dart';
 import 'package:photos/models/social/reaction.dart';
+import 'package:photos/models/social/social_data_provider.dart';
 import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -1127,8 +1129,9 @@ class RemoteSyncService {
           collectionID: comment.collectionID,
           fileID: comment.fileID,
           commentID: comment.id,
-          commentText: comment.data,
           createdAt: comment.createdAt,
+          actorUserID: comment.userID,
+          actorAnonID: comment.anonUserID,
         ),
       );
     }
@@ -1153,8 +1156,9 @@ class RemoteSyncService {
             collectionID: reply.collectionID,
             fileID: reply.fileID,
             commentID: reply.id,
-            commentText: reply.data,
             createdAt: reply.createdAt,
+            actorUserID: reply.userID,
+            actorAnonID: reply.anonUserID,
           ),
         );
       } else if (reply.fileID != null) {
@@ -1190,6 +1194,8 @@ class RemoteSyncService {
           collectionID: reaction.collectionID,
           fileID: reaction.fileID,
           createdAt: reaction.createdAt,
+          actorUserID: reaction.userID,
+          actorAnonID: reaction.anonUserID,
         ),
       );
     }
@@ -1204,8 +1210,9 @@ class RemoteSyncService {
           collectionID: reply.collectionID,
           fileID: reply.fileID,
           commentID: reply.id,
-          commentText: reply.data,
           createdAt: reply.createdAt,
+          actorUserID: reply.userID,
+          actorAnonID: reply.anonUserID,
         ),
       );
     }
@@ -1223,9 +1230,10 @@ class RemoteSyncService {
       if (fileID == null) {
         continue;
       }
+      final title = await _getSocialNotificationTitle(candidate);
       await NotificationService.instance.showNotification(
-        _getSocialNotificationTitle(candidate.type, s),
-        _getSocialNotificationBody(candidate, s),
+        title,
+        _getSocialNotificationBody(candidate.type, s),
         channelID: "social_activity",
         channelName: "Activity",
         payload: _buildSocialNotificationPayload(candidate),
@@ -1273,30 +1281,28 @@ class RemoteSyncService {
     return base | (hash & 0x0fffffff);
   }
 
-  String _getSocialNotificationTitle(FeedItemType type, AppLocalizations s) {
-    switch (type) {
-      case FeedItemType.comment:
-      case FeedItemType.reply:
-        return s.newCommentNotificationTitle;
-      case FeedItemType.photoLike:
-      case FeedItemType.commentLike:
-      case FeedItemType.replyLike:
-        return s.newLikeNotificationTitle;
+  Future<String> _getSocialNotificationTitle(
+    _SocialActivityCandidate candidate,
+  ) async {
+    final userID = candidate.actorUserID;
+    final anonID = candidate.actorAnonID;
+    if (userID <= 0 && anonID != null) {
+      return SocialDataProvider.instance.getAnonDisplayName(
+        anonID,
+        candidate.collectionID,
+        fallback: anonID,
+      );
     }
+    final user =
+        _collectionsService.getFileOwner(userID, candidate.collectionID);
+    return user.nameOrEmail;
   }
 
   String _getSocialNotificationBody(
-    _SocialActivityCandidate candidate,
+    FeedItemType type,
     AppLocalizations s,
   ) {
-    if (candidate.type == FeedItemType.comment ||
-        candidate.type == FeedItemType.reply) {
-      final snippet = _sanitizeCommentSnippet(candidate.commentText ?? "");
-      if (snippet.isNotEmpty) {
-        return snippet;
-      }
-    }
-    return _getSocialNotificationDetail(candidate.type, s);
+    return _getSocialNotificationDetail(type, s);
   }
 
   String _getSocialNotificationDetail(
@@ -1334,18 +1340,6 @@ class RemoteSyncService {
       queryParameters: params,
     ).toString();
   }
-
-  String _sanitizeCommentSnippet(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return '';
-    final collapsed = trimmed.replaceAll(RegExp(r'\s+'), ' ');
-    const maxLength = 140;
-    if (collapsed.length <= maxLength) {
-      return collapsed;
-    }
-    final truncated = collapsed.substring(0, maxLength - 3).trimRight();
-    return '$truncated...';
-  }
 }
 
 class _SocialActivityCandidate {
@@ -1353,16 +1347,18 @@ class _SocialActivityCandidate {
   final int collectionID;
   final int? fileID;
   final String? commentID;
-  final String? commentText;
   final int createdAt;
+  final int actorUserID;
+  final String? actorAnonID;
 
   _SocialActivityCandidate({
     required this.type,
     required this.collectionID,
     required this.createdAt,
+    required this.actorUserID,
     this.fileID,
     this.commentID,
-    this.commentText,
+    this.actorAnonID,
   });
 }
 
