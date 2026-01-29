@@ -2529,14 +2529,5 @@
   "deleteHiddenFilesFromDevice": "Delete hidden files from device",
   "deleteHiddenFilesFromDeviceDescription": "Delete local copies of hidden files from your device",
   "deleteOnDeviceFiles": "Delete on device files",
-  "noHiddenFilesOnDevice": "No hidden files on device",
-  "deleteSelectedFromDevice": "Delete selected from device",
-  "deleteFromDeviceConfirmation": "Are you sure you want to delete {count, plural, =1{1 file} other{{count} files}} from your device? The files will remain safe in the cloud.",
-  "@deleteFromDeviceConfirmation": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  }
+  "noHiddenFilesOnDevice": "No hidden files on device"
 }

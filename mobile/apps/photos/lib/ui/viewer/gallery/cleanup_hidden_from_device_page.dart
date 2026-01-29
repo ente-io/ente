@@ -173,8 +173,8 @@ class _CleanupHiddenFromDevicePageState
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: l10n.deleteAll,
-          buttonType: ButtonType.critical,
+          labelText: l10n.deleteFromDevice,
+          buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
@@ -200,8 +200,7 @@ class _CleanupHiddenFromDevicePageState
           isInAlert: true,
         ),
       ],
-      title: l10n.deleteFromDevice,
-      body: l10n.deleteFromDeviceConfirmation(count: allFiles.length),
+      body: l10n.theseItemsWillBeDeletedFromYourDevice,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
 

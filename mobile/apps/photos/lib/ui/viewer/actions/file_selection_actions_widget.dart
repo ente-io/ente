@@ -1056,15 +1056,14 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _deleteSelectedFromDevice() async {
     final filesToDelete = widget.selectedFiles.files.toList();
-    final count = filesToDelete.length;
     final l10n = AppLocalizations.of(context);
 
     final actionResult = await showActionSheet(
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: l10n.deleteSelectedFromDevice,
-          buttonType: ButtonType.critical,
+          labelText: l10n.deleteFromDevice,
+          buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
@@ -1090,8 +1089,7 @@ class _FileSelectionActionsWidgetState
           isInAlert: true,
         ),
       ],
-      title: l10n.deleteFromDevice,
-      body: l10n.deleteFromDeviceConfirmation(count: count),
+      body: l10n.theseItemsWillBeDeletedFromYourDevice,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
 
