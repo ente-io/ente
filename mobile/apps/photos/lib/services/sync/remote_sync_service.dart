@@ -140,7 +140,11 @@ class RemoteSyncService {
       await _collectionsService.movePendingRemovalActionsToUncategorized();
 
       // Sync social data immediately after diff sync, before uploads
-      _socialSync().ignore();
+      if (AppLifecycleService.instance.isForeground) {
+        _socialSync().ignore();
+      } else {
+        await _socialSync();
+      }
 
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
