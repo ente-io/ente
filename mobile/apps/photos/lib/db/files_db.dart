@@ -1694,7 +1694,6 @@ class FilesDB with SqlDbBase {
   }
 
   /// Returns only uploaded file IDs from given collections.
-  /// Used for checking if hidden files exist in non-hidden collections.
   /// If [ownerID] is provided, only returns files owned by that user.
   Future<List<int>> getUploadedFileIDsInCollections(
     Set<int> collectionIds, {
@@ -1913,8 +1912,7 @@ class FilesDB with SqlDbBase {
   /// Returns hidden files that have local copies on the device.
   /// Only returns files owned by [ownerID] from the specified
   /// [hiddenCollectionIds].
-  /// Results are deduplicated by uploadedFileID to avoid showing the same
-  /// file multiple times if it exists in multiple hidden collections.
+  /// Results are deduplicated by uploadedFileID
   Future<List<EnteFile>> getHiddenFilesWithLocalCopy(
     Set<int> hiddenCollectionIds,
     int ownerID,
@@ -1940,7 +1938,6 @@ class FilesDB with SqlDbBase {
   }
 
   /// Returns true if there are any hidden files with local copies on the device.
-  /// More efficient than loading all files when only checking for existence.
   Future<bool> hasHiddenFilesWithLocalCopy(
     Set<int> hiddenCollectionIds,
     int ownerID,
