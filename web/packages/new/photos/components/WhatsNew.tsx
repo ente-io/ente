@@ -79,11 +79,13 @@ const ChangelogContent: React.FC = () => {
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
             <Typography variant="h6">
-                {ut("Map view, manual people tagging, and more")}
+                {ut(
+                    "Watch folders updations, File context menu, Edit location, and more",
+                )}
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "Explore your photos on a map. Manually tag people in photos. Album admins can now remove photos added by collaborators. Viewers and collaborators can see and copy public links. Free users can now create public links with a device limit of 5.",
+                    "Watch folders now handle inaccessible paths, hidden albums, and unsupported files better. Added right-click context menu, album sorting, edit location, and refreshed login/signup UI.",
                 )}
             </Typography>
         </Stack>
