@@ -1051,14 +1051,42 @@ class RemoteSyncService {
         );
         final s = await LanguageService.locals;
         // ignore: unawaited_futures
-        NotificationService.instance.showNotification(
-          collection!.displayName,
-          totalCount.toString() + s.newPhotosEmoji,
-          channelID: "collection:" + collectionID.toString(),
+        _showNotificationSafely(
+          title: collection!.displayName,
+          message: "$totalCount${s.newPhotosEmoji}",
+          channelID: "collection:$collectionID",
           channelName: collection.displayName,
-          payload: "ente://collection/?collectionID=" + collectionID.toString(),
+          payload: "ente://collection/?collectionID=$collectionID",
+          context: 'collection=$collectionID',
         );
       }
+    }
+  }
+
+  Future<void> _showNotificationSafely({
+    required String title,
+    required String message,
+    int? id,
+    required String channelID,
+    required String channelName,
+    required String payload,
+    required String context,
+  }) async {
+    try {
+      await NotificationService.instance.showNotification(
+        title,
+        message,
+        channelID: channelID,
+        channelName: channelName,
+        payload: payload,
+        id: id,
+      );
+    } catch (e, stackTrace) {
+      _logger.warning(
+        "Failed to show notification ($context)",
+        e,
+        stackTrace,
+      );
     }
   }
 
@@ -1230,19 +1258,29 @@ class RemoteSyncService {
       if (fileID == null) {
         continue;
       }
-      final title = await _getSocialNotificationTitle(candidate);
-      await NotificationService.instance.showNotification(
-        title,
-        _getSocialNotificationBody(candidate.type, s),
-        channelID: "social_activity",
-        channelName: "Activity",
-        payload: _buildSocialNotificationPayload(candidate),
-        id: _buildSocialNotificationId(
-          candidate.collectionID,
-          fileID,
-          _notificationGroupForType(candidate.type),
-        ),
-      );
+      try {
+        final title = await _getSocialNotificationTitle(candidate);
+        await _showNotificationSafely(
+          title: title,
+          message: _getSocialNotificationBody(candidate.type, s),
+          channelID: "social_activity",
+          channelName: "Activity",
+          payload: _buildSocialNotificationPayload(candidate),
+          id: _buildSocialNotificationId(
+            candidate.collectionID,
+            fileID,
+            _notificationGroupForType(candidate.type),
+          ),
+          context:
+              'social type=${candidate.type.name} collection=${candidate.collectionID} file=$fileID',
+        );
+      } catch (e, stackTrace) {
+        _logger.warning(
+          "Failed to prepare social notification",
+          e,
+          stackTrace,
+        );
+      }
     }
     await _prefs.setInt(
       kLastSocialActivityNotificationTime,
