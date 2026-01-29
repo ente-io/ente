@@ -2522,5 +2522,12 @@
     }
   },
   "searchSettings": "Search settings",
-  "suggestions": "Suggestions"
+  "suggestions": "Suggestions",
+  "cleanupHiddenFiles": "Clean up hidden files",
+  "cleanupHiddenFilesDescription": "Some files in hidden albums still exist in non-hidden albums making them visible outside of the hidden section. Cleaning up will remove them from non-hidden albums.",
+  "cleanupComplete": "Cleanup complete",
+  "deleteHiddenFilesFromDevice": "Delete hidden files from device",
+  "deleteHiddenFilesFromDeviceDescription": "Delete local copies of hidden files from your device",
+  "deleteOnDeviceFiles": "Delete on device files",
+  "noHiddenFilesOnDevice": "No hidden files on device"
 }

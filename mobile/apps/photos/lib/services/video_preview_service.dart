@@ -113,7 +113,7 @@ class VideoPreviewService {
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
 
   bool get isVideoStreamingEnabled {
-    if(isOfflineMode) {
+    if (isOfflineMode) {
       return false;
     }
     if (flagService.internalUser) {
