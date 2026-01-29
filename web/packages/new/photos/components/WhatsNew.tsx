@@ -85,7 +85,7 @@ const ChangelogContent: React.FC = () => {
             </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "Watch folders now handle inaccessible paths, hidden albums, and unsupported files better. Added right-click context menu, album sorting, edit location, and refreshed login/signup UI.",
+                    "Hide shared albums. Watch folders now support hidden albums, and are marked as inaccessible instead of being removed when they can't be accessed. Right-click context menu for files. New 'Clean uncategorized' and 'Clean large files' options. Edit location. Improved album selector with sort options. Upload to hidden albums. Public album improvements. Redesigned login and sign-up pages.",
                 )}
             </Typography>
         </Stack>
