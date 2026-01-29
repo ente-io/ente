@@ -1,11 +1,8 @@
 // TODO: Audit this file (too many null assertions + other issues)
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Download01Icon } from "@hugeicons/core-free-icons";
+import { Download01Icon, ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
-
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { FeedIcon } from "components/Collections/CollectionHeader";
@@ -68,6 +65,8 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
@@ -453,11 +452,13 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles!);
-            await downloadAndSaveFiles(
-                selectedFiles,
-                t("files_count", { count: selectedFiles.length }),
-                onAddSaveGroup,
-            );
+            const singleFile =
+                selectedFiles.length === 1 ? selectedFiles[0] : undefined;
+            const title =
+                singleFile?.metadata.fileType === FileType.livePhoto
+                    ? fileFileName(singleFile)
+                    : t("files_count", { count: selectedFiles.length });
+            await downloadAndSaveFiles(selectedFiles, title, onAddSaveGroup);
             clearSelection();
         } catch (e) {
             log.error("failed to download selected files", e);
@@ -477,6 +478,8 @@ export default function PublicCollectionGallery() {
     const commentsEnabled =
         publicCollection?.publicURLs[0]?.enableComment ?? false;
 
+    const hasSelection = selected.count > 0;
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -491,6 +494,7 @@ export default function PublicCollectionGallery() {
                                   onShowFeed: commentsEnabled
                                       ? showPublicFeed
                                       : undefined,
+                                  hasSelection,
                               }}
                           />
                       ),
@@ -504,6 +508,7 @@ export default function PublicCollectionGallery() {
             downloadEnabled,
             showPublicFeed,
             commentsEnabled,
+            hasSelection,
         ],
     );
 
@@ -561,6 +566,7 @@ export default function PublicCollectionGallery() {
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
+            message={t("upload_dropzone_hint_public_album")}
         >
             {layout === "trip" ? (
                 <TripLayout
@@ -577,11 +583,16 @@ export default function PublicCollectionGallery() {
             ) : (
                 <>
                     <NavbarBase
-                        sx={{
-                            mb: "16px",
-                            px: "24px",
-                            "@media (width < 720px)": { px: "4px" },
-                        }}
+                        sx={[
+                            {
+                                mb: "16px",
+                                px: "24px",
+                                "@media (width < 720px)": { px: "4px" },
+                            },
+                            selected.count > 0 && {
+                                borderColor: "accent.main",
+                            },
+                        ]}
                     >
                         {selected.count > 0 ? (
                             <SelectedFileOptions
@@ -699,16 +710,26 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <AddPhotoAlternateOutlinedIcon />;
-
     return (
         <Box>
             {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>{icon}</IconButton>
+                <IconButton {...{ onClick, disabled }}>
+                    <HugeiconsIcon
+                        icon={ImageAdd02Icon}
+                        size={22}
+                        strokeWidth={1.8}
+                    />
+                </IconButton>
             ) : (
                 <FocusVisibleButton
                     color="secondary"
-                    startIcon={icon}
+                    startIcon={
+                        <HugeiconsIcon
+                            icon={ImageAdd02Icon}
+                            size={20}
+                            strokeWidth={1.8}
+                        />
+                    }
                     sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
@@ -779,7 +800,13 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 }) => (
     <Stack
         direction="row"
-        sx={{ flex: 1, gap: 2, alignItems: "center", mr: 1 }}
+        sx={{
+            flex: 1,
+            gap: 1,
+            alignItems: "center",
+            mx: -2,
+            "@media (width < 720px)": { mx: -1 },
+        }}
     >
         <IconButton onClick={clearSelection}>
             <CloseIcon />
@@ -789,7 +816,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         </Typography>
         <Tooltip title={t("download")}>
             <IconButton onClick={downloadFilesHelper}>
-                <DownloadIcon />
+                <HugeiconsIcon icon={Download01Icon} strokeWidth={1.6} />
             </IconButton>
         </Tooltip>
     </Stack>
@@ -801,6 +828,7 @@ interface FileListHeaderProps {
     downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
     onShowFeed?: () => void;
+    hasSelection: boolean;
 }
 
 /**
@@ -820,6 +848,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     downloadEnabled,
     onAddSaveGroup,
     onShowFeed,
+    hasSelection,
 }) => {
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
@@ -840,9 +869,13 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                 <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ alignItems: "center" }}
+                    sx={{
+                        alignItems: "center",
+                        mr: -1.5,
+                        "@media (width < 720px)": { mr: -1 },
+                    }}
                 >
-                    {onShowFeed && (
+                    {onShowFeed && !hasSelection && (
                         <IconButton onClick={onShowFeed}>
                             <Box
                                 sx={{
@@ -857,7 +890,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                             </Box>
                         </IconButton>
                     )}
-                    {downloadEnabled && (
+                    {downloadEnabled && !hasSelection && (
                         <IconButton onClick={downloadAllFiles}>
                             <HugeiconsIcon
                                 icon={Download01Icon}

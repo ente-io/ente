@@ -29,6 +29,9 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final _logger = Logger("NotificationService");
+  void Function(NotificationResponse notificationResponse)? _onNotificationTapped;
+  bool _pluginInitialized = false;
+  bool _launchDetailsHandled = false;
 
   void init(SharedPreferences preferences) {
     _preferences = preferences;
@@ -41,6 +44,21 @@ class NotificationService {
       NotificationResponse notificationResponse,
     ) onNotificationTapped,
   ) async {
+    _onNotificationTapped = onNotificationTapped;
+    await _ensurePluginInitialized();
+    await _handleLaunchDetailsIfNeeded();
+    if (!hasGrantedPermissions() &&
+        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      await requestPermissions();
+    }
+  }
+
+  Future<void> initializeForBackground() async {
+    await _ensurePluginInitialized();
+  }
+
+  Future<void> _ensurePluginInitialized() async {
+    if (_pluginInitialized) return;
     await initTimezones();
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
@@ -56,20 +74,31 @@ class NotificationService {
     );
     await _notificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: onNotificationTapped,
+      onDidReceiveNotificationResponse: _handleNotificationResponse,
     );
+    _pluginInitialized = true;
+  }
 
+  void _handleNotificationResponse(NotificationResponse response) {
+    if (_onNotificationTapped != null) {
+      _onNotificationTapped!(response);
+      return;
+    }
+    _logger.warning(
+      "Notification response received before handler was set; ignoring.",
+    );
+  }
+
+  Future<void> _handleLaunchDetailsIfNeeded() async {
+    if (_launchDetailsHandled) return;
     final launchDetails =
         await _notificationsPlugin.getNotificationAppLaunchDetails();
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      onNotificationTapped(launchDetails.notificationResponse!);
+      _onNotificationTapped?.call(launchDetails.notificationResponse!);
     }
-    if (!hasGrantedPermissions() &&
-        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
-      await requestPermissions();
-    }
+    _launchDetailsHandled = true;
   }
 
   Future<void> initTimezones() async {
@@ -216,6 +245,7 @@ class NotificationService {
       channelDescription: 'ente alerts',
       importance: Importance.max,
       priority: Priority.high,
+      icon: 'notification_icon',
       showWhen: false,
     );
     final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
@@ -267,6 +297,7 @@ class NotificationService {
         importance: Importance.max,
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
+        icon: 'notification_icon',
         showWhen: false,
         timeoutAfter: timeoutDurationAndroid?.inMilliseconds,
       );

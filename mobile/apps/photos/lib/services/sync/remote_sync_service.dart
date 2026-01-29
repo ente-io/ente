@@ -1283,7 +1283,7 @@ class RemoteSyncService {
           title: title,
           message: _getSocialNotificationBody(candidate.type, s),
           channelID: "social_activity",
-          channelName: "Activity",
+          channelName: "Ente Feed",
           payload: _buildSocialNotificationPayload(candidate),
           id: _buildSocialNotificationId(
             candidate.collectionID,

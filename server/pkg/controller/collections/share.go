@@ -100,7 +100,9 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	}
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(collection.Owner.ID, true)
 	if err != nil {
-		return stacktrace.Propagate(err, "")
+		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			return stacktrace.Propagate(err, "")
+		}
 	}
 	role := ente.VIEWER
 	if collectionLinkToken.EnableCollect {

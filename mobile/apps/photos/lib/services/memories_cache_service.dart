@@ -217,6 +217,10 @@ class MemoriesCacheService {
 
   Future<List<SmartMemory>> getMemories({bool onlyUseCache = false}) async {
     _logger.info("getMemories called");
+    if (isOfflineMode && kDebugMode) {
+      _logger.info("skip cache in offline in debugMode");
+      onlyUseCache = false;
+    }
     if (!showAnyMemories) {
       _logger.info('Showing memories is disabled in settings, showing none');
       return [];
@@ -372,6 +376,10 @@ class MemoriesCacheService {
   }
 
   Future<void> updateCache({bool forced = false}) async {
+    if (isOfflineMode && kDebugMode) {
+      _logger.warning('Force updating cache in offline debug mode');
+      forced = true;
+    }
     if (!showAnyMemories) {
       return;
     }

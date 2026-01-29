@@ -602,6 +602,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleClose = useCallback(() => {
+        if (document.fullscreenElement) void document.exitFullscreen();
         setNeedsRemotePull((needsPull) => {
             if (needsPull) onTriggerRemotePull?.();
             return false;
@@ -617,6 +618,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
+        setIsFullscreen(false);
         onClose();
     }, [onTriggerRemotePull, onClose]);
 
@@ -1742,7 +1744,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             document.fullscreenElement
                 ? document.exitFullscreen()
                 : document.body.requestFullscreen()
-        ).then(updateFullscreenStatus);
+        ).then(() => setTimeout(updateFullscreenStatus, 200));
     }, [handleMoreMenuCloseIfNeeded, updateFullscreenStatus]);
 
     const handleShortcuts = useCallback(() => {

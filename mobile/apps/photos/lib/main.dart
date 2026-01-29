@@ -197,6 +197,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     // Misc Services
     await UserService.instance.init();
     NotificationService.instance.init(prefs);
+    await NotificationService.instance.initializeForBackground();
 
     // Begin Execution
     // only runs for android
@@ -247,6 +248,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
+    await NotificationService.instance.initializeForBackground();
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
