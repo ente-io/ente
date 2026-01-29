@@ -260,6 +260,7 @@ class SocialNotificationCoordinator {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final s = await LanguageService.locals;
 
+    int? latestSentNotificationTime;
     for (final candidate in candidates) {
       final fileID = candidate.fileID;
       if (fileID == null) {
@@ -279,6 +280,7 @@ class SocialNotificationCoordinator {
             _notificationGroupForType(candidate.type),
           ),
         );
+        latestSentNotificationTime ??= candidate.createdAt;
       } catch (e, stackTrace) {
         _logger.severe(
           'Failed to prepare social notification',
@@ -288,10 +290,12 @@ class SocialNotificationCoordinator {
       }
     }
 
-    await prefs.setInt(
-      kLastSocialActivityNotificationTime,
-      candidates.first.createdAt,
-    );
+    if (latestSentNotificationTime != null) {
+      await prefs.setInt(
+        kLastSocialActivityNotificationTime,
+        latestSentNotificationTime,
+      );
+    }
   }
 
   bool _isSocialNotificationEnabledForType(FeedItemType type) {
