@@ -1128,8 +1128,17 @@ class RemoteSyncService {
 
     final hiddenCollectionIds = _collectionsService.getHiddenCollectionIds();
     final latestByKey = <String, _SocialActivityCandidate>{};
+    final bool enableCommentNotifications =
+        NotificationService.instance.shouldShowCommentNotifications();
+    final bool enableLikeNotifications =
+        NotificationService.instance.shouldShowLikeNotifications();
+    final bool enableReplyNotifications =
+        NotificationService.instance.shouldShowReplyNotifications();
 
     void considerCandidate(_SocialActivityCandidate candidate) {
+      if (!_isSocialNotificationEnabledForType(candidate.type)) {
+        return;
+      }
       if (candidate.createdAt <= cutoffTime) {
         return;
       }
@@ -1150,10 +1159,12 @@ class RemoteSyncService {
 
     final db = SocialDB.instance;
 
-    final List<Comment> fileComments = await db.getCommentsOnFilesSince(
-      excludeUserID: userID,
-      sinceTime: cutoffTime,
-    );
+    final List<Comment> fileComments = enableCommentNotifications
+        ? await db.getCommentsOnFilesSince(
+            excludeUserID: userID,
+            sinceTime: cutoffTime,
+          )
+        : <Comment>[];
     for (final comment in fileComments) {
       considerCandidate(
         _SocialActivityCandidate(
@@ -1168,14 +1179,18 @@ class RemoteSyncService {
       );
     }
 
-    final List<Comment> replies = await db.getRepliesToUserCommentsSince(
-      targetUserID: userID,
-      sinceTime: cutoffTime,
-    );
-    final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
-      excludeUserID: userID,
-      sinceTime: cutoffTime,
-    );
+    final List<Comment> replies = enableReplyNotifications
+        ? await db.getRepliesToUserCommentsSince(
+            targetUserID: userID,
+            sinceTime: cutoffTime,
+          )
+        : <Comment>[];
+    final List<Reaction> photoLikes = enableLikeNotifications
+        ? await db.getReactionsOnFilesSince(
+            excludeUserID: userID,
+            sinceTime: cutoffTime,
+          )
+        : <Reaction>[];
 
     final repliesNeedingOwnerCheck = <Comment>[];
     final fileIDsNeedingOwnership = <int>{};
@@ -1293,9 +1308,24 @@ class RemoteSyncService {
   }
 
   bool _shouldShowSocialNotifications() {
-    return NotificationService.instance
-            .shouldShowNotificationsForSharedPhotos() &&
-        isFirstRemoteSyncDone();
+    return isFirstRemoteSyncDone() &&
+        (NotificationService.instance.shouldShowCommentNotifications() ||
+            NotificationService.instance.shouldShowLikeNotifications() ||
+            NotificationService.instance.shouldShowReplyNotifications());
+  }
+
+  bool _isSocialNotificationEnabledForType(FeedItemType type) {
+    switch (type) {
+      case FeedItemType.comment:
+        return NotificationService.instance.shouldShowCommentNotifications();
+      case FeedItemType.reply:
+        return NotificationService.instance.shouldShowReplyNotifications();
+      case FeedItemType.photoLike:
+        return NotificationService.instance.shouldShowLikeNotifications();
+      case FeedItemType.commentLike:
+      case FeedItemType.replyLike:
+        return false; // Currently not notifying for comment/reply likes
+    }
   }
 
   _SocialNotificationGroup _notificationGroupForType(FeedItemType type) {
