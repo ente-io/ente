@@ -9,7 +9,8 @@ import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
-import "package:photos/service_locator.dart" show entityService, flagService;
+import "package:photos/service_locator.dart"
+    show entityService, flagService, hasGrantedMLConsent;
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 
