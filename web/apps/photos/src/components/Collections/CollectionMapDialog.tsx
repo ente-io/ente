@@ -155,7 +155,6 @@ interface MapIndexPoint {
  * two metrics kept to analyse this change.
  */
 
-
 /**
  * The small payload we attach to a point: fileId points to the photo, and timestamp keeps
  * enough context for sorting or choosing the freshest item in a cluster.
@@ -297,7 +296,6 @@ function useCurrentUser() {
         }
     }, []);
 }
-
 
 /**
  *
