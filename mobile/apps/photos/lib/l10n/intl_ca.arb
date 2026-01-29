@@ -2421,7 +2421,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, one {}=0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
+  "commentsCount": "{count, plural, =0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

@@ -14,7 +14,7 @@ class WidgetSettingsScreen extends StatelessWidget {
   const WidgetSettingsScreen({super.key});
 
   void onPeopleTapped(BuildContext context) {
-    final bool isMLEnabled = !flagService.hasGrantedMLConsent;
+    final bool isMLEnabled = !hasGrantedMLConsent;
     if (isMLEnabled) {
       routeToPage(
         context,

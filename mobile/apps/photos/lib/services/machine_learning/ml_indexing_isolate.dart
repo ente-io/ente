@@ -68,7 +68,7 @@ class MLIndexingIsolate extends SuperIsolate {
     try {
       final resultJsonString =
           await runInIsolate(IsolateOperation.analyzeImage, {
-        "enteFileID": instruction.file.uploadedFileID ?? -1,
+        "enteFileID": instruction.fileKey,
         "filePath": filePath,
         "runFaces": instruction.shouldRunFaces,
         "runClip": instruction.shouldRunClip,
@@ -85,12 +85,12 @@ class MLIndexingIsolate extends SuperIsolate {
       result = MLResult.fromJsonString(resultJsonString);
     } catch (e, s) {
       _logger.severe(
-        "Could not analyze image with ID ${instruction.file.uploadedFileID} \n",
+        "Could not analyze image with ID ${instruction.fileKey} \n",
         e,
         s,
       );
       debugPrint(
-        "This image with fileID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
+        "This image with fileID ${instruction.fileKey} has name ${instruction.file.displayName}.",
       );
       rethrow;
     }

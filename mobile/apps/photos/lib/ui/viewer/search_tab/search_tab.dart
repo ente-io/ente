@@ -145,7 +145,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     final sectionType = searchTypes[index];
                     switch (sectionType) {
                       case SectionType.face:
-                        if (!flagService.hasGrantedMLConsent) {
+                        if (!hasGrantedMLConsent) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(

@@ -13,20 +13,27 @@ import "package:shared_preferences/shared_preferences.dart";
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
 
-  static const _databaseName = "ente.ml.vectordb.clip.usearch";
-  static const _kMigrationKey = "clip_vectordb_migration";
+  final String _databaseName;
+  final String _migrationKey;
 
   static final BigInt _embeddingDimension = BigInt.from(512);
 
   static Logger get logger => _logger;
 
   // Singleton pattern
-  ClipVectorDB._privateConstructor();
-  static final instance = ClipVectorDB._privateConstructor();
+  ClipVectorDB._privateConstructor(this._databaseName, this._migrationKey);
+  static final instance = ClipVectorDB._privateConstructor(
+    "ente.ml.vectordb.clip.usearch",
+    "clip_vectordb_migration",
+  );
+  static final offlineInstance = ClipVectorDB._privateConstructor(
+    "ente.ml.offline.vectordb.clip.usearch",
+    "clip_vectordb_migration_offline",
+  );
   factory ClipVectorDB() => instance;
 
   // only have a single app-wide reference to the database
-  static Future<VectorDb>? _vectorDbFuture;
+  Future<VectorDb>? _vectorDbFuture;
 
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
@@ -69,7 +76,7 @@ class ClipVectorDB {
     if (_migrationDone != null) return _migrationDone!;
     _logger.info("Checking if ClipVectorDB migration has run");
     final prefs = await SharedPreferences.getInstance();
-    final migrationDone = prefs.getBool(_kMigrationKey) ?? false;
+    final migrationDone = prefs.getBool(_migrationKey) ?? false;
     if (migrationDone) {
       _logger.info("ClipVectorDB migration already done");
       _migrationDone = true;
@@ -84,7 +91,7 @@ class ClipVectorDB {
   Future<void> setMigrationDone() async {
     _logger.info("Setting ClipVectorDB migration done");
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMigrationKey, true);
+    await prefs.setBool(_migrationKey, true);
     _migrationDone = true;
   }
 
@@ -308,7 +315,7 @@ class ClipVectorDB {
       _vectorDbFuture = null;
       if (undoMigration) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(_kMigrationKey, false);
+        await prefs.setBool(_migrationKey, false);
         _migrationDone = false;
         _logger.info("Undid migration flag");
       }

@@ -109,8 +109,6 @@ class _SettingsBody extends StatelessWidget {
                 _buildAppearanceCard(context, colorScheme),
                 const SizedBox(height: 8),
                 if (isOfflineMode) ...[
-                  _buildMachineLearningCard(context, colorScheme),
-                  const SizedBox(height: 8),
                   _buildOfflineFeaturesCard(context, colorScheme),
                   const SizedBox(height: 8),
                 ],
@@ -295,30 +293,38 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
-  Widget _buildMachineLearningCard(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-  ) {
-    return MenuItemWidgetNew(
-      title: AppLocalizations.of(context).machineLearning,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedMagicWand01,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const MachineLearningSettingsPage());
-      },
-    );
-  }
-
   Widget _buildOfflineFeaturesCard(
     BuildContext context,
     EnteColorScheme colorScheme,
   ) {
     return SettingsGroupedCard(
       children: [
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).machineLearning,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedMagicWand01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MachineLearningSettingsPage());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).memories,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedSparkles,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MemoriesSettingsScreen());
+          },
+        ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).notifications,
           borderRadius: 0,

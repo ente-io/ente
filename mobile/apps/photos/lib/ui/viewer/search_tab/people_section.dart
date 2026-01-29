@@ -13,6 +13,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -208,8 +209,8 @@ class PersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCluster = (searchResult.type() == ResultType.faces &&
-        int.tryParse(searchResult.name()) != null);
+    final bool isCluster = searchResult.type() == ResultType.faces &&
+        searchResult.params.containsKey(kClusterParamId);
 
     return ListenableBuilder(
       listenable: selectedPeople ?? ValueNotifier(false),
@@ -308,45 +309,51 @@ class PersonSearchExample extends StatelessWidget {
                 ],
               ),
               isCluster
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () async {
-                        final result = await showAssignPersonAction(
-                          context,
-                          clusterID: searchResult.name(),
-                        );
-                        if (result != null &&
-                            result is (PersonEntity, EnteFile)) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result.$1,
-                              searchResult: null,
+                  ? isOfflineMode
+                      ? const SizedBox.shrink()
+                      : GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () async {
+                            final clusterId =
+                                searchResult.params[kClusterParamId]
+                                    as String?;
+                            final result = await showAssignPersonAction(
+                              context,
+                              clusterID: clusterId ?? searchResult.name(),
+                            );
+                            if (result != null &&
+                                result is (PersonEntity, EnteFile)) {
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result.$1,
+                                  searchResult: null,
+                                ),
+                              );
+                            } else if (result != null &&
+                                result is PersonEntity) {
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result,
+                                  searchResult: null,
+                                ),
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 6, bottom: 0),
+                            child: Text(
+                              AppLocalizations.of(context).addName,
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: getEnteTextTheme(context).small,
                             ),
-                          );
-                        } else if (result != null && result is PersonEntity) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result,
-                              searchResult: null,
-                            ),
-                          );
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 6, bottom: 0),
-                        child: Text(
-                          AppLocalizations.of(context).addName,
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
-                        ),
-                      ),
-                    )
+                          ),
+                        )
                   : Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 0),
                       child: SizedBox(

@@ -1820,7 +1820,7 @@
   "font": "Lettertype",
   "background": "Achtergrond",
   "align": "Uitlijnen",
-  "addedToAlbums": "{count, plural, one {}=1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
+  "addedToAlbums": "{count, plural, =1{Succesvol toegevoegd aan 1 album} other{Succesvol toegevoegd aan {count} albums}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {

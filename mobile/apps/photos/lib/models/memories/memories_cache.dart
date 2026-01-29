@@ -72,6 +72,7 @@ class MemoriesCache {
 class ToShowMemory {
   final String title;
   final List<int> fileUploadedIDs;
+  final List<int>? fileLocalIntIDs;
   final MemoryType type;
   final int firstTimeToShow;
   final int lastTimeToShow;
@@ -106,6 +107,7 @@ class ToShowMemory {
     this.lastTimeToShow,
     this.id,
     this.calculationTime, {
+    this.fileLocalIntIDs,
     this.personID,
     this.personName,
     this.isBirthday,
@@ -124,7 +126,11 @@ class ToShowMemory {
           "PersonID and peopleMemoryType must be provided for people memory type, and location must be provided for trips memory type",
         );
 
-  factory ToShowMemory.fromSmartMemory(SmartMemory memory, DateTime calcTime) {
+  factory ToShowMemory.fromSmartMemory(
+    SmartMemory memory,
+    DateTime calcTime, {
+    List<int>? fileLocalIntIDs,
+  }) {
     String? personID;
     String? personName;
     bool? isBirthday;
@@ -141,17 +147,19 @@ class ToShowMemory {
     } else if (memory is ClipMemory) {
       clipMemoryType = memory.clipMemoryType;
     }
+    final fileUploadedIDs = memory.memories
+        .where((m) => m.file.uploadedFileID != null)
+        .map((m) => m.file.uploadedFileID!)
+        .toList();
     return ToShowMemory(
       memory.title,
-      memory.memories
-          .where((m) => m.file.uploadedFileID != null)
-          .map((m) => m.file.uploadedFileID!)
-          .toList(),
+      fileUploadedIDs,
       memory.type,
       memory.firstDateToShow,
       memory.lastDateToShow,
       memory.id,
       calcTime.microsecondsSinceEpoch,
+      fileLocalIntIDs: fileLocalIntIDs,
       personID: personID,
       personName: personName,
       isBirthday: isBirthday,
@@ -170,6 +178,9 @@ class ToShowMemory {
       json['lastTimeToShow'],
       json['id'] ?? newID(json['type'] as String),
       json['calculationTime'],
+      fileLocalIntIDs: json['fileLocalIntIDs'] != null
+          ? List<int>.from(json['fileLocalIntIDs'])
+          : null,
       personID: json['personID'],
       isBirthday: json['isBirthday'],
       personName: json['personName'],
@@ -192,6 +203,8 @@ class ToShowMemory {
     return {
       'title': title,
       'fileUploadedIDs': fileUploadedIDs.toList(),
+      if (fileLocalIntIDs != null)
+        'fileLocalIntIDs': fileLocalIntIDs!.toList(),
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,

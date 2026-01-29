@@ -9,6 +9,7 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
@@ -44,7 +45,8 @@ class MemoriesCacheService {
   final SharedPreferences _prefs;
   static final Logger _logger = Logger("MemoriesCacheService");
 
-  final _memoriesDB = MemoriesDB.instance;
+  MemoriesDB get _memoriesDB =>
+      isOfflineMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
 
   List<SmartMemory>? _cachedMemories;
   bool _shouldUpdate = false;
@@ -69,21 +71,48 @@ class MemoriesCacheService {
 
     Bus.instance.on<FilesUpdatedEvent>().where((event) {
       return event.type == EventType.deletedFromEverywhere;
-    }).listen((event) {
+    }).listen((event) async {
       if (_cachedMemories == null) return;
-      final generatedIDs = event.updatedFiles
-          .where((element) => element.generatedID != null)
-          .map((e) => e.generatedID!)
-          .toSet();
-      for (final memory in _cachedMemories!) {
-        memory.memories
-            .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
+      if (isOfflineMode) {
+        final localIds = event.updatedFiles
+            .map((file) => file.localID)
+            .whereType<String>()
+            .where((id) => id.isNotEmpty)
+            .toSet();
+        if (localIds.isEmpty) return;
+        final localIdToIntId =
+            await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+        _localIdToIntIdCache.addAll(localIdToIntId);
+        final localIntIds = localIdToIntId.values.toSet();
+        for (final memory in _cachedMemories!) {
+          memory.memories.removeWhere((mem) {
+            final localId = mem.file.localID;
+            if (localId == null || localId.isEmpty) return false;
+            final localIntId = _localIdToIntIdCache[localId];
+            return localIntId != null && localIntIds.contains(localIntId);
+          });
+        }
+      } else {
+        final generatedIDs = event.updatedFiles
+            .where((element) => element.generatedID != null)
+            .map((e) => e.generatedID!)
+            .toSet();
+        for (final memory in _cachedMemories!) {
+          memory.memories
+              .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
+        }
       }
     });
   }
 
+  String get _lastCacheUpdateKey =>
+      isOfflineMode ? "${_lastMemoriesCacheUpdateTimeKey}_offline" : _lastMemoriesCacheUpdateTimeKey;
+
+  String get _shouldUpdateKey =>
+      isOfflineMode ? "${_shouldUpdateCacheKey}_offline" : _shouldUpdateCacheKey;
+
   int get lastMemoriesCacheUpdateTime {
-    return _prefs.getInt(_lastMemoriesCacheUpdateTimeKey) ?? 0;
+    return _prefs.getInt(_lastCacheUpdateKey) ?? 0;
   }
 
   bool get showAnyMemories {
@@ -103,20 +132,18 @@ class MemoriesCacheService {
   }
 
   bool get enableSmartMemories =>
-      flagService.hasGrantedMLConsent &&
+      hasGrantedMLConsent &&
       localSettings.isMLLocalIndexingEnabled &&
       localSettings.isSmartMemoriesEnabled;
 
   bool get curatedMemoriesOption =>
-      showAnyMemories &&
-      flagService.hasGrantedMLConsent &&
-      localSettings.isMLLocalIndexingEnabled;
+      showAnyMemories && hasGrantedMLConsent && localSettings.isMLLocalIndexingEnabled;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
       return;
     }
-    _shouldUpdate = _prefs.getBool(_shouldUpdateCacheKey) ?? _shouldUpdate;
+    _shouldUpdate = _prefs.getBool(_shouldUpdateKey) ?? _shouldUpdate;
     if (_timeToUpdateCache()) {
       queueUpdateCache();
     }
@@ -131,16 +158,60 @@ class MemoriesCacheService {
 
   Future markMemoryAsSeen(Memory memory, bool lastInList) async {
     memory.markSeen();
+    int? seenTimeKey;
+    if (isOfflineMode) {
+      final localId = memory.file.localID;
+      if (localId != null && localId.isNotEmpty) {
+        seenTimeKey = _localIdToIntIdCache[localId];
+        if (seenTimeKey == null) {
+          seenTimeKey =
+              await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+          _localIdToIntIdCache[localId] = seenTimeKey;
+        }
+      }
+    }
     await _memoriesDB.markMemoryAsSeen(
       memory,
       DateTime.now().microsecondsSinceEpoch,
+      seenTimeKey: seenTimeKey,
     );
-    if (_cachedMemories != null && memory.file.generatedID != null) {
-      final generatedID = memory.file.generatedID!;
-      for (final smartMemory in _cachedMemories!) {
-        for (final mem in smartMemory.memories) {
-          if (mem.file.generatedID == generatedID) {
-            mem.markSeen();
+    if (_cachedMemories != null) {
+      if (isOfflineMode) {
+        final localId = memory.file.localID;
+        if (localId != null && localId.isNotEmpty) {
+          final localIntId = _localIdToIntIdCache[localId] ??
+              await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+          _localIdToIntIdCache[localId] = localIntId;
+          final cachedLocalIds = _cachedMemories!
+              .expand((mem) => mem.memories)
+              .map((mem) => mem.file.localID)
+              .whereType<String>()
+              .where((id) => id.isNotEmpty)
+              .toSet();
+          if (cachedLocalIds.isNotEmpty) {
+            final cacheLocalIdToIntId =
+                await OfflineFilesDB.instance.ensureLocalIntIds(cachedLocalIds);
+            _localIdToIntIdCache.addAll(cacheLocalIdToIntId);
+            for (final smartMemory in _cachedMemories!) {
+              for (final mem in smartMemory.memories) {
+                final memLocalId = mem.file.localID;
+                final memLocalIntId = memLocalId != null
+                    ? _localIdToIntIdCache[memLocalId]
+                    : null;
+                if (memLocalIntId == localIntId) {
+                  mem.markSeen();
+                }
+              }
+            }
+          }
+        }
+      } else if (memory.file.generatedID != null) {
+        final generatedID = memory.file.generatedID!;
+        for (final smartMemory in _cachedMemories!) {
+          for (final mem in smartMemory.memories) {
+            if (mem.file.generatedID == generatedID) {
+              mem.markSeen();
+            }
           }
         }
       }
@@ -150,7 +221,7 @@ class MemoriesCacheService {
 
   void queueUpdateCache() {
     _shouldUpdate = true;
-    unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
+    unawaited(_prefs.setBool(_shouldUpdateKey, true));
   }
 
   Future<void> purgePersonFromMemoriesCache(String personID) async {
@@ -303,37 +374,82 @@ class MemoriesCacheService {
     try {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
-      final seenTimes = await MemoriesDB.instance.getSeenTimes();
-      final minimalFileIDs = <int>{};
+      final seenTimes = await (isOfflineMode
+              ? MemoriesDB.offlineInstance
+              : MemoriesDB.instance)
+          .getSeenTimes();
+      final minimalUploadedIDs = <int>{};
+      final minimalLocalIntIds = <int>{};
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
-          minimalFileIDs.addAll(memory.fileUploadedIDs);
+          if (memory.fileLocalIntIDs != null &&
+              memory.fileLocalIntIDs!.isNotEmpty) {
+            minimalLocalIntIds.addAll(memory.fileLocalIntIDs!);
+          } else {
+            minimalUploadedIDs.addAll(memory.fileUploadedIDs);
+          }
         }
       }
-      final minimalFiles = await FilesDB.instance.getFilesFromIDs(
-        minimalFileIDs.toList(),
+      final minimalFilesFromUploaded = await FilesDB.instance.getFilesFromIDs(
+        minimalUploadedIDs.toList(),
         collectionsToIgnore: SearchService.instance.ignoreCollections(),
       );
-      final minimalFileIdsToFile = <int, EnteFile>{};
-      for (final file in minimalFiles) {
+      final uploadedIdToFile = <int, EnteFile>{};
+      for (final file in minimalFilesFromUploaded) {
         if (file.uploadedFileID != null) {
-          minimalFileIdsToFile[file.uploadedFileID!] = file;
+          uploadedIdToFile[file.uploadedFileID!] = file;
         }
+      }
+      final localIdToFile = <String, EnteFile>{};
+      if (minimalLocalIntIds.isNotEmpty) {
+        final localIdMap =
+            await OfflineFilesDB.instance.getLocalIdsForIntIds(
+          minimalLocalIntIds,
+        );
+        final allFiles = await SearchService.instance.getAllFilesForSearch();
+        final neededLocalIds = localIdMap.values.toSet();
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && neededLocalIds.contains(localId)) {
+            localIdToFile[localId] = file;
+          }
+        }
+        _localIntIdToLocalId = localIdMap;
       }
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
+          final useLocalIntIds = memory.fileLocalIntIDs != null &&
+              memory.fileLocalIntIDs!.isNotEmpty;
+          final fileIds =
+              useLocalIntIds ? memory.fileLocalIntIDs! : memory.fileUploadedIDs;
           late final SmartMemory smartMemory;
           if (memory.type == MemoryType.people) {
             smartMemory = PeopleMemory(
-              memory.fileUploadedIDs
-                  .where((fileID) => minimalFileIdsToFile.containsKey(fileID))
-                  .map(
-                    (fileID) => Memory.fromFile(
-                      minimalFileIdsToFile[fileID]!,
-                      seenTimes,
-                    ),
+              fileIds
+                  .where(
+                    (fileID) => useLocalIntIds
+                        ? true
+                        : uploadedIdToFile.containsKey(fileID),
                   )
+                  .map(
+                    (fileID) {
+                      final file = useLocalIntIds
+                          ? _fileFromLocalIntId(
+                              fileID,
+                              localIdToFile,
+                            )
+                          : uploadedIdToFile[fileID];
+                      return file == null
+                          ? null
+                          : Memory.fromFile(
+                              file,
+                              seenTimes,
+                              seenTimeKey: useLocalIntIds ? fileID : null,
+                            );
+                    },
+                  )
+                  .whereType<Memory>()
                   .toList(),
               memory.firstTimeToShow,
               memory.lastTimeToShow,
@@ -345,14 +461,30 @@ class MemoriesCacheService {
             );
           } else {
             smartMemory = SmartMemory(
-              memory.fileUploadedIDs
-                  .where((fileID) => minimalFileIdsToFile.containsKey(fileID))
-                  .map(
-                    (fileID) => Memory.fromFile(
-                      minimalFileIdsToFile[fileID]!,
-                      seenTimes,
-                    ),
+              fileIds
+                  .where(
+                    (fileID) => useLocalIntIds
+                        ? true
+                        : uploadedIdToFile.containsKey(fileID),
                   )
+                  .map(
+                    (fileID) {
+                      final file = useLocalIntIds
+                          ? _fileFromLocalIntId(
+                              fileID,
+                              localIdToFile,
+                            )
+                          : uploadedIdToFile[fileID];
+                      return file == null
+                          ? null
+                          : Memory.fromFile(
+                              file,
+                              seenTimes,
+                              seenTimeKey: useLocalIntIds ? fileID : null,
+                            );
+                    },
+                  )
+                  .whereType<Memory>()
                   .toList(),
               memory.type,
               memory.title,
@@ -423,13 +555,18 @@ class MemoriesCacheService {
         final nextResult =
             await smartMemoriesService.calcSmartMemories(next, newCache);
         w?.log("calculated new memories");
+        final localIdToIntId = isOfflineMode
+            ? await _buildLocalIntIdMapForMemories(
+                [...nowResult.memories, ...nextResult.memories],
+              )
+            : <String, int>{};
         for (final nowMemory in nowResult.memories) {
           newCache.toShowMemories
-              .add(ToShowMemory.fromSmartMemory(nowMemory, now));
+              .add(_toCacheMemory(nowMemory, now, localIdToIntId));
         }
         for (final nextMemory in nextResult.memories) {
           newCache.toShowMemories
-              .add(ToShowMemory.fromSmartMemory(nextMemory, next));
+              .add(_toCacheMemory(nextMemory, next, localIdToIntId));
         }
         newCache.baseLocations.addAll(nowResult.baseLocations);
         w?.log("added memories to cache");
@@ -456,16 +593,65 @@ class MemoriesCacheService {
     });
   }
 
+  static Map<int, String> _localIntIdToLocalId = {};
+  static final Map<String, int> _localIdToIntIdCache = {};
+
+  static EnteFile? _fileFromLocalIntId(
+    int localIntId,
+    Map<String, EnteFile> localIdToFile,
+  ) {
+    final localId = _localIntIdToLocalId[localIntId];
+    if (localId == null) return null;
+    return localIdToFile[localId];
+  }
+
+  static Future<Map<String, int>> _buildLocalIntIdMapForMemories(
+    List<SmartMemory> memories,
+  ) async {
+    final localIds = <String>{};
+    for (final memory in memories) {
+      for (final mem in memory.memories) {
+        final localId = mem.file.localID;
+        if (localId != null && localId.isNotEmpty) {
+          localIds.add(localId);
+        }
+      }
+    }
+    if (localIds.isEmpty) return {};
+    final mapping = await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+    _localIdToIntIdCache.addAll(mapping);
+    return mapping;
+  }
+
+  static ToShowMemory _toCacheMemory(
+    SmartMemory memory,
+    DateTime calcTime,
+    Map<String, int> localIdToIntId,
+  ) {
+    final localIntIds = memory.memories
+        .map((m) => m.file.localID)
+        .whereType<String>()
+        .map((localId) => localIdToIntId[localId])
+        .whereType<int>()
+        .toList();
+    return ToShowMemory.fromSmartMemory(
+      memory,
+      calcTime,
+      fileLocalIntIDs: localIntIds.isNotEmpty ? localIntIds : null,
+    );
+  }
+
   Future<String> _getCachePath() async {
+    final suffix = isOfflineMode ? "_offline" : "";
     return (await getApplicationSupportDirectory()).path +
-        "/cache/memories_cache";
+        "/cache/memories_cache$suffix";
   }
 
   Future<void> _cacheUpdated() async {
     _shouldUpdate = false;
-    unawaited(_prefs.setBool(_shouldUpdateCacheKey, false));
+    unawaited(_prefs.setBool(_shouldUpdateKey, false));
     await _prefs.setInt(
-      _lastMemoriesCacheUpdateTimeKey,
+      _lastCacheUpdateKey,
       DateTime.now().microsecondsSinceEpoch,
     );
     Bus.instance.fire(MemoriesChangedEvent());

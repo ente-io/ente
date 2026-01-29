@@ -197,7 +197,7 @@
   "publicLinkEnabled": "Ο δημόσιος σύνδεσμος ενεργοποιήθηκε",
   "shareALink": "Μοιραστείτε έναν σύνδεσμο",
   "sharedAlbumSectionDescription": "Δημιουργία κοινόχρηστων και συνεργατικών άλμπουμ με άλλους χρήστες Ente, συμπεριλαμβανομένων των χρηστών με δωρεάν συνδρομή.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Μοιραστείτε με συγκεκριμένους ανθρώπους} =1 {Μοιραστείτε με 1 άτομο} other {Μοιραστείτε με {numberOfPeople} άτομα}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -411,7 +411,7 @@
   "skip": "Παράλειψη",
   "updatingFolderSelection": "Ενημέρωση επιλογής φακέλων...",
   "itemCount": "{count, plural, one{{count} αντικείμενο} other{{count} αντικείμενα}}",
-  "deleteItemCount": "{count, plural, one {}=1 {Διαγραφή {count} αντικειμένου} other {Διαγραφή {count} αντικειμένων}}",
+  "deleteItemCount": "{count, plural, =1 {Διαγραφή {count} αντικειμένου} other {Διαγραφή {count} αντικειμένων}}",
   "duplicateItemsGroup": "{count} αρχεία, {formattedSize} το καθένα",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -677,11 +677,11 @@
   "share": "Κοινοποίηση",
   "unhideToAlbum": "Επανεμφάνιση στο άλμπουμ",
   "restoreToAlbum": "Επαναφορά στο άλμπουμ",
-  "moveItem": "{count, plural, one {}=1 {Μετακίνηση αντικειμένου} other {Μετακίνηση αντικειμένων}}",
+  "moveItem": "{count, plural, =1 {Μετακίνηση αντικειμένου} other {Μετακίνηση αντικειμένων}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {}=1 {Προσθήκη αντικειμένου} other {Προσθήκη αντικειμένων}}",
+  "addItem": "{count, plural, =1 {Προσθήκη αντικειμένου} other {Προσθήκη αντικειμένων}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -692,7 +692,7 @@
   "enterAlbumName": "Εισάγετε όνομα άλμπουμ",
   "askYourLovedOnesToShare": "Ζητήστε από τα αγαπημένα σας πρόσωπα να συνεισφέρουν",
   "invite": "Πρόσκληση",
-  "trashDaysLeft": "{count, plural, one {}=0 {Σύντομα} =1 {1 ημέρα} other {{count} ημέρες}}",
+  "trashDaysLeft": "{count, plural, =0 {Σύντομα} =1 {1 ημέρα} other {{count} ημέρες}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -729,7 +729,7 @@
   "authToViewYourMemories": "Παρακαλώ πραγματοποιήστε έλεγχο ταυτότητας για να δείτε τις αναμνήσεις σας",
   "unlock": "Ξεκλείδωμα",
   "freeUpSpace": "Ελευθερώστε χώρο",
-  "freeUpSpaceSaving": "{count, plural, one {}=1 {Μπορεί να διαγραφεί από τη συσκευή για να ελευθερώσει {formattedSize}} other {Μπορούν να διαγραφούν από τη συσκευή για να ελευθερώσουν {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Μπορεί να διαγραφεί από τη συσκευή για να ελευθερώσει {formattedSize}} other {Μπορούν να διαγραφούν από τη συσκευή για να ελευθερώσουν {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 αρχείο} other {{formattedNumber} αρχεία}} σε αυτό το άλμπουμ έχουν αντίγραφα ασφαλείας",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -763,7 +763,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Μπορείτε να {count, plural, one {}=1 {το} other {τα}} βρείτε στο Ente όσο έχετε ενεργή συνδρομή",
+  "freeUpAccessPostDelete": "Μπορείτε να {count, plural, =1 {το} other {τα}} βρείτε στο Ente όσο έχετε ενεργή συνδρομή",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -976,8 +976,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Εύρεση ατόμων γρήγορα με το όνομά τους",
-  "addViewers": "{count, plural, one {}=0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
-  "addCollaborators": "{count, plural, one {}=0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
+  "addViewers": "{count, plural, =0 {Προσθήκη θεατή} =1 {Προσθήκη θεατή} other {Προσθήκη θεατών}}",
+  "addCollaborators": "{count, plural, =0 {Προσθήκη συνεργάτη} =1 {Προσθήκη συνεργάτη} other {Προσθήκη συνεργατών}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Πατήστε παρατεταμένα ένα email για να επιβεβαιώσετε την κρυπτογράφηση από άκρη σε άκρη.",
   "developerSettingsWarning": "Είστε σίγουροι ότι θέλετε να τροποποιήσετε τις ρυθμίσεις προγραμματιστή;",
   "developerSettings": "Ρυθμίσεις προγραμματιστή",
