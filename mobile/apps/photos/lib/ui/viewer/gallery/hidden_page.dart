@@ -12,6 +12,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
@@ -167,9 +168,10 @@ class _HiddenPageState extends State<HiddenPage> {
                 onCleanupComplete: () => _checkForCleanupNeeded(),
               ),
               secondChild: const SizedBox(width: double.infinity),
-              crossFadeState: _hasFilesNeedingCleanup
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
+              crossFadeState:
+                  _hasFilesNeedingCleanup && flagService.cleanupHiddenActions
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
               duration: const Duration(milliseconds: 750),
             ),
           ),
@@ -182,9 +184,10 @@ class _HiddenPageState extends State<HiddenPage> {
                 onCleanupComplete: () => _checkForDeviceCleanupNeeded(),
               ),
               secondChild: const SizedBox(width: double.infinity),
-              crossFadeState: _hasHiddenFilesOnDevice
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
+              crossFadeState:
+                  _hasHiddenFilesOnDevice && flagService.cleanupHiddenActions
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
               duration: const Duration(milliseconds: 750),
             ),
           ),
