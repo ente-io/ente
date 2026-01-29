@@ -403,7 +403,7 @@ class SettingsSearchRegistry {
       );
     }
 
-    if (hasLoggedIn && !isOffline) {
+    if (hasLoggedIn || isOffline) {
       items.addAll([
         SettingsSearchItem(
           title: l10n.memories,
@@ -432,7 +432,9 @@ class SettingsSearchRegistry {
             keywords: ["curated", "smart", "memories"],
           ),
       ]);
+    }
 
+    if (hasLoggedIn && !isOffline) {
       items.addAll([
         SettingsSearchItem(
           title: l10n.notifications,
