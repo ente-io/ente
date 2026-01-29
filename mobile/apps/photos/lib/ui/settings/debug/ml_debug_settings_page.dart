@@ -140,7 +140,7 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
             HugeIcons.strokeRoundedAiBrain01,
           ),
           trailingWidget: ToggleSwitchWidget(
-            value: () => flagService.hasGrantedMLConsent,
+            value: () => hasGrantedMLConsent,
             onChanged: _onMLConsentChanged,
           ),
         ),
@@ -500,9 +500,9 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
 
   Future<void> _onMLConsentChanged() async {
     try {
-      final oldMlConsent = flagService.hasGrantedMLConsent;
+      final oldMlConsent = hasGrantedMLConsent;
       final mlConsent = !oldMlConsent;
-      await flagService.setMLConsent(mlConsent);
+      await setMLConsent(mlConsent);
       logger.info('ML consent turned ${mlConsent ? 'on' : 'off'}');
       if (!mlConsent) {
         MLService.instance.pauseIndexingAndClustering();
