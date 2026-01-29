@@ -234,7 +234,6 @@ Future<void> deleteFilesOnDeviceOnly(
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final List<EnteFile> deletedFiles = [];
-  final List<int> uploadedFileIDsToClear = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
     if (deletedIDs.contains(file.localID) ||
@@ -242,18 +241,11 @@ Future<void> deleteFilesOnDeviceOnly(
       deletedFiles.add(file);
       if (hasLocalOnlyFiles && localOnlyIDs.contains(file.localID)) {
         await FilesDB.instance.deleteLocalFile(file);
-      } else if (file.uploadedFileID != null) {
-        // Collect uploadedFileIDs to batch clear localID for all rows
-        // with the same uploadedFileID (handles multiple collection entries)
-        uploadedFileIDsToClear.add(file.uploadedFileID!);
+      } else {
         file.localID = null;
+        await FilesDB.instance.update(file);
       }
     }
-  }
-  // Batch clear localIDs for all rows with matching uploadedFileIDs
-  if (uploadedFileIDsToClear.isNotEmpty) {
-    await FilesDB.instance
-        .clearLocalIDsForUploadedFileIDs(uploadedFileIDsToClear);
   }
   if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {
     Bus.instance.fire(
