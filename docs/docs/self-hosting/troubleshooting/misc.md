@@ -5,6 +5,31 @@ description: Fixing various errors when trying to self host Ente
 
 # Troubleshooting
 
+## Storage not freed after deleting files
+
+Deleted files don't immediately free up S3/MinIO storage:
+
+1. **Trash retention**: 30 days
+2. **Deletion queue**: Additional 45 days after permanent deletion
+3. **Total**: Up to 75 days before storage is freed
+
+To speed this up:
+
+1. **Empty trash** from the app to skip the 30-day wait
+2. **Expedite the deletion queue** via SQL:
+
+    ```sql
+    -- Check pending deletions
+    SELECT COUNT(*) FROM queue WHERE queue_name = 'deleteObject';
+
+    -- Make items ready for processing (bypasses 45-day safety buffer)
+    UPDATE queue
+    SET created_at = created_at - INTERVAL '46 days'
+    WHERE queue_name = 'deleteObject';
+    ```
+
+The cleanup cron runs every few minutes and will process these items.
+
 ## Functionality not working on self hosted instance
 
 If some specific functionality (e.g. album listing, video playback) does not
