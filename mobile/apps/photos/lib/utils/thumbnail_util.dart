@@ -102,7 +102,7 @@ Future<Uint8List?> getThumbnailFromLocal(
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
   }
-  if (file.uploadedFileID != null && file.uploadedFileID! > 0) {
+  if (file.isUploaded) {
     final cachedThumbnail = cachedThumbnailPath(file);
     if ((await cachedThumbnail.exists())) {
       final data = await cachedThumbnail.readAsBytes();
