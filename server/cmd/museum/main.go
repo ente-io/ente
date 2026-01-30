@@ -108,7 +108,6 @@ func main() {
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
-	viper.SetDefault("features.llmchat", false)
 	viper.SetDefault("llmchat.attachments.enabled", false)
 	viper.SetDefault("llmchat.attachments.cleanup", false)
 	viper.SetDefault("llmchat.max_json_body_bytes", int64(800*1024))
@@ -121,8 +120,6 @@ func main() {
 	secretEncryptionKey := viper.GetString("key.encryption")
 	hashingKey := viper.GetString("key.hash")
 	jwtSecret := viper.GetString("jwt.secret")
-	llmChatEnabled := viper.GetBool("features.llmchat")
-	llmChatAttachmentsEnabled := viper.GetBool("llmchat.attachments.enabled")
 	llmChatAttachmentsCleanup := viper.GetBool("llmchat.attachments.cleanup")
 
 	secretEncryptionKeyBytes, err := b64.StdEncoding.DecodeString(secretEncryptionKey)
@@ -164,7 +161,7 @@ func main() {
 	}, []string{"method"})
 
 	s3Config := s3config.NewS3Config()
-	if llmChatEnabled && llmChatAttachmentsEnabled {
+	if viper.GetBool("llmchat.attachments.enabled") {
 		// Ensure llmchat bucket (b7) is configured. No fallback.
 		_ = s3Config.GetLlmChatBucket()
 	}
@@ -183,10 +180,7 @@ func main() {
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
 	authRepo := &authenticatorRepo.Repository{DB: db}
-	var llmChatRepository *llmchatRepo.Repository
-	if llmChatEnabled {
-		llmChatRepository = &llmchatRepo.Repository{DB: db}
-	}
+	llmChatRepository := &llmchatRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
 
@@ -216,10 +210,7 @@ func main() {
 
 	authCache := cache.New(1*time.Minute, 15*time.Minute)
 	accessTokenCache := cache.New(1*time.Minute, 15*time.Minute)
-	var llmChatKeyCache *cache.Cache
-	if llmChatEnabled {
-		llmChatKeyCache = cache.New(1*time.Minute, 5*time.Minute)
-	}
+	llmChatKeyCache := cache.New(1*time.Minute, 5*time.Minute)
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
 	rateLimiter := middleware.NewRateLimitMiddleware(discordController, 1000, 1*time.Second)
 	defer rateLimiter.Stop()
@@ -900,44 +891,42 @@ func main() {
 	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
 
 	var llmChatAttachmentController *llmchatCtrl.AttachmentController
-	if llmChatEnabled {
-		if llmChatAttachmentsEnabled {
-			llmChatAttachmentController = &llmchatCtrl.AttachmentController{
-				S3Config:            s3Config,
-				Repo:                llmChatRepository,
-				SubscriptionChecker: billingController,
-				Enabled:             true,
-				UserRepo:            userRepo,
-				RemoteStoreRepo:     remoteStoreRepository,
-			}
-		}
-		llmChatController := &llmchatCtrl.Controller{
+	if viper.GetBool("llmchat.attachments.enabled") {
+		llmChatAttachmentController = &llmchatCtrl.AttachmentController{
+			S3Config:            s3Config,
 			Repo:                llmChatRepository,
-			KeyCache:            llmChatKeyCache,
 			SubscriptionChecker: billingController,
-			AttachmentCtrl:      llmChatAttachmentController,
-			AttachmentsEnabled:  llmChatAttachmentsEnabled,
-			CleanupAttachments:  llmChatAttachmentsCleanup && llmChatAttachmentsEnabled,
+			Enabled:             true,
 			UserRepo:            userRepo,
 			RemoteStoreRepo:     remoteStoreRepository,
 		}
-		llmChatHandler := &api.LlmChatHandler{
-			Controller:           llmChatController,
-			AttachmentController: llmChatAttachmentController,
-		}
-
-		privateAPI.POST("/llmchat/chat/key", llmChatHandler.UpsertKey)
-		privateAPI.GET("/llmchat/chat/key", llmChatHandler.GetKey)
-		privateAPI.POST("/llmchat/chat/session", llmChatHandler.UpsertSession)
-		privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
-		privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
-		privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
-		if llmChatAttachmentsEnabled {
-			privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
-			privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
-		}
-		privateAPI.GET("/llmchat/chat/diff", llmChatHandler.GetDiff)
 	}
+	llmChatController := &llmchatCtrl.Controller{
+		Repo:                llmChatRepository,
+		KeyCache:            llmChatKeyCache,
+		SubscriptionChecker: billingController,
+		AttachmentCtrl:      llmChatAttachmentController,
+		AttachmentsEnabled:  viper.GetBool("llmchat.attachments.enabled"),
+		CleanupAttachments:  llmChatAttachmentsCleanup && viper.GetBool("llmchat.attachments.enabled"),
+		UserRepo:            userRepo,
+		RemoteStoreRepo:     remoteStoreRepository,
+	}
+	llmChatHandler := &api.LlmChatHandler{
+		Controller:           llmChatController,
+		AttachmentController: llmChatAttachmentController,
+	}
+
+	privateAPI.POST("/llmchat/chat/key", llmChatHandler.UpsertKey)
+	privateAPI.GET("/llmchat/chat/key", llmChatHandler.GetKey)
+	privateAPI.POST("/llmchat/chat/session", llmChatHandler.UpsertSession)
+	privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
+	privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
+	privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
+	if viper.GetBool("llmchat.attachments.enabled") {
+		privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
+		privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
+	}
+	privateAPI.GET("/llmchat/chat/diff", llmChatHandler.GetDiff)
 
 	dataCleanupController := &dataCleanupCtrl.DeleteUserCleanupController{
 		Repo:           dataCleanupRepository,

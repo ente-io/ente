@@ -1,0 +1,2 @@
+-- noop since we can't remove a value from an enum: https://www.postgresql.org/docs/current/datatype-enum.html
+-- and a migration is expensive

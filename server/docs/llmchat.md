@@ -4,8 +4,8 @@ Museum can store encrypted LLM chat sessions/messages.
 
 ## Enable
 
-1. Set `features.llmchat: true` in `museum.yaml`.
-2. Ensure migration `115` has been applied.
+1. Ensure migrations `115` (llmchat schema) and `117` (llmchat app enum) have been applied.
+2. LLM chat uses app type `llmchat` (clients should send `X-Client-Package: io.ente.ensu` or `io.ente.llmchat`).
 
 ## Endpoints (authenticated)
 
@@ -36,7 +36,7 @@ When enabled, attachments are only available for internal users (`@ente.io` or u
 
 When enabled:
 
-- Apply migrations `115` and `116` (adds `b7` to `s3region`).
+- Apply migration `116` (adds `b7` to `s3region`) after the base llmchat migrations.
 - Uploads are staged under `llmchat/attachments/<user_id>/<attachment_uuid>` in bucket `b7`.
 - Attachments are committed when referenced by a message.
 

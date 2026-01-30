@@ -95,6 +95,10 @@ func GetApp(c *gin.Context) ente.App {
 		return ente.Locker
 	}
 
+	if strings.HasPrefix(c.GetHeader("X-Client-Package"), "io.ente.ensu") || strings.HasPrefix(c.GetHeader("X-Client-Package"), "io.ente.llmchat") {
+		return ente.LlmChat
+	}
+
 	return ente.Photos
 }
 
