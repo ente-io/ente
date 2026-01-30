@@ -81,6 +81,106 @@ class NotificationSettingsScreen extends StatelessWidget {
                         ),
                       ),
                       MenuItemWidgetNew(
+                        title:
+                            AppLocalizations.of(context).commentNotifications,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () =>
+                              NotificationService.instance
+                                  .hasGrantedPermissions() &&
+                              NotificationService.instance
+                                  .shouldShowCommentNotifications(),
+                          onChanged: () async {
+                            await NotificationService.instance
+                                .requestPermissions();
+                            await NotificationService.instance
+                                .setShouldShowCommentNotifications(
+                              !NotificationService.instance
+                                  .shouldShowCommentNotifications(),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                          bottom: 16,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .commentNotificationsExplanation,
+                          style: textTheme.mini
+                              .copyWith(color: colorScheme.textMuted),
+                        ),
+                      ),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).likeNotifications,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () =>
+                              NotificationService.instance
+                                  .hasGrantedPermissions() &&
+                              NotificationService.instance
+                                  .shouldShowLikeNotifications(),
+                          onChanged: () async {
+                            await NotificationService.instance
+                                .requestPermissions();
+                            await NotificationService.instance
+                                .setShouldShowLikeNotifications(
+                              !NotificationService.instance
+                                  .shouldShowLikeNotifications(),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                          bottom: 16,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .likeNotificationsExplanation,
+                          style: textTheme.mini
+                              .copyWith(color: colorScheme.textMuted),
+                        ),
+                      ),
+                      MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).replyNotifications,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () =>
+                              NotificationService.instance
+                                  .hasGrantedPermissions() &&
+                              NotificationService.instance
+                                  .shouldShowReplyNotifications(),
+                          onChanged: () async {
+                            await NotificationService.instance
+                                .requestPermissions();
+                            await NotificationService.instance
+                                .setShouldShowReplyNotifications(
+                              !NotificationService.instance
+                                  .shouldShowReplyNotifications(),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                          bottom: 16,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .replyNotificationsExplanation,
+                          style: textTheme.mini
+                              .copyWith(color: colorScheme.textMuted),
+                        ),
+                      ),
+                      MenuItemWidgetNew(
                         title: AppLocalizations.of(context).onThisDayMemories,
                         trailingWidget: ToggleSwitchWidget(
                           value: () =>

@@ -6,6 +6,7 @@ import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/services/collections_service.dart";
+import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/services/social_sync_service.dart";
 
 /// Provider for feed data.
@@ -101,6 +102,9 @@ class FeedDataProvider {
   Future<void> syncAllSharedCollections() async {
     try {
       await SocialSyncService.instance.syncAllSharedCollections();
+      await SocialNotificationCoordinator.instance.notifyAfterSocialSync(
+        trigger: SocialNotificationTrigger.feedRefresh,
+      );
     } catch (e) {
       _logger.warning('Failed to sync shared collections', e);
     }
