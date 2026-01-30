@@ -30,6 +30,8 @@ services:
 
   postgres:
     image: postgres:15
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
