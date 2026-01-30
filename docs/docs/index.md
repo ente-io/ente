@@ -10,12 +10,13 @@ description: >
 
 ## Introduction
 
-Ente (pronounced en-_tay_) is a end-to-end encrypted platform for privately,
-reliably, and securely storing your data on the cloud, over which 2 applications
-have been developed and made available for mobile, web and desktop, namely:
+Ente (pronounced en-_tay_) is an end-to-end encrypted platform for privately,
+reliably, and securely storing your data on the cloud, over which 3 applications
+have been developed and made available, namely:
 
 - **Ente Photos** - An alternative to Google Photos and Apple Photos.
 - **Ente Auth** - A free 2FA alternative to Authy.
+- **Ente Locker** - Secure storage for documents and sensitive information.
 
 ## History
 
@@ -37,9 +38,9 @@ and friendly nature of the community and team.
 
 ## Getting Started
 
-We recommend reading the documentation for [Ente Photos](/photos/) or
-[Ente Auth](/auth/) to get started with installation on the desired platform,
-explore available features and usage.
+We recommend reading the documentation for [Ente Photos](/photos/),
+[Ente Auth](/auth/), or [Ente Locker](/locker/) to get started with installation
+on the desired platform, explore available features and usage.
 
 If you are looking to self-host Ente, we recommend you to read the
 [official documentation](/self-hosting/) for updated information on getting

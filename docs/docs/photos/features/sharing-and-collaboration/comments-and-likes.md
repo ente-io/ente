@@ -32,11 +32,13 @@ When you comment on a photo or like it, only people with access to that shared a
 You can like any photo or video in a shared album:
 
 **On mobile:**
+
 1. Open a photo in a shared album
 2. Tap the heart icon in the bottom bar
 3. Your like is added instantly
 
 **On web/desktop:**
+
 1. Open a photo in a shared album
 2. Click the heart icon in the viewer
 3. Your like is added instantly
@@ -55,6 +57,7 @@ To see who has liked a photo:
 ### Adding comments
 
 **On mobile:**
+
 1. Open a photo in a shared album
 2. Tap the comment icon in the bottom bar
 3. The comments sheet opens at the bottom
@@ -62,6 +65,7 @@ To see who has liked a photo:
 5. Tap the send button
 
 **On web/desktop:**
+
 1. Open a photo in a shared album
 2. Click the comment icon in the viewer
 3. The comments sidebar opens on the right
@@ -74,11 +78,13 @@ Your comment appears immediately for all album participants.
 You can reply directly to any comment to maintain conversation threads:
 
 **On mobile:**
+
 - **Long press** on a comment bubble and select "Reply", or
 - **Swipe right** on a comment to quickly start a reply
 - Type your reply and send
 
 **On web/desktop:**
+
 - Right click a comment and click the reply icon
 - Type your reply and send
 
@@ -89,12 +95,14 @@ Replies show a quote from the parent comment to maintain context.
 You can like individual comments:
 
 **On mobile:**
+
 - **Double tap** a comment bubble to quickly like it, or
 - **Long press** on a comment and select the heart icon
 - The like count appears in the bottom-right corner of liked comments
 - Tap the like count to see who liked the comment
 
 **On web/desktop:**
+
 - Right click over a comment and click like
 
 ### Deleting comments
@@ -102,11 +110,13 @@ You can like individual comments:
 You can delete your own comments, and album owners/admins can delete any comment:
 
 **On mobile:**
+
 - Long press on your comment
 - Select "Delete"
 - Confirm the deletion
 
 **On web/desktop:**
+
 - Right click on the comment and click delete
 
 ### Multi-album files
@@ -126,6 +136,7 @@ Each album maintains its own separate comments and likes for the same photo.
 People viewing your album through a public link can comment and like without creating an Ente account:
 
 **First-time visitors are prompted to:**
+
 1. Enter a display name (used to identify their comments)
 2. Start commenting and liking
 
@@ -144,6 +155,7 @@ Album owners can control whether comments and likes are allowed on public links:
 When disabled, comments and likes and their buttons are hidden from public link viewers.
 
 **Who can delete public link comments:**
+
 - Anonymous commenters can delete their own comments
 - Album owners and admins can delete any comment, including anonymous ones
 
@@ -154,6 +166,7 @@ This helps you moderate content collected through public links.
 The Feed feature provides a centralized view of all social activity across your shared albums:
 
 **What appears in your feed:**
+
 - New likes on your photos
 - New comments on your photos
 - Replies to your comments
@@ -162,6 +175,7 @@ The Feed feature provides a centralized view of all social activity across your 
 **Accessing the feed:**
 
 **On mobile:**
+
 - Go to the "Sharing" tab
 - Tap "Feed" at the top
 - Scroll through recent social activity
@@ -182,12 +196,14 @@ To maintain performance and prevent abuse:
 ## Platform availability
 
 **Mobile apps (iOS and Android):**
+
 - Full support for comments and likes
 - Can add, view, reply, like, and delete
 - Feed feature available
 - Interactive gestures (double-tap to like, swipe to reply)
 
 **Web and desktop:**
+
 - Full support for comments and likes
 - Can add, view, reply, like, and delete
 
