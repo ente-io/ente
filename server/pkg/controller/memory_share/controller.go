@@ -64,6 +64,11 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 		}
 	}
 
+	// Validate all requested file IDs exist
+	if len(fileOwnerMap) != len(fileIDs) {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "one or more file IDs do not exist")
+	}
+
 	accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 
 	share := ente.MemoryShare{
