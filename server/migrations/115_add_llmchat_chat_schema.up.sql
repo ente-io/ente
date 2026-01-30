@@ -1,3 +1,5 @@
+ALTER TYPE app ADD VALUE 'llmchat';
+
 CREATE TABLE IF NOT EXISTS llmchat_key (
     user_id       BIGINT PRIMARY KEY NOT NULL,
     encrypted_key TEXT   NOT NULL,
