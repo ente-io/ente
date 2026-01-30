@@ -1,4 +1,7 @@
 import Foundation
+#if os(iOS)
+import UIKit
+#endif
 #if canImport(ZIPFoundation)
 import ZIPFoundation
 #endif
@@ -82,8 +85,8 @@ final class EnsuLogging {
                 try? FileManager.default.createDirectory(at: self.logsDirectory, withIntermediateDirectories: true)
             }
 
-            let details = self.buildSystemInfo()
-            self.log(level: .info, tag: "App", message: "Ensū started", details: details, error: nil)
+            let launchMessage = self.buildAppLaunchMessage()
+            self.log(level: .info, tag: "App", message: launchMessage)
         }
     }
 
@@ -191,13 +194,45 @@ final class EnsuLogging {
     private func formatLine(_ entry: EnsuLogEntry) -> String {
         let ts = lineFormatter.string(from: entry.timestamp)
         let header = "[\(entry.tag)][\(entry.level.rawValue)] [\(ts)]"
-        var out = "\(header) \(entry.message)\n"
-        if let details = entry.details, !details.isEmpty {
-            for line in details.split(separator: "\n", omittingEmptySubsequences: false) {
-                out += "\(header) ⤷ \(line)\n"
+        let message = entry.message
+        let details = entry.details ?? ""
+        let shouldInline = entry.level == .info && !details.isEmpty && !looksLikeStackTrace(details)
+        var out = "\(header) \(message)\n"
+        if !details.isEmpty {
+            if shouldInline {
+                let inline = inlineDetails(details)
+                if !inline.isEmpty {
+                    out += "\(inline)\n"
+                }
+            } else {
+                for line in details.split(separator: "\n", omittingEmptySubsequences: false) {
+                    out += "\(line)\n"
+                }
             }
         }
         return out
+    }
+
+    private func inlineDetails(_ details: String) -> String {
+        details
+            .split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: " | ")
+    }
+
+    private func looksLikeStackTrace(_ details: String) -> Bool {
+        details
+            .split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .contains { isStackTraceLine($0) }
+    }
+
+    private func isStackTraceLine(_ line: String) -> Bool {
+        line.hasPrefix("at ") ||
+            line.hasPrefix("...") ||
+            line.hasPrefix("Caused by") ||
+            line.hasPrefix("Suppressed:")
     }
 
     private func combineDetails(details: String?, error: Error?) -> String? {
@@ -213,21 +248,25 @@ final class EnsuLogging {
         return parts.isEmpty ? nil : parts.joined(separator: "\n")
     }
 
-    private func buildSystemInfo() -> String {
-        var lines: [String] = []
+    private func buildAppLaunchMessage() -> String {
+        var parts: [String] = ["App launched"]
+
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                parts.append("app=\(version)+\(build)")
+            } else {
+                parts.append("app=\(version)")
+            }
+        }
 
         #if os(iOS)
-        let device = "\(ProcessInfo.processInfo.operatingSystemVersionString)"
-        lines.append("os: \(device)")
+        parts.append("device=\(UIDevice.current.model)")
         #elseif os(macOS)
-        lines.append("os: \(ProcessInfo.processInfo.operatingSystemVersionString)")
+        parts.append("device=Mac")
         #endif
 
-        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-           let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-            lines.append("app: \(version)+\(build)")
-        }
-        return lines.joined(separator: "\n")
+        parts.append("os=\(ProcessInfo.processInfo.operatingSystemVersionString)")
+        return parts.joined(separator: " ")
     }
 }
 

@@ -10,9 +10,8 @@ struct LogsView: View {
     @State private var query: String = ""
     @State private var selectedEntry: EnsuLogEntry?
 
-    @State private var presentingShare = false
-    @State private var presentingExport = false
-    @State private var archiveURL: URL?
+    @State private var shareArchive: LogArchive?
+    @State private var exportArchive: LogArchive?
 
     @ObservedObject private var logStore = EnsuLogStore.shared
 
@@ -61,15 +60,11 @@ struct LogsView: View {
             refreshEntries()
         }
         #if os(iOS)
-        .sheet(isPresented: $presentingShare) {
-            if let archiveURL {
-                ActivityView(activityItems: [archiveURL])
-            }
+        .sheet(item: $shareArchive) { archive in
+            ActivityView(activityItems: [archive.url])
         }
-        .sheet(isPresented: $presentingExport) {
-            if let archiveURL {
-                ExportDocumentPicker(urls: [archiveURL])
-            }
+        .sheet(item: $exportArchive) { archive in
+            ExportDocumentPicker(urls: [archive.url])
         }
         #endif
         .sheet(item: $selectedEntry) { entry in
@@ -162,6 +157,21 @@ struct LogsView: View {
         for line in lines {
             guard !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
             guard let match = logLineRegex.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.count)) else {
+                if let index = currentIndex {
+                    let detailLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !detailLine.isEmpty {
+                        let current = parsedEntries[index]
+                        let existing = current.details ?? ""
+                        let combined = existing.isEmpty ? detailLine : "\n" + detailLine
+                        parsedEntries[index] = EnsuLogEntry(
+                            timestamp: current.timestamp,
+                            level: current.level,
+                            tag: current.tag,
+                            message: current.message,
+                            details: combined
+                        )
+                    }
+                }
                 continue
             }
 
@@ -177,9 +187,14 @@ struct LogsView: View {
             let timestampString = String(line[timestampRange])
             let message = String(line[messageRange])
 
-            if message.hasPrefix("⤷ ") {
+            if message.hasPrefix("-> ") || message.hasPrefix("⤷ ") {
                 guard let index = currentIndex else { continue }
-                let detailLine = String(message.dropFirst(2))
+                let detailLine: String
+                if message.hasPrefix("-> ") {
+                    detailLine = String(message.dropFirst(3))
+                } else {
+                    detailLine = String(message.dropFirst(2))
+                }
                 let current = parsedEntries[index]
                 let existing = current.details ?? ""
                 let combined = existing.isEmpty ? detailLine : "\n" + detailLine
@@ -211,39 +226,32 @@ struct LogsView: View {
 
     private func shareTapped() {
         do {
-            archiveURL = try EnsuLogging.shared.createLogsArchive()
+            let archiveURL = try EnsuLogging.shared.createLogsArchive()
+            #if os(iOS)
+            shareArchive = LogArchive(url: archiveURL)
+            #elseif os(macOS)
+            MacShareSheet(items: [archiveURL]).present()
+            #endif
         } catch {
             logger.error("Failed to create logs archive", error)
-            return
         }
-
-        #if os(iOS)
-        presentingShare = true
-        #elseif os(macOS)
-        if let archiveURL {
-            MacShareSheet(items: [archiveURL]).present()
-        }
-        #endif
     }
 
     private func exportTapped() {
         do {
-            archiveURL = try EnsuLogging.shared.createLogsArchive()
+            let archiveURL = try EnsuLogging.shared.createLogsArchive()
+            #if os(iOS)
+            exportArchive = LogArchive(url: archiveURL)
+            #elseif os(macOS)
+            exportOnMac(url: archiveURL)
+            #endif
         } catch {
             logger.error("Failed to create logs archive", error)
-            return
         }
-
-        #if os(iOS)
-        presentingExport = true
-        #elseif os(macOS)
-        exportOnMac()
-        #endif
     }
 
     #if os(macOS)
-    private func exportOnMac() {
-        guard let archiveURL else { return }
+    private func exportOnMac(url archiveURL: URL) {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = archiveURL.lastPathComponent
         panel.begin { response in
@@ -259,6 +267,11 @@ struct LogsView: View {
         }
     }
     #endif
+}
+
+private struct LogArchive: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 private struct LogCard: View {
