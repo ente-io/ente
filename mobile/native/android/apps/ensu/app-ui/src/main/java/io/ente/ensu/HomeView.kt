@@ -140,6 +140,7 @@ fun HomeView(
     }
 
     val handleDeveloperTap: () -> Unit = handle@{
+        if (!EnsuFeatureFlags.enableSignIn) return@handle
         // Don't allow switching endpoints for logged-in users.
         if (appState.auth.isLoggedIn) return@handle
 
@@ -354,7 +355,13 @@ fun HomeView(
                             },
                             onStartDownload = { userInitiated ->
                                 store.startModelDownload(userInitiated = userInitiated)
-                            }
+                            },
+                            onOverflowTrim = store::confirmOverflowTrim,
+                            onOverflowIncreaseContext = {
+                                store.cancelOverflowDialog()
+                                navController.navigate(HomeRoute.ModelSettings)
+                            },
+                            onOverflowCancel = store::cancelOverflowDialog
                         )
                     }
                     composable(

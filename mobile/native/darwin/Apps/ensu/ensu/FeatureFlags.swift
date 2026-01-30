@@ -2,7 +2,7 @@
 import Foundation
 
 enum EnsuFeatureFlags {
-    static let enableSignIn = false
+    static let enableSignIn = true
     static let enableImageUploads = true
 }
 #endif

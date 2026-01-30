@@ -27,5 +27,13 @@ data class ChatState(
     val transientAssistantParentId: String? = null,
     val isModelDownloaded: Boolean = false,
     val modelDownloadSizeBytes: Long? = null,
-    val hasRequestedModelDownload: Boolean = false
+    val hasRequestedModelDownload: Boolean = false,
+    val overflowDialog: OverflowDialogState? = null
+)
+
+data class OverflowDialogState(
+    val inputTokens: Int,
+    val inputBudget: Int,
+    val contextLength: Int,
+    val maxOutput: Int
 )
