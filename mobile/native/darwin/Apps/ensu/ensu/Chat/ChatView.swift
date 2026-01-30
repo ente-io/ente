@@ -8,28 +8,36 @@ struct ChatView: View {
     @EnvironmentObject private var appState: EnsuAppState
     @ObservedObject private var modelSettings = ModelSettingsStore.shared
 
-    @State private var isDrawerOpen = false
-    @State private var showSettings = false
-    @State private var toastMessage: ToastMessage?
+    @StateObject private var viewState = ChatViewState()
     @StateObject private var keyboard = KeyboardObserver()
-    @State private var deleteSession: ChatSession?
-    @State private var developerTapCount = 0
-    @State private var lastDeveloperTapAt: Date?
-    @State private var isOpeningDeveloperSettings = false
-    @State private var showDeveloperAlert = false
-    @State private var showDeveloperSettings = false
-    @State private var showAttachmentDownloads = false
-    @State private var showSignInComingSoon = false
-    @State private var didAutoFocusInput = false
     @FocusState private var isInputFocused: Bool
-    @State private var inputBarHeight: CGFloat = 0
-    @State private var wasDrawerOpen = false
-    @State private var didDismissKeyboard = false
-    @State private var sessionTransitionId = UUID()
 
     private var editingMessage: ChatMessage? {
         guard let editingId = viewModel.editingMessageId else { return nil }
         return viewModel.messages.first { $0.id == editingId }
+    }
+
+    private var toastTrigger: ToastTrigger {
+        ToastTrigger(
+            syncError: viewModel.syncErrorMessage,
+            syncSuccess: viewModel.syncSuccessMessage,
+            generationError: viewModel.generationErrorMessage
+        )
+    }
+
+    private var shouldAutoFocusInput: Bool {
+        viewModel.isModelDownloaded
+            && !viewModel.isDownloading
+            && !viewModel.isGenerating
+            && !viewState.didAutoFocusInput
+            && !viewState.isDrawerOpen
+            && !viewState.didDismissKeyboard
+            && !viewState.showSettings
+            && !viewState.showDeveloperSettings
+    }
+
+    private var modelSettingsSignature: String {
+        "\(modelSettings.useCustomModel)|\(modelSettings.modelUrl)|\(modelSettings.mmprojUrl)"
     }
 
     private let drawerWidth: CGFloat = 320
@@ -63,21 +71,21 @@ struct ChatView: View {
                                 .gesture(
                                     DragGesture(minimumDistance: 20)
                                         .onEnded { value in
-                                            guard !isDrawerOpen else { return }
+                                            guard !viewState.isDrawerOpen else { return }
                                             guard value.startLocation.x <= 24 else { return }
                                             let horizontal = value.translation.width
                                             let vertical = value.translation.height
                                             guard abs(horizontal) > abs(vertical), horizontal > 40 else { return }
-                                            isDrawerOpen = true
+                                            viewState.isDrawerOpen = true
                                         }
                                 )
                             #endif
                         }
 
-                    if isDrawerOpen {
+                    if viewState.isDrawerOpen {
                         Color.black.opacity(0.25)
                             .ignoresSafeArea()
-                            .onTapGesture { isDrawerOpen = false }
+                            .onTapGesture { viewState.isDrawerOpen = false }
                             #if os(iOS)
                             .gesture(
                                 DragGesture(minimumDistance: 20)
@@ -85,7 +93,7 @@ struct ChatView: View {
                                         let horizontal = value.translation.width
                                         let vertical = value.translation.height
                                         guard abs(horizontal) > abs(vertical), horizontal < -40 else { return }
-                                        isDrawerOpen = false
+                                        viewState.isDrawerOpen = false
                                     }
                             )
                             #endif
@@ -97,101 +105,90 @@ struct ChatView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onChange(of: isWideLayout) { newValue in
                 if newValue {
-                    isDrawerOpen = false
+                    viewState.isDrawerOpen = false
                 }
             }
-            .onChange(of: isDrawerOpen) { isOpen in
+            .onChange(of: viewState.isDrawerOpen) { isOpen in
                 if isOpen {
                     isInputFocused = false
-                    wasDrawerOpen = true
-                } else if wasDrawerOpen {
+                    viewState.wasDrawerOpen = true
+                } else if viewState.wasDrawerOpen {
                     let shouldRestoreFocus = viewModel.isModelDownloaded
                         && !viewModel.isDownloading
                         && !viewModel.isGenerating
-                        && !didDismissKeyboard
-                        && !showSettings
-                        && !showDeveloperSettings
+                        && !viewState.didDismissKeyboard
+                        && !viewState.showSettings
+                        && !viewState.showDeveloperSettings
                     if shouldRestoreFocus {
                         requestInputFocus()
                     }
-                    wasDrawerOpen = false
+                    viewState.wasDrawerOpen = false
                 }
             }
-            .onChange(of: viewModel.syncErrorMessage) { message in
-                guard let message else { return }
-                showToast(message, duration: 2)
-                viewModel.syncErrorMessage = nil
+            .onChange(of: toastTrigger) { trigger in
+                handleToastTrigger(trigger)
             }
-            .onChange(of: viewModel.syncSuccessMessage) { message in
-                guard let message else { return }
-                showToast(message, duration: 2)
-                viewModel.syncSuccessMessage = nil
-            }
-            .onChange(of: viewModel.generationErrorMessage) { message in
-                guard let message else { return }
-                showToast(message, duration: 2)
-                viewModel.generationErrorMessage = nil
-            }
-            .onChange(of: modelSettings.useCustomModel) { _ in
-                viewModel.refreshModelDownloadInfo()
-            }
-            .onChange(of: modelSettings.modelUrl) { _ in
-                viewModel.refreshModelDownloadInfo()
-            }
-            .onChange(of: modelSettings.mmprojUrl) { _ in
+            .onChange(of: modelSettingsSignature) { _ in
                 viewModel.refreshModelDownloadInfo()
             }
         }
-        .sheet(isPresented: $showSettings) {
+        .sheet(isPresented: $viewState.showSettings) {
             SettingsView(
                 isLoggedIn: appState.isLoggedIn,
                 email: CredentialStore.shared.email,
                 onSignOut: {
                     appState.logout()
-                    showSettings = false
-                    isDrawerOpen = false
+                    viewState.showSettings = false
+                    viewState.isDrawerOpen = false
                 },
                 onSignIn: {
-                    handleSignInRequest()
+                    viewState.pendingSignInRequest = true
+                    viewState.showSettings = false
                 }
             )
         }
-        .onChange(of: showSettings) { isPresented in
+        .onChange(of: viewState.showSettings) { isPresented in
             if isPresented {
-                didDismissKeyboard = true
+                viewState.didDismissKeyboard = true
                 isInputFocused = false
+            } else if viewState.pendingSignInRequest {
+                viewState.pendingSignInRequest = false
+                handleSignInRequest()
             }
         }
-        .sheet(isPresented: $showAttachmentDownloads) {
+        .sheet(isPresented: $viewState.showAttachmentDownloads) {
             AttachmentDownloadsSheet(
                 downloads: viewModel.attachmentDownloads,
                 sessionTitle: { viewModel.sessionTitle(for: $0) },
                 onCancel: { viewModel.cancelAttachmentDownload($0) },
-                onDismiss: { showAttachmentDownloads = false }
+                onDismiss: { viewState.showAttachmentDownloads = false }
             )
         }
-        .sheet(isPresented: $showSignInComingSoon) {
+        .sheet(isPresented: $viewState.showSignInComingSoon) {
             ComingSoonSheet(title: "Sign in", message: "Coming soon") {
-                showSignInComingSoon = false
+                viewState.showSignInComingSoon = false
             }
         }
-        .platformFullScreenCover(isPresented: $showDeveloperSettings) {
+        .sheet(isPresented: $viewState.showModelSettings) {
+            ModelSettingsView(embeddedInNavigation: true)
+        }
+        .platformFullScreenCover(isPresented: $viewState.showDeveloperSettings) {
             DeveloperSettingsView { message in
                 showToast(message, duration: 2)
             }
         }
-        .alert("Developer settings", isPresented: $showDeveloperAlert) {
+        .alert("Developer settings", isPresented: $viewState.showDeveloperAlert) {
             Button("Yes") {
-                showDeveloperSettings = true
-                isOpeningDeveloperSettings = false
+                viewState.showDeveloperSettings = true
+                viewState.isOpeningDeveloperSettings = false
             }
             Button("Cancel", role: .cancel) {
-                isOpeningDeveloperSettings = false
+                viewState.isOpeningDeveloperSettings = false
             }
         } message: {
             Text("Are you sure that you want to modify Developer settings?")
         }
-        .alert(item: $deleteSession) { session in
+        .alert(item: $viewState.deleteSession) { session in
             Alert(
                 title: Text("Delete Chat"),
                 message: Text("Are you sure you want to delete this chat?"),
@@ -201,8 +198,22 @@ struct ChatView: View {
                 secondaryButton: .cancel()
             )
         }
+        .confirmationDialog("Context limit reached", item: $viewModel.overflowAlert, titleVisibility: .visible) { alert in
+            Button("Trim history") {
+                viewModel.confirmOverflowTrim()
+            }
+            Button("Increase context") {
+                viewModel.cancelOverflowDialog()
+                viewState.showModelSettings = true
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelOverflowDialog()
+            }
+        } message: { alert in
+            Text("Input uses \(alert.inputTokens) tokens (budget \(alert.inputBudget)).")
+        }
         .overlay(alignment: .bottom) {
-            if let toastMessage {
+            if let toastMessage = viewState.toastMessage {
                 ToastView(message: toastMessage.text)
                     .padding(.bottom, EnsuSpacing.xl)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -220,12 +231,12 @@ struct ChatView: View {
                 showsMenuButton: showsMenuButton,
                 attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
                 modelDownloadState: viewModel.downloadToast,
-                onMenu: { isDrawerOpen.toggle() },
+                onMenu: { viewState.isDrawerOpen.toggle() },
                 onSignIn: {
                     handleSignInRequest()
                 },
                 onAttachmentDownloads: {
-                    showAttachmentDownloads = true
+                    viewState.showAttachmentDownloads = true
                 }
             )
 
@@ -248,7 +259,7 @@ struct ChatView: View {
                     isGenerating: viewModel.isGenerating,
                     sessionId: viewModel.currentSessionId,
                     keyboardHeight: keyboard.height,
-                    inputBarHeight: viewModel.isModelDownloaded ? inputBarHeight : 0,
+                    inputBarHeight: viewModel.isModelDownloaded ? viewState.inputBarHeight : 0,
                     emptyStateTitle: "Welcome",
                     emptyStateSubtitle: "Start typing to begin a conversation",
                     onEdit: { message in
@@ -265,12 +276,12 @@ struct ChatView: View {
                         viewModel.changeBranch(for: message, delta: delta)
                     },
                     onDismissKeyboard: {
-                        didDismissKeyboard = true
+                        viewState.didDismissKeyboard = true
                         isInputFocused = false
                     }
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .id(sessionTransitionId)
+                .id(viewState.sessionTransitionId)
                 .transition(sessionTransition)
                 .onAppear {
                     viewModel.autoStartModelDownloadIfNeeded()
@@ -281,14 +292,7 @@ struct ChatView: View {
                 .zIndex(0)
 
                 if viewModel.isModelDownloaded {
-                    let shouldAutoFocus = viewModel.isModelDownloaded
-                        && !viewModel.isDownloading
-                        && !viewModel.isGenerating
-                        && !didAutoFocusInput
-                        && !isDrawerOpen
-                        && !didDismissKeyboard
-                        && !showSettings
-                        && !showDeveloperSettings
+                    let shouldAutoFocus = shouldAutoFocusInput
 
                     MessageInputView(
                         text: $viewModel.draftText,
@@ -299,7 +303,7 @@ struct ChatView: View {
                         isProcessingAttachments: viewModel.isProcessingAttachments,
                         isAttachmentDownloadBlocked: viewModel.isAttachmentDownloadBlocked,
                         onSend: {
-                            didDismissKeyboard = true
+                            viewState.didDismissKeyboard = true
                             isInputFocused = false
                             viewModel.sendDraft()
                         },
@@ -319,28 +323,28 @@ struct ChatView: View {
                             viewModel.removeAttachment(attachment)
                         },
                         onUserFocus: {
-                            didDismissKeyboard = false
+                            viewState.didDismissKeyboard = false
                         },
                         onDismissKeyboard: {
-                            didDismissKeyboard = true
+                            viewState.didDismissKeyboard = true
                         },
                         isFocused: $isInputFocused
                     )
                     .onPreferenceChange(InputBarHeightKey.self) { newValue in
-                        inputBarHeight = newValue
+                        viewState.inputBarHeight = newValue
                     }
                     .onAppear {
                         if shouldAutoFocus {
                             requestInputFocus()
-                            didAutoFocusInput = true
-                            didDismissKeyboard = false
+                            viewState.didAutoFocusInput = true
+                            viewState.didDismissKeyboard = false
                         }
                     }
                     .onChange(of: shouldAutoFocus) { newValue in
                         if newValue {
                             requestInputFocus()
-                            didAutoFocusInput = true
-                            didDismissKeyboard = false
+                            viewState.didAutoFocusInput = true
+                            viewState.didDismissKeyboard = false
                         }
                     }
                     .zIndex(1)
@@ -362,12 +366,12 @@ struct ChatView: View {
                     .zIndex(2)
                 }
             }
-            .animation(.easeInOut(duration: 0.32), value: sessionTransitionId)
+            .animation(.easeInOut(duration: 0.32), value: viewState.sessionTransitionId)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onChange(of: viewModel.currentSessionId) { _ in
             withAnimation(.easeInOut(duration: 0.32)) {
-                sessionTransitionId = UUID()
+                viewState.sessionTransitionId = UUID()
             }
         }
     }
@@ -381,21 +385,21 @@ struct ChatView: View {
             email: CredentialStore.shared.email,
             onNewChat: {
                 viewModel.startNewSession()
-                isDrawerOpen = false
+                viewState.isDrawerOpen = false
             },
             onSelectSession: { session in
                 viewModel.selectSession(session)
-                isDrawerOpen = false
+                viewState.isDrawerOpen = false
             },
             onDeleteSession: { session in
-                deleteSession = session
+                viewState.deleteSession = session
             },
             onSync: {
                 viewModel.syncNow(showErrors: true, showSuccess: true)
             },
             onOpenSettings: {
-                isDrawerOpen = false
-                showSettings = true
+                viewState.isDrawerOpen = false
+                viewState.showSettings = true
             },
             onDeveloperTap: {
                 handleDeveloperTap()
@@ -407,19 +411,44 @@ struct ChatView: View {
             drawer
         } else {
             drawer
-                .offset(x: isDrawerOpen ? 0 : drawerHiddenOffset)
-                .animation(.easeOut(duration: 0.25), value: isDrawerOpen)
+                .offset(x: viewState.isDrawerOpen ? 0 : drawerHiddenOffset)
+                .animation(.easeOut(duration: 0.25), value: viewState.isDrawerOpen)
+        }
+    }
+
+    private func handleToastTrigger(_ trigger: ToastTrigger) {
+        if let message = trigger.syncError {
+            showToast(message, duration: 2)
+            viewModel.syncErrorMessage = nil
+            return
+        }
+        if let message = trigger.syncSuccess {
+            showToast(message, duration: 2)
+            viewModel.syncSuccessMessage = nil
+            return
+        }
+        if let message = trigger.generationError {
+            showToast(message, duration: 2)
+            viewModel.generationErrorMessage = nil
         }
     }
 
     private func showToast(_ text: String, duration: TimeInterval) {
+        viewState.toastTask?.cancel()
         withAnimation(.easeOut(duration: 0.2)) {
-            toastMessage = ToastMessage(text: text)
+            viewState.toastMessage = ToastMessage(text: text)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            withAnimation(.easeIn(duration: 0.2)) {
-                toastMessage = nil
+        let nanoseconds = UInt64(max(0, duration) * 1_000_000_000)
+        viewState.toastTask = Task { @MainActor in
+            do {
+                try await Task.sleep(nanoseconds: nanoseconds)
+            } catch {
+                return
             }
+            withAnimation(.easeIn(duration: 0.2)) {
+                viewState.toastMessage = nil
+            }
+            viewState.toastTask = nil
         }
     }
 
@@ -433,33 +462,63 @@ struct ChatView: View {
         if EnsuFeatureFlags.enableSignIn {
             isShowingAuth = true
         } else {
-            showSignInComingSoon = true
+            viewState.showSignInComingSoon = true
         }
     }
 
     private func handleDeveloperTap() {
+        guard EnsuFeatureFlags.enableSignIn else { return }
         // Don't allow switching endpoints for logged-in users.
         guard !appState.isLoggedIn else { return }
 
         let now = Date()
-        if let lastDeveloperTapAt,
+        if let lastDeveloperTapAt = viewState.lastDeveloperTapAt,
            now.timeIntervalSince(lastDeveloperTapAt) > 2 {
-            developerTapCount = 0
+            viewState.developerTapCount = 0
         }
 
-        lastDeveloperTapAt = now
-        developerTapCount += 1
+        viewState.lastDeveloperTapAt = now
+        viewState.developerTapCount += 1
 
-        guard developerTapCount >= 5 else { return }
-        developerTapCount = 0
+        guard viewState.developerTapCount >= 5 else { return }
+        viewState.developerTapCount = 0
         presentDeveloperPrompt()
     }
 
     private func presentDeveloperPrompt() {
-        guard !isOpeningDeveloperSettings else { return }
-        isOpeningDeveloperSettings = true
-        showDeveloperAlert = true
+        guard !viewState.isOpeningDeveloperSettings else { return }
+        viewState.isOpeningDeveloperSettings = true
+        viewState.showDeveloperAlert = true
     }
+}
+
+private final class ChatViewState: ObservableObject {
+    @Published var isDrawerOpen = false
+    @Published var showSettings = false
+    @Published var toastMessage: ToastMessage?
+    @Published var deleteSession: ChatSession?
+    @Published var developerTapCount = 0
+    @Published var lastDeveloperTapAt: Date?
+    @Published var isOpeningDeveloperSettings = false
+    @Published var showDeveloperAlert = false
+    @Published var showDeveloperSettings = false
+    @Published var showModelSettings = false
+    @Published var showAttachmentDownloads = false
+    @Published var showSignInComingSoon = false
+    @Published var pendingSignInRequest = false
+    @Published var didAutoFocusInput = false
+    @Published var inputBarHeight: CGFloat = 0
+    @Published var wasDrawerOpen = false
+    @Published var didDismissKeyboard = false
+    @Published var sessionTransitionId = UUID()
+
+    var toastTask: Task<Void, Never>?
+}
+
+private struct ToastTrigger: Equatable {
+    let syncError: String?
+    let syncSuccess: String?
+    let generationError: String?
 }
 
 private struct DownloadOnboardingView: View {
@@ -485,7 +544,7 @@ private struct DownloadOnboardingView: View {
                     if let totalBytes, let percent = downloadPercent, percent >= 0 {
                         let clamped = min(max(percent, 0), 100)
                         let downloaded = Int64(Double(totalBytes) * Double(clamped) / 100.0)
-                        return "Downloading... \(formatBytes(downloaded)) / \(formatBytes(totalBytes))"
+                        return "Downloading... \(downloaded.formattedFileSize) / \(totalBytes.formattedFileSize)"
                     }
                     if let statusText, !statusText.isEmpty {
                         return statusText
@@ -536,11 +595,6 @@ private struct DownloadOnboardingView: View {
         }
     }
 
-    private func formatBytes(_ bytes: Int64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: bytes)
-    }
 }
 
 private struct ToastMessage: Identifiable {

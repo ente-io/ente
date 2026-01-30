@@ -4,6 +4,7 @@ import android.content.Context
 import io.ente.ensu.data.EndpointPreferencesDataStore
 import io.ente.ensu.data.network.NetworkConfiguration
 import io.ente.ensu.data.storage.CredentialStore
+import io.ente.ensu.data.storage.FilePathManager
 import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.labs.llmchat_sync.LlmChatSync
 import io.ente.labs.llmchat_sync.SyncAuth
@@ -11,7 +12,6 @@ import io.ente.labs.llmchat_sync.SyncException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class RustChatSyncRepository(
     private val context: Context,
@@ -19,13 +19,23 @@ class RustChatSyncRepository(
     private val endpointPreferences: EndpointPreferencesDataStore
 ) : ChatSyncRepository {
 
-    private val syncEngine: LlmChatSync by lazy { buildSyncEngine() }
+    private val filePaths = FilePathManager(context)
+    private var syncEngine: LlmChatSync? = null
 
     override suspend fun sync() {
         withContext(Dispatchers.IO) {
             try {
-                syncEngine.sync(buildAuth())
+                syncEngine().sync(buildAuth())
             } catch (err: Throwable) {
+                if (shouldResetSync(err)) {
+                    resetSyncState()
+                    try {
+                        syncEngine().sync(buildAuth())
+                        return@withContext
+                    } catch (retryErr: Throwable) {
+                        throw IllegalStateException(syncErrorMessage(retryErr), retryErr)
+                    }
+                }
                 throw IllegalStateException(syncErrorMessage(err), err)
             }
         }
@@ -33,33 +43,23 @@ class RustChatSyncRepository(
 
     override suspend fun downloadAttachment(attachmentId: String, sessionId: String): Boolean {
         return withContext(Dispatchers.IO) {
-            syncEngine.downloadAttachment(attachmentId, sessionId, buildAuth())
+            syncEngine().downloadAttachment(attachmentId, sessionId, buildAuth())
         }
     }
 
+    private fun syncEngine(): LlmChatSync {
+        return syncEngine ?: buildSyncEngine().also { syncEngine = it }
+    }
+
     private fun buildSyncEngine(): LlmChatSync {
-        val baseDir = File(context.filesDir, "llmchat")
-        if (!baseDir.exists()) baseDir.mkdirs()
-
-        val encryptedAttachmentsDir = File(baseDir, "chat_attachments_encrypted")
-        if (!encryptedAttachmentsDir.exists()) encryptedAttachmentsDir.mkdirs()
-
-        val metaDir = File(baseDir, "sync_meta")
-        if (!metaDir.exists()) metaDir.mkdirs()
-
-        val mainDb = File(context.filesDir, "llmchat.db").absolutePath
-        val attachmentsDb = File(context.filesDir, "llmchat_attachments.db").absolutePath
         val dbKey = credentialStore.getOrCreateChatDbKey()
-        val plaintextDir = File(context.filesDir, "attachments")
-        if (!plaintextDir.exists()) plaintextDir.mkdirs()
-
         return LlmChatSync.open(
-            mainDbPath = mainDb,
-            attachmentsDbPath = attachmentsDb,
+            mainDbPath = filePaths.mainDbFile.absolutePath,
+            attachmentsDbPath = filePaths.attachmentsDbFile.absolutePath,
             dbKey = dbKey,
-            attachmentsDir = encryptedAttachmentsDir.absolutePath,
-            metaDir = metaDir.absolutePath,
-            plaintextDir = plaintextDir.absolutePath
+            attachmentsDir = filePaths.encryptedAttachmentsDir.absolutePath,
+            metaDir = filePaths.syncMetaDir.absolutePath,
+            plaintextDir = filePaths.plaintextAttachmentsDir.absolutePath
         )
     }
 
@@ -88,6 +88,19 @@ class RustChatSyncRepository(
     private fun normalizeToken(token: String): String {
         val remainder = token.length % 4
         return if (remainder == 0) token else token + "=".repeat(4 - remainder)
+    }
+
+    private fun shouldResetSync(error: Throwable): Boolean {
+        val message = syncErrorMessage(error).lowercase()
+        return message.contains("stream pull failed") ||
+            message.contains("invalid blob") ||
+            message.contains("invalid encrypted")
+    }
+
+    private fun resetSyncState() {
+        runCatching { filePaths.syncMetaDir.deleteRecursively() }
+        runCatching { filePaths.syncMetaDir.mkdirs() }
+        syncEngine = null
     }
 
     private fun syncErrorMessage(error: Throwable): String {

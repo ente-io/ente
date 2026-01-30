@@ -18,7 +18,6 @@ import io.ente.ensu.domain.store.AppStore
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
@@ -55,10 +54,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val appVersion = runCatching { getAppVersion(application) }.getOrDefault("unknown")
-        val deviceInfo = "app=$appVersion\ndevice=${Build.MANUFACTURER} ${Build.MODEL}\nos=${Build.VERSION.RELEASE} (sdk=${Build.VERSION.SDK_INT})"
-        logRepository.log(LogLevel.Info, "App launched", details = deviceInfo, tag = "App")
+        val launchMessage = "App launched app=$appVersion device=${Build.MANUFACTURER} ${Build.MODEL} os=${Build.VERSION.RELEASE} (sdk=${Build.VERSION.SDK_INT})"
+        logRepository.log(LogLevel.Info, launchMessage, tag = "App")
 
-        runBlocking {
+        viewModelScope.launch {
             val endpoint = endpointPreferences.endpointFlow.first()
             val buildEndpoint = BuildConfig.API_ENDPOINT.trim()
             if (endpoint.isNullOrBlank()) {

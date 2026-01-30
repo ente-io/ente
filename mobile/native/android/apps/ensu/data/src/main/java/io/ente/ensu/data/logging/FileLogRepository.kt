@@ -180,14 +180,45 @@ class FileLogRepository(
     private fun formatLine(entry: LogEntry): String {
         val timestamp = lineTimestampFormatter.format(Date(entry.timestampMillis))
         val header = "[${entry.tag}][${entry.level.name.uppercase()}] [$timestamp]"
-        var out = "$header ${entry.message}".trimEnd() + "\n"
+        val details = entry.details.orEmpty()
+        val shouldInline = entry.level == LogLevel.Info && details.isNotBlank() && !looksLikeStackTrace(details)
+        val message = entry.message
+        var out = "$header $message".trimEnd() + "\n"
 
-        entry.details?.takeIf { it.isNotBlank() }?.let { details ->
-            details.lines().forEach { line ->
-                out += "$header ⤷ $line\n"
+        if (details.isNotBlank()) {
+            if (shouldInline) {
+                val inline = inlineDetails(details)
+                if (inline.isNotBlank()) {
+                    out += "$inline\n"
+                }
+            } else {
+                details.lines().forEach { line ->
+                    out += "$line\n"
+                }
             }
         }
         return out
+    }
+
+    private fun inlineDetails(details: String): String {
+        return details.lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .joinToString(" | ")
+    }
+
+    private fun looksLikeStackTrace(details: String): Boolean {
+        return details.lineSequence()
+            .map { it.trimStart() }
+            .any { isStackTraceLine(it) }
+    }
+
+    private fun isStackTraceLine(line: String): Boolean {
+        val trimmed = line.trimStart()
+        return trimmed.startsWith("at ") ||
+            trimmed.startsWith("...") ||
+            trimmed.startsWith("Caused by") ||
+            trimmed.startsWith("Suppressed:")
     }
 
     private fun parseLogEntries(text: String): List<LogEntry> {
@@ -205,6 +236,8 @@ class FileLogRepository(
             if (match == null) {
                 if (current != null) {
                     details.add(trimmed)
+                } else if (entries.isNotEmpty() && shouldAttachToPrevious(trimmed)) {
+                    appendDetailToLast(entries, trimmed)
                 } else {
                     entries.add(
                         LogEntry(
@@ -227,13 +260,26 @@ class FileLogRepository(
             val trimmedMessage = message.trimStart()
             val isDetail = isDetailLine(trimmedMessage)
             if (isDetail) {
+                val cleaned = when {
+                    trimmedMessage.startsWith("->") -> trimmedMessage.removePrefix("->").trim()
+                    trimmedMessage.startsWith("⤷") -> trimmedMessage.removePrefix("⤷").trim()
+                    else -> trimmedMessage
+                }
                 if (current != null) {
-                    val cleaned = if (trimmedMessage.startsWith("⤷")) {
-                        trimmedMessage.removePrefix("⤷").trim()
-                    } else {
-                        trimmedMessage
-                    }
                     details.add(cleaned)
+                } else if (entries.isNotEmpty() && shouldAttachToPrevious(cleaned)) {
+                    appendDetailToLast(entries, cleaned)
+                } else {
+                    entries.add(
+                        LogEntry(
+                            id = UUID.randomUUID().toString(),
+                            timestampMillis = System.currentTimeMillis(),
+                            level = LogLevel.Info,
+                            tag = "Log",
+                            message = cleaned,
+                            details = null
+                        )
+                    )
                 }
                 return@forEach
             }
@@ -267,6 +313,20 @@ class FileLogRepository(
         return entries
     }
 
+    private fun appendDetailToLast(entries: MutableList<LogEntry>, line: String) {
+        if (entries.isEmpty()) return
+        val last = entries.removeAt(entries.lastIndex)
+        val updatedDetails = listOfNotNull(last.details?.takeIf { it.isNotBlank() }, line)
+            .joinToString("\n")
+        entries.add(last.copy(details = updatedDetails))
+    }
+
+    private fun shouldAttachToPrevious(line: String): Boolean {
+        if (line.isBlank()) return false
+        val trimmed = line.trimStart()
+        return line.firstOrNull()?.isWhitespace() == true || isStackTraceLine(trimmed)
+    }
+
     private fun parseLevel(value: String): LogLevel? = when (value.uppercase()) {
         "INFO" -> LogLevel.Info
         "WARNING", "WARN" -> LogLevel.Warning
@@ -276,7 +336,8 @@ class FileLogRepository(
 
     private fun isDetailLine(message: String): Boolean {
         val trimmed = message.trimStart()
-        return trimmed.startsWith("⤷") ||
+        return trimmed.startsWith("->") ||
+            trimmed.startsWith("⤷") ||
             trimmed.startsWith("at ") ||
             trimmed.startsWith("...") ||
             trimmed.startsWith("Caused by") ||

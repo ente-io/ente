@@ -38,6 +38,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -98,6 +100,8 @@ import io.ente.ensu.domain.model.AttachmentType
 import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.state.ChatState
+import io.ente.ensu.domain.state.OverflowDialogState
+import io.ente.ensu.domain.util.formatBytes
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -121,7 +125,10 @@ fun ChatView(
     onCancelEdit: () -> Unit,
     onBranchChange: (String, Int) -> Unit,
     onOpenAttachment: (Attachment) -> Unit,
-    onStartDownload: (Boolean) -> Unit
+    onStartDownload: (Boolean) -> Unit,
+    onOverflowTrim: () -> Unit,
+    onOverflowIncreaseContext: () -> Unit,
+    onOverflowCancel: () -> Unit
 ) {
     val showDownloadOnboarding = !chatState.isModelDownloaded &&
         chatState.messages.isEmpty() &&
@@ -139,18 +146,21 @@ fun ChatView(
         !didAutoFocusInput &&
         !isDrawerOpen
 
-    LaunchedEffect(shouldAutoFocusInput) {
-        if (shouldAutoFocusInput) {
-            focusRequestId += 1
-            didAutoFocusInput = true
-        }
-    }
-
-    LaunchedEffect(isDrawerOpen) {
+    LaunchedEffect(shouldAutoFocusInput, isDrawerOpen) {
         if (isDrawerOpen) {
             focusManager.clearFocus()
             wasDrawerOpen = true
-        } else if (wasDrawerOpen) {
+            return@LaunchedEffect
+        }
+
+        if (shouldAutoFocusInput) {
+            focusRequestId += 1
+            didAutoFocusInput = true
+            wasDrawerOpen = false
+            return@LaunchedEffect
+        }
+
+        if (wasDrawerOpen) {
             val shouldRestoreFocus = chatState.isModelDownloaded &&
                 !showDownloadOnboarding &&
                 !chatState.isDownloading &&
@@ -219,6 +229,15 @@ fun ChatView(
                     onBranchChange = onBranchChange,
                     onOpenAttachment = onOpenAttachment,
                     onStartDownload = onStartDownload
+                )
+            }
+
+            chatState.overflowDialog?.let { overflow ->
+                OverflowDialog(
+                    state = overflow,
+                    onTrim = onOverflowTrim,
+                    onIncreaseContext = onOverflowIncreaseContext,
+                    onCancel = onOverflowCancel
                 )
             }
 
@@ -328,20 +347,16 @@ private fun MessageList(
         }
     }
 
-    LaunchedEffect(isGenerating) {
+    val lastMessage = messages.lastOrNull()
+    LaunchedEffect(isGenerating, lastMessage?.id) {
         if (isGenerating) {
             autoScrollEnabled = true
             lastHapticLength = 0
         }
-    }
 
-    val lastMessage = messages.lastOrNull()
-    LaunchedEffect(lastMessage?.id) {
         if (lastMessage == null) {
             lastUserMessageId = null
-            return@LaunchedEffect
-        }
-        if (lastMessage.author == MessageAuthor.User && lastMessage.id != lastUserMessageId) {
+        } else if (lastMessage.author == MessageAuthor.User && lastMessage.id != lastUserMessageId) {
             lastUserMessageId = lastMessage.id
             if (!listState.isScrollInProgress || isAtBottom) {
                 autoScrollEnabled = true
@@ -598,6 +613,42 @@ private fun DownloadOnboarding(
             }
         }
     }
+}
+
+@Composable
+private fun OverflowDialog(
+    state: OverflowDialogState,
+    onTrim: () -> Unit,
+    onIncreaseContext: () -> Unit,
+    onCancel: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(text = "Context limit reached", style = EnsuTypography.h3) },
+        text = {
+            Text(
+                text = "Input uses ${state.inputTokens} tokens (budget ${state.inputBudget}). Trim history or increase context size?",
+                style = EnsuTypography.body,
+                color = EnsuColor.textPrimary()
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onTrim) {
+                Text(text = "Trim history", color = EnsuColor.textPrimary())
+            }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
+                TextButton(onClick = onIncreaseContext) {
+                    Text(text = "Increase context", color = EnsuColor.textPrimary())
+                }
+                TextButton(onClick = onCancel) {
+                    Text(text = "Cancel", color = EnsuColor.textMuted())
+                }
+            }
+        },
+        containerColor = EnsuColor.backgroundBase()
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -1274,17 +1325,6 @@ private fun MessageInput(
             }
         }
     }
-}
-
-private fun formatBytes(bytes: Long): String {
-    val units = arrayOf("B", "KB", "MB", "GB")
-    var size = bytes.toDouble()
-    var unitIndex = 0
-    while (size >= 1024 && unitIndex < units.size - 1) {
-        size /= 1024
-        unitIndex++
-    }
-    return String.format(Locale.US, "%.1f %s", size, units[unitIndex])
 }
 
 private val timestampFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())

@@ -315,7 +315,7 @@ struct ChatAttachment: Identifiable, Equatable {
     }
 
     var formattedSize: String {
-        ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+        ChatViewModel.fileSizeFormatter.string(fromByteCount: size)
     }
 
     var iconName: String {
@@ -345,7 +345,7 @@ struct AttachmentDownloadItem: Identifiable, Equatable {
     var errorMessage: String? = nil
 
     var formattedSize: String {
-        ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+        ChatViewModel.fileSizeFormatter.string(fromByteCount: size)
     }
 }
 
@@ -418,14 +418,29 @@ struct DownloadToastState: Identifiable, Equatable {
     var offerRetryDownload: Bool
 }
 
+struct OverflowAlertState: Identifiable, Equatable {
+    let id = UUID()
+    let inputTokens: Int
+    let inputBudget: Int
+    let contextLength: Int
+    let maxOutput: Int
+}
+
 @MainActor
 final class ChatViewModel: ObservableObject {
-    private static let defaultTemperature: Float = 0.7
+    private static let defaultTemperature: Float = 0.5
     private static let systemPrompt = "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$"
+    private static let overflowSafetyTokens = 128
+    private static let imageTokenEstimate = 768
     private static let sessionTitleMaxLength = 40
     private static let sessionSummaryMaxWords = 7
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
     private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title."
+    fileprivate static let fileSizeFormatter: ByteCountFormatter = {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter
+    }()
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
 
@@ -434,6 +449,7 @@ final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage]
     @Published var streamingResponse: String = ""
     @Published var streamingParentId: UUID? = nil
+    @Published var overflowAlert: OverflowAlertState? = nil
 
     var displayedStreamingResponse: String {
         guard let activeSession = activeGenerationSessionId,
@@ -488,6 +504,8 @@ final class ChatViewModel: ObservableObject {
     private var pendingSyncShowErrors = false
     private var pendingSyncShowSuccess = false
     private var modelDownloadLoggedStart = false
+    private var pendingOverflow: PendingOverflow?
+    private var overflowBypassMessageId: UUID?
 
     private var attachmentDownloadQueue: [String] = []
     private var attachmentDownloadTasks: [String: Task<Void, Never>] = [:]
@@ -622,9 +640,7 @@ final class ChatViewModel: ObservableObject {
 
     var modelDownloadSizeText: String {
         guard let bytes = modelDownloadSizeBytes else { return "Approx. size varies by model" }
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return "Approx. \(formatter.string(fromByteCount: bytes))"
+        return "Approx. \(Self.fileSizeFormatter.string(fromByteCount: bytes))"
     }
 
     func sessionTitle(for sessionId: UUID) -> String {
@@ -911,6 +927,24 @@ final class ChatViewModel: ObservableObject {
         provider.stopGeneration()
     }
 
+    func confirmOverflowTrim() {
+        guard let pendingOverflow else { return }
+        guard let node = messageStore[pendingOverflow.sessionId]?.first(where: { $0.id == pendingOverflow.messageId }) else {
+            cancelOverflowDialog()
+            return
+        }
+        overflowBypassMessageId = pendingOverflow.messageId
+        self.pendingOverflow = nil
+        overflowAlert = nil
+        startGeneration(for: node)
+    }
+
+    func cancelOverflowDialog() {
+        pendingOverflow = nil
+        overflowBypassMessageId = nil
+        overflowAlert = nil
+    }
+
     func refreshModelDownloadInfo() {
         let target = modelSettings.currentTarget()
         isModelDownloaded = provider.isModelDownloaded(target: target)
@@ -1093,6 +1127,32 @@ final class ChatViewModel: ObservableObject {
         generationTask?.cancel()
         sessionSummaryTask?.cancel()
         stopRequested = false
+
+        let target = modelSettings.currentTarget()
+        let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
+        let historySelection = buildHistorySelection(
+            sessionId: userNode.sessionId,
+            promptText: prompt.text,
+            promptImageCount: prompt.imageFiles.count,
+            currentMessageId: userNode.id,
+            target: target
+        )
+
+        if historySelection.wasTrimmed && overflowBypassMessageId != userNode.id {
+            pendingOverflow = PendingOverflow(sessionId: userNode.sessionId, messageId: userNode.id)
+            overflowAlert = OverflowAlertState(
+                inputTokens: historySelection.inputTokens,
+                inputBudget: historySelection.inputBudget,
+                contextLength: target.contextLength ?? 4096,
+                maxOutput: target.maxTokens ?? 1024
+            )
+            return
+        }
+
+        overflowBypassMessageId = nil
+        pendingOverflow = nil
+        overflowAlert = nil
+
         let generationId = UUID()
         activeGenerationId = generationId
         activeGenerationSessionId = userNode.sessionId
@@ -1103,8 +1163,6 @@ final class ChatViewModel: ObservableObject {
         streamingParentId = userNode.id
         downloadToast = nil
         rebuildMessages(for: userNode.sessionId)
-
-        let target = modelSettings.currentTarget()
 
         generationTask = Task {
             do {
@@ -1139,8 +1197,7 @@ final class ChatViewModel: ObservableObject {
                 return
             }
 
-            let prompt = buildPrompt(text: userNode.text, attachments: userNode.attachments)
-            let history = buildHistory(sessionId: userNode.sessionId, promptText: prompt.text, currentMessageId: userNode.id)
+            let history = historySelection.messages
             let systemMessage = InferenceMessage(text: Self.systemPrompt, role: .system, hasAttachments: false)
             let messages = [systemMessage] + history + [InferenceMessage(text: prompt.text, role: .user, hasAttachments: !userNode.attachments.isEmpty)]
 
@@ -1920,6 +1977,18 @@ final class ChatViewModel: ObservableObject {
         return destination
     }
 
+    private struct HistorySelection {
+        let messages: [InferenceMessage]
+        let inputTokens: Int
+        let inputBudget: Int
+        let wasTrimmed: Bool
+    }
+
+    private struct PendingOverflow {
+        let sessionId: UUID
+        let messageId: UUID
+    }
+
     private func buildPrompt(text: String, attachments: [ChatAttachment]) -> PromptResult {
         var prompt = text
         let documents = attachments.filter { $0.kind == .document }
@@ -1945,33 +2014,44 @@ final class ChatViewModel: ObservableObject {
         return PromptResult(text: prompt, imageFiles: imageFiles)
     }
 
-    private func buildHistory(sessionId: UUID, promptText: String, currentMessageId: UUID) -> [InferenceMessage] {
+    private func buildHistorySelection(
+        sessionId: UUID,
+        promptText: String,
+        promptImageCount: Int,
+        currentMessageId: UUID,
+        target: InferenceModelTarget
+    ) -> HistorySelection {
         let path = buildSelectedPath(for: sessionId)
-        let history = path.prefix { $0.id != currentMessageId }
-        if history.isEmpty { return [] }
+        let historyMessages = path.prefix { $0.id != currentMessageId }
 
-        let target = modelSettings.currentTarget()
         let contextSize: Int = target.contextLength ?? 4096
         let maxTokens: Int = target.maxTokens ?? 1024
-        var budget: Int = contextSize - maxTokens - 256
-        budget -= estimateTokens(promptText)
-        if budget <= 0 { return [] }
+        let inputBudget = max(0, contextSize - maxTokens - Self.overflowSafetyTokens)
+        let systemTokens = estimateTokens(Self.systemPrompt)
+        let promptTokens = estimatePromptTokens(promptText: promptText, imageCount: promptImageCount)
+        let historyTokens = historyMessages.reduce(0) { total, node in
+            total + estimateTokens(historyText(node))
+        }
+        let inputTokens = systemTokens + promptTokens + historyTokens
+        var remaining = inputBudget - systemTokens - promptTokens
+
+        if remaining <= 0 || historyMessages.isEmpty {
+            return HistorySelection(messages: [], inputTokens: inputTokens, inputBudget: inputBudget, wasTrimmed: inputTokens > inputBudget)
+        }
 
         var selected: [InferenceMessage] = []
-        for node in history.reversed() {
+        for node in historyMessages.reversed() {
             let text = historyText(node)
             let cost = estimateTokens(text)
-            if cost <= budget {
+            if cost <= remaining {
                 selected.append(InferenceMessage(text: text, role: node.role == .user ? .user : .assistant, hasAttachments: !node.attachments.isEmpty))
-                budget -= cost
-            } else if selected.isEmpty {
-                selected.append(InferenceMessage(text: trimToBudget(text, budget: budget), role: node.role == .user ? .user : .assistant, hasAttachments: !node.attachments.isEmpty))
-                break
+                remaining -= cost
             } else {
                 break
             }
         }
-        return selected.reversed()
+
+        return HistorySelection(messages: selected.reversed(), inputTokens: inputTokens, inputBudget: inputBudget, wasTrimmed: inputTokens > inputBudget)
     }
 
     private func historyText(_ node: MessageNode) -> String {
@@ -1996,9 +2076,18 @@ final class ChatViewModel: ObservableObject {
         max(1, text.count / 4)
     }
 
+    private func estimateImageTokens(_ imageCount: Int) -> Int {
+        imageCount * Self.imageTokenEstimate
+    }
+
+    private func estimatePromptTokens(promptText: String, imageCount: Int) -> Int {
+        estimateTokens(promptText) + estimateImageTokens(imageCount)
+    }
+
     private func resolveTemperature() -> Float {
         let value = Float(modelSettings.temperature.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
-        return value.map { max(0, $0) } ?? Self.defaultTemperature
+        let resolved = value.map { max(0, $0) } ?? Self.defaultTemperature
+        return min(max(resolved, 0.35), 0.7)
     }
 
     private struct MessageNode: Identifiable {

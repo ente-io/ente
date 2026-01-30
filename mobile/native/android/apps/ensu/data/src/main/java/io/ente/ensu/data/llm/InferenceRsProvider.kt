@@ -5,6 +5,7 @@ import io.ente.ensu.domain.llm.GenerationSummary
 import io.ente.ensu.domain.llm.LlmMessage
 import io.ente.ensu.domain.llm.LlmModelTarget
 import io.ente.ensu.domain.llm.LlmProvider
+import io.ente.ensu.domain.util.formatBytes
 import io.ente.labs.inference_rs.ContextHandle
 import io.ente.labs.inference_rs.ContextParams
 import io.ente.labs.inference_rs.GenerateChatRequest
@@ -29,7 +30,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.security.MessageDigest
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 
@@ -129,6 +129,7 @@ class InferenceRsProvider(
         val context = contextHandle ?: throw IllegalStateException("Model context not loaded")
         currentJobId = null
         val mmprojPath = if (imageFiles.isEmpty()) null else mmprojPathFor(target)?.absolutePath
+        val clampedTemperature = temperature.coerceIn(0.35f, 0.7f)
 
         val request = GenerateChatRequest(
             messages = messages.map { msg ->
@@ -140,12 +141,12 @@ class InferenceRsProvider(
             mmprojPath = mmprojPath,
             mediaMarker = null,
             maxTokens = maxTokens,
-            temperature = temperature,
-            topP = null,
-            topK = null,
-            repeatPenalty = null,
-            frequencyPenalty = null,
-            presencePenalty = null,
+            temperature = clampedTemperature,
+            topP = 0.9f,
+            topK = 50,
+            repeatPenalty = 1.18f,
+            frequencyPenalty = 0f,
+            presencePenalty = 0f,
             seed = null,
             stopSequences = null,
             grammar = null
@@ -405,17 +406,6 @@ class InferenceRsProvider(
     private fun hash(value: String): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(value.toByteArray())
         return digest.joinToString("") { "%02x".format(it) }
-    }
-
-    private fun formatBytes(bytes: Long): String {
-        val units = arrayOf("B", "KB", "MB", "GB")
-        var size = bytes.toDouble()
-        var unitIndex = 0
-        while (size >= 1024 && unitIndex < units.size - 1) {
-            size /= 1024
-            unitIndex++
-        }
-        return String.format(Locale.US, "%.1f %s", size, units[unitIndex])
     }
 
     private fun generateStreamWithCallback(

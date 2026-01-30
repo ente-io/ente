@@ -14,6 +14,7 @@ import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
 import io.ente.ensu.domain.model.LogLevel
 import io.ente.ensu.domain.model.MessageAuthor
+import io.ente.ensu.domain.model.sanitizeTitleText
 import io.ente.ensu.domain.model.sessionTitleFromText
 import io.ente.ensu.domain.preferences.SessionPreferences
 import io.ente.ensu.domain.state.AppState
@@ -31,9 +32,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedDeque
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -51,6 +53,7 @@ class AppStore(
     private val messageStore = mutableMapOf<String, MutableList<ChatMessage>>()
     private val branchSelections = mutableMapOf<String, MutableMap<String, String>>()
     private val sessionSummaries = mutableMapOf<String, String>()
+    private val sessionAccessTimes = mutableMapOf<String, Long>()
     private var scope: CoroutineScope? = null
     private var generationJob: Job? = null
     private var modelDownloadJob: Job? = null
@@ -61,21 +64,28 @@ class AppStore(
     private var pendingSyncRequested = false
     private var pendingSyncErrorHandler: ((String) -> Unit)? = null
     private var pendingSyncSuccessHandler: (() -> Unit)? = null
+    private var pendingOverflow: PendingOverflow? = null
+    private var overflowBypassMessageId: String? = null
 
     private val sessionSummarySystemPrompt =
         "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title."
     private val sessionSummaryMaxWords = 7
 
-    private val attachmentDownloads = mutableMapOf<String, AttachmentDownloadItem>()
-    private val attachmentDownloadQueue = ArrayDeque<String>()
-    private val attachmentDownloadActive = mutableMapOf<String, Job>()
+    private val attachmentDownloads = ConcurrentHashMap<String, AttachmentDownloadItem>()
+    private val attachmentDownloadQueue = ConcurrentLinkedDeque<String>()
+    private val attachmentDownloadActive = ConcurrentHashMap<String, Job>()
     private val maxAttachmentDownloadConcurrency = 2
 
     fun bootstrap(scope: CoroutineScope) {
         this.scope = scope
 
         sessionSummaries.clear()
-        sessionSummaries.putAll(runBlocking { sessionPreferences.sessionSummaries.first() }.mapKeys { it.key.lowercase() })
+        scope.launch {
+            val summaries = sessionPreferences.sessionSummaries.first()
+            sessionSummaries.clear()
+            sessionSummaries.putAll(summaries.mapKeys { sessionKey(it.key) })
+            applySessionSummariesToState()
+        }
 
         if (_state.value.chat.sessions.isEmpty()) {
             loadSessionsFromDb()
@@ -86,11 +96,10 @@ class AppStore(
         scope.launch {
             sessionPreferences.sessionSummaries.collectLatest { summaries ->
                 sessionSummaries.clear()
-                sessionSummaries.putAll(summaries.mapKeys { it.key.lowercase() })
+                sessionSummaries.putAll(summaries.mapKeys { sessionKey(it.key) })
                 applySessionSummariesToState()
             }
         }
-
     }
 
     private fun refreshModelDownloadInfo() {
@@ -151,6 +160,8 @@ class AppStore(
                 )
             )
         }
+        markSessionAccess(session.id)
+        trimSessionCaches()
         // Session is empty, no DB load needed.
         rebuildChatState(session.id)
         updateAttachmentDownloadState()
@@ -219,19 +230,12 @@ class AppStore(
         }
 
         chatRepository.deleteSession(sessionId)
-        messageStore.remove(sessionId)
-        branchSelections.remove(sessionId)
+        removeSessionCaches(sessionId)
         purgeAttachmentDownloads(sessionId)
-        sessionSummaries.remove(sessionId.lowercase())
+        sessionSummaries.remove(sessionKey(sessionId))
         scope?.launch { sessionPreferences.setSessionSummary(sessionId, null) }
 
-        val remaining = currentState.chat.sessions.filterNot { it.id == sessionId }
-        val sessions = remaining
-
-        sessions.forEach { session ->
-            messageStore.getOrPut(session.id) { mutableListOf() }
-            branchSelections.getOrPut(session.id) { mutableMapOf() }
-        }
+        val sessions = currentState.chat.sessions.filterNot { it.id == sessionId }
 
         val newCurrent = if (isCurrent) {
             sessions.firstOrNull()?.id
@@ -268,6 +272,7 @@ class AppStore(
                 appState.copy(chat = appState.chat.copy(messages = emptyList(), branchSelections = emptyMap()))
             }
         }
+        trimSessionCaches(sessions.map { it.id }.toSet())
 
         scope?.launch { sessionPreferences.setSelectedSessionId(newCurrent) }
         syncNow()
@@ -563,6 +568,27 @@ class AppStore(
         )
     }
 
+    fun confirmOverflowTrim() {
+        val pending = pendingOverflow ?: return
+        val message = messageStore[pending.sessionId]?.firstOrNull { it.id == pending.messageId }
+        if (message == null) {
+            pendingOverflow = null
+            overflowBypassMessageId = null
+            clearOverflowDialog()
+            return
+        }
+        overflowBypassMessageId = pending.messageId
+        pendingOverflow = null
+        clearOverflowDialog()
+        startGeneration(pending.sessionId, message)
+    }
+
+    fun cancelOverflowDialog() {
+        pendingOverflow = null
+        overflowBypassMessageId = null
+        clearOverflowDialog()
+    }
+
     fun updateModelSettings(state: ModelSettingsState) {
         _state.update { appState ->
             appState.copy(modelSettings = state)
@@ -683,7 +709,7 @@ class AppStore(
     fun cancelAttachmentDownload(attachmentId: String) {
         attachmentDownloadActive[attachmentId]?.cancel()
         attachmentDownloadActive.remove(attachmentId)
-        attachmentDownloadQueue.removeAll { it == attachmentId }
+        attachmentDownloadQueue.removeIf { it == attachmentId }
         attachmentDownloads[attachmentId]?.let { item ->
             attachmentDownloads[attachmentId] = item.copy(status = AttachmentDownloadStatus.Canceled)
         }
@@ -708,7 +734,7 @@ class AppStore(
         ids.forEach { id ->
             attachmentDownloadActive[id]?.cancel()
             attachmentDownloadActive.remove(id)
-            attachmentDownloadQueue.removeAll { it == id }
+            attachmentDownloadQueue.removeIf { it == id }
             attachmentDownloads.remove(id)
         }
         updateAttachmentDownloadState()
@@ -737,7 +763,7 @@ class AppStore(
                 if (path != null && File(path).exists()) {
                     attachmentDownloadActive[attachment.id]?.cancel()
                     attachmentDownloadActive.remove(attachment.id)
-                    attachmentDownloadQueue.removeAll { it == attachment.id }
+                    attachmentDownloadQueue.removeIf { it == attachment.id }
                     attachmentDownloads.remove(attachment.id)
                     continue
                 }
@@ -784,7 +810,10 @@ class AppStore(
     private fun startNextAttachmentDownloads() {
         val scope = scope ?: return
         while (attachmentDownloadActive.size < maxAttachmentDownloadConcurrency && attachmentDownloadQueue.isNotEmpty()) {
-            val id = attachmentDownloadQueue.removeFirst()
+            val id = attachmentDownloadQueue.pollFirst() ?: continue
+            if (attachmentDownloadActive.containsKey(id)) {
+                continue
+            }
             val item = attachmentDownloads[id] ?: continue
             if (item.status == AttachmentDownloadStatus.Completed || item.status == AttachmentDownloadStatus.Canceled) {
                 continue
@@ -859,8 +888,29 @@ class AppStore(
         generationJob?.cancel()
         sessionSummaryJob?.cancel()
         stopRequested = false
-        val generationToken = nextGenerationToken()
 
+        val settings = _state.value.modelSettings
+        val target = resolveTarget(settings)
+        val prompt = buildPrompt(userMessage.text, userMessage.attachments)
+        val historySelection = buildHistorySelection(
+            sessionId = sessionId,
+            promptText = prompt.text,
+            promptImageCount = prompt.imageFiles.size,
+            currentMessageId = userMessage.id,
+            target = target
+        )
+
+        if (historySelection.wasTrimmed && overflowBypassMessageId != userMessage.id) {
+            pendingOverflow = PendingOverflow(sessionId, userMessage.id)
+            showOverflowDialog(historySelection, target)
+            return
+        }
+
+        overflowBypassMessageId = null
+        pendingOverflow = null
+        clearOverflowDialog()
+
+        val generationToken = nextGenerationToken()
         streamingParentId = userMessage.id
         _state.update { appState ->
             appState.copy(
@@ -878,8 +928,6 @@ class AppStore(
         rebuildChatState(sessionId)
 
         generationJob = scope.launch {
-            val settings = _state.value.modelSettings
-            val target = resolveTarget(settings)
             val isActive = { isGenerationActive(generationToken, sessionId) }
             try {
                 llmProvider.ensureModelReady(target) { progress ->
@@ -930,8 +978,7 @@ class AppStore(
 
             if (!isActive()) return@launch
 
-            val prompt = buildPrompt(userMessage.text, userMessage.attachments)
-            val history = buildHistory(sessionId, prompt.text, userMessage.id)
+            val history = historySelection.messages
             val systemMessage = LlmMessage(
                 text = SYSTEM_PROMPT,
                 role = LlmMessageRole.System
@@ -1077,7 +1124,7 @@ class AppStore(
     private fun applySessionSummariesToState() {
         _state.update { appState ->
             val updatedSessions = appState.chat.sessions.map { session ->
-                val summary = sessionSummaries[session.id.lowercase()]
+                val summary = sessionSummaries[sessionKey(session.id)]
                 if (!summary.isNullOrBlank() && summary != session.title) {
                     session.copy(title = summary)
                 } else {
@@ -1091,7 +1138,7 @@ class AppStore(
     private fun scheduleSessionSummary(sessionId: String) {
         val scope = scope ?: return
         sessionSummaryJob?.cancel()
-        if (sessionSummaries.containsKey(sessionId.lowercase())) return
+        if (sessionSummaries.containsKey(sessionKey(sessionId))) return
         val summaryInput = buildSessionSummaryInput(sessionId) ?: return
         val target = resolveTarget(_state.value.modelSettings)
 
@@ -1172,7 +1219,7 @@ class AppStore(
     private fun applySessionSummary(sessionId: String, summary: String) {
         val sanitized = sessionTitleFromText(summary, fallback = "New Chat")
         if (sanitized.isBlank()) return
-        val summaryKey = sessionId.lowercase()
+        val summaryKey = sessionKey(sessionId)
         if (sessionSummaries[summaryKey] == sanitized) return
         sessionSummaries[summaryKey] = sanitized
         scope?.launch { sessionPreferences.setSessionSummary(sessionId, sanitized) }
@@ -1200,18 +1247,49 @@ class AppStore(
         return summaryWords.joinToString(" ")
     }
 
-    private fun sanitizeTitleText(text: String): String {
-        return text
-            .replace(Regex("[\r\n\t]+"), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    }
-
     private fun loadMessagesFromDb(sessionId: String) {
         val messages = chatRepository.getMessages(sessionId)
         messageStore[sessionId] = messages.toMutableList()
         // Reset branch selections for this session. (Branch selection is computed in-memory.)
         branchSelections.getOrPut(sessionId) { mutableMapOf() }.clear()
+        markSessionAccess(sessionId)
+        trimSessionCaches()
+    }
+
+    private fun markSessionAccess(sessionId: String) {
+        sessionAccessTimes[sessionId] = clock()
+    }
+
+    private fun trimSessionCaches(availableSessions: Set<String> = _state.value.chat.sessions.map { it.id }.toSet()) {
+        val availableKeys = availableSessions.map(::sessionKey).toSet()
+        sessionSummaries.keys.retainAll(availableKeys)
+
+        val keepIds = LinkedHashSet<String>()
+        val currentSessionId = _state.value.chat.currentSessionId
+        if (currentSessionId != null && currentSessionId in availableSessions) {
+            keepIds.add(currentSessionId)
+        }
+        val ordered = sessionAccessTimes.entries
+            .filter { it.key in availableSessions }
+            .sortedByDescending { it.value }
+            .map { it.key }
+        for (id in ordered) {
+            if (keepIds.size >= MAX_CACHED_SESSIONS) break
+            keepIds.add(id)
+        }
+        messageStore.keys.retainAll(keepIds)
+        branchSelections.keys.retainAll(keepIds)
+        sessionAccessTimes.keys.retainAll(keepIds)
+    }
+
+    private fun removeSessionCaches(sessionId: String) {
+        messageStore.remove(sessionId)
+        branchSelections.remove(sessionId)
+        sessionAccessTimes.remove(sessionId)
+    }
+
+    private fun sessionKey(sessionId: String): String {
+        return sessionId.lowercase()
     }
 
     private fun rebuildChatState(sessionId: String?) {
@@ -1328,6 +1406,18 @@ class AppStore(
         selectionMap[selectionKey] = childId
     }
 
+    private data class HistorySelection(
+        val messages: List<LlmMessage>,
+        val inputTokens: Int,
+        val inputBudget: Int,
+        val wasTrimmed: Boolean
+    )
+
+    private data class PendingOverflow(
+        val sessionId: String,
+        val messageId: String
+    )
+
     private fun buildPrompt(text: String, attachments: List<Attachment>): PromptResult {
         val builder = StringBuilder(text)
         val documents = attachments.filter { it.type == AttachmentType.Document }
@@ -1359,16 +1449,27 @@ class AppStore(
         return PromptResult(builder.toString(), imageFiles)
     }
 
-    private fun buildHistory(sessionId: String, promptText: String, currentMessageId: String): List<LlmMessage> {
+    private fun buildHistorySelection(
+        sessionId: String,
+        promptText: String,
+        promptImageCount: Int,
+        currentMessageId: String,
+        target: LlmModelTarget
+    ): HistorySelection {
         val path = buildSelectedPath(sessionId)
-        if (path.isEmpty()) return emptyList()
-
         val historyMessages = path.takeWhile { it.id != currentMessageId }
-        val contextSize = resolveTarget(_state.value.modelSettings).contextLength ?: 4096
-        val maxOutput = resolveTarget(_state.value.modelSettings).maxTokens ?: 1024
-        val budget = contextSize - maxOutput - 256
-        var remaining = budget - estimateTokens(promptText)
-        if (remaining <= 0) return emptyList()
+        val contextSize = target.contextLength ?: 4096
+        val maxOutput = target.maxTokens ?: 1024
+        val inputBudget = max(0, contextSize - maxOutput - OVERFLOW_SAFETY_TOKENS)
+        val systemTokens = estimateTokens(SYSTEM_PROMPT)
+        val promptTokens = estimatePromptTokens(promptText, promptImageCount)
+        val historyTokens = historyMessages.sumOf { estimateTokens(historyText(it)) }
+        val inputTokens = systemTokens + promptTokens + historyTokens
+        var remaining = inputBudget - systemTokens - promptTokens
+
+        if (remaining <= 0 || historyMessages.isEmpty()) {
+            return HistorySelection(emptyList(), inputTokens, inputBudget, inputTokens > inputBudget)
+        }
 
         val selected = mutableListOf<LlmMessage>()
         for (message in historyMessages.asReversed()) {
@@ -1383,21 +1484,33 @@ class AppStore(
                     )
                 )
                 remaining -= cost
-            } else if (selected.isEmpty()) {
-                selected.add(
-                    LlmMessage(
-                        text = trimToBudget(text, remaining),
-                        role = if (message.author == MessageAuthor.User) LlmMessageRole.User else LlmMessageRole.Assistant,
-                        hasAttachments = message.attachments.isNotEmpty()
-                    )
-                )
-                break
             } else {
                 break
             }
         }
 
-        return selected.reversed()
+        return HistorySelection(selected.reversed(), inputTokens, inputBudget, inputTokens > inputBudget)
+    }
+
+    private fun showOverflowDialog(selection: HistorySelection, target: LlmModelTarget) {
+        _state.update { appState ->
+            appState.copy(
+                chat = appState.chat.copy(
+                    overflowDialog = io.ente.ensu.domain.state.OverflowDialogState(
+                        inputTokens = selection.inputTokens,
+                        inputBudget = selection.inputBudget,
+                        contextLength = target.contextLength ?: 4096,
+                        maxOutput = target.maxTokens ?: 1024
+                    )
+                )
+            )
+        }
+    }
+
+    private fun clearOverflowDialog() {
+        _state.update { appState ->
+            appState.copy(chat = appState.chat.copy(overflowDialog = null))
+        }
     }
 
     private fun historyText(message: ChatMessage): String {
@@ -1421,9 +1534,18 @@ class AppStore(
         return max(1, text.length / 4)
     }
 
+    private fun estimateImageTokens(imageCount: Int): Int {
+        return imageCount * IMAGE_TOKEN_ESTIMATE
+    }
+
+    private fun estimatePromptTokens(promptText: String, imageCount: Int): Int {
+        return estimateTokens(promptText) + estimateImageTokens(imageCount)
+    }
+
     private fun resolveTemperature(settings: ModelSettingsState): Float {
         val temperature = settings.temperature.trim().toFloatOrNull()
-        return temperature?.takeIf { it >= 0f } ?: DEFAULT_TEMPERATURE
+        val resolved = temperature?.takeIf { it >= 0f } ?: DEFAULT_TEMPERATURE
+        return resolved.coerceIn(0.35f, 0.7f)
     }
 
     private fun resolveTarget(settings: ModelSettingsState): LlmModelTarget {
@@ -1445,17 +1567,12 @@ class AppStore(
 
     private fun loadSessionsFromDb() {
         val sessions = chatRepository.listSessions().map { session ->
-            val summary = sessionSummaries[session.id.lowercase()]
+            val summary = sessionSummaries[sessionKey(session.id)]
             if (!summary.isNullOrBlank()) {
                 session.copy(title = summary)
             } else {
                 session
             }
-        }
-
-        sessions.forEach { session ->
-            messageStore.getOrPut(session.id) { mutableListOf() }
-            branchSelections.getOrPut(session.id) { mutableMapOf() }
         }
 
         val currentSessionId = _state.value.chat.currentSessionId
@@ -1476,6 +1593,7 @@ class AppStore(
         } else {
             updateAttachmentDownloadState()
         }
+        trimSessionCaches(sessions.map { it.id }.toSet())
     }
 
     private data class PromptResult(
@@ -1489,7 +1607,10 @@ class AppStore(
         private const val DEFAULT_MMPROJ_URL =
             "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf"
         private const val MEDIA_MARKER = "<__media__>"
-        private const val DEFAULT_TEMPERATURE = 0.7f
+        private const val OVERFLOW_SAFETY_TOKENS = 128
+        private const val IMAGE_TOKEN_ESTIMATE = 768
+        private const val DEFAULT_TEMPERATURE = 0.5f
+        private const val MAX_CACHED_SESSIONS = 8
         private const val SYSTEM_PROMPT =
             "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put \$\$ on its own line (never inline). Example:\n\$\$\nx^2 + y^2 = z^2\n\$\$"
     }

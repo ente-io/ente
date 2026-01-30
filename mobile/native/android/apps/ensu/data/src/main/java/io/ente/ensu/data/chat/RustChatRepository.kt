@@ -2,6 +2,7 @@ package io.ente.ensu.data.chat
 
 import android.content.Context
 import io.ente.ensu.data.storage.CredentialStore
+import io.ente.ensu.data.storage.FilePathManager
 import io.ente.ensu.domain.chat.ChatRepository
 import io.ente.ensu.domain.model.Attachment
 import io.ente.ensu.domain.model.AttachmentType
@@ -20,17 +21,12 @@ class RustChatRepository(
     credentialStore: CredentialStore
 ) : ChatRepository {
 
-    private val attachmentsDir = File(context.filesDir, "attachments")
-    private val mainDbFile = File(context.filesDir, "llmchat.db")
-    private val attachmentsDbFile = File(context.filesDir, "llmchat_attachments.db")
+    private val filePaths = FilePathManager(context)
+    private val attachmentsDir = filePaths.attachmentsDir
+    private val mainDbFile = filePaths.mainDbFile
+    private val attachmentsDbFile = filePaths.attachmentsDbFile
     private val dbKey = credentialStore.getOrCreateChatDbKey()
     private var db: LlmChatDb = openDb()
-
-    init {
-        if (!attachmentsDir.exists()) {
-            attachmentsDir.mkdirs()
-        }
-    }
 
     override fun listSessions(): List<ChatSession> = withDbRecovery {
         val sessions = db.listSessions()
