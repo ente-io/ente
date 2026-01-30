@@ -481,10 +481,6 @@ func (r *Repository) populateMessageAttachments(ctx context.Context, userID int6
 		pq.Array(messageUUIDs),
 	)
 	if err != nil {
-		var pqErr *pq.Error
-		if errors.As(err, &pqErr) && pqErr.Code == "42P01" {
-			return nil
-		}
 		return stacktrace.Propagate(err, "failed to query llmchat message diff attachments")
 	}
 	defer rows.Close()

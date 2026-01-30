@@ -36,7 +36,7 @@ When enabled, attachments are only available for internal users (`@ente.io` or u
 
 When enabled:
 
-- Apply migration `116`.
+- Apply migration `115`.
 - Uploads are staged under `llmchat/attachments/<user_id>/<attachment_uuid>` in bucket `b7`.
 - Attachments are committed when referenced by a message.
 
