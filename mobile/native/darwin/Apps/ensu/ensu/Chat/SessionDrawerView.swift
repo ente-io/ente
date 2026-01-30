@@ -13,6 +13,8 @@ struct SessionDrawerView: View {
     let onOpenSettings: () -> Void
     let onDeveloperTap: () -> Void
 
+    @State private var searchQuery: String = ""
+
     var body: some View {
         VStack(spacing: 0) {
             drawerHeader
@@ -49,9 +51,9 @@ struct SessionDrawerView: View {
         VStack(alignment: .leading, spacing: EnsuSpacing.md) {
             HStack {
                 if isLoggedIn {
-                    EnsuLogo(height: 28)
+                    drawerLogo
                 } else {
-                    EnsuLogo(height: 28)
+                    drawerLogo
                         .contentShape(Rectangle())
                         .onTapGesture {
                             onDeveloperTap()
@@ -59,9 +61,18 @@ struct SessionDrawerView: View {
                 }
 
                 Spacer()
+
+                if isLoggedIn {
+                    drawerPrimaryTile(
+                        icon: "ArrowReloadHorizontalIcon",
+                        title: "Sync",
+                        action: onSync,
+                        expands: false
+                    )
+                }
             }
 
-            newChatTile(horizontalPadding: 0)
+            headerControls
         }
         .padding(EnsuSpacing.lg)
         .background(
@@ -73,24 +84,63 @@ struct SessionDrawerView: View {
         )
     }
 
-    private func newChatTile(horizontalPadding: CGFloat = EnsuSpacing.lg) -> some View {
-        HStack(spacing: EnsuSpacing.sm) {
-            drawerPrimaryTile(
-                icon: "PlusSignIcon",
-                title: "New Chat",
-                action: onNewChat
-            )
+    private var drawerLogo: some View {
+        EnsuLogo(height: 28)
+    }
 
-            if isLoggedIn {
-                drawerPrimaryTile(
-                    icon: "ArrowReloadHorizontalIcon",
-                    title: "Sync",
-                    action: onSync
-                )
-            }
+    private var headerControls: some View {
+        HStack(alignment: .center, spacing: EnsuSpacing.sm) {
+            searchField
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            newChatButton
         }
-        // Make the tiles take equal width (50/50) and keep some space between.
-        .padding(.horizontal, horizontalPadding)
+    }
+
+    private var searchField: some View {
+        HStack(spacing: EnsuSpacing.sm) {
+            Image("Search01Icon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 16, height: 16)
+                .foregroundStyle(EnsuColor.textMuted)
+
+            TextField("Search chats", text: $searchQuery)
+                .font(EnsuTypography.body)
+                .platformTextInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .platformTextFieldStyle()
+                .foregroundStyle(EnsuColor.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, EnsuSpacing.inputHorizontal)
+        .padding(.vertical, EnsuSpacing.inputVertical)
+        .background(EnsuColor.fillFaint)
+        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
+    }
+
+    private var hasSearchQuery: Bool {
+        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var newChatButton: some View {
+        Button(action: {
+            hapticTap()
+            if hasSearchQuery {
+                searchQuery = ""
+            } else {
+                onNewChat()
+            }
+        }) {
+            Image(hasSearchQuery ? "Cancel01Icon" : "PlusSignIcon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 18)
+                .foregroundStyle(EnsuColor.textPrimary)
+                .frame(width: 36, height: 36)
+        }
+        .buttonStyle(.plain)
+        .contentShape(Circle())
     }
 
     private func sessionTile(_ session: ChatSession) -> some View {
@@ -169,7 +219,7 @@ struct SessionDrawerView: View {
         .padding(EnsuSpacing.lg)
     }
 
-    private func drawerPrimaryTile(icon: String, title: String, action: @escaping () -> Void) -> some View {
+    private func drawerPrimaryTile(icon: String, title: String, action: @escaping () -> Void, expands: Bool = true) -> some View {
         Button(action: {
             hapticTap()
             action()
@@ -184,18 +234,29 @@ struct SessionDrawerView: View {
                     .font(EnsuTypography.body)
             }
             .foregroundStyle(EnsuColor.textPrimary)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: expands ? .infinity : nil)
             .padding(.horizontal, EnsuSpacing.lg)
             .padding(.vertical, EnsuSpacing.md)
             .background(EnsuColor.fillFaint)
             .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.card, style: .continuous))
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: expands ? .infinity : nil)
+    }
+
+    private var filteredSessions: [ChatSession] {
+        let trimmed = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return sessions }
+        let lower = trimmed.lowercased()
+        return sessions.filter { session in
+            let title = ChatViewModel.sessionTitle(from: session.title, fallback: "New chat")
+            return title.lowercased().contains(lower)
+                || session.lastMessage.lowercased().contains(lower)
+        }
     }
 
     private var sectionedSessions: [SessionSection] {
-        let grouped = Dictionary(grouping: sessions) { session in
+        let grouped = Dictionary(grouping: filteredSessions) { session in
             sectionTitle(for: session.updatedAt)
         }
 

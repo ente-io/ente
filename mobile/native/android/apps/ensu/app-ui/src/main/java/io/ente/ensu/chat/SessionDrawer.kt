@@ -17,15 +17,23 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +64,20 @@ fun SessionDrawer(
     onOpenSettings: () -> Unit,
     onDeveloperTap: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredSessions = remember(searchQuery, sessions) {
+        val query = searchQuery.trim()
+        if (query.isEmpty()) {
+            sessions
+        } else {
+            val lower = query.lowercase()
+            sessions.filter { session ->
+                session.title.lowercase().contains(lower) ||
+                    (session.lastMessagePreview?.lowercase()?.contains(lower) == true)
+            }
+        }
+    }
+
     ModalDrawerSheet(
         drawerContainerColor = EnsuColor.backgroundBase(),
         drawerShape = RectangleShape
@@ -67,6 +89,8 @@ fun SessionDrawer(
         ) {
             DrawerHeader(
                 isLoggedIn = isLoggedIn,
+                searchQuery = searchQuery,
+                onSearchChange = { searchQuery = it },
                 onDeveloperTap = onDeveloperTap,
                 onNewChat = onNewChat,
                 onSync = onSync
@@ -82,7 +106,7 @@ fun SessionDrawer(
                 verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
             ) {
                 SessionGroups(
-                    sessions = sessions,
+                    sessions = filteredSessions,
                     selectedSessionId = selectedSessionId,
                     onSelectSession = onSelectSession,
                     onDeleteSession = onDeleteSession
@@ -103,6 +127,8 @@ fun SessionDrawer(
 @Composable
 private fun DrawerHeader(
     isLoggedIn: Boolean,
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
     onDeveloperTap: () -> Unit,
     onNewChat: () -> Unit,
     onSync: () -> Unit
@@ -114,18 +140,35 @@ private fun DrawerHeader(
             .padding(EnsuSpacing.lg.dp),
         verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            EnsuLogo(height = 28.dp)
+            Box(
+                modifier = Modifier
+                    .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
+            ) {
+                EnsuLogo(height = 28.dp)
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (isLoggedIn) {
+                DrawerPrimaryTile(
+                    iconRes = HugeIcons.ArrowReloadHorizontalIcon,
+                    label = "Sync",
+                    onClick = onSync,
+                    isEnabled = true
+                )
+            }
         }
 
-        DrawerNewChat(
-            modifier = Modifier.fillMaxWidth(),
+        DrawerSearchControls(
+            query = searchQuery,
+            onQueryChange = onSearchChange,
+            onClearSearch = { onSearchChange("") },
             onNewChat = onNewChat,
-            onSync = onSync,
-            isLoggedIn = isLoggedIn
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -162,33 +205,89 @@ private fun DrawerPrimaryTile(
 
 
 @Composable
-private fun DrawerNewChat(
-    modifier: Modifier = Modifier,
+private fun DrawerSearchControls(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClearSearch: () -> Unit,
     onNewChat: () -> Unit,
-    onSync: () -> Unit,
-    isLoggedIn: Boolean
+    modifier: Modifier = Modifier
 ) {
+    val hasQuery = query.isNotBlank()
+
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
+        horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        DrawerPrimaryTile(
-            iconRes = HugeIcons.PlusSignIcon,
-            label = "New Chat",
-            onClick = onNewChat,
-            isEnabled = true,
+        DrawerSearchField(
+            query = query,
+            onQueryChange = onQueryChange,
             modifier = Modifier.weight(1f)
         )
 
-        if (isLoggedIn) {
-            DrawerPrimaryTile(
-                iconRes = HugeIcons.ArrowReloadHorizontalIcon,
-                label = "Sync",
-                onClick = onSync,
-                isEnabled = true,
-                modifier = Modifier.weight(1f)
+        DrawerNewChatButton(
+            iconRes = if (hasQuery) HugeIcons.Cancel01Icon else HugeIcons.PlusSignIcon,
+            contentDescription = if (hasQuery) "Clear search" else "New Chat",
+            onClick = if (hasQuery) onClearSearch else onNewChat
+        )
+    }
+}
+
+@Composable
+private fun DrawerSearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = modifier,
+        placeholder = {
+            Text(
+                text = "Search chats",
+                style = EnsuTypography.body,
+                color = EnsuColor.textMuted()
             )
-        }
+        },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(HugeIcons.Search01Icon),
+                contentDescription = "Search",
+                modifier = Modifier.size(18.dp),
+                tint = EnsuColor.textMuted()
+            )
+        },
+        singleLine = true,
+        textStyle = EnsuTypography.body,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = EnsuColor.fillFaint(),
+            unfocusedContainerColor = EnsuColor.fillFaint(),
+            focusedIndicatorColor = EnsuColor.fillFaint(),
+            unfocusedIndicatorColor = EnsuColor.fillFaint()
+        ),
+        shape = RoundedCornerShape(EnsuCornerRadius.card.dp)
+    )
+}
+
+@Composable
+private fun DrawerNewChatButton(
+    iconRes: Int,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+    ) {
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = contentDescription,
+            modifier = Modifier.size(18.dp),
+            tint = EnsuColor.textPrimary()
+        )
     }
 }
 
