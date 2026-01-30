@@ -452,9 +452,9 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     // unique key.
     switch (collectionSummaryType) {
         case "trash":
-            menuOptions = [
-                <EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />,
-            ];
+            menuOptions = fileCount
+                ? [<EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />]
+                : [];
             break;
 
         case "userFavorites":
@@ -790,8 +790,8 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     </Stack>
 );
 
-const showEmptyTrashQuickOption = ({ type }: CollectionSummary) =>
-    type == "trash";
+const showEmptyTrashQuickOption = ({ type, fileCount }: CollectionSummary) =>
+    type == "trash" && fileCount > 0;
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("empty_trash")}>
