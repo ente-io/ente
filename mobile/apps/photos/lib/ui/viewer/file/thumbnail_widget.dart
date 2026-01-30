@@ -200,14 +200,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
       }
 
-      if (widget.file.fileType == FileType.video) {
-        if (widget.shouldShowVideoDuration) {
-          contentChildren
-              .add(VideoOverlayDuration(duration: widget.file.duration!));
-        } else if (widget.shouldShowVideoOverlayIcon) {
-          contentChildren.add(const VideoOverlayIcon());
-        }
-      } else if (widget.shouldShowLivePhotoOverlay &&
+      if (widget.file.fileType != FileType.video &&
+          widget.shouldShowLivePhotoOverlay &&
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
@@ -238,6 +232,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
+    if (!widget.rawThumbnail && widget.file.fileType == FileType.video) {
+      if (widget.shouldShowVideoDuration) {
+        viewChildren.add(
+          VideoOverlayDuration(duration: widget.file.duration),
+        );
+      } else if (widget.shouldShowVideoOverlayIcon) {
+        viewChildren.add(const VideoOverlayIcon());
+      }
+    }
     if (widget.shouldShowSyncStatus &&
         !widget.file.isUploaded &&
         !isOfflineMode) {
