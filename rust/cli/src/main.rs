@@ -7,22 +7,24 @@ use ente_rs::{
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
-    // Initialize logger
+async fn main() {
+    if let Err(e) = run().await {
+        eprintln!("{e}");
+        std::process::exit(1);
+    }
+}
+
+async fn run() -> Result<()> {
     env_logger::init();
 
-    // Initialize libsodium
-    ente_rs::crypto::init()?;
+    ente_core::crypto::init()?;
 
-    // Initialize storage
     let config_dir = ente_rs::utils::get_cli_config_dir()?;
     let db_path = config_dir.join("ente.db");
     let storage = Storage::new(&db_path)?;
 
-    // Parse CLI arguments
     let cli = Cli::parse();
 
-    // Handle commands
     match cli.command {
         Commands::Version => {
             println!("ente-rs version {}", ente_rs::cli::version::VERSION);

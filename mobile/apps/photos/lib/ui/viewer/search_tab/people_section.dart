@@ -82,6 +82,7 @@ class _PeopleSectionState extends State<PeopleSection> {
     debugPrint("Building section for ${widget.sectionType.name}");
     final shouldShowMore = _examples.length >= widget.limit - 1;
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -106,16 +107,14 @@ class _PeopleSectionState extends State<PeopleSection> {
                         style: textTheme.largeBold,
                       ),
                     ),
-                    shouldShowMore
-                        ? Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.chevron_right_outlined,
-                              color:
-                                  getEnteColorScheme(context).blurStrokePressed,
-                            ),
-                          )
-                        : const SizedBox.shrink(),
+                    if (shouldShowMore)
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.chevron_right_outlined,
+                          color: colorScheme.blurStrokePressed,
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 2),

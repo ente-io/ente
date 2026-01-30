@@ -86,6 +86,7 @@ class FlagService {
       internalUser || _isServerFlagEnabled(_backupOptionsFlag);
 
   bool get facesTimeline => internalUser;
+  bool get cleanupHiddenActions => internalUser;
   bool get ritualsFlag => true;
 
   bool get stopStreamProcess => true;
@@ -95,8 +96,6 @@ class FlagService {
   bool get manualTagFileToPerson => hasGrantedMLConsent;
 
   bool get enableShareePin => true;
-
-  bool get showSharedAlbumsInMoveSheet => internalUser;
 
   bool get isSocialEnabled =>
       internalUser || _isServerFlagEnabled(_commentsFlag);

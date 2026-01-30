@@ -288,6 +288,9 @@
       ]
     },
     {
+      "title": "btcturk"
+    },
+    {
       "title": "Bugzilla"
     },
     {
@@ -764,6 +767,9 @@
       "title": "Gusto"
     },
     {
+      "title": "guns.lol"
+    },
+    {
       "title": "Habbo"
     },
     {
@@ -952,6 +958,13 @@
       "slug": "lark",
       "altNames": [
         "飞书"
+      ]
+    },
+    {
+      "title": "Laneros",
+      "slug": "laneros",
+      "altNames": [
+        "laneros.com"
       ]
     },
     {
@@ -2135,12 +2148,21 @@
       "slug": "netim"
     },
     {
+      "title": "nexo"
+    },
+    {
       "title": "Wordfence",
       "slug": "wordfence"
     },
     {
       "title": "Hytale",
       "slug": "hytale"
+    },
+    {
+      "title": "Manage My Health",
+      "name": "Manage My Health",
+      "slug": "managemyhealth",
+      "altNames": ["managemyhealth", "Manage My Health NZ"]
     }
   ]
 }

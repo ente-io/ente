@@ -66,6 +66,7 @@ export const DownloadStatusNotifications: React.FC<
     DownloadStatusNotificationsProps
 > = ({ saveGroups, onRemoveSaveGroup, onShowCollectionSummary }) => {
     const { showMiniDialog } = useBaseContext();
+    const fileLabel = t("file").toLowerCase();
 
     const confirmCancelDownload = (group: SaveGroup) =>
         showMiniDialog({
@@ -111,6 +112,9 @@ export const DownloadStatusNotifications: React.FC<
 
         // Determine if this is a ZIP download (web with multiple files or live photo)
         const isZipDownload = !group.downloadDirPath && group.total > 1;
+        const shouldShowZipPart =
+            isZipDownload &&
+            (group.includeZipNumber || (group.currentPart ?? 1) > 1);
         const isDesktopOrSingleFile =
             !!group.downloadDirPath || group.total === 1;
 
@@ -127,11 +131,15 @@ export const DownloadStatusNotifications: React.FC<
             }
         } else if (isComplete) {
             statusText = t("download_complete");
-        } else if (isZipDownload) {
+        } else if (shouldShowZipPart) {
             const part = group.currentPart ?? 1;
             statusText = group.isDownloadingZip
                 ? t("downloading_part", { part })
                 : t("preparing_part", { part });
+        } else if (isZipDownload) {
+            statusText = group.isDownloadingZip
+                ? t("downloading")
+                : t("preparing");
         } else if (isDesktopOrSingleFile) {
             statusText =
                 group.total === 1
@@ -142,10 +150,17 @@ export const DownloadStatusNotifications: React.FC<
         }
 
         // Build caption: "Status • X / Y files"
-        const progress = t("download_progress", {
-            count: group.success + group.failed,
-            total: group.total,
-        });
+        const completedCount = group.success + group.failed;
+        const progress =
+            group.total === 1
+                ? `${t("processed_counts", {
+                      count: completedCount,
+                      total: group.total,
+                  })} ${fileLabel}`
+                : t("download_progress", {
+                      count: completedCount,
+                      total: group.total,
+                  });
         const caption = (
             <Typography
                 variant="small"
@@ -182,7 +197,12 @@ export const DownloadStatusNotifications: React.FC<
         }
 
         // Title is always the album name (truncated)
-        const truncatedName = truncateAlbumName(group.title);
+        const filesCountTitle = t("files_count", { count: group.total });
+        const title =
+            group.total === 1 && group.title === filesCountTitle
+                ? `${group.total} ${fileLabel}`
+                : group.title;
+        const truncatedName = truncateAlbumName(title);
 
         return (
             <Notification

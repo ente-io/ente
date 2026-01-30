@@ -233,7 +233,6 @@
   "failedToApplyCode": "Αποτυχία εφαρμογής κωδικού",
   "enterReferralCode": "Εισάγετε τον προωθητικό κωδικό",
   "codeAppliedPageTitle": "Ο κωδικός εφαρμόστηκε",
-  "changeYourReferralCode": "Αλλάξτε τον προωθητικό κωδικό σας",
   "change": "Αλλαγή",
   "unavailableReferralCode": "Λυπούμαστε, αυτός ο κωδικός δεν είναι διαθέσιμος.",
   "codeChangeLimitReached": "Λυπούμαστε, έχετε συμπληρώσει το όριο των αλλαγών κωδικού.",
@@ -251,11 +250,9 @@
   "claimFreeStorage": "Κερδίστε δωρεάν χώρο αποθήκευσης",
   "inviteYourFriends": "Προσκαλέστε τους φίλους σας",
   "failedToFetchReferralDetails": "Δεν είναι δυνατή η λήψη λεπτομερειών σχετικά με τον προώθησης. Παρακαλώ προσπαθήστε ξανά αργότερα.",
-  "referralStep1": "1. Δώστε αυτόν τον κωδικό στους φίλους σας",
   "referralStep2": "2. Ξεκινούν μία συνδρομή επί πληρωμή",
   "referralStep3": "3. Και οι δύο κερδίζετε {storageInGB} GB* δωρεάν",
   "referralsAreCurrentlyPaused": "Οι παραπομπές είναι σε παύση αυτή τη στιγμή",
-  "youCanAtMaxDoubleYourStorage": "* Μπορείτε κατά μέγιστο να διπλασιάσετε τον αποθηκευτικό σας χώρο",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Η οικογένειά σας έχει κερδίσει {storageAmountInGb} GB μέχρι τώρα} false {Έχετε κερδίσει {storageAmountInGb} GB μέχρι τώρα} other {Έχετε κερδίσει {storageAmountInGb} GB μέχρι τώρα!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -863,7 +860,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} ελεύθερα",
-  "appVersion": "Έκδοση: {versionValue}",
   "verifyIDLabel": "Επαλήθευση",
   "fileInfoAddDescHint": "Προσθήκη περιγραφής...",
   "editLocationTagTitle": "Επεξεργασία τοποθεσίας",

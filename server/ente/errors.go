@@ -243,6 +243,12 @@ var ErrLinkEditNotAllowed = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrFileInTrash = ApiError{
+	Code:           FileInTrash,
+	Message:        "One or more files are in trash or have been deleted, please restore them first",
+	HttpStatusCode: http.StatusConflict,
+}
+
 var ErrLockerRegistrationDisabled = &ApiError{
 	Code:           LockerRegistrationDisabled,
 	Message:        "Locker is restricted to paid users currently",
@@ -306,6 +312,9 @@ const (
 	LlmChatMessageLimitReached    ErrorCode = "LLMCHAT_MESSAGE_LIMIT_REACHED"
 	LlmChatAttachmentLimitReached ErrorCode = "LLMCHAT_ATTACHMENT_LIMIT_REACHED"
 	LlmChatPayloadTooLarge        ErrorCode = "LLMCHAT_PAYLOAD_TOO_LARGE"
+
+	// FileInTrash indicates files are present in trash and cannot be added to collection
+	FileInTrash ErrorCode = "FILE_IN_TRASH"
 
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
 

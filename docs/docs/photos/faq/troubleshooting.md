@@ -245,6 +245,16 @@ Ente will automatically skip files that have already been uploaded, so you can d
 
 If the browser settings cannot be changed, we recommend uploading files through the desktop app.
 
+### Why do I get "system error number 13" during ML indexing on Windows? {#windows-ml-indexing-error-13}
+
+If you see "system error number 13" errors in your logs during ML indexing, this is usually caused by Windows roaming profiles preventing access to the ML model files in `%APPDATA%\ente\models\`.
+
+**Solution:**
+
+Switch to a local profile, or exclude `%APPDATA%\ente\models\` from roaming sync. Contact your IT administrator if you're on a domain-joined computer.
+
+After making changes, quit the app completely, log out, and log back in to restart the ML pipeline.
+
 ### Why aren't my watch folders syncing? {#watch-folders-troubleshooting}
 
 If watch folders aren't uploading new files automatically:

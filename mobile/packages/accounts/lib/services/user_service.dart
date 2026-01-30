@@ -814,6 +814,7 @@ class UserService {
             _config.getKeyAttributes()!,
             keyEncryptionKey: keyEncryptionKey,
           );
+          _config.resetVolatilePassword();
           page = _homePage;
         } else {
           throw Exception("unexpected response during email verification");

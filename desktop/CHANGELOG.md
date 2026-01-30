@@ -2,7 +2,24 @@
 
 ## v1.7.18 (unreleased)
 
--
+- Hide shared albums
+- Watch folders will now be marked as inaccessible if they can't be accessed, instead of completely removing them from the list
+- Watch folders now support hidden albums
+- Watch folders will now skip unsupported files (zip, etc) instead of trying to upload them on every sync
+- Right-click context menu for files
+- Clean large files
+- Fix search bar losing focus on last backspace
+- Hide empty favorites album from albums bar
+- "Clean uncategorized" button
+- Hide favorites from album selector dialogs
+- Show current album in the album selector for upload flow
+- Show sort options in album selector (for upload, add, move, etc)
+- "Select all" button in the gallery and albums view
+- Edit location
+- Better sort for albums list
+- Improved UI for login, sign-up, etc, pages
+- Public album improvements
+- Upload to hidden albums
 
 ## v1.7.17
 

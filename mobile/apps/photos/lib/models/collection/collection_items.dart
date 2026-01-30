@@ -17,4 +17,8 @@ class SharedCollections {
   final List<Collection> quickLinks;
 
   SharedCollections(this.outgoing, this.incoming, this.quickLinks);
+
+  static SharedCollections empty() {
+    return SharedCollections([], [], []);
+  }
 }

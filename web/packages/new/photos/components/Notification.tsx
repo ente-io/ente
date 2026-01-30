@@ -72,6 +72,10 @@ export interface NotificationAttributes {
      * notification body.
      */
     onEndIconClick?: () => void;
+    /**
+     * If set, the notification will automatically close after this many
+     * milliseconds.
+     */
 }
 
 type NotificationProps = ModalVisibilityProps & {

@@ -278,7 +278,6 @@
   "failedToApplyCode": "Gagal menerapkan kode",
   "enterReferralCode": "Masukkan kode rujukan",
   "codeAppliedPageTitle": "Kode diterapkan",
-  "changeYourReferralCode": "Ganti kode rujukan kamu",
   "change": "Ubah",
   "unavailableReferralCode": "Maaf, kode ini tidak tersedia.",
   "codeChangeLimitReached": "Maaf, kamu telah mencapai batas perubahan kode.",
@@ -296,11 +295,9 @@
   "claimFreeStorage": "Peroleh kuota gratis",
   "inviteYourFriends": "Undang teman-temanmu",
   "failedToFetchReferralDetails": "Tidak dapat mengambil kode rujukan. Harap ulang lagi nanti.",
-  "referralStep1": "1. Berikan kode ini ke teman kamu",
   "referralStep2": "2. Ia perlu daftar ke paket berbayar",
   "referralStep3": "3. Kalian berdua mendapat {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Rujukan sedang dijeda",
-  "youCanAtMaxDoubleYourStorage": "* Maksimal dua kali lipat dari kuota penyimpananmu",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Keluargamu saat ini telah memperoleh {storageAmountInGb} GB} false {Kamu saat ini telah memperoleh {storageAmountInGb} GB} other {Kamu saat ini telah memperoleh {storageAmountInGb} GB!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1079,7 +1076,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} tersedia",
-  "appVersion": "Versi: {versionValue}",
   "fileInfoAddDescHint": "Tambahkan keterangan...",
   "editLocationTagTitle": "Edit lokasi",
   "familyPlanPortalTitle": "Keluarga",

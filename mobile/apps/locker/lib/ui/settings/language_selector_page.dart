@@ -111,114 +111,36 @@ class _LanguageItemsWidgetState extends State<_LanguageItemsWidget> {
 
   String _getLanguageName(Locale locale) {
     switch (locale.languageCode) {
-      case 'ar':
-        return 'العربية';
-      case 'be':
-        return 'Беларуская';
-      case 'bg':
-        return 'Български';
-      case 'ca':
-        return 'Català';
       case 'cs':
         return 'Čeština';
-      case 'da':
-        return 'Dansk';
       case 'de':
         return 'Deutsch';
-      case 'el':
-        return 'Ελληνικά';
       case 'en':
         return 'English';
       case 'es':
-        switch (locale.countryCode) {
-          case 'ES':
-            return 'Español (España)';
-          default:
-            return 'Español';
-        }
-      case 'et':
-        return 'Eesti';
-      case 'fa':
-        return 'فارسی';
-      case 'fi':
-        return 'Suomi';
+        return 'Español';
       case 'fr':
         return 'Français';
-      case 'gu':
-        return 'ગુજરાતી';
-      case 'he':
-        return 'עברית';
-      case 'hi':
-        return 'हिन्दी';
-      case 'hu':
-        return 'Magyar';
-      case 'id':
-        return 'Bahasa Indonesia';
       case 'it':
         return 'Italiano';
       case 'ja':
         return '日本語';
-      case 'ka':
-        return 'ქართული';
-      case 'km':
-        return 'ភាសាខ្មែរ';
-      case 'ko':
-        return '한국어';
-      case 'lt':
-        return 'Lietuvių';
-      case 'lv':
-        return 'Latviešu';
-      case 'ml':
-        return 'മലയാളം';
       case 'nl':
         return 'Nederlands';
-      case 'no':
-        return 'Norsk';
       case 'pl':
         return 'Polski';
       case 'pt':
-        switch (locale.countryCode) {
-          case 'BR':
-            return 'Português (Brasil)';
-          default:
-            return 'Português';
-        }
+        return 'Português';
       case 'ro':
         return 'Română';
       case 'ru':
         return 'Русский';
-      case 'sk':
-        return 'Slovenčina';
-      case 'sl':
-        return 'Slovenščina';
-      case 'sr':
-        return 'Српски';
-      case 'sv':
-        return 'Svenska';
-      case 'ti':
-        return 'ትግርኛ';
       case 'tr':
         return 'Türkçe';
       case 'uk':
         return 'Українська';
       case 'vi':
         return 'Tiếng Việt';
-      case 'zh':
-        if (locale.countryCode == 'TW') {
-          return '中文 (台灣)';
-        } else if (locale.countryCode == 'HK') {
-          return '中文 (香港)';
-        } else if (locale.countryCode == 'CN') {
-          return '中文 (中国)';
-        }
-        switch (locale.scriptCode) {
-          case 'Hans':
-            return '中文 (简体)';
-          case 'Hant':
-            return '中文 (繁體)';
-          default:
-            return '中文';
-        }
       default:
         return locale.languageCode;
     }

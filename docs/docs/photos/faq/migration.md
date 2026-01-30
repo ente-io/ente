@@ -57,3 +57,7 @@ This usually occurs due to a network connectivity issue:
 - On desktop/web, try disabling "Faster uploads" in Settings > Preferences > Advanced
 
 For more check: [Troubleshooting](https://ente.io/help/photos/faq/troubleshooting#desktop-app-issues)
+
+### Is there a way to remove partner sharing photos when importing via Google Takeout?
+
+There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.

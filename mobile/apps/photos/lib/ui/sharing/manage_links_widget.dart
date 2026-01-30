@@ -389,8 +389,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.adaptive.share,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        // ignore: unawaited_futures
-                        await shareAlbumLinkWithPlaceholder(
+                        await shareAlbumLink(
                           context,
                           widget.collection!,
                           urlValue,
@@ -420,7 +419,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             return QrCodeDialog(
                               data: urlValue,
                               title: widget.collection!.displayName,
-                              accentColor: enteColorScheme.primary500,
+                              accentColor: const Color(0xFF08C225),
                               shareFileName:
                                   'ente_qr_${widget.collection!.displayName}.png',
                               shareText:
@@ -433,7 +432,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                 text: 'ente',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Montserrat',
                                 ),
                               ),
                             );

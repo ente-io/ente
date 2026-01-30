@@ -3,6 +3,7 @@ import "dart:async";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
@@ -35,6 +36,7 @@ class SearchWidgetState extends State<SearchWidget> {
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
   late FocusNode focusNode;
+  StreamSubscription<TabChangedEvent>? _tabChangedEvent;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   double _bottomPadding = 0.0;
   double _distanceOfWidgetFromBottom = 0;
@@ -48,6 +50,19 @@ class SearchWidgetState extends State<SearchWidget> {
   void initState() {
     super.initState();
     focusNode = FocusNode();
+    focusNode.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen((event) async {
+      if (!mounted) {
+        return;
+      }
+      if (event.selectedIndex != 3) {
+        focusNode.unfocus();
+      }
+    });
     _tabDoubleTapEvent =
         Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
       debugPrint("Firing now ${event.selectedIndex}");
@@ -102,6 +117,7 @@ class SearchWidgetState extends State<SearchWidget> {
   void dispose() {
     _debouncer.cancelDebounceTimer();
     focusNode.dispose();
+    _tabChangedEvent?.cancel();
     _tabDoubleTapEvent?.cancel();
     textController.removeListener(textControllerListener);
     textController.dispose();
@@ -124,48 +140,57 @@ class SearchWidgetState extends State<SearchWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final mutedTextColor =
+        textTheme.smallMuted.color ?? colorScheme.strokeMuted;
+    final shouldShowClearButton = focusNode.hasFocus ||
+        MediaQuery.viewInsetsOf(context).bottom > 0 ||
+        textController.text.trim().isNotEmpty;
     return RepaintBoundary(
       key: widgetKey,
       child: Padding(
         padding: EdgeInsets.only(bottom: _bottomPadding),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: SizedBox(
+            height: 58,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                color: colorScheme.backgroundBase,
-                child: Container(
-                  color: colorScheme.fillFaint,
-                  child: TextField(
-                    controller: textController,
-                    focusNode: focusNode,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlignVertical: const TextAlignVertical(y: 0),
-                    // Below parameters are to disable auto-suggestion
-                    // Above parameters are to disable auto-suggestion
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context).search,
-                      filled: true,
-                      fillColor: getEnteColorScheme(context).fillFaint,
-                      border: const UnderlineInputBorder(
-                        borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(16),
+              child: ColoredBox(
+                color: colorScheme.fillFaint,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: mutedTextColor,
+                        size: 24,
+                        strokeWidth: 1.5,
                       ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: Hero(
-                        tag: "search_icon",
-                        child: Icon(
-                          Icons.search,
-                          color: colorScheme.strokeFaint,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: textController,
+                          focusNode: focusNode,
+                          style: textTheme.small,
+                          textAlignVertical: TextAlignVertical.center,
+                          // Below parameters are to disable auto-suggestion
+                          // Above parameters are to disable auto-suggestion
+                          decoration: InputDecoration(
+                            hintText: AppLocalizations.of(context).search,
+                            hintStyle: textTheme.smallMuted,
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
                       ),
 
                       /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
                       setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
-                      suffixIcon: ValueListenableBuilder(
+                      ValueListenableBuilder(
                         valueListenable: isLoading,
                         builder: (
                           BuildContext context,
@@ -174,10 +199,11 @@ class SearchWidgetState extends State<SearchWidget> {
                         ) {
                           return SearchSuffixIcon(
                             isSearching,
+                            showClearButton: shouldShowClearButton,
                           );
                         },
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -193,7 +219,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 12 : 11;
+    final maxResultCount = _isYearValid(query) ? 13 : 12;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -266,6 +292,12 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getCollectionSearchResults(query).then(
       (collectionResults) {
         onResultsReceived(collectionResults);
+      },
+    );
+
+    _searchService.getDeviceCollectionSearchResults(query).then(
+      (deviceCollectionResults) {
+        onResultsReceived(deviceCollectionResults);
       },
     );
 

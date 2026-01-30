@@ -345,7 +345,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                   _lockscreenSetting.getInvalidAttemptCount()) {
             invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
 
-            if (invalidAttemptCount > 9) {
+            // For logged-in users, auto-logout after 10 failed attempts
+            if (invalidAttemptCount > 9 && widget.config.isLoggedIn()) {
               await _autoLogoutOnMaxInvalidAttempts();
               return;
             }
