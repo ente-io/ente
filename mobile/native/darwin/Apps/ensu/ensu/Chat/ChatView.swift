@@ -36,6 +36,17 @@ struct ChatView: View {
             && !viewState.showDeveloperSettings
     }
 
+    private var overflowDialogPresented: Binding<Bool> {
+        Binding(
+            get: { viewModel.overflowAlert != nil },
+            set: { isPresented in
+                if !isPresented {
+                    viewModel.cancelOverflowDialog()
+                }
+            }
+        )
+    }
+
     private var modelSettingsSignature: String {
         "\(modelSettings.useCustomModel)|\(modelSettings.modelUrl)|\(modelSettings.mmprojUrl)"
     }
@@ -198,7 +209,7 @@ struct ChatView: View {
                 secondaryButton: .cancel()
             )
         }
-        .confirmationDialog("Context limit reached", item: $viewModel.overflowAlert, titleVisibility: .visible) { alert in
+        .confirmationDialog("Context limit reached", isPresented: overflowDialogPresented, titleVisibility: .visible) {
             Button("Trim history") {
                 viewModel.confirmOverflowTrim()
             }
@@ -209,8 +220,12 @@ struct ChatView: View {
             Button("Cancel", role: .cancel) {
                 viewModel.cancelOverflowDialog()
             }
-        } message: { alert in
-            Text("Input uses \(alert.inputTokens) tokens (budget \(alert.inputBudget)).")
+        } message: {
+            if let alert = viewModel.overflowAlert {
+                Text("Input uses \(alert.inputTokens) tokens (budget \(alert.inputBudget)).")
+            } else {
+                Text("")
+            }
         }
         .overlay(alignment: .bottom) {
             if let toastMessage = viewState.toastMessage {
