@@ -48,9 +48,9 @@ For more details about how to get museum up and running, see
 
 ## LLM chat (optional)
 
-Museum can store encrypted chat sessions/messages (and optional attachments) for
-LLM chat clients. Enable it via `features.llmchat: true` in your `museum.yaml`
-and see [docs/llmchat.md](docs/llmchat.md) for endpoints and cleanup settings.
+Museum can store encrypted chat sessions/messages for LLM chat clients.
+Enable it via `features.llmchat: true` in your `museum.yaml` and see
+[docs/llmchat.md](docs/llmchat.md) for endpoints and cleanup settings.
 
 ## Architecture
 

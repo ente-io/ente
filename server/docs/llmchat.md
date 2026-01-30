@@ -1,11 +1,12 @@
 # LLM chat
 
-Museum can store encrypted LLM chat sessions/messages and optional attachments.
+Museum can store encrypted LLM chat sessions/messages. Attachment support is
+currently disabled.
 
 ## Enable
 
 1. Add `features.llmchat: true` in `museum.yaml`.
-2. Ensure migrations `115`, `116`, and `117` have been applied.
+2. Ensure migration `115` has been applied.
 
 ## Endpoints (authenticated)
 
@@ -16,17 +17,20 @@ Museum can store encrypted LLM chat sessions/messages and optional attachments.
 - `DELETE /llmchat/chat/session?id=<session_uuid>`
 - `DELETE /llmchat/chat/message?id=<message_uuid>`
 - `GET /llmchat/chat/diff?sinceTime=<microseconds>`
-- `POST /llmchat/chat/attachment/:attachmentId/upload-url`
-- `GET /llmchat/chat/attachment/:attachmentId`
+- `POST /llmchat/chat/attachment/:attachmentId/upload-url` *(only when attachments are enabled)*
+- `GET /llmchat/chat/attachment/:attachmentId` *(only when attachments are enabled)*
 
-## Attachments
+## Attachments (disabled)
 
-Attachment uploads require S3 configuration. Uploads are staged under
+Attachment uploads are currently disabled. The endpoints are gated behind
+`llmchat.attachments.enabled: true` and require a future migration to re-enable
+attachment storage. When enabled, uploads are staged under
 `llmchat/attachments/<user_id>/<attachment_uuid>` in the hot bucket and are
 committed when referenced by a message.
 
-To control cleanup, set `llmchat.attachments.cleanup: true` to enable daily
-purging of unreferenced attachments. Temp uploads are cleaned automatically.
+To control cleanup when attachments are enabled, set
+`llmchat.attachments.cleanup: true` to enable daily purging of unreferenced
+attachments. Temp uploads are cleaned automatically.
 
 ## Retention
 
