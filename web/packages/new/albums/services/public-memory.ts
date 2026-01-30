@@ -1,9 +1,5 @@
 import { decryptBoxBytes } from "ente-base/crypto";
-import {
-    authenticatedPublicAlbumsRequestHeaders,
-    ensureOk,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import {
     decryptRemoteFile,
@@ -13,21 +9,27 @@ import {
 import { z } from "zod";
 
 /**
- * Credentials for accessing a public memory share.
+ * Credentials needed to make public memory share related API requests.
  */
 export interface PublicMemoryCredentials {
+    /**
+     * The access token for the public memory share.
+     *
+     * This is obtained from the "t" query parameter of the share URL.
+     * It both identifies the share and authenticates the request.
+     */
     accessToken: string;
 }
 
 /**
- * Request headers for authenticated public memory share requests.
+ * Return headers for public memory share API requests.
  */
-export const authenticatedPublicMemoryRequestHeaders = (
-    credentials: PublicMemoryCredentials,
-): ReturnType<typeof authenticatedPublicAlbumsRequestHeaders> =>
-    authenticatedPublicAlbumsRequestHeaders(
-        credentials as PublicAlbumsCredentials,
-    );
+export const authenticatedPublicMemoryRequestHeaders = ({
+    accessToken,
+}: PublicMemoryCredentials) => ({
+    "X-Auth-Access-Token": accessToken,
+    ...publicRequestHeaders(),
+});
 
 /**
  * Information about a public memory share fetched from remote.
@@ -61,7 +63,7 @@ export const getPublicMemoryInfo = async (
     accessToken: string,
 ): Promise<PublicMemoryShareInfo> => {
     const res = await fetch(await apiURL("/public-memory/info"), {
-        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        headers: authenticatedPublicMemoryRequestHeaders({ accessToken }),
     });
     ensureOk(res);
     const { memoryShare } = PublicMemoryShareInfoResponse.parse(
@@ -95,7 +97,7 @@ export const getPublicMemoryFiles = async (
     shareKey: string,
 ): Promise<EnteFile[]> => {
     const res = await fetch(await apiURL("/public-memory/files"), {
-        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+        headers: authenticatedPublicMemoryRequestHeaders({ accessToken }),
     });
     ensureOk(res);
     const { files } = PublicMemoryShareFilesResponse.parse(await res.json());
