@@ -575,7 +575,7 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
                     style={{
                         display: "block",
                         maxWidth: "100%",
-                        maxHeight: "100%",
+                        maxHeight: "calc(100vh - 220px)",
                         objectFit: "contain",
                         userSelect: "none",
                         pointerEvents: "none",
@@ -767,7 +767,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     style={{
                         display: "block",
                         maxWidth: "100%",
-                        maxHeight: "100%",
+                        maxHeight: "calc(100vh - 220px)",
                         objectFit: "contain",
                         userSelect: "none",
                     }}
@@ -787,7 +787,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     style={{
                         display: "block",
                         maxWidth: "100%",
-                        maxHeight: "100%",
+                        maxHeight: "calc(100vh - 220px)",
                         objectFit: "contain",
                         userSelect: "none",
                     }}
@@ -801,7 +801,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     style={{
                         display: "block",
                         maxWidth: "100%",
-                        maxHeight: "100%",
+                        maxHeight: "calc(100vh - 220px)",
                         objectFit: "contain",
                         userSelect: "none",
                         pointerEvents: "none",
