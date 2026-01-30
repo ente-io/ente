@@ -80,9 +80,7 @@ class SocialNotificationCoordinator {
 
   bool _shouldShowSocialNotifications(SharedPreferences prefs) {
     return prefs.containsKey(kIsFirstRemoteSyncDoneKey) &&
-        (NotificationService.instance.shouldShowCommentNotifications() ||
-            NotificationService.instance.shouldShowLikeNotifications() ||
-            NotificationService.instance.shouldShowReplyNotifications());
+        NotificationService.instance.shouldShowSocialNotifications();
   }
 
   int _getCutoffTime(SharedPreferences prefs) {
@@ -116,12 +114,6 @@ class SocialNotificationCoordinator {
 
     final hiddenCollectionIds = _collectionsService.getHiddenCollectionIds();
     final latestByKey = <String, _SocialActivityCandidate>{};
-    final bool enableCommentNotifications =
-        NotificationService.instance.shouldShowCommentNotifications();
-    final bool enableLikeNotifications =
-        NotificationService.instance.shouldShowLikeNotifications();
-    final bool enableReplyNotifications =
-        NotificationService.instance.shouldShowReplyNotifications();
 
     void considerCandidate(_SocialActivityCandidate candidate) {
       if (!_isSocialNotificationEnabledForType(candidate.type)) {
@@ -147,12 +139,10 @@ class SocialNotificationCoordinator {
 
     final db = SocialDB.instance;
 
-    final List<Comment> fileComments = enableCommentNotifications
-        ? await db.getCommentsOnFilesSince(
-            excludeUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Comment>[];
+    final List<Comment> fileComments = await db.getCommentsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
     for (final comment in fileComments) {
       considerCandidate(
         _SocialActivityCandidate(
@@ -167,18 +157,14 @@ class SocialNotificationCoordinator {
       );
     }
 
-    final List<Comment> replies = enableReplyNotifications
-        ? await db.getRepliesToUserCommentsSince(
-            targetUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Comment>[];
-    final List<Reaction> photoLikes = enableLikeNotifications
-        ? await db.getReactionsOnFilesSince(
-            excludeUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Reaction>[];
+    final List<Comment> replies = await db.getRepliesToUserCommentsSince(
+      targetUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
 
     final repliesNeedingOwnerCheck = <Comment>[];
     final fileIDsNeedingOwnership = <int>{};
@@ -301,14 +287,12 @@ class SocialNotificationCoordinator {
   bool _isSocialNotificationEnabledForType(FeedItemType type) {
     switch (type) {
       case FeedItemType.comment:
-        return NotificationService.instance.shouldShowCommentNotifications();
       case FeedItemType.reply:
-        return NotificationService.instance.shouldShowReplyNotifications();
       case FeedItemType.photoLike:
-        return NotificationService.instance.shouldShowLikeNotifications();
+        return true;
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
-        return false; // Currently not notifying for comment/reply likes
+        return false;
     }
   }
 
