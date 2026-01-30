@@ -16,6 +16,12 @@ class NotificationService {
       "notification_permission_granted";
   static const String keyShouldShowNotificationsForSharedPhotos =
       "notifications_enabled_shared_photos";
+  static const String keyShouldShowCommentNotifications =
+      "notifications_enabled_social_comments";
+  static const String keyShouldShowLikeNotifications =
+      "notifications_enabled_social_likes";
+  static const String keyShouldShowReplyNotifications =
+      "notifications_enabled_social_replies";
 
   NotificationService._privateConstructor();
 
@@ -157,9 +163,46 @@ class NotificationService {
     );
   }
 
+  bool shouldShowCommentNotifications() {
+    final result = _preferences.getBool(keyShouldShowCommentNotifications);
+    return result ?? true;
+  }
+
+  Future<void> setShouldShowCommentNotifications(bool value) {
+    return _preferences.setBool(
+      keyShouldShowCommentNotifications,
+      value,
+    );
+  }
+
+  bool shouldShowLikeNotifications() {
+    final result = _preferences.getBool(keyShouldShowLikeNotifications);
+    return result ?? true;
+  }
+
+  Future<void> setShouldShowLikeNotifications(bool value) {
+    return _preferences.setBool(
+      keyShouldShowLikeNotifications,
+      value,
+    );
+  }
+
+  bool shouldShowReplyNotifications() {
+    final result = _preferences.getBool(keyShouldShowReplyNotifications);
+    return result ?? true;
+  }
+
+  Future<void> setShouldShowReplyNotifications(bool value) {
+    return _preferences.setBool(
+      keyShouldShowReplyNotifications,
+      value,
+    );
+  }
+
   Future<void> showNotification(
     String title,
     String message, {
+    int? id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
     String payload = "ente://home",
@@ -179,7 +222,7 @@ class NotificationService {
     final platformChannelSpecs =
         NotificationDetails(android: androidSpecs, iOS: iosSpecs);
     await _notificationsPlugin.show(
-      channelName.hashCode,
+      id ?? channelName.hashCode,
       title,
       message,
       platformChannelSpecs,

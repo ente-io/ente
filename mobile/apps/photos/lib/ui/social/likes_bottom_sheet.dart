@@ -11,6 +11,7 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
+import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -65,6 +66,7 @@ class _LikesBottomSheetState extends State<LikesBottomSheet> {
   @override
   void initState() {
     super.initState();
+    unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
     _currentUserID = Configuration.instance.getUserID()!;
     _selectedCollectionID = widget.initialCollectionID;
     _loadSharedCollections();
