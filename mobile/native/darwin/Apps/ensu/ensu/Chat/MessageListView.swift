@@ -1075,11 +1075,11 @@ private enum MarkdownParser {
     private static func parseMarkdownBlocks(_ markdown: String) -> [MarkdownBlock] {
         guard !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
         let document = Document(parsing: markdown)
-        var blocks: [MarkdownBlock] = []
+        var parsedBlocks: [MarkdownBlock] = []
         for child in document.children {
-            blocks.append(contentsOf: blocks(for: child))
+            parsedBlocks.append(contentsOf: blocks(for: child))
         }
-        return blocks
+        return parsedBlocks
     }
 
     private static func blocks(for markup: Markup) -> [MarkdownBlock] {
@@ -1110,11 +1110,11 @@ private enum MarkdownParser {
             let items = unorderedList.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
             return items.isEmpty ? [] : [.list(items: items)]
         default:
-            var blocks: [MarkdownBlock] = []
+            var nestedBlocks: [MarkdownBlock] = []
             for child in markup.children {
-                blocks.append(contentsOf: blocks(for: child))
+                nestedBlocks.append(contentsOf: blocks(for: child))
             }
-            return blocks
+            return nestedBlocks
         }
     }
 
@@ -1187,7 +1187,7 @@ private enum MarkdownParser {
 
     private static func renderInline(from markup: Markup) -> String {
         switch markup {
-        case let text as Text:
+        case let text as Markdown.Text:
             return text.string
         case _ as SoftBreak:
             return " "
@@ -1201,12 +1201,12 @@ private enum MarkdownParser {
             return "`\(inlineCode.code)`"
         case let strikethrough as Strikethrough:
             return "~~" + renderInlineChildren(strikethrough) + "~~"
-        case let link as Link:
+        case let link as Markdown.Link:
             let label = renderInlineChildren(link)
             let destination = link.destination ?? ""
             return destination.isEmpty ? label : "[\(label)](\(destination))"
         default:
-            if markup.children.isEmpty {
+            if !markup.children.contains(where: { _ in true }) {
                 return ""
             }
             return renderInlineChildren(markup)
