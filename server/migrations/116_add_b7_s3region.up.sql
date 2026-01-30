@@ -1,0 +1,1 @@
+ALTER TYPE s3region ADD VALUE 'b7';

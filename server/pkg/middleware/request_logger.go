@@ -9,11 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/museum/pkg/utils/network"
-	timeUtil "github.com/ente-io/museum/pkg/utils/time"
+
+	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente-io/stacktrace"
 	"github.com/gin-contrib/requestid"
+
+	timeUtil "github.com/ente-io/museum/pkg/utils/time"
+
+	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -29,28 +33,28 @@ var latency = promauto.NewHistogramVec(prometheus.HistogramOpts{
 // shouldSkipBodyLog returns true if the body should not be logged.
 // This is useful for endpoints that receive large or sensitive payloads.
 func shouldSkipBodyLog(method string, path string) bool {
-	if method == http.MethodPut && path == "/embeddings" {
+	if method == "PUT" && path == "/embeddings" {
 		return true
 	}
-	if path == "/user-entity/entity" && (method == http.MethodPost || method == http.MethodPut) {
+	if path == "/user-entity/entity" && (method == "POST" || method == "PUT") {
 		return true
 	}
-	if path == "/files/data" && method == http.MethodPut {
+	if path == "/files/data" && method == "PUT" {
 		return true
 	}
 	if path == "/admin/user/terminate-session" {
 		return true
 	}
-	if strings.HasPrefix(path, "/llmchat/chat/attachment/") && method == http.MethodPost {
+	if strings.HasPrefix(path, "/llmchat/chat/attachment/") && method == "POST" {
 		return true
 	}
-	if path == "/llmchat/chat/message" && method == http.MethodPost {
+	if path == "/llmchat/chat/message" && method == "POST" {
 		return true
 	}
-	if path == "/llmchat/chat/session" && method == http.MethodPost {
+	if path == "/llmchat/chat/session" && method == "POST" {
 		return true
 	}
-	if path == "/llmchat/chat/key" && method == http.MethodPost {
+	if path == "/llmchat/chat/key" && method == "POST" {
 		return true
 	}
 	return false
@@ -61,20 +65,24 @@ func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		startTime := time.Now()
 		reqID := requestid.Get(c)
+		buf, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			handler.Error(c, err)
+		}
+		rdr1 := io.NopCloser(bytes.NewBuffer(buf))
+		// Creating a new Buffer, because rdr1 will be read
+		rdr2 := io.NopCloser(bytes.NewBuffer(buf))
 
 		userAgent := c.GetHeader("User-Agent")
 		clientVersion := c.GetHeader("X-Client-Version")
 		clientPkg := c.GetHeader("X-Client-Package")
 		clientIP := network.GetClientIP(c)
 		reqMethod := c.Request.Method
-		reqPath := c.Request.URL.Path
-
 		queryValues, _ := url.ParseQuery(c.Request.URL.RawQuery)
 		if queryValues.Has("token") {
 			queryValues.Set("token", "redacted-value")
 		}
 		queryParamsForLog := queryValues.Encode()
-
 		reqContextLogger := logrus.WithFields(logrus.Fields{
 			"client_ip":      clientIP,
 			"client_pkg":     clientPkg,
@@ -82,41 +90,40 @@ func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 			"query":          queryParamsForLog,
 			"req_id":         reqID,
 			"req_method":     reqMethod,
-			"req_uri":        reqPath,
+			"req_uri":        c.Request.URL.Path,
 			"ua":             userAgent,
 		})
-
-		skipBodyLog := shouldSkipBodyLog(reqMethod, reqPath)
-		body := ""
-		if skipBodyLog {
+		skipRequestLogUnlessError := shouldSkipBodyLog(reqMethod, c.Request.URL.Path)
+		if skipRequestLogUnlessError {
 			reqContextLogger = reqContextLogger.WithField("req_body", "redacted")
 		} else {
-			buf, err := io.ReadAll(c.Request.Body)
+			body, err := readBody(rdr1)
 			if err != nil {
-				handler.Error(c, err)
-				return
+				logrus.Error("Error reading body", err)
+			} else {
+				reqContextLogger = reqContextLogger.WithField("req_body", body)
 			}
-			body = string(buf)
-			c.Request.Body = io.NopCloser(bytes.NewBuffer(buf))
-			reqContextLogger = reqContextLogger.WithField("req_body", body)
 		}
-
 		reqContextLogger.Info("incoming")
-
+		c.Request.Body = rdr2
+		// Processing request
 		c.Next()
-
 		statusCode := c.Writer.Status()
 		latencyTime := time.Since(startTime)
 		reqURI := urlSanitizer(c)
 		if reqMethod != http.MethodOptions {
-			latency.WithLabelValues(strconv.Itoa(statusCode), reqMethod, c.Request.Host, reqURI).
+			latency.WithLabelValues(strconv.Itoa(statusCode), reqMethod,
+				c.Request.Host, reqURI).
 				Observe(float64(latencyTime.Milliseconds()))
 		}
-
-		if statusCode >= 400 && !skipBodyLog {
-			reqContextLogger = reqContextLogger.WithField("req_body", body)
+		if statusCode >= 400 && !skipRequestLogUnlessError {
+			body, err := readBody(rdr1)
+			if err != nil {
+				logrus.Error("Error reading body", err)
+			} else {
+				reqContextLogger = reqContextLogger.WithField("req_body", body)
+			}
 		}
-
 		reqContextLogger.WithFields(logrus.Fields{
 			"latency_time": latencyTime,
 			"h_latency":    timeUtil.HumanFriendlyDuration(latencyTime),
@@ -124,4 +131,10 @@ func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 			"user_id":      auth.GetUserID(c.Request.Header),
 		}).Info("outgoing")
 	}
+}
+
+func readBody(reader io.Reader) (string, error) {
+	buf := new(bytes.Buffer)
+	_, err := buf.ReadFrom(reader)
+	return buf.String(), stacktrace.Propagate(err, "")
 }
