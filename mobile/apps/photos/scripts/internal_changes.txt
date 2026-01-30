@@ -1,3 +1,4 @@
+- Laurens: Notifications for comments and likes
 - Neeraj: Fix incorrect thumbnail for local files
 - Neeraj: QOL: Parse duration & always show video indicator/duration 
 - Ashil: QOL: (i) Option to remove hidden files from outside of hidden
