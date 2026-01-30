@@ -43,14 +43,8 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
   }
 
   Future<void> _confirmPasswordMatch() async {
-    final password = _confirmPasswordController.text;
-    // Defense-in-depth: prevent empty/whitespace-only passwords
-    if (password.isEmpty || password.trim().isEmpty) {
-      await HapticFeedback.vibrate();
-      throw Exception("Password cannot be empty");
-    }
-    if (widget.password == password) {
-      await _lockscreenSetting.setPassword(password);
+    if (widget.password == _confirmPasswordController.text) {
+      await _lockscreenSetting.setPassword(_confirmPasswordController.text);
 
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
@@ -146,8 +140,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
                     onChange: (p0) {
                       _confirmPasswordController.text = p0;
                       _isFormValid.value =
-                          _confirmPasswordController.text.isNotEmpty &&
-                              _confirmPasswordController.text.trim().isNotEmpty;
+                          _confirmPasswordController.text.isNotEmpty;
                     },
                     onSubmit: (p0) {
                       return _confirmPasswordMatch();
