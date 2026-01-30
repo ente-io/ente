@@ -2,10 +2,32 @@ import { decryptBoxBytes } from "ente-base/crypto";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     ensureOk,
+    type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { decryptRemoteFile, RemoteEnteFile, type EnteFile } from "ente-media/file";
+import {
+    decryptRemoteFile,
+    RemoteEnteFile,
+    type EnteFile,
+} from "ente-media/file";
 import { z } from "zod";
+
+/**
+ * Credentials for accessing a public memory share.
+ */
+export interface PublicMemoryCredentials {
+    accessToken: string;
+}
+
+/**
+ * Request headers for authenticated public memory share requests.
+ */
+export const authenticatedPublicMemoryRequestHeaders = (
+    credentials: PublicMemoryCredentials,
+): ReturnType<typeof authenticatedPublicAlbumsRequestHeaders> =>
+    authenticatedPublicAlbumsRequestHeaders(
+        credentials as PublicAlbumsCredentials,
+    );
 
 /**
  * Information about a public memory share fetched from remote.
@@ -83,11 +105,7 @@ export const getPublicMemoryFiles = async (
         // The file's key is re-encrypted to the per-share key.
         // Override the file's encryptedKey/nonce with the share-level values
         // so that decryptRemoteFile can decrypt using the shareKey.
-        const remoteFile = {
-            ...file,
-            encryptedKey,
-            keyDecryptionNonce,
-        };
+        const remoteFile = { ...file, encryptedKey, keyDecryptionNonce };
         const decrypted = await decryptRemoteFile(remoteFile, shareKey);
         enteFiles.push(decrypted);
     }
