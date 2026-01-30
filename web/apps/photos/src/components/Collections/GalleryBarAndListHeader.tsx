@@ -185,7 +185,7 @@ export const GalleryBarAndListHeader: React.FC<
                         onSelectCollection,
                         onSelectPerson,
                     }}
-                    collectionSummary={collectionSummary!}
+                    collectionSummary={collectionSummary}
                     onCollectionShare={showCollectionShare}
                     onCollectionCast={showCollectionCast}
                 />
