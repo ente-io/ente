@@ -180,6 +180,14 @@ class _FileSelectionActionsWidgetState
           onTap: _permanentlyDelete,
         ),
       );
+    } else if (widget.type == GalleryType.cleanupHiddenFromDevice) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_outline,
+          labelText: AppLocalizations.of(context).deleteFromDevice,
+          onTap: _deleteSelectedFromDevice,
+        ),
+      );
     } else if (widget.type == GalleryType.deleteSuggestions) {
       items.add(
         SelectionActionButton(
@@ -1042,6 +1050,50 @@ class _FileSelectionActionsWidgetState
       context,
       widget.selectedFiles.files.toList(),
     )) {
+      widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _deleteSelectedFromDevice() async {
+    final filesToDelete = widget.selectedFiles.files.toList();
+    final l10n = AppLocalizations.of(context);
+
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: l10n.deleteFromDevice,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            try {
+              await deleteFilesOnDeviceOnly(context, filesToDelete);
+            } catch (e) {
+              if (context.mounted) {
+                await showGenericErrorDialog(context: context, error: e);
+              }
+              rethrow;
+            }
+          },
+        ),
+        ButtonWidget(
+          labelText: l10n.cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+        ),
+      ],
+      body: l10n.theseItemsWillBeDeletedFromYourDevice,
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+
+    if (actionResult?.action == ButtonAction.first) {
       widget.selectedFiles.clearAll();
     }
   }
