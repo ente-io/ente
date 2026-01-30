@@ -68,7 +68,7 @@ class AppStore(
     private var overflowBypassMessageId: String? = null
 
     private val sessionSummarySystemPrompt =
-        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title."
+        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no markdown characters, no quotes, no emojis, no trailing punctuation, and output only the title."
     private val sessionSummaryMaxWords = 7
 
     private val attachmentDownloads = ConcurrentHashMap<String, AttachmentDownloadItem>()
