@@ -1,19 +1,25 @@
 import { keyframes } from "@emotion/react";
 import { Box, Link, Typography, styled } from "@mui/material";
-import { LoadingIndicator } from "ente-base/components/loaders";
 import { Stack100vhCenter } from "ente-base/components/containers";
 import { CustomHead } from "ente-base/components/Head";
+import { LoadingIndicator } from "ente-base/components/loaders";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { downloadManager } from "ente-gallery/services/download";
+import {
+    downloadManager,
+    type RenderableSourceURLs,
+} from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
+import type { HLSPlaylistData } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationPhotoDate } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
 import {
     decryptMemoryShareName,
     getPublicMemoryFiles,
     getPublicMemoryInfo,
 } from "ente-new/albums/services/public-memory";
+import "hls-video-element";
 import Head from "next/head";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -39,8 +45,19 @@ export default function PublicMemoryPage() {
     useEffect(() => {
         const main = async () => {
             try {
-                // Extract token from pathname (e.g., /ABC123XYZ0)
-                const token = window.location.pathname.slice(1);
+                const currentURL = new URL(window.location.href);
+
+                // Extract token from either:
+                // - query param ?t=TOKEN (from server-generated URLs)
+                // - pathname /TOKEN (direct links)
+                let token = currentURL.searchParams.get("t");
+                if (!token) {
+                    const path = window.location.pathname.slice(1);
+                    // Ignore /memory path prefix
+                    if (path && path !== "memory") {
+                        token = path;
+                    }
+                }
 
                 // Root path → redirect to ente.io/memories (or show landing)
                 if (!token) {
@@ -48,8 +65,6 @@ export default function PublicMemoryPage() {
                     window.location.href = "https://ente.io/memories";
                     return;
                 }
-
-                const currentURL = new URL(window.location.href);
                 const shareKey =
                     await extractCollectionKeyFromShareURL(currentURL);
 
@@ -70,18 +85,14 @@ export default function PublicMemoryPage() {
                     setMemoryName(name);
                 }
 
-                downloadManager.setPublicMemoryCredentials(token);
+                downloadManager.setPublicMemoryCredentials({
+                    accessToken: token,
+                });
 
                 const enteFiles = await getPublicMemoryFiles(token, shareKey);
 
-                // Sort files by creation date (newest first)
-                const sortedFiles = [...enteFiles].sort((a, b) => {
-                    const dateA = fileCreationPhotoDate(a).getTime();
-                    const dateB = fileCreationPhotoDate(b).getTime();
-                    return dateB - dateA;
-                });
-
-                setFiles(sortedFiles);
+                // Preserve the order from the server (matches mobile app's intended order)
+                setFiles(enteFiles);
             } catch (e) {
                 if (
                     isHTTPErrorWithStatus(e, 401) ||
@@ -205,7 +216,7 @@ interface MemoryViewerProps {
     onPrev: () => void;
 }
 
-const AUTO_PROGRESS_DURATION_MS = 5000;
+const IMAGE_AUTO_PROGRESS_DURATION_MS = 5000;
 
 const progressFillAnimation = keyframes`
     from { width: 0%; }
@@ -222,14 +233,31 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
     const currentFile = files[currentIndex]!;
     const [paused, setPaused] = useState(false);
     const [fileLoaded, setFileLoaded] = useState(false);
+    // For videos, track if duration is known (prevents premature animation start).
+    const [videoDurationKnown, setVideoDurationKnown] = useState(false);
+    // For videos, we track the duration in ms; for images, use the constant.
+    const [progressDuration, setProgressDuration] = useState(
+        IMAGE_AUTO_PROGRESS_DURATION_MS,
+    );
 
-    // Reset loaded state when file changes.
+    const isVideo = currentFile.metadata.fileType === FileType.video;
+
+    // Reset loaded state and duration when file changes.
     useEffect(() => {
         setFileLoaded(false);
+        setVideoDurationKnown(false);
+        // Reset to image duration; video will update this when it loads.
+        setProgressDuration(IMAGE_AUTO_PROGRESS_DURATION_MS);
     }, [currentIndex]);
 
     const handleFullLoad = useCallback(() => {
         setFileLoaded(true);
+    }, []);
+
+    const handleVideoDuration = useCallback((durationSeconds: number) => {
+        // Convert seconds to milliseconds for the progress bar.
+        setProgressDuration(durationSeconds * 1000);
+        setVideoDurationKnown(true);
     }, []);
 
     // Preload next file's thumbnail for smoother navigation.
@@ -262,8 +290,14 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     <ProgressIndicator
                         total={files.length}
                         current={currentIndex}
-                        paused={paused || !fileLoaded}
+                        paused={
+                            paused ||
+                            !fileLoaded ||
+                            (isVideo && !videoDurationKnown)
+                        }
+                        duration={progressDuration}
                         onComplete={onNext}
+                        isVideo={isVideo}
                     />
                 </HeaderSection>
                 <PhotoContainer
@@ -271,11 +305,22 @@ const MemoryViewer: React.FC<MemoryViewerProps> = ({
                     onMouseLeave={() => setPaused(false)}
                     onClick={handleClick}
                 >
-                    <PhotoImage
-                        file={currentFile}
-                        onFullLoad={handleFullLoad}
-                        dateBadge={<DateBadge file={currentFile} />}
-                    />
+                    {isVideo ? (
+                        <VideoPlayer
+                            file={currentFile}
+                            onReady={handleFullLoad}
+                            onDuration={handleVideoDuration}
+                            onEnded={onNext}
+                            paused={paused}
+                            dateBadge={<DateBadge file={currentFile} />}
+                        />
+                    ) : (
+                        <PhotoImage
+                            file={currentFile}
+                            onFullLoad={handleFullLoad}
+                            dateBadge={<DateBadge file={currentFile} />}
+                        />
+                    )}
                 </PhotoContainer>
                 <Footer />
             </ContentContainer>
@@ -337,14 +382,19 @@ interface ProgressIndicatorProps {
     total: number;
     current: number;
     paused: boolean;
+    duration: number;
     onComplete: () => void;
+    /** If true, the progress bar won't auto-advance (video handles its own end). */
+    isVideo?: boolean;
 }
 
 const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
     total,
     current,
     paused,
+    duration,
     onComplete,
+    isVideo,
 }) => {
     // Calculate the total width: 30px per bar + 12px gap between bars
     const totalWidth = total * 30 + (total - 1) * 12;
@@ -364,7 +414,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                 <ProgressBar
                     // Use a unique key for the active bar so it remounts
                     // (restarting the CSS animation) when navigating.
-                    key={i === current ? `active-${current}` : i}
+                    key={i === current ? `active-${current}-${duration}` : i}
                     state={
                         i < current
                             ? "past"
@@ -373,7 +423,11 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                               : "future"
                     }
                     paused={paused}
-                    onComplete={i === current ? onComplete : undefined}
+                    duration={duration}
+                    // For videos, don't trigger onComplete from animation - video's onEnded handles it.
+                    onComplete={
+                        i === current && !isVideo ? onComplete : undefined
+                    }
                 />
             ))}
         </Box>
@@ -383,12 +437,14 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 interface ProgressBarProps {
     state: "past" | "active" | "future";
     paused: boolean;
+    duration: number;
     onComplete?: () => void;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
     state,
     paused,
+    duration,
     onComplete,
 }) => {
     return (
@@ -419,12 +475,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                               ? "100%"
                               : "0%",
                     ...(state === "active" && {
-                        animation: `${progressFillAnimation} ${AUTO_PROGRESS_DURATION_MS}ms linear forwards`,
+                        animation: `${progressFillAnimation} ${duration}ms linear forwards`,
                         animationPlayState: paused ? "paused" : "running",
                     }),
-                    ...(state === "past" && {
-                        transition: "none",
-                    }),
+                    ...(state === "past" && { transition: "none" }),
                 }}
             />
         </Box>
@@ -534,6 +588,232 @@ const PhotoImage: React.FC<PhotoImageProps> = ({
     );
 };
 
+interface VideoPlayerProps {
+    file: EnteFile;
+    onReady?: () => void;
+    onDuration?: (durationSeconds: number) => void;
+    onEnded?: () => void;
+    paused?: boolean;
+    dateBadge?: React.ReactNode;
+}
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({
+    file,
+    onReady,
+    onDuration,
+    onEnded,
+    paused,
+    dateBadge,
+}) => {
+    const [hlsData, setHlsData] = useState<HLSPlaylistData | undefined>(
+        undefined,
+    );
+    const [videoURL, setVideoURL] = useState<string | undefined>(undefined);
+    const [thumbnailURL, setThumbnailURL] = useState<string | undefined>(
+        undefined,
+    );
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const onReadyRef = useRef(onReady);
+    const onDurationRef = useRef(onDuration);
+    const onEndedRef = useRef(onEnded);
+
+    onReadyRef.current = onReady;
+    onDurationRef.current = onDuration;
+    onEndedRef.current = onEnded;
+
+    // Load video URL (try HLS first, fallback to direct download)
+    useEffect(() => {
+        let cancelled = false;
+        setIsLoading(true);
+        setError(false);
+        setVideoURL(undefined);
+        setHlsData(undefined);
+
+        const load = async () => {
+            try {
+                // First load thumbnail as poster
+                const thumbURL =
+                    await downloadManager.renderableThumbnailURL(file);
+                if (!cancelled && thumbURL) {
+                    setThumbnailURL(thumbURL);
+                }
+
+                // Try HLS streaming first (better quality, adaptive bitrate)
+                const hlsPlaylistData =
+                    await downloadManager.hlsPlaylistDataForPublicMemory(file);
+                if (
+                    !cancelled &&
+                    typeof hlsPlaylistData === "object" &&
+                    hlsPlaylistData?.playlistURL
+                ) {
+                    setHlsData(hlsPlaylistData);
+                    return;
+                }
+
+                // Fallback to direct video download
+                const sourceURLs: RenderableSourceURLs =
+                    await downloadManager.renderableSourceURLs(file);
+                if (!cancelled && sourceURLs.type === "video") {
+                    setVideoURL(sourceURLs.videoURL);
+                }
+            } catch (e) {
+                log.error("Failed to load video", e);
+                if (!cancelled) {
+                    setError(true);
+                    setIsLoading(false);
+                }
+            }
+        };
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, [file]);
+
+    // Handle pause/play state
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || (!videoURL && !hlsData)) return;
+
+        if (paused) {
+            video.pause();
+        } else {
+            video.play().catch(() => {
+                // Autoplay may be blocked; ignore
+            });
+        }
+    }, [paused, videoURL, hlsData]);
+
+    const handleLoadedMetadata = useCallback(() => {
+        const video = videoRef.current;
+        if (video && !isNaN(video.duration) && video.duration > 0) {
+            onDurationRef.current?.(video.duration);
+        }
+    }, []);
+
+    const handleCanPlay = useCallback(() => {
+        setIsLoading(false);
+        onReadyRef.current?.();
+        // Auto-play when ready
+        const video = videoRef.current;
+        if (video) {
+            video.play().catch(() => {
+                // Autoplay may be blocked
+            });
+        }
+    }, []);
+
+    const handleEnded = useCallback(() => {
+        onEndedRef.current?.();
+    }, []);
+
+    if (error) {
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                }}
+            >
+                <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
+                    Unable to play video
+                </Typography>
+            </Box>
+        );
+    }
+
+    return (
+        <Box
+            sx={{
+                position: "relative",
+                display: "inline-block",
+                maxWidth: "100%",
+                maxHeight: "100%",
+                borderRadius: "24px",
+                overflow: "hidden",
+            }}
+        >
+            {/* Loading overlay */}
+            {isLoading && (
+                <Box
+                    sx={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        zIndex: 2,
+                    }}
+                >
+                    <LoadingIndicator />
+                </Box>
+            )}
+            {/* HLS video element (when HLS streaming is available) */}
+            {hlsData && (
+                <hls-video
+                    ref={videoRef as React.RefObject<HTMLVideoElement>}
+                    src={hlsData.playlistURL}
+                    poster={thumbnailURL}
+                    playsInline
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onCanPlay={handleCanPlay}
+                    onEnded={handleEnded}
+                    style={{
+                        display: "block",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        userSelect: "none",
+                    }}
+                />
+            )}
+            {/* Regular video element (fallback when HLS is not available) */}
+            {!hlsData && videoURL && (
+                <video
+                    ref={videoRef}
+                    src={videoURL}
+                    poster={thumbnailURL}
+                    playsInline
+                    muted={false}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onCanPlay={handleCanPlay}
+                    onEnded={handleEnded}
+                    style={{
+                        display: "block",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        userSelect: "none",
+                    }}
+                />
+            )}
+            {/* Show thumbnail while video loads */}
+            {!videoURL && !hlsData && thumbnailURL && (
+                <img
+                    src={thumbnailURL}
+                    alt=""
+                    style={{
+                        display: "block",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        userSelect: "none",
+                        pointerEvents: "none",
+                    }}
+                />
+            )}
+            {/* Date badge positioned over the video */}
+            {dateBadge}
+        </Box>
+    );
+};
+
 interface FileImageProps {
     file: EnteFile;
 }
@@ -638,13 +918,7 @@ const getOrdinalSuffix = (n: number): string => {
 };
 
 const Footer: React.FC = () => (
-    <Box
-        sx={{
-            flexShrink: 0,
-            textAlign: "center",
-            width: "100%",
-        }}
-    >
+    <Box sx={{ flexShrink: 0, textAlign: "center", width: "100%" }}>
         <Link
             href="https://ente.io"
             target="_blank"

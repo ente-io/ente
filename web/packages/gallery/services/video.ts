@@ -12,6 +12,7 @@ import { ensureAuthToken } from "ente-base/token";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
+import type { PublicMemoryCredentials } from "ente-new/albums/services/public-memory";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
 import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
@@ -330,6 +331,7 @@ export type HLSPlaylistDataForFile = HLSPlaylistData | "skip" | undefined;
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
+    publicMemoryCredentials?: PublicMemoryCredentials,
 ): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
@@ -341,6 +343,7 @@ export const hlsPlaylistDataForFile = async (
         "vid_preview",
         file.id,
         publicAlbumsCredentials,
+        publicMemoryCredentials,
     );
     if (!playlistFileData) return undefined;
 
@@ -358,6 +361,7 @@ export const hlsPlaylistDataForFile = async (
         "vid_preview",
         file.id,
         publicAlbumsCredentials,
+        publicMemoryCredentials,
     );
     if (!videoURL) return undefined;
 

@@ -19,7 +19,12 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import {
+    authenticatedPublicMemoryRequestHeaders,
+    type PublicMemoryCredentials,
+} from "ente-new/albums/services/public-memory";
 import { playableVideoURL, renderableImageBlob } from "./convert";
+import { hlsPlaylistDataForFile, type HLSPlaylistDataForFile } from "./video";
 
 /**
  * URL(s) for the original image or video, alongwith with potential conversions
@@ -109,6 +114,11 @@ class DownloadManager {
      */
     publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     /**
+     * Credentials that should be used to download files when we're in the
+     * context of the public memory share app.
+     */
+    publicMemoryCredentials: PublicMemoryCredentials | undefined;
+    /**
      * Access token for downloading files when we're in the context of a
      * public memory share.
      */
@@ -192,6 +202,7 @@ class DownloadManager {
      */
     logout() {
         this.publicAlbumsCredentials = undefined;
+        this.publicMemoryCredentials = undefined;
         this.publicMemoryAccessToken = undefined;
         this.thumbnailURLPromises.clear();
         this.fileURLPromises.clear();
@@ -211,11 +222,14 @@ class DownloadManager {
     }
 
     /**
-     * Set the access token for downloading files when we're running in the
-     * context of a public memory share.
+     * Set the credentials that should be used for download files when we're
+     * running in the context of a public memory share.
      */
-    setPublicMemoryCredentials(accessToken: string | undefined) {
-        this.publicMemoryAccessToken = accessToken;
+    setPublicMemoryCredentials(
+        credentials: PublicMemoryCredentials | undefined,
+    ) {
+        this.publicMemoryCredentials = credentials;
+        this.publicMemoryAccessToken = credentials?.accessToken;
     }
 
     /**
@@ -316,10 +330,10 @@ class DownloadManager {
     };
 
     private async _downloadThumbnail(file: EnteFile) {
-        if (this.publicMemoryAccessToken) {
+        if (this.publicMemoryCredentials) {
             return publicMemory_downloadThumbnail(
                 file,
-                this.publicMemoryAccessToken,
+                this.publicMemoryCredentials,
             );
         } else if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadThumbnail(
@@ -330,6 +344,23 @@ class DownloadManager {
             return photos_downloadThumbnail(file);
         }
     }
+
+    /**
+     * Return HLS playlist data for a file when viewing a public memory share.
+     *
+     * @returns HLS playlist data if available, or undefined if HLS streaming
+     * is not available for this file.
+     */
+    hlsPlaylistDataForPublicMemory = async (
+        file: EnteFile,
+    ): Promise<HLSPlaylistDataForFile> => {
+        if (!this.publicMemoryCredentials) return undefined;
+        return hlsPlaylistDataForFile(
+            file,
+            undefined,
+            this.publicMemoryCredentials,
+        );
+    };
 
     /**
      * Return a URL (and associated metadata) that can be used to show the given
@@ -541,6 +572,11 @@ class DownloadManager {
             return publicAlbums_downloadFile(
                 file,
                 this.publicAlbumsCredentials,
+            );
+        } else if (this.publicMemoryCredentials) {
+            return publicMemory_downloadFile(
+                file,
+                this.publicMemoryCredentials,
             );
         } else {
             return photos_downloadFile(file, opts);
@@ -862,17 +898,19 @@ const publicAlbums_downloadFile = async (
 };
 
 /**
- * The publicMemory_* helpers are used for thumbnail fetches when we're
- * running in the context of a public memory share page.
+ * The various publicMemory_* functions are used for the actual downloads when
+ * we're running in the context of a public memory share.
  */
 const publicMemory_downloadThumbnail = async (
     file: EnteFile,
-    accessToken: string,
+    credentials: PublicMemoryCredentials,
 ) => {
     const customOrigin = await customAPIOrigin();
 
     const getThumbnail = async () => {
         if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
+            const { accessToken } = credentials;
             const params = new URLSearchParams({ accessToken });
             return fetch(
                 `${customOrigin}/public-memory/files/preview/${file.id}?${params.toString()}`,
@@ -882,9 +920,8 @@ const publicMemory_downloadThumbnail = async (
             return fetch(
                 await apiURL(`/public-memory/files/preview/${file.id}`),
                 {
-                    headers: authenticatedPublicAlbumsRequestHeaders({
-                        accessToken,
-                    }),
+                    headers:
+                        authenticatedPublicMemoryRequestHeaders(credentials),
                 },
             );
         }
@@ -892,4 +929,28 @@ const publicMemory_downloadThumbnail = async (
 
     const res = await retryEnsuringHTTPOk(getThumbnail);
     return new Uint8Array(await res.arrayBuffer());
+};
+
+const publicMemory_downloadFile = async (
+    file: EnteFile,
+    credentials: PublicMemoryCredentials,
+) => {
+    const customOrigin = await customAPIOrigin();
+
+    const getFile = async () => {
+        if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
+            const { accessToken } = credentials;
+            const params = new URLSearchParams({ accessToken });
+            return fetch(
+                `${customOrigin}/public-memory/files/${file.id}?${params.toString()}`,
+            );
+        } else {
+            return fetch(await apiURL(`/public-memory/files/${file.id}`), {
+                headers: authenticatedPublicMemoryRequestHeaders(credentials),
+            });
+        }
+    };
+
+    return retryEnsuringHTTPOk(getFile);
 };
