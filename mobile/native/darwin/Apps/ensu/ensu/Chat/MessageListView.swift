@@ -1,5 +1,6 @@
 #if canImport(EnteCore)
 import SwiftUI
+import Markdown
 #if os(macOS)
 import QuickLookUI
 #else
@@ -31,15 +32,17 @@ struct MessageListView: View {
     @State private var lastHapticLength = 0
     @State private var wasAtBottomBeforeKeyboard = false
     @State private var isUserDragging = false
+    @State private var lastContentHeight: CGFloat = 0
+    @State private var lastScrollChange = ScrollChange()
     #if os(iOS)
-    @State private var haptic = UIImpactFeedbackGenerator(style: .medium)
+    @State private var haptic: UIImpactFeedbackGenerator?
     #endif
 
     var body: some View {
         GeometryReader { proxy in
             ScrollViewReader { scrollProxy in
                 ScrollView {
-                    messageListContent()
+                    messageListContent(containerHeight: proxy.size.height)
                 }
                 .id(sessionId)
                 .coordinateSpace(name: "scroll")
@@ -68,72 +71,20 @@ struct MessageListView: View {
                     let distanceToBottom = value - proxy.size.height
                     isAtBottom = distanceToBottom <= threshold
                 }
-                .onChange(of: messages.count) { _ in
-                    scrollToBottom(scrollProxy, animated: isGenerating)
-                }
-                .onChange(of: sessionId) { _ in
-                    autoScrollEnabled = true
-                    DispatchQueue.main.async {
+                .onPreferenceChange(ContentHeightKey.self) { newHeight in
+                    let delta = newHeight - lastContentHeight
+                    lastContentHeight = newHeight
+                    if delta > 1, autoScrollEnabled, !isUserDragging {
                         scrollToBottom(scrollProxy, force: true, animated: false)
                     }
                 }
-                .onChange(of: streamingResponse) { newValue in
-                    #if os(iOS)
-                    if isGenerating {
-                        let length = newValue.count
-                        if length > lastHapticLength {
-                            haptic.impactOccurred()
-                            haptic.prepare()
-                            lastHapticLength = length
-                        }
-                    }
-                    #endif
-                    scrollToBottom(scrollProxy, animated: false)
-                }
-                .onChange(of: keyboardHeight) { newValue in
-                    if newValue > 0 {
-                        wasAtBottomBeforeKeyboard = isAtBottom
-                    }
-                    if wasAtBottomBeforeKeyboard {
-                        autoScrollEnabled = true
-                        scrollToBottom(scrollProxy, force: true, animated: false)
-                    }
-                    if newValue == 0 {
-                        wasAtBottomBeforeKeyboard = false
-                    }
-                }
-                .onChange(of: inputBarHeight) { _ in
-                    if autoScrollEnabled && !isUserDragging {
-                        scrollToBottom(scrollProxy, force: true, animated: false)
-                    }
-                }
-                .onChange(of: isGenerating) { newValue in
-                    if newValue {
-                        autoScrollEnabled = true
-                        lastHapticLength = 0
-                        #if os(iOS)
-                        haptic.prepare()
-                        #endif
-                        #if os(iOS) || os(macOS)
-                        if #available(iOS 17.0, macOS 14.0, *) {
-                            scrollToBottom(scrollProxy, force: true, animated: false)
-                        } else {
-                            scrollToBottom(scrollProxy, force: true, animated: false)
-                        }
-                        #else
-                        scrollToBottom(scrollProxy, force: true, animated: false)
-                        #endif
-                    }
-                }
-                .onChange(of: isAtBottom) { newValue in
-                    if newValue && !isUserDragging {
-                        autoScrollEnabled = true
-                        scrollToBottom(scrollProxy, force: true, animated: false)
-                    }
+                .onChange(of: currentScrollChange) { newValue in
+                    handleScrollChange(newValue, scrollProxy: scrollProxy)
                 }
                 .onAppear {
+                    lastScrollChange = currentScrollChange
                     #if os(iOS)
-                    haptic.prepare()
+                    prepareHaptic()
                     #endif
                     scrollToBottom(scrollProxy, force: true, animated: false)
                 }
@@ -144,24 +95,121 @@ struct MessageListView: View {
         }
     }
 
+    private var currentScrollChange: ScrollChange {
+        ScrollChange(
+            messagesCount: messages.count,
+            sessionId: sessionId,
+            streamingLength: streamingResponse.count,
+            keyboardHeight: keyboardHeight,
+            inputBarHeight: inputBarHeight,
+            isGenerating: isGenerating,
+            isAtBottom: isAtBottom
+        )
+    }
+
+    private func handleScrollChange(_ newValue: ScrollChange, scrollProxy: ScrollViewProxy) {
+        let previous = lastScrollChange
+        lastScrollChange = newValue
+
+        if newValue.messagesCount != previous.messagesCount {
+            scrollToBottom(scrollProxy, animated: newValue.isGenerating)
+        }
+
+        if newValue.sessionId != previous.sessionId {
+            autoScrollEnabled = true
+            scrollToBottom(scrollProxy, force: true, animated: false)
+        }
+
+        if newValue.streamingLength != previous.streamingLength {
+            #if os(iOS)
+            if newValue.isGenerating {
+                let length = newValue.streamingLength
+                if length > lastHapticLength {
+                    impactHaptic()
+                    lastHapticLength = length
+                }
+            }
+            #endif
+            scrollToBottom(scrollProxy, animated: false)
+        }
+
+        if newValue.keyboardHeight != previous.keyboardHeight {
+            if newValue.keyboardHeight > 0 {
+                wasAtBottomBeforeKeyboard = isAtBottom
+            }
+            if wasAtBottomBeforeKeyboard {
+                autoScrollEnabled = true
+                scrollToBottom(scrollProxy, force: true, animated: false)
+            }
+            if newValue.keyboardHeight == 0 {
+                wasAtBottomBeforeKeyboard = false
+            }
+        }
+
+        if newValue.inputBarHeight != previous.inputBarHeight {
+            if autoScrollEnabled && !isUserDragging {
+                scrollToBottom(scrollProxy, force: true, animated: false)
+            }
+        }
+
+        if newValue.isGenerating != previous.isGenerating {
+            if newValue.isGenerating {
+                autoScrollEnabled = true
+                lastHapticLength = 0
+                #if os(iOS)
+                prepareHaptic()
+                #endif
+                scrollToBottom(scrollProxy, force: true, animated: false)
+            }
+        }
+
+        if newValue.isAtBottom != previous.isAtBottom {
+            if newValue.isAtBottom && !isUserDragging {
+                autoScrollEnabled = true
+                scrollToBottom(scrollProxy, force: true, animated: false)
+            }
+        }
+    }
+
+    #if os(iOS)
+    private func prepareHaptic() {
+        let generator = haptic ?? UIImpactFeedbackGenerator(style: .medium)
+        haptic = generator
+        generator.prepare()
+    }
+
+    private func impactHaptic() {
+        let generator = haptic ?? UIImpactFeedbackGenerator(style: .medium)
+        haptic = generator
+        generator.impactOccurred()
+        generator.prepare()
+    }
+    #endif
+
     @ViewBuilder
-    private func messageListContent() -> some View {
+    private func messageListContent(containerHeight: CGFloat) -> some View {
+        let emptyStateMinHeight = max(0, containerHeight - contentBottomPadding - (EnsuSpacing.lg * 2))
+
         VStack(alignment: .leading, spacing: 0) {
             LazyVStack(alignment: .leading, spacing: EnsuSpacing.lg) {
                 if messages.isEmpty && !isGenerating {
-                    VStack(spacing: EnsuSpacing.sm) {
-                        Text(emptyStateTitle)
-                            .font(EnsuTypography.h2)
-                            .foregroundStyle(EnsuColor.textPrimary)
-                        if let emptyStateSubtitle {
-                            Text(emptyStateSubtitle)
-                                .font(EnsuTypography.body)
-                                .foregroundStyle(EnsuColor.textMuted)
+                    VStack {
+                        Spacer(minLength: 0)
+                        VStack(spacing: EnsuSpacing.sm) {
+                            Text(emptyStateTitle)
+                                .font(EnsuTypography.h2)
+                                .foregroundStyle(EnsuColor.textPrimary)
+                            if let emptyStateSubtitle {
+                                Text(emptyStateSubtitle)
+                                    .font(EnsuTypography.body)
+                                    .foregroundStyle(EnsuColor.textMuted)
+                            }
                         }
+                        .multilineTextAlignment(.center)
+                        Spacer(minLength: 0)
                     }
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity, alignment: .top)
-                    .padding(.top, EnsuSpacing.lg)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: emptyStateMinHeight)
                 }
 
                 ForEach(messages) { message in
@@ -213,6 +261,12 @@ struct MessageListView: View {
                     }
                 )
         }
+        .background(
+            GeometryReader { geo in
+                Color.clear
+                    .preference(key: ContentHeightKey.self, value: geo.size.height)
+            }
+        )
     }
 
     private var messageTransition: AnyTransition {
@@ -266,6 +320,14 @@ struct MessageListView: View {
 }
 
 private struct BottomOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+private struct ContentHeightKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
 
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -846,11 +908,11 @@ private struct MarkdownView: View {
     }
 }
 
-private func markdownText(_ text: String) -> Text {
+private func markdownText(_ text: String) -> SwiftUI.Text {
     if let attributed = try? AttributedString(markdown: text) {
-        return Text(attributed)
+        return SwiftUI.Text(attributed)
     }
-    return Text(text)
+    return SwiftUI.Text(text)
 }
 
 private enum MarkdownBlock: Identifiable {
@@ -876,49 +938,54 @@ private enum MarkdownParser {
                 if !code.isEmpty {
                     blocks.append(.code(text: code))
                 }
-            } else {
-                blocks.append(contentsOf: parseTextBlocks(segment))
+                continue
+            }
+
+            for piece in splitByMathBlocks(segment) {
+                switch piece {
+                case .math(let latex):
+                    let trimmed = latex.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !trimmed.isEmpty {
+                        blocks.append(.math(text: trimmed))
+                    }
+                case .markdown(let markdown):
+                    blocks.append(contentsOf: parseMarkdownBlocks(markdown))
+                }
             }
         }
 
         return blocks
     }
 
-    private static func parseTextBlocks(_ text: String) -> [MarkdownBlock] {
+    private enum Segment {
+        case markdown(String)
+        case math(String)
+    }
+
+    private static func splitByMathBlocks(_ text: String) -> [Segment] {
         let lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
-        var blocks: [MarkdownBlock] = []
-        var paragraph: [String] = []
-        var listItems: [String] = []
+        var segments: [Segment] = []
+        var markdownLines: [String] = []
         var mathLines: [String] = []
         var mathEndDelimiter: String? = nil
 
-        func flushParagraph() {
-            if !paragraph.isEmpty {
-                blocks.append(.paragraph(text: paragraph.joined(separator: "\n")))
-                paragraph.removeAll()
-            }
-        }
-
-        func flushList() {
-            if !listItems.isEmpty {
-                blocks.append(.list(items: listItems))
-                listItems.removeAll()
+        func flushMarkdown() {
+            if !markdownLines.isEmpty {
+                segments.append(.markdown(markdownLines.joined(separator: "\n")))
+                markdownLines.removeAll()
             }
         }
 
         func flushMath() {
-            if mathEndDelimiter != nil {
-                if !mathLines.isEmpty {
-                    blocks.append(.math(text: mathLines.joined(separator: "\n")))
-                }
-                mathLines.removeAll()
-                mathEndDelimiter = nil
+            if !mathLines.isEmpty {
+                segments.append(.math(mathLines.joined(separator: "\n")))
             }
+            mathLines.removeAll()
+            mathEndDelimiter = nil
         }
 
         func startMath(endDelimiter: String, initialContent: String? = nil) {
-            flushParagraph()
-            flushList()
+            flushMarkdown()
             mathEndDelimiter = endDelimiter
             mathLines.removeAll()
             if let initial = initialContent?.trimmingCharacters(in: .whitespacesAndNewlines), !initial.isEmpty {
@@ -966,7 +1033,8 @@ private enum MarkdownParser {
                 let content = String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
                 if content.hasSuffix("\\]") {
                     let inner = String(content.dropLast(2)).trimmingCharacters(in: .whitespaces)
-                    blocks.append(.math(text: inner))
+                    flushMarkdown()
+                    segments.append(.math(inner))
                 } else {
                     startMath(endDelimiter: "\\]", initialContent: content)
                 }
@@ -977,7 +1045,8 @@ private enum MarkdownParser {
                 let content = String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
                 if content.hasSuffix("$$") {
                     let inner = String(content.dropLast(2)).trimmingCharacters(in: .whitespaces)
-                    blocks.append(.math(text: inner))
+                    flushMarkdown()
+                    segments.append(.math(inner))
                 } else {
                     startMath(endDelimiter: "$$", initialContent: content)
                 }
@@ -986,62 +1055,162 @@ private enum MarkdownParser {
 
             if isBracketMathLine(trimmed) {
                 let inner = String(trimmed.dropFirst().dropLast()).trimmingCharacters(in: .whitespaces)
-                blocks.append(.math(text: inner))
+                flushMarkdown()
+                segments.append(.math(inner))
                 continue
             }
 
-            if trimmed.isEmpty {
-                flushParagraph()
-                flushList()
-                continue
-            }
-
-            if trimmed == "---" || trimmed == "***" || trimmed == "___" {
-                flushParagraph()
-                flushList()
-                blocks.append(.divider)
-                continue
-            }
-
-            if trimmed.hasPrefix("# ") || trimmed.hasPrefix("## ") || trimmed.hasPrefix("### ") {
-                flushParagraph()
-                flushList()
-                let level = trimmed.prefix(3).filter { $0 == "#" }.count
-                let headingText = trimmed.drop(while: { $0 == "#" || $0 == " " })
-                blocks.append(.heading(level: max(1, min(level, 3)), text: String(headingText)))
-                continue
-            }
-
-            if trimmed.hasPrefix(">") {
-                flushParagraph()
-                flushList()
-                let quote = trimmed.drop(while: { $0 == ">" || $0 == " " })
-                blocks.append(.blockquote(text: String(quote)))
-                continue
-            }
-
-            if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") {
-                flushParagraph()
-                let item = trimmed.dropFirst(2)
-                listItems.append(String(item))
-                continue
-            }
-
-            if let range = trimmed.range(of: ". "),
-               let leading = Int(trimmed[..<range.lowerBound]) {
-                flushParagraph()
-                listItems.append(String(trimmed[range.upperBound...]))
-                _ = leading
-                continue
-            }
-
-            paragraph.append(line)
+            markdownLines.append(line)
         }
 
-        flushParagraph()
-        flushList()
-        flushMath()
+        if mathEndDelimiter != nil {
+            flushMath()
+        } else {
+            flushMarkdown()
+        }
+
+        return segments
+    }
+
+    private static func parseMarkdownBlocks(_ markdown: String) -> [MarkdownBlock] {
+        guard !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+        let document = Document(parsing: markdown)
+        var blocks: [MarkdownBlock] = []
+        for child in document.children {
+            blocks.append(contentsOf: blocks(for: child))
+        }
         return blocks
+    }
+
+    private static func blocks(for markup: Markup) -> [MarkdownBlock] {
+        switch markup {
+        case let heading as Heading:
+            let text = renderInlineChildren(heading)
+            guard !text.isEmpty else { return [] }
+            let level = max(1, min(heading.level, 3))
+            return [.heading(level: level, text: text)]
+        case let paragraph as Paragraph:
+            let text = renderInlineChildren(paragraph)
+            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+            return [.paragraph(text: text)]
+        case let blockQuote as BlockQuote:
+            let text = renderBlockQuote(blockQuote)
+            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+            return [.blockquote(text: text)]
+        case let codeBlock as CodeBlock:
+            let code = codeBlock.code.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !code.isEmpty else { return [] }
+            return [.code(text: code)]
+        case _ as ThematicBreak:
+            return [.divider]
+        case let orderedList as OrderedList:
+            let items = orderedList.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
+            return items.isEmpty ? [] : [.list(items: items)]
+        case let unorderedList as UnorderedList:
+            let items = unorderedList.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
+            return items.isEmpty ? [] : [.list(items: items)]
+        default:
+            var blocks: [MarkdownBlock] = []
+            for child in markup.children {
+                blocks.append(contentsOf: blocks(for: child))
+            }
+            return blocks
+        }
+    }
+
+    private static func renderBlockQuote(_ quote: BlockQuote) -> String {
+        var parts: [String] = []
+        for child in quote.children {
+            if let paragraph = child as? Paragraph {
+                let text = renderInlineChildren(paragraph)
+                if !text.isEmpty {
+                    parts.append(text)
+                }
+                continue
+            }
+            if let heading = child as? Heading {
+                let text = renderInlineChildren(heading)
+                if !text.isEmpty {
+                    parts.append(text)
+                }
+                continue
+            }
+            if let list = child as? OrderedList {
+                let items = list.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
+                if !items.isEmpty {
+                    parts.append(items.joined(separator: "\n"))
+                }
+                continue
+            }
+            if let list = child as? UnorderedList {
+                let items = list.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
+                if !items.isEmpty {
+                    parts.append(items.joined(separator: "\n"))
+                }
+                continue
+            }
+        }
+        return parts.joined(separator: "\n")
+    }
+
+    private static func renderListItem(_ item: ListItem) -> String {
+        var parts: [String] = []
+        for child in item.children {
+            if let paragraph = child as? Paragraph {
+                let text = renderInlineChildren(paragraph)
+                if !text.isEmpty {
+                    parts.append(text)
+                }
+                continue
+            }
+            if let list = child as? OrderedList {
+                let items = list.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
+                if !items.isEmpty {
+                    parts.append(items.joined(separator: "\n"))
+                }
+                continue
+            }
+            if let list = child as? UnorderedList {
+                let items = list.children.compactMap { $0 as? ListItem }.map(renderListItem).filter { !$0.isEmpty }
+                if !items.isEmpty {
+                    parts.append(items.joined(separator: "\n"))
+                }
+                continue
+            }
+        }
+        return parts.joined(separator: "\n")
+    }
+
+    private static func renderInlineChildren(_ markup: Markup) -> String {
+        markup.children.map(renderInline(from:)).joined()
+    }
+
+    private static func renderInline(from markup: Markup) -> String {
+        switch markup {
+        case let text as Text:
+            return text.string
+        case _ as SoftBreak:
+            return " "
+        case _ as LineBreak:
+            return "\n"
+        case let emphasis as Emphasis:
+            return "*" + renderInlineChildren(emphasis) + "*"
+        case let strong as Strong:
+            return "**" + renderInlineChildren(strong) + "**"
+        case let inlineCode as InlineCode:
+            return "`\(inlineCode.code)`"
+        case let strikethrough as Strikethrough:
+            return "~~" + renderInlineChildren(strikethrough) + "~~"
+        case let link as Link:
+            let label = renderInlineChildren(link)
+            let destination = link.destination ?? ""
+            return destination.isEmpty ? label : "[\(label)](\(destination))"
+        default:
+            if markup.children.isEmpty {
+                return ""
+            }
+            return renderInlineChildren(markup)
+        }
     }
 }
 
@@ -1116,6 +1285,17 @@ private struct BlockQuoteView: View {
             .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
     }
 }
+
+private struct ScrollChange: Equatable {
+    var messagesCount: Int = 0
+    var sessionId: UUID?
+    var streamingLength: Int = 0
+    var keyboardHeight: CGFloat = 0
+    var inputBarHeight: CGFloat = 0
+    var isGenerating: Bool = false
+    var isAtBottom: Bool = true
+}
+
 #else
 import SwiftUI
 
