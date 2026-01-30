@@ -1,6 +1,6 @@
 #if canImport(EnteCore)
 import SwiftUI
-import iosMath
+import SwiftMath
 
 struct LaTeXView: View {
     let latex: String

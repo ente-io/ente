@@ -7,12 +7,13 @@ Swift bindings generated via UniFFI for the Rust core in `../rust`.
 From the repo root:
 
 ```bash
-cd swift
+cd mobile/native/darwin/Packages/Rust
 ./tool/generate_bindings.sh
 ```
 
 This writes the Swift sources plus the UniFFI header/modulemap into
-`swift/Sources/InferenceRS`.
+`Sources/InferenceRS`. These generated files are gitignored—re-run the script
+whenever you need to regenerate bindings.
 
 Note: The script applies the llama.cpp mtmd patch (requires `python3`). Set
 `APPLY_LLAMA_MTMD_PATCH=0` to skip it.
@@ -22,12 +23,13 @@ Note: The script applies the llama.cpp mtmd patch (requires `python3`). Set
 From the repo root:
 
 ```bash
-cd swift
+cd mobile/native/darwin/Packages/Rust
 ./tool/build_xcframework.sh
 ```
 
-This produces `swift/InferenceRSFFI.xcframework`, which the Swift package
-references as a binary target.
+This produces `InferenceRSFFI.xcframework`, which the Swift package references
+as a binary target. The xcframework is gitignored and should be generated
+locally as needed.
 
 Note: The build applies the llama.cpp mtmd patch (requires `python3`). Set
 `APPLY_LLAMA_MTMD_PATCH=0` to skip it.
