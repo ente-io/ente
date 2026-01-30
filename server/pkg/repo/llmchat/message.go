@@ -4,20 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/llmchat"
 	"github.com/ente-io/stacktrace"
-	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
 func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.UpsertMessageRequest) (model.Message, error) {
-	attachments := req.Attachments
-	if attachments == nil {
-		attachments = []model.AttachmentMeta{}
-	}
+	attachments := []model.AttachmentMeta{}
 
 	createdAt := sanitizeCreatedAt(req.CreatedAt)
 
@@ -82,17 +77,6 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		return rollback(stacktrace.Propagate(err, "failed to upsert llmchat message"))
 	}
 
-	if err := r.replaceMessageAttachments(ctx, tx, userID, req.MessageUUID, attachments); err != nil {
-		return rollback(stacktrace.Propagate(err, "failed to persist llmchat attachments"))
-	}
-
-	for _, attachment := range attachments {
-		objectKey := fmt.Sprintf("llmchat/attachments/%d/%s", userID, attachment.ID)
-		if _, err := tx.ExecContext(ctx, `DELETE FROM temp_objects WHERE object_key = $1`, objectKey); err != nil {
-			return rollback(stacktrace.Propagate(err, "failed to commit llmchat attachment"))
-		}
-	}
-
 	if err := tx.Commit(); err != nil {
 		return model.Message{}, stacktrace.Propagate(err, "failed to commit transaction")
 	}
@@ -150,14 +134,7 @@ func (r *Repository) GetMessageMeta(ctx context.Context, userID int64, messageUU
 		}
 		return result, stacktrace.Propagate(err, "failed to fetch llmchat message")
 	}
-	attachments, err := r.getAttachmentsByMessageUUIDs(ctx, userID, []string{messageUUID})
-	if err != nil {
-		return result, stacktrace.Propagate(err, "failed to fetch llmchat attachments")
-	}
-	result.Attachments = attachments[messageUUID]
-	if result.Attachments == nil {
-		result.Attachments = []model.AttachmentMeta{}
-	}
+	result.Attachments = []model.AttachmentMeta{}
 	return result, nil
 }
 
@@ -352,7 +329,6 @@ func (r *Repository) GetMessageTombstonesPage(ctx context.Context, userID int64,
 	return entries, hasMore, nil
 }
 
-// GetMessageDiff returns a non-paginated diff; retained for backwards compatibility.
 func (r *Repository) GetMessageDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.MessageDiffEntry, error) {
 	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, created_at, updated_at
 		FROM llmchat_messages
@@ -448,54 +424,8 @@ func convertRowsToMessageTombstones(rows *sql.Rows) ([]model.MessageTombstone, e
 }
 
 func (r *Repository) populateMessageAttachments(ctx context.Context, userID int64, entries []model.MessageDiffEntry) error {
-	if len(entries) == 0 {
-		return nil
-	}
-	messageUUIDs := make([]string, len(entries))
-	for i, entry := range entries {
-		messageUUIDs[i] = entry.MessageUUID
-	}
-	attachmentsByMessage, err := r.getAttachmentsByMessageUUIDs(ctx, userID, messageUUIDs)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to fetch llmchat attachments")
-	}
 	for i := range entries {
-		attachments := attachmentsByMessage[entries[i].MessageUUID]
-		if attachments == nil {
-			attachments = []model.AttachmentMeta{}
-		}
-		entries[i].Attachments = attachments
+		entries[i].Attachments = []model.AttachmentMeta{}
 	}
 	return nil
-}
-
-func (r *Repository) getAttachmentsByMessageUUIDs(ctx context.Context, userID int64, messageUUIDs []string) (map[string][]model.AttachmentMeta, error) {
-	result := make(map[string][]model.AttachmentMeta)
-	if len(messageUUIDs) == 0 {
-		return result, nil
-	}
-	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, attachment_id, size, encrypted_name
-		FROM llmchat_attachments
-		WHERE user_id = $1 AND message_uuid = ANY($2::uuid[])
-		ORDER BY message_uuid, id`,
-		userID,
-		pq.Array(messageUUIDs),
-	)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to query llmchat attachments")
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var messageUUID string
-		var attachment model.AttachmentMeta
-		if err := rows.Scan(&messageUUID, &attachment.ID, &attachment.Size, &attachment.EncryptedName); err != nil {
-			return nil, stacktrace.Propagate(err, "failed to scan llmchat attachments")
-		}
-		result[messageUUID] = append(result[messageUUID], attachment)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to iterate llmchat attachments")
-	}
-	return result, nil
 }

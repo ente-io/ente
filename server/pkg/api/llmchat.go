@@ -242,6 +242,11 @@ func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 	startTime := time.Now()
 	defer observeLlmChatMetrics(c, llmChatEndpointUploadAttachment, startTime)
 
+	if h.AttachmentController == nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled"))
+		return
+	}
+
 	if err := h.Controller.ValidateKey(c); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -286,6 +291,11 @@ func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 func (h *LlmChatHandler) DownloadAttachment(c *gin.Context) {
 	startTime := time.Now()
 	defer observeLlmChatMetrics(c, llmChatEndpointDownloadAttachment, startTime)
+
+	if h.AttachmentController == nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled"))
+		return
+	}
 
 	if err := h.Controller.ValidateKey(c); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

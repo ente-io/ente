@@ -113,9 +113,6 @@ func createTestUser(t *testing.T) int64 {
 func cleanupUser(t *testing.T, userID int64) {
 	t.Helper()
 
-	if _, err := testDB.Exec(`DELETE FROM llmchat_attachments WHERE user_id = $1`, userID); err != nil {
-		t.Fatalf("failed to cleanup llmchat attachments: %v", err)
-	}
 	if _, err := testDB.Exec(`DELETE FROM llmchat_messages WHERE user_id = $1`, userID); err != nil {
 		t.Fatalf("failed to cleanup llmchat messages: %v", err)
 	}
@@ -329,17 +326,11 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 	}
 
 	messageOne := uuid.NewString()
-	attachmentOne := model.AttachmentMeta{
-		ID:            uuid.NewString(),
-		Size:          123,
-		EncryptedName: "enc-name-1",
-	}
 	if _, err := repo.UpsertMessage(ctx, userID, model.UpsertMessageRequest{
 		MessageUUID:       messageOne,
 		SessionUUID:       sessionUUID,
 		ParentMessageUUID: nil,
 		Sender:            "self",
-		Attachments:       []model.AttachmentMeta{attachmentOne},
 		EncryptedData:     "enc-msg-1",
 		Header:            "hdr-msg-1",
 	}); err != nil {
@@ -349,18 +340,12 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 	time.Sleep(2 * time.Millisecond)
 
 	messageTwo := uuid.NewString()
-	attachmentTwo := model.AttachmentMeta{
-		ID:            uuid.NewString(),
-		Size:          456,
-		EncryptedName: "enc-name-2",
-	}
 	parent := messageOne
 	if _, err := repo.UpsertMessage(ctx, userID, model.UpsertMessageRequest{
 		MessageUUID:       messageTwo,
 		SessionUUID:       sessionUUID,
 		ParentMessageUUID: &parent,
 		Sender:            "other",
-		Attachments:       []model.AttachmentMeta{attachmentTwo},
 		EncryptedData:     "enc-msg-2",
 		Header:            "hdr-msg-2",
 	}); err != nil {
@@ -392,13 +377,8 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 	if entryOne.Sender != "self" {
 		t.Fatalf("expected message one sender self")
 	}
-	if len(entryOne.Attachments) != 1 {
-		t.Fatalf("expected message one attachments length 1")
-	}
-	if entryOne.Attachments[0].ID != attachmentOne.ID ||
-		entryOne.Attachments[0].Size != attachmentOne.Size ||
-		entryOne.Attachments[0].EncryptedName != attachmentOne.EncryptedName {
-		t.Fatalf("unexpected message one attachment metadata")
+	if len(entryOne.Attachments) != 0 {
+		t.Fatalf("expected message one attachments length 0")
 	}
 
 	entryTwo, ok := entriesByID[messageTwo]
@@ -411,13 +391,8 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 	if entryTwo.Sender != "other" {
 		t.Fatalf("expected message two sender other")
 	}
-	if len(entryTwo.Attachments) != 1 {
-		t.Fatalf("expected message two attachments length 1")
-	}
-	if entryTwo.Attachments[0].ID != attachmentTwo.ID ||
-		entryTwo.Attachments[0].Size != attachmentTwo.Size ||
-		entryTwo.Attachments[0].EncryptedName != attachmentTwo.EncryptedName {
-		t.Fatalf("unexpected message two attachment metadata")
+	if len(entryTwo.Attachments) != 0 {
+		t.Fatalf("expected message two attachments length 0")
 	}
 
 	messageTombstone, err := repo.DeleteMessage(ctx, userID, messageOne)
@@ -907,65 +882,5 @@ func TestUpsertAndDeleteIdempotency(t *testing.T) {
 	}
 	if messageTombstone.DeletedAt != messageTombstoneRepeat.DeletedAt {
 		t.Fatalf("expected delete message to be idempotent")
-	}
-}
-
-func TestUpsertMessageCommitsTempObjects(t *testing.T) {
-	ctx := context.Background()
-	repo := &Repository{DB: testDB}
-
-	userID := createTestUser(t)
-	t.Cleanup(func() {
-		cleanupUser(t, userID)
-	})
-	ensureKey(t, repo, userID)
-
-	sessionUUID := uuid.NewString()
-	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:     sessionUUID,
-		RootSessionUUID: sessionUUID,
-		EncryptedData:   "enc-session",
-		Header:          "hdr-session",
-	}); err != nil {
-		t.Fatalf("failed to upsert session: %v", err)
-	}
-
-	attachmentID := uuid.NewString()
-	objectKey := fmt.Sprintf("llmchat/attachments/%d/%s", userID, attachmentID)
-
-	expiration := time.Now().Add(24 * time.Hour).UnixMicro()
-	if _, err := testDB.Exec(
-		`INSERT INTO temp_objects(object_key, expiration_time) VALUES ($1, $2)`,
-		objectKey,
-		expiration,
-	); err != nil {
-		t.Fatalf("failed to insert temp object: %v", err)
-	}
-
-	messageUUID := uuid.NewString()
-	if _, err := repo.UpsertMessage(ctx, userID, model.UpsertMessageRequest{
-		MessageUUID: messageUUID,
-		SessionUUID: sessionUUID,
-		Sender:      "self",
-		Attachments: []model.AttachmentMeta{{
-			ID:            attachmentID,
-			Size:          123,
-			EncryptedName: "enc-name",
-		}},
-		EncryptedData: "enc-msg",
-		Header:        "hdr-msg",
-	}); err != nil {
-		t.Fatalf("failed to upsert message: %v", err)
-	}
-
-	var remaining int
-	if err := testDB.QueryRow(
-		`SELECT COUNT(*) FROM temp_objects WHERE object_key = $1`,
-		objectKey,
-	).Scan(&remaining); err != nil {
-		t.Fatalf("failed to count temp objects: %v", err)
-	}
-	if remaining != 0 {
-		t.Fatalf("expected temp object to be removed, got %d", remaining)
 	}
 }

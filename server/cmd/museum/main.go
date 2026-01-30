@@ -109,6 +109,7 @@ func main() {
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
 	viper.SetDefault("features.llmchat", false)
+	viper.SetDefault("llmchat.attachments.enabled", false)
 	viper.SetDefault("llmchat.attachments.cleanup", false)
 
 	setupLogger(environment)
@@ -118,6 +119,7 @@ func main() {
 	hashingKey := viper.GetString("key.hash")
 	jwtSecret := viper.GetString("jwt.secret")
 	llmChatEnabled := viper.GetBool("features.llmchat")
+	llmChatAttachmentsEnabled := viper.GetBool("llmchat.attachments.enabled")
 	llmChatAttachmentsCleanup := viper.GetBool("llmchat.attachments.cleanup")
 
 	secretEncryptionKeyBytes, err := b64.StdEncoding.DecodeString(secretEncryptionKey)
@@ -892,17 +894,20 @@ func main() {
 
 	var llmChatAttachmentController *llmchatCtrl.AttachmentController
 	if llmChatEnabled {
-		llmChatAttachmentController = &llmchatCtrl.AttachmentController{
-			S3Config:            s3Config,
-			Repo:                llmChatRepository,
-			SubscriptionChecker: billingController,
+		if llmChatAttachmentsEnabled {
+			llmChatAttachmentController = &llmchatCtrl.AttachmentController{
+				S3Config:            s3Config,
+				Repo:                llmChatRepository,
+				SubscriptionChecker: billingController,
+			}
 		}
 		llmChatController := &llmchatCtrl.Controller{
 			Repo:                llmChatRepository,
 			KeyCache:            llmChatKeyCache,
 			SubscriptionChecker: billingController,
 			AttachmentCtrl:      llmChatAttachmentController,
-			CleanupAttachments:  llmChatAttachmentsCleanup,
+			AttachmentsEnabled:  llmChatAttachmentsEnabled,
+			CleanupAttachments:  llmChatAttachmentsCleanup && llmChatAttachmentsEnabled,
 		}
 		llmChatHandler := &api.LlmChatHandler{
 			Controller:           llmChatController,
@@ -915,8 +920,10 @@ func main() {
 		privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
 		privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
 		privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
-		privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
-		privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
+		if llmChatAttachmentsEnabled {
+			privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
+			privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
+		}
 		privateAPI.GET("/llmchat/chat/diff", llmChatHandler.GetDiff)
 	}
 

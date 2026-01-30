@@ -189,7 +189,6 @@ func (r *Repository) GetSessionTombstonesPage(ctx context.Context, userID int64,
 	return entries, hasMore, nil
 }
 
-// GetSessionDiff returns a non-paginated diff; retained for backwards compatibility.
 func (r *Repository) GetSessionDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.SessionDiffEntry, error) {
 	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, root_session_uuid, branch_from_message_uuid, encrypted_data, header, created_at, updated_at
 		FROM llmchat_sessions

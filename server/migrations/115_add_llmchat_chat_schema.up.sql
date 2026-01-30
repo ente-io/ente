@@ -30,13 +30,13 @@ CREATE TABLE IF NOT EXISTS llmchat_messages (
     session_uuid        uuid   NOT NULL,
     parent_message_uuid uuid,
     sender              TEXT   NOT NULL,
-    attachments         JSONB  NOT NULL DEFAULT '[]'::jsonb,
     encrypted_data      TEXT,
     header              TEXT,
     is_deleted          BOOLEAN NOT NULL DEFAULT FALSE,
     created_at          BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
     updated_at          BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
     CONSTRAINT fk_llmchat_messages_user_id FOREIGN KEY (user_id) REFERENCES llmchat_key (user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_llmchat_messages_session_uuid FOREIGN KEY (session_uuid) REFERENCES llmchat_sessions (session_uuid),
     CONSTRAINT llmchat_messages_state_constraint CHECK (
         (is_deleted IS TRUE AND encrypted_data IS NULL AND header IS NULL) OR
         (is_deleted IS FALSE AND encrypted_data IS NOT NULL AND header IS NOT NULL)
@@ -49,9 +49,6 @@ CREATE INDEX IF NOT EXISTS llmchat_sessions_state_updated_at_index
 
 CREATE INDEX IF NOT EXISTS llmchat_messages_state_updated_at_index
     ON llmchat_messages (user_id, is_deleted, updated_at);
-
-CREATE INDEX IF NOT EXISTS llmchat_messages_attachments_gin_index
-    ON llmchat_messages USING GIN (attachments);
 
 CREATE TRIGGER update_llmchat_sessions_updated_at
     BEFORE UPDATE

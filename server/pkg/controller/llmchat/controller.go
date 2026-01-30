@@ -38,12 +38,12 @@ const (
 	llmChatDiffTypeMessageTombstones = "message_tombstones"
 )
 
-// Controller exposes business logic for llmchat.
 type Controller struct {
 	Repo                *llmchat.Repository
 	KeyCache            *cache.Cache
 	SubscriptionChecker SubscriptionChecker
 	AttachmentCtrl      *AttachmentController
+	AttachmentsEnabled  bool
 	CleanupAttachments  bool
 }
 
@@ -130,7 +130,7 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 	if err := c.enforceAttachmentStorageLimit(ctx, userID, req.MessageUUID, req.Attachments); err != nil {
 		return nil, err
 	}
-	if c.AttachmentCtrl != nil {
+	if c.AttachmentsEnabled && c.AttachmentCtrl != nil {
 		for _, attachment := range req.Attachments {
 			if err := c.AttachmentCtrl.VerifyUploaded(ctx, userID, attachment.ID, attachment.Size); err != nil {
 				return nil, err
@@ -152,7 +152,7 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 	userID := auth.GetUserID(ctx.Request.Header)
 
 	var attachments []model.AttachmentMeta
-	if c.CleanupAttachments && c.AttachmentCtrl != nil {
+	if c.AttachmentsEnabled && c.CleanupAttachments && c.AttachmentCtrl != nil {
 		var err error
 		attachments, err = c.Repo.GetActiveSessionMessageAttachments(ctx, userID, sessionUUID)
 		if err != nil {
@@ -169,7 +169,7 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat session")
 	}
 
-	if c.CleanupAttachments && c.AttachmentCtrl != nil {
+	if c.AttachmentsEnabled && c.CleanupAttachments && c.AttachmentCtrl != nil {
 		for _, attachment := range attachments {
 			referenced, refErr := c.Repo.HasActiveAttachmentReference(ctx, userID, attachment.ID)
 			if refErr != nil {
@@ -199,7 +199,7 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 	userID := auth.GetUserID(ctx.Request.Header)
 
 	var meta llmchat.MessageMeta
-	if c.CleanupAttachments && c.AttachmentCtrl != nil {
+	if c.AttachmentsEnabled && c.CleanupAttachments && c.AttachmentCtrl != nil {
 		var err error
 		meta, err = c.Repo.GetMessageMeta(ctx, userID, messageUUID)
 		if err != nil {
@@ -212,7 +212,7 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat message")
 	}
 
-	if c.CleanupAttachments && !meta.IsDeleted && c.AttachmentCtrl != nil {
+	if c.AttachmentsEnabled && c.CleanupAttachments && !meta.IsDeleted && c.AttachmentCtrl != nil {
 		for _, attachment := range meta.Attachments {
 			referenced, refErr := c.Repo.HasActiveAttachmentReference(ctx, userID, attachment.ID)
 			if refErr != nil {
@@ -484,6 +484,12 @@ func (c *Controller) maxAttachmentStorage(userID int64) int64 {
 }
 
 func (c *Controller) validateAttachments(userID int64, attachments []model.AttachmentMeta) error {
+	if !c.AttachmentsEnabled {
+		if len(attachments) > 0 {
+			return stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled")
+		}
+		return nil
+	}
 	if len(attachments) > c.maxAttachments(userID) {
 		return stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
 	}
@@ -506,6 +512,9 @@ func (c *Controller) validateAttachments(userID int64, attachments []model.Attac
 }
 
 func (c *Controller) enforceAttachmentStorageLimit(ctx *gin.Context, userID int64, messageUUID string, attachments []model.AttachmentMeta) error {
+	if !c.AttachmentsEnabled || len(attachments) == 0 {
+		return nil
+	}
 	maxStorage := c.maxAttachmentStorage(userID)
 	if maxStorage <= 0 {
 		return nil

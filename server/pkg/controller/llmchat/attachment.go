@@ -320,7 +320,6 @@ func (c *AttachmentController) CleanupExpiredTempUploads(ctx context.Context, li
 			Key:    aws.String(o.ObjectKey),
 		})
 		if err != nil && !isAttachmentNotFound(err) {
-			// Extend expiry by 1 day to avoid tight loops on transient errors.
 			newExpiry := timeUtil.MicrosecondsAfterDays(1)
 			_, _ = tx.ExecContext(ctx, `UPDATE temp_objects SET expiration_time = $1 WHERE object_key = $2`, newExpiry, o.ObjectKey)
 			continue

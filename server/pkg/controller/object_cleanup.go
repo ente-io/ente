@@ -618,10 +618,7 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 		"last_modified": lastModified,
 	})
 
-	// llmchat attachments are not tracked in object_keys.
-	// If orphan cleanup is configured with a broad prefix, it can accidentally delete
-	// active chat attachments. We rely on llmchat's own policies (temp_objects for
-	// uncommitted uploads and optional in-app cleanup for referenced attachments).
+	// Skip llmchat attachments; llmchat handles cleanup.
 	if strings.HasPrefix(objectKey, "llmchat/attachments/") {
 		return
 	}

@@ -81,6 +81,8 @@ features:
 # LLM chat configuration
 llmchat:
     attachments:
+        # Enable LLM chat attachments endpoints + storage.
+        enabled: false
         # Enable background cleanup of unreferenced attachments.
         cleanup: false
 
