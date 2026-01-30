@@ -436,9 +436,12 @@ func (c *Controller) validateKey(ctx *gin.Context) error {
 }
 
 func (c *Controller) ensureSessionActive(ctx *gin.Context, userID int64, sessionUUID string) error {
-	meta, err := c.Repo.GetSessionMeta(ctx, userID, sessionUUID)
+	meta, err := c.Repo.GetSessionMeta(ctx, sessionUUID)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to fetch llmchat session")
+	}
+	if meta.UserID != userID {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "llmchat session does not belong to user")
 	}
 	if meta.IsDeleted {
 		return stacktrace.Propagate(&ente.ErrNotFoundError, "llmchat session not found")

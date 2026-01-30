@@ -84,18 +84,18 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 }
 
 type SessionMeta struct {
+	UserID    int64
 	IsDeleted bool
 }
 
-func (r *Repository) GetSessionMeta(ctx context.Context, userID int64, sessionUUID string) (SessionMeta, error) {
-	row := r.DB.QueryRowContext(ctx, `SELECT is_deleted
+func (r *Repository) GetSessionMeta(ctx context.Context, sessionUUID string) (SessionMeta, error) {
+	row := r.DB.QueryRowContext(ctx, `SELECT user_id, is_deleted
 		FROM llmchat_sessions
-		WHERE session_uuid = $1 AND user_id = $2`,
+		WHERE session_uuid = $1`,
 		sessionUUID,
-		userID,
 	)
 	var meta SessionMeta
-	if err := row.Scan(&meta.IsDeleted); err != nil {
+	if err := row.Scan(&meta.UserID, &meta.IsDeleted); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return meta, stacktrace.Propagate(&ente.ErrNotFoundError, "llmchat session not found")
 		}
