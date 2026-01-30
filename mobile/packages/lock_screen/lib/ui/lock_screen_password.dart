@@ -152,7 +152,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                     shouldSurfaceExecutionStates: false,
                     onChange: (p0) {
                       _passwordController.text = p0;
-                      _isFormValid.value = _passwordController.text.isNotEmpty;
+                      _isFormValid.value = _passwordController.text.isNotEmpty &&
+                          _passwordController.text.trim().isNotEmpty;
                     },
                     onSubmit: (p0) {
                       return _confirmPassword();

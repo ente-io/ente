@@ -61,6 +61,7 @@ class LockScreenSettings {
     await runLockScreenChangesMigration();
 
     await _clearLsDataInKeychainIfFreshInstall(hasOptedForOfflineMode);
+    await _clearLsDataInWindowsIfFreshInstall(hasOptedForOfflineMode);
 
     Bus.instance.on<SignedOutEvent>().listen((event) {
       removePinAndPassword();
@@ -245,6 +246,21 @@ class LockScreenSettings {
     bool hasOptedForOfflineMode,
   ) async {
     if ((Platform.isIOS || Platform.isMacOS) &&
+        !_config.isLoggedIn() &&
+        !hasOptedForOfflineMode) {
+      await _secureStorage.delete(key: password);
+      await _secureStorage.delete(key: pin);
+      await _secureStorage.delete(key: saltKey);
+    }
+  }
+
+  // On Windows, secure storage uses Windows Credential Manager which persists
+  // after app uninstall. Clear old credentials on fresh install to prevent
+  // stale app lock from blocking access.
+  Future<void> _clearLsDataInWindowsIfFreshInstall(
+    bool hasOptedForOfflineMode,
+  ) async {
+    if (Platform.isWindows &&
         !_config.isLoggedIn() &&
         !hasOptedForOfflineMode) {
       await _secureStorage.delete(key: password);
