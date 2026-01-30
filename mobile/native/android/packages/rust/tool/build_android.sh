@@ -31,7 +31,11 @@ fi
 if [[ -n "$NDK_VERSION" ]]; then
   NDK_ROOT_PATH="$SDK_ROOT/ndk/$NDK_VERSION"
 elif [[ -d "$SDK_ROOT/ndk" ]]; then
-  NDK_ROOT_PATH="$(ls -1d "$SDK_ROOT/ndk/"* 2>/dev/null | sort -V | tail -n 1)"
+  # Prefer numeric version folders (ignore legacy rXX folders).
+  NDK_ROOT_PATH="$(ls -1d "$SDK_ROOT/ndk/"[0-9]* 2>/dev/null | sort -V | tail -n 1)"
+  if [[ -z "$NDK_ROOT_PATH" ]]; then
+    NDK_ROOT_PATH="$(ls -1d "$SDK_ROOT/ndk/"* 2>/dev/null | sort -V | tail -n 1)"
+  fi
 elif [[ -d "$SDK_ROOT/ndk-bundle" ]]; then
   NDK_ROOT_PATH="$SDK_ROOT/ndk-bundle"
 fi

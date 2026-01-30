@@ -24,6 +24,6 @@ android {
 }
 
 dependencies {
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
-    implementation("androidx.annotation:annotation:1.7.1")
+    api("net.java.dev.jna:jna:5.14.0@aar")
+    api("androidx.annotation:annotation:1.7.1")
 }
