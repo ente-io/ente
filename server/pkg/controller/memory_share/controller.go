@@ -2,6 +2,7 @@ package memory_share
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/ente-io/museum/ente"
@@ -64,33 +65,14 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 		}
 	}
 
-	// Validate all requested file IDs exist
 	if len(fileOwnerMap) != len(fileIDs) {
 		return nil, stacktrace.Propagate(ente.ErrBadRequest, "one or more file IDs do not exist")
-	}
-
-	accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
-
-	share := ente.MemoryShare{
-		UserID:             userID,
-		Type:               ente.MemoryShareTypeShare,
-		MetadataCipher:     req.MetadataCipher,
-		MetadataNonce:      req.MetadataNonce,
-		EncryptedKey:       req.EncryptedKey,
-		KeyDecryptionNonce: req.KeyDecryptionNonce,
-		AccessToken:        accessToken,
-	}
-
-	share, err = c.Repo.Create(ctx, share)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to create memory share")
 	}
 
 	shareFiles := make([]ente.MemoryShareFile, len(req.Files))
 	now := time.Microseconds()
 	for i, f := range req.Files {
 		shareFiles[i] = ente.MemoryShareFile{
-			MemoryShareID:      share.ID,
 			FileID:             f.FileID,
 			FileOwnerID:        fileOwnerMap[f.FileID],
 			EncryptedKey:       f.EncryptedKey,
@@ -99,15 +81,35 @@ func (c *Controller) Create(ctx *gin.Context, userID int64, req ente.CreateMemor
 		}
 	}
 
-	err = c.Repo.AddFiles(ctx, share.ID, shareFiles)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to add files to memory share")
+	var share ente.MemoryShare
+	for attempt := 0; attempt < 5; attempt++ {
+		// Retry on rare access-token collisions to match collection/file link behavior.
+		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
+
+		share = ente.MemoryShare{
+			UserID:             userID,
+			Type:               ente.MemoryShareTypeShare,
+			MetadataCipher:     req.MetadataCipher,
+			MetadataNonce:      req.MetadataNonce,
+			EncryptedKey:       req.EncryptedKey,
+			KeyDecryptionNonce: req.KeyDecryptionNonce,
+			AccessToken:        accessToken,
+		}
+
+		share, err = c.Repo.CreateWithFiles(ctx, share, shareFiles)
+		if errors.Is(err, ente.ErrAccessTokenInUse) {
+			continue
+		}
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to create memory share")
+		}
+
+		return &ente.CreateMemoryShareResponse{MemoryShare: share}, nil
 	}
 
-	return &ente.CreateMemoryShareResponse{MemoryShare: share}, nil
+	return nil, stacktrace.Propagate(ente.ErrAccessTokenInUse, "failed to generate unique access token")
 }
 
-// List returns all memory shares for a user
 func (c *Controller) List(ctx context.Context, userID int64) (*ente.ListMemorySharesResponse, error) {
 	shares, err := c.Repo.GetByUserID(ctx, userID)
 	if err != nil {
@@ -119,7 +121,6 @@ func (c *Controller) List(ctx context.Context, userID int64) (*ente.ListMemorySh
 	return &ente.ListMemorySharesResponse{MemoryShares: shares}, nil
 }
 
-// Delete soft-deletes a memory share
 func (c *Controller) Delete(ctx context.Context, userID int64, shareID int64) error {
 	err := c.Repo.Delete(ctx, shareID, userID)
 	if err != nil {
@@ -128,14 +129,13 @@ func (c *Controller) Delete(ctx context.Context, userID int64, shareID int64) er
 	return nil
 }
 
-// GetByID retrieves a memory share by ID (for owner only)
 func (c *Controller) GetByID(ctx context.Context, userID int64, shareID int64) (*ente.MemoryShare, error) {
 	share, err := c.Repo.GetByID(ctx, shareID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to get memory share")
 	}
 	if share.UserID != userID {
-		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "user does not own this memory share")
+		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "user does not own this share")
 	}
 	return share, nil
 }

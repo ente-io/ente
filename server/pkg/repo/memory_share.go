@@ -12,13 +12,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-// MemoryShareRepository is an implementation of the repository for memory shares
+// MemoryShareRepository persists memory share rows and their files.
 type MemoryShareRepository struct {
 	DB         *sql.DB
 	memoryHost string
 }
 
-// NewMemoryShareRepository creates a new MemoryShareRepository
+// NewMemoryShareRepository builds a repository using the configured public memories host.
 func NewMemoryShareRepository(db *sql.DB) *MemoryShareRepository {
 	memoryHost := viper.GetString("apps.public-memories")
 	if memoryHost == "" {
@@ -30,12 +30,12 @@ func NewMemoryShareRepository(db *sql.DB) *MemoryShareRepository {
 	}
 }
 
-// GetMemoryShareURL returns the public URL for a memory share
+// GetMemoryShareURL constructs the public URL for a share token.
 func (r *MemoryShareRepository) GetMemoryShareURL(accessToken string) string {
 	return fmt.Sprintf("%s/%s", r.memoryHost, accessToken)
 }
 
-// Create creates a new memory share and returns it with the generated ID
+// Create inserts a memory share and returns the saved row.
 func (r *MemoryShareRepository) Create(ctx context.Context, share ente.MemoryShare) (ente.MemoryShare, error) {
 	now := time.Microseconds()
 	err := r.DB.QueryRowContext(ctx, `
@@ -48,7 +48,10 @@ func (r *MemoryShareRepository) Create(ctx context.Context, share ente.MemorySha
 		share.EncryptedKey, share.KeyDecryptionNonce, share.AccessToken,
 		false, now, now).Scan(&share.ID)
 	if err != nil {
-		return share, stacktrace.Propagate(err, "failed to create memory share")
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			return share, ente.ErrAccessTokenInUse
+		}
+		return share, stacktrace.Propagate(err, "failed to insert memory share")
 	}
 	share.CreatedAt = now
 	share.UpdatedAt = now
@@ -56,7 +59,54 @@ func (r *MemoryShareRepository) Create(ctx context.Context, share ente.MemorySha
 	return share, nil
 }
 
-// AddFiles adds files to a memory share
+// CreateWithFiles atomically creates the share and its file rows so we never persist an empty share.
+func (r *MemoryShareRepository) CreateWithFiles(ctx context.Context, share ente.MemoryShare, files []ente.MemoryShareFile) (ente.MemoryShare, error) {
+	tx, err := r.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return share, stacktrace.Propagate(err, "failed to begin transaction")
+	}
+	defer tx.Rollback()
+
+	now := time.Microseconds()
+
+	err = tx.QueryRowContext(ctx, `
+		INSERT INTO memory_shares
+		(user_id, type, metadata_cipher, metadata_nonce,
+		 mem_enc_key, mem_key_decryption_nonce, access_token, is_deleted, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		RETURNING id`,
+		share.UserID, share.Type, share.MetadataCipher, share.MetadataNonce,
+		share.EncryptedKey, share.KeyDecryptionNonce, share.AccessToken,
+		false, now, now).Scan(&share.ID)
+	if err != nil {
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			return share, ente.ErrAccessTokenInUse
+		}
+		return share, stacktrace.Propagate(err, "failed to insert memory share")
+	}
+
+	for _, file := range files {
+		_, err = tx.ExecContext(ctx, `
+			INSERT INTO memory_share_files
+			(memory_share_id, file_id, file_owner_id, file_enc_key, file_key_decryption_nonce, created_at)
+			VALUES ($1, $2, $3, $4, $5, $6)`,
+			share.ID, file.FileID, file.FileOwnerID, file.EncryptedKey, file.KeyDecryptionNonce, now)
+		if err != nil {
+			return share, stacktrace.Propagate(err, "failed to insert share file")
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return share, stacktrace.Propagate(err, "failed to commit transaction")
+	}
+
+	share.CreatedAt = now
+	share.UpdatedAt = now
+	share.URL = r.GetMemoryShareURL(share.AccessToken)
+	return share, nil
+}
+
+// AddFiles appends files to an existing memory share.
 func (r *MemoryShareRepository) AddFiles(ctx context.Context, shareID int64, files []ente.MemoryShareFile) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -72,7 +122,7 @@ func (r *MemoryShareRepository) AddFiles(ctx context.Context, shareID int64, fil
 			VALUES ($1, $2, $3, $4, $5, $6)`,
 			shareID, file.FileID, file.FileOwnerID, file.EncryptedKey, file.KeyDecryptionNonce, now)
 		if err != nil {
-			return stacktrace.Propagate(err, "failed to add file to memory share")
+			return stacktrace.Propagate(err, "failed to insert share file")
 		}
 	}
 
@@ -82,7 +132,7 @@ func (r *MemoryShareRepository) AddFiles(ctx context.Context, shareID int64, fil
 	return nil
 }
 
-// GetByID retrieves a memory share by its ID
+// GetByID fetches a memory share by primary key.
 func (r *MemoryShareRepository) GetByID(ctx context.Context, id int64) (*ente.MemoryShare, error) {
 	share := &ente.MemoryShare{}
 	err := r.DB.QueryRowContext(ctx, `
@@ -102,7 +152,7 @@ func (r *MemoryShareRepository) GetByID(ctx context.Context, id int64) (*ente.Me
 	return share, nil
 }
 
-// GetByAccessToken retrieves a memory share by its access token
+// GetByAccessToken fetches a memory share using its public token.
 func (r *MemoryShareRepository) GetByAccessToken(ctx context.Context, token string) (*ente.MemoryShare, error) {
 	share := &ente.MemoryShare{}
 	err := r.DB.QueryRowContext(ctx, `
@@ -122,13 +172,13 @@ func (r *MemoryShareRepository) GetByAccessToken(ctx context.Context, token stri
 	return share, nil
 }
 
-// GetFiles retrieves all files for a memory share
+// GetFiles returns all file rows for a memory share.
 func (r *MemoryShareRepository) GetFiles(ctx context.Context, shareID int64) ([]ente.MemoryShareFile, error) {
 	rows, err := r.DB.QueryContext(ctx, `
 		SELECT id, memory_share_id, file_id, file_owner_id, file_enc_key, file_key_decryption_nonce, created_at
 		FROM memory_share_files WHERE memory_share_id = $1`, shareID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get memory share files")
+		return nil, stacktrace.Propagate(err, "failed to query share files")
 	}
 	defer rows.Close()
 
@@ -137,19 +187,19 @@ func (r *MemoryShareRepository) GetFiles(ctx context.Context, shareID int64) ([]
 		var file ente.MemoryShareFile
 		if err = rows.Scan(&file.ID, &file.MemoryShareID, &file.FileID, &file.FileOwnerID,
 			&file.EncryptedKey, &file.KeyDecryptionNonce, &file.CreatedAt); err != nil {
-			return nil, stacktrace.Propagate(err, "failed to scan memory share file")
+			return nil, stacktrace.Propagate(err, "failed to scan share file")
 		}
 		files = append(files, file)
 	}
 	return files, nil
 }
 
-// GetFileIDs retrieves all file IDs for a memory share
+// GetFileIDs returns just the file IDs for a memory share.
 func (r *MemoryShareRepository) GetFileIDs(ctx context.Context, shareID int64) ([]int64, error) {
 	rows, err := r.DB.QueryContext(ctx, `
 		SELECT file_id FROM memory_share_files WHERE memory_share_id = $1`, shareID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get memory share file IDs")
+		return nil, stacktrace.Propagate(err, "failed to query file IDs")
 	}
 	defer rows.Close()
 
@@ -164,7 +214,7 @@ func (r *MemoryShareRepository) GetFileIDs(ctx context.Context, shareID int64) (
 	return fileIDs, nil
 }
 
-// GetByUserID retrieves all memory shares for a user
+// GetByUserID returns all non-deleted shares created by a user.
 func (r *MemoryShareRepository) GetByUserID(ctx context.Context, userID int64) ([]ente.MemoryShare, error) {
 	rows, err := r.DB.QueryContext(ctx, `
 		SELECT id, user_id, type, metadata_cipher, metadata_nonce,
@@ -172,7 +222,7 @@ func (r *MemoryShareRepository) GetByUserID(ctx context.Context, userID int64) (
 		FROM memory_shares WHERE user_id = $1 AND is_deleted = false
 		ORDER BY created_at DESC`, userID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get memory shares for user")
+		return nil, stacktrace.Propagate(err, "failed to query user shares")
 	}
 	defer rows.Close()
 
@@ -190,7 +240,7 @@ func (r *MemoryShareRepository) GetByUserID(ctx context.Context, userID int64) (
 	return shares, nil
 }
 
-// Delete soft-deletes a memory share
+// Delete soft-deletes a memory share owned by the given user.
 func (r *MemoryShareRepository) Delete(ctx context.Context, shareID int64, userID int64) error {
 	result, err := r.DB.ExecContext(ctx, `
 		UPDATE memory_shares SET is_deleted = true, updated_at = $1
@@ -209,12 +259,12 @@ func (r *MemoryShareRepository) Delete(ctx context.Context, shareID int64, userI
 	return nil
 }
 
-// GetFileOwnerMap returns a map of file ID to owner ID for files in a memory share
+// GetFileOwnerMap returns a fileID->ownerID map for a share.
 func (r *MemoryShareRepository) GetFileOwnerMap(ctx context.Context, shareID int64) (map[int64]int64, error) {
 	rows, err := r.DB.QueryContext(ctx, `
 		SELECT file_id, file_owner_id FROM memory_share_files WHERE memory_share_id = $1`, shareID)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get file owner map")
+		return nil, stacktrace.Propagate(err, "failed to query file owner map")
 	}
 	defer rows.Close()
 
@@ -229,7 +279,7 @@ func (r *MemoryShareRepository) GetFileOwnerMap(ctx context.Context, shareID int
 	return ownerMap, nil
 }
 
-// GetFileByID retrieves a specific file from a memory share
+// GetFileByID fetches a specific file entry for a share.
 func (r *MemoryShareRepository) GetFileByID(ctx context.Context, shareID int64, fileID int64) (*ente.MemoryShareFile, error) {
 	file := &ente.MemoryShareFile{}
 	err := r.DB.QueryRowContext(ctx, `
@@ -239,14 +289,14 @@ func (r *MemoryShareRepository) GetFileByID(ctx context.Context, shareID int64, 
 		&file.EncryptedKey, &file.KeyDecryptionNonce, &file.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, stacktrace.Propagate(ente.ErrNotFound, "file not found in memory share")
+			return nil, stacktrace.Propagate(ente.ErrNotFound, "file not found in share")
 		}
-		return nil, stacktrace.Propagate(err, "failed to get file from memory share")
+		return nil, stacktrace.Propagate(err, "failed to get file by ID")
 	}
 	return file, nil
 }
 
-// FileExistsInShare checks if a file is part of a memory share
+// FileExistsInShare reports whether a file belongs to a share and returns the ownerID.
 func (r *MemoryShareRepository) FileExistsInShare(ctx context.Context, shareID int64, fileID int64) (bool, int64, error) {
 	var ownerID int64
 	err := r.DB.QueryRowContext(ctx, `
@@ -261,13 +311,13 @@ func (r *MemoryShareRepository) FileExistsInShare(ctx context.Context, shareID i
 	return true, ownerID, nil
 }
 
-// GetFilesWithKeys retrieves files along with their re-encrypted keys for public access
+// GetFilesWithKeys returns file entries and re-encrypted keys for the requested file IDs.
 func (r *MemoryShareRepository) GetFilesWithKeys(ctx context.Context, shareID int64, fileIDs []int64) ([]ente.MemoryShareFile, error) {
 	rows, err := r.DB.QueryContext(ctx, `
 		SELECT id, memory_share_id, file_id, file_owner_id, file_enc_key, file_key_decryption_nonce, created_at
 		FROM memory_share_files WHERE memory_share_id = $1 AND file_id = ANY($2)`, shareID, pq.Array(fileIDs))
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to get memory share files with keys")
+		return nil, stacktrace.Propagate(err, "failed to query files with keys")
 	}
 	defer rows.Close()
 
@@ -276,7 +326,7 @@ func (r *MemoryShareRepository) GetFilesWithKeys(ctx context.Context, shareID in
 		var file ente.MemoryShareFile
 		if err = rows.Scan(&file.ID, &file.MemoryShareID, &file.FileID, &file.FileOwnerID,
 			&file.EncryptedKey, &file.KeyDecryptionNonce, &file.CreatedAt); err != nil {
-			return nil, stacktrace.Propagate(err, "failed to scan memory share file")
+			return nil, stacktrace.Propagate(err, "failed to scan file with keys")
 		}
 		files = append(files, file)
 	}
