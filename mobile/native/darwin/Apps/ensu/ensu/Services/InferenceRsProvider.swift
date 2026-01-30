@@ -114,9 +114,9 @@ final class InferenceRsProvider {
                     }
 
                     let status = if hasTotal {
-                        "Downloading... \(self.formatBytes(overallDownloaded)) / \(self.formatBytes(totalBytes))"
+                        "Downloading... \(overallDownloaded.formattedFileSize) / \(totalBytes.formattedFileSize)"
                     } else {
-                        "Downloading \(download.label.lowercased())... \(self.formatBytes(downloaded))"
+                        "Downloading \(download.label.lowercased())... \(downloaded.formattedFileSize)"
                     }
 
                     onProgress(InferenceDownloadProgress(percent: min(99, max(0, percent)), status: status))
@@ -149,6 +149,7 @@ final class InferenceRsProvider {
         }
 
         let mmprojPath = imageFiles.isEmpty ? nil : mmprojPathFor(target: target)?.path
+        let clampedTemperature = min(max(temperature, 0.35), 0.7)
 
         let request = GenerateChatRequest(
             messages: nativeMessages,
@@ -158,12 +159,12 @@ final class InferenceRsProvider {
             mmprojPath: mmprojPath,
             mediaMarker: nil,
             maxTokens: Int32(maxTokens),
-            temperature: temperature,
-            topP: nil,
-            topK: nil,
-            repeatPenalty: nil,
-            frequencyPenalty: nil,
-            presencePenalty: nil,
+            temperature: clampedTemperature,
+            topP: 0.9,
+            topK: 50,
+            repeatPenalty: 1.18,
+            frequencyPenalty: 0,
+            presencePenalty: 0,
             seed: nil,
             stopSequences: nil,
             grammar: nil
@@ -483,12 +484,6 @@ final class InferenceRsProvider {
         guard data.count == 4 else { return false }
         let header = String(decoding: data, as: UTF8.self)
         return header == "GGUF"
-    }
-
-    private func formatBytes(_ bytes: Int64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: bytes)
     }
 
     private func modelPathFor(target: InferenceModelTarget) -> URL {
