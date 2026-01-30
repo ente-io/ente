@@ -111,6 +111,9 @@ func main() {
 	viper.SetDefault("features.llmchat", false)
 	viper.SetDefault("llmchat.attachments.enabled", false)
 	viper.SetDefault("llmchat.attachments.cleanup", false)
+	viper.SetDefault("llmchat.max_json_body_bytes", int64(800*1024))
+	viper.SetDefault("llmchat.diff.default_limit", 500)
+	viper.SetDefault("llmchat.diff.maximum_limit", 2500)
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
@@ -161,6 +164,10 @@ func main() {
 	}, []string{"method"})
 
 	s3Config := s3config.NewS3Config()
+	if llmChatEnabled && llmChatAttachmentsEnabled {
+		// Ensure llmchat bucket (b7) is configured. No fallback.
+		_ = s3Config.GetLlmChatBucket()
+	}
 	passkeysRepo, err := passkey.NewRepository(db)
 	if err != nil {
 		panic(err)
@@ -899,6 +906,9 @@ func main() {
 				S3Config:            s3Config,
 				Repo:                llmChatRepository,
 				SubscriptionChecker: billingController,
+				Enabled:             true,
+				UserRepo:            userRepo,
+				RemoteStoreRepo:     remoteStoreRepository,
 			}
 		}
 		llmChatController := &llmchatCtrl.Controller{
@@ -908,6 +918,8 @@ func main() {
 			AttachmentCtrl:      llmChatAttachmentController,
 			AttachmentsEnabled:  llmChatAttachmentsEnabled,
 			CleanupAttachments:  llmChatAttachmentsCleanup && llmChatAttachmentsEnabled,
+			UserRepo:            userRepo,
+			RemoteStoreRepo:     remoteStoreRepository,
 		}
 		llmChatHandler := &api.LlmChatHandler{
 			Controller:           llmChatController,

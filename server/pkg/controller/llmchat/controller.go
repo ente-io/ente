@@ -45,6 +45,15 @@ type Controller struct {
 	AttachmentCtrl      *AttachmentController
 	AttachmentsEnabled  bool
 	CleanupAttachments  bool
+	UserRepo            InternalUserRepo
+	RemoteStoreRepo     RemoteStoreRepo
+}
+
+func (c *Controller) attachmentsAllowed(ctx *gin.Context, userID int64) bool {
+	if !c.AttachmentsEnabled {
+		return false
+	}
+	return isInternalUser(ctx.Request.Context(), userID, c.UserRepo, c.RemoteStoreRepo)
 }
 
 func (c *Controller) UpsertKey(ctx *gin.Context, req model.UpsertKeyRequest) (*model.Key, error) {
@@ -121,8 +130,12 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sender")
 	}
 
-	if err := c.validateAttachments(userID, req.Attachments); err != nil {
+	allowedAttachments := c.attachmentsAllowed(ctx, userID)
+	if err := c.validateAttachments(ctx, userID, req.Attachments); err != nil {
 		return nil, err
+	}
+	if !allowedAttachments {
+		req.Attachments = nil
 	}
 	if err := c.enforceMessageLimit(ctx, userID, req.MessageUUID); err != nil {
 		return nil, err
@@ -130,7 +143,7 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 	if err := c.enforceAttachmentStorageLimit(ctx, userID, req.MessageUUID, req.Attachments); err != nil {
 		return nil, err
 	}
-	if c.AttachmentsEnabled && c.AttachmentCtrl != nil {
+	if allowedAttachments && c.AttachmentCtrl != nil {
 		for _, attachment := range req.Attachments {
 			if err := c.AttachmentCtrl.VerifyUploaded(ctx, userID, attachment.ID, attachment.Size); err != nil {
 				return nil, err
@@ -149,10 +162,13 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 	if err := c.validateKey(ctx); err != nil {
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
+	if _, err := uuid.Parse(sessionUUID); err != nil {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid session id")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 
 	var attachments []model.AttachmentMeta
-	if c.AttachmentsEnabled && c.CleanupAttachments && c.AttachmentCtrl != nil {
+	if c.CleanupAttachments && c.AttachmentCtrl != nil {
 		var err error
 		attachments, err = c.Repo.GetActiveSessionMessageAttachments(ctx, userID, sessionUUID)
 		if err != nil {
@@ -169,7 +185,7 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat session")
 	}
 
-	if c.AttachmentsEnabled && c.CleanupAttachments && c.AttachmentCtrl != nil {
+	if c.CleanupAttachments && c.AttachmentCtrl != nil {
 		for _, attachment := range attachments {
 			referenced, refErr := c.Repo.HasActiveAttachmentReference(ctx, userID, attachment.ID)
 			if refErr != nil {
@@ -196,14 +212,24 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 	if err := c.validateKey(ctx); err != nil {
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
+	if _, err := uuid.Parse(messageUUID); err != nil {
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid message id")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 
 	var meta llmchat.MessageMeta
-	if c.AttachmentsEnabled && c.CleanupAttachments && c.AttachmentCtrl != nil {
+	var attachments []model.AttachmentMeta
+	if c.CleanupAttachments && c.AttachmentCtrl != nil {
 		var err error
 		meta, err = c.Repo.GetMessageMeta(ctx, userID, messageUUID)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "failed to fetch llmchat message")
+		}
+		if !meta.IsDeleted {
+			attachments, err = c.Repo.GetMessageAttachments(ctx, userID, messageUUID)
+			if err != nil {
+				return nil, stacktrace.Propagate(err, "failed to fetch llmchat message attachments")
+			}
 		}
 	}
 
@@ -212,8 +238,8 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to delete llmchat message")
 	}
 
-	if c.AttachmentsEnabled && c.CleanupAttachments && !meta.IsDeleted && c.AttachmentCtrl != nil {
-		for _, attachment := range meta.Attachments {
+	if c.CleanupAttachments && !meta.IsDeleted && c.AttachmentCtrl != nil {
+		for _, attachment := range attachments {
 			referenced, refErr := c.Repo.HasActiveAttachmentReference(ctx, userID, attachment.ID)
 			if refErr != nil {
 				logrus.WithError(refErr).WithField("user_id", userID).Warn("Failed to check llmchat attachment reference")
@@ -486,10 +512,16 @@ func (c *Controller) maxAttachmentStorage(userID int64) int64 {
 	return maxAttachmentStorageForUser(c.SubscriptionChecker, userID)
 }
 
-func (c *Controller) validateAttachments(userID int64, attachments []model.AttachmentMeta) error {
-	if !c.AttachmentsEnabled {
+func (c *Controller) validateAttachments(ctx *gin.Context, userID int64, attachments []model.AttachmentMeta) error {
+	if !c.attachmentsAllowed(ctx, userID) {
 		if len(attachments) > 0 {
 			return stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled")
+		}
+		return nil
+	}
+	if c.AttachmentCtrl == nil {
+		if len(attachments) > 0 {
+			return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 		}
 		return nil
 	}
@@ -497,10 +529,15 @@ func (c *Controller) validateAttachments(userID int64, attachments []model.Attac
 		return stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
 	}
 	maxSize := c.maxAttachmentSize(userID)
+	seen := make(map[string]struct{}, len(attachments))
 	for _, attachment := range attachments {
 		if attachment.ID == "" {
 			return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 		}
+		if _, ok := seen[attachment.ID]; ok {
+			return stacktrace.Propagate(ente.ErrBadRequest, "duplicate attachment id")
+		}
+		seen[attachment.ID] = struct{}{}
 		if _, err := uuid.Parse(attachment.ID); err != nil {
 			return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
 		}
@@ -515,7 +552,7 @@ func (c *Controller) validateAttachments(userID int64, attachments []model.Attac
 }
 
 func (c *Controller) enforceAttachmentStorageLimit(ctx *gin.Context, userID int64, messageUUID string, attachments []model.AttachmentMeta) error {
-	if !c.AttachmentsEnabled || len(attachments) == 0 {
+	if !c.attachmentsAllowed(ctx, userID) || len(attachments) == 0 {
 		return nil
 	}
 	maxStorage := c.maxAttachmentStorage(userID)

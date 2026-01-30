@@ -17,6 +17,7 @@ import (
 	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 const (
@@ -28,6 +29,16 @@ type AttachmentController struct {
 	S3Config            *s3config.S3Config
 	Repo                *llmchatRepo.Repository
 	SubscriptionChecker SubscriptionChecker
+	Enabled             bool
+	UserRepo            InternalUserRepo
+	RemoteStoreRepo     RemoteStoreRepo
+}
+
+func (c *AttachmentController) attachmentsAllowed(ctx context.Context, userID int64) bool {
+	if !c.Enabled {
+		return false
+	}
+	return isInternalUser(ctx, userID, c.UserRepo, c.RemoteStoreRepo)
 }
 
 func (c *AttachmentController) maxAttachmentSize(userID int64) int64 {
@@ -47,6 +58,9 @@ func (c *AttachmentController) GetUploadURL(
 	if attachmentID == "" {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 	}
+	if _, err := uuid.Parse(attachmentID); err != nil {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+	}
 	if c.S3Config == nil {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
@@ -58,6 +72,10 @@ func (c *AttachmentController) GetUploadURL(
 	}
 
 	userID := auth.GetUserID(ctx.Request.Header)
+	if !c.attachmentsAllowed(ctx.Request.Context(), userID) {
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled")
+	}
+
 	maxSize := c.maxAttachmentSize(userID)
 	if req.ContentLength > maxSize {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
@@ -94,9 +112,9 @@ func (c *AttachmentController) GetUploadURL(
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	s3Client := c.S3Config.GetHotS3Client()
-	dc := c.S3Config.GetHotDataCenter()
-	bucket := c.S3Config.GetHotBucket()
+	s3Client := c.S3Config.GetLlmChatS3Client()
+	dc := c.S3Config.GetLlmChatBucketID()
+	bucket := c.S3Config.GetLlmChatBucket()
 
 	putInput := &s3.PutObjectInput{
 		Bucket: bucket,
@@ -138,8 +156,8 @@ func (c *AttachmentController) attachmentExists(
 	attachmentID string,
 ) (bool, error) {
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetHotBucket()
-	s3Client := c.S3Config.GetHotS3Client()
+	bucket := c.S3Config.GetLlmChatBucket()
+	s3Client := c.S3Config.GetLlmChatS3Client()
 
 	_, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
@@ -163,13 +181,19 @@ func (c *AttachmentController) VerifyUploaded(
 	if attachmentID == "" {
 		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 	}
+	if _, err := uuid.Parse(attachmentID); err != nil {
+		return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+	}
 	if c.S3Config == nil {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
+	if !c.attachmentsAllowed(ctx.Request.Context(), userID) {
+		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled")
+	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetHotBucket()
-	s3Client := c.S3Config.GetHotS3Client()
+	bucket := c.S3Config.GetLlmChatBucket()
+	s3Client := c.S3Config.GetLlmChatS3Client()
 
 	out, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
@@ -191,6 +215,9 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 	if attachmentID == "" {
 		return "", stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 	}
+	if _, err := uuid.Parse(attachmentID); err != nil {
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+	}
 	if c.S3Config == nil {
 		return "", stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
@@ -199,6 +226,9 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 	}
 
 	userID := auth.GetUserID(ctx.Request.Header)
+	if !c.attachmentsAllowed(ctx.Request.Context(), userID) {
+		return "", stacktrace.Propagate(ente.ErrNotImplemented, "attachments are disabled")
+	}
 	referenced, err := c.Repo.HasActiveAttachmentReference(ctx, userID, attachmentID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "failed to verify attachment access")
@@ -219,8 +249,8 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	s3Client := c.S3Config.GetHotS3Client()
-	bucket := c.S3Config.GetHotBucket()
+	s3Client := c.S3Config.GetLlmChatS3Client()
+	bucket := c.S3Config.GetLlmChatBucket()
 
 	getReq, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: bucket,
@@ -237,13 +267,16 @@ func (c *AttachmentController) Delete(ctx context.Context, userID int64, attachm
 	if attachmentID == "" {
 		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
 	}
+	if _, err := uuid.Parse(attachmentID); err != nil {
+		return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+	}
 	if c.S3Config == nil {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetHotBucket()
-	s3Client := c.S3Config.GetHotS3Client()
+	bucket := c.S3Config.GetLlmChatBucket()
+	s3Client := c.S3Config.GetLlmChatS3Client()
 
 	_, err := s3Client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
 		Bucket: bucket,
@@ -308,7 +341,7 @@ func (c *AttachmentController) CleanupExpiredTempUploads(ctx context.Context, li
 
 	deleted := 0
 	for _, o := range objs {
-		dc := c.S3Config.GetHotDataCenter()
+		dc := c.S3Config.GetLlmChatBucketID()
 		if o.BucketID.Valid && o.BucketID.String != "" {
 			dc = o.BucketID.String
 		}

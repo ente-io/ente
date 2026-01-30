@@ -86,6 +86,7 @@ var (
 	dcWasabiEuropeCentralDerived      string = "wasabi-eu-central-2-derived"
 	bucket5                           string = "b5"
 	bucket6                           string = "b6"
+	bucket7                           string = "b7" // dedicated llmchat bucket
 )
 
 // Number of days that the wasabi bucket is configured to retain objects.
@@ -100,9 +101,9 @@ func NewS3Config() *S3Config {
 }
 
 func (config *S3Config) initialize() {
-	dcs := [8]string{
+	dcs := [9]string{
 		dcB2EuropeCentral, dcSCWEuropeFranceLockedDeprecated, dcWasabiEuropeCentralDeprecated,
-		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3, dcWasabiEuropeCentralDerived, bucket5, bucket6}
+		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3, dcWasabiEuropeCentralDerived, bucket5, bucket6, bucket7}
 
 	config.hotDC = dcB2EuropeCentral
 	config.secondaryHotDC = dcWasabiEuropeCentral_v3
@@ -136,10 +137,10 @@ func (config *S3Config) initialize() {
 			Endpoint: aws.String(viper.GetString("s3." + dc + ".endpoint")),
 			Region:   aws.String(viper.GetString("s3." + dc + ".region")),
 		}
-		if usePathStyleURLs || viper.GetBool("s3." + dc + ".use_path_style_urls") || areLocalBuckets {
+		if usePathStyleURLs || viper.GetBool("s3."+dc+".use_path_style_urls") || areLocalBuckets {
 			s3Config.S3ForcePathStyle = aws.Bool(true)
 		}
-		if areLocalBuckets || viper.GetBool("s3." + dc + ".disable_ssl") {
+		if areLocalBuckets || viper.GetBool("s3."+dc+".disable_ssl") {
 			s3Config.DisableSSL = aws.Bool(true)
 		}
 		s3Session, err := session.NewSession(&s3Config)
@@ -216,6 +217,26 @@ func (config *S3Config) GetHotS3Config() *aws.Config {
 
 func (config *S3Config) GetHotS3Client() *s3.S3 {
 	s3Client := config.GetS3Client(config.hotDC)
+	return &s3Client
+}
+
+func (config *S3Config) GetLlmChatBucketID() string {
+	return bucket7
+}
+
+func (config *S3Config) GetLlmChatBucket() *string {
+	bucket := config.buckets[bucket7]
+	if bucket == "" {
+		log.Fatal("Missing s3.b7.bucket configuration (required for llmchat attachments)")
+	}
+	return &bucket
+}
+
+func (config *S3Config) GetLlmChatS3Client() *s3.S3 {
+	if config.buckets[bucket7] == "" {
+		log.Fatal("Missing s3.b7.bucket configuration (required for llmchat attachments)")
+	}
+	s3Client := config.GetS3Client(bucket7)
 	return &s3Client
 }
 

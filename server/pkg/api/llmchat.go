@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/llmchat"
 	llmchat "github.com/ente-io/museum/pkg/controller/llmchat"
@@ -20,6 +18,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 // LlmChatHandler expose request handlers for llm chat endpoints.
@@ -39,10 +38,40 @@ const (
 	llmChatEndpointUploadAttachment   = "upload_attachment"
 	llmChatEndpointDownloadAttachment = "download_attachment"
 
-	llmChatMaxJSONBodyBytes = int64(800 * 1024) // 800KB
-	llmChatDiffDefaultLimit = 500
-	llmChatDiffMaximumLimit = 2500
+	llmChatMaxJSONBodyBytesDefault int64 = 800 * 1024
+	llmChatDiffDefaultLimitDefault int16 = 500
+	llmChatDiffMaximumLimitDefault int16 = 2500
 )
+
+func llmChatMaxJSONBodyBytes() int64 {
+	v := viper.GetInt64("llmchat.max_json_body_bytes")
+	if v <= 0 {
+		return llmChatMaxJSONBodyBytesDefault
+	}
+	return v
+}
+
+func llmChatDiffDefaultLimit() int16 {
+	v := viper.GetInt("llmchat.diff.default_limit")
+	if v <= 0 {
+		return llmChatDiffDefaultLimitDefault
+	}
+	if v > int(^uint16(0)>>1) {
+		return llmChatDiffDefaultLimitDefault
+	}
+	return int16(v)
+}
+
+func llmChatDiffMaximumLimit() int16 {
+	v := viper.GetInt("llmchat.diff.maximum_limit")
+	if v <= 0 {
+		return llmChatDiffMaximumLimitDefault
+	}
+	if v > int(^uint16(0)>>1) {
+		return llmChatDiffMaximumLimitDefault
+	}
+	return int16(v)
+}
 
 var (
 	llmChatLatency = promauto.NewHistogramVec(prometheus.HistogramOpts{
@@ -138,7 +167,7 @@ func (h *LlmChatHandler) UpsertKey(c *gin.Context) {
 	defer observeLlmChatMetrics(c, llmChatEndpointUpsertKey, startTime)
 
 	var request model.UpsertKeyRequest
-	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes); err != nil {
+	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
 		return
 	}
@@ -167,7 +196,7 @@ func (h *LlmChatHandler) UpsertSession(c *gin.Context) {
 	defer observeLlmChatMetrics(c, llmChatEndpointUpsertSession, startTime)
 
 	var request model.UpsertSessionRequest
-	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes); err != nil {
+	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
 		return
 	}
@@ -184,7 +213,7 @@ func (h *LlmChatHandler) UpsertMessage(c *gin.Context) {
 	defer observeLlmChatMetrics(c, llmChatEndpointUpsertMessage, startTime)
 
 	var request model.UpsertMessageRequest
-	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes); err != nil {
+	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
 		return
 	}
@@ -205,10 +234,6 @@ func (h *LlmChatHandler) DeleteSession(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing session id"))
 		return
 	}
-	if _, err := uuid.Parse(sessionUUID); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid session id"))
-		return
-	}
 	resp, err := h.Controller.DeleteSession(c, sessionUUID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to delete llm chat session"))
@@ -224,10 +249,6 @@ func (h *LlmChatHandler) DeleteMessage(c *gin.Context) {
 	messageUUID := c.Query("id")
 	if messageUUID == "" {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing message id"))
-		return
-	}
-	if _, err := uuid.Parse(messageUUID); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid message id"))
 		return
 	}
 	resp, err := h.Controller.DeleteMessage(c, messageUUID)
@@ -257,13 +278,8 @@ func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing attachment id"))
 		return
 	}
-	if _, err := uuid.Parse(attachmentID); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid attachment id"))
-		return
-	}
-
 	var req model.GetAttachmentUploadURLRequest
-	if err := bindJSONWithLimit(c, &req, llmChatMaxJSONBodyBytes); err != nil {
+	if err := bindJSONWithLimit(c, &req, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
 		return
 	}
@@ -307,11 +323,6 @@ func (h *LlmChatHandler) DownloadAttachment(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing attachment id"))
 		return
 	}
-	if _, err := uuid.Parse(attachmentID); err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Invalid attachment id"))
-		return
-	}
-
 	url, err := h.AttachmentController.GetDownloadURL(c, attachmentID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to get attachment download URL"))
@@ -331,11 +342,13 @@ func (h *LlmChatHandler) GetDiff(c *gin.Context) {
 			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
+	defaultLimit := llmChatDiffDefaultLimit()
+	maxLimit := llmChatDiffMaximumLimit()
 	if request.Limit <= 0 {
-		request.Limit = llmChatDiffDefaultLimit
+		request.Limit = defaultLimit
 	}
-	if request.Limit > llmChatDiffMaximumLimit {
-		request.Limit = llmChatDiffMaximumLimit
+	if request.Limit > maxLimit {
+		request.Limit = maxLimit
 	}
 	resp, err := h.Controller.GetDiff(c, request)
 	if err != nil {

@@ -49,6 +49,14 @@ s3:
       region: eu-central-2
       bucket: scw-eu-fr-v3
 
+    # Dedicated bucket for llmchat attachments (required when llmchat.attachments.enabled is true)
+    b7:
+      key: <key>
+      secret: <secret>
+      endpoint: localhost:3200
+      region: eu-central-2
+      bucket: b7
+
 # Specify the base endpoints for various web apps
 apps:
     # If you're running a self hosted instance and wish to serve public links,
@@ -80,9 +88,16 @@ features:
 
 # LLM chat configuration
 llmchat:
+    # Max JSON body size for llmchat endpoints (bytes).
+    max_json_body_bytes: 819200
+    diff:
+        # Default page size.
+        default_limit: 500
+        # Maximum allowed page size.
+        maximum_limit: 2500
     attachments:
         # Enable LLM chat attachments endpoints + storage.
+        # Note: when enabled, attachments are only available for internal users.
         enabled: false
         # Enable background cleanup of unreferenced attachments.
         cleanup: false
-
