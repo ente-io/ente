@@ -24,7 +24,6 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -52,39 +51,25 @@ class FileLogRepository(
 
     override fun log(level: LogLevel, message: String, details: String?, tag: String?, throwable: Throwable?) {
         val resolvedTag = tag ?: "ensu"
-        val combinedDetails = buildString {
-            if (!details.isNullOrBlank()) {
-                append(details)
-            }
-            if (throwable != null) {
-                if (isNotEmpty()) append("\n")
-                append(throwable.stackTraceToString())
-            }
-        }.ifBlank { null }
-
-        val safeMessage = LogSanitizer.sanitize(message).orEmpty()
-        val safeDetails = LogSanitizer.sanitize(combinedDetails)
-
-        val entry = LogEntry(
-            id = UUID.randomUUID().toString(),
-            timestampMillis = System.currentTimeMillis(),
+        val entry = LogEntryBuilder.buildEntry(
             level = level,
+            message = message,
+            details = details,
             tag = resolvedTag,
-            message = safeMessage,
-            details = safeDetails
+            throwable = throwable
         )
 
         _logs.update { (listOf(entry) + it).take(maxEntriesInMemory) }
 
         // Also mirror to Logcat.
         when (level) {
-            LogLevel.Info -> Log.i(resolvedTag, safeMessage)
-            LogLevel.Warning -> Log.w(resolvedTag, safeMessage)
+            LogLevel.Info -> Log.i(resolvedTag, entry.message)
+            LogLevel.Warning -> Log.w(resolvedTag, entry.message)
             LogLevel.Error -> {
                 if (throwable != null) {
-                    Log.e(resolvedTag, safeMessage, throwable)
+                    Log.e(resolvedTag, entry.message, throwable)
                 } else {
-                    Log.e(resolvedTag, safeMessage)
+                    Log.e(resolvedTag, entry.message)
                 }
             }
         }

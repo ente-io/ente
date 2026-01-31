@@ -23,6 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -33,7 +35,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,51 +45,77 @@ import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 
 @Composable
-fun MarkdownView(markdown: String, enableSelection: Boolean = true) {
-    val blocks = MarkdownParser.parse(markdown)
+fun MarkdownView(
+    markdown: String,
+    enableSelection: Boolean = true,
+    trailingCursor: Boolean = false
+) {
+    val blocks = remember(markdown) { MarkdownParser.parse(markdown) }
     val content = @Composable {
         Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)) {
-            blocks.forEach { block ->
-                when (block) {
-                    is MarkdownBlock.Heading -> {
-                        Text(
-                            text = markdownAnnotatedText(block.text),
-                            style = headingStyle(block.level),
-                            color = EnsuColor.textPrimary()
-                        )
-                    }
-                    is MarkdownBlock.Paragraph -> {
-                        Text(
-                            text = markdownAnnotatedText(block.text),
-                            style = EnsuTypography.message,
-                            color = EnsuColor.textPrimary()
-                        )
-                    }
-                    is MarkdownBlock.BlockQuote -> {
-                        BlockQuoteView(text = block.text)
-                    }
-                    is MarkdownBlock.Code -> {
-                        CodeBlockView(code = block.text)
-                    }
-                    is MarkdownBlock.Math -> {
-                        MathBlockView(text = block.text)
-                    }
-                    is MarkdownBlock.ListItems -> {
-                        Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.xs.dp)) {
-                            block.items.forEach { item ->
-                                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                                    Text(text = "•", style = EnsuTypography.message, color = EnsuColor.textPrimary())
-                                    Text(
-                                        text = markdownAnnotatedText(item),
-                                        style = EnsuTypography.message,
-                                        color = EnsuColor.textPrimary()
-                                    )
+            blocks.forEachIndexed { index, block ->
+                key(index) {
+                    val appendCursor = trailingCursor && index == blocks.lastIndex
+                    when (block) {
+                        is MarkdownBlock.Heading -> {
+                            Text(
+                                text = markdownAnnotatedText(block.text, appendCursor),
+                                style = headingStyle(block.level),
+                                color = EnsuColor.textPrimary()
+                            )
+                        }
+                        is MarkdownBlock.Paragraph -> {
+                            Text(
+                                text = markdownAnnotatedText(block.text, appendCursor),
+                                style = EnsuTypography.message,
+                                color = EnsuColor.textPrimary()
+                            )
+                        }
+                        is MarkdownBlock.BlockQuote -> {
+                            BlockQuoteView(text = block.text, appendCursor = appendCursor)
+                        }
+                        is MarkdownBlock.Code -> {
+                            CodeBlockView(code = block.text)
+                            if (appendCursor) {
+                                TrailingCursor()
+                            }
+                        }
+                        is MarkdownBlock.Math -> {
+                            MathBlockView(text = block.text)
+                            if (appendCursor) {
+                                TrailingCursor()
+                            }
+                        }
+                        is MarkdownBlock.ListItems -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.xs.dp)) {
+                                block.items.forEachIndexed { itemIndex, item ->
+                                    key(itemIndex) {
+                                        val itemCursor = appendCursor && itemIndex == block.items.lastIndex
+                                        Row(
+                                            verticalAlignment = Alignment.Top,
+                                            horizontalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
+                                        ) {
+                                            Text(
+                                                text = "•",
+                                                style = EnsuTypography.message,
+                                                color = EnsuColor.textPrimary()
+                                            )
+                                            Text(
+                                                text = markdownAnnotatedText(item, itemCursor),
+                                                style = EnsuTypography.message,
+                                                color = EnsuColor.textPrimary()
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                    MarkdownBlock.Divider -> {
-                        Divider(color = EnsuColor.border())
+                        MarkdownBlock.Divider -> {
+                            Divider(color = EnsuColor.border())
+                            if (appendCursor) {
+                                TrailingCursor()
+                            }
+                        }
                     }
                 }
             }
@@ -105,7 +132,7 @@ fun MarkdownView(markdown: String, enableSelection: Boolean = true) {
 }
 
 @Composable
-private fun BlockQuoteView(text: String) {
+private fun BlockQuoteView(text: String, appendCursor: Boolean = false) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -121,7 +148,7 @@ private fun BlockQuoteView(text: String) {
         )
         Spacer(modifier = Modifier.width(EnsuSpacing.sm.dp))
         Text(
-            text = markdownAnnotatedText(text),
+            text = markdownAnnotatedText(text, appendCursor),
             style = EnsuTypography.message,
             color = EnsuColor.textPrimary()
         )
@@ -186,6 +213,15 @@ private fun MathBlockView(text: String) {
     }
 }
 
+@Composable
+private fun TrailingCursor() {
+    Text(
+        text = "▍",
+        style = EnsuTypography.message,
+        color = EnsuColor.textPrimary()
+    )
+}
+
 private fun headingStyle(level: Int): TextStyle {
     val size = when (level) {
         1 -> 20.sp
@@ -195,7 +231,7 @@ private fun headingStyle(level: Int): TextStyle {
     return EnsuTypography.message.copy(fontSize = size, fontWeight = FontWeight.SemiBold, lineHeight = (size.value + 6).sp)
 }
 
-private fun markdownAnnotatedText(text: String): AnnotatedString {
+private fun markdownAnnotatedText(text: String, appendCursor: Boolean = false): AnnotatedString {
     val pattern = Regex("(\\*\\*[^*]+\\*\\*|`[^`]+`|\\*[^*]+\\*)")
     val codeFamily = EnsuTypography.code.fontFamily
     return buildAnnotatedString {
@@ -228,6 +264,9 @@ private fun markdownAnnotatedText(text: String): AnnotatedString {
         }
         if (currentIndex < text.length) {
             append(text.substring(currentIndex))
+        }
+        if (appendCursor) {
+            append("▍")
         }
     }
 }

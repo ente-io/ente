@@ -1,11 +1,11 @@
 import SwiftUI
 
+#if canImport(EnteCore)
 struct EmailEntryView: View {
     let onNavigate: (AuthRoute) -> Void
 
     @State private var email: String = ""
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    @StateObject private var actionState = AuthActionState()
 
     private var isEmailValid: Bool {
         let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -29,19 +29,15 @@ struct EmailEntryView: View {
                     Task { await continueTapped() }
                 }
 
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.error)
-                        .padding(.horizontal, EnsuSpacing.pageHorizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                if let errorMessage = actionState.errorMessage {
+                    AuthErrorText(message: errorMessage)
                 }
             }
         } bottom: {
             PrimaryButton(
                 text: "Log in",
-                isLoading: isLoading,
-                isEnabled: isEmailValid && !isLoading
+                isLoading: actionState.isLoading,
+                isEnabled: isEmailValid && !actionState.isLoading
             ) {
                 Task { await continueTapped() }
             }
@@ -50,14 +46,10 @@ struct EmailEntryView: View {
 
     @MainActor
     private func continueTapped() async {
-        guard !isLoading else { return }
-        errorMessage = nil
-        isLoading = true
-        defer { isLoading = false }
-
-        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        do {
+        await actionState.run(onError: { error in
+            "Failed to get account info: \(error.localizedDescription)"
+        }) {
+            let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
             let srpAttrs = try await EnsuAuthService.shared.getSrpAttributes(email: trimmedEmail)
 
             if srpAttrs.isEmailMfaEnabled {
@@ -66,8 +58,13 @@ struct EmailEntryView: View {
             } else {
                 onNavigate(.password(email: trimmedEmail, srp: srpAttrs))
             }
-        } catch {
-            errorMessage = "Failed to get account info: \(error.localizedDescription)"
         }
     }
 }
+#else
+struct EmailEntryView: View {
+    var body: some View {
+        Text("Authentication unavailable")
+    }
+}
+#endif

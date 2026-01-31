@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if canImport(EnteCore)
 struct PasswordView: View {
     let email: String
     let srpAttributes: SrpAttributes
@@ -7,58 +8,25 @@ struct PasswordView: View {
     let onLoggedIn: () -> Void
 
     @State private var password: String = ""
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    @StateObject private var actionState = AuthActionState()
     @State private var showPassword = false
 
-    private var hasPassword: Bool {
-        !password.isEmpty
-    }
-
     var body: some View {
-        AuthScreen {
-            AuthHeader(title: "Enter password")
-            AuthSubtitle(text: email)
-
-            VStack(spacing: EnsuSpacing.xxl) {
-                PasswordTextField(
-                    label: "Password",
-                    hint: "Enter your password",
-                    text: $password,
-                    showPassword: $showPassword,
-                    submitLabel: .go
-                ) {
-                    Task { await loginTapped() }
-                }
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.error)
-                        .padding(.horizontal, EnsuSpacing.pageHorizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-            .padding(.top, EnsuSpacing.xxl)
-        } bottom: {
-            PrimaryButton(
-                text: "Log in",
-                isLoading: isLoading,
-                isEnabled: hasPassword && !isLoading
-            ) {
-                Task { await loginTapped() }
-            }
-        }
+        PasswordEntryView(
+            title: "Enter password",
+            subtitle: email,
+            buttonText: "Log in",
+            password: $password,
+            showPassword: $showPassword,
+            isLoading: actionState.isLoading,
+            errorMessage: actionState.errorMessage,
+            onSubmit: loginTapped
+        )
     }
 
     @MainActor
     private func loginTapped() async {
-        guard !isLoading else { return }
-        errorMessage = nil
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
+        await actionState.run {
             let result = try await EnsuAuthService.shared.loginWithSrp(
                 email: email,
                 password: password,
@@ -92,8 +60,13 @@ struct PasswordView: View {
             }
 
             onLoggedIn()
-        } catch {
-            errorMessage = error.localizedDescription
         }
     }
 }
+#else
+struct PasswordView: View {
+    var body: some View {
+        Text("Authentication unavailable")
+    }
+}
+#endif

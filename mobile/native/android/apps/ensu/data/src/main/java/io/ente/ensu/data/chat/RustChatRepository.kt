@@ -159,10 +159,8 @@ class RustChatRepository(
         val message = when (error) {
             is DbException.Message -> error.v1
             else -> error.message.orEmpty()
-        }.lowercase()
-        return message.contains("stream pull failed") ||
-            message.contains("invalid blob") ||
-            message.contains("invalid encrypted")
+        }
+        return ChatRecovery.shouldResetFromMessage(message)
     }
 
     private fun resetDb() {

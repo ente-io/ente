@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if canImport(EnteCore)
 struct TwoFactorView: View {
     let email: String
     let srpAttributes: SrpAttributes
@@ -9,57 +10,26 @@ struct TwoFactorView: View {
     let onLoggedIn: () -> Void
 
     @State private var code: String = ""
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-
-    private var hasValidCode: Bool {
-        code.trimmingCharacters(in: .whitespacesAndNewlines).count == 6
-    }
+    @StateObject private var actionState = AuthActionState()
 
     var body: some View {
-        AuthScreen {
-            AuthHeader(
-                title: "Two-factor authentication",
-                subtitle: "Enter the code from your authenticator app"
-            )
-
-            VStack(spacing: EnsuSpacing.lg) {
-                CodeTextField(code: $code) { value in
-                    if value.count == 6 {
-                        Task { await verifyTapped() }
-                    }
-                }
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(EnsuTypography.small)
-                        .foregroundStyle(EnsuColor.error)
-                        .padding(.horizontal, EnsuSpacing.pageHorizontal)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-        } bottom: {
-            PrimaryButton(
-                text: "Verify",
-                isLoading: isLoading,
-                isEnabled: hasValidCode && !isLoading
-            ) {
-                Task { await verifyTapped() }
-            }
-        }
+        VerificationCodeView(
+            title: "Two-factor authentication",
+            subtitle: "Enter the code from your authenticator app",
+            code: $code,
+            buttonText: "Verify",
+            isLoading: actionState.isLoading,
+            errorMessage: actionState.errorMessage,
+            onSubmit: verifyTapped
+        )
     }
 
     @MainActor
     private func verifyTapped() async {
-        guard !isLoading else { return }
-        errorMessage = nil
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
+        await actionState.run {
             let payload = try await EnsuAuthService.shared.verifyTwoFactor(sessionId: sessionId, code: code)
             guard let keyAttrs = payload.keyAttributes else {
-                errorMessage = "Invalid response"
+                actionState.setError("Invalid response")
                 return
             }
 
@@ -87,8 +57,13 @@ struct TwoFactorView: View {
                     token: payload.token
                 )
             )
-        } catch {
-            errorMessage = error.localizedDescription
         }
     }
 }
+#else
+struct TwoFactorView: View {
+    var body: some View {
+        Text("Authentication unavailable")
+    }
+}
+#endif

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 #if canImport(EnteCore)
 import EnteCore
 #else
@@ -292,140 +293,7 @@ final class LlmChatSync {
 }
 #endif
 
-struct ChatAttachment: Identifiable, Equatable {
-    enum Kind {
-        case image
-        case document
-    }
-
-    let id: UUID
-    let name: String
-    let size: Int64
-    let kind: Kind
-    let url: URL?
-    var isUploading: Bool
-
-    init(id: UUID = UUID(), name: String, size: Int64, kind: Kind, url: URL? = nil, isUploading: Bool = false) {
-        self.id = id
-        self.name = name
-        self.size = size
-        self.kind = kind
-        self.url = url
-        self.isUploading = isUploading
-    }
-
-    var formattedSize: String {
-        ChatViewModel.fileSizeFormatter.string(fromByteCount: size)
-    }
-
-    var iconName: String {
-        switch kind {
-        case .image:
-            return "Attachment01Icon"
-        case .document:
-            return "Attachment01Icon"
-        }
-    }
-}
-
-struct AttachmentDownloadItem: Identifiable, Equatable {
-    enum Status {
-        case queued
-        case downloading
-        case completed
-        case failed
-        case canceled
-    }
-
-    let id: String
-    let sessionId: UUID
-    let name: String
-    let size: Int64
-    var status: Status
-    var errorMessage: String? = nil
-
-    var formattedSize: String {
-        ChatViewModel.fileSizeFormatter.string(fromByteCount: size)
-    }
-}
-
-struct ChatMessage: Identifiable, Equatable {
-    enum Role: String {
-        case user
-        case assistant
-    }
-
-    let id: UUID
-    var role: Role
-    var text: String
-    var timestamp: Date
-    var attachments: [ChatAttachment]
-    var isInterrupted: Bool
-    var tokensPerSecond: Double?
-    var branchIndex: Int
-    var branchCount: Int
-
-    init(
-        id: UUID = UUID(),
-        role: Role,
-        text: String,
-        timestamp: Date = Date(),
-        attachments: [ChatAttachment] = [],
-        isInterrupted: Bool = false,
-        tokensPerSecond: Double? = nil,
-        branchIndex: Int = 1,
-        branchCount: Int = 1
-    ) {
-        self.id = id
-        self.role = role
-        self.text = text
-        self.timestamp = timestamp
-        self.attachments = attachments
-        self.isInterrupted = isInterrupted
-        self.tokensPerSecond = tokensPerSecond
-        self.branchIndex = branchIndex
-        self.branchCount = branchCount
-    }
-}
-
-struct ChatSession: Identifiable, Equatable {
-    let id: UUID
-    var title: String
-    var lastMessage: String
-    var updatedAt: Date
-
-    init(id: UUID = UUID(), title: String, lastMessage: String, updatedAt: Date = Date()) {
-        self.id = id
-        self.title = title
-        self.lastMessage = lastMessage
-        self.updatedAt = updatedAt
-    }
-}
-
-struct DownloadToastState: Identifiable, Equatable {
-    enum Phase {
-        case downloading
-        case loading
-        case complete
-        case errorDownload
-        case errorLoad
-    }
-
-    let id = UUID()
-    var phase: Phase
-    var percent: Int
-    var status: String
-    var offerRetryDownload: Bool
-}
-
-struct OverflowAlertState: Identifiable, Equatable {
-    let id = UUID()
-    let inputTokens: Int
-    let inputBudget: Int
-    let contextLength: Int
-    let maxOutput: Int
-}
-
+#if canImport(EnteCore)
 @MainActor
 final class ChatViewModel: ObservableObject {
     private static let defaultTemperature: Float = 0.5
@@ -436,11 +304,6 @@ final class ChatViewModel: ObservableObject {
     private static let sessionSummaryMaxWords = 7
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
     private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no markdown characters, no quotes, no emojis, no trailing punctuation, and output only the title."
-    fileprivate static let fileSizeFormatter: ByteCountFormatter = {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter
-    }()
 
     private let logger = EnsuLogging.shared.logger("ChatViewModel")
 
@@ -492,6 +355,7 @@ final class ChatViewModel: ObservableObject {
 
     private var messageStore: [UUID: [MessageNode]] = [:]
     private var branchSelections: [UUID: [String: UUID]] = [:]
+    private var childrenByParentCache: [UUID: [UUID: [MessageNode]]] = [:]
     private var sessionSummaries: [String: String] = [:]
     private var sessionSummaryTask: Task<Void, Never>?
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
@@ -561,24 +425,7 @@ final class ChatViewModel: ObservableObject {
 
         // Load sessions/messages.
         let loaded = (try? chatDb.listSessions()) ?? []
-        let sessions: [ChatSession] = loaded.compactMap { session in
-            guard let id = UUID(uuidString: session.uuid) else { return nil }
-            let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
-            let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
-            let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
-            let lastMessage = sortedMessages.last?.text ?? ""
-            let summary = summaries[session.uuid.lowercased()]
-            let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                session.title.caseInsensitiveCompare("New chat") == .orderedSame
-            let seedTitle = summary ?? (isPlaceholderTitle ? firstUserMessage : session.title)
-            let title = Self.sessionTitle(from: seedTitle, fallback: session.title)
-            return ChatSession(
-                id: id,
-                title: title,
-                lastMessage: lastMessage,
-                updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
-            )
-        }
+        let sessions = Self.buildSessions(from: loaded, chatDb: chatDb, summaries: summaries)
 
         // Stored properties.
         self.provider = provider
@@ -598,8 +445,6 @@ final class ChatViewModel: ObservableObject {
 
         if let current = self.currentSessionId {
             loadMessagesFromDb(for: current)
-            rebuildMessages(for: current)
-            queueMissingAttachments(for: current)
         } else {
             refreshAttachmentDownloadState()
         }
@@ -617,30 +462,53 @@ final class ChatViewModel: ObservableObject {
     }
 
     var attachmentDownloadProgress: Double? {
-        let active = attachmentDownloads.filter { $0.status != .canceled }
+        let active = attachmentDownloads.filter { $0.status != AttachmentDownloadItem.Status.canceled }
         let total = active.count
         guard total > 0 else { return nil }
-        guard active.contains(where: { $0.status == .queued || $0.status == .downloading || $0.status == .failed }) else {
-            return nil
+
+        let hasPending = active.contains { item in
+            item.status == AttachmentDownloadItem.Status.queued ||
+                item.status == AttachmentDownloadItem.Status.downloading ||
+                item.status == AttachmentDownloadItem.Status.failed
         }
-        let completed = active.filter { $0.status == .completed }.count
+        guard hasPending else { return nil }
+
+        let completed = active.filter { $0.status == AttachmentDownloadItem.Status.completed }.count
         return Double(completed) / Double(total)
     }
 
     var attachmentDownloadSummary: (completed: Int, total: Int)? {
-        let active = attachmentDownloads.filter { $0.status != .canceled }
+        let active = attachmentDownloads.filter { $0.status != AttachmentDownloadItem.Status.canceled }
         let total = active.count
         guard total > 0 else { return nil }
-        guard active.contains(where: { $0.status == .queued || $0.status == .downloading || $0.status == .failed }) else {
-            return nil
+
+        let hasPending = active.contains { item in
+            item.status == AttachmentDownloadItem.Status.queued ||
+                item.status == AttachmentDownloadItem.Status.downloading ||
+                item.status == AttachmentDownloadItem.Status.failed
         }
-        let completed = active.filter { $0.status == .completed }.count
+        guard hasPending else { return nil }
+
+        let completed = active.filter { $0.status == AttachmentDownloadItem.Status.completed }.count
         return (completed, total)
     }
 
     var modelDownloadSizeText: String {
         guard let bytes = modelDownloadSizeBytes else { return "Approx. size varies by model" }
-        return "Approx. \(Self.fileSizeFormatter.string(fromByteCount: bytes))"
+        return "Approx. \(bytes.formattedFileSize)"
+    }
+
+    private func resetGenerationState(stopRequested: Bool = false) {
+        generationTask?.cancel()
+        provider.stopGeneration()
+        self.stopRequested = stopRequested
+        activeGenerationId = nil
+        activeGenerationSessionId = nil
+        isGenerating = false
+        isDownloading = false
+        streamingResponse = ""
+        streamingParentId = nil
+        downloadToast = nil
     }
 
     func sessionTitle(for sessionId: UUID) -> String {
@@ -649,16 +517,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func startNewSession() {
-        generationTask?.cancel()
-        provider.stopGeneration()
-        stopRequested = false
-        activeGenerationId = nil
-        activeGenerationSessionId = nil
-        isGenerating = false
-        isDownloading = false
-        streamingResponse = ""
-        streamingParentId = nil
-        downloadToast = nil
+        resetGenerationState()
         draftText = ""
         draftAttachments = []
         editingMessageId = nil
@@ -669,34 +528,15 @@ final class ChatViewModel: ObservableObject {
     }
 
     func selectSession(_ session: ChatSession) {
-        generationTask?.cancel()
-        provider.stopGeneration()
-        stopRequested = false
-        activeGenerationId = nil
-        activeGenerationSessionId = nil
-        isGenerating = false
-        isDownloading = false
-        streamingResponse = ""
-        streamingParentId = nil
-        downloadToast = nil
+        resetGenerationState()
         currentSessionId = session.id
+        messages = []
         loadMessagesFromDb(for: session.id)
-        rebuildMessages(for: session.id)
-        queueMissingAttachments(for: session.id)
     }
 
     func deleteSession(_ session: ChatSession) {
         if currentSessionId == session.id {
-            generationTask?.cancel()
-            provider.stopGeneration()
-            stopRequested = false
-            activeGenerationId = nil
-            activeGenerationSessionId = nil
-            isGenerating = false
-            isDownloading = false
-            streamingResponse = ""
-            streamingParentId = nil
-            downloadToast = nil
+            resetGenerationState()
         }
 
         if let nodes = messageStore[session.id] {
@@ -712,13 +552,13 @@ final class ChatViewModel: ObservableObject {
         sessions.removeAll { $0.id == session.id }
         messageStore[session.id] = nil
         branchSelections[session.id] = nil
+        childrenByParentCache[session.id] = nil
         purgeAttachmentDownloads(for: session.id)
         if currentSessionId == session.id {
             currentSessionId = sessions.first?.id
             if let next = currentSessionId {
+                messages = []
                 loadMessagesFromDb(for: next)
-                rebuildMessages(for: next)
-                queueMissingAttachments(for: next)
             } else {
                 messages = []
                 refreshAttachmentDownloadState()
@@ -769,10 +609,14 @@ final class ChatViewModel: ObservableObject {
                 }
             } catch {
                 let message = syncErrorMessage(from: error)
+                let needsReset = ChatRecovery.shouldResetFromMessage(message)
+                let userMessage = needsReset
+                    ? "\(message). Reset chat data to recover."
+                    : message
                 log.error("Sync failed", error, details: message)
                 await MainActor.run {
                     if showErrors {
-                        self.syncErrorMessage = "Sync failed: \(message)"
+                        self.syncErrorMessage = "Sync failed: \(userMessage)"
                     }
                 }
             }
@@ -858,17 +702,24 @@ final class ChatViewModel: ObservableObject {
 
         let sessionId = currentSessionId ?? createSessionForDraft()
 
-        if !missingAttachments(for: sessionId).isEmpty {
-            queueMissingAttachments(for: sessionId)
-            return
+        Task { @MainActor in
+            let missing = await self.missingAttachments(for: sessionId)
+            if !missing.isEmpty {
+                self.queueMissingAttachments(for: sessionId, missing: missing)
+                return
+            }
+            self.sendDraftMessage(trimmed: trimmed, attachments: attachments, sessionId: sessionId)
         }
+    }
 
+    private func sendDraftMessage(trimmed: String, attachments: [ChatAttachment], sessionId: UUID) {
         let parentId: UUID? = {
             if let editingId = editingMessageId {
                 let existing = messageStore[sessionId]?.first { $0.id == editingId }
                 return existing?.parentId
             }
-            return buildSelectedPath(for: sessionId).last?.id
+            let childrenMap = childrenByParent(sessionId: sessionId)
+            return buildSelectedPath(for: sessionId, childrenMap: childrenMap).last?.id
         }()
 
         let meta: [AttachmentMeta] = attachments.map { attachment in
@@ -910,6 +761,7 @@ final class ChatViewModel: ObservableObject {
         )
 
         messageStore[sessionId, default: []].append(userNode)
+        invalidateChildrenCache(for: sessionId)
         updateSelection(for: sessionId, parentId: parentId, childId: userNode.id)
 
         draftText = ""
@@ -1047,7 +899,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func cancelDownload() {
-        generationTask?.cancel()
+        resetGenerationState(stopRequested: true)
         modelDownloadTask?.cancel()
         modelDownloadTask = nil
         provider.cancelDownload()
@@ -1055,15 +907,7 @@ final class ChatViewModel: ObservableObject {
             logger.info("Model download cancelled")
             modelDownloadLoggedStart = false
         }
-        stopRequested = true
-        activeGenerationId = nil
-        activeGenerationSessionId = nil
-        isGenerating = false
-        isDownloading = false
         hasRequestedModelDownload = false
-        streamingResponse = ""
-        streamingParentId = nil
-        downloadToast = nil
         refreshModelDownloadInfo()
     }
 
@@ -1081,13 +925,16 @@ final class ChatViewModel: ObservableObject {
               let userNode = messageStore[sessionId]?.first(where: { $0.id == parent }) else {
             return
         }
-        if !missingAttachments(for: sessionId).isEmpty {
-            queueMissingAttachments(for: sessionId)
-            return
+        Task { @MainActor in
+            let missing = await self.missingAttachments(for: sessionId)
+            if !missing.isEmpty {
+                self.queueMissingAttachments(for: sessionId, missing: missing)
+                return
+            }
+            self.provider.resetContext()
+            self.startGeneration(for: userNode)
+            self.syncNow(showErrors: false)
         }
-        provider.resetContext()
-        startGeneration(for: userNode)
-        syncNow(showErrors: false)
     }
 
     func changeBranch(for message: ChatMessage, delta: Int) {
@@ -1119,6 +966,7 @@ final class ChatViewModel: ObservableObject {
         currentSessionId = session.id
         messageStore[session.id] = []
         branchSelections[session.id] = [:]
+        invalidateChildrenCache(for: session.id)
         refreshAttachmentDownloadState()
         return session.id
     }
@@ -1323,6 +1171,7 @@ final class ChatViewModel: ObservableObject {
                 )
 
                 messageStore[parent.sessionId, default: []].append(assistant)
+                invalidateChildrenCache(for: parent.sessionId)
                 updateSelection(for: parent.sessionId, parentId: parent.id, childId: assistant.id)
                 updateSessionPreview(sessionId: parent.sessionId, preview: trimmed, date: assistant.timestamp)
             }
@@ -1420,56 +1269,67 @@ final class ChatViewModel: ObservableObject {
         return description
     }
 
-    private func queueMissingAttachments(for sessionId: UUID) {
-        let missing = missingAttachments(for: sessionId)
-        guard !missing.isEmpty else {
-            refreshAttachmentDownloadState()
-            return
-        }
-
-        var updated = attachmentDownloads
-        for item in missing {
-            if let existingIndex = updated.firstIndex(where: { $0.id == item.id }) {
-                if updated[existingIndex].status == .failed || updated[existingIndex].status == .canceled {
-                    updated[existingIndex].status = .queued
-                    updated[existingIndex].errorMessage = nil
-                }
+    private func queueMissingAttachments(for sessionId: UUID, missing: [AttachmentDownloadItem]? = nil) {
+        Task { @MainActor in
+            let resolvedMissing: [AttachmentDownloadItem]
+            if let missing {
+                resolvedMissing = missing
             } else {
-                updated.append(item)
+                resolvedMissing = await self.missingAttachments(for: sessionId)
             }
-        }
 
-        attachmentDownloads = updated
-        for item in missing {
-            if !attachmentDownloadQueue.contains(item.id) && attachmentDownloadTasks[item.id] == nil {
-                attachmentDownloadQueue.append(item.id)
+            guard !resolvedMissing.isEmpty else {
+                self.refreshAttachmentDownloadState(missing: [])
+                return
             }
-        }
 
-        refreshAttachmentDownloadState()
-        startNextAttachmentDownloads()
+            var updated = self.attachmentDownloads
+            for item in resolvedMissing {
+                if let existingIndex = updated.firstIndex(where: { $0.id == item.id }) {
+                    if updated[existingIndex].status == AttachmentDownloadItem.Status.failed ||
+                        updated[existingIndex].status == AttachmentDownloadItem.Status.canceled {
+                        updated[existingIndex].status = AttachmentDownloadItem.Status.queued
+                        updated[existingIndex].errorMessage = nil
+                    }
+                } else {
+                    updated.append(item)
+                }
+            }
+
+            self.attachmentDownloads = updated
+            for item in resolvedMissing {
+                if !self.attachmentDownloadQueue.contains(item.id) && self.attachmentDownloadTasks[item.id] == nil {
+                    self.attachmentDownloadQueue.append(item.id)
+                }
+            }
+
+            self.refreshAttachmentDownloadState(missing: resolvedMissing)
+            self.startNextAttachmentDownloads()
+        }
     }
 
-    private func missingAttachments(for sessionId: UUID) -> [AttachmentDownloadItem] {
+    private func missingAttachments(for sessionId: UUID) async -> [AttachmentDownloadItem] {
         guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return [] }
-        var seen = Set<String>()
-        var missing: [AttachmentDownloadItem] = []
+        let attachments = nodes.flatMap { $0.attachments }
+        let existingDownloads = attachmentDownloads
+        let attachmentsDir = attachmentsDir
 
-        for node in nodes {
-            for attachment in node.attachments {
+        let result: (missing: [AttachmentDownloadItem], availableIds: Set<String>) = await Task.detached {
+            var seen = Set<String>()
+            var missing: [AttachmentDownloadItem] = []
+            var availableIds = Set<String>()
+
+            for attachment in attachments {
                 let id = attachment.id.uuidString.lowercased()
                 if seen.contains(id) { continue }
                 seen.insert(id)
                 let path = attachmentsDir.appendingPathComponent(id).path
                 if FileManager.default.fileExists(atPath: path) {
-                    attachmentDownloadTasks[id]?.cancel()
-                    attachmentDownloadTasks[id] = nil
-                    attachmentDownloadQueue.removeAll { $0 == id }
-                    attachmentDownloads.removeAll { $0.id == id }
+                    availableIds.insert(id)
                     continue
                 }
-                let existing = attachmentDownloads.first { $0.id == id }
-                let status = existing?.status ?? .queued
+                let existing = existingDownloads.first { $0.id == id }
+                let status = existing?.status ?? AttachmentDownloadItem.Status.queued
                 missing.append(AttachmentDownloadItem(
                     id: id,
                     sessionId: sessionId,
@@ -1479,9 +1339,20 @@ final class ChatViewModel: ObservableObject {
                     errorMessage: existing?.errorMessage
                 ))
             }
+
+            return (missing, availableIds)
+        }.value
+
+        if !result.availableIds.isEmpty {
+            for id in result.availableIds {
+                attachmentDownloadTasks[id]?.cancel()
+                attachmentDownloadTasks[id] = nil
+            }
+            attachmentDownloadQueue.removeAll { result.availableIds.contains($0) }
+            attachmentDownloads.removeAll { result.availableIds.contains($0.id) }
         }
 
-        return missing
+        return result.missing
     }
 
     private func startNextAttachmentDownloads() {
@@ -1491,11 +1362,12 @@ final class ChatViewModel: ObservableObject {
         while attachmentDownloadTasks.count < maxAttachmentDownloads, !attachmentDownloadQueue.isEmpty {
             let id = attachmentDownloadQueue.removeFirst()
             guard let index = attachmentDownloads.firstIndex(where: { $0.id == id }) else { continue }
-            if attachmentDownloads[index].status == .canceled || attachmentDownloads[index].status == .completed {
+            if attachmentDownloads[index].status == AttachmentDownloadItem.Status.canceled ||
+                attachmentDownloads[index].status == AttachmentDownloadItem.Status.completed {
                 continue
             }
             let sessionId = attachmentDownloads[index].sessionId
-            attachmentDownloads[index].status = .downloading
+            attachmentDownloads[index].status = AttachmentDownloadItem.Status.downloading
 
             let task = Task.detached { [weak self] in
                 guard let self else { return }
@@ -1506,12 +1378,12 @@ final class ChatViewModel: ObservableObject {
                         auth: auth
                     )
                     await MainActor.run {
-                        self.updateAttachmentDownloadStatus(id: id, status: .completed, errorMessage: nil)
+                        self.updateAttachmentDownloadStatus(id: id, status: AttachmentDownloadItem.Status.completed, errorMessage: nil)
                     }
                 } catch {
                     let message = self.syncErrorMessage(from: error)
                     await MainActor.run {
-                        self.updateAttachmentDownloadStatus(id: id, status: .failed, errorMessage: message)
+                        self.updateAttachmentDownloadStatus(id: id, status: AttachmentDownloadItem.Status.failed, errorMessage: message)
                     }
                 }
             }
@@ -1525,9 +1397,9 @@ final class ChatViewModel: ObservableObject {
         errorMessage: String?
     ) {
         if let index = attachmentDownloads.firstIndex(where: { $0.id == id }) {
-            if attachmentDownloads[index].status != .canceled {
+            if attachmentDownloads[index].status != AttachmentDownloadItem.Status.canceled {
                 attachmentDownloads[index].status = status
-                attachmentDownloads[index].errorMessage = status == .failed ? errorMessage : nil
+                attachmentDownloads[index].errorMessage = status == AttachmentDownloadItem.Status.failed ? errorMessage : nil
             }
         }
         attachmentDownloadTasks[id] = nil
@@ -1535,11 +1407,19 @@ final class ChatViewModel: ObservableObject {
         startNextAttachmentDownloads()
     }
 
-    private func refreshAttachmentDownloadState() {
-        if let sessionId = currentSessionId {
-            currentSessionMissingAttachments = missingAttachments(for: sessionId)
-        } else {
+    private func refreshAttachmentDownloadState(missing: [AttachmentDownloadItem]? = nil) {
+        guard let sessionId = currentSessionId else {
             currentSessionMissingAttachments = []
+            return
+        }
+
+        if let missing {
+            currentSessionMissingAttachments = missing
+            return
+        }
+
+        Task { @MainActor in
+            self.currentSessionMissingAttachments = await self.missingAttachments(for: sessionId)
         }
     }
 
@@ -1549,7 +1429,7 @@ final class ChatViewModel: ObservableObject {
             attachmentDownloadTasks[id] = nil
         }
         if let index = attachmentDownloads.firstIndex(where: { $0.id == id }) {
-            attachmentDownloads[index].status = .canceled
+            attachmentDownloads[index].status = AttachmentDownloadItem.Status.canceled
         }
         attachmentDownloadQueue.removeAll { $0 == id }
         refreshAttachmentDownloadState()
@@ -1568,15 +1448,18 @@ final class ChatViewModel: ObservableObject {
         startNextAttachmentDownloads()
     }
 
-    private func reloadFromDb() {
-        let loaded = (try? chatDb.listSessions()) ?? []
-        let refreshed: [ChatSession] = loaded.compactMap { session in
+    private static func buildSessions(
+        from loaded: [LlmChatSession],
+        chatDb: LlmChatDb,
+        summaries: [String: String]
+    ) -> [ChatSession] {
+        loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
             let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
             let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
             let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
             let lastMessage = sortedMessages.last?.text ?? ""
-            let summary = sessionSummaries[sessionSummaryKey(session.uuid)]
+            let summary = summaries[session.uuid.lowercased()]
             let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                 session.title.caseInsensitiveCompare("New chat") == .orderedSame
             let seedTitle = summary ?? (isPlaceholderTitle ? firstUserMessage : session.title)
@@ -1588,6 +1471,11 @@ final class ChatViewModel: ObservableObject {
                 updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
             )
         }
+    }
+
+    private func reloadFromDb() {
+        let loaded = (try? chatDb.listSessions()) ?? []
+        let refreshed = Self.buildSessions(from: loaded, chatDb: chatDb, summaries: sessionSummaries)
 
         let selected = currentSessionId
         let resolved = selected.flatMap { id in
@@ -1599,6 +1487,7 @@ final class ChatViewModel: ObservableObject {
         messages = []
         messageStore = [:]
         branchSelections = [:]
+        childrenByParentCache = [:]
 
         for session in refreshed {
             messageStore[session.id] = []
@@ -1607,67 +1496,75 @@ final class ChatViewModel: ObservableObject {
 
         if let current = resolved {
             loadMessagesFromDb(for: current)
-            rebuildMessages(for: current)
-            queueMissingAttachments(for: current)
         } else {
             refreshAttachmentDownloadState()
         }
     }
 
     private func loadMessagesFromDb(for sessionId: UUID) {
-        guard messageStore[sessionId] != nil else {
+        if messageStore[sessionId] == nil {
             messageStore[sessionId] = []
             branchSelections[sessionId] = [:]
-            return
         }
 
-        guard let rawMessages = try? chatDb.getMessages(sessionUuid: sessionId.uuidString) else {
-            messageStore[sessionId] = []
-            branchSelections[sessionId] = [:]
-            return
-        }
+        let chatDb = chatDb
+        let attachmentsDir = attachmentsDir
 
-        let nodes: [MessageNode] = rawMessages.compactMap { msg in
-            guard let messageId = UUID(uuidString: msg.uuid) else { return nil }
-            let parentId = msg.parentMessageUuid.flatMap { UUID(uuidString: $0) }
-            let role: ChatMessage.Role = (msg.sender == .selfUser) ? .user : .assistant
-            let timestamp = Date(timeIntervalSince1970: Double(msg.createdAtUs) / 1_000_000.0)
+        Task.detached { [weak self, chatDb, attachmentsDir] in
+            guard let self else { return }
 
-            let attachments: [ChatAttachment] = msg.attachments.compactMap { meta in
-                guard let attachmentId = UUID(uuidString: meta.id) else { return nil }
-                let kind: ChatAttachment.Kind = (meta.kind == .image) ? .image : .document
-                let url = attachmentsDir.appendingPathComponent(meta.id)
-                return ChatAttachment(
-                    id: attachmentId,
-                    name: meta.name,
-                    size: meta.size,
-                    kind: kind,
-                    url: url,
-                    isUploading: false
+            let rawMessages = (try? chatDb.getMessages(sessionUuid: sessionId.uuidString)) ?? []
+
+            let nodes: [MessageNode] = rawMessages.compactMap { msg in
+                guard let messageId = UUID(uuidString: msg.uuid) else { return nil }
+                let parentId = msg.parentMessageUuid.flatMap { UUID(uuidString: $0) }
+                let role: ChatMessage.Role = (msg.sender == .selfUser) ? .user : .assistant
+                let timestamp = Date(timeIntervalSince1970: Double(msg.createdAtUs) / 1_000_000.0)
+
+                let attachments: [ChatAttachment] = msg.attachments.compactMap { meta in
+                    guard let attachmentId = UUID(uuidString: meta.id) else { return nil }
+                    let kind: ChatAttachment.Kind = (meta.kind == .image) ? .image : .document
+                    let url = attachmentsDir.appendingPathComponent(meta.id)
+                    return ChatAttachment(
+                        id: attachmentId,
+                        name: meta.name,
+                        size: meta.size,
+                        kind: kind,
+                        url: url,
+                        isUploading: false
+                    )
+                }
+
+                return MessageNode(
+                    id: messageId,
+                    sessionId: sessionId,
+                    parentId: parentId,
+                    role: role,
+                    text: msg.text,
+                    timestamp: timestamp,
+                    attachments: attachments,
+                    isInterrupted: false,
+                    tokensPerSecond: nil
                 )
             }
 
-            return MessageNode(
-                id: messageId,
-                sessionId: sessionId,
-                parentId: parentId,
-                role: role,
-                text: msg.text,
-                timestamp: timestamp,
-                attachments: attachments,
-                isInterrupted: false,
-                tokensPerSecond: nil
-            )
+            await MainActor.run {
+                guard self.messageStore[sessionId] != nil else { return }
+                self.messageStore[sessionId] = nodes
+                // Branch selection is computed in-memory.
+                self.branchSelections[sessionId] = [:]
+                self.invalidateChildrenCache(for: sessionId)
+                if self.currentSessionId == sessionId {
+                    self.rebuildMessages(for: sessionId)
+                    self.queueMissingAttachments(for: sessionId)
+                }
+            }
         }
-
-        messageStore[sessionId] = nodes
-        // Branch selection is computed in-memory.
-        branchSelections[sessionId] = [:]
     }
 
     private func rebuildMessages(for sessionId: UUID) {
-        let path = buildSelectedPath(for: sessionId)
         let childrenMap = childrenByParent(sessionId: sessionId)
+        let path = buildSelectedPath(for: sessionId, childrenMap: childrenMap)
         let selectionMap = branchSelections[sessionId, default: [:]]
 
         messages = path.map { node in
@@ -1691,10 +1588,9 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    private func buildSelectedPath(for sessionId: UUID) -> [MessageNode] {
+    private func buildSelectedPath(for sessionId: UUID, childrenMap: [UUID: [MessageNode]]) -> [MessageNode] {
         guard let nodes = messageStore[sessionId], !nodes.isEmpty else { return [] }
         let byId = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
-        let childrenMap = childrenByParent(sessionId: sessionId)
         let roots = dedupeSiblings(nodes.filter { node in
             guard let parentId = node.parentId else { return true }
             return byId[parentId] == nil
@@ -1725,7 +1621,14 @@ final class ChatViewModel: ObservableObject {
         return candidates.last
     }
 
+    private func invalidateChildrenCache(for sessionId: UUID) {
+        childrenByParentCache[sessionId] = nil
+    }
+
     private func childrenByParent(sessionId: UUID) -> [UUID: [MessageNode]] {
+        if let cached = childrenByParentCache[sessionId] {
+            return cached
+        }
         var map: [UUID: [MessageNode]] = [:]
         guard let nodes = messageStore[sessionId] else { return map }
         let byId = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
@@ -1733,6 +1636,7 @@ final class ChatViewModel: ObservableObject {
             let parent = node.parentId.flatMap { byId[$0] != nil ? $0 : nil } ?? rootId
             map[parent, default: []].append(node)
         }
+        childrenByParentCache[sessionId] = map
         return map
     }
 
@@ -2021,7 +1925,8 @@ final class ChatViewModel: ObservableObject {
         currentMessageId: UUID,
         target: InferenceModelTarget
     ) -> HistorySelection {
-        let path = buildSelectedPath(for: sessionId)
+        let childrenMap = childrenByParent(sessionId: sessionId)
+        let path = buildSelectedPath(for: sessionId, childrenMap: childrenMap)
         let historyMessages = path.prefix { $0.id != currentMessageId }
 
         let contextSize: Int = target.contextLength ?? 4096
@@ -2057,8 +1962,18 @@ final class ChatViewModel: ObservableObject {
     private func historyText(_ node: MessageNode) -> String {
         var text = node.text
         if node.role == .assistant {
-            text = text.replacingOccurrences(of: "<think>[\\s\\S]*?</think>", with: "", options: .regularExpression)
-            text = text.replacingOccurrences(of: "<todo_list>[\\s\\S]*?</todo_list>", with: "", options: .regularExpression)
+            if let regex = ChatMessageTagRegex.think {
+                let range = NSRange(text.startIndex..., in: text)
+                text = regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
+            } else {
+                text = text.replacingOccurrences(of: "<think>[\\s\\S]*?</think>", with: "", options: .regularExpression)
+            }
+            if let regex = ChatMessageTagRegex.todoList {
+                let range = NSRange(text.startIndex..., in: text)
+                text = regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
+            } else {
+                text = text.replacingOccurrences(of: "<todo_list>[\\s\\S]*?</todo_list>", with: "", options: .regularExpression)
+            }
         } else if !node.attachments.isEmpty {
             text += "\n\n[\(node.attachments.count) attachments attached]"
         }
@@ -2107,3 +2022,9 @@ final class ChatViewModel: ObservableObject {
         let imageFiles: [URL]
     }
 }
+#else
+@MainActor
+final class ChatViewModel: ObservableObject {
+    init() {}
+}
+#endif

@@ -12,3 +12,7 @@ fun formatBytes(bytes: Long): String {
     }
     return String.format(Locale.US, "%.1f %s", size, units[unitIndex])
 }
+
+fun Long.formattedFileSize(): String {
+    return formatBytes(this)
+}

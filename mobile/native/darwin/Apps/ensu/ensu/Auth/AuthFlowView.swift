@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if canImport(EnteCore)
 enum AuthRoute: Hashable {
     case otp(email: String, srp: SrpAttributes)
     case password(email: String, srp: SrpAttributes)
@@ -230,3 +231,14 @@ struct AuthFlowView: View {
             #endif
     }
 }
+#else
+enum AuthRoute: Hashable {
+    case unavailable
+}
+
+struct AuthFlowView: View {
+    var body: some View {
+        Text("Authentication unavailable")
+    }
+}
+#endif

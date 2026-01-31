@@ -16,11 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -98,20 +99,13 @@ fun SessionDrawer(
 
             HorizontalDivider(color = EnsuColor.border())
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = EnsuSpacing.lg.dp),
-                verticalArrangement = Arrangement.spacedBy(EnsuSpacing.lg.dp)
-            ) {
-                SessionGroups(
-                    sessions = filteredSessions,
-                    selectedSessionId = selectedSessionId,
-                    onSelectSession = onSelectSession,
-                    onDeleteSession = onDeleteSession
-                )
-            }
+            SessionGroups(
+                sessions = filteredSessions,
+                selectedSessionId = selectedSessionId,
+                onSelectSession = onSelectSession,
+                onDeleteSession = onDeleteSession,
+                modifier = Modifier.weight(1f)
+            )
 
             HorizontalDivider(color = EnsuColor.border())
 
@@ -296,36 +290,44 @@ private fun SessionGroups(
     sessions: List<ChatSession>,
     selectedSessionId: String?,
     onSelectSession: (ChatSession) -> Unit,
-    onDeleteSession: (ChatSession) -> Unit
+    onDeleteSession: (ChatSession) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val grouped = sessions.groupBy { sessionGroupLabel(it.updatedAtMillis) }
+    val grouped = remember(sessions) { sessions.groupBy { sessionGroupLabel(it.updatedAtMillis) } }
     val order = listOf("TODAY", "YESTERDAY", "THIS WEEK", "LAST WEEK", "THIS MONTH", "OLDER")
+    val orderedGroups = remember(grouped) {
+        order.mapNotNull { label ->
+            grouped[label]?.takeIf { it.isNotEmpty() }?.let { label to it }
+        }
+    }
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        // iOS uses `VStack(..., spacing: EnsuSpacing.lg)`, but Compose text metrics
-        // make this look a bit looser, so we tighten slightly.
-        verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(vertical = EnsuSpacing.lg.dp),
+        verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)
     ) {
-        order.forEach { label ->
-            val groupSessions = grouped[label] ?: return@forEach
-
-            Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.sm.dp)) {
-                Text(
-                    text = label,
-                    style = EnsuTypography.tiny.copy(letterSpacing = 1.sp),
-                    color = EnsuColor.textMuted(),
-                    modifier = Modifier.padding(horizontal = EnsuSpacing.lg.dp)
-                )
-
-                groupSessions.forEach { session ->
-                    SessionTile(
-                        session = session,
-                        isSelected = session.id == selectedSessionId,
-                        onSelect = { onSelectSession(session) },
-                        onDelete = { onDeleteSession(session) }
+        orderedGroups.forEachIndexed { index, (label, groupSessions) ->
+            item(key = "header_$label") {
+                Column {
+                    if (index > 0) {
+                        Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
+                    }
+                    Text(
+                        text = label,
+                        style = EnsuTypography.tiny.copy(letterSpacing = 1.sp),
+                        color = EnsuColor.textMuted(),
+                        modifier = Modifier.padding(horizontal = EnsuSpacing.lg.dp)
                     )
                 }
+            }
+
+            items(groupSessions, key = { it.id }) { session ->
+                SessionTile(
+                    session = session,
+                    isSelected = session.id == selectedSessionId,
+                    onSelect = { onSelectSession(session) },
+                    onDelete = { onDeleteSession(session) }
+                )
             }
         }
     }

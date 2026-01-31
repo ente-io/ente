@@ -254,16 +254,11 @@ struct ModelSettingsView: View {
                 .font(EnsuTypography.small)
                 .foregroundStyle(EnsuColor.textMuted)
 
-            TextField(hint, text: text)
-                .platformKeyboardType(keyboardType)
-                .platformTextInputAutocapitalization(.never)
-                .foregroundStyle(EnsuColor.textPrimary)
-                .platformTextFieldStyle()
-                .autocorrectionDisabled()
-                .padding(.horizontal, EnsuSpacing.inputHorizontal)
-                .padding(.vertical, EnsuSpacing.inputVertical)
-                .background(EnsuColor.fillFaint)
-                .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.input, style: .continuous))
+            StyledTextField(
+                hint: hint,
+                text: text,
+                keyboardType: keyboardType
+            )
 
             if let error {
                 Text(error)

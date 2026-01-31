@@ -372,20 +372,17 @@ class InferenceRsProvider(
     )
 
     private fun modelPathFor(target: LlmModelTarget): File {
-        val baseDir = File(modelDir, "models")
-        val filename = target.url.substringAfterLast('/').ifBlank { "model.gguf" }
-        return if (target.id.startsWith("custom:")) {
-            val customDir = File(baseDir, "custom")
-            File(customDir, "${hash(target.url)}_$filename")
-        } else {
-            File(baseDir, filename)
-        }
+        return pathForUrl(target, target.url, fallback = "model.gguf")
     }
 
     private fun mmprojPathFor(target: LlmModelTarget): File? {
         val url = target.mmprojUrl ?: return null
+        return pathForUrl(target, url, fallback = "mmproj.gguf")
+    }
+
+    private fun pathForUrl(target: LlmModelTarget, url: String, fallback: String): File {
         val baseDir = File(modelDir, "models")
-        val filename = url.substringAfterLast('/').ifBlank { "mmproj.gguf" }
+        val filename = url.substringAfterLast('/').ifBlank { fallback }
         return if (target.id.startsWith("custom:")) {
             val customDir = File(baseDir, "custom")
             File(customDir, "${hash(url)}_$filename")

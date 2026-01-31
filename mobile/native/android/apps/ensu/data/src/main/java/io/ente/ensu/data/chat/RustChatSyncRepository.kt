@@ -91,10 +91,8 @@ class RustChatSyncRepository(
     }
 
     private fun shouldResetSync(error: Throwable): Boolean {
-        val message = syncErrorMessage(error).lowercase()
-        return message.contains("stream pull failed") ||
-            message.contains("invalid blob") ||
-            message.contains("invalid encrypted")
+        val message = syncErrorMessage(error)
+        return ChatRecovery.shouldResetFromMessage(message)
     }
 
     private fun resetSyncState() {

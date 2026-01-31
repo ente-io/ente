@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if canImport(EnteCore)
 struct PasskeyView: View {
     let email: String
     let srpAttributes: SrpAttributes
@@ -235,3 +236,10 @@ struct PasskeyView: View {
         )
     }
 }
+#else
+struct PasskeyView: View {
+    var body: some View {
+        Text("Authentication unavailable")
+    }
+}
+#endif
