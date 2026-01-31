@@ -28,7 +28,7 @@ impl From<SyncAuth> for core::SyncAuth {
         core::SyncAuth {
             base_url: value.base_url,
             auth_token: value.auth_token,
-            master_key: value.master_key,
+            master_key: value.master_key.into(),
             user_agent: value.user_agent,
             client_package: value.client_package,
             client_version: value.client_version,

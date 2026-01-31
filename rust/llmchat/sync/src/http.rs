@@ -8,6 +8,8 @@ use uuid::Uuid;
 
 use crate::errors::SyncError;
 
+const DEFAULT_BASE_URL: &str = "https://api.ente.io";
+
 #[derive(Debug, Clone)]
 pub struct HttpConfig {
     pub base_url: String,
@@ -29,11 +31,16 @@ pub struct HttpClient {
 
 impl HttpClient {
     pub fn new(config: HttpConfig) -> Result<Self, SyncError> {
+        let base_url = config.base_url.trim_end_matches('/').to_string();
+        let is_http = base_url.starts_with("http://");
+        let is_default = base_url.starts_with(DEFAULT_BASE_URL);
+        let allow_insecure = is_http || !is_default;
+
         let mut builder = Client::builder();
         if let Some(timeout) = config.timeout_secs {
             builder = builder.timeout(Duration::from_secs(timeout));
         }
-        if config.base_url.contains("ngrok-free.app") {
+        if allow_insecure {
             builder = builder.danger_accept_invalid_certs(true);
         }
         let client = builder.build().map_err(|e| SyncError::Http {
@@ -42,7 +49,7 @@ impl HttpClient {
             code: None,
         })?;
         Ok(Self {
-            base_url: config.base_url.trim_end_matches('/').to_string(),
+            base_url,
             client,
             auth_token: config.auth_token,
             user_agent: config.user_agent,

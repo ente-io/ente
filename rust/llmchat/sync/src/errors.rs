@@ -7,7 +7,7 @@ pub enum SyncError {
     #[error("unauthorized")]
     Unauthorized,
     #[error("db error: {0}")]
-    Db(String),
+    Db(#[from] llmchat_db::Error),
     #[error("crypto error: {0}")]
     Crypto(String),
     #[error("http {status}: {message}")]
@@ -28,12 +28,6 @@ pub enum SyncError {
     Serde(String),
     #[error("io error: {0}")]
     Io(String),
-}
-
-impl From<llmchat_db::Error> for SyncError {
-    fn from(err: llmchat_db::Error) -> Self {
-        SyncError::Db(err.to_string())
-    }
 }
 
 impl From<ente_core::crypto::CryptoError> for SyncError {

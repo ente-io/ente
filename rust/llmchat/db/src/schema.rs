@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS messages (
   text                BLOB NOT NULL,
   attachments         TEXT,
   created_at          INTEGER NOT NULL,
+  needs_sync          INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
   deleted_at          INTEGER,
   FOREIGN KEY (session_uuid) REFERENCES sessions(session_uuid) ON DELETE CASCADE
 );
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS messages (
   text                BLOB NOT NULL,
   attachments         TEXT,
   created_at          INTEGER NOT NULL,
+  needs_sync          INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
   deleted_at          INTEGER,
   FOREIGN KEY (session_uuid) REFERENCES sessions(session_uuid) ON DELETE CASCADE
 );
