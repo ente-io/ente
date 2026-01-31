@@ -1883,5 +1883,28 @@
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   },
-  "snowAdventures": "Avventure invernali"
+  "snowAdventures": "Avventure invernali",
+  "cLTitle1": "Ridisegno",
+  "cLDesc1Item1": "Ridisegno della schermata impostazioni",
+  "cLDesc1Item2": "Barra di ricerca spostata in alto",
+  "cLDesc1Item3": "Ridisegno della pagina dei risultati di ricerca",
+  "cLTitle2": "Miglioramenti",
+  "cLDesc2Item1": "Ricerca nelle impostazioni",
+  "cLDesc2Item2": "Caricamento più veloce della scheda di ricerca",
+  "cLDesc2Item3": "Ricerca in scoperta, posizione e tipo di file",
+  "cLDesc2Item4": "Permetti a amministratori e proprietari di album di eliminare commenti",
+  "cLDesc2Item5": "Pizzica per zoomare sui video",
+  "cLDesc2Item6": "Visualizza tutte le persone ignorate",
+  "cLDesc2Item7": "Flusso di unione migliorato",
+  "cLDesc2Item8": "Ricerca e ordinamento personalizzato nella pagina delle persone",
+  "cLDesc2Item9": "Ordinamento coerente dei contatti",
+  "cLDesc2Item10": "Anteprima immagini per formati non supportati",
+  "cLDesc2Item11": "Scambia foto e tocca per sostituire nel creatore di collage",
+  "cLDesc2Item12": "Miglioramento delle prestazioni nel foglio informazioni file",
+  "cLTitle3": "Correzione di bug",
+  "cLDesc3Item1": "Correzione della pausa della musica all'apertura dell'app",
+  "cLDesc3Item2": "Correzione del problema di scorrimento per selezionare sui dispositivi Samsung S",
+  "cLDesc3Item3": "Correzione del problema della schermata iniziale dopo il ripristino del backup",
+  "cLDesc3Item4": "Correzione dei problemi della galleria su tablet e modalità orizzontale",
+  "cLDesc3Item5": "Correzione della pagina senza categoria che non si aggiornava dopo lo spostamento"
 }

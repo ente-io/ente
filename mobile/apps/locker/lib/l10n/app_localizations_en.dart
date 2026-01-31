@@ -1764,4 +1764,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noResultsFound => 'No results found';
+
+  @override
+  String get viewActiveSessions => 'View active sessions';
+
+  @override
+  String get authToViewYourActiveSessions =>
+      'Please authenticate to view your active sessions';
 }

@@ -28,6 +28,7 @@ Jump to a category:
 [View complete Account Creation FAQ →](/photos/faq/account-creation)
 
 ### Installation & Setup
+
 - [How do I install Ente Photos on Android?](/photos/faq/account-creation#install-android)
 - [How do I install Ente Photos on iPhone or iPad?](/photos/faq/account-creation#install-ios)
 - [How do I install Ente Photos on desktop?](/photos/faq/account-creation#install-desktop)
@@ -38,11 +39,13 @@ Jump to a category:
 - [How do I update to the latest version?](/photos/faq/account-creation#update-latest)
 
 ### Multi-Device Setup
+
 - [How do I log in on multiple devices?](/photos/faq/account-creation#multi-device-login)
 - [Can I use Ente on both mobile and desktop?](/photos/faq/account-creation#mobile-and-desktop)
 - [Do I need separate accounts for different devices?](/photos/faq/account-creation#separate-accounts)
 
 ### Account Creation & Security
+
 - [How do I create a new Ente account?](/photos/faq/account-creation#create-account)
 - [What is the recovery key and why is it important?](/photos/faq/account-creation#recovery-key)
 - [How do I reset my password if I lost it?](/photos/faq/account-creation#reset-password)
@@ -58,6 +61,7 @@ Jump to a category:
 [View complete Albums and Organization FAQ →](/photos/faq/albums-and-organization)
 
 ### Albums
+
 - [Can Ente albums be nested?](/photos/faq/albums-and-organization#nested-albums)
 - [What happens when I upload a nested folder structure?](/photos/faq/albums-and-organization#nested-folders)
 - [Can I sync a folder with multiple subfolders?](/photos/faq/albums-and-organization#sync-subfolders)
@@ -66,6 +70,7 @@ Jump to a category:
 - [How does Ente handle photos that are part of multiple iOS albums?](/photos/faq/albums-and-organization#multiple-ios-albums)
 
 ### Uncategorized
+
 - [What is the Uncategorized album?](/photos/faq/albums-and-organization#what-is-uncategorized)
 - [Why are photos appearing in Uncategorized?](/photos/faq/albums-and-organization#why-uncategorized)
 - [How do I clean up Uncategorized items?](/photos/faq/albums-and-organization#clean-uncategorized)
@@ -78,6 +83,7 @@ Jump to a category:
 - [How do I view Uncategorized photos?](/photos/faq/albums-and-organization#view-uncategorized)
 
 ### Hide vs Archive
+
 - [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
 - [Can I hide photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
 - [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
@@ -85,6 +91,7 @@ Jump to a category:
 - [How do I archive photos in Ente?](/photos/faq/albums-and-organization#how-to-archive)
 
 ### Storage Management
+
 - [How can I free up space on my device?](/photos/faq/albums-and-organization#free-up-device-space)
 - [How can I remove duplicate photos from my library?](/photos/faq/albums-and-organization#remove-duplicates)
 - [How can I find and remove similar photos?](/photos/faq/albums-and-organization#remove-similar)
@@ -96,6 +103,7 @@ Jump to a category:
 - [Does removing duplicates affect automatic duplicate detection?](/photos/faq/albums-and-organization#manual-vs-auto-dedup)
 
 ### Trash and Deletion
+
 - [How do I delete photos in Ente?](/photos/faq/albums-and-organization#delete-photos)
 - [How do I restore deleted photos?](/photos/faq/albums-and-organization#restore-photos)
 - [How do I permanently delete photos or empty trash?](/photos/faq/albums-and-organization#empty-trash)
@@ -115,6 +123,7 @@ Jump to a category:
 [View complete Backup and Sync FAQ →](/photos/faq/backup-and-sync)
 
 ### Mobile Backup
+
 - [How does automatic backup work in Ente?](/photos/faq/backup-and-sync#automatic-backup)
 - [How do I select which albums to back up?](/photos/faq/backup-and-sync#select-albums)
 - [Can I backup over mobile data or only WiFi?](/photos/faq/backup-and-sync#mobile-data)
@@ -131,6 +140,7 @@ Jump to a category:
 - [Does Ente backup Live Photos from iPhone?](/photos/faq/backup-and-sync#live-photos-backup)
 
 ### Background Sync
+
 - [How does background sync work?](/photos/faq/backup-and-sync#how-background-sync-works)
 - [Why isn't background sync working on my phone?](/photos/faq/backup-and-sync#background-sync-not-working)
 - [Does background sync work on web?](/photos/faq/backup-and-sync#background-sync-web)
@@ -138,6 +148,7 @@ Jump to a category:
 - [How does background sync work on Android?](/photos/faq/backup-and-sync#android-background-sync)
 
 ### Desktop Backup (Watch Folders)
+
 - [How do watch folders work?](/photos/faq/backup-and-sync#how-watch-folders-work)
 - [What are watch folders?](/photos/faq/backup-and-sync#what-are-watch-folders)
 - [How do I set up watch folders?](/photos/faq/backup-and-sync#set-up-watch-folders)
@@ -153,18 +164,21 @@ Jump to a category:
 - [Can I watch a folder and manually upload to it at the same time?](/photos/faq/backup-and-sync#watch-and-manual-upload)
 
 ### General Backup Questions
+
 - [Can I backup photos from my computer?](/photos/faq/backup-and-sync#backup-from-computer)
 - [Can I pause and resume backups?](/photos/faq/backup-and-sync#pause-resume-backup)
 - [Why are some photos not uploading?](/photos/faq/backup-and-sync#photos-not-uploading)
 - [Can I use the desktop app and mobile app at the same time?](/photos/faq/backup-and-sync#use-multiple-devices)
 
 ### File Support & Upload Limits
+
 - [What file formats does Ente support?](/photos/faq/backup-and-sync#file-formats)
 - [Is there a file size limit?](/photos/faq/backup-and-sync#file-size-limit)
 - [Does Ente support videos?](/photos/faq/backup-and-sync#video-support)
 - [Does Ente apply compression to uploaded photos?](/photos/faq/backup-and-sync#compression)
 
 ### Deduplication
+
 - [How does the deduplication feature work on the desktop app?](/photos/faq/backup-and-sync#deduplication-desktop)
 
 ## Metadata and Editing
@@ -172,16 +186,19 @@ Jump to a category:
 [View complete Metadata and Editing FAQ →](/photos/faq/metadata-and-editing)
 
 ### Viewing Metadata
+
 - [What metadata does Ente preserve during import?](/photos/faq/metadata-and-editing#metadata-preserved)
 - [How does Ente handle Exif data and descriptions?](/photos/faq/metadata-and-editing#exif-handling)
 - [Where does Ente import photo dates from?](/photos/faq/metadata-and-editing#photo-date-sources)
 - [How do I view EXIF data for a photo?](/photos/faq/metadata-and-editing#view-exif)
 
 ### Importing from Google Photos
+
 - [How does Ente handle Google Takeout metadata?](/photos/faq/metadata-and-editing#google-takeout-metadata)
 - [Why are my Google Photos dates wrong after import?](/photos/faq/metadata-and-editing#google-photos-dates-wrong)
 
 ### Editing Metadata
+
 - [How do I add descriptions or captions to photos?](/photos/faq/metadata-and-editing#add-descriptions)
 - [Can I bulk edit photo dates?](/photos/faq/metadata-and-editing#bulk-edit-dates)
 - [Can I bulk edit photo locations?](/photos/faq/metadata-and-editing#bulk-edit-locations)
@@ -191,11 +208,13 @@ Jump to a category:
 - [Can I add location data to photos that don't have it?](/photos/faq/metadata-and-editing#add-location)
 
 ### Exporting Metadata
+
 - [Does the exported data preserve metadata?](/photos/faq/metadata-and-editing#export-data-preserve-metadata)
 - [What happens to file creation time during export?](/photos/faq/metadata-and-editing#file-creation-time)
 - [Can I modify the original files during export?](/photos/faq/metadata-and-editing#modify-originals)
 
 ### Platform-Specific Behavior
+
 - [Do metadata edits sync across devices?](/photos/faq/metadata-and-editing#edits-sync)
 - [Can I edit metadata on all platforms?](/photos/faq/metadata-and-editing#platform-support)
 - [Does Ente modify any file metadata?](/photos/faq/metadata-and-editing#modify-file-metadata)
@@ -205,6 +224,7 @@ Jump to a category:
 [View complete Migration FAQ →](/photos/faq/migration)
 
 ### Importing from Google Photos
+
 - [How much Ente storage do I need when importing my Google Photos Takeout?](/photos/faq/migration#google-takeout-storage)
 
 ## Search and Discovery
@@ -212,17 +232,20 @@ Jump to a category:
 [View complete Search and Discovery FAQ →](/photos/faq/search-and-discovery)
 
 ### Map View
+
 - [Why doesn't the map show all my photos?](/photos/faq/search-and-discovery#missing-photos)
 - [Is my location data sent to Ente servers?](/photos/faq/search-and-discovery#privacy)
 - [Can I view all albums on the map at once?](/photos/faq/search-and-discovery#all-albums)
 - [How do I access the map view?](/photos/faq/search-and-discovery#access-map)
 
 ### Location Tags
+
 - [How are location tags different from map view?](/photos/faq/search-and-discovery#location-tags-vs-map)
 - [How do I create location tags?](/photos/faq/search-and-discovery#create-location-tags)
 - [Are my location tags encrypted?](/photos/faq/search-and-discovery#location-tags-encryption)
 
 ### Machine Learning and Face Recognition
+
 - [Why doesn't search work for me?](/photos/faq/search-and-discovery#search-not-working)
 - [How do I enable face recognition?](/photos/faq/search-and-discovery#enable-face-recognition)
 - [Can I merge or de-merge persons recognized by the app?](/photos/faq/search-and-discovery#merge-persons)
@@ -236,12 +259,14 @@ Jump to a category:
 - [Can I name the recognized persons?](/photos/faq/search-and-discovery#name-persons)
 
 ### Magic Search
+
 - [What is magic search?](/photos/faq/search-and-discovery#what-is-magic-search)
 - [How do I enable magic search?](/photos/faq/search-and-discovery#enable-magic-search)
 - [Does magic search require internet?](/photos/faq/search-and-discovery#magic-search-offline)
 - [Can I search for photos using the descriptions I've added?](/photos/faq/search-and-discovery#search-descriptions)
 
 ### General Search
+
 - [How do I search my photos?](/photos/faq/search-and-discovery#how-to-search)
 - [Can I save my searches?](/photos/faq/search-and-discovery#save-searches)
 - [Does search include archived or hidden photos?](/photos/faq/search-and-discovery#search-archived-hidden)
@@ -257,12 +282,14 @@ Jump to a category:
 [View complete Security and Privacy FAQ →](/photos/faq/security-and-privacy)
 
 ### Data Encryption and Storage
+
 - [Can Ente see my photos and videos?](/photos/faq/security-and-privacy#can-ente-see-photos)
 - [How is my data encrypted?](/photos/faq/security-and-privacy#data-encryption)
 - [Where is my data stored?](/photos/faq/security-and-privacy#data-storage-location)
 - [How does Ente's encryption compare to industry standards?](/photos/faq/security-and-privacy#encryption-comparison)
 
 ### Account Security
+
 - [What happens if I forget my password?](/photos/faq/security-and-privacy#account-recovery)
 - [What is my recovery key and why is it critical?](/photos/faq/security-and-privacy#recovery-key-importance)
 - [How do I find my recovery key?](/photos/faq/security-and-privacy#find-recovery-key)
@@ -272,17 +299,21 @@ Jump to a category:
 - [Do you support two-factor authentication (2FA)?](/photos/faq/security-and-privacy#two-factor-auth)
 
 ### Sharing and Collaboration
+
 - [How does sharing work?](/photos/faq/security-and-privacy#sharing-encryption)
 
 ### Machine Learning and Privacy
+
 - [Is my face data used to train AI models?](/photos/faq/security-and-privacy#face-data-privacy)
 - [How does on-device ML maintain privacy?](/photos/faq/security-and-privacy#ml-privacy-details)
 - [Are my location tags encrypted?](/photos/faq/security-and-privacy#location-tags-encrypted)
 
 ### Account Management
+
 - [How can I delete my account?](/photos/faq/security-and-privacy#delete-account)
 
 ### Trust and Reliability
+
 - [Why should I trust Ente for long-term data storage?](/photos/faq/security-and-privacy#trust)
 
 ## Storage and Plans
@@ -290,6 +321,7 @@ Jump to a category:
 [View complete Storage and Plans FAQ →](/photos/faq/storage-and-plans)
 
 ### Understanding Storage
+
 - [Why does Ente consume less storage than other providers?](/photos/faq/storage-and-plans#less-storage-usage)
 - [How does Ente deduplicate photos?](/photos/faq/storage-and-plans#deduplication)
 - [Does Ente deduplicate across different albums?](/photos/faq/storage-and-plans#dedup-albums)
@@ -298,12 +330,14 @@ Jump to a category:
 - [What happens if I exceed my storage limit?](/photos/faq/storage-and-plans#exceed-storage)
 
 ### Subscription Plans
+
 - [What plans does Ente offer?](/photos/faq/storage-and-plans#available-plans)
 - [Is there a forever-free plan?](/photos/faq/storage-and-plans#free-plan)
 - [What are the limitations of the free plan?](/photos/faq/storage-and-plans#free-plan-limits)
 - [Is there an x GB plan?](/photos/faq/storage-and-plans#specific-plan-size)
 
 ### Family Plans
+
 - [Does Ente have Family Plans?](/photos/faq/storage-and-plans#family-plans-faq)
 - [How many family members can I add to my plan?](/photos/faq/storage-and-plans#family-members-limit)
 - [Can family members see each other's photos?](/photos/faq/storage-and-plans#family-privacy)
@@ -313,12 +347,15 @@ Jump to a category:
 - [How do I remove someone from my family plan?](/photos/faq/storage-and-plans#remove-family-member)
 
 ### Student Discounts
+
 - [Does Ente offer discounts to students?](/photos/faq/storage-and-plans#student-discount)
 
 ### Discount Codes and Referrals
+
 - [How do I apply a discount code to my subscription?](/photos/faq/storage-and-plans#apply-discount-code)
 
 ### Referral Program
+
 - [How can I earn free storage?](/photos/faq/storage-and-plans#earn-storage-referrals)
 - [How much storage can I earn through referrals?](/photos/faq/storage-and-plans#referral-storage-limit)
 - [For how long do I have access to referred storage?](/photos/faq/storage-and-plans#referral-duration)
@@ -326,12 +363,14 @@ Jump to a category:
 - [What counts as abuse of the referral program?](/photos/faq/storage-and-plans#referral-abuse)
 
 ### Payment Methods
+
 - [What payment methods does Ente support?](/photos/faq/storage-and-plans#supported-payment-methods)
 - [Can I pay with PayPal?](/photos/faq/storage-and-plans#paypal-payment)
 - [Does Ente accept crypto payments?](/photos/faq/storage-and-plans#crypto-payment)
 - [Does Ente store my card details?](/photos/faq/storage-and-plans#card-security)
 
 ### Managing Your Subscription
+
 - [What happens when my subscription expires?](/photos/faq/storage-and-plans#subscription-expires)
 - [What happens when I upgrade my plan?](/photos/faq/storage-and-plans#upgrade-plan)
 - [What happens when I downgrade my plan?](/photos/faq/storage-and-plans#downgrade-plan)
@@ -344,6 +383,7 @@ Jump to a category:
 [View complete Troubleshooting FAQ →](/photos/faq/troubleshooting)
 
 ### Upload Issues
+
 - [Why are my large videos failing to upload?](/photos/faq/troubleshooting#video-upload-failures)
 - [Why does the app crash when watching videos or using ML?](/photos/faq/troubleshooting#app-crashes-ml-video)
 - [Why aren't my photos uploading?](/photos/faq/troubleshooting#upload-failures)
@@ -352,10 +392,12 @@ Jump to a category:
 - [Why can't the app detect certain file types?](/photos/faq/troubleshooting#file-type-detection)
 
 ### Mobile Backup Issues
+
 - [Why isn't background sync working on my phone?](/photos/faq/troubleshooting#background-sync-issues)
 - [Why can't Ente access my photos?](/photos/faq/troubleshooting#photo-access-permissions)
 
 ### Desktop App Issues
+
 - [Why does my desktop app crash during large uploads?](/photos/faq/troubleshooting#desktop-large-uploads)
 - [Why are my photo thumbnails missing or incorrect?](/photos/faq/troubleshooting#thumbnails)
 - [Why aren't my watch folders syncing?](/photos/faq/troubleshooting#watch-folders-troubleshooting)
@@ -363,6 +405,7 @@ Jump to a category:
 - [Can I safely close the desktop app while it's uploading?](/photos/faq/troubleshooting#close-during-upload)
 
 ### Platform-Specific Issues
+
 - [Why is my iOS app stuck on "Please wait..." when I purchase a subscription?](/photos/faq/troubleshooting#ios-appstore-subscription)
 - [Why is my Android app stuck on the splash screen?](/photos/faq/troubleshooting#android-splash-freeze)
 - [Why is the Linux desktop app still showing the old icon after updating?](/photos/faq/troubleshooting#linux-icon-update)
@@ -375,10 +418,12 @@ Jump to a category:
 - [How do I identify which files failed to upload?](/photos/faq/troubleshooting#identify-failed-uploads)
 
 ### Performance Issues
+
 - [Why is the app slow to load my photos?](/photos/faq/troubleshooting#app-slow-loading)
 - [Why is face recognition or magic search taking so long?](/photos/faq/troubleshooting#ml-slow)
 
 ### Getting Help
+
 - [How do I share debug logs with support?](/photos/faq/troubleshooting#sharing-logs)
 - [Where can I get help?](/photos/faq/troubleshooting#get-help)
 
@@ -387,6 +432,7 @@ Jump to a category:
 [View complete Advanced Features FAQ →](/photos/faq/advanced-features)
 
 ### Command Line Interface (CLI)
+
 - [What is the Ente CLI?](/photos/faq/advanced-features#what-is-cli)
 - [How do I install the CLI?](/photos/faq/advanced-features#install-cli-advanced)
 - [How do I use the CLI to export my photos?](/photos/faq/advanced-features#cli-export-photos)
@@ -397,6 +443,7 @@ Jump to a category:
 - [NAS export issues with CLI](/photos/faq/advanced-features#cli-nas-export)
 
 ### Exporting from Desktop
+
 - [How can I backup my data locally outside Ente?](/photos/faq/advanced-features#local-backup)
 - [Does the exported data preserve album structure?](/photos/faq/advanced-features#export-album-structure)
 - [Does the exported data preserve metadata?](/photos/faq/advanced-features#export-preserves-metadata)
@@ -406,6 +453,7 @@ Jump to a category:
 - [How do I set up continuous exports?](/photos/faq/advanced-features#continuous-export)
 
 ### Utilities
+
 - [What is video streaming in Ente?](/photos/faq/advanced-features#video-streaming)
 - [What is a stream technically?](/photos/faq/advanced-features#what-is-a-stream)
 - [Will streams consume space in my storage?](/photos/faq/advanced-features#stream-storage)
@@ -421,6 +469,7 @@ Jump to a category:
 - [How do I manage notification settings?](/photos/faq/advanced-features#manage-notifications)
 
 ### Other Advanced Features
+
 - [Can I access Ente from multiple browsers?](/photos/faq/advanced-features#multiple-browsers)
 - [Does Ente have an API?](/photos/faq/advanced-features#api)
 - [Can I self-host Ente?](/photos/faq/advanced-features#self-hosting)
@@ -431,12 +480,14 @@ Jump to a category:
 [View complete Sharing and Collaboration FAQ →](/photos/faq/sharing-and-collaboration)
 
 ### Understanding Sharing Methods
+
 - [What are the different ways to share in Ente?](/photos/faq/sharing-and-collaboration#sharing-methods)
 - [What's the difference between public links and quick links?](/photos/faq/sharing-and-collaboration#link-types)
 - [Can I use my own domain for public links?](/photos/faq/sharing-and-collaboration#custom-domains)
 - [Do Trip albums work with custom domains?](/photos/faq/sharing-and-collaboration#trip-custom-domains)
 
 ### Collaboration
+
 - [How do I share an album with other Ente users?](/photos/faq/sharing-and-collaboration#share-with-users)
 - [Who pays for storage in collaborative albums?](/photos/faq/sharing-and-collaboration#collab-storage)
 - [Can collaborators delete photos from shared albums?](/photos/faq/sharing-and-collaboration#collab-permissions)
@@ -445,6 +496,7 @@ Jump to a category:
 - [Why am I not getting notifications when photos are added to shared albums?](/photos/faq/sharing-and-collaboration#shared-album-notifications)
 
 ### Public Links
+
 - [How do I create a collect link to gather photos from others?](/photos/faq/sharing-and-collaboration#create-collect-link)
 - [Can people without Ente add photos to my album?](/photos/faq/sharing-and-collaboration#collect-without-account)
 - [Do collected photos count against my storage?](/photos/faq/sharing-and-collaboration#collect-storage)
@@ -453,26 +505,31 @@ Jump to a category:
 - [Can I see who added photos to my collect link?](/photos/faq/sharing-and-collaboration#collect-link-attribution)
 
 ### Public Link Features
+
 - [Can I convert a quick link to a regular album?](/photos/faq/sharing-and-collaboration#quick-link-convert)
 - [How do I create a quick link?](/photos/faq/sharing-and-collaboration#create-quick-link)
 
 ### Managing Shared Content
+
 - [Can I add photos from a shared album to my own albums?](/photos/faq/sharing-and-collaboration#add-shared-photos)
 - [Why does adding shared photos to my albums count against my storage?](/photos/faq/sharing-and-collaboration#shared-storage-count)
 - [Can I remove myself from a shared album?](/photos/faq/sharing-and-collaboration#leave-shared-album)
 - [How do I see all my shared albums?](/photos/faq/sharing-and-collaboration#view-shared-albums)
 
 ### Permissions and Access
+
 - [Who can create collaborative albums or public links?](/photos/faq/sharing-and-collaboration#who-can-share)
 - [Can I change permissions for collaborators after sharing?](/photos/faq/sharing-and-collaboration#change-permissions)
 - [What happens to shared albums if I cancel my subscription?](/photos/faq/sharing-and-collaboration#cancel-subscription-impact)
 
 ### Security and Privacy
+
 - [Are public links end-to-end encrypted?](/photos/faq/sharing-and-collaboration#public-link-encryption)
 - [How does sharing work with encryption?](/photos/faq/sharing-and-collaboration#sharing-encryption-technical)
 - [Can Ente see my shared photos?](/photos/faq/sharing-and-collaboration#ente-see-shared)
 
 ### Embedding Albums
+
 - [How do I embed an album on my website?](/photos/faq/sharing-and-collaboration#embed-albums)
 - [Do embedded albums work with custom domains?](/photos/faq/sharing-and-collaboration#embed-custom-domains)
 - [Can I embed password-protected albums?](/photos/faq/sharing-and-collaboration#embed-password)

@@ -4,6 +4,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 /// A row of social media icons for the settings page.
+/// Figma specs: 32x32 containers, 8px gap, icons 16-19px, strokeBase color
 class SocialIconsRow extends StatelessWidget {
   const SocialIconsRow({super.key});
 
@@ -48,16 +49,22 @@ class SocialIconsRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: socialLinks.map((link) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: GestureDetector(
             onTap: () => _launchUrl(link.url),
             child: Semantics(
               label: link.label,
               button: true,
-              child: HugeIcon(
-                icon: link.icon,
-                color: colorScheme.strokeMuted,
-                size: 24,
+              child: SizedBox(
+                width: 32,
+                height: 32,
+                child: Center(
+                  child: HugeIcon(
+                    icon: link.icon,
+                    color: colorScheme.menuItemIconStroke,
+                    size: 18,
+                  ),
+                ),
               ),
             ),
           ),

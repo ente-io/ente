@@ -155,6 +155,10 @@ export const sidebar = [
                                 link: "/photos/features/sharing-and-collaboration/collaboration",
                             },
                             {
+                                text: "Comments and likes",
+                                link: "/photos/features/sharing-and-collaboration/comments-and-likes",
+                            },
+                            {
                                 text: "Public links",
                                 link: "/photos/features/sharing-and-collaboration/public-links",
                             },
@@ -332,6 +336,156 @@ export const sidebar = [
                     {
                         text: "Export",
                         link: "/auth/migration/export",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        text: "Locker",
+        items: [
+            { text: "Introduction", link: "/locker/" },
+            {
+                text: "Getting Started",
+                collapsed: true,
+                items: [
+                    { text: "Overview", link: "/locker/getting-started/" },
+                    {
+                        text: "Installation",
+                        link: "/locker/getting-started/installation",
+                    },
+                    {
+                        text: "Sign up",
+                        link: "/locker/getting-started/signup",
+                    },
+                    {
+                        text: "First document",
+                        link: "/locker/getting-started/first-document",
+                    },
+                ],
+            },
+            {
+                text: "Features",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Information Types",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/information-types/",
+                            },
+                            {
+                                text: "Personal Notes",
+                                link: "/locker/features/information-types/personal-notes",
+                            },
+                            {
+                                text: "Account Credentials",
+                                link: "/locker/features/information-types/account-credentials",
+                            },
+                            {
+                                text: "Physical Records",
+                                link: "/locker/features/information-types/physical-records",
+                            },
+                            {
+                                text: "Emergency Contacts",
+                                link: "/locker/features/information-types/emergency-contacts",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Organization",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/organization/",
+                            },
+                            {
+                                text: "Collections",
+                                link: "/locker/features/organization/collections",
+                            },
+                            {
+                                text: "Trash",
+                                link: "/locker/features/organization/trash",
+                            },
+                            {
+                                text: "Search",
+                                link: "/locker/features/organization/search",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Sharing",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/sharing/",
+                            },
+                            {
+                                text: "Share with users",
+                                link: "/locker/features/sharing/share-with-users",
+                            },
+                            {
+                                text: "Public links",
+                                link: "/locker/features/sharing/public-links",
+                            },
+                        ],
+                    },
+                    {
+                        text: "Security",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/locker/features/security/",
+                            },
+                            {
+                                text: "Encryption",
+                                link: "/locker/features/security/encryption",
+                            },
+                            {
+                                text: "Lock screen",
+                                link: "/locker/features/security/lock-screen",
+                            },
+                            {
+                                text: "Sync",
+                                link: "/locker/features/security/sync",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                text: "FAQ",
+                link: "/locker/faq/",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Getting Started",
+                        link: "/locker/faq/getting-started",
+                    },
+                    {
+                        text: "Information Types",
+                        link: "/locker/faq/information-types",
+                    },
+                    {
+                        text: "Organization",
+                        link: "/locker/faq/organization",
+                    },
+                    {
+                        text: "Sharing",
+                        link: "/locker/faq/sharing",
+                    },
+                    {
+                        text: "Security",
+                        link: "/locker/faq/security",
+                    },
+                    {
+                        text: "Troubleshooting",
+                        link: "/locker/faq/troubleshooting",
                     },
                 ],
             },

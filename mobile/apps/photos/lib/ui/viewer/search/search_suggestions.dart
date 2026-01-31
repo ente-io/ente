@@ -7,6 +7,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/device_album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import 'package:photos/models/search/search_result.dart';
@@ -14,6 +15,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/device_folder_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 
@@ -84,6 +86,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   void releaseResources() {
     subscription?.cancel();
     timer?.cancel();
+    queueOfSearchResults.clear();
   }
 
   ///This method generates searchResultsWidgets from the queueOfEvents by checking
@@ -179,37 +182,15 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       if (widgets.isNotEmpty) {
         widgets.add(const SizedBox(height: 18));
       }
-      final orderedResults = _orderedResultsForSection(section, results);
       widgets.add(
         _SearchResultsSectionWidget(
           title: _sectionTitle(context, section),
           icon: _sectionIcon(section),
-          results: orderedResults,
+          results: results,
         ),
       );
     }
     return widgets;
-  }
-
-  List<SearchResult> _orderedResultsForSection(
-    _SearchResultsSection section,
-    List<SearchResult> results,
-  ) {
-    if (section != _SearchResultsSection.people) {
-      return results;
-    }
-    final people = <SearchResult>[];
-    final shared = <SearchResult>[];
-    for (final result in results) {
-      if (result.type() == ResultType.faces) {
-        people.add(result);
-      } else if (result.type() == ResultType.shared) {
-        shared.add(result);
-      } else {
-        shared.add(result);
-      }
-    }
-    return [...people, ...shared];
   }
 }
 
@@ -243,6 +224,18 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
           ),
         ),
       );
+    } else if (result is DeviceAlbumSearchResult) {
+      final deviceResult = result as DeviceAlbumSearchResult;
+      return SearchResultWidget(
+        result,
+        resultCount: Future.value(deviceResult.deviceCollection.count),
+        borderRadius: borderRadius,
+        showTypeLabel: showTypeLabel,
+        onResultTap: () => routeToPage(
+          context,
+          DeviceFolderPage(deviceResult.deviceCollection),
+        ),
+      );
     } else if (result is GenericSearchResult) {
       return SearchResultWidget(
         result,
@@ -261,6 +254,7 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
 
 enum _SearchResultsSection {
   people,
+  shared,
   albums,
   magic,
   files,
@@ -274,15 +268,18 @@ const List<_SearchResultsSection> _sectionOrder = [
   _SearchResultsSection.albums,
   _SearchResultsSection.locations,
   _SearchResultsSection.people,
+  _SearchResultsSection.shared,
   _SearchResultsSection.magic,
 ];
 
 _SearchResultsSection _sectionForResult(SearchResult result) {
   switch (result.type()) {
     case ResultType.faces:
-    case ResultType.shared:
       return _SearchResultsSection.people;
+    case ResultType.shared:
+      return _SearchResultsSection.shared;
     case ResultType.collection:
+    case ResultType.deviceCollection:
       return _SearchResultsSection.albums;
     case ResultType.magic:
       return _SearchResultsSection.magic;
@@ -308,6 +305,8 @@ String _sectionTitle(BuildContext context, _SearchResultsSection section) {
   switch (section) {
     case _SearchResultsSection.people:
       return AppLocalizations.of(context).people;
+    case _SearchResultsSection.shared:
+      return AppLocalizations.of(context).searchResultShared;
     case _SearchResultsSection.albums:
       return AppLocalizations.of(context).albums;
     case _SearchResultsSection.magic:
@@ -325,6 +324,8 @@ List<List<dynamic>> _sectionIcon(_SearchResultsSection section) {
   switch (section) {
     case _SearchResultsSection.people:
       return HugeIcons.strokeRoundedUserMultiple;
+    case _SearchResultsSection.shared:
+      return HugeIcons.strokeRoundedShare08;
     case _SearchResultsSection.albums:
       return HugeIcons.strokeRoundedImage01;
     case _SearchResultsSection.magic:

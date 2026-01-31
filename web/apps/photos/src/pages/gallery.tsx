@@ -2,9 +2,10 @@
 // the file it depends on have been audited and their interfaces fixed).
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Upload01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
 import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
@@ -951,13 +952,19 @@ const Page: React.FC = () => {
                           )
                         : filteredFiles;
                 const selectedFiles = getSelectedFiles(selected, opFiles);
-                const toProcessFiles =
+                const ownedSelectedFiles =
                     op == "download"
                         ? selectedFiles
                         : selectedFiles.filter(
                               // There'll be a user if files are being selected.
                               (file) => file.ownerID == user!.id,
                           );
+                const toProcessFiles =
+                    op == "unfavorite"
+                        ? ownedSelectedFiles.filter((file) =>
+                              favoriteFileIDs.has(file.id),
+                          )
+                        : ownedSelectedFiles;
                 if (toProcessFiles.length > 0) {
                     await performFileOp(
                         op,
@@ -977,7 +984,10 @@ const Page: React.FC = () => {
                 // on the user's own files.
                 //
                 // See: [Note: Add and move of non-user files].
-                if (toProcessFiles.length != selectedFiles.length) {
+                if (
+                    op != "download" &&
+                    ownedSelectedFiles.length != selectedFiles.length
+                ) {
                     showMiniDialog(notifyOthersFilesDialogAttributes());
                 }
                 clearSelection();
@@ -1008,7 +1018,6 @@ const Page: React.FC = () => {
                     startIcon: <CheckCircleIcon />,
                     title: t("added_to_person"),
                     caption: personName,
-                    autoHideDuration: 3000,
                 });
             } catch (e) {
                 onGenericError(e);
@@ -1265,6 +1274,18 @@ const Page: React.FC = () => {
 
     const selectedCount = selected.count;
     const selectedOwnCount = selected.ownCount;
+    const selectedFavoriteCount = useMemo(() => {
+        if (selected.count == 0) return 0;
+        let count = 0;
+        for (const [key, value] of Object.entries(selected)) {
+            if (typeof value === "boolean" && value) {
+                if (favoriteFileIDs.has(Number(key))) {
+                    count += 1;
+                }
+            }
+        }
+        return count;
+    }, [favoriteFileIDs, selected]);
 
     /**
      * Handle a context menu action on a file.
@@ -1282,6 +1303,9 @@ const Page: React.FC = () => {
                     break;
                 case "favorite":
                     createFileOpHandler("favorite")();
+                    break;
+                case "unfavorite":
+                    createFileOpHandler("unfavorite")();
                     break;
                 case "archive":
                     createFileOpHandler("archive")();
@@ -1546,7 +1570,11 @@ const Page: React.FC = () => {
                 open={openCollectionSelector}
                 onClose={handleCloseCollectionSelector}
                 attributes={collectionSelectorAttributes}
-                collectionSummaries={normalCollectionSummaries}
+                collectionSummaries={
+                    collectionSelectorAttributes?.showHiddenCollections
+                        ? state.hiddenCollectionSummaries
+                        : normalCollectionSummaries
+                }
                 collectionForCollectionSummaryID={(id) =>
                     findCollectionCreatingUncategorizedIfNeeded(
                         state.collections,
@@ -1587,6 +1615,7 @@ const Page: React.FC = () => {
                         }
                         selectedFileCount={selected.count}
                         selectedOwnFileCount={selected.ownCount}
+                        selectedFavoriteCount={selectedFavoriteCount}
                         onClearSelection={clearSelection}
                         onRemoveFilesFromCollection={
                             handleRemoveFilesFromCollection
@@ -1607,6 +1636,7 @@ const Page: React.FC = () => {
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
                         onBack={() => dispatch({ type: "showAlbums" })}
+                        onUpload={openUploader}
                     />
                 ) : (
                     <NormalNavbarContents
@@ -1685,6 +1715,7 @@ const Page: React.FC = () => {
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
                 onShowSessionExpiredDialog={showSessionExpiredDialog}
+                isInHiddenSection={barMode == "hidden-albums"}
             />
             <Sidebar
                 {...sidebarVisibilityProps}
@@ -1874,7 +1905,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
-    const icon = <FileUploadOutlinedIcon />;
+    const icon = <HugeiconsIcon icon={Upload01Icon} size={20} />;
 
     return (
         <>
@@ -1884,6 +1915,7 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
                 <FocusVisibleButton
                     color="secondary"
                     startIcon={icon}
+                    sx={{ borderRadius: "16px" }}
                     {...{ onClick, disabled }}
                 >
                     {t("upload")}
@@ -1895,11 +1927,12 @@ const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
 
 interface HiddenSectionNavbarContentsProps {
     onBack: () => void;
+    onUpload: () => void;
 }
 
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
-> = ({ onBack }) => (
+> = ({ onBack, onUpload }) => (
     <Stack
         direction="row"
         sx={(theme) => ({
@@ -1913,6 +1946,7 @@ const HiddenSectionNavbarContents: React.FC<
             <ArrowBackIcon />
         </IconButton>
         <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
+        <UploadButton onClick={onUpload} />
     </Stack>
 );
 

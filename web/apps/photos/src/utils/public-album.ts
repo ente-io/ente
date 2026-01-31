@@ -1,9 +1,9 @@
-import { photosAppOrigin } from "ente-base/origins";
-
 /**
- * Get the appropriate URL for sign up or install based on platform.
+ * Get the appropriate URL for "Get Ente" button based on platform.
+ *
+ * Returns app store URLs for iOS/Android devices, ente.io for desktop.
  */
-export const getSignUpOrInstallURL = (isTouchscreen: boolean): string => {
+export const getEnteURL = (isTouchscreen: boolean): string => {
     if (isTouchscreen) {
         // For mobile devices, redirect to app stores
         const userAgent = navigator.userAgent || "";
@@ -20,6 +20,6 @@ export const getSignUpOrInstallURL = (isTouchscreen: boolean): string => {
         }
         // For other touchscreen devices, fall back to web
     }
-    // For desktop or other platforms, redirect to photos app
-    return photosAppOrigin();
+    // For desktop or other platforms, redirect to ente.io
+    return "https://web.ente.io";
 };

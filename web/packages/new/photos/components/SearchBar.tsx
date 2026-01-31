@@ -1,9 +1,10 @@
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
-import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
     Box,
@@ -149,7 +150,7 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
             <EnteLogo height={15} />
         </EnteLogoBox>
         <IconButton onClick={onSearch}>
-            <SearchIcon />
+            <HugeiconsIcon icon={Search01Icon} />
         </IconButton>
     </Stack>
 );
@@ -516,7 +517,7 @@ const iconForOption = (option: SearchOption | undefined) => {
         case "city":
             return <LocationIcon />;
         default:
-            return <SearchIcon />;
+            return <HugeiconsIcon icon={Search01Icon} />;
     }
 };
 

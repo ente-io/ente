@@ -328,7 +328,7 @@
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
   "referralStorageForBoth": "{storageAmountInGB} GB for them + {storageAmountInGB} GB for you when they upgrade.",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
-  "shareTextReferralCode": "Ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
+  "shareTextReferralCode": "Ente Photos is a private and safe home for your photos\n* Download Ente Photos from https://ente.io/app\n* Create an account\n* Apply the referral code {referralCode} in Settings->Referral\n* Get {referralStorageInGB}GB free when you upgrade to a paid plan",
   "claimFreeStorage": "Claim free storage",
   "inviteYourFriends": "Invite your friends",
   "earnFreeStorage": "Earn free storage",
@@ -336,9 +336,9 @@
   "youBothGet": "You both get",
   "free": "free",
   "failedToFetchReferralDetails": "Unable to fetch referral details. Please try again later.",
-  "referralStep1": "1. Customise and share your code with your friends.",
-  "referralStep2": "2. They sign up for a paid plan",
-  "referralStep3": "3. Both of you get {storageInGB} GB* free",
+  "referralStep1": "1. Customise and share your code.",
+  "referralStep2": "2. They sign up to Ente using your code.",
+  "referralStep3": "3. {storageInGB}GB free for them + {storageInGB}GB free for you when they upgrade.",
   "referralsAreCurrentlyPaused": "Referrals are currently paused",
   "youCanAtMaxDoubleYourStorage": "You can max double your storage",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} GB so far} false {You have claimed {storageAmountInGb} GB so far} other {You have claimed {storageAmountInGb} GB so far!}}",
@@ -382,6 +382,8 @@
   "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
+  "cannotMoveToSharedAlbums": "Can't move to shared albums",
+  "cannotMoveToSharedAlbumsMessage": "Items can only be added to shared albums, not moved. Would you like to add instead?",
   "deleteSharedAlbum": "Delete shared album?",
   "deleteAlbum": "Delete album",
   "deleteAlbumDialog": "Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?",
@@ -638,6 +640,12 @@
   "notifications": "Notifications",
   "sharedPhotoNotifications": "New shared photos",
   "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
+  "commentNotifications": "Comments",
+  "commentNotificationsExplanation": "Receive notifications when someone comments on your shared photos",
+  "likeNotifications": "Likes",
+  "likeNotificationsExplanation": "Receive notifications when someone likes your photos",
+  "replyNotifications": "Replies",
+  "replyNotificationsExplanation": "Receive notifications when someone replies to your comments",
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
@@ -1558,6 +1566,26 @@
   "addNewPerson": "Add new person",
   "addNameOrMerge": "Add name or merge",
   "mergeWithExisting": "Merge with existing",
+  "mergeWithPersonTitle": "Merge with {name}?",
+  "@mergeWithPersonTitle": {
+    "description": "Title for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
+  "mergeWithPersonDescription": "All photos from both face groups will be merged together under {name}.",
+  "@mergeWithPersonDescription": {
+    "description": "Description for confirming a merge with an existing person.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Jamie Long"
+      }
+    }
+  },
   "newPerson": "New person",
   "addName": "Add name",
   "add": "Add",
@@ -1963,7 +1991,7 @@
   "areThey": "Are they ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Save as another person",
-  "showLessFaces": "Show less faces",
+  "showLessFaces": "Show fewer faces",
   "showMoreFaces": "Show more faces",
   "ignore": "Ignore",
   "merge": "Merge",
@@ -2150,10 +2178,29 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Comments and reactions",
-  "cLDesc1": "We are introducing comments and reactions on shared photos. You can react or comment on a photo by opening it and using the actions at the bottom. All incoming comments and reactions will be visible on the Shared tab.",
-  "cLTitle2": "Admin for albums",
-  "cLDesc2": "You can now assign another Ente user as an administrator of your album. With this, they will be able to add other viewers and collaborators, remove photos from the albums, and even suggest participants to delete their photos.",
+  "cLTitle1": "Redesign",
+  "cLDesc1Item1": "Settings screen redesign",
+  "cLDesc1Item2": "Search bar moved to top",
+  "cLDesc1Item3": "Search results page redesign",
+  "cLTitle2": "Improvements",
+  "cLDesc2Item1": "Search within settings",
+  "cLDesc2Item2": "Faster search tab loading",
+  "cLDesc2Item3": "Search within discovery, location, file type sections",
+  "cLDesc2Item4": "Allow admin and album owner to delete comments",
+  "cLDesc2Item5": "Pinch to zoom on video",
+  "cLDesc2Item6": "View all ignored persons",
+  "cLDesc2Item7": "Better merge flow",
+  "cLDesc2Item8": "Search and custom sort on people page",
+  "cLDesc2Item9": "Consistent sorting of contacts",
+  "cLDesc2Item10": "Preview images for unsupported image formats",
+  "cLDesc2Item11": "Swap photos and tap to replace in collage creator",
+  "cLDesc2Item12": "Performance improvement on file info sheet",
+  "cLTitle3": "Bug fixes",
+  "cLDesc3Item1": "Fix for music pausing when opening the app",
+  "cLDesc3Item2": "Fix for swipe to select issue on Samsung S devices",
+  "cLDesc3Item3": "Fix for splash screen issue after backup restore",
+  "cLDesc3Item4": "Fix for gallery issues on tablets and landscape mode",
+  "cLDesc3Item5": "Fix for uncategorised page not updating after move",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2349,6 +2396,14 @@
   "ritualEmojiUseAction": "Use",
   "ritualSearchEmpty": "Build a ritual to keep your photo habit going.",
   "feed": "Feed",
+  "newCommentNotificationTitle": "You got a comment",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "You got a like",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
+  },
   "likedYourPhoto": "Liked a photo",
   "commentedOnYourPhoto": "Commented on a photo",
   "repliedToYourComment": "Replied to a comment",
@@ -2479,5 +2534,14 @@
         "type": "int"
       }
     }
-  }
+  },
+  "searchSettings": "Search settings",
+  "suggestions": "Suggestions",
+  "cleanupHiddenFiles": "Clean up hidden files",
+  "cleanupHiddenFilesDescription": "Some files in hidden albums still exist in non-hidden albums making them visible outside of the hidden section. Cleaning up will remove them from non-hidden albums.",
+  "cleanupComplete": "Cleanup complete",
+  "deleteHiddenFilesFromDevice": "Delete hidden files from device",
+  "deleteHiddenFilesFromDeviceDescription": "Delete local copies of hidden files from your device",
+  "deleteOnDeviceFiles": "Delete on device files",
+  "noHiddenFilesOnDevice": "No hidden files on device"
 }

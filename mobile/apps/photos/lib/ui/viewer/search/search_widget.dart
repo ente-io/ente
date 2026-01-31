@@ -50,18 +50,16 @@ class SearchWidgetState extends State<SearchWidget> {
   void initState() {
     super.initState();
     focusNode = FocusNode();
+    focusNode.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     _tabChangedEvent = Bus.instance.on<TabChangedEvent>().listen((event) async {
       if (!mounted) {
         return;
       }
-      if (event.selectedIndex == 3) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
-          focusNode.requestFocus();
-        });
-      } else {
+      if (event.selectedIndex != 3) {
         focusNode.unfocus();
       }
     });
@@ -145,6 +143,9 @@ class SearchWidgetState extends State<SearchWidget> {
     final textTheme = getEnteTextTheme(context);
     final mutedTextColor =
         textTheme.smallMuted.color ?? colorScheme.strokeMuted;
+    final shouldShowClearButton = focusNode.hasFocus ||
+        MediaQuery.viewInsetsOf(context).bottom > 0 ||
+        textController.text.trim().isNotEmpty;
     return RepaintBoundary(
       key: widgetKey,
       child: Padding(
@@ -198,6 +199,7 @@ class SearchWidgetState extends State<SearchWidget> {
                         ) {
                           return SearchSuffixIcon(
                             isSearching,
+                            showClearButton: shouldShowClearButton,
                           );
                         },
                       ),
@@ -217,7 +219,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 12 : 11;
+    final maxResultCount = _isYearValid(query) ? 13 : 12;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -290,6 +292,12 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getCollectionSearchResults(query).then(
       (collectionResults) {
         onResultsReceived(collectionResults);
+      },
+    );
+
+    _searchService.getDeviceCollectionSearchResults(query).then(
+      (deviceCollectionResults) {
+        onResultsReceived(deviceCollectionResults);
       },
     );
 

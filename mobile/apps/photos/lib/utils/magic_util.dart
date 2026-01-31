@@ -59,18 +59,22 @@ Future<void> changeCollectionVisibility(
   required int newVisibility,
   required int prevVisibility,
   bool isOwner = true,
+  bool showProgressDialog = true,
 }) async {
   final visibilityAction =
       _getVisibilityAction(context, newVisibility, prevVisibility);
-  final dialog = createProgressDialog(
-    context,
-    _visActionProgressDialogText(
+  ProgressDialog? dialog;
+  if (showProgressDialog) {
+    dialog = createProgressDialog(
       context,
-      visibilityAction,
-    ),
-  );
+      _visActionProgressDialogText(
+        context,
+        visibilityAction,
+      ),
+    );
+    await dialog.show();
+  }
 
-  await dialog.show();
   try {
     final Map<String, dynamic> update = {magicKeyVisibility: newVisibility};
     if (isOwner) {
@@ -86,18 +90,20 @@ Future<void> changeCollectionVisibility(
         "CollectionVisibilityChange: $visibilityAction",
       ),
     );
-    showShortToast(
-      context,
-      _visActionSuccessfulText(
+    if (showProgressDialog) {
+      showShortToast(
         context,
-        visibilityAction,
-      ),
-    );
+        _visActionSuccessfulText(
+          context,
+          visibilityAction,
+        ),
+      );
+    }
 
-    await dialog.hide();
+    await dialog?.hide();
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
-    await dialog.hide();
+    await dialog?.hide();
     rethrow;
   }
 }

@@ -12,12 +12,11 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
-import "package:photos/main.dart";
+import 'package:photos/main.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/service_locator.dart";
-import "package:photos/services/language_service.dart";
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/language_service.dart';
 import 'package:photos/services/notification_service.dart';
-import 'package:photos/services/social_sync_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -132,6 +131,7 @@ class SyncService {
         if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.sendTimeout ||
             e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionError ||
             e.type == DioExceptionType.unknown) {
           Bus.instance.fire(
             SyncStatusUpdate(
@@ -197,6 +197,10 @@ class SyncService {
   Future<void> _doSync() async {
     _logger.info("[SYNC] Starting local sync");
     await _localSyncService.sync();
+    if (isOfflineMode) {
+      _logger.info("[SYNC] Offline mode, skipping remote sync");
+      return;
+    }
 
     final bool allowRemoteSync =
         _localSyncService.hasCompletedFirstImportOrBypassed();
@@ -213,14 +217,6 @@ class SyncService {
 
       if (!isProcessBg) {
         await smartAlbumsService.syncSmartAlbums();
-      }
-
-      // Sync social data for shared collections
-      try {
-        _logger.info("[SYNC] Starting social sync");
-        await SocialSyncService.instance.syncAllSharedCollections();
-      } catch (e) {
-        _logger.warning("[SYNC] Social sync failed, continuing", e);
       }
     } else {
       _logger.info("[SYNC] First import not completed, skipping remote");

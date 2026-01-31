@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/components/alert_bottom_sheet.dart";
@@ -6,6 +7,7 @@ import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
@@ -92,15 +94,31 @@ class _SettingsSearchPageState extends State<SettingsSearchPage> {
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
+          title: l10n.emailVerificationToggle,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
+          title: l10n.passkey,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
+        ),
+        _SearchableSetting(
           title: l10n.appLock,
           category: l10n.security,
           page: const SecuritySettingsPage(),
         ),
         _SearchableSetting(
-          title: l10n.appearance,
-          category: l10n.appearance,
-          page: const ThemeSettingsPage(),
+          title: l10n.viewActiveSessions,
+          category: l10n.security,
+          page: const SecuritySettingsPage(),
         ),
+        if (Platform.isAndroid || kDebugMode)
+          _SearchableSetting(
+            title: l10n.appearance,
+            category: l10n.appearance,
+            page: const ThemeSettingsPage(),
+          ),
       ],
       _SearchableSetting(
         title: l10n.general,

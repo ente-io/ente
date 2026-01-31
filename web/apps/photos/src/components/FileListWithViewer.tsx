@@ -206,7 +206,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const { show: showMapDialog, props: mapDialogVisibilityProps } =
         useModalVisibility();
     const { onGenericError } = useBaseContext();
-    const { mapEnabled, isCommentsEnabled } = useSettingsSnapshot();
+    const { mapEnabled } = useSettingsSnapshot();
     const { mode: colorSchemeMode, systemMode } = useColorScheme();
     const theme = useTheme();
     const resolvedMode =
@@ -293,7 +293,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const shouldShowMapButton =
         modePlus !== "search" &&
         activeCollectionSummary?.type === "all" &&
-        activeCollectionSummary.fileCount > 0;
+        (activeCollectionSummary.fileCount > 0 || files.length > 0);
 
     const handleShowMap = useCallback(async () => {
         if (!activeCollectionSummary) return;
@@ -401,7 +401,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     enableComment,
                     enableJoin,
                 }}
-                isCommentsFeatureEnabled={isCommentsEnabled}
+                isCommentsFeatureEnabled
                 onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
