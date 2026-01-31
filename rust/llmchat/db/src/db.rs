@@ -129,7 +129,15 @@ impl<B: Backend> ChatDb<B> {
     pub fn get_sessions_needing_sync(&self) -> Result<Vec<Session>> {
         let rows = self.backend.query(
             "SELECT session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at \
-             FROM sessions WHERE needs_sync = 1 AND deleted_at IS NULL ORDER BY updated_at DESC",
+             FROM sessions \
+             WHERE deleted_at IS NULL \
+               AND (needs_sync = 1 OR EXISTS (\
+                 SELECT 1 FROM messages \
+                 WHERE messages.session_uuid = sessions.session_uuid \
+                   AND messages.needs_sync = 1 \
+                   AND messages.deleted_at IS NULL\
+               )) \
+             ORDER BY updated_at DESC",
             &[],
         )?;
         rows.iter().map(|row| self.session_from_row(row)).collect()
@@ -151,8 +159,8 @@ impl<B: Backend> ChatDb<B> {
 
         self.backend.transaction(|tx| {
             tx.execute(
-                "INSERT INTO messages (message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at) \
-                 VALUES (?, ?, ?, ?, ?, ?, ?, NULL)",
+                "INSERT INTO messages (message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at) \
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL)",
                 &[
                     Value::Text(message_uuid.to_string()),
                     Value::Text(session_uuid.to_string()),
@@ -180,14 +188,24 @@ impl<B: Backend> ChatDb<B> {
             text: text.to_string(),
             attachments,
             created_at: now,
+            needs_sync: true,
             deleted_at: None,
         })
     }
 
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
         let rows = self.backend.query(
-            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at \
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
              FROM messages WHERE session_uuid = ? AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC",
+            &[Value::Text(session_uuid.to_string())],
+        )?;
+        rows.iter().map(|row| self.message_from_row(row)).collect()
+    }
+
+    pub fn get_messages_needing_sync(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
+        let rows = self.backend.query(
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
+             FROM messages WHERE session_uuid = ? AND needs_sync = 1 AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC",
             &[Value::Text(session_uuid.to_string())],
         )?;
         rows.iter().map(|row| self.message_from_row(row)).collect()
@@ -208,7 +226,7 @@ impl<B: Backend> ChatDb<B> {
             let session_uuid = Uuid::parse_str(&row.get_string(0)?)?;
 
             let affected = tx.execute(
-                "UPDATE messages SET text = ? WHERE message_uuid = ? AND deleted_at IS NULL",
+                "UPDATE messages SET text = ?, needs_sync = 1 WHERE message_uuid = ? AND deleted_at IS NULL",
                 &[Value::Blob(encrypted_text), Value::Text(uuid.to_string())],
             )?;
             ensure_row_updated(affected, EntityType::Message, uuid)?;
@@ -251,6 +269,14 @@ impl<B: Backend> ChatDb<B> {
         ensure_row_updated(affected, EntityType::Session, uuid)
     }
 
+    pub fn mark_message_synced(&self, uuid: Uuid) -> Result<()> {
+        let affected = self.backend.execute(
+            "UPDATE messages SET needs_sync = 0 WHERE message_uuid = ? AND deleted_at IS NULL",
+            &[Value::Text(uuid.to_string())],
+        )?;
+        ensure_row_updated(affected, EntityType::Message, uuid)
+    }
+
     pub fn upsert_session_from_remote(
         &self,
         session_uuid: Uuid,
@@ -263,7 +289,7 @@ impl<B: Backend> ChatDb<B> {
             "INSERT INTO sessions (session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at) \
              VALUES (?, ?, ?, ?, ?, 0, NULL) \
              ON CONFLICT(session_uuid) DO UPDATE SET \
-               title = excluded.title, \
+               title = CASE WHEN sessions.needs_sync = 1 THEN sessions.title ELSE excluded.title END, \
                created_at = MIN(sessions.created_at, excluded.created_at), \
                updated_at = MAX(sessions.updated_at, excluded.updated_at), \
                remote_id = COALESCE(sessions.remote_id, excluded.remote_id), \
@@ -314,8 +340,8 @@ impl<B: Backend> ChatDb<B> {
         let attachments_json = self.serialize_attachments(&attachments)?;
 
         self.backend.execute(
-            "INSERT INTO messages (message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, deleted_at) \
-             VALUES (?, ?, ?, ?, ?, ?, ?, NULL) \
+            "INSERT INTO messages (message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at) \
+             VALUES (?, ?, ?, ?, ?, ?, ?, 0, NULL) \
              ON CONFLICT(message_uuid) DO UPDATE SET \
                session_uuid = excluded.session_uuid, \
                parent_message_uuid = excluded.parent_message_uuid, \
@@ -323,6 +349,7 @@ impl<B: Backend> ChatDb<B> {
                text = excluded.text, \
                attachments = excluded.attachments, \
                created_at = MIN(messages.created_at, excluded.created_at), \
+               needs_sync = CASE WHEN messages.needs_sync = 1 THEN 1 ELSE excluded.needs_sync END, \
                deleted_at = NULL",
             &[
                 Value::Text(message_uuid.to_string()),
@@ -349,6 +376,7 @@ impl<B: Backend> ChatDb<B> {
             text: text.to_string(),
             attachments,
             created_at,
+            needs_sync: false,
             deleted_at: None,
         })
     }
@@ -443,7 +471,8 @@ impl<B: Backend> ChatDb<B> {
         let attachments_json = row.get_optional_string(5)?;
         let attachments = self.deserialize_attachments(attachments_json)?;
         let created_at = row.get_i64(6)?;
-        let deleted_at = row.get_optional_i64(7)?;
+        let needs_sync = bool_from_i64(row.get_i64(7)?)?;
+        let deleted_at = row.get_optional_i64(8)?;
 
         Ok(Message {
             uuid,
@@ -453,6 +482,7 @@ impl<B: Backend> ChatDb<B> {
             text,
             attachments,
             created_at,
+            needs_sync,
             deleted_at,
         })
     }

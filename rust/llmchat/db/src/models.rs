@@ -21,6 +21,7 @@ pub struct Message {
     pub text: String,
     pub attachments: Vec<AttachmentMeta>,
     pub created_at: i64,
+    pub needs_sync: bool,
     pub deleted_at: Option<i64>,
 }
 

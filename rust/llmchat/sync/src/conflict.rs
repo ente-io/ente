@@ -9,6 +9,7 @@ pub fn find_duplicate_message(
     text: &str,
     attachments: &[AttachmentMeta],
     created_at: i64,
+    parent: Option<Uuid>,
 ) -> Option<Uuid> {
     let signature = attachments_signature(attachments);
     local_messages.iter().find_map(|message| {
@@ -16,6 +17,9 @@ pub fn find_duplicate_message(
             return None;
         }
         if message.text != text {
+            return None;
+        }
+        if message.parent_message_uuid != parent {
             return None;
         }
         if attachments_signature(&message.attachments) != signature {
@@ -83,6 +87,71 @@ fn dfs_order(
 fn attachments_signature(attachments: &[AttachmentMeta]) -> Vec<String> {
     attachments
         .iter()
-        .map(|att| format!("{:?}:{}", att.kind, att.name))
+        .map(|att| format!("{:?}:{}:{}", att.kind, att.name, att.size))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use llmchat_db::{AttachmentKind, AttachmentMeta, Message, Sender};
+    use uuid::Uuid;
+
+    #[test]
+    fn duplicate_message_respects_parent_and_attachment_size() {
+        let session_uuid = Uuid::new_v4();
+        let parent_uuid = Uuid::new_v4();
+        let message_uuid = Uuid::new_v4();
+        let attachment = AttachmentMeta {
+            id: "att-1".to_string(),
+            kind: AttachmentKind::Image,
+            size: 512,
+            name: "photo.png".to_string(),
+        };
+
+        let local = Message {
+            uuid: message_uuid,
+            session_uuid,
+            parent_message_uuid: Some(parent_uuid),
+            sender: Sender::SelfUser,
+            text: "hello".to_string(),
+            attachments: vec![attachment.clone()],
+            created_at: 10_000,
+            needs_sync: true,
+            deleted_at: None,
+        };
+
+        let wrong_size = AttachmentMeta { size: 256, ..attachment.clone() };
+        assert!(find_duplicate_message(
+            &[local.clone()],
+            &Sender::SelfUser,
+            "hello",
+            &[wrong_size],
+            10_000,
+            Some(parent_uuid),
+        )
+        .is_none());
+
+        assert!(find_duplicate_message(
+            &[local.clone()],
+            &Sender::SelfUser,
+            "hello",
+            &[attachment.clone()],
+            10_000,
+            None,
+        )
+        .is_none());
+
+        assert_eq!(
+            find_duplicate_message(
+                &[local],
+                &Sender::SelfUser,
+                "hello",
+                &[attachment],
+                10_000,
+                Some(parent_uuid),
+            ),
+            Some(message_uuid)
+        );
+    }
 }

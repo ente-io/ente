@@ -2,14 +2,26 @@ use crate::{Backend, Error, Result};
 use crate::backend::RowExt;
 use crate::schema;
 
-pub const LATEST_VERSION: i64 = 1;
+pub const LATEST_VERSION: i64 = 2;
 
 pub fn migrate<B: Backend>(backend: &B) -> Result<()> {
     let version = user_version(backend)?;
     match version {
         0 => {
             backend.execute_batch(schema::CREATE_ALL)?;
-            backend.execute("PRAGMA user_version = 1;", &[])?;
+            backend.execute("PRAGMA user_version = 2;", &[])?;
+            Ok(())
+        }
+        1 => {
+            backend.execute(
+                "ALTER TABLE messages ADD COLUMN needs_sync INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1));",
+                &[],
+            )?;
+            backend.execute(
+                "UPDATE messages SET needs_sync = 0 WHERE session_uuid IN (SELECT session_uuid FROM sessions WHERE needs_sync = 0);",
+                &[],
+            )?;
+            backend.execute("PRAGMA user_version = 2;", &[])?;
             Ok(())
         }
         LATEST_VERSION => Ok(()),

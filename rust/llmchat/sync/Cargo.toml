@@ -13,6 +13,8 @@ thiserror = "2"
 uuid = { version = "1", features = ["v4", "rng-getrandom"] }
 hkdf = "0.12"
 sha2 = "0.10"
+zeroize = "1"
 
 [dev-dependencies]
+httpmock = "0.7"
 tempfile = "3"

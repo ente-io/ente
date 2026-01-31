@@ -1,5 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
+use std::sync::Arc;
+
+use zeroize::Zeroizing;
 
 use ente_core::crypto::keys;
 use llmchat_db::{
@@ -26,7 +29,7 @@ const CHAT_KEY_META_KEY: &str = "llmchat.chat.key";
 pub struct SyncAuth {
     pub base_url: String,
     pub auth_token: String,
-    pub master_key: Vec<u8>,
+    pub master_key: Zeroizing<Vec<u8>>,
     pub user_agent: Option<String>,
     pub client_package: Option<String>,
     pub client_version: Option<String>,
@@ -116,6 +119,13 @@ impl SyncEngine {
         Ok(result)
     }
 
+    pub fn sync_in_background(
+        self: Arc<Self>,
+        auth: SyncAuth,
+    ) -> std::thread::JoinHandle<Result<SyncResult, SyncError>> {
+        std::thread::spawn(move || self.sync(auth))
+    }
+
     pub fn download_attachment(
         &self,
         auth: SyncAuth,
@@ -189,6 +199,15 @@ impl SyncEngine {
         Ok(true)
     }
 
+    pub fn download_attachment_in_background(
+        self: Arc<Self>,
+        auth: SyncAuth,
+        attachment_id: String,
+        session_uuid: String,
+    ) -> std::thread::JoinHandle<Result<bool, SyncError>> {
+        std::thread::spawn(move || self.download_attachment(auth, attachment_id, session_uuid))
+    }
+
     fn pull(
         &self,
         http: &HttpClient,
@@ -196,7 +215,7 @@ impl SyncEngine {
         result: &mut SyncResult,
     ) -> Result<(), SyncError> {
         let mut cursor = self.load_cursor()?;
-        let mut seen_cursor = None;
+        let mut seen_cursors: HashSet<SyncCursor> = HashSet::new();
 
         loop {
             let query = vec![
@@ -226,7 +245,7 @@ impl SyncEngine {
                 }
             };
 
-            if Some(next_cursor.clone()) == seen_cursor {
+            if !seen_cursors.insert(next_cursor.clone()) {
                 break;
             }
 
@@ -236,8 +255,6 @@ impl SyncEngine {
             if cursor.is_complete_cycle() {
                 break;
             }
-
-            seen_cursor = Some(cursor.clone());
         }
 
         Ok(())
@@ -326,18 +343,23 @@ impl SyncEngine {
                 self.db.get_messages(session_uuid).unwrap_or_default()
             });
 
-            if let Some(dup_uuid) =
-                find_duplicate_message(local_messages, &sender, &payload.text, &attachments, message.created_at)
-            {
-                duplicate_map.insert(message_uuid, dup_uuid);
-                continue;
-            }
-
             let parent_uuid = message
                 .parent_message_uuid
                 .as_ref()
                 .and_then(|parent| Uuid::parse_str(parent).ok())
                 .and_then(|parent| duplicate_map.get(&parent).cloned().or(Some(parent)));
+
+            if let Some(dup_uuid) = find_duplicate_message(
+                local_messages,
+                &sender,
+                &payload.text,
+                &attachments,
+                message.created_at,
+                parent_uuid,
+            ) {
+                duplicate_map.insert(message_uuid, dup_uuid);
+                continue;
+            }
 
             let inserted = self.db.upsert_message_from_remote(
                 message_uuid,
@@ -413,43 +435,70 @@ impl SyncEngine {
         let sessions = self.db.get_sessions_needing_sync()?;
         for session in sessions {
             let session_uuid = session.uuid;
-            let messages = self.db.get_messages(session_uuid)?;
-            self.reconcile_attachments(session_uuid, &messages)?;
+            let messages = self.db.get_messages_needing_sync(session_uuid)?;
+            let should_upsert_session = session.needs_sync || session.remote_id.is_none();
 
-            let force_uploads = self.revalidate_uploaded_attachments(http, session_uuid, &messages)?;
-            let uploaded =
-                self.upload_pending_attachments(http, chat_key, session_uuid, &force_uploads)?;
-            result.uploaded_attachments += uploaded;
+            if !messages.is_empty() {
+                self.reconcile_attachments(session_uuid, &messages)?;
 
-            let upload_states = self.collect_attachment_states(&messages)?;
-            let blocked = blocked_messages(&messages, &upload_states);
+                let force_uploads = self.revalidate_uploaded_attachments(http, session_uuid, &messages)?;
+                let uploaded =
+                    self.upload_pending_attachments(http, chat_key, session_uuid, &force_uploads)?;
+                result.uploaded_attachments += uploaded;
 
-            let ordered = order_for_sync(&messages);
-            let filtered: Vec<Message> = ordered
-                .into_iter()
-                .filter(|message| !blocked.contains(&message.uuid))
-                .collect();
+                let upload_states = self.collect_attachment_states(&messages)?;
+                let blocked = blocked_messages(&messages, &upload_states);
 
-            let session_payload = SessionPayload {
-                title: session.title.clone(),
-            };
-            let encrypted = encrypt_payload(&session_payload, chat_key)?;
-            let session_request = UpsertSessionRequest {
-                session_uuid: session_uuid.to_string(),
-                root_session_uuid: session_uuid.to_string(),
-                branch_from_message_uuid: None,
-                encrypted_data: encrypted.encrypted_data,
-                header: encrypted.header,
-                created_at: session.created_at,
-            };
-            let _response: serde_json::Value = http.post_json("/llmchat/chat/session", &session_request)?;
-            result.pushed.sessions += 1;
+                let ordered = order_for_sync(&messages);
+                let filtered: Vec<Message> = ordered
+                    .into_iter()
+                    .filter(|message| !blocked.contains(&message.uuid))
+                    .collect();
 
-            for message in filtered.iter() {
-                self.push_message_with_retry(http, chat_key, message, result)?;
-            }
+                if should_upsert_session {
+                    let session_payload = SessionPayload {
+                        title: session.title.clone(),
+                    };
+                    let encrypted = encrypt_payload(&session_payload, chat_key)?;
+                    let session_request = UpsertSessionRequest {
+                        session_uuid: session_uuid.to_string(),
+                        root_session_uuid: session_uuid.to_string(),
+                        branch_from_message_uuid: None,
+                        encrypted_data: encrypted.encrypted_data,
+                        header: encrypted.header,
+                        created_at: session.created_at,
+                    };
+                    let _response: serde_json::Value =
+                        http.post_json("/llmchat/chat/session", &session_request)?;
+                    result.pushed.sessions += 1;
+                }
 
-            if blocked.is_empty() && filtered.len() == messages.len() {
+                for message in filtered.iter() {
+                    self.push_message_with_retry(http, chat_key, message, result)?;
+                    let _ = self.db.mark_message_synced(message.uuid);
+                }
+
+                if blocked.is_empty() && filtered.len() == messages.len() {
+                    let _ = self
+                        .db
+                        .mark_session_synced(session_uuid, &session_uuid.to_string());
+                }
+            } else if should_upsert_session {
+                let session_payload = SessionPayload {
+                    title: session.title.clone(),
+                };
+                let encrypted = encrypt_payload(&session_payload, chat_key)?;
+                let session_request = UpsertSessionRequest {
+                    session_uuid: session_uuid.to_string(),
+                    root_session_uuid: session_uuid.to_string(),
+                    branch_from_message_uuid: None,
+                    encrypted_data: encrypted.encrypted_data,
+                    header: encrypted.header,
+                    created_at: session.created_at,
+                };
+                let _response: serde_json::Value =
+                    http.post_json("/llmchat/chat/session", &session_request)?;
+                result.pushed.sessions += 1;
                 let _ = self
                     .db
                     .mark_session_synced(session_uuid, &session_uuid.to_string());
@@ -692,9 +741,10 @@ impl SyncEngine {
         session_uuid: Uuid,
         attachment_id: &str,
     ) -> Result<(), SyncError> {
-        let encrypted = self.ensure_encrypted_bytes(attachment_id, session_uuid, chat_key)?;
+        let (encrypted, content_length) =
+            self.encrypted_attachment_bytes(attachment_id, session_uuid, chat_key)?;
         let request = UploadUrlRequest {
-            content_length: encrypted.len() as i64,
+            content_length,
             content_md5: None,
         };
         let upload_url = http.post_json::<UploadUrlResponse, _>(
@@ -725,16 +775,19 @@ impl SyncEngine {
             self.db
                 .set_attachment_upload_state(&row.attachment_id, UploadState::Uploading)?;
 
-            let encrypted = match self.ensure_encrypted_bytes(&row.attachment_id, session_uuid, chat_key) {
-                Ok(data) => data,
-                Err(err) => {
-                    let _ = self.db.set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
-                    return Err(err);
-                }
-            };
+            let (encrypted, content_length) =
+                match self.encrypted_attachment_bytes(&row.attachment_id, session_uuid, chat_key) {
+                    Ok(data) => data,
+                    Err(err) => {
+                        let _ = self
+                            .db
+                            .set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
+                        return Err(err);
+                    }
+                };
 
             let request = UploadUrlRequest {
-                content_length: encrypted.len() as i64,
+                content_length,
                 content_md5: None,
             };
 
@@ -780,6 +833,17 @@ impl SyncEngine {
         Ok(uploaded)
     }
 
+    fn encrypted_attachment_bytes(
+        &self,
+        attachment_id: &str,
+        session_uuid: Uuid,
+        chat_key: &[u8],
+    ) -> Result<(Vec<u8>, i64), SyncError> {
+        let bytes = self.ensure_encrypted_bytes(attachment_id, session_uuid, chat_key)?;
+        let size = bytes.len() as i64;
+        Ok((bytes, size))
+    }
+
     fn encrypted_attachment_size(
         &self,
         attachment_id: &str,
@@ -791,8 +855,8 @@ impl SyncEngine {
             return Ok(size as i64);
         }
 
-        let encrypted = self.ensure_encrypted_bytes(attachment_id, session_uuid, chat_key)?;
-        Ok(encrypted.len() as i64)
+        let (_bytes, size) = self.encrypted_attachment_bytes(attachment_id, session_uuid, chat_key)?;
+        Ok(size)
     }
 
     fn ensure_encrypted_bytes(

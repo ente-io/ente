@@ -69,6 +69,10 @@ impl<B: crate::Backend> LlmChatDb<B> {
         self.chat.get_messages(session_uuid)
     }
 
+    pub fn get_messages_needing_sync(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
+        self.chat.get_messages_needing_sync(session_uuid)
+    }
+
     pub fn update_message_text(&self, uuid: Uuid, text: &str) -> Result<()> {
         self.chat.update_message_text(uuid, text)
     }
@@ -125,6 +129,10 @@ impl<B: crate::Backend> LlmChatDb<B> {
     // Sync helpers
     pub fn mark_session_synced(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
         self.chat.mark_session_synced(uuid, remote_id)
+    }
+
+    pub fn mark_message_synced(&self, uuid: Uuid) -> Result<()> {
+        self.chat.mark_message_synced(uuid)
     }
 
     pub fn get_sessions_needing_sync(&self) -> Result<Vec<Session>> {
