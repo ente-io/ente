@@ -3011,6 +3011,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No results found'**
   String get noResultsFound;
+
+  /// No description provided for @viewActiveSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'View active sessions'**
+  String get viewActiveSessions;
+
+  /// No description provided for @authToViewYourActiveSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to view your active sessions'**
+  String get authToViewYourActiveSessions;
 }
 
 class _AppLocalizationsDelegate
