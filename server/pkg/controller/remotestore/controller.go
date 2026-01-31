@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/utils/rollout"
 	"github.com/spf13/viper"
@@ -17,7 +18,7 @@ import (
 )
 
 const (
-	backupOptionsRolloutPercentage = 20
+	backupOptionsRolloutPercentage = 100
 	backupOptionsRolloutNonce      = "backup-options-v1"
 )
 
