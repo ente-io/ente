@@ -12,8 +12,8 @@ tauri = { version = "1.5.0", features = [ "dialog-save", "dialog-open", "path-al
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 ente-core = { path = "../../../rust/core", features = ["srp"] }
-llmchat-db = { path = "../../../rust/llmchat-db" }
-inference_rs = { path = "../../../rust/inference_rs" }
+llmchat-db = { path = "../../../rust/llmchat/db" }
+inference_rs = { path = "../../../rust/llmchat/inference" }
 uuid = { version = "1", features = ["v4"] }
 
 [features]
