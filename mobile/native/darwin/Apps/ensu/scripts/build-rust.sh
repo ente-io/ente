@@ -4,7 +4,7 @@ set -euo pipefail
 # Build the UniFFI Rust static libraries for the current Xcode build platform.
 #
 # Outputs universal static libraries at:
-#   $TARGET_TEMP_DIR/ensu_rust/libensu_uniffi.a
+#   $TARGET_TEMP_DIR/ensu_rust/libcore_uniffi.a
 #   $TARGET_TEMP_DIR/ensu_rust/libllmchat_db_uniffi.a
 #   $TARGET_TEMP_DIR/ensu_rust/libllmchat_sync_uniffi.a
 
@@ -126,9 +126,9 @@ HOST_SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
 export SDKROOT="${HOST_SDKROOT}"
 
 build_crate_universal() {
-  crate_name="$1"           # e.g. ensu_uniffi
+  crate_name="$1"           # e.g. core_uniffi
   crate_dir="$2"            # absolute path
-  lib_name="$3"             # e.g. libensu_uniffi.a
+  lib_name="$3"             # e.g. libcore_uniffi.a
 
   echo "🔧 Building ${crate_name} → ${lib_name}"
 
@@ -189,6 +189,6 @@ build_crate_universal() {
   echo "✅ Built ${universal_lib}"
 }
 
-build_crate_universal "ensu_uniffi" "${REPO_ROOT}/rust/ensu_uniffi" "libensu_uniffi.a"
-build_crate_universal "llmchat_db_uniffi" "${REPO_ROOT}/rust/llmchat_db_uniffi" "libllmchat_db_uniffi.a"
-build_crate_universal "llmchat_sync_uniffi" "${REPO_ROOT}/rust/llmchat_sync_uniffi" "libllmchat_sync_uniffi.a"
+build_crate_universal "core_uniffi" "${REPO_ROOT}/rust/uniffi/core_uniffi" "libcore_uniffi.a"
+build_crate_universal "llmchat_db_uniffi" "${REPO_ROOT}/rust/llmchat/uniffi/llmchat_db_uniffi" "libllmchat_db_uniffi.a"
+build_crate_universal "llmchat_sync_uniffi" "${REPO_ROOT}/rust/llmchat/uniffi/llmchat_sync_uniffi" "libllmchat_sync_uniffi.a"

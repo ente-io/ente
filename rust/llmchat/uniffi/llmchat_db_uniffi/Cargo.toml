@@ -1,16 +1,16 @@
 [package]
-name = "llmchat_sync_uniffi"
+name = "llmchat_db_uniffi"
 version = "0.1.0"
 edition = "2024"
 
 [lib]
-name = "llmchat_sync_uniffi"
+name = "llmchat_db_uniffi"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-llmchat-sync = { path = "../llmchat-sync" }
+llmchat-db = { path = "../../db" }
 serde = { version = "1", features = ["derive"] }
 thiserror = "2"
 uniffi = { version = "0.31.0" }
+uuid = { version = "1" }
 
-[build-dependencies]

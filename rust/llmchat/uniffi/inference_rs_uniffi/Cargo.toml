@@ -8,7 +8,7 @@ name = "inference_rs_uniffi"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-inference_rs = { path = "../inference_rs" }
+inference_rs = { path = "../../inference" }
 serde = { version = "1", features = ["derive"] }
 thiserror = "1"
 uniffi = { version = "0.31.0" }

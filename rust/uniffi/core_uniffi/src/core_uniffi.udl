@@ -37,7 +37,7 @@ interface EnsuError {
   Message(string message);
 };
 
-namespace ensu_uniffi {
+namespace core_uniffi {
   [Throws=EnsuError]
   void init_crypto();
 

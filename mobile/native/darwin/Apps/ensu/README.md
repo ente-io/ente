@@ -14,7 +14,7 @@ All commands below assume you run them from `darwin/Apps/ensu`.
 
 The Xcode build script (`scripts/build-rust.sh`) builds Rust static libs, but it does
 not regenerate the Swift bindings. If bindings are missing, build the corresponding
-`rust/*_uniffi` crate and run `uniffi-bindgen generate` to output into the paths above.
+`rust/uniffi/*` or `rust/llmchat/uniffi/*` crate and run `uniffi-bindgen generate` to output into the paths above.
 `../Packages/Rust/tool/generate_bindings.sh` and `../Packages/Rust/tool/build_xcframework.sh`
 handle the InferenceRS bindings and xcframework.
 

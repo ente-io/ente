@@ -3,11 +3,11 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
-INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/inference_rs_uniffi"
-CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_db_uniffi"
-CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat_sync_uniffi"
+INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/inference_rs_uniffi"
+CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/llmchat_db_uniffi"
+CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/llmchat_sync_uniffi"
 # Patch llama.cpp mtmd sources so mmproj models load correctly.
-PATCH_SCRIPT="$REPO_ROOT/rust/inference_rs/tool/patch_llama_mtmd.sh"
+PATCH_SCRIPT="$REPO_ROOT/rust/llmchat/inference/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 OUT_DIR="$ROOT/src/main/jniLibs"
 SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"

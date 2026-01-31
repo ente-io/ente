@@ -1,6 +1,6 @@
 # InferenceRS (Swift)
 
-Swift bindings generated via UniFFI for the Rust core in `../rust`.
+Swift bindings generated via UniFFI for the Rust core in `rust/llmchat/inference`.
 
 ## Generate bindings
 

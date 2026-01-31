@@ -282,6 +282,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
+name = "core_uniffi"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "ente-core",
+ "once_cell",
+ "thiserror 1.0.69",
+ "uniffi",
+]
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -370,17 +381,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "ensu_uniffi"
-version = "0.1.0"
-dependencies = [
- "base64",
- "ente-core",
- "once_cell",
- "thiserror 1.0.69",
- "uniffi",
 ]
 
 [[package]]

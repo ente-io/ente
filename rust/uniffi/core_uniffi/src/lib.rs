@@ -7,7 +7,7 @@ use std::sync::{Mutex, MutexGuard};
 
 use ente_core::{auth, crypto};
 
-uniffi::include_scaffolding!("ensu_uniffi");
+uniffi::include_scaffolding!("core_uniffi");
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AuthSecrets {

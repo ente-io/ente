@@ -41,55 +41,62 @@
 ## Contents (this repo)
 
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
-- `rust/cli/` - Rust CLI (work-in-progress).
+- `rust/cli/` (`ente-rs`) - Rust CLI.
+- `rust/llmchat/` - LLM chat stack (see `rust/llmchat/README.md`).
 
 ## Directory Structure
 
 ```
 rust/
-├── cli/                    # CLI package
+├── cli/                          # CLI package (ente-rs)
 │   ├── src/
 │   │   └── main.rs
 │   ├── Cargo.toml
 │   └── Cargo.lock
 │
-└── core/                   # Pure Rust shared logic
-    ├── src/
-    │   ├── lib.rs
-    │   ├── crypto/
-    │   └── auth/
-    ├── docs/
-    │   ├── crypto.md
-    │   └── auth.md
-    └── Cargo.toml          # crate name: ente-core
+├── core/                         # Pure Rust shared logic (ente-core)
+│   ├── src/
+│   │   ├── lib.rs
+│   │   ├── crypto/
+│   │   └── auth/
+│   ├── docs/
+│   │   ├── crypto.md
+│   │   └── auth.md
+│   └── Cargo.toml
+│
+└── llmchat/                      # LLM chat stack (see rust/llmchat/README.md)
 
-web/packages/wasm/          # WASM bindings (lives in web workspace)
+rust/uniffi/                      # UniFFI bindings for core crypto/auth
+├── core_uniffi/
+
+web/packages/wasm/                # WASM bindings (lives in web workspace)
 ├── src/
-│   └── lib.rs              # #[wasm_bindgen] wrappers around ente-core
-├── Cargo.toml              # crate name: ente-wasm
-├── package.json            # includes wasm-pack as devDependency
-└── pkg/                    # generated output (gitignored)
+│   └── lib.rs                    # #[wasm_bindgen] wrappers around ente-core
+├── Cargo.toml                    # crate name: ente-wasm
+├── package.json                  # includes wasm-pack as devDependency
+└── pkg/                          # generated output (gitignored)
 
-mobile/packages/rust/       # Shared FRB bindings for all mobile apps
+mobile/packages/rust/             # Shared FRB bindings for all mobile apps
 ├── rust/
 │   ├── src/
-│   │   └── api/            # #[frb] wrappers around ente-core
-│   └── Cargo.toml          # crate name: ente_rust
-├── lib/                    # Generated Dart bindings
-└── pubspec.yaml            # Flutter plugin package
+│   │   └── api/                  # #[frb] wrappers around ente-core
+│   └── Cargo.toml                # crate name: ente_rust
+├── lib/                          # Generated Dart bindings
+└── pubspec.yaml                  # Flutter plugin package
 
-mobile/apps/photos/rust/    # Photos app-specific FRB bindings
+mobile/apps/photos/rust/          # Photos app-specific FRB bindings
 ├── src/
 │   ├── lib.rs
-│   └── api/                # #[frb] app-specific code (usearch, ML)
+│   └── api/                      # #[frb] app-specific code (usearch, ML)
 │       └── *.rs
-└── Cargo.toml              # crate name: ente_photos_rust
+└── Cargo.toml                    # crate name: ente_photos_rust
 ```
 
 **Crates:**
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
   - Docs: `rust/core/docs/crypto.md`, `rust/core/docs/auth.md`
+- `ente-rs` - CLI binary
 - `ente-wasm` - wasm-bindgen wrappers for web
 - `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
 - `ente_photos_rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)

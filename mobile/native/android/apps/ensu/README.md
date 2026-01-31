@@ -22,11 +22,11 @@ cd mobile/native/android/packages/rust/tool
 
 This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/`.
 The UniFFI Kotlin bindings are generated separately into:
-- `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/ensu_uniffi.kt`
+- `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core_uniffi.kt`
 - `android/packages/rust/src/main/kotlin/io/ente/labs/*/*_uniffi.kt`
 
 These generated files are gitignored. If bindings are missing, rebuild the corresponding
-`rust/*_uniffi` crate(s) and run `uniffi-bindgen generate` for Kotlin (see each crate’s
+`rust/uniffi/*` and `rust/llmchat/uniffi/*` crates and run `uniffi-bindgen generate` for Kotlin (see each crate’s
 `uniffi.toml` for package names).
 
 ### 2. Build Debug APK

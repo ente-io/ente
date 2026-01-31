@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
 RUST_DIR="$ROOT/rust"
-CORE_ROOT="$REPO_ROOT/rust/inference_rs"
+CORE_ROOT="$REPO_ROOT/rust/llmchat/inference"
 PATCH_SCRIPT="$CORE_ROOT/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 LIB_NAME="libinference_rs_uniffi.a"

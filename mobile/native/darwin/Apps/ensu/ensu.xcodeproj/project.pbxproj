@@ -133,7 +133,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "ensu" */;
 			buildPhases = (
-				CC142736A470612F436ECF8E /* Build Rust (ensu_uniffi) */,
+				CC142736A470612F436ECF8E /* Build Rust (core_uniffi) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,
@@ -161,7 +161,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9C5C5C140967470293DCAAF2 /* Build configuration list for PBXNativeTarget "ensu-macos" */;
 			buildPhases = (
-				25484CE4873ED7217FB27990 /* Build Rust (ensu_uniffi) */,
+				25484CE4873ED7217FB27990 /* Build Rust (core_uniffi) */,
 				BB83D829CC14232E7E8BDD51 /* Sources */,
 				0BCBB02794980AFFDC386B69 /* Frameworks */,
 				1FDE2B245F9DADEF5E026D0B /* Resources */,
@@ -310,16 +310,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		CC142736A470612F436ECF8E /* Build Rust (ensu_uniffi) */ = {
+		CC142736A470612F436ECF8E /* Build Rust (core_uniffi) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (ensu_uniffi)";
+			name = "Build Rust (core_uniffi)";
 			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 			);
@@ -327,16 +327,16 @@
 			shellPath = /bin/sh;
 			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
 		};
-		25484CE4873ED7217FB27990 /* Build Rust (ensu_uniffi) */ = {
+		25484CE4873ED7217FB27990 /* Build Rust (core_uniffi) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (ensu_uniffi)";
+			name = "Build Rust (core_uniffi)";
 			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 			);
@@ -544,14 +544,14 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 					"-Xcc",
@@ -605,14 +605,14 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 					"-Xcc",
@@ -664,14 +664,14 @@
 					"-framework",
 					"SystemConfiguration",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 					"-Xcc",
@@ -724,14 +724,14 @@
 					"-framework",
 					"SystemConfiguration",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libensu_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
 					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/ensu_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
 					"-Xcc",
 					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
 					"-Xcc",
