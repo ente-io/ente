@@ -2,6 +2,8 @@ use std::time::Duration;
 
 use reqwest::blocking::{Client, Response};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
+use reqwest::redirect::Policy;
+use reqwest::Url;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use uuid::Uuid;
@@ -22,6 +24,7 @@ pub struct HttpConfig {
 
 pub struct HttpClient {
     base_url: String,
+    base_origin: Url,
     client: Client,
     auth_token: String,
     user_agent: Option<String>,
@@ -32,11 +35,13 @@ pub struct HttpClient {
 impl HttpClient {
     pub fn new(config: HttpConfig) -> Result<Self, SyncError> {
         let base_url = config.base_url.trim_end_matches('/').to_string();
+        let base_origin = Url::parse(&base_url)
+            .map_err(|_| SyncError::InvalidResponse("invalid base url".to_string()))?;
         let is_http = base_url.starts_with("http://");
         let is_default = base_url.starts_with(DEFAULT_BASE_URL);
         let allow_insecure = is_http || !is_default;
 
-        let mut builder = Client::builder();
+        let mut builder = Client::builder().redirect(Policy::none());
         if let Some(timeout) = config.timeout_secs {
             builder = builder.timeout(Duration::from_secs(timeout));
         }
@@ -50,6 +55,7 @@ impl HttpClient {
         })?;
         Ok(Self {
             base_url,
+            base_origin,
             client,
             auth_token: config.auth_token,
             user_agent: config.user_agent,
@@ -134,20 +140,18 @@ impl HttpClient {
     }
 
     pub fn get_bytes(&self, url: &str) -> Result<Vec<u8>, SyncError> {
-        let mut current_url = url.to_string();
+        let mut current_url = self.parse_url(url)?;
         for _ in 0..5 {
+            let headers = self.build_headers_for_url(&current_url);
             let resp = self
                 .client
-                .get(&current_url)
-                .headers(self.build_headers())
+                .get(current_url.clone())
+                .headers(headers)
                 .send()
                 .map_err(map_reqwest_error)?;
             if resp.status().is_redirection() {
                 if let Some(location) = resp.headers().get(LOCATION) {
-                    let next = location
-                        .to_str()
-                        .map_err(|_| SyncError::InvalidResponse("invalid redirect location".to_string()))?;
-                    current_url = next.to_string();
+                    current_url = self.resolve_redirect(&current_url, location)?;
                     continue;
                 }
             }
@@ -162,12 +166,13 @@ impl HttpClient {
     }
 
     fn head_status_url(&self, url: &str) -> Result<u16, SyncError> {
-        let mut current_url = url.to_string();
+        let mut current_url = self.parse_url(url)?;
         for _ in 0..5 {
+            let headers = self.build_headers_for_url(&current_url);
             let resp = self
                 .client
-                .head(&current_url)
-                .headers(self.build_headers())
+                .head(current_url.clone())
+                .headers(headers)
                 .send()
                 .map_err(map_reqwest_error)?;
             let status = resp.status().as_u16();
@@ -176,10 +181,7 @@ impl HttpClient {
             }
             if resp.status().is_redirection() {
                 if let Some(location) = resp.headers().get(LOCATION) {
-                    let next = location
-                        .to_str()
-                        .map_err(|_| SyncError::InvalidResponse("invalid redirect location".to_string()))?;
-                    current_url = next.to_string();
+                    current_url = self.resolve_redirect(&current_url, location)?;
                     continue;
                 }
             }
@@ -203,11 +205,11 @@ impl HttpClient {
             header_map.insert(header_name, header_value);
         }
 
-        let mut current_url = url.to_string();
+        let mut current_url = self.parse_url(url)?;
         for _ in 0..5 {
             let resp = self
                 .client
-                .put(&current_url)
+                .put(current_url.clone())
                 .headers(header_map.clone())
                 .body(body.to_vec())
                 .send()
@@ -215,10 +217,7 @@ impl HttpClient {
 
             if resp.status().is_redirection() {
                 if let Some(location) = resp.headers().get(LOCATION) {
-                    let next = location
-                        .to_str()
-                        .map_err(|_| SyncError::InvalidResponse("invalid redirect location".to_string()))?;
-                    current_url = next.to_string();
+                    current_url = self.resolve_redirect(&current_url, location)?;
                     continue;
                 }
             }
@@ -227,6 +226,43 @@ impl HttpClient {
         }
 
         Err(SyncError::InvalidResponse("too many redirects".to_string()))
+    }
+
+    fn parse_url(&self, url: &str) -> Result<Url, SyncError> {
+        Url::parse(url).map_err(|_| SyncError::InvalidResponse("invalid url".to_string()))
+    }
+
+    fn resolve_redirect(&self, current_url: &Url, location: &HeaderValue) -> Result<Url, SyncError> {
+        let next = location
+            .to_str()
+            .map_err(|_| SyncError::InvalidResponse("invalid redirect location".to_string()))?;
+        Url::parse(next)
+            .or_else(|_| current_url.join(next))
+            .map_err(|_| SyncError::InvalidResponse("invalid redirect location".to_string()))
+    }
+
+    fn is_same_origin(&self, url: &Url) -> bool {
+        self.base_origin.scheme() == url.scheme()
+            && self.base_origin.host_str() == url.host_str()
+            && self.base_origin.port_or_known_default() == url.port_or_known_default()
+    }
+
+    fn build_headers_for_url(&self, url: &Url) -> HeaderMap {
+        if self.is_same_origin(url) {
+            self.build_headers()
+        } else {
+            self.build_public_headers()
+        }
+    }
+
+    fn build_public_headers(&self) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        if let Some(agent) = &self.user_agent {
+            if let Ok(value) = HeaderValue::from_str(agent) {
+                headers.insert("User-Agent", value);
+            }
+        }
+        headers
     }
 
     fn build_headers(&self) -> HeaderMap {
@@ -265,7 +301,7 @@ fn parse_json_response<T: DeserializeOwned>(resp: Response) -> Result<T, SyncErr
     if status == 401 {
         return Err(SyncError::Unauthorized);
     }
-    if status >= 400 {
+    if status >= 300 {
         let body = resp.text().unwrap_or_default();
         return Err(map_error_response(status, &body));
     }
@@ -289,7 +325,7 @@ fn parse_bytes_response(resp: Response) -> Result<Vec<u8>, SyncError> {
     if status == 401 {
         return Err(SyncError::Unauthorized);
     }
-    if status >= 400 {
+    if status >= 300 {
         let body = resp.text().unwrap_or_default();
         return Err(map_error_response(status, &body));
     }
