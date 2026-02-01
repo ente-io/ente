@@ -7,7 +7,8 @@
  * - Message passing to popup/content scripts
  * - Auto-lock functionality
  */
-import type { BackgroundMessage, CheckEmailResult, ExtensionState, OTPResult, SiteMatch } from "@/lib/types/messages";
+import { defineBackground } from "wxt/sandbox";
+import type { BackgroundMessage, CheckEmailResult, ExtensionState, OTPResult, SiteMatchPreview } from "@/lib/types/messages";
 import type { Code } from "@/lib/types/code";
 import type { KeyAttributes, LocalUser } from "@/lib/types/auth";
 
@@ -30,10 +31,8 @@ export default defineBackground(() => {
     encryptedToken: string;
   } | null) => {
     if (data) {
-      console.log("setPendingLogin: storing pending login for", data.email);
       await chrome.storage.session.set({ [PENDING_LOGIN_KEY]: data });
     } else {
-      console.log("setPendingLogin: clearing pending login");
       await chrome.storage.session.remove(PENDING_LOGIN_KEY);
     }
   };
@@ -46,7 +45,6 @@ export default defineBackground(() => {
   } | null> => {
     const result = await chrome.storage.session.get(PENDING_LOGIN_KEY);
     const pending = result[PENDING_LOGIN_KEY] || null;
-    console.log("getPendingLogin:", pending ? `found for ${pending.email}` : "not found");
     return pending;
   };
 
@@ -56,11 +54,37 @@ export default defineBackground(() => {
   const init = async () => {
     const { initCrypto } = await import("@/lib/crypto");
     await initCrypto();
-    console.log("Ente Auth extension initialized");
+
+    // Migrate legacy plaintext token storage to encryptedToken (if needed).
+    await migrateLegacyTokenStorage();
 
     // Enforce auto-lock on startup to cover service worker restarts
     await enforceAutoLockOnStartup();
     await scheduleTokenCheck();
+  };
+
+  const migrateLegacyTokenStorage = async () => {
+    try {
+      const { localStorage } = await import("@/lib/storage");
+      const user = await localStorage.getUser();
+      const encryptedToken = await localStorage.getEncryptedToken();
+      const keyAttributes = await localStorage.getKeyAttributes();
+
+      if (!user || !user.token || encryptedToken || !keyAttributes?.publicKey) {
+        return;
+      }
+
+      // Legacy versions stored a plaintext token. Convert it to an encryptedToken
+      // sealed to the user's public key so future unlocks can recover it.
+      const { fromB64URLSafe, boxSeal } = await import("@/lib/crypto");
+      const tokenBytes = await fromB64URLSafe(user.token);
+      const sealed = await boxSeal(tokenBytes, keyAttributes.publicKey);
+
+      await localStorage.setEncryptedToken(sealed);
+      await localStorage.setUser({ id: user.id, email: user.email });
+    } catch (e) {
+      console.warn("Legacy token migration skipped:", e);
+    }
   };
 
   /**
@@ -106,15 +130,16 @@ export default defineBackground(() => {
    * after a suspend/resume cycle.
    */
   const enforceAutoLockOnStartup = async () => {
-    const { localStorage, sessionStorage } = await import("@/lib/storage");
+    const { localStorage, sessionStorage, clearVaultSession } = await import("@/lib/storage");
     const timeout = await localStorage.getAutoLockTimeout();
     if (timeout <= 0) {
       await chrome.alarms.clear(AUTO_LOCK_ALARM);
       return;
     }
 
-    // If we don't have the master key in-memory, treat as locked
+    // If we don't have the master key in-memory, treat as locked and clear decrypted vault state
     if (!inMemoryMasterKey) {
+      await clearVaultSession();
       await sessionStorage.setUnlocked(false);
     }
 
@@ -142,14 +167,19 @@ export default defineBackground(() => {
     });
   };
 
+  const isVaultUnlocked = async (): Promise<boolean> => {
+    const { sessionStorage } = await import("@/lib/storage");
+    return (await sessionStorage.isUnlocked()) && !!inMemoryMasterKey;
+  };
+
   /**
    * Schedule periodic token validity checks.
    */
   const scheduleTokenCheck = async () => {
-    const { localStorage } = await import("@/lib/storage");
-    const user = await localStorage.getUser();
+    const { sessionStorage } = await import("@/lib/storage");
+    const token = await sessionStorage.getAuthToken();
     await chrome.alarms.clear(TOKEN_CHECK_ALARM);
-    if (user?.token) {
+    if (token) {
       await chrome.alarms.create(TOKEN_CHECK_ALARM, {
         delayInMinutes: TOKEN_CHECK_INTERVAL_MINUTES,
         periodInMinutes: TOKEN_CHECK_INTERVAL_MINUTES,
@@ -163,13 +193,13 @@ export default defineBackground(() => {
   const validateToken = async () => {
     const { localStorage, sessionStorage, clearAllData } = await import("@/lib/storage");
     const { checkSessionValidity } = await import("@/lib/api/auth");
-    const user = await localStorage.getUser();
-    if (!user?.token) {
+    const token = await sessionStorage.getAuthToken();
+    if (!token) {
       return;
     }
 
     try {
-      const result = await checkSessionValidity(user.token);
+      const result = await checkSessionValidity(token);
       if (!result.isValid || result.passwordChanged) {
         console.warn("Token invalid or password changed, locking and clearing data");
         inMemoryMasterKey = null;
@@ -189,16 +219,17 @@ export default defineBackground(() => {
    * Lock the extension.
    */
   const lock = async (): Promise<void> => {
-    const { sessionStorage, localStorage } = await import("@/lib/storage");
-    await sessionStorage.clear();
+    const { sessionStorage, localStorage, clearVaultSession } = await import("@/lib/storage");
+    await clearVaultSession();
+    await sessionStorage.setUnlocked(false);
     await localStorage.setLastActivityTime(Date.now());
     inMemoryMasterKey = null;
     await chrome.alarms.clear(AUTO_LOCK_ALARM);
+    await chrome.alarms.clear(TOKEN_CHECK_ALARM);
     if (lockTimer) {
       clearTimeout(lockTimer);
       lockTimer = null;
     }
-    console.log("Extension locked");
   };
 
   /**
@@ -207,7 +238,7 @@ export default defineBackground(() => {
   const unlock = async (password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { localStorage, sessionStorage } = await import("@/lib/storage");
-      const { decryptMasterKey } = await import("@/lib/crypto");
+      const { decryptMasterKey, decryptPrivateKey, boxSealOpenURLSafe } = await import("@/lib/crypto");
       const { syncCodes } = await import("@/lib/services/sync");
 
       const keyAttributes = await localStorage.getKeyAttributes();
@@ -215,12 +246,20 @@ export default defineBackground(() => {
         return { success: false, error: "Not logged in" };
       }
 
+      const encryptedToken = await localStorage.getEncryptedToken();
+      if (!encryptedToken) {
+        return { success: false, error: "Missing encrypted token. Please log in again." };
+      }
+
       // Derive master key from password
       const masterKey = await decryptMasterKey(password, keyAttributes);
+      const privateKey = await decryptPrivateKey(masterKey, keyAttributes);
+      const token = await boxSealOpenURLSafe(encryptedToken, keyAttributes.publicKey, privateKey);
 
       // Keep master key in-memory only
       inMemoryMasterKey = masterKey;
       await sessionStorage.setUnlocked(true);
+      await sessionStorage.setAuthToken(token);
 
       // Sync codes
       await syncCodes(masterKey);
@@ -317,61 +356,103 @@ export default defineBackground(() => {
   /**
    * Complete login with password.
    */
-  const loginComplete = async (password: string): Promise<{ success: boolean; error?: string }> => {
-    // Get pending login first
-    const pendingLogin = await getPendingLogin();
-    console.log("loginComplete: pendingLogin =", pendingLogin ? "exists" : "null");
-
-    if (!pendingLogin) {
-      return { success: false, error: "No pending login. Please start again." };
-    }
-
-    const { id, email, keyAttributes, encryptedToken } = pendingLogin;
-
-    // Try to decrypt - if it fails, pending login should remain for retry
+  const finishLogin = async (params: {
+    id: number;
+    email: string;
+    password: string;
+    keyAttributes: KeyAttributes;
+    encryptedToken: string;
+  }): Promise<{ success: boolean; error?: string }> => {
     try {
       const { localStorage, sessionStorage } = await import("@/lib/storage");
       const { decryptMasterKey, decryptPrivateKey, boxSealOpenURLSafe } = await import("@/lib/crypto");
       const { syncCodes } = await import("@/lib/services/sync");
 
-      // Decrypt master key - this will throw if password is wrong
-      const masterKey = await decryptMasterKey(password, keyAttributes);
-      console.log("loginComplete: masterKey decrypted successfully");
+      const masterKey = await decryptMasterKey(params.password, params.keyAttributes);
+      const privateKey = await decryptPrivateKey(masterKey, params.keyAttributes);
+      const token = await boxSealOpenURLSafe(
+        params.encryptedToken,
+        params.keyAttributes.publicKey,
+        privateKey,
+      );
 
-      // Decrypt private key
-      const privateKey = await decryptPrivateKey(masterKey, keyAttributes);
-      console.log("loginComplete: privateKey decrypted successfully");
-
-      // Decrypt auth token (uses URL-safe base64 encoding)
-      const token = await boxSealOpenURLSafe(encryptedToken, keyAttributes.publicKey, privateKey);
-      console.log("loginComplete: token decrypted successfully");
-
-      // Store user data
-      const user: LocalUser = { id, email, token };
+      const user: LocalUser = { id: params.id, email: params.email };
       await localStorage.setUser(user);
-      await localStorage.setKeyAttributes(keyAttributes);
+      await localStorage.setKeyAttributes(params.keyAttributes);
+      await localStorage.setEncryptedToken(params.encryptedToken);
 
-      // Keep master key in-memory only
       inMemoryMasterKey = masterKey;
       await sessionStorage.setUnlocked(true);
+      await sessionStorage.setAuthToken(token);
 
-      // Only clear pending login on SUCCESS
-      await setPendingLogin(null);
-      console.log("loginComplete: login successful, cleared pendingLogin");
-
-      // Sync codes
       await syncCodes(masterKey);
-
-      // Reset auto-lock timer
       await resetLockTimer();
       await scheduleTokenCheck();
 
       return { success: true };
     } catch (e) {
-      // Password decryption failed - DO NOT clear pending login
-      // so user can retry with correct password
-      console.error("Login complete failed (pendingLogin preserved for retry):", e);
+      console.error("finishLogin failed:", e);
       return { success: false, error: "Invalid password" };
+    }
+  };
+
+  const loginComplete = async (password: string): Promise<{ success: boolean; error?: string }> => {
+    const pendingLogin = await getPendingLogin();
+
+    if (!pendingLogin) {
+      return { success: false, error: "No pending login. Please start again." };
+    }
+
+    const result = await finishLogin({
+      id: pendingLogin.id,
+      email: pendingLogin.email,
+      password,
+      keyAttributes: pendingLogin.keyAttributes,
+      encryptedToken: pendingLogin.encryptedToken,
+    });
+
+    if (result.success) {
+      await setPendingLogin(null);
+    }
+
+    return result;
+  };
+
+  /**
+   * Login via SRP (password-only flow; no email OTP).
+   */
+  const loginSRP = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { getSRPAttributes } = await import("@/lib/api/auth");
+      const { verifySRP } = await import("@/lib/services/srp");
+
+      const srpAttributes = await getSRPAttributes(email);
+      if (!srpAttributes) {
+        return { success: false, error: "This account does not support password-only login. Use email verification instead." };
+      }
+
+      const response = await verifySRP(srpAttributes, password);
+
+      if (response.twoFactorSessionID || response.twoFactorSessionIDV2) {
+        return { success: false, error: "Two-factor authentication is required. Please use the Ente Auth web app to complete login." };
+      }
+
+      if (!response.keyAttributes || !response.encryptedToken) {
+        return { success: false, error: "Invalid verification response" };
+      }
+
+      return finishLogin({
+        id: response.id,
+        email,
+        password,
+        keyAttributes: response.keyAttributes,
+        encryptedToken: response.encryptedToken,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Login failed";
+      console.error("SRP login failed:", e);
+      // Prefer the SRP verification error message if present.
+      return { success: false, error: msg || "Login failed" };
     }
   };
 
@@ -380,13 +461,13 @@ export default defineBackground(() => {
    */
   const doLogout = async (): Promise<{ success: boolean }> => {
     try {
-      const { localStorage, clearAllData } = await import("@/lib/storage");
+      const { localStorage, sessionStorage, clearAllData } = await import("@/lib/storage");
       const { logout } = await import("@/lib/api/auth");
 
-      const user = await localStorage.getUser();
-      if (user?.token) {
+      const token = await sessionStorage.getAuthToken();
+      if (token) {
         try {
-          await logout(user.token);
+          await logout(token);
         } catch (e) {
           console.error("Server logout failed:", e);
         }
@@ -413,6 +494,9 @@ export default defineBackground(() => {
    * Get all codes.
    */
   const getCodes = async (): Promise<{ codes: Code[] }> => {
+    if (!(await isVaultUnlocked())) {
+      return { codes: [] };
+    }
     const { getCachedCodes } = await import("@/lib/services/sync");
     const codes = await getCachedCodes();
     return { codes };
@@ -421,11 +505,27 @@ export default defineBackground(() => {
   /**
    * Get codes matching a site URL.
    */
-  const getCodesForSite = async (url: string): Promise<{ matches: SiteMatch[] }> => {
+  const getCodesForSite = async (url: string): Promise<{ matches: SiteMatchPreview[] }> => {
+    if (!(await isVaultUnlocked())) {
+      return { matches: [] };
+    }
     const { getCachedCodes } = await import("@/lib/services/sync");
     const { matchCodesToSite } = await import("@/lib/services/site-matcher");
     const codes = await getCachedCodes();
-    const matches = matchCodesToSite(codes, url);
+    const fullMatches = matchCodesToSite(codes, url);
+    const matches: SiteMatchPreview[] = fullMatches.map((m) => ({
+      score: m.score,
+      matchType: m.matchType,
+      code: {
+        id: m.code.id,
+        type: m.code.type,
+        issuer: m.code.issuer,
+        account: m.code.account,
+        period: m.code.period,
+        length: m.code.length,
+        codeDisplay: m.code.codeDisplay,
+      },
+    }));
     return { matches };
   };
 
@@ -433,6 +533,9 @@ export default defineBackground(() => {
    * Generate OTP for a code.
    */
   const generateOTP = async (codeId: string): Promise<OTPResult> => {
+    if (!(await isVaultUnlocked())) {
+      throw new Error("Not unlocked");
+    }
     const { getCachedCodes, getCachedTimeOffset } = await import("@/lib/services/sync");
     const { generateOTPs, getSecondsRemaining } = await import("@/lib/services/code");
 
@@ -448,6 +551,23 @@ export default defineBackground(() => {
     const validFor = getSecondsRemaining(code, timeOffset);
 
     return { otp, nextOtp, validFor };
+  };
+
+  /**
+   * Generate OTPs for multiple codes (used to avoid N messages/sec from the popup/content scripts).
+   */
+  const generateOTPs = async (codeIds: string[]): Promise<{ otps: Record<string, OTPResult | null> }> => {
+    const results: Record<string, OTPResult | null> = {};
+    await Promise.all(
+      codeIds.map(async (codeId) => {
+        try {
+          results[codeId] = await generateOTP(codeId);
+        } catch {
+          results[codeId] = null;
+        }
+      }),
+    );
+    return { otps: results };
   };
 
   /**
@@ -493,9 +613,17 @@ export default defineBackground(() => {
       return;
     }
 
-    // Reset auto-lock timer on any activity
-    if (message.type !== "GET_STATE") {
-      resetLockTimer();
+    // Reset auto-lock timer:
+    // - Always on explicit USER_ACTIVITY (we only send this on real user actions).
+    // - For extension pages (popup), on any message except GET_STATE.
+    if (message.type === "USER_ACTIVITY") {
+      void resetLockTimer();
+    } else {
+      const isExtensionPage =
+        typeof sender?.url === "string" && sender.url.startsWith(chrome.runtime.getURL(""));
+      if (isExtensionPage && message.type !== "GET_STATE") {
+        void resetLockTimer();
+      }
     }
 
     const handleMessage = async () => {
@@ -511,6 +639,9 @@ export default defineBackground(() => {
 
         case "GENERATE_OTP":
           return generateOTP(message.codeId);
+
+        case "GENERATE_OTPS":
+          return generateOTPs(message.codeIds);
 
         case "SYNC":
           return doSync();
@@ -531,6 +662,9 @@ export default defineBackground(() => {
         case "LOGIN_VERIFY_OTT":
           return loginVerifyOTT(message.email, message.ott);
 
+        case "LOGIN_SRP":
+          return loginSRP(message.email, message.password);
+
         case "LOGIN_COMPLETE":
           return loginComplete(message.password);
 
@@ -538,7 +672,6 @@ export default defineBackground(() => {
           return doLogout();
 
         case "USER_ACTIVITY":
-          await resetLockTimer();
           return { success: true };
 
         case "COPY_TO_CLIPBOARD":
@@ -562,8 +695,6 @@ export default defineBackground(() => {
 
   // Initialize on startup
   init();
-
-  console.log("Ente Auth background script loaded");
 
   // Auto-lock via alarms for when the service worker wakes up later
   chrome.alarms.onAlarm.addListener(async (alarm) => {

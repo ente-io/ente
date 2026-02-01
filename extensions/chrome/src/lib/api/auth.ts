@@ -8,7 +8,7 @@ import {
   type KeyAttributes,
   type VerificationResponse,
 } from "../types/auth";
-import { apiRequest, apiRequestNoAuth } from "./client";
+import { HTTPError, apiRequest, apiRequestNoAuth } from "./client";
 
 /**
  * SRP Attributes for a user.
@@ -173,4 +173,48 @@ export const logout = async (token: string): Promise<void> => {
     },
     token,
   );
+};
+
+/**
+ * Create SRP session (send A, receive B).
+ */
+const CreateSRPSessionResponseSchema = z.object({
+  sessionID: z.string(),
+  srpB: z.string(),
+});
+
+export const createSRPSession = async (params: {
+  srpUserID: string;
+  srpA: string;
+}): Promise<{ sessionID: string; srpB: string }> => {
+  const response = await apiRequestNoAuth<unknown>("/users/srp/create-session", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+  return CreateSRPSessionResponseSchema.parse(response);
+};
+
+/**
+ * Verify SRP session (send M1, receive M2 + verification response).
+ *
+ * On 401, treat as invalid credentials.
+ */
+export const verifySRPSession = async (params: {
+  sessionID: string;
+  srpUserID: string;
+  srpM1: string;
+}): Promise<VerificationResponse & { srpM2: string }> => {
+  try {
+    const response = await apiRequestNoAuth<unknown>("/users/srp/verify-session", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+    const schema = VerificationResponseSchema.extend({ srpM2: z.string() });
+    return schema.parse(response);
+  } catch (e) {
+    if (e instanceof HTTPError && e.status === 401) {
+      throw new Error("Invalid email or password");
+    }
+    throw e;
+  }
 };

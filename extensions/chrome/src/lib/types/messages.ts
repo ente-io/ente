@@ -1,4 +1,4 @@
-import type { Code } from "./code";
+import type { Code, CodeDisplay } from "./code";
 
 /**
  * Messages sent from popup/content scripts to background.
@@ -8,12 +8,14 @@ export type BackgroundMessage =
   | { type: "GET_CODES" }
   | { type: "GET_CODES_FOR_SITE"; url: string }
   | { type: "GENERATE_OTP"; codeId: string }
+  | { type: "GENERATE_OTPS"; codeIds: string[] }
   | { type: "SYNC" }
   | { type: "LOCK" }
   | { type: "UNLOCK"; password: string }
   | { type: "CHECK_EMAIL"; email: string }
   | { type: "LOGIN_SEND_OTT"; email: string }
   | { type: "LOGIN_VERIFY_OTT"; email: string; ott: string }
+  | { type: "LOGIN_SRP"; email: string; password: string }
   | { type: "LOGIN_COMPLETE"; password: string }
   | { type: "LOGOUT" }
   | { type: "USER_ACTIVITY" }
@@ -46,6 +48,26 @@ export interface SiteMatch {
 }
 
 /**
+ * A restricted code shape safe to send to content scripts.
+ * (No OTP secret or OTPAuth URI string.)
+ */
+export interface CodePreview {
+  id: string;
+  type: Code["type"];
+  account?: string;
+  issuer: string;
+  length: number;
+  period: number;
+  codeDisplay: CodeDisplay | undefined;
+}
+
+export interface SiteMatchPreview {
+  code: CodePreview;
+  score: number;
+  matchType: SiteMatch["matchType"];
+}
+
+/**
  * Generated OTP result.
  */
 export interface OTPResult {
@@ -63,9 +85,13 @@ export type BackgroundResponse<T extends BackgroundMessage["type"]> =
     : T extends "GET_CODES"
       ? { codes: Code[] }
       : T extends "GET_CODES_FOR_SITE"
-        ? { matches: SiteMatch[] }
+        ? { matches: SiteMatchPreview[] }
         : T extends "GENERATE_OTP"
           ? OTPResult
+          : T extends "GENERATE_OTPS"
+            ? { otps: Record<string, OTPResult | null> }
+          : T extends "CHECK_EMAIL"
+            ? CheckEmailResult
           : { success: boolean; error?: string };
 
 /**

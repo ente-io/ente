@@ -54,6 +54,14 @@ export const fromB64 = async (input: string): Promise<Uint8Array> => {
 };
 
 /**
+ * Convert URL-safe base64 string to bytes.
+ */
+export const fromB64URLSafe = async (input: string): Promise<Uint8Array> => {
+  const s = await ensureSodium();
+  return s.from_base64(input, s.base64_variants.URLSAFE);
+};
+
+/**
  * Helper to convert BytesOrB64 to bytes.
  */
 type BytesOrB64 = Uint8Array | string;
@@ -210,6 +218,37 @@ export const deriveKey = async (
 };
 
 /**
+ * Derive a subkey from a high-entropy key using libsodium KDF.
+ * Used for SRP login ("loginctx").
+ */
+export const deriveSubKeyBytes = async (
+  key: string,
+  subKeyLength: number,
+  subKeyID: number,
+  context: string,
+): Promise<Uint8Array> => {
+  const s = await ensureSodium();
+  return s.crypto_kdf_derive_from_key(
+    subKeyLength,
+    subKeyID,
+    context,
+    await bytes(key),
+  );
+};
+
+/**
+ * Derive the SRP "login sub-key" from the user's KEK.
+ *
+ * Mirrors the Ente web client derivation:
+ * - derive subkey bytes with context "loginctx", id 1
+ * - take first 16 bytes, base64 encode
+ */
+export const deriveSRPLoginSubKey = async (kek: string): Promise<string> => {
+  const subKey = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
+  return toB64(subKey.slice(0, 16));
+};
+
+/**
  * Public key decryption (box seal open).
  * Decrypts data encrypted with boxSeal using the keypair.
  * Returns result as regular base64.
@@ -244,6 +283,19 @@ export const boxSealOpenURLSafe = async (
     await fromB64(privateKey),
   );
   return toB64URLSafe(decrypted);
+};
+
+/**
+ * Public key encryption (box seal).
+ * Encrypts data for the recipient public key and returns ciphertext as base64.
+ */
+export const boxSeal = async (
+  data: BytesOrB64,
+  publicKey: string,
+): Promise<string> => {
+  const s = await ensureSodium();
+  const encrypted = s.crypto_box_seal(await bytes(data), await fromB64(publicKey));
+  return toB64(encrypted);
 };
 
 /**

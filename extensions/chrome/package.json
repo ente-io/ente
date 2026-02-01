@@ -16,11 +16,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "buffer": "^6.0.3",
+    "fast-srp-hap": "^2.0.4",
     "jssha": "~3.3.1",
     "libsodium-wrappers-sumo": "^0.7.15",
     "otpauth": "9.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tldts": "^7.0.10",
     "zod": "^3.24.1"
   },
   "devDependencies": {

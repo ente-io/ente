@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { sendMessage, type CheckEmailResult } from "@/lib/types/messages";
+import { sendMessage } from "@/lib/types/messages";
 
 type Step = "email" | "ott" | "password";
+type LoginMethod = "email-ott" | "srp";
 
 interface Props {
   onComplete: () => void;
@@ -24,6 +25,7 @@ const EyeOffIcon = () => (
 
 export default function Login({ onComplete }: Props) {
   const [step, setStep] = useState<Step>("email");
+  const [method, setMethod] = useState<LoginMethod>("email-ott");
   const [email, setEmail] = useState("");
   const [ott, setOtt] = useState("");
   const [password, setPassword] = useState("");
@@ -43,17 +45,18 @@ export default function Login({ onComplete }: Props) {
       const checkResult = await sendMessage({
         type: "CHECK_EMAIL",
         email: email.trim(),
-      }) as CheckEmailResult;
+      });
 
-      // If email MFA is disabled (SRP-only), show error
-      // SRP support will be added in a future version
+      // If email MFA is disabled (SRP-only), proceed directly to password.
       if (checkResult.exists && !checkResult.isEmailMFAEnabled) {
-        setError("This account uses password-only login (SRP). Please enable email verification in Ente Auth mobile app settings, or use the web app to login.");
+        setMethod("srp");
+        setStep("password");
         setLoading(false);
         return;
       }
 
       // Proceed with OTT flow
+      setMethod("email-ott");
       const result = await sendMessage({
         type: "LOGIN_SEND_OTT",
         email: email.trim(),
@@ -105,10 +108,17 @@ export default function Login({ onComplete }: Props) {
     setError("");
 
     try {
-      const result = await sendMessage({
-        type: "LOGIN_COMPLETE",
-        password,
-      });
+      const result =
+        method === "srp"
+          ? await sendMessage({
+              type: "LOGIN_SRP",
+              email: email.trim(),
+              password,
+            })
+          : await sendMessage({
+              type: "LOGIN_COMPLETE",
+              password,
+            });
 
       if (result.success) {
         onComplete();
@@ -123,7 +133,7 @@ export default function Login({ onComplete }: Props) {
   };
 
   return (
-    <div className="min-h-[400px] bg-gray-900 text-white p-4 flex flex-col">
+    <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] p-4 flex flex-col">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2">
@@ -148,7 +158,7 @@ export default function Login({ onComplete }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white text-base placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-3 py-2.5 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
               autoFocus
               disabled={loading}
             />
@@ -161,7 +171,7 @@ export default function Login({ onComplete }: Props) {
           <button
             type="submit"
             disabled={loading || !email.trim()}
-            className="w-full py-2.5 bg-[#8F33D6] hover:bg-[#722ED1] disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
+            className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
             {loading ? "Sending..." : "Continue"}
           </button>
@@ -174,7 +184,7 @@ export default function Login({ onComplete }: Props) {
           <div className="mb-2 text-sm text-gray-400">
             Enter the 6-digit code sent to
           </div>
-          <div className="mb-4 text-[#B37FEB]">{email}</div>
+          <div className="mb-4 text-[var(--ente-accent-soft)]">{email}</div>
 
           <div className="mb-4">
             <input
@@ -182,7 +192,7 @@ export default function Login({ onComplete }: Props) {
               value={ott}
               onChange={(e) => setOtt(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
-              className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-white text-center text-2xl tracking-widest placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-3 py-2.5 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-center text-2xl tracking-widest placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
               autoFocus
               disabled={loading}
               maxLength={6}
@@ -196,7 +206,7 @@ export default function Login({ onComplete }: Props) {
           <button
             type="submit"
             disabled={loading || ott.length !== 6}
-            className="w-full py-2.5 bg-[#8F33D6] hover:bg-[#722ED1] disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
+            className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
             {loading ? "Verifying..." : "Verify"}
           </button>
@@ -205,6 +215,7 @@ export default function Login({ onComplete }: Props) {
             type="button"
             onClick={() => {
               setStep("email");
+              setMethod("email-ott");
               setOtt("");
               setError("");
             }}
@@ -221,15 +232,14 @@ export default function Login({ onComplete }: Props) {
           <div className="mb-2 text-sm text-gray-400">
             Enter your password
           </div>
-          <div className="mb-4 text-[#B37FEB]">{email}</div>
-
+          <div className="mb-4 text-[var(--ente-accent-soft)]">{email}</div>
           <div className="mb-4 relative">
             <input
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full px-3 py-2.5 pr-10 bg-gray-800 border border-gray-700 rounded-xl text-white text-base placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
               autoFocus
               disabled={loading}
             />
@@ -249,15 +259,16 @@ export default function Login({ onComplete }: Props) {
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full py-2.5 bg-[#8F33D6] hover:bg-[#722ED1] disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
+            className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
-            {loading ? "Unlocking..." : "Unlock"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
 
           <button
             type="button"
             onClick={() => {
               setStep("email");
+              setMethod("email-ott");
               setEmail("");
               setOtt("");
               setPassword("");

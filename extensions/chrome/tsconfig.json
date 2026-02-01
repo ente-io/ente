@@ -1,5 +1,4 @@
 {
-  "extends": "wxt/tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",

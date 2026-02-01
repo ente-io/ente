@@ -46,14 +46,17 @@ export interface VerificationResponse {
   twoFactorSessionIDV2?: string;
 }
 
+const nullToUndefined = <T>(v: T | null | undefined): T | undefined =>
+  v == null ? undefined : v;
+
 export const VerificationResponseSchema = z.object({
   id: z.number(),
-  keyAttributes: KeyAttributesSchema.optional(),
-  encryptedToken: z.string().optional(),
-  token: z.string().optional(),
-  twoFactorSessionID: z.string().optional(),
-  passkeySessionID: z.string().optional(),
-  twoFactorSessionIDV2: z.string().optional(),
+  keyAttributes: KeyAttributesSchema.nullish().transform(nullToUndefined),
+  encryptedToken: z.string().nullish().transform(nullToUndefined),
+  token: z.string().nullish().transform(nullToUndefined),
+  twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+  passkeySessionID: z.string().nullish().transform(nullToUndefined),
+  twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
 });
 
 /**
@@ -62,7 +65,13 @@ export const VerificationResponseSchema = z.object({
 export interface LocalUser {
   id: number;
   email: string;
-  token: string;
+  /**
+   * Deprecated: plaintext auth token stored from older extension versions.
+   *
+   * Newer versions store only `encryptedToken` in local storage and keep the
+   * decrypted auth token in session/in-memory only after unlocking.
+   */
+  token?: string;
 }
 
 /**

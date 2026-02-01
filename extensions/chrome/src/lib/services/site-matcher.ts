@@ -3,6 +3,7 @@
  */
 import type { Code } from "../types/code";
 import type { SiteMatch } from "../types/messages";
+import { getDomain } from "tldts";
 
 /**
  * Known domain aliases for common services.
@@ -55,23 +56,10 @@ const ISSUER_ALIASES: Record<string, string[]> = {
   nvidia: ["nvidia.com"],
 };
 
-/**
- * Extract base domain from hostname.
- * e.g., "accounts.google.com" -> "google.com"
- */
-const extractBaseDomain = (hostname: string): string => {
-  const parts = hostname.split(".");
-  if (parts.length <= 2) return hostname;
-
-  // Handle known TLDs like .co.uk
-  const knownTLDs = [".co.uk", ".com.au", ".co.nz", ".co.jp"];
-  for (const tld of knownTLDs) {
-    if (hostname.endsWith(tld)) {
-      return parts.slice(-3).join(".");
-    }
-  }
-
-  return parts.slice(-2).join(".");
+const getBaseDomain = (hostname: string): string => {
+  // Correct eTLD+1 handling using the Public Suffix List via tldts.
+  // Falls back to the hostname for IPs/localhost/unparseable values.
+  return getDomain(hostname) ?? hostname;
 };
 
 /**
@@ -88,7 +76,8 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
     return [];
   }
 
-  const baseDomain = extractBaseDomain(hostname);
+  const baseDomain = getBaseDomain(hostname);
+  const baseKey = baseDomain.replace(/[^a-z0-9]/g, "");
   const matches: SiteMatch[] = [];
 
   const isAliasMatch = (issuerKey: string): boolean => {
@@ -104,6 +93,7 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
   for (const code of codes) {
     const issuer = code.issuer.toLowerCase();
     const issuerClean = issuer.replace(/[^a-z0-9.]/g, "");
+    const issuerKey = issuer.replace(/[^a-z0-9]/g, "");
 
     // Exact domain or subdomain match for known aliases
     if (isAliasMatch(issuerClean)) {
@@ -113,7 +103,7 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
 
     // Domain match when issuer itself is a domain-like string
     if (issuer.includes(".")) {
-      const issuerDomain = extractBaseDomain(issuer);
+      const issuerDomain = getBaseDomain(issuer);
       if (baseDomain === issuerDomain) {
         matches.push({ code, score: 80, matchType: "domain" });
         continue;
@@ -124,6 +114,27 @@ export const matchCodesToSite = (codes: Code[], url: string): SiteMatch[] => {
     if (issuerClean && issuerClean === baseDomain.replace(/\./g, "")) {
       matches.push({ code, score: 70, matchType: "exact" });
       continue;
+    }
+
+    // Fallback fuzzy match: helps "bitwarden" match "bitwarden.com", etc.
+    // This is intentionally lower-confidence and should NOT trigger "silent" autofill.
+    if (issuerKey.length >= 4) {
+      const STOPWORDS = new Set([
+        "auth",
+        "authenticator",
+        "otp",
+        "totp",
+        "mfa",
+        "2fa",
+        "verify",
+        "verification",
+        "code",
+        "security",
+      ]);
+      if (!STOPWORDS.has(issuerKey) && baseKey.includes(issuerKey)) {
+        matches.push({ code, score: 50, matchType: "fuzzy" });
+        continue;
+      }
     }
   }
 

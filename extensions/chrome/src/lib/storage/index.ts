@@ -8,6 +8,7 @@ const SESSION_KEYS = {
   SESSION_KEY: "sessionKey",
   MASTER_KEY: "masterKey",
   AUTHENTICATOR_KEY: "authenticatorKey",
+  AUTH_TOKEN: "authToken",
   CODES: "codes",
   TIME_OFFSET: "timeOffset",
   IS_UNLOCKED: "isUnlocked",
@@ -19,12 +20,18 @@ const SESSION_KEYS = {
 const LOCAL_KEYS = {
   USER: "user",
   KEY_ATTRIBUTES: "keyAttributes",
+  ENCRYPTED_TOKEN: "encryptedToken",
   ENCRYPTED_MASTER_KEY: "encryptedMasterKey",
   LAST_SYNC_TIME: "lastSyncTime",
   LAST_ACTIVITY_TIME: "lastActivityTime",
   // Preferences (plaintext)
   AUTO_LOCK_TIMEOUT: "autoLockTimeout",
   SHOW_PHISHING_WARNINGS: "showPhishingWarnings",
+  PREFILL_SINGLE_MATCH: "prefillSingleMatch",
+  AUTO_SUBMIT: "autoSubmitEnabled",
+  CLIPBOARD_AUTO_CLEAR: "clipboardAutoClearEnabled",
+  CLIPBOARD_AUTO_CLEAR_SECONDS: "clipboardAutoClearSeconds",
+  DISABLED_SITES: "disabledSites",
   CUSTOM_API_ENDPOINT: "customApiEndpoint",
 } as const;
 
@@ -74,6 +81,14 @@ export const sessionStorage = {
     await this.set(SESSION_KEYS.AUTHENTICATOR_KEY, key);
   },
 
+  async getAuthToken(): Promise<string | undefined> {
+    return this.get<string>(SESSION_KEYS.AUTH_TOKEN);
+  },
+
+  async setAuthToken(token: string): Promise<void> {
+    await this.set(SESSION_KEYS.AUTH_TOKEN, token);
+  },
+
   async getCodes(): Promise<Code[]> {
     return (await this.get<Code[]>(SESSION_KEYS.CODES)) ?? [];
   },
@@ -98,6 +113,14 @@ export const sessionStorage = {
     await this.set(SESSION_KEYS.IS_UNLOCKED, unlocked);
   },
 };
+
+/**
+ * Clear the decrypted-vault session state while preserving other session keys
+ * (ex: pending login state stored by background).
+ */
+export async function clearVaultSession(): Promise<void> {
+  await chrome.storage.session.remove(Object.values(SESSION_KEYS));
+}
 
 /**
  * Local storage operations (persistent).
@@ -139,6 +162,18 @@ export const localStorage = {
 
   async setKeyAttributes(attrs: KeyAttributes): Promise<void> {
     await this.set(LOCAL_KEYS.KEY_ATTRIBUTES, attrs);
+  },
+
+  async getEncryptedToken(): Promise<string | undefined> {
+    return this.get<string>(LOCAL_KEYS.ENCRYPTED_TOKEN);
+  },
+
+  async setEncryptedToken(encryptedToken: string): Promise<void> {
+    await this.set(LOCAL_KEYS.ENCRYPTED_TOKEN, encryptedToken);
+  },
+
+  async removeEncryptedToken(): Promise<void> {
+    await this.remove(LOCAL_KEYS.ENCRYPTED_TOKEN);
   },
 
   async getEncryptedMasterKey(): Promise<
@@ -185,6 +220,46 @@ export const localStorage = {
 
   async setShowPhishingWarnings(show: boolean): Promise<void> {
     await this.set(LOCAL_KEYS.SHOW_PHISHING_WARNINGS, show);
+  },
+
+  async getPrefillSingleMatch(): Promise<boolean> {
+    return (await this.get<boolean>(LOCAL_KEYS.PREFILL_SINGLE_MATCH)) ?? true;
+  },
+
+  async setPrefillSingleMatch(enabled: boolean): Promise<void> {
+    await this.set(LOCAL_KEYS.PREFILL_SINGLE_MATCH, enabled);
+  },
+
+  async getAutoSubmitEnabled(): Promise<boolean> {
+    return (await this.get<boolean>(LOCAL_KEYS.AUTO_SUBMIT)) ?? true;
+  },
+
+  async setAutoSubmitEnabled(enabled: boolean): Promise<void> {
+    await this.set(LOCAL_KEYS.AUTO_SUBMIT, enabled);
+  },
+
+  async getClipboardAutoClearEnabled(): Promise<boolean> {
+    return (await this.get<boolean>(LOCAL_KEYS.CLIPBOARD_AUTO_CLEAR)) ?? false;
+  },
+
+  async setClipboardAutoClearEnabled(enabled: boolean): Promise<void> {
+    await this.set(LOCAL_KEYS.CLIPBOARD_AUTO_CLEAR, enabled);
+  },
+
+  async getClipboardAutoClearSeconds(): Promise<number> {
+    return (await this.get<number>(LOCAL_KEYS.CLIPBOARD_AUTO_CLEAR_SECONDS)) ?? 30;
+  },
+
+  async setClipboardAutoClearSeconds(seconds: number): Promise<void> {
+    await this.set(LOCAL_KEYS.CLIPBOARD_AUTO_CLEAR_SECONDS, seconds);
+  },
+
+  async getDisabledSites(): Promise<string[]> {
+    return (await this.get<string[]>(LOCAL_KEYS.DISABLED_SITES)) ?? [];
+  },
+
+  async setDisabledSites(sites: string[]): Promise<void> {
+    await this.set(LOCAL_KEYS.DISABLED_SITES, sites);
   },
 
   async getCustomApiEndpoint(): Promise<string | undefined> {

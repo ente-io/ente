@@ -1,7 +1,7 @@
 /**
  * API client for Ente endpoints.
  */
-import { localStorage } from "../storage";
+import { localStorage, sessionStorage } from "../storage";
 
 const DEFAULT_API_ENDPOINT = "https://api.ente.io";
 const ALLOWED_API_HOSTS = new Set(["api.ente.io", "localhost"]);
@@ -114,11 +114,11 @@ export const authenticatedRequest = async <T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> => {
-  const user = await localStorage.getUser();
-  if (!user?.token) {
-    throw new UnauthorizedError("Not logged in");
+  const token = await sessionStorage.getAuthToken();
+  if (!token) {
+    throw new UnauthorizedError("Not unlocked");
   }
-  return apiRequest<T>(path, options, user.token);
+  return apiRequest<T>(path, options, token);
 };
 
 /**

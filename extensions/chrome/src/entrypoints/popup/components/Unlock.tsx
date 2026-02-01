@@ -55,7 +55,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
   };
 
   return (
-    <div className="min-h-[400px] bg-gray-900 text-white p-4 flex flex-col">
+    <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] p-4 flex flex-col">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2">
@@ -70,9 +70,9 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
 
       {/* Lock Icon */}
       <div className="text-center mb-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-800 rounded-full">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--ente-paper)] rounded-full">
           <svg
-            className="w-8 h-8 text-[#8F33D6]"
+            className="w-8 h-8 text-[var(--ente-accent)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -92,7 +92,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
           Extension is locked
         </div>
         {email && (
-          <div className="mb-4 text-[#B37FEB] text-center text-sm">{email}</div>
+          <div className="mb-4 text-[var(--ente-accent-soft)] text-center text-sm">{email}</div>
         )}
 
         <div className="mb-4 relative">
@@ -101,7 +101,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="w-full px-3 py-2.5 pr-10 bg-gray-800 border border-gray-700 rounded-xl text-white text-base placeholder-gray-500 focus:outline-none focus:border-purple-500"
+            className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
             autoFocus
             disabled={loading}
           />
@@ -121,7 +121,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
         <button
           type="submit"
           disabled={loading || !password}
-          className="w-full py-2.5 bg-[#8F33D6] hover:bg-[#722ED1] disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
+          className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
         >
           {loading ? "Unlocking..." : "Unlock"}
         </button>

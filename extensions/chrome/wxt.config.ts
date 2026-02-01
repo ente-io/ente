@@ -34,7 +34,7 @@ export default defineConfig({
       48: "icon/48.png",
       128: "icon/128.png",
     },
-    permissions: ["storage", "activeTab", "clipboardWrite", "alarms"],
+    permissions: ["storage", "clipboardWrite", "alarms"],
     host_permissions: [
       "https://api.ente.io/*",
       "http://localhost:8080/*", // Self-hosted
@@ -52,6 +52,9 @@ export default defineConfig({
           __dirname,
           "node_modules/libsodium-wrappers-sumo/dist/modules-sumo/libsodium-wrappers.js"
         ),
+        // fast-srp-hap is Node-oriented; provide minimal shims for the subset it uses.
+        crypto: path.resolve(__dirname, "src/lib/shims/crypto.ts"),
+        assert: path.resolve(__dirname, "src/lib/shims/assert.ts"),
       },
     },
     build: {

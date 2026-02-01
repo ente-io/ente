@@ -5,14 +5,16 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 360px;
+  width: 380px;
   min-height: 400px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #111827;
+  background: var(--ente-background);
   overflow-x: hidden;
+  border-radius: 8px;
+  overflow: hidden;
   border: none;
   outline: none;
 }
@@ -20,8 +22,8 @@ html, body {
 #root {
   width: 100%;
   min-height: 400px;
-  background: #111827;
-  border-radius: 12px;
+  background: var(--ente-background);
+  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -57,4 +59,146 @@ html, body {
 
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
+}
+
+:root {
+  --ente-background: #000000;
+  --ente-paper: #1b1b1b;
+  --ente-paper-2: #252525;
+  --ente-text: #ffffff;
+  --ente-text-muted: rgba(255, 255, 255, 0.7);
+  --ente-text-faint: rgba(255, 255, 255, 0.5);
+  --ente-stroke: rgba(255, 255, 255, 0.12);
+  --ente-accent: #8f33d6;
+  --ente-accent-700: #722ed1;
+  --ente-accent-300: #984df4;
+  --ente-accent-soft: #b37feb;
+  --ente-warning: #ffc247;
+  --ente-success: #1db954;
+  --ente-pin-ribbon-bg: #390c4f;
+}
+
+.ente-code-card {
+  position: relative;
+  background-color: var(--ente-paper);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.ente-code-card:hover {
+  background-color: var(--ente-paper-2);
+}
+
+.ente-code-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  background-color: var(--ente-accent);
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+}
+
+.ente-code-progress-bar.warning {
+  background-color: var(--ente-warning);
+}
+
+.ente-pin-ribbon {
+  position: absolute;
+  top: -5px;
+  right: -41px;
+  width: 107px;
+  height: 26px;
+  background-color: var(--ente-pin-ribbon-bg);
+  transform: rotate(43deg);
+  z-index: 0;
+}
+
+.ente-pin-icon {
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  color: var(--ente-accent);
+  z-index: 1;
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ente-code-content {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.ente-code-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.ente-code-issuer {
+  font-size: 15px;
+  line-height: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ente-text);
+  max-width: 100%;
+}
+
+.ente-code-account {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--ente-text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin-bottom: 8px;
+}
+
+.ente-code-otp {
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ente-text);
+}
+
+/* Copy feedback is shown via toast in the popup (not by mutating card text). */
+
+.ente-code-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  text-align: right;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.ente-code-next-label {
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 500;
+  color: var(--ente-text-faint);
+}
+
+.ente-code-next-otp {
+  font-size: 15px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--ente-text-muted);
 }

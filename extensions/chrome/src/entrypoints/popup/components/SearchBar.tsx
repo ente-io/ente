@@ -9,7 +9,7 @@ export default function SearchBar({ value, onChange }: Props) {
   return (
     <div className="relative">
       <svg
-        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--ente-text-faint)]"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -26,12 +26,12 @@ export default function SearchBar({ value, onChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search codes..."
-        className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 text-sm"
+        className="w-full pl-9 pr-3 py-2 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)] text-sm"
       />
       {value && (
         <button
           onClick={() => onChange("")}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ente-text-faint)] hover:text-[var(--ente-text-muted)]"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
