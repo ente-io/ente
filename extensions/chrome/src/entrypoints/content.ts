@@ -8,8 +8,6 @@
  */
 import { defineContentScript } from "wxt/sandbox";
 import type { SiteMatchPreview } from "@/lib/types/messages";
-import { getDomain } from "tldts";
-import { checkPhishing } from "@/lib/services/site-matcher";
 
 type OTPFieldSingleDetection = {
   type: "single";
@@ -39,45 +37,12 @@ export default defineContentScript({
     const MAX_MATCHES = 8;
     const ICON_SIZE = 24;
     const ICON_PADDING = 4;
-    const PREFILL_SINGLE_MATCH_STORAGE_KEY = "prefillSingleMatch";
-    const DEFAULT_PREFILL_SINGLE_MATCH = true;
-    let prefillSingleMatchEnabled = DEFAULT_PREFILL_SINGLE_MATCH;
     const AUTO_SUBMIT_STORAGE_KEY = "autoSubmitEnabled";
     let autoSubmitEnabled = true;
-    const SHOW_PHISHING_WARNINGS_KEY = "showPhishingWarnings";
-    let showPhishingWarnings = true;
-    const DISABLED_SITES_KEY = "disabledSites";
-    let disabledSites: string[] = [];
-
-    chrome.storage.local.get(PREFILL_SINGLE_MATCH_STORAGE_KEY, (result) => {
-      const value = result[PREFILL_SINGLE_MATCH_STORAGE_KEY] as boolean | undefined;
-      if (typeof value === "boolean") prefillSingleMatchEnabled = value;
-    });
 
     chrome.storage.local.get(AUTO_SUBMIT_STORAGE_KEY, (result) => {
       const value = result[AUTO_SUBMIT_STORAGE_KEY] as boolean | undefined;
       if (typeof value === "boolean") autoSubmitEnabled = value;
-    });
-
-    chrome.storage.local.get(SHOW_PHISHING_WARNINGS_KEY, (result) => {
-      const value = result[SHOW_PHISHING_WARNINGS_KEY] as boolean | undefined;
-      if (typeof value === "boolean") showPhishingWarnings = value;
-    });
-
-    chrome.storage.local.get(DISABLED_SITES_KEY, (result) => {
-      const value = result[DISABLED_SITES_KEY] as string[] | undefined;
-      if (Array.isArray(value)) disabledSites = value.filter((v) => typeof v === "string");
-    });
-
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName !== "local") return;
-      const change = changes[PREFILL_SINGLE_MATCH_STORAGE_KEY];
-      if (!change) return;
-      if (typeof change.newValue === "boolean") {
-        prefillSingleMatchEnabled = change.newValue;
-      } else {
-        prefillSingleMatchEnabled = DEFAULT_PREFILL_SINGLE_MATCH;
-      }
     });
 
     chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -86,16 +51,6 @@ export default defineContentScript({
       if (changes[AUTO_SUBMIT_STORAGE_KEY]) {
         const v = changes[AUTO_SUBMIT_STORAGE_KEY]!.newValue;
         autoSubmitEnabled = typeof v === "boolean" ? v : true;
-      }
-
-      if (changes[SHOW_PHISHING_WARNINGS_KEY]) {
-        const v = changes[SHOW_PHISHING_WARNINGS_KEY]!.newValue;
-        showPhishingWarnings = typeof v === "boolean" ? v : true;
-      }
-
-      if (changes[DISABLED_SITES_KEY]) {
-        const v = changes[DISABLED_SITES_KEY]!.newValue;
-        disabledSites = Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
       }
     });
 
@@ -287,7 +242,6 @@ export default defineContentScript({
     let currentDetection: OTPFieldDetection | null = null;
     let matches: SiteMatchPreview[] = [];
     let otpById: Record<string, OtpInfo> = {};
-    let phishingWarning: string | null = null;
 
     // Shadow DOM UI elements (icon inside input + dropdown)
     let shadowHost: HTMLDivElement | null = null;
@@ -495,23 +449,6 @@ export default defineContentScript({
       };
     };
 
-    const getSiteKey = (): string => {
-      const hostname = window.location.hostname.toLowerCase();
-      return getDomain(hostname) ?? hostname;
-    };
-
-    const isAutofillDisabledOnSite = (): boolean => {
-      const key = getSiteKey();
-      return disabledSites.includes(key);
-    };
-
-    const disableAutofillOnSite = (): void => {
-      const key = getSiteKey();
-      const next = Array.from(new Set([...(disabledSites || []), key]));
-      disabledSites = next;
-      chrome.storage.local.set({ [DISABLED_SITES_KEY]: next }, () => {});
-    };
-
     const positionIcon = (input: HTMLInputElement): void => {
       if (!shadowHost) return;
       const rect = input.getBoundingClientRect();
@@ -600,30 +537,7 @@ export default defineContentScript({
       header.appendChild(logo);
       header.appendChild(title);
 
-      const actions = document.createElement("div");
-      actions.className = "ente-header-actions";
-      const disableBtn = document.createElement("button");
-      disableBtn.className = "ente-header-action";
-      disableBtn.type = "button";
-      disableBtn.textContent = "Disable";
-      disableBtn.title = "Disable autofill on this site";
-      disableBtn.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        disableAutofillOnSite();
-        hideAutofill();
-      });
-      actions.appendChild(disableBtn);
-      header.appendChild(actions);
-
       dropdownEl.appendChild(header);
-
-      if (phishingWarning) {
-        const warning = document.createElement("div");
-        warning.className = "ente-warning";
-        warning.textContent = phishingWarning;
-        dropdownEl.appendChild(warning);
-      }
 
       const list = document.createElement("div");
       list.className = "ente-list";
@@ -658,8 +572,7 @@ export default defineContentScript({
           }
           if (!otp) return;
 
-          // Avoid accidental submission on potentially suspicious pages.
-          fillCode(currentDetection, otp, autoSubmitEnabled && !phishingWarning);
+          fillCode(currentDetection, otp, autoSubmitEnabled);
           hideAutofill();
         });
 
@@ -921,15 +834,9 @@ export default defineContentScript({
         hideAutofill();
       }
 
-      if (isAutofillDisabledOnSite()) {
-        hideAutofill();
-        return;
-      }
-
       currentInput = input;
       currentDetection = detection;
       closeDropdown();
-      phishingWarning = null;
 
       try {
         const response = await chrome.runtime.sendMessage({
@@ -946,32 +853,7 @@ export default defineContentScript({
         return;
       }
 
-      if (showPhishingWarnings) {
-        for (const m of matches) {
-          const check = checkPhishing(window.location.href, m.code.issuer);
-          if (check.isPhishing) {
-            phishingWarning = check.warning || "This site does not match known domains for this issuer.";
-            break;
-          }
-        }
-      }
-
       ensureIconUi(input);
-
-      // Nice UX: if there's exactly one strong match and the field is empty, prefill (no autosubmit).
-      // Never prefill for low-confidence ("fuzzy") matches.
-      if (
-        !phishingWarning &&
-        prefillSingleMatchEnabled &&
-        matches.length === 1 &&
-        matches[0]?.matchType !== "fuzzy" &&
-        !input.value.trim()
-      ) {
-        const one = await generateOTP(matches[0]!.code.id);
-        if (one?.otp) {
-          fillCode(detection, one.otp, false);
-        }
-      }
     };
 
     // Handle focus on input fields

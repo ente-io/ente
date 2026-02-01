@@ -26,12 +26,9 @@ const LOCAL_KEYS = {
   LAST_ACTIVITY_TIME: "lastActivityTime",
   // Preferences (plaintext)
   AUTO_LOCK_TIMEOUT: "autoLockTimeout",
-  SHOW_PHISHING_WARNINGS: "showPhishingWarnings",
-  PREFILL_SINGLE_MATCH: "prefillSingleMatch",
   AUTO_SUBMIT: "autoSubmitEnabled",
   CLIPBOARD_AUTO_CLEAR: "clipboardAutoClearEnabled",
   CLIPBOARD_AUTO_CLEAR_SECONDS: "clipboardAutoClearSeconds",
-  DISABLED_SITES: "disabledSites",
   CUSTOM_API_ENDPOINT: "customApiEndpoint",
 } as const;
 
@@ -214,22 +211,6 @@ export const localStorage = {
     await this.set(LOCAL_KEYS.AUTO_LOCK_TIMEOUT, minutes);
   },
 
-  async getShowPhishingWarnings(): Promise<boolean> {
-    return (await this.get<boolean>(LOCAL_KEYS.SHOW_PHISHING_WARNINGS)) ?? true;
-  },
-
-  async setShowPhishingWarnings(show: boolean): Promise<void> {
-    await this.set(LOCAL_KEYS.SHOW_PHISHING_WARNINGS, show);
-  },
-
-  async getPrefillSingleMatch(): Promise<boolean> {
-    return (await this.get<boolean>(LOCAL_KEYS.PREFILL_SINGLE_MATCH)) ?? true;
-  },
-
-  async setPrefillSingleMatch(enabled: boolean): Promise<void> {
-    await this.set(LOCAL_KEYS.PREFILL_SINGLE_MATCH, enabled);
-  },
-
   async getAutoSubmitEnabled(): Promise<boolean> {
     return (await this.get<boolean>(LOCAL_KEYS.AUTO_SUBMIT)) ?? true;
   },
@@ -252,14 +233,6 @@ export const localStorage = {
 
   async setClipboardAutoClearSeconds(seconds: number): Promise<void> {
     await this.set(LOCAL_KEYS.CLIPBOARD_AUTO_CLEAR_SECONDS, seconds);
-  },
-
-  async getDisabledSites(): Promise<string[]> {
-    return (await this.get<string[]>(LOCAL_KEYS.DISABLED_SITES)) ?? [];
-  },
-
-  async setDisabledSites(sites: string[]): Promise<void> {
-    await this.set(LOCAL_KEYS.DISABLED_SITES, sites);
   },
 
   async getCustomApiEndpoint(): Promise<string | undefined> {

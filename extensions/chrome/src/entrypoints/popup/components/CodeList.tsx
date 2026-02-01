@@ -22,12 +22,9 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   const [toast, setToast] = useState<string | null>(null);
   const [recentById, setRecentById] = useState<Record<string, number>>({});
   const [otpById, setOtpById] = useState<Record<string, { otp: string; nextOtp: string; validFor: number }>>({});
-  const [prefillSingleMatch, setPrefillSingleMatch] = useState(true);
   const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(true);
-  const [showPhishingWarnings, setShowPhishingWarnings] = useState(true);
   const [clipboardAutoClearEnabled, setClipboardAutoClearEnabled] = useState(false);
   const [clipboardAutoClearSeconds, setClipboardAutoClearSeconds] = useState(30);
-  const [disabledSitesCount, setDisabledSitesCount] = useState(0);
 
   const MenuIcon = ({ children }: { children: React.ReactNode }) => (
     <span className="inline-flex items-center justify-center w-4 h-4 text-[var(--ente-text-faint)]">
@@ -57,27 +54,16 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   }, []);
 
   useEffect(() => {
-    chrome.storage.local.get("prefillSingleMatch", (result) => {
-      const value = result.prefillSingleMatch;
-      setPrefillSingleMatch(typeof value === "boolean" ? value : true);
-    });
-  }, []);
-
-  useEffect(() => {
     chrome.storage.local.get(
       [
         "autoSubmitEnabled",
-        "showPhishingWarnings",
         "clipboardAutoClearEnabled",
         "clipboardAutoClearSeconds",
-        "disabledSites",
       ],
       (result) => {
         setAutoSubmitEnabled(typeof result.autoSubmitEnabled === "boolean" ? result.autoSubmitEnabled : true);
-        setShowPhishingWarnings(typeof result.showPhishingWarnings === "boolean" ? result.showPhishingWarnings : true);
         setClipboardAutoClearEnabled(typeof result.clipboardAutoClearEnabled === "boolean" ? result.clipboardAutoClearEnabled : false);
         setClipboardAutoClearSeconds(typeof result.clipboardAutoClearSeconds === "number" ? result.clipboardAutoClearSeconds : 30);
-        setDisabledSitesCount(Array.isArray(result.disabledSites) ? result.disabledSites.length : 0);
       },
     );
   }, []);
@@ -89,17 +75,9 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
     ) => {
       if (areaName !== "local") return;
 
-      if (changes.prefillSingleMatch) {
-        const v = changes.prefillSingleMatch.newValue;
-        setPrefillSingleMatch(typeof v === "boolean" ? v : true);
-      }
       if (changes.autoSubmitEnabled) {
         const v = changes.autoSubmitEnabled.newValue;
         setAutoSubmitEnabled(typeof v === "boolean" ? v : true);
-      }
-      if (changes.showPhishingWarnings) {
-        const v = changes.showPhishingWarnings.newValue;
-        setShowPhishingWarnings(typeof v === "boolean" ? v : true);
       }
       if (changes.clipboardAutoClearEnabled) {
         const v = changes.clipboardAutoClearEnabled.newValue;
@@ -108,10 +86,6 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
       if (changes.clipboardAutoClearSeconds) {
         const v = changes.clipboardAutoClearSeconds.newValue;
         setClipboardAutoClearSeconds(typeof v === "number" ? v : 30);
-      }
-      if (changes.disabledSites) {
-        const v = changes.disabledSites.newValue;
-        setDisabledSitesCount(Array.isArray(v) ? v.length : 0);
       }
     };
 
@@ -230,14 +204,6 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
     }
   };
 
-  const togglePrefillSingleMatch = () => {
-    const next = !prefillSingleMatch;
-    setPrefillSingleMatch(next);
-    chrome.storage.local.set({ prefillSingleMatch: next }, () => {});
-    setToast(next ? "Prefill single match: on" : "Prefill single match: off");
-    setTimeout(() => setToast(null), 1500);
-  };
-
   const toggleAutoSubmit = () => {
     const next = !autoSubmitEnabled;
     setAutoSubmitEnabled(next);
@@ -246,27 +212,11 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
     setTimeout(() => setToast(null), 1500);
   };
 
-  const togglePhishingWarnings = () => {
-    const next = !showPhishingWarnings;
-    setShowPhishingWarnings(next);
-    chrome.storage.local.set({ showPhishingWarnings: next }, () => {});
-    setToast(next ? "Phishing warnings: on" : "Phishing warnings: off");
-    setTimeout(() => setToast(null), 1500);
-  };
-
   const toggleClipboardAutoClear = () => {
     const next = !clipboardAutoClearEnabled;
     setClipboardAutoClearEnabled(next);
     chrome.storage.local.set({ clipboardAutoClearEnabled: next }, () => {});
     setToast(next ? "Clipboard auto-clear: on" : "Clipboard auto-clear: off");
-    setTimeout(() => setToast(null), 1500);
-  };
-
-  const clearDisabledSites = () => {
-    chrome.storage.local.set({ disabledSites: [] }, () => {
-      setDisabledSitesCount(0);
-    });
-    setToast("Cleared disabled sites");
     setTimeout(() => setToast(null), 1500);
   };
 
@@ -414,28 +364,6 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                   <button
                     onClick={() => {
                       setShowMenu(false);
-                      togglePrefillSingleMatch();
-                    }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
-                    title="When enabled, focusing an OTP field with exactly one matching code will prefill the OTP (no autosubmit)."
-                  >
-                    <span className="text-sm flex items-center gap-2">
-                      <MenuIcon>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v4m0 10v4M4.22 5.22l2.83 2.83m9.9 9.9l2.83 2.83M3 12h4m10 0h4M5.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83" />
-                        </svg>
-                      </MenuIcon>
-                      Prefill 1 match
-                    </span>
-                    {prefillSingleMatch && (
-                      <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
-                      </svg>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
                       toggleAutoSubmit();
                     }}
                     className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
@@ -450,28 +378,6 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                       Autosubmit
                     </span>
                     {autoSubmitEnabled && (
-                      <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
-                      </svg>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      togglePhishingWarnings();
-                    }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
-                    title="Warn when the site doesn't match known domains for popular issuers."
-                  >
-                    <span className="text-sm flex items-center gap-2">
-                      <MenuIcon>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l8 4v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z" />
-                        </svg>
-                      </MenuIcon>
-                      Phishing warnings
-                    </span>
-                    {showPhishingWarnings && (
                       <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
                       </svg>
@@ -498,25 +404,6 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
                       </svg>
                     )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      clearDisabledSites();
-                    }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
-                    title="Re-enable autofill on all sites where you previously disabled it."
-                    disabled={disabledSitesCount === 0}
-                  >
-                    <span className="text-sm flex items-center gap-2">
-                      <MenuIcon>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-3-6.7M21 3v6h-6" />
-                        </svg>
-                      </MenuIcon>
-                      Clear disabled
-                    </span>
-                    <span className="text-xs text-white/50">{disabledSitesCount || ""}</span>
                   </button>
                   <button
                     onClick={() => {
