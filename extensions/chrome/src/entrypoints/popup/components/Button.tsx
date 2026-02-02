@@ -31,7 +31,9 @@ export default function Button({
           base,
           fullWidth && "w-full",
           // Primary actions are intentionally larger/bolder.
-          "py-2.5 px-4 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] text-white text-lg font-bold",
+          "py-2.5 px-4 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] text-white text-base font-bold",
+          // In light theme, a white disabled label on a near-white disabled bg looks invisible.
+          "disabled:bg-[var(--ente-paper-2)] disabled:text-[var(--ente-text-faint)] disabled:opacity-100",
           className,
         )}
       />
@@ -44,7 +46,8 @@ export default function Button({
       className={cn(
         base,
         fullWidth && "w-full",
-        "py-2 px-3 text-sm font-medium hover:bg-[var(--ente-hover)]",
+        // Text buttons should read like links (no filled hover background).
+        "py-2 px-3 text-sm font-medium",
         tone === "danger"
           ? "text-[var(--ente-text-muted)] hover:text-red-500"
           : "text-[var(--ente-text-muted)] hover:text-[var(--ente-text)]",

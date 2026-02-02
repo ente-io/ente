@@ -76,7 +76,7 @@ export default function AppLockModal({ open, onClose }: Props) {
       <div className="fixed inset-0 bg-black/60 z-20" onClick={onClose} />
       <div className="fixed inset-0 z-30 flex items-center justify-center p-4">
         <div className="w-full max-w-sm bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-xl shadow-2xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--ente-stroke)] flex items-center justify-between">
+          <div className="px-4 py-3 flex items-center justify-between">
             <div className="text-sm font-semibold text-[var(--ente-text)]">Passcode lock</div>
             <button
               onClick={onClose}
@@ -118,7 +118,7 @@ export default function AppLockModal({ open, onClose }: Props) {
             {error && <div className="mt-3 text-sm text-red-400">{error}</div>}
           </div>
 
-          <div className="px-4 py-3 border-t border-[var(--ente-stroke)] flex items-center justify-between gap-2">
+          <div className="px-4 py-3 flex items-center justify-between gap-2">
             <Button
               onClick={handleDisable}
               disabled={!enabled || saving}
@@ -131,6 +131,7 @@ export default function AppLockModal({ open, onClose }: Props) {
               onClick={handleSave}
               disabled={!canSave || saving}
               variant="primary"
+              className="text-sm py-2"
             >
               {saving ? "Saving..." : enabled ? "Change" : "Enable"}
             </Button>

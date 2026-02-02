@@ -31,8 +31,8 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   const [showAppLockModal, setShowAppLockModal] = useState(false);
   const [popupTheme, setPopupTheme] = useState<"dark" | "light">("dark");
 
-  const MenuIcon = ({ icon }: { icon: React.ReactNode }) => (
-    <span className="inline-flex items-center justify-center w-4 h-4 text-[var(--ente-text-faint)]">
+  const MenuIcon = ({ icon, className }: { icon: React.ReactNode; className?: string }) => (
+    <span className={`inline-flex items-center justify-center w-4 h-4 ${className || ""}`}>
       {icon}
     </span>
   );
@@ -383,7 +383,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center gap-2"
                   >
-                    <MenuIcon icon={<HugeIcon icon={hugeLock} size={16} />} />
+                    <MenuIcon className="text-[var(--ente-text-faint)]" icon={<HugeIcon icon={hugeLock} size={16} />} />
                     Lock
                   </button>
                   <button
@@ -396,7 +396,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                   >
                     <span className="flex items-center gap-2">
                       {/* Keep the theme icon consistent across themes. */}
-                      <MenuIcon icon={<HugeIcon icon={hugeSun01} size={16} />} />
+                      <MenuIcon className="text-[var(--ente-text-faint)]" icon={<HugeIcon icon={hugeSun01} size={16} />} />
                       Theme
                     </span>
                     <span className="text-sm text-[var(--ente-text-faint)]">{popupTheme}</span>
@@ -409,7 +409,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center gap-2"
                     title="Set a local passcode to unlock the extension."
                   >
-                    <MenuIcon icon={<HugeIcon icon={hugeLockPassword} size={16} />} />
+                    <MenuIcon className="text-[var(--ente-text-faint)]" icon={<HugeIcon icon={hugeLockPassword} size={16} />} />
                     {appLockEnabled ? "Change passcode" : "Set passcode"}
                   </button>
                   <button
@@ -421,7 +421,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     title="When enabled, selecting a code from the in-page dropdown will attempt to submit the form."
                   >
                     <span className="flex items-center gap-2">
-                      <MenuIcon icon={<HugeIcon icon={hugeArrowUp02} size={16} />} />
+                      <MenuIcon className="text-[var(--ente-text-faint)]" icon={<HugeIcon icon={hugeArrowUp02} size={16} />} />
                       Autosubmit
                     </span>
                     {autoSubmitEnabled && (
@@ -439,7 +439,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     title="Clears the copied OTP from your clipboard after a short delay (may not work on all sites/browsers)."
                   >
                     <span className="flex items-center gap-2">
-                      <MenuIcon icon={<HugeIcon icon={hugeClipboard} size={16} />} />
+                      <MenuIcon className="text-[var(--ente-text-faint)]" icon={<HugeIcon icon={hugeClipboard} size={16} />} />
                       Clipboard clear
                     </span>
                     {clipboardAutoClearEnabled && (
@@ -455,7 +455,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-[var(--ente-hover)] transition-colors flex items-center gap-2"
                   >
-                    <MenuIcon icon={<HugeIcon icon={hugeLogout01} size={16} />} />
+                    <MenuIcon className="text-red-500" icon={<HugeIcon icon={hugeLogout01} size={16} />} />
                     Logout
                   </button>
                 </div>
