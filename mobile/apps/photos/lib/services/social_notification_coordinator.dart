@@ -6,6 +6,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/social_db.dart';
 import 'package:photos/extensions/user_extension.dart';
 import 'package:photos/generated/l10n.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/social/comment.dart';
 import 'package:photos/models/social/feed_item.dart';
 import 'package:photos/models/social/reaction.dart';
@@ -180,15 +181,16 @@ class SocialNotificationCoordinator {
       );
     }
 
-    final fileIDsNeedingOwnership = <int>{};
+    final allFileIDs = <int>{};
     for (final reaction in photoLikes) {
-      if (reaction.fileID != null) {
-        fileIDsNeedingOwnership.add(reaction.fileID!);
-      }
+      if (reaction.fileID != null) allFileIDs.add(reaction.fileID!);
+    }
+    for (final comment in fileComments) {
+      if (comment.fileID != null) allFileIDs.add(comment.fileID!);
     }
 
     final filesByID =
-        await _filesDb.getFileIDToFileFromIDs(fileIDsNeedingOwnership.toList());
+        await _filesDb.getFileIDToFileFromIDs(allFileIDs.toList());
 
     bool isOwnedByUser(int? fileID) {
       if (fileID == null) {
@@ -229,10 +231,11 @@ class SocialNotificationCoordinator {
         continue;
       }
       try {
+        final fileType = filesByID[fileID]?.fileType;
         final title = await _getSocialNotificationTitle(candidate);
         await NotificationService.instance.showNotification(
           title,
-          _getSocialNotificationBody(candidate.type, s),
+          _getSocialNotificationBody(candidate.type, s, fileType),
           channelID: 'social_activity',
           channelName: 'Ente Feed',
           payload: _buildSocialNotificationPayload(candidate),
@@ -317,19 +320,22 @@ class SocialNotificationCoordinator {
   String _getSocialNotificationBody(
     FeedItemType type,
     AppLocalizations s,
+    FileType? fileType,
   ) {
-    return _getSocialNotificationDetail(type, s);
+    return _getSocialNotificationDetail(type, s, fileType);
   }
 
   String _getSocialNotificationDetail(
     FeedItemType type,
     AppLocalizations s,
+    FileType? fileType,
   ) {
+    final isVideo = fileType == FileType.video;
     switch (type) {
       case FeedItemType.photoLike:
-        return s.likedYourPhoto;
+        return isVideo ? s.likedYourVideo : s.likedYourPhoto;
       case FeedItemType.comment:
-        return s.commentedOnYourPhoto;
+        return isVideo ? s.commentedOnAVideo : s.commentedOnYourPhoto;
       case FeedItemType.reply:
         return s.repliedToYourComment;
       case FeedItemType.commentLike:
