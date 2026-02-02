@@ -95,26 +95,22 @@ func (repo *CommentsRepository) SoftDeleteByCollectionAndUser(ctx context.Contex
 
 func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*socialentity.Comment, error) {
 	var (
-		fileID       sql.NullInt64
-		parent       sql.NullString
-		parentUserID sql.NullInt64
-		anon         sql.NullString
-		cipher       sql.NullString
-		nonce        sql.NullString
+		fileID sql.NullInt64
+		parent sql.NullString
+		anon   sql.NullString
+		cipher sql.NullString
+		nonce  sql.NullString
 	)
 	comment := &socialentity.Comment{}
 	err := repo.DB.QueryRowContext(ctx, `
-        SELECT c.id, c.collection_id, c.file_id, c.parent_comment_id, p.user_id,
-               c.user_id, c.anon_user_id, c.cipher, c.nonce, c.is_deleted, c.created_at, c.updated_at
-        FROM comments c
-        LEFT JOIN comments p ON c.parent_comment_id = p.id
-        WHERE c.id = $1
+        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
+        FROM comments
+        WHERE id = $1
     `, id).Scan(
 		&comment.ID,
 		&comment.CollectionID,
 		&fileID,
 		&parent,
-		&parentUserID,
 		&comment.UserID,
 		&anon,
 		&cipher,
@@ -132,9 +128,6 @@ func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*social
 	if parent.Valid {
 		comment.ParentCommentID = &parent.String
 	}
-	if parentUserID.Valid {
-		comment.ParentCommentUserID = &parentUserID.Int64
-	}
 	if anon.Valid {
 		comment.AnonUserID = &anon.String
 	}
@@ -149,14 +142,12 @@ func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*social
 
 func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64) ([]socialentity.Comment, bool, error) {
 	query := `
-        SELECT c.id, c.collection_id, c.file_id, c.parent_comment_id, p.user_id,
-               c.user_id, c.anon_user_id, c.cipher, c.nonce, c.is_deleted, c.created_at, c.updated_at
-        FROM comments c
-        LEFT JOIN comments p ON c.parent_comment_id = p.id
-        WHERE c.collection_id = $1
-          AND c.updated_at > $2
-          AND ($3::BIGINT IS NULL OR c.file_id IS NOT DISTINCT FROM $3::BIGINT)
-        ORDER BY c.updated_at ASC
+        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
+        FROM comments
+        WHERE collection_id = $1
+          AND updated_at > $2
+          AND ($3::BIGINT IS NULL OR file_id IS NOT DISTINCT FROM $3::BIGINT)
+        ORDER BY updated_at ASC
         LIMIT $4
     `
 	rows, err := repo.DB.QueryContext(ctx, query, collectionID, since, fileID, limit+1)
@@ -168,20 +159,18 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 	comments := make([]socialentity.Comment, 0, limit+1)
 	for rows.Next() {
 		var (
-			file         sql.NullInt64
-			parent       sql.NullString
-			parentUserID sql.NullInt64
-			anon         sql.NullString
-			cipher       sql.NullString
-			nonce        sql.NullString
-			comment      socialentity.Comment
+			file    sql.NullInt64
+			parent  sql.NullString
+			anon    sql.NullString
+			cipher  sql.NullString
+			nonce   sql.NullString
+			comment socialentity.Comment
 		)
 		if err := rows.Scan(
 			&comment.ID,
 			&comment.CollectionID,
 			&file,
 			&parent,
-			&parentUserID,
 			&comment.UserID,
 			&anon,
 			&cipher,
@@ -197,9 +186,6 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 		}
 		if parent.Valid {
 			comment.ParentCommentID = &parent.String
-		}
-		if parentUserID.Valid {
-			comment.ParentCommentUserID = &parentUserID.Int64
 		}
 		if anon.Valid {
 			comment.AnonUserID = &anon.String
@@ -318,7 +304,7 @@ func (repo *CommentsRepository) GetActiveUserIDs(ctx context.Context, collection
 // 2. Replies to user's comments
 func (repo *CommentsRepository) GetAlbumFeedComments(ctx context.Context, collectionID int64, userID int64, since int64, limit int) ([]socialentity.Comment, bool, error) {
 	query := `
-        SELECT c.id, c.collection_id, c.file_id, c.parent_comment_id, p.user_id,
+        SELECT c.id, c.collection_id, c.file_id, c.parent_comment_id,
                c.user_id, c.anon_user_id, c.cipher, c.nonce, c.is_deleted, c.created_at, c.updated_at
         FROM comments c
         LEFT JOIN comments p ON c.parent_comment_id = p.id
@@ -350,20 +336,18 @@ func (repo *CommentsRepository) GetAlbumFeedComments(ctx context.Context, collec
 	comments := make([]socialentity.Comment, 0, limit+1)
 	for rows.Next() {
 		var (
-			file         sql.NullInt64
-			parent       sql.NullString
-			parentUserID sql.NullInt64
-			anon         sql.NullString
-			cipher       sql.NullString
-			nonce        sql.NullString
-			comment      socialentity.Comment
+			file    sql.NullInt64
+			parent  sql.NullString
+			anon    sql.NullString
+			cipher  sql.NullString
+			nonce   sql.NullString
+			comment socialentity.Comment
 		)
 		if err := rows.Scan(
 			&comment.ID,
 			&comment.CollectionID,
 			&file,
 			&parent,
-			&parentUserID,
 			&comment.UserID,
 			&anon,
 			&cipher,
@@ -379,9 +363,6 @@ func (repo *CommentsRepository) GetAlbumFeedComments(ctx context.Context, collec
 		}
 		if parent.Valid {
 			comment.ParentCommentID = &parent.String
-		}
-		if parentUserID.Valid {
-			comment.ParentCommentUserID = &parentUserID.Int64
 		}
 		if anon.Valid {
 			comment.AnonUserID = &anon.String
