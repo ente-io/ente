@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:photos/db/ml/db.dart';
+import "package:photos/service_locator.dart" show isOfflineMode;
 import 'package:photos/services/machine_learning/ml_computer.dart';
 
 class TextEmbeddingsCacheService {
@@ -9,9 +10,11 @@ class TextEmbeddingsCacheService {
   static final instance = TextEmbeddingsCacheService._privateConstructor();
 
   Future<List<double>> getEmbedding(String query) async {
+    final mlDataDB =
+        isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
     // 1. Check database cache
     final dbResult =
-        await MLDataDB.instance.getRepeatedTextEmbeddingCache(query);
+        await mlDataDB.getRepeatedTextEmbeddingCache(query);
     if (dbResult != null) {
       _logger.info('Text embedding cache hit for query');
       return dbResult;
@@ -22,7 +25,7 @@ class TextEmbeddingsCacheService {
     final embedding = await MLComputer.instance.runClipText(query);
 
     // 3. Store in database cache
-    await MLDataDB.instance.putRepeatedTextEmbeddingCache(query, embedding);
+    await mlDataDB.putRepeatedTextEmbeddingCache(query, embedding);
 
     return embedding;
   }

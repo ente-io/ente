@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	backupOptionsRolloutPercentage = 20
+	backupOptionsRolloutPercentage = 100
 	backupOptionsRolloutNonce      = "backup-options-v1"
 )
 
