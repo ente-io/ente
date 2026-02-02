@@ -248,6 +248,26 @@ const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
 const Color _primary400 = Color.fromRGBO(38, 203, 95, 1);
 const Color _primary300 = Color.fromRGBO(1, 222, 77, 1);
 
+
+// Green Colors
+const Color green = Color.fromRGBO(8, 194, 37, 1);
+const Color greenLightLight = Color.fromRGBO(231, 246, 233, 1);
+const Color greenLightDark = Color.fromRGBO(33, 33, 33, 1);
+const Color greenDark = Color.fromRGBO(6, 157, 30, 1);
+const Color greenDarker = Color.fromRGBO(5, 124, 24, 1);
+
+// Red Colors
+const Color red = Color.fromRGBO(246, 58, 58, 1);
+const Color redLightLight = Color.fromRGBO(250, 235, 235, 1);
+const Color redLightDark = Color.fromRGBO(33, 33, 33, 1);
+const Color redDark = Color.fromRGBO(221, 52, 52, 1);
+const Color redDarker = Color.fromRGBO(197, 46, 46, 1);
+
+// Button Colors
+const Color buttonDisabledBg = Color(0xFFF5F5F5);
+const Color buttonDisabledText = Color(0xFF969696);
+const Color buttonTextOnColor = Color(0xFFFFFFFF);
+
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
