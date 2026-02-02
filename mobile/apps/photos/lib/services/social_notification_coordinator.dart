@@ -157,8 +157,8 @@ class SocialNotificationCoordinator {
       );
     }
 
-    final List<Comment> replies = await db.getRepliesToUserCommentsSince(
-      targetUserID: userID,
+    final List<Comment> replies = await db.getRepliesSince(
+      excludeUserID: userID,
       sinceTime: cutoffTime,
     );
     final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
@@ -166,28 +166,21 @@ class SocialNotificationCoordinator {
       sinceTime: cutoffTime,
     );
 
-    final repliesNeedingOwnerCheck = <Comment>[];
-    final fileIDsNeedingOwnership = <int>{};
-
     for (final reply in replies) {
-      if (reply.parentCommentUserID == userID) {
-        considerCandidate(
-          _SocialActivityCandidate(
-            type: FeedItemType.reply,
-            collectionID: reply.collectionID,
-            fileID: reply.fileID,
-            commentID: reply.id,
-            createdAt: reply.createdAt,
-            actorUserID: reply.userID,
-            actorAnonID: reply.anonUserID,
-          ),
-        );
-      } else if (reply.fileID != null) {
-        repliesNeedingOwnerCheck.add(reply);
-        fileIDsNeedingOwnership.add(reply.fileID!);
-      }
+      considerCandidate(
+        _SocialActivityCandidate(
+          type: FeedItemType.reply,
+          collectionID: reply.collectionID,
+          fileID: reply.fileID,
+          commentID: reply.id,
+          createdAt: reply.createdAt,
+          actorUserID: reply.userID,
+          actorAnonID: reply.anonUserID,
+        ),
+      );
     }
 
+    final fileIDsNeedingOwnership = <int>{};
     for (final reaction in photoLikes) {
       if (reaction.fileID != null) {
         fileIDsNeedingOwnership.add(reaction.fileID!);
@@ -217,23 +210,6 @@ class SocialNotificationCoordinator {
           createdAt: reaction.createdAt,
           actorUserID: reaction.userID,
           actorAnonID: reaction.anonUserID,
-        ),
-      );
-    }
-
-    for (final reply in repliesNeedingOwnerCheck) {
-      if (!isOwnedByUser(reply.fileID)) {
-        continue;
-      }
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.reply,
-          collectionID: reply.collectionID,
-          fileID: reply.fileID,
-          commentID: reply.id,
-          createdAt: reply.createdAt,
-          actorUserID: reply.userID,
-          actorAnonID: reply.anonUserID,
         ),
       );
     }
