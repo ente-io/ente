@@ -148,9 +148,10 @@ var domainRegex = regexp.MustCompile(`^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-
 
 const customDomainFamilyPrefix = "_"
 
-// BuildFamilyCustomDomainPointer builds a user-scoped custom domain pointer.
-func BuildFamilyCustomDomainPointer(userID int64, domain string) string {
-	return fmt.Sprintf("%s%d:%s", customDomainFamilyPrefix, userID, domain)
+// BuildFamilyCustomDomainPointer builds a member-scoped custom domain pointer
+// to keep the custom domain unique across family members.
+func BuildFamilyCustomDomainPointer(memberID int64, domain string) string {
+	return fmt.Sprintf("%s%d:%s", customDomainFamilyPrefix, memberID, domain)
 }
 
 // ParseFamilyCustomDomainPointer parses a custom domain pointer of the form _<userID>:<domain>.
@@ -164,15 +165,15 @@ func ParseFamilyCustomDomainPointer(value string) (int64, string, bool, error) {
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		return 0, "", true, NewBadRequestWithMessage("invalid family custom domain format")
 	}
-	adminID, err := strconv.ParseInt(parts[0], 10, 64)
-	if err != nil || adminID <= 0 {
-		return 0, "", true, NewBadRequestWithMessage("invalid family custom domain admin id")
+	memberID, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil || memberID <= 0 {
+		return 0, "", true, NewBadRequestWithMessage("invalid family custom domain user id")
 	}
 	domain := parts[1]
 	if err := isValidDomainWithoutScheme(domain); err != nil {
 		return 0, "", true, err
 	}
-	return adminID, domain, true, nil
+	return memberID, domain, true, nil
 }
 
 // ResolveCustomDomainValue returns the effective domain for a custom domain value.
