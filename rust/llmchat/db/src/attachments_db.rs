@@ -159,6 +159,15 @@ impl<B: Backend> AttachmentsDb<B> {
         Ok(())
     }
 
+    pub fn reset_all_upload_state(&self) -> Result<()> {
+        let now = self.clock.now_us();
+        self.backend.execute(
+            "UPDATE attachments SET upload_state = 'pending', remote_id = NULL, uploaded_at = NULL, updated_at = ?",
+            &[Value::Integer(now)],
+        )?;
+        Ok(())
+    }
+
     pub fn get_upload_state(&self, attachment_id: &str) -> Result<Option<UploadState>> {
         let row = self.backend.query_row(
             "SELECT upload_state FROM attachments WHERE attachment_id = ?",

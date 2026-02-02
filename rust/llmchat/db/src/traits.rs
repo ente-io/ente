@@ -115,6 +115,14 @@ impl FsAttachmentStore {
         Ok(fs::metadata(path)?.len())
     }
 
+    pub fn clear_all(&self) -> Result<()> {
+        if self.root.exists() {
+            fs::remove_dir_all(&self.root)?;
+        }
+        fs::create_dir_all(&self.root)?;
+        Ok(())
+    }
+
     fn attachment_path(&self, id: &str) -> PathBuf {
         self.root.join(id)
     }

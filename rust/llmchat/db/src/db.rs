@@ -264,6 +264,18 @@ impl<B: Backend> ChatDb<B> {
         ensure_row_updated(affected, EntityType::Session, uuid)
     }
 
+    pub fn mark_all_needs_sync(&self) -> Result<()> {
+        self.backend.execute(
+            "UPDATE sessions SET needs_sync = 1 WHERE deleted_at IS NULL",
+            &[],
+        )?;
+        self.backend.execute(
+            "UPDATE messages SET needs_sync = 1 WHERE deleted_at IS NULL",
+            &[],
+        )?;
+        Ok(())
+    }
+
     pub fn mark_message_synced(&self, uuid: Uuid) -> Result<()> {
         let affected = self.backend.execute(
             "UPDATE messages SET needs_sync = 0 WHERE message_uuid = ? AND deleted_at IS NULL",

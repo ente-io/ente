@@ -7,4 +7,4 @@ pub mod models;
 pub mod sync;
 
 pub use errors::SyncError;
-pub use sync::{SyncEngine, SyncResult, SyncStats, SyncAuth};
+pub use sync::{SyncAuth, SyncEngine, SyncResult, SyncStats};

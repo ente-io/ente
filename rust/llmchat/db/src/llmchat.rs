@@ -234,6 +234,14 @@ impl<B: crate::Backend> LlmChatDb<B> {
     pub fn get_attachment_upload_state(&self, attachment_id: &str) -> Result<Option<UploadState>> {
         self.attachments.get_upload_state(attachment_id)
     }
+
+    pub fn mark_all_needs_sync(&self) -> Result<()> {
+        self.chat.mark_all_needs_sync()
+    }
+
+    pub fn reset_attachment_sync_state(&self) -> Result<()> {
+        self.attachments.reset_all_upload_state()
+    }
 }
 
 #[cfg(feature = "sqlite")]

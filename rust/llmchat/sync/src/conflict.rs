@@ -121,26 +121,33 @@ mod tests {
             deleted_at: None,
         };
 
-        let wrong_size = AttachmentMeta { size: 256, ..attachment.clone() };
-        assert!(find_duplicate_message(
-            &[local.clone()],
-            &Sender::SelfUser,
-            "hello",
-            &[wrong_size],
-            10_000,
-            Some(parent_uuid),
-        )
-        .is_none());
+        let wrong_size = AttachmentMeta {
+            size: 256,
+            ..attachment.clone()
+        };
+        assert!(
+            find_duplicate_message(
+                &[local.clone()],
+                &Sender::SelfUser,
+                "hello",
+                &[wrong_size],
+                10_000,
+                Some(parent_uuid),
+            )
+            .is_none()
+        );
 
-        assert!(find_duplicate_message(
-            &[local.clone()],
-            &Sender::SelfUser,
-            "hello",
-            &[attachment.clone()],
-            10_000,
-            None,
-        )
-        .is_none());
+        assert!(
+            find_duplicate_message(
+                &[local.clone()],
+                &Sender::SelfUser,
+                "hello",
+                &[attachment.clone()],
+                10_000,
+                None,
+            )
+            .is_none()
+        );
 
         assert_eq!(
             find_duplicate_message(

@@ -17,7 +17,10 @@ pub enum SyncError {
         code: Option<String>,
     },
     #[error("limit reached: {code}")]
-    LimitReached { code: String, message: Option<String> },
+    LimitReached {
+        code: String,
+        message: Option<String>,
+    },
     #[error("attachment API unavailable")]
     AttachmentApiUnavailable,
     #[error("attachment missing: {0}")]

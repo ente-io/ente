@@ -13,7 +13,9 @@ use llmchat_db::{
 use uuid::Uuid;
 
 use crate::conflict::{find_duplicate_message, order_for_sync};
-use crate::crypto::{decrypt_chat_key, decrypt_payload, encrypt_attachment_bytes, encrypt_chat_key, encrypt_payload};
+use crate::crypto::{
+    decrypt_chat_key, decrypt_payload, encrypt_attachment_bytes, encrypt_chat_key, encrypt_payload,
+};
 use crate::diff_cursor::SyncCursor;
 use crate::errors::SyncError;
 use crate::http::{HttpClient, HttpConfig};
@@ -47,6 +49,13 @@ pub struct SyncResult {
     pub pushed: SyncStats,
     pub uploaded_attachments: i64,
     pub downloaded_attachments: i64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ChatKeyStatus {
+    Cached,
+    Remote,
+    Created,
 }
 
 pub struct SyncEngine {
@@ -110,10 +119,14 @@ impl SyncEngine {
             timeout_secs: None,
         })?;
 
-        let chat_key = self.get_or_create_chat_key(&http, &master_key)?;
+        let (chat_key, key_status) = self.get_or_create_chat_key(&http, &master_key)?;
         let mut result = SyncResult::default();
 
-        self.pull(&http, &chat_key, &mut result)?;
+        if key_status == ChatKeyStatus::Created {
+            self.prepare_for_new_chat_key()?;
+        } else {
+            self.pull(&http, &chat_key, &mut result)?;
+        }
         self.push(&http, &chat_key, &mut result)?;
 
         Ok(result)
@@ -124,6 +137,28 @@ impl SyncEngine {
         auth: SyncAuth,
     ) -> std::thread::JoinHandle<Result<SyncResult, SyncError>> {
         std::thread::spawn(move || self.sync(auth))
+    }
+
+    fn prepare_for_new_chat_key(&self) -> Result<(), SyncError> {
+        self.reset_cursor_to_now()?;
+        self.db.mark_all_needs_sync()?;
+        self.db.reset_attachment_sync_state()?;
+        self.attachment_store.clear_all()?;
+        Ok(())
+    }
+
+    fn reset_cursor_to_now(&self) -> Result<(), SyncError> {
+        let clock = SystemClock;
+        let now = clock.now_us();
+        let cursor = SyncCursor {
+            base_since_time: now,
+            since_time: now,
+            max_time: now,
+            since_type: "sessions".to_string(),
+            since_id: "00000000-0000-0000-0000-000000000000".to_string(),
+        };
+        self.save_cursor(&cursor)?;
+        Ok(())
     }
 
     pub fn download_attachment(
@@ -170,7 +205,7 @@ impl SyncEngine {
             timeout_secs: None,
         })?;
 
-        let chat_key = self.get_or_create_chat_key(&http, &master_key)?;
+        let (chat_key, _) = self.get_or_create_chat_key(&http, &master_key)?;
         let encrypted = if self.attachment_store.exists(&attachment_id)? {
             self.attachment_store.read(&attachment_id)?
         } else {
@@ -187,12 +222,9 @@ impl SyncEngine {
             let bytes = match http.get_bytes(&url) {
                 Ok(bytes) => bytes,
                 Err(SyncError::Http { status: 404, .. }) => {
-                    if let Err(err) = self.force_upload_attachment(
-                        &http,
-                        &chat_key,
-                        session_uuid,
-                        &attachment_id,
-                    ) {
+                    if let Err(err) =
+                        self.force_upload_attachment(&http, &chat_key, session_uuid, &attachment_id)
+                    {
                         return Err(err);
                     }
                     if let Some(updated) = self.db.get_attachment_remote_id(&attachment_id)? {
@@ -207,7 +239,8 @@ impl SyncEngine {
             bytes
         };
 
-        let plaintext = crate::crypto::decrypt_attachment_bytes(&encrypted, &chat_key, session_uuid)?;
+        let plaintext =
+            crate::crypto::decrypt_attachment_bytes(&encrypted, &chat_key, session_uuid)?;
         std::fs::write(plaintext_path, plaintext)?;
         Ok(true)
     }
@@ -359,9 +392,9 @@ impl SyncEngine {
             let (attachments, attachment_remote_ids) =
                 self.decrypt_remote_attachments(&message.attachments, chat_key)?;
 
-            let local_messages = local_messages_cache.entry(session_uuid).or_insert_with(|| {
-                self.db.get_messages(session_uuid).unwrap_or_default()
-            });
+            let local_messages = local_messages_cache
+                .entry(session_uuid)
+                .or_insert_with(|| self.db.get_messages(session_uuid).unwrap_or_default());
 
             let parent_uuid = message
                 .parent_message_uuid
@@ -398,7 +431,9 @@ impl SyncEngine {
             )?;
 
             for attachment in &attachments {
-                let remote_id = attachment_remote_ids.get(&attachment.id).map(String::as_str);
+                let remote_id = attachment_remote_ids
+                    .get(&attachment.id)
+                    .map(String::as_str);
                 let _ = self.db.upsert_attachment_with_state(
                     &attachment.id,
                     session_uuid,
@@ -442,18 +477,12 @@ impl SyncEngine {
         for (entity_type, uuid) in pending_deletes {
             match entity_type {
                 EntityType::Session => {
-                    http.delete(
-                        "/llmchat/chat/session",
-                        &[("id", uuid.to_string())],
-                    )?;
+                    http.delete("/llmchat/chat/session", &[("id", uuid.to_string())])?;
                     let _ = self.db.delete_attachment_tracking_for_session(uuid);
                     self.db.hard_delete(entity_type, uuid)?;
                 }
                 EntityType::Message => {
-                    http.delete(
-                        "/llmchat/chat/message",
-                        &[("id", uuid.to_string())],
-                    )?;
+                    http.delete("/llmchat/chat/message", &[("id", uuid.to_string())])?;
                     let _ = self.db.delete_attachment_tracking_for_message(uuid);
                     self.db.hard_delete(entity_type, uuid)?;
                 }
@@ -469,7 +498,8 @@ impl SyncEngine {
             if !messages.is_empty() {
                 self.reconcile_attachments(session_uuid, &messages)?;
 
-                let force_uploads = self.revalidate_uploaded_attachments(http, session_uuid, &messages)?;
+                let force_uploads =
+                    self.revalidate_uploaded_attachments(http, session_uuid, &messages)?;
                 let uploaded =
                     self.upload_pending_attachments(http, chat_key, session_uuid, &force_uploads)?;
                 result.uploaded_attachments += uploaded;
@@ -588,13 +618,11 @@ impl SyncEngine {
             text: message.text.clone(),
         };
         let encrypted = encrypt_payload(&message_payload, chat_key)?;
-        let attachments = self.encrypt_attachments(message.session_uuid, &message.attachments, chat_key)?;
+        let attachments =
+            self.encrypt_attachments(message.session_uuid, &message.attachments, chat_key)?;
 
-        let client_metadata = encode_client_metadata(
-            &message.uuid.to_string(),
-            message.created_at,
-            chat_key,
-        )?;
+        let client_metadata =
+            encode_client_metadata(&message.uuid.to_string(), message.created_at, chat_key)?;
         let message_request = UpsertMessageRequest {
             message_uuid: message.uuid.to_string(),
             session_uuid: message.session_uuid.to_string(),
@@ -605,7 +633,8 @@ impl SyncEngine {
             header: encrypted.header,
             client_metadata: Some(client_metadata),
         };
-        let _response: serde_json::Value = http.post_json("/llmchat/chat/message", &message_request)?;
+        let _response: serde_json::Value =
+            http.post_json("/llmchat/chat/message", &message_request)?;
         Ok(())
     }
 
@@ -628,9 +657,13 @@ impl SyncEngine {
 
     fn is_attachment_size_mismatch(&self, error: &SyncError) -> bool {
         match error {
-            SyncError::Http { status: 400, message, .. } => {
-                message.to_ascii_lowercase().contains("attachment size mismatch")
-            }
+            SyncError::Http {
+                status: 400,
+                message,
+                ..
+            } => message
+                .to_ascii_lowercase()
+                .contains("attachment size mismatch"),
             _ => false,
         }
     }
@@ -765,14 +798,12 @@ impl SyncEngine {
                     }
                 };
 
-                let status = match http.head_status(&format!(
-                    "/llmchat/chat/attachment/{}",
-                    remote_id
-                )) {
-                    Ok(status) => status,
-                    Err(SyncError::Unauthorized) => return Err(SyncError::Unauthorized),
-                    Err(_) => continue,
-                };
+                let status =
+                    match http.head_status(&format!("/llmchat/chat/attachment/{}", remote_id)) {
+                        Ok(status) => status,
+                        Err(SyncError::Unauthorized) => return Err(SyncError::Unauthorized),
+                        Err(_) => continue,
+                    };
 
                 if status == 404 {
                     let _ = self.db.upsert_pending_attachment(
@@ -812,7 +843,11 @@ impl SyncEngine {
         self.db
             .set_attachment_remote_id(attachment_id, Some(&upload_url.attachment_id))?;
         http.put_bytes(&upload_url.url, &encrypted, &[])?;
-        if self.db.get_attachment_upload_state(attachment_id)?.is_some() {
+        if self
+            .db
+            .get_attachment_upload_state(attachment_id)?
+            .is_some()
+        {
             let _ = self.db.mark_attachment_uploaded(attachment_id);
         }
         Ok(())
@@ -861,12 +896,18 @@ impl SyncEngine {
                     uploaded += 1;
                     None
                 }
-                Err(SyncError::Http { status: 404 | 501, .. }) => {
-                    let _ = self.db.set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
+                Err(SyncError::Http {
+                    status: 404 | 501, ..
+                }) => {
+                    let _ = self
+                        .db
+                        .set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
                     return Err(SyncError::AttachmentApiUnavailable);
                 }
                 Err(err) => {
-                    let _ = self.db.set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
+                    let _ = self
+                        .db
+                        .set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
                     return Err(err);
                 }
             };
@@ -877,7 +918,9 @@ impl SyncEngine {
                     Some(&upload_url.attachment_id),
                 )?;
                 if let Err(err) = http.put_bytes(&upload_url.url, &encrypted, &[]) {
-                    let _ = self.db.set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
+                    let _ = self
+                        .db
+                        .set_attachment_upload_state(&row.attachment_id, UploadState::Failed);
                     return Err(err);
                 }
                 let _ = self.db.mark_attachment_uploaded(&row.attachment_id);
@@ -910,7 +953,8 @@ impl SyncEngine {
             return Ok(size as i64);
         }
 
-        let (_bytes, size) = self.encrypted_attachment_bytes(attachment_id, session_uuid, chat_key)?;
+        let (_bytes, size) =
+            self.encrypted_attachment_bytes(attachment_id, session_uuid, chat_key)?;
         Ok(size)
     }
 
@@ -977,33 +1021,33 @@ impl SyncEngine {
         &self,
         http: &HttpClient,
         master_key: &[u8],
-    ) -> Result<Vec<u8>, SyncError> {
+    ) -> Result<(Vec<u8>, ChatKeyStatus), SyncError> {
         if let Some(key) = self.load_chat_key_from_meta(master_key)? {
-            return Ok(key);
+            return Ok((key, ChatKeyStatus::Cached));
         }
 
         let remote = http.get_json_optional::<ChatKeyPayload>("/llmchat/chat/key", &[]);
         let remote = match remote {
             Ok(value) => value,
-            Err(SyncError::Http { status: 400, code: Some(code), .. })
-                if code == "AuthKeyNotCreated" =>
-            {
-                None
-            }
+            Err(SyncError::Http {
+                status: 400,
+                code: Some(code),
+                ..
+            }) if code == "AuthKeyNotCreated" => None,
             Err(err) => return Err(err),
         };
 
         if let Some(payload) = remote {
-            let encrypted = payload
-                .encrypted_value()
-                .ok_or_else(|| SyncError::InvalidResponse("missing encrypted chat key".to_string()))?;
+            let encrypted = payload.encrypted_value().ok_or_else(|| {
+                SyncError::InvalidResponse("missing encrypted chat key".to_string())
+            })?;
             let encrypted_payload = crate::models::EncryptedPayload {
                 encrypted_data: encrypted.to_string(),
                 header: payload.header.clone(),
             };
             let key = decrypt_chat_key(&encrypted_payload, master_key)?;
             self.save_chat_key_to_meta(&payload)?;
-            return Ok(key);
+            return Ok((key, ChatKeyStatus::Remote));
         }
 
         let chat_key = keys::generate_stream_key();
@@ -1011,7 +1055,7 @@ impl SyncEngine {
         let payload = ChatKeyPayload::from_encrypted(&encrypted);
         http.post_empty("/llmchat/chat/key", &payload)?;
         self.save_chat_key_to_meta(&payload)?;
-        Ok(chat_key)
+        Ok((chat_key, ChatKeyStatus::Created))
     }
 }
 
@@ -1050,8 +1094,8 @@ fn decode_client_created_at(value: &str, chat_key: &[u8]) -> Option<i64> {
         let parsed = match created_at_value {
             serde_json::Value::Number(number) => number.as_i64(),
             serde_json::Value::String(raw) => {
-                let decrypted = llmchat_db::crypto::decrypt_json_field(&raw, chat_key)
-                    .unwrap_or(raw);
+                let decrypted =
+                    llmchat_db::crypto::decrypt_json_field(&raw, chat_key).unwrap_or(raw);
                 decrypted.parse::<i64>().ok()
             }
             _ => None,
@@ -1097,11 +1141,12 @@ fn decode_attachment_metadata(
     chat_key: &[u8],
 ) -> Result<(AttachmentMeta, String), SyncError> {
     if let Some(metadata) = &attachment.client_metadata {
-        let payload = serde_json::from_str::<AttachmentClientMetadata>(metadata)
-            .map_err(|_| SyncError::InvalidResponse("invalid attachment clientMetadata".to_string()))?;
-        let encrypted_name = payload
-            .encrypted_name
-            .ok_or_else(|| SyncError::InvalidResponse("missing attachment encryptedName".to_string()))?;
+        let payload = serde_json::from_str::<AttachmentClientMetadata>(metadata).map_err(|_| {
+            SyncError::InvalidResponse("invalid attachment clientMetadata".to_string())
+        })?;
+        let encrypted_name = payload.encrypted_name.ok_or_else(|| {
+            SyncError::InvalidResponse("missing attachment encryptedName".to_string())
+        })?;
         let name = llmchat_db::crypto::decrypt_json_field(&encrypted_name, chat_key)
             .map_err(|err| SyncError::Crypto(err.to_string()))?;
         let kind = payload.kind.unwrap_or_else(|| infer_kind(&name));
@@ -1116,9 +1161,10 @@ fn decode_attachment_metadata(
         ));
     }
 
-    let encrypted_name = attachment.encrypted_name.as_ref().ok_or_else(|| {
-        SyncError::InvalidResponse("missing attachment metadata".to_string())
-    })?;
+    let encrypted_name = attachment
+        .encrypted_name
+        .as_ref()
+        .ok_or_else(|| SyncError::InvalidResponse("missing attachment metadata".to_string()))?;
     let name = llmchat_db::crypto::decrypt_json_field(encrypted_name, chat_key)
         .map_err(|err| SyncError::Crypto(err.to_string()))?;
     let kind = attachment.kind.unwrap_or_else(|| infer_kind(&name));
@@ -1225,4 +1271,3 @@ fn infer_kind(name: &str) -> AttachmentKind {
         AttachmentKind::Document
     }
 }
-

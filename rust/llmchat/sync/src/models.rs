@@ -170,7 +170,11 @@ pub struct DiffResponse {
 #[serde(rename_all = "camelCase")]
 pub struct UploadUrlRequest {
     pub content_length: i64,
-    #[serde(rename = "contentMD5", alias = "content_md5", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "contentMD5",
+        alias = "content_md5",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub content_md5: Option<String>,
 }
 
