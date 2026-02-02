@@ -747,11 +747,12 @@ pub fn chat_db_get_messages_for_sync(
 ) -> Result<Vec<ChatMessageDto>, ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
-        Ok(db
-            .get_messages_for_sync(uuid, include_deleted, true)?
-            .into_iter()
-            .map(ChatMessageDto::from)
-            .collect())
+        let messages = if include_deleted {
+            db.get_messages_for_sync(uuid, true)?
+        } else {
+            db.get_messages_needing_sync(uuid)?
+        };
+        Ok(messages.into_iter().map(ChatMessageDto::from).collect())
     })
 }
 
