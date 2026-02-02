@@ -17,6 +17,7 @@
         "idb": "^8.0.3",
         "katex": "^0.16.28",
         "react-markdown": "^9.1.0",
+        "react-virtuoso": "^4.7.2",
         "rehype-katex": "^7.0.1",
         "remark-gfm": "^4.0.1",
         "remark-math": "^6.0.0"
