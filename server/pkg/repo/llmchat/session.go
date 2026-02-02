@@ -77,7 +77,7 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		&result.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return result, stacktrace.Propagate(&ente.ErrNotFoundError, "llmchat session not found")
+			return result, stacktrace.Propagate(ente.ErrPermissionDenied, "sessionUUID belongs to another user")
 		}
 		return result, stacktrace.Propagate(err, "failed to upsert llmchat session")
 	}

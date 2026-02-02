@@ -20,6 +20,11 @@ type AttachmentClientRef struct {
 	MessageUUID  string
 }
 
+type AttachmentOwner struct {
+	UserID      int64
+	MessageUUID string
+}
+
 func buildAttachmentObjectKey(userID int64, attachmentID string) string {
 	return fmt.Sprintf("%s/%d/%s", llmChatAttachmentPrefix, userID, attachmentID)
 }
@@ -39,6 +44,23 @@ func (r *Repository) GetAttachmentByClientID(ctx context.Context, userID int64, 
 		return nil, stacktrace.Propagate(err, "failed to fetch llmchat attachment by client id")
 	}
 	return &ref, nil
+}
+
+func (r *Repository) GetAttachmentOwner(ctx context.Context, attachmentID string) (*AttachmentOwner, error) {
+	row := r.DB.QueryRowContext(ctx, `SELECT user_id, message_uuid
+		FROM llmchat_attachments
+		WHERE attachment_id = $1
+		LIMIT 1`,
+		attachmentID,
+	)
+	var owner AttachmentOwner
+	if err := row.Scan(&owner.UserID, &owner.MessageUUID); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, stacktrace.Propagate(err, "failed to fetch llmchat attachment owner")
+	}
+	return &owner, nil
 }
 
 func (r *Repository) GetActiveAttachmentUsage(ctx context.Context, userID int64) (int64, error) {

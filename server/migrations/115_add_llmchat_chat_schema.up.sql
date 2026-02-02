@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS llmchat_attachments (
     CONSTRAINT fk_llmchat_attachments_user_id FOREIGN KEY (user_id) REFERENCES llmchat_key (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_llmchat_attachments_message_uuid FOREIGN KEY (message_uuid) REFERENCES llmchat_messages (message_uuid) ON DELETE CASCADE,
     CONSTRAINT llmchat_attachments_size_constraint CHECK (size >= 0),
-    CONSTRAINT llmchat_attachments_unique_per_user UNIQUE (user_id, attachment_id)
+    CONSTRAINT llmchat_attachments_unique_attachment_id UNIQUE (attachment_id)
 );
 
 CREATE INDEX IF NOT EXISTS llmchat_sessions_state_updated_at_index

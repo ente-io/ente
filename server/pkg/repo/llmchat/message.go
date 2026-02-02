@@ -81,7 +81,7 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		&result.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return rollback(stacktrace.Propagate(&ente.ErrNotFoundError, "llmchat message not found"))
+			return rollback(stacktrace.Propagate(ente.ErrPermissionDenied, "messageUUID belongs to another user"))
 		}
 		return rollback(stacktrace.Propagate(err, "failed to upsert llmchat message"))
 	}
@@ -124,6 +124,18 @@ func (r *Repository) replaceMessageAttachments(ctx context.Context, tx *sql.Tx, 
 
 	inputs := make([]attachmentInput, 0, len(attachments))
 	for _, attachment := range attachments {
+		owner, err := r.GetAttachmentOwner(ctx, attachment.ID)
+		if err != nil {
+			return err
+		}
+		if owner != nil {
+			if owner.UserID != userID {
+				return stacktrace.Propagate(ente.ErrPermissionDenied, "attachmentId belongs to another user")
+			}
+			if owner.MessageUUID != messageUUID {
+				return stacktrace.Propagate(ente.ErrBadRequest, "attachmentId already used")
+			}
+		}
 		clientID, err := ParseClientID(attachment.ClientMetadata)
 		if err != nil {
 			return err
