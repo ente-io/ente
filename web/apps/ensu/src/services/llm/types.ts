@@ -12,6 +12,8 @@ export interface ModelInfo {
     mmprojUrl?: string;
     description?: string;
     sizeHuman?: string;
+    sizeBytes?: number;
+    mmprojSizeBytes?: number;
     contextLength?: number;
     maxTokens?: number;
 }
@@ -39,12 +41,7 @@ export interface GenerateSummary {
 }
 
 export type GenerateEvent =
-    | {
-          type: "text";
-          job_id: number;
-          text: string;
-          token_id?: number | null;
-      }
+    | { type: "text"; job_id: number; text: string; token_id?: number | null }
     | { type: "done"; summary: GenerateSummary }
     | { type: "error"; job_id: number; message: string };
 

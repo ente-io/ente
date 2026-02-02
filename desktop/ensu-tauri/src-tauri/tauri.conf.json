@@ -32,7 +32,7 @@
       "all": false,
       "shell": {
         "all": false,
-        "open": true
+        "open": "^((mailto:)|(tel:)|(https?://)|(file://)).+"
       },
       "dialog": {
         "all": false,

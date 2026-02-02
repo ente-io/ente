@@ -6,12 +6,13 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/service_locator.dart" show flagService;
+import "package:photos/service_locator.dart" show flagService, isOfflineMode;
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart"
@@ -198,7 +199,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
 
     // Add "Add person" button at the end
-    if (flagService.manualTagFileToPerson &&
+    if (!isOfflineMode &&
+        flagService.manualTagFileToPerson &&
         widget.file.uploadedFileID != null) {
       children.add(_buildAddPersonButton(thumbnailWidth));
     }
@@ -331,7 +333,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   Widget _buildNoFacesWidget() {
     final reason = _errorReason ?? NoFacesReason.noFacesFound;
-    final showManualTagOption = flagService.manualTagFileToPerson &&
+    final showManualTagOption = !isOfflineMode &&
+        flagService.manualTagFileToPerson &&
         reason == NoFacesReason.noFacesFound;
     final label = showManualTagOption
         ? AppLocalizations.of(context).noFacesDetectedTapToAdd
@@ -411,6 +414,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Widget _editStateButton() {
+    if (isOfflineMode) {
+      return const SizedBox.shrink();
+    }
     if (_isEditMode) {
       return Padding(
         padding: const EdgeInsets.only(right: 12.0),
@@ -449,25 +455,45 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Future<_FaceDataResult> _fetchFaceData() async {
-    if (widget.file.uploadedFileID == null) {
-      return _FaceDataResult(
-        defaultFaces: [],
-        remainingFaces: [],
-        manualPersons: const [],
-        errorReason: NoFacesReason.fileNotUploaded,
-      );
+    final bool isOffline = isOfflineMode;
+    int? fileKey;
+    if (isOffline) {
+      final localId = widget.file.localID;
+      if (localId == null || localId.isEmpty) {
+        return _FaceDataResult(
+          defaultFaces: [],
+          remainingFaces: [],
+          manualPersons: const [],
+          errorReason: NoFacesReason.fileNotUploaded,
+        );
+      }
+      fileKey = await OfflineFilesDB.instance.getOrCreateLocalIntId(localId);
+    } else {
+      if (widget.file.uploadedFileID == null) {
+        return _FaceDataResult(
+          defaultFaces: [],
+          remainingFaces: [],
+          manualPersons: const [],
+          errorReason: NoFacesReason.fileNotUploaded,
+        );
+      }
+      fileKey = widget.file.uploadedFileID!;
     }
 
     // Fetch persons map early so we can check for manual assignments
     // even when no faces are detected
-    final persons = await PersonService.instance.getPersonsMap();
+    final persons = isOffline
+        ? <String, PersonEntity>{}
+        : await PersonService.instance.getPersonsMap();
 
-    final mlDataDB = MLDataDB.instance;
-    final faces =
-        await mlDataDB.getFacesForGivenFileID(widget.file.uploadedFileID!);
+    final mlDataDB =
+        isOffline ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final faces = await mlDataDB.getFacesForGivenFileID(fileKey);
 
     if (faces == null) {
-      final manualPersons = _getManualPersonsForFile(persons, [], []);
+      final manualPersons = isOffline
+          ? const <PersonEntity>[]
+          : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],
@@ -481,7 +507,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
       faces.map((face) => face.faceID).toList(),
     );
-    final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
+    final clusterIDToPerson =
+        isOffline ? <String, String>{} : await mlDataDB.getClusterIDToPersonID();
     final faceCrops =
         await getCachedFaceCrops(widget.file, faces, useTempCache: true);
     final defaultFaces = <Face>[];
@@ -505,7 +532,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       }
     }
     if (defaultFaces.isEmpty && remainingFaces.isEmpty) {
-      final manualPersons = _getManualPersonsForFile(persons, [], []);
+      final manualPersons = isOffline
+          ? const <PersonEntity>[]
+          : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],
@@ -515,7 +544,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
 
     if (faceCrops == null) {
-      final manualPersons = _getManualPersonsForFile(persons, [], []);
+      final manualPersons = isOffline
+          ? const <PersonEntity>[]
+          : _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],

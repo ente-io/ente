@@ -17,17 +17,18 @@ export const DEFAULT_MODEL: ModelInfo = {
     id: "lfm-2.5-vl-1.6b",
     name: "LFM 2.5 VL 1.6B (Q4_0)",
     url: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/LFM2.5-VL-1.6B-Q4_0.gguf",
-    mmprojUrl: "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
+    mmprojUrl:
+        "https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B-GGUF/resolve/main/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf",
     description: "Liquid AI multimodal model (text-only on web)",
-    sizeHuman: "~1.1 GB",
+    sizeHuman: "~664 MB",
+    sizeBytes: 695_752_160,
+    mmprojSizeBytes: 583_109_888,
 };
 
 export class LlmProvider {
     private backend = createInferenceBackend({
         backend: "auto",
-        wasm: {
-            progressCallback: (event) => this.handleWasmProgress(event),
-        },
+        wasm: { progressCallback: (event) => this.handleWasmProgress(event) },
     });
 
     private initialized = false;
@@ -39,6 +40,7 @@ export class LlmProvider {
     private downloadAbort?: AbortController;
     private progressListeners = new Set<(progress: DownloadProgress) => void>();
     private modelReady = false;
+    private ensureInFlight?: { key: string; promise: Promise<void> };
 
     public async initialize() {
         if (this.initialized) return;
@@ -125,97 +127,130 @@ export class LlmProvider {
                 ? await this.resolveAuxModelPath(mmprojUrl, settings)
                 : undefined;
 
-        log.info("LLM ensureModelReady", {
-            backend: this.backend.kind,
+        const ensureKey = JSON.stringify({
             modelId: model.id,
             modelPath,
             mmprojPath,
             contextKey,
         });
 
-        if (
-            this.currentModel?.id === model.id &&
-            this.currentModelPath === modelPath &&
-            this.currentContextKey === contextKey &&
-            this.currentMmprojPath === mmprojPath
-        ) {
-            log.info("LLM model already ready", { modelId: model.id });
-            this.modelReady = true;
-            this.emitProgress({ percent: 100, status: "Ready" });
-            return;
+        if (this.ensureInFlight) {
+            if (this.ensureInFlight.key === ensureKey) {
+                return this.ensureInFlight.promise;
+            }
+            try {
+                await this.ensureInFlight.promise;
+            } catch {
+                // ignore errors from previous load
+            }
         }
 
-        this.modelReady = false;
-        log.info("LLM resetting backend", { modelId: this.currentModel?.id });
-        await this.backend.freeContext();
-        await this.backend.freeModel();
-        this.currentModel = undefined;
-        this.currentModelPath = undefined;
-        this.currentMmprojPath = undefined;
-        this.currentContextKey = undefined;
-
-        if (this.backend.kind === "tauri") {
-            const downloads: Array<{
-                url: string;
-                path: string;
-                label: string;
-            }> = [];
-            const installed = await this.backend.isModelAvailable(modelPath);
-            log.info("LLM model installed", { modelPath, installed });
-            if (!installed) {
-                downloads.push({
-                    url: model.url,
-                    path: modelPath,
-                    label: "model",
-                });
-            }
-            if (mmprojUrl && mmprojPath) {
-                const mmprojInstalled =
-                    await this.backend.isModelAvailable(mmprojPath);
-                log.info("LLM mmproj installed", {
-                    mmprojPath,
-                    mmprojInstalled,
-                });
-                if (!mmprojInstalled) {
-                    downloads.push({
-                        url: mmprojUrl,
-                        path: mmprojPath,
-                        label: "mmproj",
-                    });
-                }
-            }
-
-            log.info("LLM download plan", {
-                downloads: downloads.map((download) => ({
-                    url: download.url,
-                    path: download.path,
-                    label: download.label,
-                })),
+        const ensurePromise = (async () => {
+            log.info("LLM ensureModelReady", {
+                backend: this.backend.kind,
+                modelId: model.id,
+                modelPath,
+                mmprojPath,
+                contextKey,
             });
 
-            if (downloads.length === 1) {
-                const download = downloads[0];
-                if (download) {
-                    await this.downloadModel(download.url, download.path);
+            if (
+                this.currentModel?.id === model.id &&
+                this.currentModelPath === modelPath &&
+                this.currentContextKey === contextKey &&
+                this.currentMmprojPath === mmprojPath
+            ) {
+                log.info("LLM model already ready", { modelId: model.id });
+                this.modelReady = true;
+                this.emitProgress({ percent: 100, status: "Ready" });
+                return;
+            }
+
+            this.modelReady = false;
+            log.info("LLM resetting backend", {
+                modelId: this.currentModel?.id,
+            });
+            await this.backend.freeContext();
+            await this.backend.freeModel();
+            this.currentModel = undefined;
+            this.currentModelPath = undefined;
+            this.currentMmprojPath = undefined;
+            this.currentContextKey = undefined;
+
+            if (this.backend.kind === "tauri") {
+                const downloads: Array<{
+                    url: string;
+                    path: string;
+                    label: string;
+                }> = [];
+                const installed =
+                    await this.backend.isModelAvailable(modelPath);
+                log.info("LLM model installed", { modelPath, installed });
+                if (!installed) {
+                    downloads.push({
+                        url: model.url,
+                        path: modelPath,
+                        label: "model",
+                    });
                 }
-            } else if (downloads.length > 1) {
-                await this.downloadModelsCombined(downloads);
+                if (mmprojUrl && mmprojPath) {
+                    const mmprojInstalled =
+                        await this.backend.isModelAvailable(mmprojPath);
+                    log.info("LLM mmproj installed", {
+                        mmprojPath,
+                        mmprojInstalled,
+                    });
+                    if (!mmprojInstalled) {
+                        downloads.push({
+                            url: mmprojUrl,
+                            path: mmprojPath,
+                            label: "mmproj",
+                        });
+                    }
+                }
+
+                log.info("LLM download plan", {
+                    downloads: downloads.map((download) => ({
+                        url: download.url,
+                        path: download.path,
+                        label: download.label,
+                    })),
+                });
+
+                if (downloads.length === 1) {
+                    const download = downloads[0];
+                    if (download) {
+                        await this.downloadModel(download.url, download.path);
+                    }
+                } else if (downloads.length > 1) {
+                    await this.downloadModelsCombined(downloads);
+                }
+            }
+
+            this.emitProgress({ percent: 100, status: "Loading model..." });
+            log.info("LLM load model", { modelPath });
+            await this.backend.loadModel({ modelPath });
+            log.info("LLM create context", { modelPath, contextSize });
+            await this.backend.createContext({ modelPath }, { contextSize });
+
+            this.currentModel = model;
+            this.currentModelPath = modelPath;
+            this.currentMmprojPath = mmprojPath;
+            this.currentContextKey = contextKey;
+            this.modelReady = true;
+            log.info("LLM ready", { modelId: model.id, modelPath });
+            this.emitProgress({ percent: 100, status: "Ready" });
+        })();
+
+        this.ensureInFlight = { key: ensureKey, promise: ensurePromise };
+
+        try {
+            await ensurePromise;
+        } finally {
+            if (this.ensureInFlight?.promise === ensurePromise) {
+                this.ensureInFlight = undefined;
             }
         }
-
-        this.emitProgress({ percent: 100, status: "Loading model..." });
-        log.info("LLM load model", { modelPath });
-        await this.backend.loadModel({ modelPath });
-        log.info("LLM create context", { modelPath, contextSize });
-        await this.backend.createContext({ modelPath }, { contextSize });
-
-        this.currentModel = model;
-        this.currentModelPath = modelPath;
-        this.currentMmprojPath = mmprojPath;
-        this.currentContextKey = contextKey;
-        this.modelReady = true;
-        log.info("LLM ready", { modelId: model.id, modelPath });
-        this.emitProgress({ percent: 100, status: "Ready" });
     }
 
     public async generateChatStream(
@@ -344,7 +379,6 @@ export class LlmProvider {
         return join(modelsDir, filename);
     }
 
-
     private async downloadModelsCombined(
         downloads: Array<{ url: string; path: string; label: string }>,
     ) {
@@ -419,8 +453,9 @@ export class LlmProvider {
             totalBytes: 0,
         });
 
-        const { createDir, exists, removeFile, renameFile } =
-            await import("@tauri-apps/api/fs");
+        const { createDir, exists, removeFile, renameFile } = await import(
+            "@tauri-apps/api/fs"
+        );
         const { invoke } = await import("@tauri-apps/api/tauri");
         const { dirname } = await import("@tauri-apps/api/path");
 
@@ -461,25 +496,18 @@ export class LlmProvider {
                     try {
                         const size = await invoke<number | null>(
                             "fs_file_size",
-                            {
-                                path: tmpPath,
-                            },
+                            { path: tmpPath },
                         );
                         downloaded = size ?? 0;
                         if (downloaded > 0) {
                             const head = await invoke<number[]>(
                                 "fs_read_head",
-                                {
-                                    path: tmpPath,
-                                    length: 4,
-                                },
+                                { path: tmpPath, length: 4 },
                             );
                             if (!isGgufHeader(new Uint8Array(head))) {
                                 log.warn(
                                     "LLM resume header invalid, restarting",
-                                    {
-                                        tmpPath,
-                                    },
+                                    { tmpPath },
                                 );
                                 await removeFile(tmpPath);
                                 downloaded = 0;
@@ -592,9 +620,7 @@ export class LlmProvider {
                         const percent = totalBytes
                             ? Math.min(
                                   99,
-                                  Math.round(
-                                      (downloaded / totalBytes) * 100,
-                                  ),
+                                  Math.round((downloaded / totalBytes) * 100),
                               )
                             : 0;
                         emit({
@@ -649,12 +675,9 @@ export class LlmProvider {
 
                 await renameFile(tmpPath, destPath);
 
-                const finalSize = await invoke<number | null>(
-                    "fs_file_size",
-                    {
-                        path: destPath,
-                    },
-                );
+                const finalSize = await invoke<number | null>("fs_file_size", {
+                    path: destPath,
+                });
                 if (finalSize !== null && finalSize !== downloaded) {
                     await removeFile(destPath);
                     throw new Error(
@@ -735,9 +758,7 @@ const fetchRemoteSize = async (url: string): Promise<number | undefined> => {
     }
 
     try {
-        const res = await fetch(url, {
-            headers: { Range: "bytes=0-0" },
-        });
+        const res = await fetch(url, { headers: { Range: "bytes=0-0" } });
         if (!res.ok) return undefined;
         const range = parseContentRangeTotal(res.headers.get("Content-Range"));
         if (range) return range;

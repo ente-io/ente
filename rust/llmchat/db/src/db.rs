@@ -6,7 +6,9 @@ use zeroize::Zeroizing;
 use crate::backend::{Backend, BackendTx, RowExt, Value};
 use crate::crypto;
 use crate::migrations;
-use crate::models::{AttachmentMeta, EntityType, Message, Sender, Session, StoredAttachment};
+use crate::models::{
+    AttachmentMeta, EntityType, Message, Sender, Session, SessionWithPreview, StoredAttachment,
+};
 use crate::traits::{Clock, RandomUuidGen, SystemClock, UuidGen};
 use crate::{Error, Result};
 
@@ -35,12 +37,7 @@ impl<B: Backend> ChatDb<B> {
     }
 
     pub fn new_with_defaults(backend: B, key: Vec<u8>) -> Result<Self> {
-        Self::new(
-            backend,
-            key,
-            Arc::new(SystemClock),
-            Arc::new(RandomUuidGen),
-        )
+        Self::new(backend, key, Arc::new(SystemClock), Arc::new(RandomUuidGen))
     }
 
     pub fn create_session(&self, title: &str) -> Result<Session> {
@@ -94,6 +91,46 @@ impl<B: Backend> ChatDb<B> {
             &[],
         )?;
         rows.iter().map(|row| self.session_from_row(row)).collect()
+    }
+
+    pub fn list_sessions_with_preview(&self) -> Result<Vec<SessionWithPreview>> {
+        let rows = self.backend.query(
+            "SELECT session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at, \
+                    (SELECT text FROM messages WHERE messages.session_uuid = sessions.session_uuid AND deleted_at IS NULL \
+                     ORDER BY created_at DESC, message_uuid DESC LIMIT 1) AS last_message_text \
+             FROM sessions WHERE deleted_at IS NULL ORDER BY updated_at DESC",
+            &[],
+        )?;
+
+        rows.iter()
+            .map(|row| {
+                let session = self.session_from_row(row)?;
+                let preview_blob = match row.get(7) {
+                    Some(Value::Blob(value)) => Some(value.clone()),
+                    Some(Value::Null) => None,
+                    Some(other) => {
+                        return Err(Error::Row(format!(
+                            "expected optional blob at column 7, got {other:?}"
+                        )));
+                    }
+                    None => return Err(Error::Row("missing column 7".to_string())),
+                };
+                let last_message_preview = preview_blob
+                    .map(|blob| crypto::decrypt_string(&blob, &self.key))
+                    .transpose()?;
+
+                Ok(SessionWithPreview {
+                    uuid: session.uuid,
+                    title: session.title,
+                    created_at: session.created_at,
+                    updated_at: session.updated_at,
+                    remote_id: session.remote_id,
+                    needs_sync: session.needs_sync,
+                    deleted_at: session.deleted_at,
+                    last_message_preview,
+                })
+            })
+            .collect()
     }
 
     pub fn update_session_title(&self, uuid: Uuid, title: &str) -> Result<()> {
@@ -274,11 +311,24 @@ impl<B: Backend> ChatDb<B> {
     }
 
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
-        let rows = self.backend.query(
+        self.get_messages_for_sync(session_uuid, false)
+    }
+
+    pub fn get_messages_for_sync(
+        &self,
+        session_uuid: Uuid,
+        include_deleted: bool,
+    ) -> Result<Vec<Message>> {
+        let query = if include_deleted {
             "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
-             FROM messages WHERE session_uuid = ? AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC",
-            &[Value::Text(session_uuid.to_string())],
-        )?;
+             FROM messages WHERE session_uuid = ? ORDER BY created_at ASC, message_uuid ASC"
+        } else {
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
+             FROM messages WHERE session_uuid = ? AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC"
+        };
+        let rows = self
+            .backend
+            .query(query, &[Value::Text(session_uuid.to_string())])?;
         rows.iter().map(|row| self.message_from_row(row)).collect()
     }
 
@@ -502,11 +552,17 @@ impl<B: Backend> ChatDb<B> {
         self.backend.transaction(|tx| {
             tx.execute(
                 "UPDATE messages SET deleted_at = ? WHERE session_uuid = ? AND deleted_at IS NULL",
-                &[Value::Integer(deleted_at), Value::Text(session_uuid.to_string())],
+                &[
+                    Value::Integer(deleted_at),
+                    Value::Text(session_uuid.to_string()),
+                ],
             )?;
             tx.execute(
                 "UPDATE sessions SET deleted_at = ?, needs_sync = 0 WHERE session_uuid = ?",
-                &[Value::Integer(deleted_at), Value::Text(session_uuid.to_string())],
+                &[
+                    Value::Integer(deleted_at),
+                    Value::Text(session_uuid.to_string()),
+                ],
             )?;
             Ok(())
         })
@@ -571,7 +627,10 @@ impl<B: Backend> ChatDb<B> {
     pub fn apply_message_tombstone(&self, message_uuid: Uuid, deleted_at: i64) -> Result<()> {
         self.backend.execute(
             "UPDATE messages SET deleted_at = ? WHERE message_uuid = ?",
-            &[Value::Integer(deleted_at), Value::Text(message_uuid.to_string())],
+            &[
+                Value::Integer(deleted_at),
+                Value::Text(message_uuid.to_string()),
+            ],
         )?;
         Ok(())
     }
@@ -797,16 +856,16 @@ fn parse_stored_attachments(raw: Option<String>) -> Result<Vec<StoredAttachment>
 #[cfg(all(test, feature = "sqlite"))]
 mod tests {
     use std::collections::VecDeque;
-    use std::sync::{Arc, Mutex};
     use std::sync::atomic::{AtomicI64, Ordering};
+    use std::sync::{Arc, Mutex};
 
     use uuid::Uuid;
 
     use super::*;
-    use crate::backend::{BackendTx, RowExt, Value};
     use crate::backend::sqlite::SqliteBackend;
+    use crate::backend::{BackendTx, RowExt, Value};
     use crate::crypto::KEY_BYTES;
-    use crate::models::{AttachmentMeta, AttachmentKind};
+    use crate::models::{AttachmentKind, AttachmentMeta};
 
     #[derive(Debug)]
     struct StepClock {

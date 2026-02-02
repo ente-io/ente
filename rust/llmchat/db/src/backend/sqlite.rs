@@ -1,8 +1,8 @@
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard};
 
-use rusqlite::{Connection, params_from_iter};
 use rusqlite::types::Value as SqlValue;
+use rusqlite::{Connection, params_from_iter};
 
 use crate::{Backend, BackendTx, Error, Result, Row, Value};
 
@@ -77,7 +77,8 @@ impl SqliteConn for Connection {
 
 impl<'a> SqliteConn for SqliteTransaction<'a> {
     fn execute_sql(&self, sql: &str, params: &[SqlValue]) -> rusqlite::Result<usize> {
-        self.guard.execute(sql, params_from_iter(params.iter().cloned()))
+        self.guard
+            .execute(sql, params_from_iter(params.iter().cloned()))
     }
 
     fn prepare_sql<'b>(&'b self, sql: &str) -> rusqlite::Result<rusqlite::Statement<'b>> {
