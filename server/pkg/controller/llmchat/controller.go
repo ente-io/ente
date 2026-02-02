@@ -81,20 +81,29 @@ func (c *Controller) UpsertSession(ctx *gin.Context, req model.UpsertSessionRequ
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
+	clientID, err := llmchat.ParseClientID(req.ClientMetadata)
+	if err != nil {
+		return nil, err
+	}
+	if existingSessionUUID, err := c.Repo.GetSessionUUIDByClientID(ctx, userID, clientID); err != nil {
+		return nil, err
+	} else if existingSessionUUID != "" {
+		req.SessionUUID = existingSessionUUID
+	}
 	if _, err := uuid.Parse(req.SessionUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid session_uuid")
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sessionUUID")
 	}
 	if req.RootSessionUUID == "" {
 		req.RootSessionUUID = req.SessionUUID
 	}
 	if _, err := uuid.Parse(req.RootSessionUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid root_session_uuid")
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid rootSessionUUID")
 	}
 	if req.BranchFromMessageUUID != nil {
 		if *req.BranchFromMessageUUID == "" {
 			req.BranchFromMessageUUID = nil
 		} else if _, err := uuid.Parse(*req.BranchFromMessageUUID); err != nil {
-			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid branch_from_message_uuid")
+			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid branchFromMessageUUID")
 		}
 	}
 
@@ -110,11 +119,20 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
+	clientID, err := llmchat.ParseClientID(req.ClientMetadata)
+	if err != nil {
+		return nil, err
+	}
+	if existingMessageUUID, err := c.Repo.GetMessageUUIDByClientID(ctx, userID, clientID); err != nil {
+		return nil, err
+	} else if existingMessageUUID != "" {
+		req.MessageUUID = existingMessageUUID
+	}
 	if _, err := uuid.Parse(req.MessageUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid message_uuid")
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid messageUUID")
 	}
 	if _, err := uuid.Parse(req.SessionUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid session_uuid")
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sessionUUID")
 	}
 	if err := c.ensureSessionActive(ctx, userID, req.SessionUUID); err != nil {
 		return nil, err
@@ -123,7 +141,7 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 		if *req.ParentMessageUUID == "" {
 			req.ParentMessageUUID = nil
 		} else if _, err := uuid.Parse(*req.ParentMessageUUID); err != nil {
-			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid parent_message_uuid")
+			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid parentMessageUUID")
 		}
 	}
 	if req.Sender != "self" && req.Sender != "other" {
@@ -163,7 +181,7 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
 	if _, err := uuid.Parse(sessionUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid session id")
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sessionUUID")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
 
@@ -213,7 +231,7 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 		return nil, stacktrace.Propagate(err, "failed to validateKey")
 	}
 	if _, err := uuid.Parse(messageUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid message id")
+		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid messageUUID")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
 
@@ -530,17 +548,26 @@ func (c *Controller) validateAttachments(ctx *gin.Context, userID int64, attachm
 	}
 	maxSize := c.maxAttachmentSize(userID)
 	seen := make(map[string]struct{}, len(attachments))
+	seenClientIDs := make(map[string]struct{}, len(attachments))
 	for _, attachment := range attachments {
 		if attachment.ID == "" {
-			return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
+			return stacktrace.Propagate(ente.ErrBadRequest, "missing attachmentId")
 		}
 		if _, ok := seen[attachment.ID]; ok {
-			return stacktrace.Propagate(ente.ErrBadRequest, "duplicate attachment id")
+			return stacktrace.Propagate(ente.ErrBadRequest, "duplicate attachmentId")
 		}
 		seen[attachment.ID] = struct{}{}
 		if _, err := uuid.Parse(attachment.ID); err != nil {
-			return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+			return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachmentId")
 		}
+		clientID, err := llmchat.ParseClientID(attachment.ClientMetadata)
+		if err != nil {
+			return err
+		}
+		if _, ok := seenClientIDs[clientID]; ok {
+			return stacktrace.Propagate(ente.ErrBadRequest, "duplicate attachment clientId")
+		}
+		seenClientIDs[clientID] = struct{}{}
 		if attachment.Size < 0 {
 			return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment size")
 		}

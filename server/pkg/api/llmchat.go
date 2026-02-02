@@ -197,11 +197,6 @@ func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 		return
 	}
 
-	attachmentID := c.Param("attachmentId")
-	if attachmentID == "" {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Missing attachment id"))
-		return
-	}
 	var req model.GetAttachmentUploadURLRequest
 	if err := bindJSONWithLimit(c, &req, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
@@ -219,7 +214,7 @@ func (h *LlmChatHandler) GetAttachmentUploadURL(c *gin.Context) {
 		force = parsed
 	}
 
-	resp, err := h.AttachmentController.GetUploadURL(c, attachmentID, req, force)
+	resp, err := h.AttachmentController.GetUploadURL(c, req, force)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to get attachment upload URL"))
 		return

@@ -139,6 +139,12 @@ func ensureKey(t *testing.T, repo *Repository, userID int64) {
 	}
 }
 
+func newClientMetadata() *string {
+	id := uuid.NewString()
+	metadata := fmt.Sprintf(`{"clientId":"%s"}`, id)
+	return &metadata
+}
+
 func assertSessionDiffOrder(t *testing.T, entries []model.SessionDiffEntry) {
 	t.Helper()
 
@@ -218,6 +224,7 @@ func TestSessionDiffAndTombstones(t *testing.T) {
 		RootSessionUUID: sessionOne,
 		EncryptedData:   "enc-1",
 		Header:          "hdr-1",
+		ClientMetadata:  newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session one: %v", err)
 	}
@@ -230,6 +237,7 @@ func TestSessionDiffAndTombstones(t *testing.T) {
 		BranchFromMessageUUID: &branchMessage,
 		EncryptedData:         "enc-2",
 		Header:                "hdr-2",
+		ClientMetadata:        newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session two: %v", err)
 	}
@@ -318,9 +326,10 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 
 	sessionUUID := uuid.NewString()
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionUUID,
-		EncryptedData: "enc-session",
-		Header:        "hdr-session",
+		SessionUUID:    sessionUUID,
+		EncryptedData:  "enc-session",
+		Header:         "hdr-session",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session: %v", err)
 	}
@@ -333,6 +342,7 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 		Sender:            "self",
 		EncryptedData:     "enc-msg-1",
 		Header:            "hdr-msg-1",
+		ClientMetadata:    newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert message one: %v", err)
 	}
@@ -348,6 +358,7 @@ func TestMessageDiffAndTombstones(t *testing.T) {
 		Sender:            "other",
 		EncryptedData:     "enc-msg-2",
 		Header:            "hdr-msg-2",
+		ClientMetadata:    newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert message two: %v", err)
 	}
@@ -442,9 +453,10 @@ func TestSessionDiffSinceTimeAndLimit(t *testing.T) {
 	sessionThree := uuid.NewString()
 
 	first, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionOne,
-		EncryptedData: "enc-1",
-		Header:        "hdr-1",
+		SessionUUID:    sessionOne,
+		EncryptedData:  "enc-1",
+		Header:         "hdr-1",
+		ClientMetadata: newClientMetadata(),
 	})
 	if err != nil {
 		t.Fatalf("failed to upsert session one: %v", err)
@@ -453,9 +465,10 @@ func TestSessionDiffSinceTimeAndLimit(t *testing.T) {
 	time.Sleep(2 * time.Millisecond)
 
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionTwo,
-		EncryptedData: "enc-2",
-		Header:        "hdr-2",
+		SessionUUID:    sessionTwo,
+		EncryptedData:  "enc-2",
+		Header:         "hdr-2",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session two: %v", err)
 	}
@@ -463,9 +476,10 @@ func TestSessionDiffSinceTimeAndLimit(t *testing.T) {
 	time.Sleep(2 * time.Millisecond)
 
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionThree,
-		EncryptedData: "enc-3",
-		Header:        "hdr-3",
+		SessionUUID:    sessionThree,
+		EncryptedData:  "enc-3",
+		Header:         "hdr-3",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session three: %v", err)
 	}
@@ -525,9 +539,10 @@ func TestMessageDiffSinceTimeAndLimit(t *testing.T) {
 
 	sessionUUID := uuid.NewString()
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionUUID,
-		EncryptedData: "enc-session",
-		Header:        "hdr-session",
+		SessionUUID:    sessionUUID,
+		EncryptedData:  "enc-session",
+		Header:         "hdr-session",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session: %v", err)
 	}
@@ -541,6 +556,7 @@ func TestMessageDiffSinceTimeAndLimit(t *testing.T) {
 		Attachments:       []model.AttachmentMeta{},
 		EncryptedData:     "enc-msg-1",
 		Header:            "hdr-msg-1",
+		ClientMetadata:    newClientMetadata(),
 	})
 	if err != nil {
 		t.Fatalf("failed to upsert message one: %v", err)
@@ -558,6 +574,7 @@ func TestMessageDiffSinceTimeAndLimit(t *testing.T) {
 		Attachments:       []model.AttachmentMeta{},
 		EncryptedData:     "enc-msg-2",
 		Header:            "hdr-msg-2",
+		ClientMetadata:    newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert message two: %v", err)
 	}
@@ -574,6 +591,7 @@ func TestMessageDiffSinceTimeAndLimit(t *testing.T) {
 		Attachments:       []model.AttachmentMeta{},
 		EncryptedData:     "enc-msg-3",
 		Header:            "hdr-msg-3",
+		ClientMetadata:    newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert message three: %v", err)
 	}
@@ -635,17 +653,19 @@ func TestSessionTombstonesSinceTimeAndLimit(t *testing.T) {
 	sessionTwo := uuid.NewString()
 
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionOne,
-		EncryptedData: "enc-1",
-		Header:        "hdr-1",
+		SessionUUID:    sessionOne,
+		EncryptedData:  "enc-1",
+		Header:         "hdr-1",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session one: %v", err)
 	}
 
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionTwo,
-		EncryptedData: "enc-2",
-		Header:        "hdr-2",
+		SessionUUID:    sessionTwo,
+		EncryptedData:  "enc-2",
+		Header:         "hdr-2",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session two: %v", err)
 	}
@@ -711,9 +731,10 @@ func TestMessageTombstonesSinceTimeAndLimit(t *testing.T) {
 
 	sessionUUID := uuid.NewString()
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:   sessionUUID,
-		EncryptedData: "enc-session",
-		Header:        "hdr-session",
+		SessionUUID:    sessionUUID,
+		EncryptedData:  "enc-session",
+		Header:         "hdr-session",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session: %v", err)
 	}
@@ -727,6 +748,7 @@ func TestMessageTombstonesSinceTimeAndLimit(t *testing.T) {
 		Attachments:       []model.AttachmentMeta{},
 		EncryptedData:     "enc-msg-1",
 		Header:            "hdr-msg-1",
+		ClientMetadata:    newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert message one: %v", err)
 	}
@@ -741,6 +763,7 @@ func TestMessageTombstonesSinceTimeAndLimit(t *testing.T) {
 		Attachments:       []model.AttachmentMeta{},
 		EncryptedData:     "enc-msg-2",
 		Header:            "hdr-msg-2",
+		ClientMetadata:    newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert message two: %v", err)
 	}
@@ -810,6 +833,7 @@ func TestUpsertAndDeleteIdempotency(t *testing.T) {
 		RootSessionUUID: sessionUUID,
 		EncryptedData:   "enc-session",
 		Header:          "hdr-session",
+		ClientMetadata:  newClientMetadata(),
 	}
 
 	if _, err := repo.UpsertSession(ctx, userID, sessionReq); err != nil {
@@ -840,6 +864,7 @@ func TestUpsertAndDeleteIdempotency(t *testing.T) {
 		Attachments:       []model.AttachmentMeta{},
 		EncryptedData:     "enc-msg",
 		Header:            "hdr-msg",
+		ClientMetadata:    newClientMetadata(),
 	}
 
 	if _, err := repo.UpsertMessage(ctx, userID, messageReq); err != nil {

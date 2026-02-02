@@ -11,9 +11,9 @@ type Key struct {
 }
 
 type AttachmentMeta struct {
-	ID            string `json:"id"`
-	Size          int64  `json:"size"`
-	EncryptedName string `json:"encryptedName"`
+	ID             string  `json:"id"`
+	Size           int64   `json:"size"`
+	ClientMetadata *string `json:"clientMetadata"`
 }
 
 type GetAttachmentUploadURLRequest struct {
@@ -22,8 +22,9 @@ type GetAttachmentUploadURLRequest struct {
 }
 
 type AttachmentUploadURLResponse struct {
-	ObjectKey string `json:"objectKey"`
-	URL       string `json:"url"`
+	AttachmentID string `json:"attachmentId"`
+	ObjectKey    string `json:"objectKey"`
+	URL          string `json:"url"`
 }
 
 type Session struct {

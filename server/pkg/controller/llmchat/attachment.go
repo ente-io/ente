@@ -63,16 +63,9 @@ func (c *AttachmentController) llmChatBucketAndClient() (*string, *s3.S3, error)
 
 func (c *AttachmentController) GetUploadURL(
 	ctx *gin.Context,
-	attachmentID string,
 	req model.GetAttachmentUploadURLRequest,
 	force bool,
 ) (model.AttachmentUploadURLResponse, error) {
-	if attachmentID == "" {
-		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
-	}
-	if _, err := uuid.Parse(attachmentID); err != nil {
-		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
-	}
 	if c.S3Config == nil {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
@@ -80,7 +73,7 @@ func (c *AttachmentController) GetUploadURL(
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrNotImplemented, "attachments repo not configured")
 	}
 	if req.ContentLength <= 0 {
-		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "content_length must be > 0")
+		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength must be > 0")
 	}
 
 	userID := auth.GetUserID(ctx.Request.Header)
@@ -92,26 +85,6 @@ func (c *AttachmentController) GetUploadURL(
 	if req.ContentLength > maxSize {
 		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(&ente.ErrLlmChatAttachmentLimitReached, "")
 	}
-	referenced, err := c.Repo.HasActiveAttachmentReference(ctx, userID, attachmentID)
-	if err != nil {
-		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to check attachment reference")
-	}
-	if referenced && !force {
-		exists, err := c.attachmentExists(ctx, userID, attachmentID)
-		if err != nil {
-			return model.AttachmentUploadURLResponse{}, err
-		}
-		if !exists {
-			if err := c.Repo.DeleteAttachmentRecords(ctx, userID, attachmentID); err != nil {
-				return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(err, "failed to clear attachment records")
-			}
-			referenced = false
-		}
-	}
-	if referenced && !force {
-		return model.AttachmentUploadURLResponse{}, stacktrace.Propagate(ente.NewConflictError("attachment is already committed"), "")
-	}
-
 	maxStorage := c.maxAttachmentStorage(userID)
 	if maxStorage > 0 {
 		usage, err := c.Repo.GetActiveAttachmentUsage(ctx, userID)
@@ -123,6 +96,7 @@ func (c *AttachmentController) GetUploadURL(
 		}
 	}
 
+	attachmentID := uuid.NewString()
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
 	bucket, s3Client, err := c.llmChatBucketAndClient()
 	if err != nil {
@@ -159,8 +133,9 @@ func (c *AttachmentController) GetUploadURL(
 	}
 
 	return model.AttachmentUploadURLResponse{
-		ObjectKey: objectKey,
-		URL:       url,
+		AttachmentID: attachmentID,
+		ObjectKey:    objectKey,
+		URL:          url,
 	}, nil
 }
 
@@ -195,10 +170,10 @@ func (c *AttachmentController) VerifyUploaded(
 	expectedSize int64,
 ) error {
 	if attachmentID == "" {
-		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
+		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachmentId")
 	}
 	if _, err := uuid.Parse(attachmentID); err != nil {
-		return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+		return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachmentId")
 	}
 	if c.S3Config == nil {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
@@ -231,10 +206,10 @@ func (c *AttachmentController) VerifyUploaded(
 
 func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID string) (string, error) {
 	if attachmentID == "" {
-		return "", stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "missing attachmentId")
 	}
 	if _, err := uuid.Parse(attachmentID); err != nil {
-		return "", stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "invalid attachmentId")
 	}
 	if c.S3Config == nil {
 		return "", stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
@@ -285,10 +260,10 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 
 func (c *AttachmentController) Delete(ctx context.Context, userID int64, attachmentID string) error {
 	if attachmentID == "" {
-		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachment id")
+		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachmentId")
 	}
 	if _, err := uuid.Parse(attachmentID); err != nil {
-		return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachment id")
+		return stacktrace.Propagate(ente.ErrBadRequest, "invalid attachmentId")
 	}
 	if c.S3Config == nil {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")

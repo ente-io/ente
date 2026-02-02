@@ -3,13 +3,42 @@ package llmchat
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/ente-io/stacktrace"
 )
 
+const llmChatAttachmentPrefix = "llmchat/attachments"
+
 type AttachmentReference struct {
 	UserID       int64
 	AttachmentID string
+}
+
+type AttachmentClientRef struct {
+	AttachmentID string
+	MessageUUID  string
+}
+
+func buildAttachmentObjectKey(userID int64, attachmentID string) string {
+	return fmt.Sprintf("%s/%d/%s", llmChatAttachmentPrefix, userID, attachmentID)
+}
+
+func (r *Repository) GetAttachmentByClientID(ctx context.Context, userID int64, clientID string) (*AttachmentClientRef, error) {
+	row := r.DB.QueryRowContext(ctx, `SELECT attachment_id, message_uuid
+		FROM llmchat_attachments
+		WHERE user_id = $1 AND client_id = $2`,
+		userID,
+		clientID,
+	)
+	var ref AttachmentClientRef
+	if err := row.Scan(&ref.AttachmentID, &ref.MessageUUID); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, stacktrace.Propagate(err, "failed to fetch llmchat attachment by client id")
+	}
+	return &ref, nil
 }
 
 func (r *Repository) GetActiveAttachmentUsage(ctx context.Context, userID int64) (int64, error) {
