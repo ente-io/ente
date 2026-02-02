@@ -1,12 +1,11 @@
 import "dart:async";
 import "dart:io";
 import "dart:math";
-import 'dart:ui' as ui show Image;
+import "dart:ui" as ui;
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
-import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_svg/svg.dart";
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
@@ -56,38 +55,126 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   final _mainEditorBarKey = GlobalKey<ImageEditorMainBottomBarState>();
   final editorKey = GlobalKey<ProImageEditorState>();
   final _logger = Logger("ImageEditor");
+  Color? _jpegBackgroundColor;
+  bool _isExitFlowInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initJpegBackgroundColor());
+  }
+
+  Future<void> _initJpegBackgroundColor() async {
+    try {
+      final assetEntity = await widget.originalFile.getAsset;
+      final Uint8List? thumbBytes = await assetEntity?.thumbnailDataWithSize(
+        const ThumbnailSize(64, 64),
+        quality: 60,
+        format: ThumbnailFormat.jpeg,
+      );
+      if (thumbBytes == null) return;
+
+      final color = await _averageBottomEdgeColor(thumbBytes);
+      if (!mounted || color == null) return;
+      setState(() {
+        _jpegBackgroundColor = color;
+      });
+    } catch (e, s) {
+      _logger.warning("Failed to sample JPEG matte color", e, s);
+    }
+  }
+
+  Future<Color?> _averageBottomEdgeColor(Uint8List bytes) async {
+    ui.Codec? codec;
+    ui.Image? image;
+    try {
+      codec = await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: 64,
+        targetHeight: 64,
+      );
+      final frame = await codec.getNextFrame();
+      image = frame.image;
+      final byteData =
+          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (byteData == null) return null;
+
+      final width = image.width;
+      final height = image.height;
+      if (width <= 0 || height <= 0) return null;
+
+      final yStart = max(0, height - 2);
+      int count = 0;
+      int sumR = 0;
+      int sumG = 0;
+      int sumB = 0;
+
+      for (int y = yStart; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          final i = (y * width + x) * 4;
+          sumR += byteData.getUint8(i);
+          sumG += byteData.getUint8(i + 1);
+          sumB += byteData.getUint8(i + 2);
+          count++;
+        }
+      }
+      if (count == 0) return null;
+
+      return Color.fromARGB(
+        255,
+        (sumR / count).round().clamp(0, 255),
+        (sumG / count).round().clamp(0, 255),
+        (sumB / count).round().clamp(0, 255),
+      );
+    } finally {
+      image?.dispose();
+      codec?.dispose();
+    }
+  }
+
+  String _buildEditedFileName() {
+    final originalTitle = widget.originalFile.title?.trim();
+    final baseName = (originalTitle == null || originalTitle.isEmpty)
+        ? "ente_photo"
+        : path.basenameWithoutExtension(originalTitle);
+
+    final sanitizedBaseName =
+        baseName.replaceAll(RegExp(r'[\\/:*?"<>|]'), "_").trim();
+
+    final safeBaseName =
+        sanitizedBaseName.isEmpty ? "ente_photo" : sanitizedBaseName;
+
+    return "${safeBaseName}_edited_${DateTime.now().microsecondsSinceEpoch}.jpg";
+  }
 
   Future<void> saveImage(Uint8List? bytes) async {
-    if (bytes == null) return;
+    if (bytes == null || bytes.isEmpty) return;
+    if (!mounted) return;
 
     final dialog =
         createProgressDialog(context, AppLocalizations.of(context).saving);
     await dialog.show();
 
-    debugPrint("Image saved with size: ${bytes.length} bytes");
+    _logger.info("Image saved with size: ${bytes.length} bytes");
     final DateTime start = DateTime.now();
 
-    final ui.Image decodedResult = await decodeImageFromList(bytes);
-    final result = await FlutterImageCompress.compressWithList(
-      bytes,
-      minWidth: decodedResult.width,
-      minHeight: decodedResult.height,
-    );
-    _logger.info('Size after compression = ${result.length}');
+    final bytesToSave = bytes;
+
     final Duration diff = DateTime.now().difference(start);
     _logger.info('image_editor time : $diff');
 
+    if (!mounted) {
+      await dialog.hide();
+      return;
+    }
+
     try {
-      final fileName =
-          path.basenameWithoutExtension(widget.originalFile.title!) +
-              "_edited_" +
-              DateTime.now().microsecondsSinceEpoch.toString() +
-              ".JPEG";
+      final fileName = _buildEditedFileName();
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
-      final AssetEntity newAsset =
-          await (PhotoManager.editor.saveImage(result, filename: fileName));
+      final AssetEntity newAsset = await (PhotoManager.editor
+          .saveImage(bytesToSave, filename: fileName));
       final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
         newAsset,
@@ -109,9 +196,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       unawaited(SyncService.instance.sync());
-      showShortToast(context, AppLocalizations.of(context).editsSaved);
-      _logger.info("Original file " + widget.originalFile.toString());
-      _logger.info("Saved edits to file " + newFile.toString());
+      if (mounted) {
+        showShortToast(context, AppLocalizations.of(context).editsSaved);
+      }
+      _logger.info("Original file ${widget.originalFile}");
+      _logger.info("Saved edits to file $newFile");
       final files = widget.detailPageConfig.files;
 
       // the index could be -1 if the files fetched doesn't contain the newly
@@ -123,6 +212,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         selectionIndex = files.length - 1;
       }
       await dialog.hide();
+      if (!mounted) return;
       replacePage(
         context,
         DetailPage(
@@ -134,7 +224,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       );
     } catch (e, s) {
       await dialog.hide();
-      showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
+      if (mounted) {
+        showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
+      }
       _logger.severe(e, s);
     } finally {
       await PhotoManager.startChangeNotify();
@@ -142,32 +234,50 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Future<void> _showExitConfirmationDialog(BuildContext context) async {
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).yesDiscardChanges,
-          buttonType: ButtonType.critical,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).no,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      body: AppLocalizations.of(context).doYouWantToDiscardTheEditsYouHaveMade,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
-    if (actionResult?.action != null &&
-        actionResult!.action == ButtonAction.first) {
-      replacePage(context, DetailPage(widget.detailPageConfig));
+    if (_isExitFlowInProgress) return;
+    _isExitFlowInProgress = true;
+    editorKey.currentState?.isPopScopeDisabled = true;
+
+    try {
+      // If there are no edits, avoid showing a discard confirmation.
+      if (editorKey.currentState?.canUndo != true) {
+        if (mounted) {
+          replacePage(context, DetailPage(widget.detailPageConfig));
+        }
+        return;
+      }
+
+      final actionResult = await showActionSheet(
+        context: context,
+        buttons: [
+          ButtonWidget(
+            labelText: AppLocalizations.of(context).yesDiscardChanges,
+            buttonType: ButtonType.critical,
+            buttonSize: ButtonSize.large,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.first,
+            isInAlert: true,
+          ),
+          ButtonWidget(
+            labelText: AppLocalizations.of(context).no,
+            buttonType: ButtonType.secondary,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.second,
+            shouldStickToDarkTheme: true,
+            isInAlert: true,
+          ),
+        ],
+        body:
+            AppLocalizations.of(context).doYouWantToDiscardTheEditsYouHaveMade,
+        actionSheetType: ActionSheetType.defaultActionSheet,
+      );
+      if (actionResult?.action != null &&
+          actionResult!.action == ButtonAction.first) {
+        replacePage(context, DetailPage(widget.detailPageConfig));
+      }
+    } finally {
+      editorKey.currentState?.isPopScopeDisabled = false;
+      _isExitFlowInProgress = false;
     }
   }
 
@@ -180,7 +290,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        editorKey.currentState?.isPopScopeDisabled = true;
         _showExitConfirmationDialog(context);
       },
       child: Scaffold(
@@ -192,7 +301,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           widget.file,
           callbacks: ProImageEditorCallbacks(
             onCloseEditor: (_) {
-              editorKey.currentState?.isPopScopeDisabled = true;
               _showExitConfirmationDialog(context);
             },
             mainEditorCallbacks: MainEditorCallbacks(
@@ -205,10 +313,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
           ),
           configs: ProImageEditorConfigs(
-            imageGeneration: const ImageGenerationConfigs(
-              jpegQuality: 100,
+            imageGeneration: ImageGenerationConfigs(
+              outputFormat: OutputFormat.jpg,
               enableIsolateGeneration: true,
-              pngLevel: 0,
+              jpegBackgroundColor:
+                  (_jpegBackgroundColor ?? colorScheme.backgroundBase)
+                      .withValues(alpha: 1),
+              jpegQuality: 100,
             ),
             layerInteraction: const LayerInteractionConfigs(
               hideToolbarOnInteraction: false,
