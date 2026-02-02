@@ -96,7 +96,13 @@ export const Export: React.FC<ExportProps> = ({
             }
             const exportRecord =
                 await exportService.getExportRecord(exportFolder);
-            setExportStage(exportRecord.stage);
+            const currentStage = exportService.getCurrentExportStage();
+            const isRunning = Boolean(exportService.isExportInProgress());
+            const effectiveStage =
+                isRunning && currentStage !== ExportStage.init
+                    ? currentStage
+                    : exportRecord.stage;
+            setExportStage(effectiveStage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
             setPendingFiles(await exportService.pendingFiles(exportRecord));
         } catch (e) {
@@ -129,20 +135,6 @@ export const Export: React.FC<ExportProps> = ({
         if (!open) return;
         void syncExportRecord(exportFolder);
     }, [open, exportFolder, syncExportRecord]);
-
-    useEffect(() => {
-        if (!exportService.isExportInProgress()) return;
-
-        // If the dialog mounts mid-export, the stage can lag behind progress.
-        const processed = exportProgress.success + exportProgress.failed;
-        if (
-            exportStage < ExportStage.exportingFiles &&
-            exportProgress.total > 0 &&
-            processed > 0
-        ) {
-            setExportStage(ExportStage.exportingFiles);
-        }
-    }, [exportProgress, exportStage, exportService]);
 
     const verifyExportFolderExists = useCallback(async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
