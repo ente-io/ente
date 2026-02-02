@@ -13,6 +13,18 @@ pub struct Session {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SessionWithPreview {
+    pub uuid: Uuid,
+    pub title: String,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub remote_id: Option<String>,
+    pub needs_sync: bool,
+    pub deleted_at: Option<i64>,
+    pub last_message_preview: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Message {
     pub uuid: Uuid,
     pub session_uuid: Uuid,
