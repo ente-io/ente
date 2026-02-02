@@ -335,7 +335,7 @@ class WasmInference implements InferenceBackend {
 
             await writable.close();
 
-            await this.modelManager.cacheManager.writeMetadata(url, {
+            await this.writeModelMetadata(opfsCache, url, {
                 etag: res.headers.get("ETag") ?? "",
                 originalSize: totalBytes || downloaded,
                 originalURL: url,
@@ -344,6 +344,29 @@ class WasmInference implements InferenceBackend {
             totals[index] = totalBytes || downloaded;
             loaded[index] = downloaded;
             emitProgress("Ready");
+        }
+    }
+
+    private async writeModelMetadata(
+        cacheDir: FileSystemDirectoryHandle,
+        url: string,
+        metadata: { etag: string; originalSize: number; originalURL: string },
+    ) {
+        try {
+            const baseName =
+                await this.modelManager.cacheManager.getNameFromURL(url);
+            const metadataFileName = `__metadata__${baseName}`;
+            const metadataHandle = await cacheDir.getFileHandle(
+                metadataFileName,
+                { create: true },
+            );
+            const writable = await metadataHandle.createWritable();
+            await writable.write(
+                new Blob([JSON.stringify(metadata)], { type: "text/plain" }),
+            );
+            await writable.close();
+        } catch (error) {
+            log.warn("LLM OPFS metadata write failed", error);
         }
     }
 

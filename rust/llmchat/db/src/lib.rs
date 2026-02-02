@@ -19,7 +19,7 @@ pub use crate::attachments_db::{AttachmentsDb, AttachmentUploadRow, UploadState}
 pub use crate::llmchat::LlmChatDb;
 pub use crate::error::{Error, Result};
 pub use crate::models::{
-    AttachmentKind, AttachmentMeta, EntityType, Message, Sender, Session,
+    Attachment, AttachmentKind, AttachmentMeta, EntityType, Message, Sender, Session,
 };
 pub use crate::traits::{
     AttachmentStore, Clock, FileMetaStore, FsAttachmentStore, MetaStore, RandomUuidGen,

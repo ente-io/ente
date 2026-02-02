@@ -266,6 +266,12 @@ const serializeAttachments = async (
     chatKey: string,
 ): Promise<StoredAttachment[]> => {
     if (!attachments.length) return [];
+    if (!isTauriRuntime()) {
+        log.warn(
+            "Chat attachments are only supported in the desktop app; ignoring attachments on web.",
+        );
+        return [];
+    }
     return Promise.all(
         attachments.map(async (attachment) => ({
             id: attachment.id,
@@ -283,7 +289,7 @@ const deserializeAttachments = async (
     attachments: StoredAttachment[] | undefined,
     chatKey: string,
 ): Promise<ChatAttachment[]> => {
-    if (!attachments?.length) return [];
+    if (!attachments?.length || !isTauriRuntime()) return [];
 
     const localKey = cachedLocalChatKey();
 

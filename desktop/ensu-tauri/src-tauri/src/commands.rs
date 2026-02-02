@@ -53,6 +53,19 @@ fn llm_error(message: impl Into<String>) -> ApiError {
     ApiError::new("llm", message)
 }
 
+fn llm_thread_error() -> ApiError {
+    ApiError::new("llm", "LLM task failed")
+}
+
+fn default_llm_threads() -> i32 {
+    let available = std::thread::available_parallelism()
+        .map(|count| count.get())
+        .unwrap_or(2);
+    let half = available / 2;
+    let threads = if half == 0 { 1 } else { half };
+    i32::try_from(threads).unwrap_or(1)
+}
+
 impl From<core_auth::AuthError> for ApiError {
     fn from(e: core_auth::AuthError) -> Self {
         use core_auth::AuthError as E;
@@ -117,7 +130,6 @@ impl From<DbError> for ApiError {
             E::Row(_) => "db_row",
             E::InvalidSender(_) => "db_invalid_sender",
             E::NotFound { .. } => "db_not_found",
-            E::AttachmentNotFound(_) => "db_attachment_not_found",
             E::Crypto(_) => "db_crypto",
             E::SerdeJson(_) => "db_serde_json",
             E::Uuid(_) => "db_uuid",
@@ -531,6 +543,7 @@ impl From<llmchat_db::Message> for ChatMessageDto {
             attachments: message
                 .attachments
                 .into_iter()
+                .map(llmchat_db::Attachment::from)
                 .map(ChatAttachmentDto::from)
                 .collect(),
             deleted_at: message.deleted_at,
@@ -691,7 +704,7 @@ pub fn chat_db_get_messages_for_sync(
     let uuid = parse_uuid(&session_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
         Ok(db
-            .get_messages_for_sync(uuid, include_deleted)?
+            .get_messages_for_sync(uuid, include_deleted, true)?
             .into_iter()
             .map(ChatMessageDto::from)
             .collect())
@@ -721,8 +734,9 @@ pub fn chat_db_insert_message(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db(&state, &app, &key_b64, move |db| {
+        let attachment_metas: Vec<llmchat_db::AttachmentMeta> = attachments.into_iter().map(Into::into).collect();
         let message =
-            db.insert_message(session_uuid, sender, &text, parent, attachments)?;
+            db.insert_message(session_uuid, sender, &text, parent, attachment_metas)?;
         Ok(ChatMessageDto::from(message))
     })
 }
@@ -802,13 +816,14 @@ pub fn chat_db_insert_message_with_uuid(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db(&state, &app, &key_b64, move |db| {
+        let attachment_metas: Vec<llmchat_db::AttachmentMeta> = attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message_with_uuid(
             message_uuid,
             session_uuid,
             sender,
             &input.text,
             parent,
-            attachments,
+            attachment_metas,
             input.created_at,
             input.deleted_at,
         )?;
@@ -985,16 +1000,21 @@ impl llm::EventSink for LlmEventSink {
 }
 
 #[tauri::command]
-pub fn llm_init_backend() -> Result<(), ApiError> {
-    llm::init_backend().map_err(llm_error)
+pub async fn llm_init_backend() -> Result<(), ApiError> {
+    async_runtime::spawn_blocking(|| llm::init_backend().map_err(llm_error))
+        .await
+        .map_err(|_| llm_thread_error())??;
+    Ok(())
 }
 
 #[tauri::command]
-pub fn llm_load_model(
-    state: State<LlmState>,
+pub async fn llm_load_model(
+    state: State<'_, LlmState>,
     params: llm::ModelLoadParams,
 ) -> Result<(), ApiError> {
-    let model = llm::load_model(params).map_err(llm_error)?;
+    let model = async_runtime::spawn_blocking(move || llm::load_model(params).map_err(llm_error))
+        .await
+        .map_err(|_| llm_thread_error())??;
     let mut model_guard = state
         .model
         .lock()
@@ -1011,8 +1031,8 @@ pub fn llm_load_model(
 }
 
 #[tauri::command]
-pub fn llm_create_context(
-    state: State<LlmState>,
+pub async fn llm_create_context(
+    state: State<'_, LlmState>,
     params: llm::ContextParams,
 ) -> Result<(), ApiError> {
     let model = state
@@ -1022,7 +1042,14 @@ pub fn llm_create_context(
         .clone()
         .ok_or_else(|| ApiError::new("llm_not_loaded", "Model not loaded"))?;
 
-    let context = llm::create_context(model, params).map_err(llm_error)?;
+    let mut params = params;
+    if params.n_threads.is_none() {
+        params.n_threads = Some(default_llm_threads());
+    }
+
+    let context = async_runtime::spawn_blocking(move || llm::create_context(model, params).map_err(llm_error))
+        .await
+        .map_err(|_| llm_thread_error())??;
 
     let mut context_guard = state
         .context

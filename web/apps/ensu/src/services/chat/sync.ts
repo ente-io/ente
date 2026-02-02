@@ -32,6 +32,10 @@ import { computeMd5Base64 } from "./md5";
 import { cachedLocalChatKey } from "./chatKey";
 import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 
+const isTauriRuntime = () =>
+    typeof window !== "undefined" &&
+    ("__TAURI__" in window || "__TAURI_IPC__" in window);
+
 type DiffCursor = {
     base_since_time: number;
     since_time: number;
@@ -123,6 +127,8 @@ export const syncChat = async (chatKey: string) => {
 };
 
 export const downloadAttachment = async (attachmentId: string) => {
+    if (!isTauriRuntime()) return;
+
     const token = await savedAuthToken();
     if (!token) return;
 
@@ -565,7 +571,7 @@ const normalizeRemoteAttachments = async (
     chatKey: string,
     uploadedAt: number,
 ): Promise<ChatAttachment[]> => {
-    if (!attachments.length) return [];
+    if (!attachments.length || !isTauriRuntime()) return [];
     return Promise.all(
         attachments.map(async (attachment) => {
             const encryptedName =

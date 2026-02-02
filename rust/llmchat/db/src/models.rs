@@ -33,6 +33,38 @@ pub struct AttachmentMeta {
     pub name: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Attachment {
+    pub id: String,
+    pub kind: AttachmentKind,
+    pub size: i64,
+    pub name: String,
+    pub uploaded_at: Option<i64>,
+}
+
+impl From<AttachmentMeta> for Attachment {
+    fn from(meta: AttachmentMeta) -> Self {
+        Self {
+            id: meta.id,
+            kind: meta.kind,
+            size: meta.size,
+            name: meta.name,
+            uploaded_at: None,
+        }
+    }
+}
+
+impl From<Attachment> for AttachmentMeta {
+    fn from(attachment: Attachment) -> Self {
+        Self {
+            id: attachment.id,
+            kind: attachment.kind,
+            size: attachment.size,
+            name: attachment.name,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AttachmentKind {

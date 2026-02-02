@@ -18,3 +18,13 @@ uuid = { version = "1", features = ["v4"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.dev]
+opt-level = 1

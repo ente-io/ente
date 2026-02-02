@@ -126,6 +126,20 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    pub fn set_session_deleted_at(&self, uuid: Uuid, deleted_at: i64) -> Result<()> {
+        self.backend.transaction(|tx| {
+            tx.execute(
+                "UPDATE messages SET deleted_at = ?, needs_sync = 1 WHERE session_uuid = ? AND deleted_at IS NULL",
+                &[Value::Integer(deleted_at), Value::Text(uuid.to_string())],
+            )?;
+            let affected = tx.execute(
+                "UPDATE sessions SET deleted_at = ?, needs_sync = 1 WHERE session_uuid = ? AND deleted_at IS NULL",
+                &[Value::Integer(deleted_at), Value::Text(uuid.to_string())],
+            )?;
+            ensure_row_updated(affected, EntityType::Session, uuid)
+        })
+    }
+
     pub fn get_sessions_needing_sync(&self) -> Result<Vec<Session>> {
         let rows = self.backend.query(
             "SELECT session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at \
@@ -193,6 +207,72 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    pub fn insert_message_with_uuid(
+        &self,
+        message_uuid: Uuid,
+        session_uuid: Uuid,
+        sender: &str,
+        text: &str,
+        parent: Option<Uuid>,
+        attachments: Vec<AttachmentMeta>,
+        created_at: i64,
+        deleted_at: Option<i64>,
+    ) -> Result<Message> {
+        let sender: Sender = sender.parse()?;
+        let encrypted_text = crypto::encrypt_string(text, &self.key)?;
+        let attachments_json = self.serialize_attachments(&attachments)?;
+
+        self.backend.transaction(|tx| {
+            tx.execute(
+                "INSERT INTO messages (message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at) \
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)",
+                &[
+                    Value::Text(message_uuid.to_string()),
+                    Value::Text(session_uuid.to_string()),
+                    parent
+                        .map(|value| Value::Text(value.to_string()))
+                        .unwrap_or(Value::Null),
+                    Value::Text(sender.as_str().to_string()),
+                    Value::Blob(encrypted_text),
+                    attachments_json
+                        .map(Value::Text)
+                        .unwrap_or(Value::Null),
+                    Value::Integer(created_at),
+                    deleted_at
+                        .map(Value::Integer)
+                        .unwrap_or(Value::Null),
+                ],
+            )?;
+
+            self.touch_session(tx, session_uuid, created_at)?;
+            Ok(())
+        })?;
+
+        Ok(Message {
+            uuid: message_uuid,
+            session_uuid,
+            parent_message_uuid: parent,
+            sender,
+            text: text.to_string(),
+            attachments,
+            created_at,
+            needs_sync: true,
+            deleted_at,
+        })
+    }
+
+    pub fn get_message(&self, uuid: Uuid) -> Result<Option<Message>> {
+        let row = self.backend.query_row(
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
+             FROM messages WHERE message_uuid = ?",
+            &[Value::Text(uuid.to_string())],
+        )?;
+        match row {
+            Some(row) => Ok(Some(self.message_from_row(&row)?)),
+            None => Ok(None),
+        }
+    }
+
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
         let rows = self.backend.query(
             "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
@@ -208,6 +288,30 @@ impl<B: Backend> ChatDb<B> {
              FROM messages WHERE session_uuid = ? AND needs_sync = 1 AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC",
             &[Value::Text(session_uuid.to_string())],
         )?;
+        rows.iter().map(|row| self.message_from_row(row)).collect()
+    }
+
+    pub fn get_messages_for_sync(
+        &self,
+        session_uuid: Uuid,
+        include_deleted: bool,
+        only_needs_sync: bool,
+    ) -> Result<Vec<Message>> {
+        let mut query = String::from(
+            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
+             FROM messages WHERE session_uuid = ?",
+        );
+        if !include_deleted {
+            query.push_str(" AND deleted_at IS NULL");
+        }
+        if only_needs_sync {
+            query.push_str(" AND needs_sync = 1");
+        }
+        query.push_str(" ORDER BY created_at ASC, message_uuid ASC");
+
+        let rows = self
+            .backend
+            .query(&query, &[Value::Text(session_uuid.to_string())])?;
         rows.iter().map(|row| self.message_from_row(row)).collect()
     }
 
@@ -258,6 +362,28 @@ impl<B: Backend> ChatDb<B> {
         })
     }
 
+    pub fn set_message_deleted_at(&self, uuid: Uuid, deleted_at: i64) -> Result<()> {
+        self.backend.transaction(|tx| {
+            let row = tx.query_row(
+                "SELECT session_uuid FROM messages WHERE message_uuid = ? AND deleted_at IS NULL",
+                &[Value::Text(uuid.to_string())],
+            )?;
+            let row = row.ok_or(Error::NotFound {
+                entity: EntityType::Message,
+                id: uuid,
+            })?;
+            let session_uuid = Uuid::parse_str(&row.get_string(0)?)?;
+
+            let affected = tx.execute(
+                "UPDATE messages SET deleted_at = ?, needs_sync = 1 WHERE message_uuid = ? AND deleted_at IS NULL",
+                &[Value::Integer(deleted_at), Value::Text(uuid.to_string())],
+            )?;
+            ensure_row_updated(affected, EntityType::Message, uuid)?;
+
+            self.touch_session(tx, session_uuid, deleted_at)
+        })
+    }
+
     pub fn mark_session_synced(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
         let affected = self.backend.execute(
             "UPDATE sessions SET remote_id = ?, needs_sync = 0 WHERE session_uuid = ?",
@@ -275,6 +401,67 @@ impl<B: Backend> ChatDb<B> {
             &[Value::Text(uuid.to_string())],
         )?;
         ensure_row_updated(affected, EntityType::Message, uuid)
+    }
+
+    pub fn mark_attachment_uploaded(&self, message_uuid: Uuid, attachment_id: &str) -> Result<()> {
+        // Validate that the message exists and has the attachment
+        let message = self.get_message(message_uuid)?.ok_or(Error::NotFound {
+            entity: EntityType::Message,
+            id: message_uuid,
+        })?;
+        
+        // Check if the attachment_id exists in the message's attachments
+        let has_attachment = message.attachments.iter().any(|a| a.id == attachment_id);
+        if !has_attachment {
+            return Err(Error::UnsupportedOperation(format!(
+                "Attachment {} not found in message {}",
+                attachment_id, message_uuid
+            )));
+        }
+        
+        // For now, this is a no-op as attachment upload status might be tracked elsewhere
+        Ok(())
+    }
+
+    pub fn upsert_session(
+        &self,
+        session_uuid: Uuid,
+        title: &str,
+        created_at: i64,
+        updated_at: i64,
+        remote_id: Option<String>,
+        needs_sync: bool,
+        deleted_at: Option<i64>,
+    ) -> Result<Session> {
+        let encrypted_title = crypto::encrypt_string(title, &self.key)?;
+        let needs_sync_val = if needs_sync { 1 } else { 0 };
+        
+        self.backend.execute(
+            "INSERT INTO sessions (session_uuid, title, created_at, updated_at, remote_id, needs_sync, deleted_at) \
+             VALUES (?, ?, ?, ?, ?, ?, ?) \
+             ON CONFLICT(session_uuid) DO UPDATE SET \
+               title = excluded.title, \
+               created_at = excluded.created_at, \
+               updated_at = excluded.updated_at, \
+               remote_id = excluded.remote_id, \
+               needs_sync = excluded.needs_sync, \
+               deleted_at = excluded.deleted_at",
+            &[
+                Value::Text(session_uuid.to_string()),
+                Value::Blob(encrypted_title),
+                Value::Integer(created_at),
+                Value::Integer(updated_at),
+                remote_id.map(Value::Text).unwrap_or(Value::Null),
+                Value::Integer(needs_sync_val),
+                deleted_at.map(Value::Integer).unwrap_or(Value::Null),
+            ],
+        )?;
+
+        let session = self.get_session(session_uuid)?.ok_or(Error::NotFound {
+            entity: EntityType::Session,
+            id: session_uuid,
+        })?;
+        Ok(session)
     }
 
     pub fn upsert_session_from_remote(

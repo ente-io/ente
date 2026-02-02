@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Manager;
+
 mod commands;
 
 fn main() {
@@ -7,6 +9,13 @@ fn main() {
         .manage(commands::SrpState::default())
         .manage(commands::LlmState::default())
         .manage(commands::ChatDbState::default())
+        .setup(|app| {
+            // Show the main window after setup is complete
+            if let Some(window) = app.get_window("main") {
+                window.show().unwrap();
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::crypto_init,
             commands::crypto_generate_key,

@@ -166,6 +166,9 @@ const randomLoadingPhrase = () => {
 };
 
 const MEDIA_MARKER = "<__media__>";
+const IMAGE_TOKEN_ESTIMATE = 768;
+const MAX_INFERENCE_IMAGE_DIMENSION = 384;
+const INFERENCE_IMAGE_QUALITY = 0.85;
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
@@ -239,7 +242,8 @@ const buildDocumentBlocks = (documents: DocumentAttachment[]) => {
     return documents
         .map((doc, index) => {
             const name = doc.name || `Document ${index + 1}`;
-            const content = doc.text.trim();
+            // Remove null bytes which are invalid in C strings used by llama.cpp
+            const content = doc.text.replace(/\0/g, '').trim();
             return `----- BEGIN DOCUMENT: ${name} -----\n${content}\n----- END DOCUMENT: ${name} -----`;
         })
         .join("\n\n");
@@ -252,6 +256,121 @@ const buildPromptWithDocuments = (
     const blocks = buildDocumentBlocks(documents);
     if (!blocks) return promptText;
     return promptText ? `${promptText}\n\n${blocks}` : blocks;
+};
+
+const sanitizeImageExtension = (filename?: string) => {
+    if (!filename) return undefined;
+    const extension = filename.split(".").pop();
+    if (!extension) return undefined;
+    const cleaned = extension.replace(/[^a-z0-9]+/gi, "");
+    return cleaned || undefined;
+};
+
+const prepareInferenceImageBytes = async (image: ImageAttachment) => {
+    const fallback = async () => ({
+        bytes: new Uint8Array(await image.file.arrayBuffer()),
+        extension: sanitizeImageExtension(image.name),
+    });
+
+    if (typeof document === "undefined") {
+        return fallback();
+    }
+
+    const resizeToJpeg = async (
+        width: number,
+        height: number,
+        draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void,
+    ) => {
+        const maxDimension = MAX_INFERENCE_IMAGE_DIMENSION;
+        if (width <= maxDimension && height <= maxDimension) {
+            return null;
+        }
+        const scale = maxDimension / Math.max(width, height);
+        const targetWidth = Math.max(1, Math.round(width * scale));
+        const targetHeight = Math.max(1, Math.round(height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+            return null;
+        }
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        draw(ctx, targetWidth, targetHeight);
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(
+                (result) => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error("Failed to encode image"));
+                    }
+                },
+                "image/jpeg",
+                INFERENCE_IMAGE_QUALITY,
+            );
+        });
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        return { bytes, extension: "jpg" };
+    };
+
+    let bitmap: ImageBitmap | null = null;
+    try {
+        if (typeof createImageBitmap !== "undefined") {
+            bitmap = await createImageBitmap(image.file);
+            const resized = await resizeToJpeg(
+                bitmap.width,
+                bitmap.height,
+                (ctx, w, h) => {
+                    ctx.drawImage(bitmap as ImageBitmap, 0, 0, w, h);
+                },
+            );
+            if (resized) {
+                return resized;
+            }
+        }
+    } catch (error) {
+        log.error("Failed to resize image with ImageBitmap", error);
+    } finally {
+        bitmap?.close();
+    }
+
+    try {
+        const resized = await new Promise<{
+            bytes: Uint8Array;
+            extension: string;
+        } | null>((resolve, reject) => {
+            const url = URL.createObjectURL(image.file);
+            const img = new Image();
+            const cleanup = () => URL.revokeObjectURL(url);
+            img.onload = () => {
+                resizeToJpeg(img.width, img.height, (ctx, w, h) => {
+                    ctx.drawImage(img, 0, 0, w, h);
+                })
+                    .then((result) => {
+                        cleanup();
+                        resolve(result);
+                    })
+                    .catch((err) => {
+                        cleanup();
+                        reject(err);
+                    });
+            };
+            img.onerror = () => {
+                cleanup();
+                reject(new Error("Failed to decode image"));
+            };
+            img.src = url;
+        });
+        if (resized) {
+            return resized;
+        }
+    } catch (error) {
+        log.error("Failed to resize image with Image element", error);
+    }
+
+    return fallback();
 };
 
 const formatBytes = (bytes: number) => {
@@ -1511,12 +1630,10 @@ const Page: React.FC = () => {
 
             const paths = await Promise.all(
                 images.map(async (image) => {
-                    const extension = image.name.split(".").pop();
+                    const { bytes, extension } =
+                        await prepareInferenceImageBytes(image);
                     const suffix = extension ? `.${extension}` : ".jpg";
                     const path = await join(dir, `${image.id}${suffix}`);
-                    const bytes = new Uint8Array(
-                        await image.file.arrayBuffer(),
-                    );
                     await writeBinaryFile({ path, contents: bytes });
                     return path;
                 }),
@@ -1766,7 +1883,9 @@ const Page: React.FC = () => {
 
     const approxTokens = useCallback((text: string) => {
         if (!text) return 0;
-        return Math.ceil(text.length / 4);
+        const baseTokens = Math.ceil(text.length / 4);
+        const imageCount = text.split(MEDIA_MARKER).length - 1;
+        return baseTokens + imageCount * IMAGE_TOKEN_ESTIMATE;
     }, []);
 
     const loadMessageDocuments = useCallback(
@@ -2814,7 +2933,7 @@ const Page: React.FC = () => {
             closeAttachmentMenu();
             const images = files.map((file) => ({
                 id: createAttachmentId(),
-                name: file.name,
+                name: file.name.replace(/\0/g, ''),
                 size: file.size,
                 file,
             }));
@@ -2948,6 +3067,8 @@ const Page: React.FC = () => {
             trimmed.replace(/\u0000/g, ""),
             pendingDocuments,
         );
+        let promptText = messageText;
+        let inferenceImagePaths: string[] = [];
 
         let attachments: ChatAttachment[] = [];
         if (pendingDocuments.length > 0 || pendingImages.length > 0) {
@@ -2965,7 +3086,7 @@ const Page: React.FC = () => {
                         return {
                             id: doc.id,
                             kind: "document",
-                            name: doc.name,
+                            name: doc.name.replace(/\0/g, ''),
                             size: bytes.length,
                         } satisfies ChatAttachment;
                     }),
@@ -2992,7 +3113,7 @@ const Page: React.FC = () => {
                         return {
                             id: img.id,
                             kind: "image",
-                            name: img.name,
+                            name: img.name.replace(/\0/g, ''),
                             size: img.size,
                         } satisfies ChatAttachment;
                     }),
@@ -3009,8 +3130,21 @@ const Page: React.FC = () => {
             }
         }
 
-        const inferenceImagePaths = await writeInferenceImages(pendingImages);
-        const inferencePromptText = buildPromptWithImages(
+        if (pendingImages.length > 0) {
+            try {
+                inferenceImagePaths = await writeInferenceImages(pendingImages);
+            } catch (error) {
+                log.error("Failed to prepare images for inference", error);
+                showMiniDialog({
+                    title: "Attachment error",
+                    message:
+                        "We could not prepare the images for inference. Please try again.",
+                });
+                return;
+            }
+        }
+
+        promptText = buildPromptWithImages(
             messageText,
             inferenceImagePaths.length,
         );
@@ -3042,18 +3176,16 @@ const Page: React.FC = () => {
                 await refreshMessages(activeSessionId);
                 void syncChat(chatKey);
 
-                try {
-                    await startGeneration({
-                        promptText: inferencePromptText,
-                        parentMessageUuid: newUserUuid,
-                        historyPath,
-                        sessionUuid: activeSessionId,
-                        imagePaths: inferenceImagePaths,
-                        mediaMarker: MEDIA_MARKER,
-                    });
-                } finally {
-                    void cleanupInferenceImages(inferenceImagePaths);
-                }
+                await startGeneration({
+                    promptText,
+                    parentMessageUuid: newUserUuid,
+                    historyPath,
+                    sessionUuid: activeSessionId,
+                    imagePaths:
+                        inferenceImagePaths.length > 0
+                            ? inferenceImagePaths
+                            : undefined,
+                });
                 return;
             }
 
@@ -3078,20 +3210,20 @@ const Page: React.FC = () => {
             await refreshMessages(activeSessionId);
             void syncChat(chatKey);
 
-            try {
-                await startGeneration({
-                    promptText: inferencePromptText,
-                    parentMessageUuid: userUuid,
-                    historyPath: basePath,
-                    sessionUuid: activeSessionId,
-                    imagePaths: inferenceImagePaths,
-                    mediaMarker: MEDIA_MARKER,
-                });
-            } finally {
-                void cleanupInferenceImages(inferenceImagePaths);
-            }
+            await startGeneration({
+                promptText,
+                parentMessageUuid: userUuid,
+                historyPath: basePath,
+                sessionUuid: activeSessionId,
+                imagePaths:
+                    inferenceImagePaths.length > 0
+                        ? inferenceImagePaths
+                        : undefined,
+            });
         } catch (error) {
             log.error("Failed to store chat message", error);
+        } finally {
+            await cleanupInferenceImages(inferenceImagePaths);
         }
 
         await refreshSessions();
@@ -3110,13 +3242,13 @@ const Page: React.FC = () => {
         showMiniDialog,
         slicePathUntil,
         startGeneration,
+        writeInferenceImages,
+        cleanupInferenceImages,
         storeEncryptedAttachmentBytes,
         syncChat,
         updateBranchSelectionState,
         updateRouteSession,
         formatErrorMessage,
-        writeInferenceImages,
-        cleanupInferenceImages,
     ]);
 
     useEffect(() => {

@@ -140,6 +140,18 @@ impl<B: Backend> AttachmentsDb<B> {
         }
     }
 
+    pub fn get_attachment(&self, attachment_id: &str) -> Result<Option<AttachmentUploadRow>> {
+        let row = self.backend.query_row(
+            "SELECT attachment_id, session_uuid, message_uuid, size, upload_state, uploaded_at, updated_at \
+             FROM attachments WHERE attachment_id = ?",
+            &[Value::Text(attachment_id.to_string())],
+        )?;
+        match row {
+            Some(row) => Ok(Some(Self::row_from_row(&row)?)),
+            None => Ok(None),
+        }
+    }
+
     pub fn upsert_attachment_with_state(
         &self,
         attachment_id: &str,
