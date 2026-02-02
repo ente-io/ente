@@ -11,8 +11,6 @@ import {
     IconButton,
     InputBase,
     LinearProgress,
-    Menu,
-    MenuItem,
     Stack,
     Typography,
 } from "@mui/material";
@@ -22,13 +20,6 @@ import type { ChatMessage } from "services/chat/store";
 import type { DownloadProgress } from "services/llm/types";
 
 type IconProps = { size: number; strokeWidth: number };
-
-type DocumentAttachment = {
-    id: string;
-    name: string;
-    size: number;
-    text: string;
-};
 
 type ImageAttachment = { id: string; name: string; size: number; file: File };
 
@@ -52,10 +43,8 @@ export interface ChatComposerProps {
     handleDownloadModel: () => void | Promise<void>;
     editingMessage: ChatMessage | null;
     handleCancelEdit: () => void;
-    pendingDocuments: DocumentAttachment[];
     pendingImages: ImageAttachment[];
     pendingImagePreviews: Record<string, string>;
-    removePendingDocument: (id: string) => void;
     removePendingImage: (id: string) => void;
     formatBytes: (size: number) => string;
     input: string;
@@ -66,11 +55,6 @@ export interface ChatComposerProps {
     handleStopGeneration: () => void;
     showAttachmentPicker: boolean;
     openAttachmentMenu: () => void;
-    attachmentAnchor: HTMLElement | null;
-    closeAttachmentMenu: () => void;
-    handleAttachmentChoice: (choice: "image" | "document") => void;
-    showImageAttachment: boolean;
-    getDocumentInputProps: () => React.InputHTMLAttributes<HTMLInputElement>;
     getImageInputProps: () => React.InputHTMLAttributes<HTMLInputElement>;
     actionButtonSx: SxProps<Theme>;
     drawerIconButtonSx: SxProps<Theme>;
@@ -93,10 +77,8 @@ export const ChatComposer = memo(
         handleDownloadModel,
         editingMessage,
         handleCancelEdit,
-        pendingDocuments,
         pendingImages,
         pendingImagePreviews,
-        removePendingDocument,
         removePendingImage,
         formatBytes,
         input,
@@ -107,11 +89,6 @@ export const ChatComposer = memo(
         handleStopGeneration,
         showAttachmentPicker,
         openAttachmentMenu,
-        attachmentAnchor,
-        closeAttachmentMenu,
-        handleAttachmentChoice,
-        showImageAttachment,
-        getDocumentInputProps,
         getImageInputProps,
         actionButtonSx,
         drawerIconButtonSx,
@@ -122,10 +99,7 @@ export const ChatComposer = memo(
     }: ChatComposerProps) => {
         const disableSend =
             isDownloading ||
-            (!isGenerating &&
-                !input.trim() &&
-                pendingDocuments.length === 0 &&
-                pendingImages.length === 0);
+            (!isGenerating && !input.trim() && pendingImages.length === 0);
 
         return (
             <>
@@ -138,13 +112,17 @@ export const ChatComposer = memo(
                         bottom: 16,
                         zIndex: 5,
                         pointerEvents: "none",
+                        width: "100%",
+                        boxSizing: "border-box",
                     }}
                 >
                     <Box
                         sx={{
                             maxWidth: 900,
+                            width: "100%",
                             mx: "auto",
                             pointerEvents: "auto",
+                            boxSizing: "border-box",
                         }}
                     >
                         {showModelGate ? (
@@ -345,67 +323,6 @@ export const ChatComposer = memo(
                                     </Box>
                                 )}
 
-                                {pendingDocuments.length > 0 && (
-                                    <Box
-                                        sx={{
-                                            display: "grid",
-                                            gridTemplateColumns:
-                                                "repeat(2, minmax(0, 1fr))",
-                                            gap: 0.5,
-                                        }}
-                                    >
-                                        {pendingDocuments.map((doc) => (
-                                            <Box
-                                                key={doc.id}
-                                                sx={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    gap: 1,
-                                                    px: 1.5,
-                                                    py: 0.75,
-                                                    borderRadius: 1.5,
-                                                    bgcolor: "fill.faint",
-                                                    minWidth: 0,
-                                                }}
-                                            >
-                                                <Typography
-                                                    variant="mini"
-                                                    sx={{
-                                                        flex: 1,
-                                                        color: "text.base",
-                                                        overflow: "hidden",
-                                                        textOverflow:
-                                                            "ellipsis",
-                                                        whiteSpace: "nowrap",
-                                                    }}
-                                                >
-                                                    {doc.name}
-                                                </Typography>
-                                                <Typography
-                                                    variant="mini"
-                                                    sx={{ color: "text.muted" }}
-                                                >
-                                                    {formatBytes(doc.size)}
-                                                </Typography>
-                                                <IconButton
-                                                    aria-label="Remove document"
-                                                    sx={actionButtonSx}
-                                                    onClick={() =>
-                                                        removePendingDocument(
-                                                            doc.id,
-                                                        )
-                                                    }
-                                                >
-                                                    <HugeiconsIcon
-                                                        icon={Cancel01Icon}
-                                                        {...smallIconProps}
-                                                    />
-                                                </IconButton>
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                )}
-
                                 {pendingImages.length > 0 && (
                                     <Box
                                         sx={{
@@ -540,8 +457,7 @@ export const ChatComposer = memo(
                                             minHeight: 48,
                                             display: "flex",
                                             alignItems: "center",
-                                            fontFamily:
-                                                '"Inter", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
+                                            fontFamily: "inherit",
                                             fontSize: "15px",
                                             lineHeight: 1.7,
                                             color: "text.base",
@@ -551,7 +467,7 @@ export const ChatComposer = memo(
                                             },
                                             "& code": {
                                                 fontFamily:
-                                                    '"JetBrains Mono", monospace',
+                                                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
                                             },
                                         }}
                                     />
@@ -649,38 +565,7 @@ export const ChatComposer = memo(
 
                 {showAttachmentPicker && (
                     <>
-                        <input {...getDocumentInputProps()} />
                         <input {...getImageInputProps()} />
-                        <Menu
-                            anchorEl={attachmentAnchor}
-                            open={Boolean(attachmentAnchor)}
-                            onClose={closeAttachmentMenu}
-                            anchorOrigin={{
-                                vertical: "top",
-                                horizontal: "right",
-                            }}
-                            transformOrigin={{
-                                vertical: "bottom",
-                                horizontal: "right",
-                            }}
-                        >
-                            {showImageAttachment && (
-                                <MenuItem
-                                    onClick={() =>
-                                        handleAttachmentChoice("image")
-                                    }
-                                >
-                                    Image
-                                </MenuItem>
-                            )}
-                            <MenuItem
-                                onClick={() =>
-                                    handleAttachmentChoice("document")
-                                }
-                            >
-                                Document
-                            </MenuItem>
-                        </Menu>
                     </>
                 )}
             </>
