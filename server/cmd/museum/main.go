@@ -159,7 +159,9 @@ func main() {
 	s3Config := s3config.NewS3Config()
 	if llmChatAttachmentsEnabled {
 		// Ensure llmchat bucket (b7) is configured. No fallback.
-		_ = s3Config.GetLlmChatBucket()
+		if _, err := s3Config.GetLlmChatBucket(); err != nil {
+			log.WithError(err).Warn("Llmchat bucket not configured")
+		}
 	}
 	passkeysRepo, err := passkey.NewRepository(db)
 	if err != nil {
@@ -919,7 +921,7 @@ func main() {
 	privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
 	privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
 	if llmChatAttachmentsEnabled {
-		privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
+		privateAPI.POST("/llmchat/chat/attachment/upload-url", llmChatHandler.GetAttachmentUploadURL)
 		privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
 	}
 	privateAPI.GET("/llmchat/chat/diff", llmChatHandler.GetDiff)
