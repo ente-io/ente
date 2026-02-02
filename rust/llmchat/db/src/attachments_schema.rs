@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS attachments (
   session_uuid  TEXT NOT NULL,
   message_uuid  TEXT NOT NULL,
   size          INTEGER NOT NULL,
+  remote_id     TEXT,
   upload_state  TEXT NOT NULL CHECK(upload_state IN ('pending','uploading','uploaded','failed')),
   uploaded_at   INTEGER,
   updated_at    INTEGER NOT NULL
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS attachments (
   session_uuid  TEXT NOT NULL,
   message_uuid  TEXT NOT NULL,
   size          INTEGER NOT NULL,
+  remote_id     TEXT,
   upload_state  TEXT NOT NULL CHECK(upload_state IN ('pending','uploading','uploaded','failed')),
   uploaded_at   INTEGER,
   updated_at    INTEGER NOT NULL

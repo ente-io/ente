@@ -194,10 +194,30 @@ impl<B: crate::Backend> LlmChatDb<B> {
         session_uuid: Uuid,
         message_uuid: Uuid,
         size: i64,
+        remote_id: Option<&str>,
         state: UploadState,
     ) -> Result<()> {
+        self.attachments.upsert_attachment_with_state(
+            attachment_id,
+            session_uuid,
+            message_uuid,
+            size,
+            remote_id,
+            state,
+        )
+    }
+
+    pub fn set_attachment_remote_id(
+        &self,
+        attachment_id: &str,
+        remote_id: Option<&str>,
+    ) -> Result<()> {
         self.attachments
-            .upsert_attachment_with_state(attachment_id, session_uuid, message_uuid, size, state)
+            .set_attachment_remote_id(attachment_id, remote_id)
+    }
+
+    pub fn get_attachment_remote_id(&self, attachment_id: &str) -> Result<Option<String>> {
+        self.attachments.get_attachment_remote_id(attachment_id)
     }
 
     pub fn get_attachment_upload_state(&self, attachment_id: &str) -> Result<Option<UploadState>> {

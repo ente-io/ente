@@ -47,6 +47,7 @@ pub struct AttachmentUploadRow {
     pub session_uuid: Uuid,
     pub message_uuid: Uuid,
     pub size: i64,
+    pub remote_id: Option<String>,
     pub upload_state: UploadState,
     pub uploaded_at: Option<i64>,
     pub updated_at: i64,
@@ -78,13 +79,14 @@ impl<B: Backend> AttachmentsDb<B> {
         // If row exists, do not overwrite an existing terminal state.
         // Only ensure it's present and updated.
         self.backend.execute(
-            "INSERT INTO attachments (attachment_id, session_uuid, message_uuid, size, upload_state, uploaded_at, updated_at) \
-             VALUES (?, ?, ?, ?, 'pending', NULL, ?) \
+            "INSERT INTO attachments (attachment_id, session_uuid, message_uuid, size, remote_id, upload_state, uploaded_at, updated_at) \
+             VALUES (?, ?, ?, ?, NULL, 'pending', NULL, ?) \
              ON CONFLICT(attachment_id) DO UPDATE SET \
                session_uuid = excluded.session_uuid, \
                message_uuid = excluded.message_uuid, \
                size = excluded.size, \
-               updated_at = excluded.updated_at", 
+               remote_id = attachments.remote_id, \
+               updated_at = excluded.updated_at",
             &[
                 Value::Text(attachment_id.to_string()),
                 Value::Text(session_uuid.to_string()),
@@ -111,6 +113,33 @@ impl<B: Backend> AttachmentsDb<B> {
             ],
         )?;
         Ok(())
+    }
+
+    pub fn set_attachment_remote_id(
+        &self,
+        attachment_id: &str,
+        remote_id: Option<&str>,
+    ) -> Result<()> {
+        let now = self.clock.now_us();
+        let value = remote_id
+            .map(|id| Value::Text(id.to_string()))
+            .unwrap_or(Value::Null);
+        self.backend.execute(
+            "UPDATE attachments SET remote_id = ?, updated_at = ? WHERE attachment_id = ?",
+            &[value, Value::Integer(now), Value::Text(attachment_id.to_string())],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_attachment_remote_id(&self, attachment_id: &str) -> Result<Option<String>> {
+        let row = self.backend.query_row(
+            "SELECT remote_id FROM attachments WHERE attachment_id = ?",
+            &[Value::Text(attachment_id.to_string())],
+        )?;
+        match row {
+            Some(row) => Ok(row.get_optional_string(0)?),
+            None => Ok(None),
+        }
     }
 
     pub fn mark_attachment_uploaded(&self, attachment_id: &str) -> Result<()> {
@@ -146,6 +175,7 @@ impl<B: Backend> AttachmentsDb<B> {
         session_uuid: Uuid,
         message_uuid: Uuid,
         size: i64,
+        remote_id: Option<&str>,
         state: UploadState,
     ) -> Result<()> {
         let now = self.clock.now_us();
@@ -154,13 +184,17 @@ impl<B: Backend> AttachmentsDb<B> {
         } else {
             Value::Null
         };
+        let remote_value = remote_id
+            .map(|value| Value::Text(value.to_string()))
+            .unwrap_or(Value::Null);
         self.backend.execute(
-            "INSERT INTO attachments (attachment_id, session_uuid, message_uuid, size, upload_state, uploaded_at, updated_at) \
-             VALUES (?, ?, ?, ?, ?, ?, ?) \
+            "INSERT INTO attachments (attachment_id, session_uuid, message_uuid, size, remote_id, upload_state, uploaded_at, updated_at) \
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?) \
              ON CONFLICT(attachment_id) DO UPDATE SET \
                session_uuid = excluded.session_uuid, \
                message_uuid = excluded.message_uuid, \
                size = excluded.size, \
+               remote_id = COALESCE(excluded.remote_id, attachments.remote_id), \
                upload_state = excluded.upload_state, \
                uploaded_at = excluded.uploaded_at, \
                updated_at = excluded.updated_at",
@@ -169,6 +203,7 @@ impl<B: Backend> AttachmentsDb<B> {
                 Value::Text(session_uuid.to_string()),
                 Value::Text(message_uuid.to_string()),
                 Value::Integer(size),
+                remote_value,
                 Value::Text(state.as_str().to_string()),
                 uploaded_at,
                 Value::Integer(now),
@@ -182,7 +217,7 @@ impl<B: Backend> AttachmentsDb<B> {
         session_uuid: Uuid,
     ) -> Result<Vec<AttachmentUploadRow>> {
         let rows = self.backend.query(
-            "SELECT attachment_id, session_uuid, message_uuid, size, upload_state, uploaded_at, updated_at \
+            "SELECT attachment_id, session_uuid, message_uuid, size, remote_id, upload_state, uploaded_at, updated_at \
              FROM attachments \
              WHERE session_uuid = ? AND upload_state IN ('pending','uploading','failed') \
              ORDER BY updated_at ASC",
@@ -197,7 +232,7 @@ impl<B: Backend> AttachmentsDb<B> {
         message_uuid: Uuid,
     ) -> Result<Vec<AttachmentUploadRow>> {
         let rows = self.backend.query(
-            "SELECT attachment_id, session_uuid, message_uuid, size, upload_state, uploaded_at, updated_at \
+            "SELECT attachment_id, session_uuid, message_uuid, size, remote_id, upload_state, uploaded_at, updated_at \
              FROM attachments \
              WHERE message_uuid = ? AND upload_state IN ('pending','uploading','failed') \
              ORDER BY updated_at ASC",
@@ -228,14 +263,16 @@ impl<B: Backend> AttachmentsDb<B> {
         let session_uuid = Uuid::parse_str(&row.get_string(1)?)?;
         let message_uuid = Uuid::parse_str(&row.get_string(2)?)?;
         let size = row.get_i64(3)?;
-        let upload_state: UploadState = row.get_string(4)?.parse()?;
-        let uploaded_at = row.get_optional_i64(5)?;
-        let updated_at = row.get_i64(6)?;
+        let remote_id = row.get_optional_string(4)?;
+        let upload_state: UploadState = row.get_string(5)?.parse()?;
+        let uploaded_at = row.get_optional_i64(6)?;
+        let updated_at = row.get_i64(7)?;
         Ok(AttachmentUploadRow {
             attachment_id,
             session_uuid,
             message_uuid,
             size,
+            remote_id,
             upload_state,
             uploaded_at,
             updated_at,

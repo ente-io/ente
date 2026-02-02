@@ -2,14 +2,19 @@ use crate::{Backend, Error, Result};
 use crate::backend::RowExt;
 use crate::attachments_schema;
 
-pub const LATEST_VERSION: i64 = 1;
+pub const LATEST_VERSION: i64 = 2;
 
 pub fn migrate<B: Backend>(backend: &B) -> Result<()> {
     let version = user_version(backend)?;
     match version {
         0 => {
             backend.execute_batch(attachments_schema::CREATE_ALL)?;
-            backend.execute("PRAGMA user_version = 1;", &[])?;
+            backend.execute("PRAGMA user_version = 2;", &[])?;
+            Ok(())
+        }
+        1 => {
+            backend.execute("ALTER TABLE attachments ADD COLUMN remote_id TEXT;", &[])?;
+            backend.execute("PRAGMA user_version = 2;", &[])?;
             Ok(())
         }
         LATEST_VERSION => Ok(()),
