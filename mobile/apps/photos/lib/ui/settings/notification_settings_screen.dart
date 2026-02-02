@@ -81,21 +81,20 @@ class NotificationSettingsScreen extends StatelessWidget {
                         ),
                       ),
                       MenuItemWidgetNew(
-                        title:
-                            AppLocalizations.of(context).commentNotifications,
+                        title: AppLocalizations.of(context).socialNotifications,
                         trailingWidget: ToggleSwitchWidget(
                           value: () =>
                               NotificationService.instance
                                   .hasGrantedPermissions() &&
                               NotificationService.instance
-                                  .shouldShowCommentNotifications(),
+                                  .shouldShowSocialNotifications(),
                           onChanged: () async {
                             await NotificationService.instance
                                 .requestPermissions();
                             await NotificationService.instance
-                                .setShouldShowCommentNotifications(
+                                .setShouldShowSocialNotifications(
                               !NotificationService.instance
-                                  .shouldShowCommentNotifications(),
+                                  .shouldShowSocialNotifications(),
                             );
                           },
                         ),
@@ -109,73 +108,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                         ),
                         child: Text(
                           AppLocalizations.of(context)
-                              .commentNotificationsExplanation,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
-                      ),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).likeNotifications,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () =>
-                              NotificationService.instance
-                                  .hasGrantedPermissions() &&
-                              NotificationService.instance
-                                  .shouldShowLikeNotifications(),
-                          onChanged: () async {
-                            await NotificationService.instance
-                                .requestPermissions();
-                            await NotificationService.instance
-                                .setShouldShowLikeNotifications(
-                              !NotificationService.instance
-                                  .shouldShowLikeNotifications(),
-                            );
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .likeNotificationsExplanation,
-                          style: textTheme.mini
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
-                      ),
-                      MenuItemWidgetNew(
-                        title: AppLocalizations.of(context).replyNotifications,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () =>
-                              NotificationService.instance
-                                  .hasGrantedPermissions() &&
-                              NotificationService.instance
-                                  .shouldShowReplyNotifications(),
-                          onChanged: () async {
-                            await NotificationService.instance
-                                .requestPermissions();
-                            await NotificationService.instance
-                                .setShouldShowReplyNotifications(
-                              !NotificationService.instance
-                                  .shouldShowReplyNotifications(),
-                            );
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 8,
-                          bottom: 16,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .replyNotificationsExplanation,
+                              .socialNotificationsExplanation,
                           style: textTheme.mini
                               .copyWith(color: colorScheme.textMuted),
                         ),
