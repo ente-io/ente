@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/dimension.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -50,6 +51,10 @@ class FaceRecognitionService {
 
   Future<void> syncPersonFeedback() async {
     if (_isSyncing) {
+      return;
+    }
+    if (isOfflineMode) {
+      _logger.finest("Skipping person feedback sync in offline mode");
       return;
     }
     _isSyncing = true;

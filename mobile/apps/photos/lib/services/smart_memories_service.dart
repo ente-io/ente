@@ -14,6 +14,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
@@ -51,7 +52,8 @@ class MemoriesResult {
 
 class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
-  final _memoriesDB = MemoriesDB.instance;
+  MemoriesDB get _memoriesDB =>
+      isOfflineMode ? MemoriesDB.offlineInstance : MemoriesDB.instance;
 
   static const _clipSimilarImageThreshold = 0.80;
   static const _clipActivityQueryThreshold = 0.20;
@@ -71,6 +73,10 @@ class SmartMemoriesService {
     bool debugSurfaceAll = false,
   }) async {
     try {
+      if (isOfflineMode) {
+        final memories = await calcSimpleMemories();
+        return MemoriesResult(memories, <BaseLocation>[]);
+      }
       final TimeLogger t = TimeLogger(context: "calcMemories");
       _logger.info(
         'calcMemories called with time: $now at ${DateTime.now()} $t',
@@ -331,7 +337,11 @@ class SmartMemoriesService {
   }
 
   Future<(Set<EnteFile>, Map<int, EnteFile>)>
-      _getFilesAndMapForMemories() async {
+      _getFilesAndMapForMemories({
+    bool useGeneratedIds = false,
+    bool requireLocalId = false,
+    bool useLocalIntIds = false,
+  }) async {
     final allFilesFromSearchService = Set<EnteFile>.from(
       await SearchService.instance.getAllFilesForSearch(),
     );
@@ -352,7 +362,18 @@ class SmartMemoriesService {
     }
     final Set<EnteFile> allFiles = {};
     for (final file in allFilesFromSearchService) {
-      if (file.uploadedFileID != null && file.creationTime != null) {
+      final localId = file.localID;
+      final hasLocalId = localId != null && localId.isNotEmpty;
+      if (requireLocalId && !hasLocalId) {
+        continue;
+      }
+      final hasId = useLocalIntIds
+          ? hasLocalId
+          : useGeneratedIds
+              ? file.generatedID != null &&
+                  (file.uploadedFileID != null || hasLocalId)
+              : file.uploadedFileID != null;
+      if (hasId && file.creationTime != null) {
         if (excludedUploadFileIDs.contains(file.uploadedFileID)) {
           continue;
         }
@@ -368,9 +389,24 @@ class SmartMemoriesService {
         allFiles.add(file);
       }
     }
+    final Map<String, int> localIdToIntId = useLocalIntIds
+        ? await OfflineFilesDB.instance.ensureLocalIntIds(
+            allFiles
+                .map((file) => file.localID)
+                .whereType<String>()
+                .where((id) => id.isNotEmpty),
+          )
+        : <String, int>{};
     final allFileIdsToFile = <int, EnteFile>{};
     for (final file in allFiles) {
-      allFileIdsToFile[file.uploadedFileID!] = file;
+      final key = useLocalIntIds
+          ? localIdToIntId[file.localID]
+          : useGeneratedIds
+              ? file.generatedID
+              : file.uploadedFileID;
+      if (key != null) {
+        allFileIdsToFile[key] = file;
+      }
     }
     return (allFiles, allFileIdsToFile);
   }
@@ -514,9 +550,20 @@ class SmartMemoriesService {
 
   Future<List<SmartMemory>> calcSimpleMemories() async {
     final now = DateTime.now();
-    final (allFiles, _) = await _getFilesAndMapForMemories();
+    final (allFiles, _) = await _getFilesAndMapForMemories(
+      useLocalIntIds: isOfflineMode,
+      requireLocalId: isOfflineMode,
+    );
     final seenTimes = await _memoriesDB.getSeenTimes();
     final collectionIDsToExclude = await getCollectionIDsToExclude();
+    final localIdToIntId = isOfflineMode
+        ? await OfflineFilesDB.instance.ensureLocalIntIds(
+            allFiles
+                .map((file) => file.localID)
+                .whereType<String>()
+                .where((id) => id.isNotEmpty),
+          )
+        : <String, int>{};
 
     final List<SmartMemory> memories = [];
 
@@ -526,6 +573,7 @@ class SmartMemoriesService {
       now,
       seenTimes: seenTimes,
       collectionIDsToExclude: collectionIDsToExclude,
+      localIdToIntId: localIdToIntId,
     );
     if (onThisDayMemories.isNotEmpty &&
         onThisDayMemories.first.shouldShowNow()) {
@@ -535,7 +583,12 @@ class SmartMemoriesService {
 
     // Filler memories
     final fillerMemories =
-        await _getFillerResults(allFiles, now, seenTimes: seenTimes);
+        await _getFillerResults(
+      allFiles,
+      now,
+      seenTimes: seenTimes,
+      localIdToIntId: localIdToIntId,
+    );
     memories.addAll(fillerMemories);
 
     final local = await getLocale();
@@ -1831,6 +1884,7 @@ class SmartMemoriesService {
     Iterable<EnteFile> allFiles,
     DateTime currentTime, {
     required Map<int, int> seenTimes,
+    Map<String, int>? localIdToIntId,
   }) async {
     final List<FillerMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
@@ -1855,7 +1909,13 @@ class SmartMemoriesService {
         final yearsAgo = currentYear - fileDate.year;
         yearsAgoToMemories
             .putIfAbsent(yearsAgo, () => [])
-            .add(Memory.fromFile(file, seenTimes));
+            .add(
+          Memory.fromFile(
+            file,
+            seenTimes,
+            seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+          ),
+        );
       } else if (almostYearEnd) {
         final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
               currentTime,
@@ -1864,7 +1924,13 @@ class SmartMemoriesService {
           final yearsAgo = currentYear - fileDate.year + 1;
           yearsAgoToMemories
               .putIfAbsent(yearsAgo, () => [])
-              .add(Memory.fromFile(file, seenTimes));
+              .add(
+            Memory.fromFile(
+              file,
+              seenTimes,
+              seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+            ),
+          );
         }
       }
     }
@@ -1935,6 +2001,7 @@ class SmartMemoriesService {
     DateTime currentTime, {
     required Map<int, int> seenTimes,
     required Set<int> collectionIDsToExclude,
+    Map<String, int>? localIdToIntId,
   }) async {
     final List<OnThisDayMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
@@ -1966,7 +2033,13 @@ class SmartMemoriesService {
       if (!diff.isNegative && diff < diffThreshold) {
         daysToMemories
             .putIfAbsent(diff.inDays, () => [])
-            .add(Memory.fromFile(file, seenTimes));
+            .add(
+          Memory.fromFile(
+            file,
+            seenTimes,
+            seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+          ),
+        );
         daysToYears.putIfAbsent(diff.inDays, () => []).add(fileDate.year);
       } else if (almostYearEnd) {
         final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
@@ -1975,7 +2048,13 @@ class SmartMemoriesService {
         if (!altDiff.isNegative && altDiff < diffThreshold) {
           daysToMemories
               .putIfAbsent(altDiff.inDays, () => [])
-              .add(Memory.fromFile(file, seenTimes));
+              .add(
+            Memory.fromFile(
+              file,
+              seenTimes,
+              seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+            ),
+          );
           daysToYears.putIfAbsent(altDiff.inDays, () => []).add(fileDate.year);
         }
       }
@@ -2080,6 +2159,16 @@ class SmartMemoriesService {
     final int dayOfYear = int.parse(DateFormat('D').format(date));
     // Integer division by 7 and add 1 to start from week 1
     return ((dayOfYear - 1) ~/ 7) + 1;
+  }
+
+  static int? _seenTimeKeyForFile(
+    EnteFile file,
+    Map<String, int>? localIdToIntId,
+  ) {
+    if (localIdToIntId == null) return null;
+    final localId = file.localID;
+    if (localId == null || localId.isEmpty) return null;
+    return localIdToIntId[localId];
   }
 
   static String? _tryFindLocationName(

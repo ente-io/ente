@@ -231,7 +231,7 @@ class PeopleHomeWidgetService {
     }
 
     // Check ML consent
-    if (!flagService.hasGrantedMLConsent) {
+    if (isOfflineMode || !hasGrantedMLConsent) {
       return true;
     }
 

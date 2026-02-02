@@ -198,12 +198,13 @@ class SyncService {
     _logger.info("[SYNC] Starting local sync");
     await _localSyncService.sync();
     if (isOfflineMode) {
+      await _localSyncService.syncAll();
       _logger.info("[SYNC] Offline mode, skipping remote sync");
       return;
     }
 
     final bool allowRemoteSync =
-        _localSyncService.hasCompletedFirstImportOrBypassed();
+        _localSyncService.hasCompletedFirstImportOrBypassed() && !isOfflineMode;
 
     if (allowRemoteSync) {
       _logger.info("[SYNC] Starting remote sync");
