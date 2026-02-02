@@ -172,6 +172,10 @@
   "confirmYourRecoveryKey": "Patvirtinkite savo atkūrimo raktą",
   "addViewer": "Pridėti žiūrėtoją",
   "addCollaborator": "Pridėti bendradarbį",
+  "admin": "Administratorius",
+  "admins": "Administratoriai",
+  "addAdmin": "Įtraukti administratorių",
+  "addMoreAdmins": "Įtraukti daugiau administratorių",
   "addANewEmail": "Įtraukite naują el. paštą",
   "orPickAnExistingOne": "Arba pasirinkite esamą",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą.",
@@ -216,6 +220,9 @@
   },
   "albumLayout": "Albumo išdėstymas",
   "layoutGrouped": "Sugrupuoti",
+  "layoutContinuous": "Tolydus",
+  "layoutTrip": "Kelionė",
+  "preview": "Peržiūrėti",
   "linkExpiry": "Nuorodos galiojimo laikas",
   "linkExpired": "Nebegalioja",
   "linkEnabled": "Įjungta",
@@ -255,7 +262,10 @@
   "shareWithNonenteUsers": "Bendrinkite su ne „Ente“ naudotojais.",
   "createPublicLink": "Kurti viešą nuorodą",
   "sendLink": "Siųsti nuorodą",
+  "qrCode": "QR kodas",
+  "sendQrCode": "Siųsti QR kodą",
   "copyLink": "Kopijuoti nuorodą",
+  "copyEmbedHtml": "Kopijuoti įterptą HTML",
   "linkHasExpired": "Nuoroda nebegalioja",
   "publicLinkEnabled": "Įjungta viešoji nuoroda",
   "shareALink": "Bendrinkite nuorodą",
@@ -294,6 +304,7 @@
   "enterCodeDescription": "Įveskite draugo pateiktą kodą, kad gautumėte nemokamą saugyklą abiem.",
   "apply": "Taikyti",
   "failedToApplyCode": "Nepavyko pritaikyti kodo.",
+  "invalidReferralCode": "Netinkamas kodas.",
   "enterReferralCode": "Įveskite rekomendacijos kodą",
   "codeAppliedPageTitle": "Pritaikytas kodas",
   "change": "Keisti",
@@ -309,12 +320,11 @@
   "claimMore": "Gaukite daugiau!",
   "theyAlsoGetXGb": "Jie taip pat gauna {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.",
-  "shareTextReferralCode": "„Ente“ rekomendacijos kodas: {referralCode} \n\nTaikykite jį per Nustatymai → Bendrieji → Rekomendacijos, kad gautumėte {referralStorageInGB} GB nemokamai po to, kai užsiregistruosite mokamam planui.\n\nhttps://ente.io",
   "claimFreeStorage": "Gaukite nemokamos saugyklos",
   "inviteYourFriends": "Kviesti savo draugus",
+  "shareCodeEarnStorage": "Bendrinkite savo kodą, uždirbkite saugyklą.",
+  "youBothGet": "Abu gaunate",
   "failedToFetchReferralDetails": "Nepavyksta gauti rekomendacijos išsamios informacijos. Bandykite dar kartą vėliau.",
-  "referralStep2": "2. Jie užsiregistruoja mokamą planą",
-  "referralStep3": "3. Abu gaunate {storageInGB} GB* nemokamai",
   "referralsAreCurrentlyPaused": "Šiuo metu rekomendacijos yra pristabdytos",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jūsų šeima gavo {storageAmountInGb} GB iki šiol} false {Jūs gavote {storageAmountInGb} GB iki šiol} other {Jūs gavote {storageAmountInGb} GB iki šiol.}}",
   "@claimedStorageSoFar": {
@@ -577,6 +587,12 @@
   "notifications": "Pranešimai",
   "sharedPhotoNotifications": "Naujos bendrintos nuotraukos",
   "sharedPhotoNotificationsExplanation": "Gaukite pranešimus, kai kas nors įtraukia nuotrauką į bendrinamą albumą, kuriame dalyvaujate.",
+  "commentNotifications": "Komentarai",
+  "commentNotificationsExplanation": "Gaukite pranešimus, kai kas nors komentuoja jūsų bendrintas nuotraukas.",
+  "likeNotifications": "Patiktukai",
+  "likeNotificationsExplanation": "Gaukite pranešimus, kai kas nors pamėgsta jūsų nuotraukas.",
+  "replyNotifications": "Atsakymai",
+  "replyNotificationsExplanation": "Gaukite pranešimus, kai kas nors atsako į jūsų komentarus.",
   "advanced": "Išplėstiniai",
   "general": "Bendrieji",
   "security": "Saugumas",
@@ -1054,6 +1070,30 @@
   "loadMessage8": "web.ente.io turi sklandų įkėlėją",
   "loadMessage9": "Naudojame „Xchacha20Poly1305“, kad saugiai užšifruotume jūsų duomenis.",
   "photoDescriptions": "Nuotraukų aprašai",
+  "searchResultFileName": "Failo pavadinimas",
+  "@searchResultFileName": {
+    "description": "Search result subtitle label for file name matches"
+  },
+  "searchResultDescription": "Aprašas",
+  "@searchResultDescription": {
+    "description": "Search result subtitle label for description matches"
+  },
+  "searchResultType": "Tipas",
+  "@searchResultType": {
+    "description": "Search result subtitle label for file type matches"
+  },
+  "searchResultFileExtension": "Failo plėtinys",
+  "@searchResultFileExtension": {
+    "description": "Search result subtitle label for file extension matches"
+  },
+  "searchResultCameraModel": "Fotoaparato modelis",
+  "@searchResultCameraModel": {
+    "description": "Search result subtitle label for camera model matches"
+  },
+  "files": "Failai",
+  "@files": {
+    "description": "Section header for file-related search results"
+  },
   "fileTypesAndNames": "Failų tipai ir pavadinimai",
   "location": "Vietovė",
   "moments": "Akimirkos",
@@ -1113,6 +1153,7 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} laisva",
+  "appVersion": "Versija {versionValue}",
   "verifyIDLabel": "Patvirtinti",
   "fileInfoAddDescHint": "Pridėti aprašymą...",
   "editLocationTagTitle": "Redaguoti vietovę",
@@ -1193,6 +1234,8 @@
   "noImagesWithLocation": "Nėra vaizdų su vietove",
   "unpinAlbum": "Atsegti albumą",
   "pinAlbum": "Prisegti albumą",
+  "pin": "Prisegti",
+  "pinPerson": "Prisegti asmenį",
   "create": "Kurti",
   "viewAll": "Peržiūrėti viską",
   "nothingSharedWithYouYet": "Kol kas su jumis niekuo nesibendrinama.",
@@ -1770,7 +1813,6 @@
   "areThey": "Ar jie ",
   "questionmark": "?",
   "saveAsAnotherPerson": "Išsaugoti kaip kitą asmenį",
-  "showLessFaces": "Rodyti mažiau veidų",
   "showMoreFaces": "Rodyti daugiau veidų",
   "ignore": "Ignoruoti",
   "merge": "Sujungti",
@@ -1867,5 +1909,13 @@
   "closeBy": "Arti",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "newCommentNotificationTitle": "Gavote komentarą",
+  "@newCommentNotificationTitle": {
+    "description": "Notification title when someone comments or replies on a shared photo."
+  },
+  "newLikeNotificationTitle": "Gavote patiktuką",
+  "@newLikeNotificationTitle": {
+    "description": "Notification title when someone likes a shared photo or comment."
   }
 }
