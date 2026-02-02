@@ -2400,8 +2400,10 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "likedYourPhoto": "Liked a photo",
+  "likedYourPhoto": "Liked your photo",
+  "likedYourVideo": "Liked your video",
   "commentedOnYourPhoto": "Commented on a photo",
+  "commentedOnAVideo": "Commented on a video",
   "repliedToYourComment": "Replied to a comment",
   "likedYourComment": "Liked a comment",
   "likedYourReply": "Liked a reply",
