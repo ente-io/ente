@@ -22,6 +22,7 @@ fn main() {
             commands::srp_session_compute_m1,
             commands::srp_session_verify_m2,
             commands::chat_db_list_sessions,
+            commands::chat_db_list_sessions_with_preview,
             commands::chat_db_get_session,
             commands::chat_db_get_message,
             commands::chat_db_create_session,

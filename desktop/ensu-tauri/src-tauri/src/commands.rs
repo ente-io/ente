@@ -2,12 +2,13 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
-use llmchat_db::{ChatDb, Error as DbError};
 use llmchat_db::backend::sqlite::SqliteBackend;
+use llmchat_db::{ChatDb, Error as DbError};
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
 use tauri::{AppHandle, State, Window};
@@ -31,7 +32,7 @@ pub struct ChatDbState {
 
 struct ChatDbHolder {
     key_b64: String,
-    db: ChatDb<SqliteBackend>,
+    db: Arc<ChatDb<SqliteBackend>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -439,6 +440,34 @@ impl From<llmchat_db::Session> for ChatSessionDto {
     }
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatSessionPreviewDto {
+    session_uuid: String,
+    title: String,
+    created_at: i64,
+    updated_at: i64,
+    remote_id: Option<String>,
+    needs_sync: bool,
+    deleted_at: Option<i64>,
+    last_message_preview: Option<String>,
+}
+
+impl From<llmchat_db::SessionWithPreview> for ChatSessionPreviewDto {
+    fn from(session: llmchat_db::SessionWithPreview) -> Self {
+        Self {
+            session_uuid: session.uuid.to_string(),
+            title: session.title,
+            created_at: session.created_at,
+            updated_at: session.updated_at,
+            remote_id: session.remote_id,
+            needs_sync: session.needs_sync,
+            deleted_at: session.deleted_at,
+            last_message_preview: session.last_message_preview,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ChatAttachmentDto {
@@ -596,6 +625,21 @@ pub fn chat_db_list_sessions(
 }
 
 #[tauri::command]
+pub fn chat_db_list_sessions_with_preview(
+    state: State<ChatDbState>,
+    app: AppHandle,
+    key_b64: String,
+) -> Result<Vec<ChatSessionPreviewDto>, ApiError> {
+    with_chat_db(&state, &app, &key_b64, |db| {
+        Ok(db
+            .list_sessions_with_preview()?
+            .into_iter()
+            .map(ChatSessionPreviewDto::from)
+            .collect())
+    })
+}
+
+#[tauri::command]
 pub fn chat_db_get_session(
     state: State<ChatDbState>,
     app: AppHandle,
@@ -721,8 +765,7 @@ pub fn chat_db_insert_message(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db(&state, &app, &key_b64, move |db| {
-        let message =
-            db.insert_message(session_uuid, sender, &text, parent, attachments)?;
+        let message = db.insert_message(session_uuid, sender, &text, parent, attachments)?;
         Ok(ChatMessageDto::from(message))
     })
 }
@@ -929,8 +972,7 @@ pub fn chat_db_reset(state: State<ChatDbState>, app: AppHandle) -> Result<(), Ap
 
     for candidate in [path, wal_path, shm_path] {
         if candidate.exists() {
-            fs::remove_file(&candidate)
-                .map_err(|err| ApiError::new("io", err.to_string()))?;
+            fs::remove_file(&candidate).map_err(|err| ApiError::new("io", err.to_string()))?;
         }
     }
 
@@ -945,7 +987,9 @@ enum LlmEvent {
         text: String,
         token_id: Option<i32>,
     },
-    Done { summary: llm::GenerateSummary },
+    Done {
+        summary: llm::GenerateSummary,
+    },
     Error {
         job_id: llm::JobId,
         message: String,
@@ -965,22 +1009,97 @@ impl From<llm::GenerateEvent> for LlmEvent {
                 token_id,
             },
             llm::GenerateEvent::Done { summary } => Self::Done { summary },
-            llm::GenerateEvent::Error { job_id, message } => Self::Error {
-                job_id,
-                message,
-            },
+            llm::GenerateEvent::Error { job_id, message } => Self::Error { job_id, message },
         }
     }
 }
 
+const LLM_EVENT_BATCH_MS: u64 = 80;
+const LLM_EVENT_BATCH_BYTES: usize = 2048;
+
 struct LlmEventSink {
     window: Window,
+    buffered_text: String,
+    buffered_job_id: Option<llm::JobId>,
+    buffered_token_id: Option<i32>,
+    last_emit: Instant,
+}
+
+impl LlmEventSink {
+    fn new(window: Window) -> Self {
+        Self {
+            window,
+            buffered_text: String::new(),
+            buffered_job_id: None,
+            buffered_token_id: None,
+            last_emit: Instant::now(),
+        }
+    }
+
+    fn flush_text(&mut self) {
+        if self.buffered_text.is_empty() {
+            self.buffered_job_id = None;
+            self.buffered_token_id = None;
+            self.last_emit = Instant::now();
+            return;
+        }
+
+        if let Some(job_id) = self.buffered_job_id.take() {
+            let payload = LlmEvent::Text {
+                job_id,
+                text: std::mem::take(&mut self.buffered_text),
+                token_id: self.buffered_token_id.take(),
+            };
+            let _ = self.window.emit("llm-event", payload);
+        } else {
+            self.buffered_text.clear();
+            self.buffered_token_id = None;
+        }
+
+        self.last_emit = Instant::now();
+    }
 }
 
 impl llm::EventSink for LlmEventSink {
     fn add(&mut self, event: llm::GenerateEvent) {
-        let payload = LlmEvent::from(event);
-        let _ = self.window.emit("llm-event", payload);
+        match event {
+            llm::GenerateEvent::Text {
+                job_id,
+                text,
+                token_id,
+            } => {
+                if let Some(current) = self.buffered_job_id {
+                    if current != job_id {
+                        self.flush_text();
+                    }
+                }
+
+                if self.buffered_text.is_empty() {
+                    self.last_emit = Instant::now();
+                }
+
+                self.buffered_job_id = Some(job_id);
+                self.buffered_token_id = token_id;
+                self.buffered_text.push_str(&text);
+
+                let elapsed = self.last_emit.elapsed();
+                if self.buffered_text.len() >= LLM_EVENT_BATCH_BYTES
+                    || elapsed >= Duration::from_millis(LLM_EVENT_BATCH_MS)
+                {
+                    self.flush_text();
+                }
+            }
+            llm::GenerateEvent::Done { summary } => {
+                self.flush_text();
+                let _ = self.window.emit("llm-event", LlmEvent::Done { summary });
+            }
+            llm::GenerateEvent::Error { job_id, message } => {
+                self.flush_text();
+                let _ = self
+                    .window
+                    .emit("llm-event", LlmEvent::Error { job_id, message });
+            }
+        }
     }
 }
 
@@ -1073,7 +1192,7 @@ pub fn llm_generate_chat_stream(
         .ok_or_else(|| ApiError::new("llm_not_ready", "Model context not loaded"))?;
 
     async_runtime::spawn_blocking(move || {
-        let mut sink = LlmEventSink { window };
+        let mut sink = LlmEventSink::new(window);
         let _ = llm::generate_chat_stream(context.as_ref(), request, &mut sink);
     });
 
@@ -1154,8 +1273,7 @@ fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
     let dir = resolver
         .app_data_dir()
         .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
-    std::fs::create_dir_all(&dir)
-        .map_err(|err| ApiError::new("io", err.to_string()))?;
+    std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
     Ok(dir.join("ensu_llmchat.db"))
 }
 
@@ -1165,28 +1283,33 @@ fn with_chat_db<T>(
     key_b64: &str,
     f: impl FnOnce(&ChatDb<SqliteBackend>) -> Result<T, DbError>,
 ) -> Result<T, ApiError> {
-    let mut guard = state
-        .inner
-        .lock()
-        .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
+    let db = {
+        let mut guard = state
+            .inner
+            .lock()
+            .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
 
-    let needs_open = guard
-        .as_ref()
-        .map(|holder| holder.key_b64 != key_b64)
-        .unwrap_or(true);
+        let needs_open = guard
+            .as_ref()
+            .map(|holder| holder.key_b64 != key_b64)
+            .unwrap_or(true);
 
-    if needs_open {
-        let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
-        let path = chat_db_path(app)?;
-        let db = ChatDb::open_sqlite_with_defaults(path, key).map_err(ApiError::from)?;
-        *guard = Some(ChatDbHolder {
-            key_b64: key_b64.to_string(),
-            db,
-        });
-    }
+        if needs_open {
+            let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
+            let path = chat_db_path(app)?;
+            let db = ChatDb::open_sqlite_with_defaults(path, key).map_err(ApiError::from)?;
+            *guard = Some(ChatDbHolder {
+                key_b64: key_b64.to_string(),
+                db: Arc::new(db),
+            });
+        }
 
-    let db = guard
-        .as_ref()
-        .ok_or_else(|| ApiError::new("db", "Chat DB not initialized"))?;
-    f(&db.db).map_err(ApiError::from)
+        guard
+            .as_ref()
+            .ok_or_else(|| ApiError::new("db", "Chat DB not initialized"))?
+            .db
+            .clone()
+    };
+
+    f(db.as_ref()).map_err(ApiError::from)
 }
