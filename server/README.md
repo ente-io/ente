@@ -46,11 +46,6 @@ This time you'll see the updated message.
 For more details about how to get museum up and running, see
 [RUNNING.md](RUNNING.md).
 
-## LLM chat (optional)
-
-Museum can store encrypted chat sessions/messages for LLM chat clients.
-See [docs/llmchat.md](docs/llmchat.md) for the app type, endpoints, and cleanup settings.
-
 ## Architecture
 
 With the mechanics of running museum out of the way, let us revisit the diagram
