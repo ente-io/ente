@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { sendMessage } from "@/lib/types/messages";
+import ThemeToggle from "./ThemeToggle";
+import Button from "./Button";
 
 type Step = "email" | "ott" | "password";
 type LoginMethod = "email-ott" | "srp";
@@ -133,7 +135,10 @@ export default function Login({ onComplete }: Props) {
   };
 
   return (
-    <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] p-4 flex flex-col">
+    <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] p-4 flex flex-col relative">
+      <div className="absolute top-2 right-2">
+        <ThemeToggle />
+      </div>
       {/* Header */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2">
@@ -150,7 +155,7 @@ export default function Login({ onComplete }: Props) {
       {step === "email" && (
         <form onSubmit={handleEmailSubmit} className="flex-1 flex flex-col">
           <div className="mb-4">
-            <label className="block text-sm text-gray-400 mb-2">
+            <label className="block text-sm text-[var(--ente-text-muted)] mb-2">
               Enter your email
             </label>
             <input
@@ -158,7 +163,7 @@ export default function Login({ onComplete }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3 py-2.5 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
+              className="w-full px-3 py-2.5 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
               autoFocus
               disabled={loading}
             />
@@ -168,20 +173,21 @@ export default function Login({ onComplete }: Props) {
             <div className="mb-4 text-red-400 text-sm">{error}</div>
           )}
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            fullWidth
             disabled={loading || !email.trim()}
-            className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
             {loading ? "Sending..." : "Continue"}
-          </button>
+          </Button>
         </form>
       )}
 
       {/* OTT Step */}
       {step === "ott" && (
         <form onSubmit={handleOttSubmit} className="flex-1 flex flex-col">
-          <div className="mb-2 text-sm text-gray-400">
+          <div className="mb-2 text-sm text-[var(--ente-text-muted)]">
             Enter the 6-digit code sent to
           </div>
           <div className="mb-4 text-[var(--ente-accent-soft)]">{email}</div>
@@ -192,7 +198,7 @@ export default function Login({ onComplete }: Props) {
               value={ott}
               onChange={(e) => setOtt(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
-              className="w-full px-3 py-2.5 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-center text-2xl tracking-widest placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
+              className="w-full px-3 py-2.5 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] text-center text-2xl tracking-widest placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
               autoFocus
               disabled={loading}
               maxLength={6}
@@ -203,15 +209,16 @@ export default function Login({ onComplete }: Props) {
             <div className="mb-4 text-red-400 text-sm">{error}</div>
           )}
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            fullWidth
             disabled={loading || ott.length !== 6}
-            className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
             {loading ? "Verifying..." : "Verify"}
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => {
               setStep("email");
@@ -219,17 +226,19 @@ export default function Login({ onComplete }: Props) {
               setOtt("");
               setError("");
             }}
-            className="mt-2 w-full py-2 text-gray-400 hover:text-white transition-colors"
+            variant="text"
+            fullWidth
+            className="mt-2"
           >
             Change email
-          </button>
+          </Button>
         </form>
       )}
 
       {/* Password Step */}
       {step === "password" && (
         <form onSubmit={handlePasswordSubmit} className="flex-1 flex flex-col">
-          <div className="mb-2 text-sm text-gray-400">
+          <div className="mb-2 text-sm text-[var(--ente-text-muted)]">
             Enter your password
           </div>
           <div className="mb-4 text-[var(--ente-accent-soft)]">{email}</div>
@@ -239,14 +248,14 @@ export default function Login({ onComplete }: Props) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
+              className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
               autoFocus
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] transition-colors"
             >
               {showPassword ? <EyeOffIcon /> : <EyeIcon />}
             </button>
@@ -256,15 +265,16 @@ export default function Login({ onComplete }: Props) {
             <div className="mb-4 text-red-400 text-sm">{error}</div>
           )}
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            fullWidth
             disabled={loading || !password}
-            className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
           >
             {loading ? "Signing in..." : "Sign in"}
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={() => {
               setStep("email");
@@ -275,10 +285,12 @@ export default function Login({ onComplete }: Props) {
               setShowPassword(false);
               setError("");
             }}
-            className="mt-2 w-full py-2 text-gray-400 hover:text-white transition-colors"
+            variant="text"
+            fullWidth
+            className="mt-2"
           >
             Change email
-          </button>
+          </Button>
         </form>
       )}
     </div>

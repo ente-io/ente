@@ -11,7 +11,9 @@ html, body {
     Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--ente-background);
+  /* The Chrome popup surface itself is rectangular; to visually get rounded
+     corners we render our UI inside a rounded root and keep the page bg clear. */
+  background: transparent;
   overflow-x: hidden;
   border-radius: 8px;
   overflow: hidden;
@@ -25,6 +27,7 @@ html, body {
   background: var(--ente-background);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 /* Custom scrollbar */
@@ -76,6 +79,25 @@ html, body {
   --ente-warning: #ffc247;
   --ente-success: #1db954;
   --ente-pin-ribbon-bg: #390c4f;
+  --ente-hover: rgba(255, 255, 255, 0.08);
+  --ente-hover-strong: rgba(255, 255, 255, 0.12);
+  color-scheme: dark;
+}
+
+/* Light theme (aligned with mobile/apps/auth/lib/theme/colors.dart) */
+html[data-theme="light"],
+:root[data-theme="light"] {
+  --ente-background: #ffffff;
+  --ente-paper: #ffffff;
+  --ente-paper-2: #fbfbfb;
+  --ente-text: #000000;
+  --ente-text-muted: rgba(0, 0, 0, 0.6);
+  --ente-text-faint: rgba(0, 0, 0, 0.5);
+  --ente-stroke: rgba(0, 0, 0, 0.12);
+  --ente-pin-ribbon-bg: #fcf5ff;
+  --ente-hover: rgba(0, 0, 0, 0.06);
+  --ente-hover-strong: rgba(0, 0, 0, 0.1);
+  color-scheme: light;
 }
 
 .ente-code-card {

@@ -26,7 +26,7 @@ export default function SearchBar({ value, onChange }: Props) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search codes..."
-        className="w-full pl-9 pr-3 py-2 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)] text-sm"
+        className="w-full pl-9 pr-3 py-2 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)] text-sm"
       />
       {value && (
         <button

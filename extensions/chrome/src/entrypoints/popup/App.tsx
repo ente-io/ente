@@ -3,6 +3,7 @@ import { sendMessage, type ExtensionState } from "@/lib/types/messages";
 import Login from "./components/Login";
 import Unlock from "./components/Unlock";
 import CodeList from "./components/CodeList";
+import Button from "./components/Button";
 
 type View = "loading" | "login" | "unlock" | "codes" | "error";
 
@@ -10,6 +11,27 @@ export default function App() {
   const [view, setView] = useState<View>("loading");
   const [email, setEmail] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const applyTheme = (theme: unknown) => {
+      const next = theme === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+    };
+
+    chrome.storage.local.get(["popupTheme"], (result) => {
+      applyTheme(result.popupTheme);
+    });
+
+    const onChanged = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => {
+      if (areaName !== "local") return;
+      if (changes.popupTheme) {
+        applyTheme(changes.popupTheme.newValue);
+      }
+    };
+
+    chrome.storage.onChanged.addListener(onChanged);
+    return () => chrome.storage.onChanged.removeListener(onChanged);
+  }, []);
 
   useEffect(() => {
     checkState();
@@ -59,7 +81,7 @@ export default function App() {
   if (view === "loading") {
     return (
       <div className="flex items-center justify-center min-h-[400px] bg-[var(--ente-background)]">
-        <div className="text-white">Loading...</div>
+        <div className="text-[var(--ente-text)]">Loading...</div>
       </div>
     );
   }
@@ -68,13 +90,10 @@ export default function App() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-[var(--ente-background)] p-4">
         <div className="text-red-400 mb-4">Something went wrong</div>
-        <div className="text-gray-500 text-sm mb-4">{error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] text-white rounded-lg font-semibold transition-colors"
-        >
+        <div className="text-[var(--ente-text-faint)] text-sm mb-4">{error}</div>
+        <Button onClick={() => window.location.reload()} variant="primary">
           Reload
-        </button>
+        </Button>
       </div>
     );
   }

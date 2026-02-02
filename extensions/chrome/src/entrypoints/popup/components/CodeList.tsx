@@ -4,7 +4,7 @@ import type { Code } from "@/lib/types/code";
 import CodeItem from "./CodeItem";
 import SearchBar from "./SearchBar";
 import AppLockModal from "./AppLockModal";
-import { HugeIcon, hugeArrowUp02, hugeClipboard, hugeLock, hugeLockPassword, hugeLogout01 } from "@/lib/ui/hugeicons";
+import { HugeIcon, hugeArrowUp02, hugeClipboard, hugeLock, hugeLockPassword, hugeLogout01, hugeSun01 } from "@/lib/ui/hugeicons";
 
 interface Props {
   email?: string;
@@ -29,6 +29,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   const [clipboardAutoClearSeconds, setClipboardAutoClearSeconds] = useState(30);
   const [appLockEnabled, setAppLockEnabled] = useState(false);
   const [showAppLockModal, setShowAppLockModal] = useState(false);
+  const [popupTheme, setPopupTheme] = useState<"dark" | "light">("dark");
 
   const MenuIcon = ({ icon }: { icon: React.ReactNode }) => (
     <span className="inline-flex items-center justify-center w-4 h-4 text-[var(--ente-text-faint)]">
@@ -60,12 +61,14 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   useEffect(() => {
     chrome.storage.local.get(
       [
+        "popupTheme",
         "appLockEnabled",
         "autoSubmitEnabled",
         "clipboardAutoClearEnabled",
         "clipboardAutoClearSeconds",
       ],
       (result) => {
+        setPopupTheme(result.popupTheme === "light" ? "light" : "dark");
         setAppLockEnabled(typeof result.appLockEnabled === "boolean" ? result.appLockEnabled : false);
         setAutoSubmitEnabled(typeof result.autoSubmitEnabled === "boolean" ? result.autoSubmitEnabled : true);
         setClipboardAutoClearEnabled(typeof result.clipboardAutoClearEnabled === "boolean" ? result.clipboardAutoClearEnabled : false);
@@ -81,6 +84,10 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
     ) => {
       if (areaName !== "local") return;
 
+      if (changes.popupTheme) {
+        const v = changes.popupTheme.newValue;
+        setPopupTheme(v === "light" ? "light" : "dark");
+      }
       if (changes.appLockEnabled) {
         const v = changes.appLockEnabled.newValue;
         setAppLockEnabled(typeof v === "boolean" ? v : false);
@@ -230,16 +237,24 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
     setTimeout(() => setToast(null), 1500);
   };
 
+  const toggleTheme = () => {
+    const next = popupTheme === "light" ? "dark" : "light";
+    setPopupTheme(next);
+    chrome.storage.local.set({ popupTheme: next }, () => {});
+    setToast(next === "light" ? "Theme: light" : "Theme: dark");
+    setTimeout(() => setToast(null), 1500);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-[400px] bg-[var(--ente-background)] text-white flex items-center justify-center">
+      <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] flex items-center justify-center">
         <div className="text-[var(--ente-text-muted)]">Loading codes...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[400px] max-h-[520px] bg-[var(--ente-background)] text-white flex flex-col">
+    <div className="min-h-[400px] max-h-[520px] bg-[var(--ente-background)] text-[var(--ente-text)] flex flex-col">
       <AppLockModal
         open={showAppLockModal}
         onClose={() => setShowAppLockModal(false)}
@@ -263,7 +278,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+            className="p-2 text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] rounded-md transition-colors"
             title="Sync"
           >
             <svg
@@ -285,7 +300,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
             <button
               onClick={() => setShowSortMenu(!showSortMenu)}
               className={`p-2 rounded-md transition-colors ${
-                showSortMenu ? "text-[var(--ente-accent)]" : "text-white/60 hover:text-white hover:bg-white/10"
+                showSortMenu ? "text-[var(--ente-accent)]" : "text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)]"
               }`}
               title="Sort"
             >
@@ -308,11 +323,11 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                         setSortOrder(key);
                         setShowSortMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm text-white/90 hover:bg-white/5 transition-colors flex items-center justify-between"
+                      className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center justify-between"
                     >
                       <span>{label}</span>
                       {sortOrder === key && (
-                        <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-[var(--ente-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
                         </svg>
                       )}
@@ -326,7 +341,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
           <button
             onClick={() => setShowSearch((v) => !v)}
             className={`p-2 rounded-md transition-colors ${
-              showSearch ? "text-[var(--ente-accent)]" : "text-white/60 hover:text-white hover:bg-white/10"
+              showSearch ? "text-[var(--ente-accent)]" : "text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)]"
             }`}
             title="Search"
           >
@@ -338,7 +353,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+              className="p-2 text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] rounded-md transition-colors"
             >
               <svg
                 className="w-5 h-5"
@@ -366,7 +381,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                       setShowMenu(false);
                       onLock();
                     }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center gap-2"
                   >
                     <MenuIcon icon={<HugeIcon icon={hugeLock} size={16} />} />
                     Lock
@@ -374,9 +389,24 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                   <button
                     onClick={() => {
                       setShowMenu(false);
+                      toggleTheme();
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center justify-between"
+                    title="Switch between light and dark themes."
+                  >
+                    <span className="flex items-center gap-2">
+                      {/* Keep the theme icon consistent across themes. */}
+                      <MenuIcon icon={<HugeIcon icon={hugeSun01} size={16} />} />
+                      Theme
+                    </span>
+                    <span className="text-sm text-[var(--ente-text-faint)]">{popupTheme}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
                       setShowAppLockModal(true);
                     }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center gap-2"
                     title="Set a local passcode to unlock the extension."
                   >
                     <MenuIcon icon={<HugeIcon icon={hugeLockPassword} size={16} />} />
@@ -387,15 +417,15 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                       setShowMenu(false);
                       toggleAutoSubmit();
                     }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
+                    className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center justify-between"
                     title="When enabled, selecting a code from the in-page dropdown will attempt to submit the form."
                   >
-                    <span className="text-sm flex items-center gap-2">
+                    <span className="flex items-center gap-2">
                       <MenuIcon icon={<HugeIcon icon={hugeArrowUp02} size={16} />} />
                       Autosubmit
                     </span>
                     {autoSubmitEnabled && (
-                      <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[var(--ente-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
                       </svg>
                     )}
@@ -405,15 +435,15 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                       setShowMenu(false);
                       toggleClipboardAutoClear();
                     }}
-                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
+                    className="w-full px-4 py-2 text-left text-sm text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors flex items-center justify-between"
                     title="Clears the copied OTP from your clipboard after a short delay (may not work on all sites/browsers)."
                   >
-                    <span className="text-sm flex items-center gap-2">
+                    <span className="flex items-center gap-2">
                       <MenuIcon icon={<HugeIcon icon={hugeClipboard} size={16} />} />
                       Clipboard clear
                     </span>
                     {clipboardAutoClearEnabled && (
-                      <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[var(--ente-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 6L9 17l-5-5" />
                       </svg>
                     )}
@@ -423,7 +453,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                       setShowMenu(false);
                       onLogout();
                     }}
-                    className="w-full px-4 py-2 text-left text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-[var(--ente-hover)] transition-colors flex items-center gap-2"
                   >
                     <MenuIcon icon={<HugeIcon icon={hugeLogout01} size={16} />} />
                     Logout
@@ -445,7 +475,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
       {/* Code List */}
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {filteredCodes.length === 0 ? (
-          <div className="flex items-center justify-center h-48 text-white/50">
+          <div className="flex items-center justify-center h-48 text-[var(--ente-text-faint)]">
             {codes.length === 0
               ? "No codes yet. Add codes in the Ente Auth app."
               : "No codes match your search"}

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { sendMessage } from "@/lib/types/messages";
+import Button from "./Button";
 
 interface Props {
   open: boolean;
@@ -76,10 +77,10 @@ export default function AppLockModal({ open, onClose }: Props) {
       <div className="fixed inset-0 z-30 flex items-center justify-center p-4">
         <div className="w-full max-w-sm bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-xl shadow-2xl overflow-hidden">
           <div className="px-4 py-3 border-b border-[var(--ente-stroke)] flex items-center justify-between">
-            <div className="text-sm font-semibold text-white">Passcode lock</div>
+            <div className="text-sm font-semibold text-[var(--ente-text)]">Passcode lock</div>
             <button
               onClick={onClose}
-              className="p-1 rounded-md text-[var(--ente-text-faint)] hover:text-white hover:bg-white/5 transition-colors"
+              className="p-1 rounded-md text-[var(--ente-text-faint)] hover:text-[var(--ente-text)] hover:bg-[var(--ente-hover)] transition-colors"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +101,7 @@ export default function AppLockModal({ open, onClose }: Props) {
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 placeholder="New passcode (min 6 chars)"
-                className="w-full px-3 py-2.5 bg-[var(--ente-paper-2)] border border-[var(--ente-stroke)] rounded-lg text-white text-sm placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
+                className="w-full px-3 py-2.5 bg-[var(--ente-paper-2)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] text-sm placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
                 autoFocus
                 disabled={saving}
               />
@@ -109,7 +110,7 @@ export default function AppLockModal({ open, onClose }: Props) {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="Confirm passcode"
-                className="w-full px-3 py-2.5 bg-[var(--ente-paper-2)] border border-[var(--ente-stroke)] rounded-lg text-white text-sm placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
+                className="w-full px-3 py-2.5 bg-[var(--ente-paper-2)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] text-sm placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
                 disabled={saving}
               />
             </div>
@@ -118,25 +119,24 @@ export default function AppLockModal({ open, onClose }: Props) {
           </div>
 
           <div className="px-4 py-3 border-t border-[var(--ente-stroke)] flex items-center justify-between gap-2">
-            <button
+            <Button
               onClick={handleDisable}
               disabled={!enabled || saving}
-              className="px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              variant="text"
               title="Remove passcode lock (you will unlock with your account password again)."
             >
               Disable
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSave}
               disabled={!canSave || saving}
-              className="px-4 py-2 rounded-lg text-sm font-semibold bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed transition-colors"
+              variant="primary"
             >
               {saving ? "Saving..." : enabled ? "Change" : "Enable"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
     </>
   );
 }
-

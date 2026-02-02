@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { sendMessage } from "@/lib/types/messages";
+import ThemeToggle from "./ThemeToggle";
+import Button from "./Button";
 
 interface Props {
   email?: string;
@@ -69,7 +71,10 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
   };
 
   return (
-    <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] p-4 flex flex-col">
+    <div className="min-h-[400px] bg-[var(--ente-background)] text-[var(--ente-text)] p-4 flex flex-col relative">
+      <div className="absolute top-2 right-2">
+        <ThemeToggle />
+      </div>
       {/* Header */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2">
@@ -102,7 +107,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
       </div>
 
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-        <div className="mb-2 text-sm text-gray-400 text-center">
+        <div className="mb-2 text-sm text-[var(--ente-text-muted)] text-center">
           {usePasscode ? "Enter your passcode" : "Extension is locked"}
         </div>
         {email && (
@@ -115,14 +120,14 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={usePasscode ? "Passcode" : "Enter your password"}
-            className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
+            className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-[var(--ente-text)] text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
             autoFocus
             disabled={loading}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ente-text-muted)] hover:text-[var(--ente-text)] transition-colors"
           >
             {showPassword ? <EyeOffIcon /> : <EyeIcon />}
           </button>
@@ -132,21 +137,25 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
           <div className="mb-4 text-red-400 text-sm text-center">{error}</div>
         )}
 
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          fullWidth
           disabled={loading || !password}
-          className="w-full py-2.5 bg-[var(--ente-accent)] hover:bg-[var(--ente-accent-700)] disabled:bg-[var(--ente-paper-2)] disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
         >
           {loading ? "Unlocking..." : "Unlock"}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
           onClick={onLogout}
-          className="mt-4 w-full py-2 text-gray-400 hover:text-red-400 transition-colors text-sm"
+          variant="text"
+          tone="danger"
+          fullWidth
+          className="mt-4"
         >
           {usePasscode ? "Forgot passcode? Logout" : "Logout"}
-        </button>
+        </Button>
       </form>
     </div>
   );
