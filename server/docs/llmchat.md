@@ -5,7 +5,7 @@ Museum can store encrypted LLM chat sessions/messages.
 ## Enable
 
 1. Ensure migration `115` has been applied (includes the `llmchat` app type).
-2. LLM chat uses app type `llmchat` (clients should send `X-Client-Package: io.ente.ensu` or `io.ente.llmchat`).
+2. LLM chat uses app type `llmchat` (clients should send `X-Client-Package: io.ente.ensu`).
 
 ## Endpoints (authenticated)
 
