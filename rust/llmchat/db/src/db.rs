@@ -35,12 +35,7 @@ impl<B: Backend> ChatDb<B> {
     }
 
     pub fn new_with_defaults(backend: B, key: Vec<u8>) -> Result<Self> {
-        Self::new(
-            backend,
-            key,
-            Arc::new(SystemClock),
-            Arc::new(RandomUuidGen),
-        )
+        Self::new(backend, key, Arc::new(SystemClock), Arc::new(RandomUuidGen))
     }
 
     pub fn create_session(&self, title: &str) -> Result<Session> {
@@ -315,11 +310,17 @@ impl<B: Backend> ChatDb<B> {
         self.backend.transaction(|tx| {
             tx.execute(
                 "UPDATE messages SET deleted_at = ? WHERE session_uuid = ? AND deleted_at IS NULL",
-                &[Value::Integer(deleted_at), Value::Text(session_uuid.to_string())],
+                &[
+                    Value::Integer(deleted_at),
+                    Value::Text(session_uuid.to_string()),
+                ],
             )?;
             tx.execute(
                 "UPDATE sessions SET deleted_at = ?, needs_sync = 0 WHERE session_uuid = ?",
-                &[Value::Integer(deleted_at), Value::Text(session_uuid.to_string())],
+                &[
+                    Value::Integer(deleted_at),
+                    Value::Text(session_uuid.to_string()),
+                ],
             )?;
             Ok(())
         })
@@ -384,7 +385,10 @@ impl<B: Backend> ChatDb<B> {
     pub fn apply_message_tombstone(&self, message_uuid: Uuid, deleted_at: i64) -> Result<()> {
         self.backend.execute(
             "UPDATE messages SET deleted_at = ? WHERE message_uuid = ?",
-            &[Value::Integer(deleted_at), Value::Text(message_uuid.to_string())],
+            &[
+                Value::Integer(deleted_at),
+                Value::Text(message_uuid.to_string()),
+            ],
         )?;
         Ok(())
     }
@@ -610,16 +614,16 @@ fn parse_stored_attachments(raw: Option<String>) -> Result<Vec<StoredAttachment>
 #[cfg(all(test, feature = "sqlite"))]
 mod tests {
     use std::collections::VecDeque;
-    use std::sync::{Arc, Mutex};
     use std::sync::atomic::{AtomicI64, Ordering};
+    use std::sync::{Arc, Mutex};
 
     use uuid::Uuid;
 
     use super::*;
-    use crate::backend::{BackendTx, RowExt, Value};
     use crate::backend::sqlite::SqliteBackend;
+    use crate::backend::{BackendTx, RowExt, Value};
     use crate::crypto::KEY_BYTES;
-    use crate::models::{AttachmentMeta, AttachmentKind};
+    use crate::models::{AttachmentKind, AttachmentMeta};
 
     #[derive(Debug)]
     struct StepClock {

@@ -27,7 +27,6 @@ pub enum Error {
     #[error("{entity:?} not found: {id}")]
     NotFound { entity: EntityType, id: uuid::Uuid },
 
-
     #[error(transparent)]
     Crypto(#[from] ente_core::crypto::CryptoError),
 

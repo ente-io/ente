@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use uuid::Uuid;
 
+use crate::Result;
 use crate::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
 use crate::db::ChatDb;
 use crate::models::{AttachmentMeta, EntityType, Message, Session};
 use crate::traits::{Clock, UuidGen};
-use crate::Result;
 
 /// High-level DB that ties together the main chat DB and the attachments upload-state DB.
 pub struct LlmChatDb<B: crate::Backend> {
@@ -37,7 +37,9 @@ impl<B: crate::Backend> LlmChatDb<B> {
 
     pub fn delete_session(&self, uuid: Uuid) -> Result<()> {
         // Best-effort cleanup in attachments DB. If this fails, still delete session.
-        let _ = self.attachments.delete_attachment_tracking_for_session(uuid);
+        let _ = self
+            .attachments
+            .delete_attachment_tracking_for_session(uuid);
         self.chat.delete_session(uuid)
     }
 
@@ -49,9 +51,9 @@ impl<B: crate::Backend> LlmChatDb<B> {
         parent: Option<Uuid>,
         attachments: Vec<AttachmentMeta>,
     ) -> Result<Message> {
-        let message = self
-            .chat
-            .insert_message(session_uuid, sender, text, parent, attachments.clone())?;
+        let message =
+            self.chat
+                .insert_message(session_uuid, sender, text, parent, attachments.clone())?;
 
         for attachment in attachments {
             self.attachments.upsert_pending_attachment(
@@ -78,7 +80,9 @@ impl<B: crate::Backend> LlmChatDb<B> {
     }
 
     pub fn delete_message(&self, uuid: Uuid) -> Result<()> {
-        let _ = self.attachments.delete_attachment_tracking_for_message(uuid);
+        let _ = self
+            .attachments
+            .delete_attachment_tracking_for_message(uuid);
         self.chat.delete_message(uuid)
     }
 
@@ -94,8 +98,13 @@ impl<B: crate::Backend> LlmChatDb<B> {
             .upsert_pending_attachment(attachment_id, session_uuid, message_uuid, size)
     }
 
-    pub fn set_attachment_upload_state(&self, attachment_id: &str, state: UploadState) -> Result<()> {
-        self.attachments.set_attachment_upload_state(attachment_id, state)
+    pub fn set_attachment_upload_state(
+        &self,
+        attachment_id: &str,
+        state: UploadState,
+    ) -> Result<()> {
+        self.attachments
+            .set_attachment_upload_state(attachment_id, state)
     }
 
     pub fn mark_attachment_uploaded(&self, attachment_id: &str) -> Result<()> {
@@ -106,14 +115,16 @@ impl<B: crate::Backend> LlmChatDb<B> {
         &self,
         session_uuid: Uuid,
     ) -> Result<Vec<AttachmentUploadRow>> {
-        self.attachments.get_pending_uploads_for_session(session_uuid)
+        self.attachments
+            .get_pending_uploads_for_session(session_uuid)
     }
 
     pub fn get_pending_uploads_for_message(
         &self,
         message_uuid: Uuid,
     ) -> Result<Vec<AttachmentUploadRow>> {
-        self.attachments.get_pending_uploads_for_message(message_uuid)
+        self.attachments
+            .get_pending_uploads_for_message(message_uuid)
     }
 
     pub fn delete_attachment_tracking_for_message(&self, message_uuid: Uuid) -> Result<()> {

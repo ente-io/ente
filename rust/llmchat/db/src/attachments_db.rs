@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use uuid::Uuid;
 
+use crate::Result;
 use crate::backend::{Backend, RowExt, Value};
 use crate::traits::{Clock, SystemClock};
-use crate::{Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UploadState {
@@ -126,7 +126,11 @@ impl<B: Backend> AttachmentsDb<B> {
             .unwrap_or(Value::Null);
         self.backend.execute(
             "UPDATE attachments SET remote_id = ?, updated_at = ? WHERE attachment_id = ?",
-            &[value, Value::Integer(now), Value::Text(attachment_id.to_string())],
+            &[
+                value,
+                Value::Integer(now),
+                Value::Text(attachment_id.to_string()),
+            ],
         )?;
         Ok(())
     }
@@ -282,10 +286,7 @@ impl<B: Backend> AttachmentsDb<B> {
 
 #[cfg(feature = "sqlite")]
 impl AttachmentsDb<crate::backend::sqlite::SqliteBackend> {
-    pub fn open_sqlite(
-        path: impl AsRef<std::path::Path>,
-        clock: Arc<dyn Clock>,
-    ) -> Result<Self> {
+    pub fn open_sqlite(path: impl AsRef<std::path::Path>, clock: Arc<dyn Clock>) -> Result<Self> {
         let backend = crate::backend::sqlite::SqliteBackend::open(path)?;
         Self::new(backend, clock)
     }
