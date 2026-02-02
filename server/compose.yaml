@@ -69,7 +69,7 @@ services:
           mc mb -p b2-eu-cen
           mc mb -p wasabi-eu-central-2-v3
           mc mb -p scw-eu-fr-v3
-          mc mb -p b7
+          mc mb -p b7-llmchat
           '
 
 configs:
@@ -89,29 +89,34 @@ configs:
           b2-eu-cen:
               key: changeme
               secret: changeme1234
-              endpoint: localhost:3200
+              endpoint: 192.168.0.105:3200
               region: eu-central-2
               bucket: b2-eu-cen
           wasabi-eu-central-2-v3:
               key: changeme
               secret: changeme1234
-              endpoint: localhost:3200
+              endpoint: 192.168.0.105:3200
               region: eu-central-2
               bucket: wasabi-eu-central-2-v3
               compliance: false
           scw-eu-fr-v3:
               key: changeme
               secret: changeme1234
-              endpoint: localhost:3200
+              endpoint: 192.168.0.105:3200
               region: eu-central-2
               bucket: scw-eu-fr-v3
 
           b7:
               key: changeme
               secret: changeme1234
-              endpoint: localhost:3200
+              endpoint: 192.168.0.105:3200
               region: eu-central-2
-              bucket: b7
+              bucket: b7-llmchat
+
+      llmchat:
+          attachments:
+              enabled: true
+              cleanup: false
 
 volumes:
   postgres-data:
