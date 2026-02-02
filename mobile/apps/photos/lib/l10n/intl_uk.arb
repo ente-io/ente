@@ -1756,7 +1756,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, =1{1 альбом} one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
+  "albumsCount": "{count, plural, one {{count} альбом} few {{count} альбоми} many {{count} альбомів} other{{count} альбомів}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -1773,7 +1773,7 @@
   "@deletedComment": {
     "description": "Label for deleted comments"
   },
-  "commentsCount": "{count, plural, =0{Немає коментарів} =1{1 коментар} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
+  "commentsCount": "{count, plural, =0{Немає коментарів} one {{count} коментар} few {{count} коментарі} many {{count} коментарів} other{{count} коментарів}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

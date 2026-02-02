@@ -165,12 +165,15 @@ class LocalSyncService {
 
   Future<bool> syncAll() async {
     if (!Configuration.instance.isLoggedIn()) {
-      _logger.warning("syncCall called when user is not logged in");
-      return false;
+      if(!isOfflineMode) {
+        _logger.warning("syncAll called when user is not logged in");
+        return false;
+      }
     }
     final stopwatch = EnteWatch("localSyncAll")..start();
 
-    final localAssets = await getAllLocalAssets();
+    final localAssets =
+        await getAllLocalAssets(needsTitle: isOfflineMode ? true : null);
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
     );
