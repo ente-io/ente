@@ -177,6 +177,7 @@ class SocialNotificationCoordinator {
           createdAt: reply.createdAt,
           actorUserID: reply.userID,
           actorAnonID: reply.anonUserID,
+          parentCommentUserID: reply.parentCommentUserID,
         ),
       );
     }
@@ -232,10 +233,17 @@ class SocialNotificationCoordinator {
       }
       try {
         final fileType = filesByID[fileID]?.fileType;
+        final isOwn = switch (candidate.type) {
+          FeedItemType.photoLike => isOwnedByUser(fileID),
+          FeedItemType.comment => isOwnedByUser(fileID),
+          FeedItemType.reply => candidate.parentCommentUserID == userID,
+          FeedItemType.commentLike => false,
+          FeedItemType.replyLike => false,
+        };
         final title = await _getSocialNotificationTitle(candidate);
         await NotificationService.instance.showNotification(
           title,
-          _getSocialNotificationBody(candidate.type, s, fileType),
+          _getSocialNotificationBody(candidate.type, s, fileType, isOwn),
           channelID: 'social_activity',
           channelName: 'Ente Feed',
           payload: _buildSocialNotificationPayload(candidate),
@@ -321,23 +329,28 @@ class SocialNotificationCoordinator {
     FeedItemType type,
     AppLocalizations s,
     FileType? fileType,
+    bool isOwn,
   ) {
-    return _getSocialNotificationDetail(type, s, fileType);
+    return _getSocialNotificationDetail(type, s, fileType, isOwn);
   }
 
   String _getSocialNotificationDetail(
     FeedItemType type,
     AppLocalizations s,
     FileType? fileType,
+    bool isOwn,
   ) {
     final isVideo = fileType == FileType.video;
     switch (type) {
       case FeedItemType.photoLike:
         return isVideo ? s.likedYourVideo : s.likedYourPhoto;
       case FeedItemType.comment:
-        return isVideo ? s.commentedOnAVideo : s.commentedOnYourPhoto;
+        if (isOwn) {
+          return isVideo ? s.commentedOnYourVideo : s.commentedOnYourPhoto;
+        }
+        return isVideo ? s.commentedOnAVideo : s.commentedOnAPhoto;
       case FeedItemType.reply:
-        return s.repliedToYourComment;
+        return isOwn ? s.repliedToYourComment : s.repliedToAComment;
       case FeedItemType.commentLike:
         return s.likedYourComment;
       case FeedItemType.replyLike:
@@ -372,6 +385,7 @@ class _SocialActivityCandidate {
   final int createdAt;
   final int actorUserID;
   final String? actorAnonID;
+  final int? parentCommentUserID;
 
   _SocialActivityCandidate({
     required this.type,
@@ -381,6 +395,7 @@ class _SocialActivityCandidate {
     this.fileID,
     this.commentID,
     this.actorAnonID,
+    this.parentCommentUserID,
   });
 }
 
