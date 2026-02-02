@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { sendMessage } from "@/lib/types/messages";
 
 interface Props {
@@ -23,10 +23,19 @@ const EyeOffIcon = () => (
 );
 
 export default function Unlock({ email, onUnlock, onLogout }: Props) {
+  const [usePasscode, setUsePasscode] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    chrome.storage.local.get(["appLockEnabled", "encryptedMasterKey", "appLockSalt"], (result) => {
+      const enabled = !!result.appLockEnabled;
+      const hasKey = !!result.encryptedMasterKey && !!result.appLockSalt;
+      setUsePasscode(enabled && hasKey);
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,15 +45,20 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
     setError("");
 
     try {
-      const result = await sendMessage({
-        type: "UNLOCK",
-        password,
-      });
+      const result = usePasscode
+        ? await sendMessage({
+            type: "UNLOCK_WITH_PASSCODE",
+            passcode: password,
+          })
+        : await sendMessage({
+            type: "UNLOCK",
+            password,
+          });
 
       if (result.success) {
         onUnlock();
       } else {
-        setError(result.error || "Invalid password");
+        setError(result.error || (usePasscode ? "Invalid passcode" : "Invalid password"));
         setPassword("");
       }
     } catch (e) {
@@ -89,7 +103,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
 
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
         <div className="mb-2 text-sm text-gray-400 text-center">
-          Extension is locked
+          {usePasscode ? "Enter your passcode" : "Extension is locked"}
         </div>
         {email && (
           <div className="mb-4 text-[var(--ente-accent-soft)] text-center text-sm">{email}</div>
@@ -100,7 +114,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
+            placeholder={usePasscode ? "Passcode" : "Enter your password"}
             className="w-full px-3 py-2.5 pr-10 bg-[var(--ente-paper)] border border-[var(--ente-stroke)] rounded-lg text-white text-base placeholder-[color:var(--ente-text-faint)] focus:outline-none focus:border-[var(--ente-accent)]"
             autoFocus
             disabled={loading}
@@ -131,7 +145,7 @@ export default function Unlock({ email, onUnlock, onLogout }: Props) {
           onClick={onLogout}
           className="mt-4 w-full py-2 text-gray-400 hover:text-red-400 transition-colors text-sm"
         >
-          Logout
+          {usePasscode ? "Forgot passcode? Logout" : "Logout"}
         </button>
       </form>
     </div>

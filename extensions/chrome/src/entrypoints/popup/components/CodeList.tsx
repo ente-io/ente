@@ -3,6 +3,8 @@ import { sendMessage } from "@/lib/types/messages";
 import type { Code } from "@/lib/types/code";
 import CodeItem from "./CodeItem";
 import SearchBar from "./SearchBar";
+import AppLockModal from "./AppLockModal";
+import { HugeIcon, hugeArrowUp02, hugeClipboard, hugeLock, hugeLockPassword, hugeLogout01 } from "@/lib/ui/hugeicons";
 
 interface Props {
   email?: string;
@@ -25,10 +27,12 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(true);
   const [clipboardAutoClearEnabled, setClipboardAutoClearEnabled] = useState(false);
   const [clipboardAutoClearSeconds, setClipboardAutoClearSeconds] = useState(30);
+  const [appLockEnabled, setAppLockEnabled] = useState(false);
+  const [showAppLockModal, setShowAppLockModal] = useState(false);
 
-  const MenuIcon = ({ children }: { children: React.ReactNode }) => (
+  const MenuIcon = ({ icon }: { icon: React.ReactNode }) => (
     <span className="inline-flex items-center justify-center w-4 h-4 text-[var(--ente-text-faint)]">
-      {children}
+      {icon}
     </span>
   );
 
@@ -56,11 +60,13 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
   useEffect(() => {
     chrome.storage.local.get(
       [
+        "appLockEnabled",
         "autoSubmitEnabled",
         "clipboardAutoClearEnabled",
         "clipboardAutoClearSeconds",
       ],
       (result) => {
+        setAppLockEnabled(typeof result.appLockEnabled === "boolean" ? result.appLockEnabled : false);
         setAutoSubmitEnabled(typeof result.autoSubmitEnabled === "boolean" ? result.autoSubmitEnabled : true);
         setClipboardAutoClearEnabled(typeof result.clipboardAutoClearEnabled === "boolean" ? result.clipboardAutoClearEnabled : false);
         setClipboardAutoClearSeconds(typeof result.clipboardAutoClearSeconds === "number" ? result.clipboardAutoClearSeconds : 30);
@@ -75,6 +81,10 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
     ) => {
       if (areaName !== "local") return;
 
+      if (changes.appLockEnabled) {
+        const v = changes.appLockEnabled.newValue;
+        setAppLockEnabled(typeof v === "boolean" ? v : false);
+      }
       if (changes.autoSubmitEnabled) {
         const v = changes.autoSubmitEnabled.newValue;
         setAutoSubmitEnabled(typeof v === "boolean" ? v : true);
@@ -230,6 +240,10 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
 
   return (
     <div className="min-h-[400px] max-h-[520px] bg-[var(--ente-background)] text-white flex flex-col">
+      <AppLockModal
+        open={showAppLockModal}
+        onClose={() => setShowAppLockModal(false)}
+      />
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--ente-stroke)]">
         <div className="flex flex-col">
@@ -245,7 +259,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
             <span className="text-sm text-[var(--ente-text-faint)] mt-0.5">{email}</span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={handleSync}
             disabled={syncing}
@@ -354,12 +368,19 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     }}
                     className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
-                    <MenuIcon>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 17v1m-6 4h12a2 2 0 002-2v-7a2 2 0 00-2-2H6a2 2 0 00-2 2v7a2 2 0 002 2zm10-11V8a4 4 0 10-8 0v3" />
-                      </svg>
-                    </MenuIcon>
+                    <MenuIcon icon={<HugeIcon icon={hugeLock} size={16} />} />
                     Lock
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      setShowAppLockModal(true);
+                    }}
+                    className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
+                    title="Set a local passcode to unlock the extension."
+                  >
+                    <MenuIcon icon={<HugeIcon icon={hugeLockPassword} size={16} />} />
+                    {appLockEnabled ? "Change passcode" : "Set passcode"}
                   </button>
                   <button
                     onClick={() => {
@@ -370,11 +391,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     title="When enabled, selecting a code from the in-page dropdown will attempt to submit the form."
                   >
                     <span className="text-sm flex items-center gap-2">
-                      <MenuIcon>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5m0 0l-4 4m4-4l4 4" />
-                        </svg>
-                      </MenuIcon>
+                      <MenuIcon icon={<HugeIcon icon={hugeArrowUp02} size={16} />} />
                       Autosubmit
                     </span>
                     {autoSubmitEnabled && (
@@ -389,14 +406,10 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                       toggleClipboardAutoClear();
                     }}
                     className="w-full px-4 py-2 text-left text-white/80 hover:bg-white/5 transition-colors flex items-center justify-between"
-                    title="Attempts to clear the clipboard after a delay (best-effort; may be blocked by browser permissions)."
+                    title="Clears the copied OTP from your clipboard after a short delay (may not work on all sites/browsers)."
                   >
                     <span className="text-sm flex items-center gap-2">
-                      <MenuIcon>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5h6m-6 0a2 2 0 00-2 2v1h10V7a2 2 0 00-2-2m-6 0a2 2 0 012-2h2a2 2 0 012 2M7 9h10v12H7z" />
-                        </svg>
-                      </MenuIcon>
+                      <MenuIcon icon={<HugeIcon icon={hugeClipboard} size={16} />} />
                       Clipboard clear
                     </span>
                     {clipboardAutoClearEnabled && (
@@ -412,13 +425,7 @@ export default function CodeList({ email, onLock, onLogout }: Props) {
                     }}
                     className="w-full px-4 py-2 text-left text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
-                    <MenuIcon>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 17l5-5-5-5" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H3" />
-                      </svg>
-                    </MenuIcon>
+                    <MenuIcon icon={<HugeIcon icon={hugeLogout01} size={16} />} />
                     Logout
                   </button>
                 </div>

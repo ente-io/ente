@@ -276,6 +276,138 @@ export default defineBackground(() => {
   };
 
   /**
+   * Unlock the extension with local app-lock passcode.
+   *
+   * This avoids asking the user for their account password on every unlock.
+   * We store the master key encrypted with a key derived from the passcode
+   * (Argon2id) and keep the decrypted master key in memory only.
+   */
+  const unlockWithPasscode = async (passcode: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { localStorage, sessionStorage } = await import("@/lib/storage");
+      const { decryptBox, deriveKey, decryptPrivateKey, boxSealOpenURLSafe } = await import("@/lib/crypto");
+      const { syncCodes } = await import("@/lib/services/sync");
+
+      const enabled = await localStorage.isAppLockEnabled();
+      const lockoutUntil = await localStorage.getAppLockLockoutUntil();
+      const salt = await localStorage.getAppLockSalt();
+      const opsLimit = await localStorage.getAppLockOpsLimit();
+      const memLimit = await localStorage.getAppLockMemLimit();
+      const encryptedMasterKey = await localStorage.getEncryptedMasterKey();
+      const keyAttributes = await localStorage.getKeyAttributes();
+      const encryptedToken = await localStorage.getEncryptedToken();
+
+      const now = Date.now();
+      if (lockoutUntil && now < lockoutUntil) {
+        const seconds = Math.ceil((lockoutUntil - now) / 1000);
+        return { success: false, error: `Too many attempts. Try again in ${seconds}s.` };
+      }
+
+      if (!enabled || !salt || !opsLimit || !memLimit || !encryptedMasterKey) {
+        return { success: false, error: "Passcode lock is not set up. Please log in again." };
+      }
+      if (!keyAttributes || !encryptedToken) {
+        return { success: false, error: "Not logged in" };
+      }
+
+      const appKey = await deriveKey(passcode, salt, opsLimit, memLimit);
+      const masterKey = await decryptBox(encryptedMasterKey, appKey);
+      const privateKey = await decryptPrivateKey(masterKey, keyAttributes);
+      const token = await boxSealOpenURLSafe(encryptedToken, keyAttributes.publicKey, privateKey);
+
+      inMemoryMasterKey = masterKey;
+      await sessionStorage.setUnlocked(true);
+      await sessionStorage.setAuthToken(token);
+
+      await localStorage.resetAppLockFailures();
+      await syncCodes(masterKey);
+      await resetLockTimer();
+      await scheduleTokenCheck();
+
+      return { success: true };
+    } catch (e) {
+      try {
+        const { localStorage } = await import("@/lib/storage");
+        const attempts = (await localStorage.getAppLockFailedAttempts()) + 1;
+        await localStorage.setAppLockFailedAttempts(attempts);
+
+        // After 5 failures, exponential backoff up to 5 minutes.
+        if (attempts >= 5) {
+          const delaySeconds = Math.min(300, 15 * 2 ** (attempts - 5));
+          await localStorage.setAppLockLockoutUntil(Date.now() + delaySeconds * 1000);
+        }
+      } catch {
+        // Ignore: failing to store lockout state shouldn't break unlock flow.
+      }
+
+      console.error("Unlock with passcode failed:", e);
+      return { success: false, error: "Invalid passcode" };
+    }
+  };
+
+  /**
+   * Enable (or change) local app-lock passcode.
+   *
+   * Requires the vault to be unlocked so we can encrypt the master key for
+   * future passcode-based unlocks.
+   */
+  const setAppLockPasscode = async (passcode: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { localStorage } = await import("@/lib/storage");
+      const { encryptBox, deriveKey, initCrypto, toB64 } = await import("@/lib/crypto");
+
+      if (!(await isVaultUnlocked())) {
+        return { success: false, error: "Unlock the extension first" };
+      }
+      const masterKey = inMemoryMasterKey;
+      if (!masterKey) {
+        return { success: false, error: "Unlock the extension first" };
+      }
+
+      // Enforce a minimum length to avoid trivially weak passcodes.
+      if (!passcode || passcode.length < 6) {
+        return { success: false, error: "Passcode must be at least 6 characters" };
+      }
+
+      await initCrypto();
+      // Use moderate Argon2id parameters (offline attack resistance vs UX).
+      const OPS_LIMIT = 3;
+      const MEM_LIMIT = 64 * 1024 * 1024;
+
+      // Generate a random salt and derive an encryption key from the passcode.
+      const salt = new Uint8Array(16);
+      crypto.getRandomValues(salt);
+      const saltB64 = await toB64(salt);
+      const appKey = await deriveKey(passcode, saltB64, OPS_LIMIT, MEM_LIMIT);
+
+      const encryptedMasterKey = await encryptBox(masterKey, appKey);
+
+      await localStorage.setEncryptedMasterKey(encryptedMasterKey);
+      await localStorage.setAppLockEnabled(true);
+      await localStorage.setAppLockSalt(saltB64);
+      await localStorage.setAppLockOpsLimit(OPS_LIMIT);
+      await localStorage.setAppLockMemLimit(MEM_LIMIT);
+      await localStorage.resetAppLockFailures();
+
+      return { success: true };
+    } catch (e) {
+      console.error("Set app lock passcode failed:", e);
+      return { success: false, error: "Failed to set passcode" };
+    }
+  };
+
+  const disableAppLock = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { localStorage } = await import("@/lib/storage");
+      await localStorage.removeAppLock();
+      return { success: true };
+    } catch (e) {
+      console.error("Disable app lock failed:", e);
+      return { success: false, error: "Failed to disable passcode lock" };
+    }
+  };
+
+  /**
    * Check email to determine login method.
    */
   const checkEmail = async (email: string): Promise<CheckEmailResult> => {
@@ -652,6 +784,15 @@ export default defineBackground(() => {
 
         case "UNLOCK":
           return unlock(message.password);
+
+        case "UNLOCK_WITH_PASSCODE":
+          return unlockWithPasscode(message.passcode);
+
+        case "SET_APP_LOCK_PASSCODE":
+          return setAppLockPasscode(message.passcode);
+
+        case "DISABLE_APP_LOCK":
+          return disableAppLock();
 
         case "CHECK_EMAIL":
           return checkEmail(message.email);

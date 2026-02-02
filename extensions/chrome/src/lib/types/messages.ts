@@ -12,6 +12,9 @@ export type BackgroundMessage =
   | { type: "SYNC" }
   | { type: "LOCK" }
   | { type: "UNLOCK"; password: string }
+  | { type: "UNLOCK_WITH_PASSCODE"; passcode: string }
+  | { type: "SET_APP_LOCK_PASSCODE"; passcode: string }
+  | { type: "DISABLE_APP_LOCK" }
   | { type: "CHECK_EMAIL"; email: string }
   | { type: "LOGIN_SEND_OTT"; email: string }
   | { type: "LOGIN_VERIFY_OTT"; email: string; ott: string }
@@ -84,15 +87,15 @@ export type BackgroundResponse<T extends BackgroundMessage["type"]> =
     ? ExtensionState
     : T extends "GET_CODES"
       ? { codes: Code[] }
-      : T extends "GET_CODES_FOR_SITE"
-        ? { matches: SiteMatchPreview[] }
-        : T extends "GENERATE_OTP"
-          ? OTPResult
-          : T extends "GENERATE_OTPS"
-            ? { otps: Record<string, OTPResult | null> }
-          : T extends "CHECK_EMAIL"
-            ? CheckEmailResult
-          : { success: boolean; error?: string };
+    : T extends "GET_CODES_FOR_SITE"
+      ? { matches: SiteMatchPreview[] }
+    : T extends "GENERATE_OTP"
+      ? OTPResult
+    : T extends "GENERATE_OTPS"
+      ? { otps: Record<string, OTPResult | null> }
+    : T extends "CHECK_EMAIL"
+      ? CheckEmailResult
+    : { success: boolean; error?: string };
 
 /**
  * Send a message to the background script and get typed response.

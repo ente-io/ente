@@ -22,6 +22,12 @@ const LOCAL_KEYS = {
   KEY_ATTRIBUTES: "keyAttributes",
   ENCRYPTED_TOKEN: "encryptedToken",
   ENCRYPTED_MASTER_KEY: "encryptedMasterKey",
+  APP_LOCK_ENABLED: "appLockEnabled",
+  APP_LOCK_SALT: "appLockSalt",
+  APP_LOCK_OPS_LIMIT: "appLockOpsLimit",
+  APP_LOCK_MEM_LIMIT: "appLockMemLimit",
+  APP_LOCK_FAILED_ATTEMPTS: "appLockFailedAttempts",
+  APP_LOCK_LOCKOUT_UNTIL: "appLockLockoutUntil",
   LAST_SYNC_TIME: "lastSyncTime",
   LAST_ACTIVITY_TIME: "lastActivityTime",
   // Preferences (plaintext)
@@ -184,6 +190,74 @@ export const localStorage = {
     nonce: string;
   }): Promise<void> {
     await this.set(LOCAL_KEYS.ENCRYPTED_MASTER_KEY, data);
+  },
+
+  // App lock (local passcode)
+  async isAppLockEnabled(): Promise<boolean> {
+    return (await this.get<boolean>(LOCAL_KEYS.APP_LOCK_ENABLED)) ?? false;
+  },
+
+  async setAppLockEnabled(enabled: boolean): Promise<void> {
+    await this.set(LOCAL_KEYS.APP_LOCK_ENABLED, enabled);
+  },
+
+  async getAppLockSalt(): Promise<string | undefined> {
+    return this.get<string>(LOCAL_KEYS.APP_LOCK_SALT);
+  },
+
+  async setAppLockSalt(saltB64: string): Promise<void> {
+    await this.set(LOCAL_KEYS.APP_LOCK_SALT, saltB64);
+  },
+
+  async getAppLockOpsLimit(): Promise<number | undefined> {
+    return this.get<number>(LOCAL_KEYS.APP_LOCK_OPS_LIMIT);
+  },
+
+  async setAppLockOpsLimit(opsLimit: number): Promise<void> {
+    await this.set(LOCAL_KEYS.APP_LOCK_OPS_LIMIT, opsLimit);
+  },
+
+  async getAppLockMemLimit(): Promise<number | undefined> {
+    return this.get<number>(LOCAL_KEYS.APP_LOCK_MEM_LIMIT);
+  },
+
+  async setAppLockMemLimit(memLimit: number): Promise<void> {
+    await this.set(LOCAL_KEYS.APP_LOCK_MEM_LIMIT, memLimit);
+  },
+
+  async removeAppLock(): Promise<void> {
+    await Promise.all([
+      this.remove(LOCAL_KEYS.APP_LOCK_ENABLED),
+      this.remove(LOCAL_KEYS.APP_LOCK_SALT),
+      this.remove(LOCAL_KEYS.APP_LOCK_OPS_LIMIT),
+      this.remove(LOCAL_KEYS.APP_LOCK_MEM_LIMIT),
+      this.remove(LOCAL_KEYS.APP_LOCK_FAILED_ATTEMPTS),
+      this.remove(LOCAL_KEYS.APP_LOCK_LOCKOUT_UNTIL),
+      this.remove(LOCAL_KEYS.ENCRYPTED_MASTER_KEY),
+    ]);
+  },
+
+  async getAppLockFailedAttempts(): Promise<number> {
+    return (await this.get<number>(LOCAL_KEYS.APP_LOCK_FAILED_ATTEMPTS)) ?? 0;
+  },
+
+  async setAppLockFailedAttempts(attempts: number): Promise<void> {
+    await this.set(LOCAL_KEYS.APP_LOCK_FAILED_ATTEMPTS, attempts);
+  },
+
+  async getAppLockLockoutUntil(): Promise<number> {
+    return (await this.get<number>(LOCAL_KEYS.APP_LOCK_LOCKOUT_UNTIL)) ?? 0;
+  },
+
+  async setAppLockLockoutUntil(ts: number): Promise<void> {
+    await this.set(LOCAL_KEYS.APP_LOCK_LOCKOUT_UNTIL, ts);
+  },
+
+  async resetAppLockFailures(): Promise<void> {
+    await Promise.all([
+      this.remove(LOCAL_KEYS.APP_LOCK_FAILED_ATTEMPTS),
+      this.remove(LOCAL_KEYS.APP_LOCK_LOCKOUT_UNTIL),
+    ]);
   },
 
   async getLastSyncTime(): Promise<number> {
