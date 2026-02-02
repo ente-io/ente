@@ -230,15 +230,15 @@ You can also change an existing participant's role to Admin by opening the album
 
 ### What's the difference between admin and collaborator? {#admin-vs-collaborator}
 
-| Permission | Collaborator | Admin |
-| --- | --- | --- |
-| View and download photos | ✓ | ✓ |
-| Add photos to album | ✓ | ✓ |
-| Remove own photos | ✓ | ✓ |
-| Remove any photo | ✗ | ✓ |
-| Manage participants | ✗ | ✓ |
-| Suggest deletion | ✗ | ✓ |
-| Manage link settings | ✗ | ✗ |
+| Permission               | Collaborator | Admin |
+| ------------------------ | ------------ | ----- |
+| View and download photos | ✓            | ✓     |
+| Add photos to album      | ✓            | ✓     |
+| Remove own photos        | ✓            | ✓     |
+| Remove any photo         | ✗            | ✓     |
+| Manage participants      | ✗            | ✓     |
+| Suggest deletion         | ✗            | ✓     |
+| Manage link settings     | ✗            | ✗     |
 
 Use **Collaborator** for participants who should only add and view photos. Use **Admin** for trusted participants who help manage the album.
 

@@ -197,6 +197,10 @@ class SyncService {
   Future<void> _doSync() async {
     _logger.info("[SYNC] Starting local sync");
     await _localSyncService.sync();
+    if (isOfflineMode) {
+      _logger.info("[SYNC] Offline mode, skipping remote sync");
+      return;
+    }
 
     final bool allowRemoteSync =
         _localSyncService.hasCompletedFirstImportOrBypassed();

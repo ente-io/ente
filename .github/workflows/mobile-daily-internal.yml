@@ -158,6 +158,7 @@ jobs:
                   track: internal
                   whatsNewDirectory: mobile/apps/photos/whatsnew
                   mappingFile: mobile/apps/photos/build/app/outputs/mapping/playstoreRelease/mapping.txt
+                  changesNotSentForReview: true
 
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1

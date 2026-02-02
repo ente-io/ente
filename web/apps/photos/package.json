@@ -19,13 +19,13 @@
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-leaflet": "^5.0.0",
-        "react-leaflet-cluster": "^4.0.0",
         "react-select": "^5.10.2",
         "react-top-loading-bar": "^3.0.2",
         "react-virtualized-auto-sizer": "^1.0.26",
         "react-window": "^1.8.11",
         "sanitize-filename": "^1.6.3",
-        "similarity-transformation": "^0.0.1"
+        "similarity-transformation": "^0.0.1",
+        "supercluster": "^8.0.1"
     },
     "devDependencies": {
         "@types/node": "^22.15.32",

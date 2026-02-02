@@ -78,7 +78,7 @@ class _MachineLearningSettingsPageState
 
   @override
   Widget build(BuildContext context) {
-    final hasEnabled = flagService.hasGrantedMLConsent;
+    final hasEnabled = hasGrantedMLConsent;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
@@ -219,7 +219,7 @@ class _MachineLearningSettingsPageState
   }
 
   Future<void> toggleMlConsent() async {
-    final oldMlConsent = flagService.hasGrantedMLConsent;
+    final oldMlConsent = hasGrantedMLConsent;
     // Go to consent page first if not enabled
     if (!oldMlConsent) {
       final result = await Navigator.push(
@@ -235,7 +235,7 @@ class _MachineLearningSettingsPageState
       }
     }
     final mlConsent = !oldMlConsent;
-    await flagService.setMLConsent(mlConsent);
+    await setMLConsent(mlConsent);
     if (!mlConsent) {
       MLService.instance.pauseIndexingAndClustering();
       unawaited(
@@ -252,7 +252,7 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _getMlSettings(BuildContext context) {
-    final hasEnabled = flagService.hasGrantedMLConsent;
+    final hasEnabled = hasGrantedMLConsent;
     if (!hasEnabled) {
       return const SizedBox.shrink();
     }

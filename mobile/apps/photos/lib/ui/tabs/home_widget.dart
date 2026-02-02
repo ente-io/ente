@@ -18,6 +18,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/account_configured_event.dart";
+import "package:photos/events/app_mode_changed_event.dart";
 import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/christmas_banner_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -69,6 +70,7 @@ import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/social/feed_screen.dart";
@@ -137,6 +139,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _homepageSwipeToSelectInProgressEventSubscription;
   late StreamSubscription<ChristmasBannerEvent>
       _christmasBannerEventSubscription;
+  late StreamSubscription<AppModeChangedEvent> _appModeChangedEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
 
@@ -184,7 +187,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
       // fetch user flags on login
-      flagService.flags;
+      if (!isOfflineMode) {
+        flagService.flags;
+      }
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -199,6 +204,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _permissionGrantedEvent =
         Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _appModeChangedEventSubscription =
+        Bus.instance.on<AppModeChangedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
@@ -515,6 +526,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     _permissionGrantedEvent.cancel();
+    _appModeChangedEventSubscription.cancel();
     _firstImportEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
@@ -811,9 +823,16 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final bool offlineMode = isOfflineMode;
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      return const LandingPageWidget();
+      if (offlineMode) {
+        if (_shouldShowPermissionWidget()) {
+          return const GrantPermissionsWidget();
+        }
+      } else {
+        return const LandingPageWidget();
+      }
     }
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
@@ -1034,7 +1053,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
             ? int.tryParse(albumIdRaw)
             : null;
+        var canOpenRitual = true;
         if (ritualId.isNotEmpty) {
+          final ritual = findRitualById(ritualId);
+          canOpenRitual = ritual != null
+              ? await requestHiddenRitualAccess(context, ritual)
+              : await requestHiddenRitualAccessForAlbumId(context, albumId);
+          if (!mounted || !canOpenRitual) {
+            return;
+          }
           // Ensure the camera is stacked on top of the ritual page so the user
           // lands on the ritual details after adding photos via a notification.
           // ignore: unawaited_futures
@@ -1043,6 +1070,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             RitualPage(ritualId: ritualId),
           );
         }
+        if (!canOpenRitual) return;
         // ignore: unawaited_futures
         routeToPage(
           context,
@@ -1057,8 +1085,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (!Configuration.instance.isLoggedIn()) {
           return;
         }
+        final target = FeedNavigationTarget.fromUri(uri);
         // ignore: unawaited_futures
-        routeToPage(context, const FeedScreen());
+        routeToPage(
+          context,
+          FeedScreen(
+            initialTarget: target,
+          ),
+        );
         return;
       }
       if (payload.toLowerCase().contains("onthisday")) {
@@ -1109,6 +1143,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowLoadingWidget() {
+    if (isOfflineMode) {
+      return false;
+    }
     if (flagService.enableOnlyBackupFuturePhotos) {
       if (!permissionService.hasGrantedPermissions()) {
         return false;
@@ -1120,6 +1157,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowBackupHook() {
+    if (isOfflineMode) {
+      return false;
+    }
     final bool noFoldersSelected =
         !backupPreferenceService.hasSelectedAnyBackupFolder;
     final bool hasLimitedPermission =
@@ -1134,6 +1174,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (_personSyncTriggered) {
       return;
     }
+    if (isOfflineMode) {
+      return;
+    }
     _personSyncTriggered = true;
     entityService.syncEntities().then((_) {
       PersonService.instance.refreshPersonCache();
@@ -1142,6 +1185,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _ensureCollectionsSync() {
     if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (isOfflineMode) {
       return;
     }
     if (!(backupPreferenceService.hasSkippedOnboardingPermission ||
