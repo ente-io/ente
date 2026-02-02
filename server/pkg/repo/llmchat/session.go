@@ -22,8 +22,6 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		branchFromMessageUUID = sql.NullString{String: *req.BranchFromMessageUUID, Valid: true}
 	}
 
-	createdAt := sanitizeCreatedAt(req.CreatedAt)
-
 	row := r.DB.QueryRowContext(ctx, `INSERT INTO llmchat_sessions(
 		session_uuid,
 		user_id,
@@ -31,29 +29,32 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		branch_from_message_uuid,
 		encrypted_data,
 		header,
+		client_metadata,
 		is_deleted,
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, FALSE, COALESCE($7, now_utc_micro_seconds()))
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE, now_utc_micro_seconds())
 	ON CONFLICT (session_uuid) DO UPDATE
 		SET root_session_uuid = EXCLUDED.root_session_uuid,
 			branch_from_message_uuid = EXCLUDED.branch_from_message_uuid,
 			encrypted_data = EXCLUDED.encrypted_data,
 			header = EXCLUDED.header,
+			client_metadata = EXCLUDED.client_metadata,
 			is_deleted = FALSE
 		WHERE llmchat_sessions.user_id = EXCLUDED.user_id
-	RETURNING session_uuid, user_id, root_session_uuid, branch_from_message_uuid, encrypted_data, header, is_deleted, created_at, updated_at`,
+	RETURNING session_uuid, user_id, root_session_uuid, branch_from_message_uuid, encrypted_data, header, client_metadata, is_deleted, created_at, updated_at`,
 		req.SessionUUID,
 		userID,
 		rootSessionUUID,
 		branchFromMessageUUID,
 		req.EncryptedData,
 		req.Header,
-		createdAt,
+		req.ClientMetadata,
 	)
 
 	var result model.Session
 	var encryptedData sql.NullString
 	var header sql.NullString
+	var clientMetadata sql.NullString
 	var scannedBranch sql.NullString
 	if err := row.Scan(
 		&result.SessionUUID,
@@ -62,6 +63,7 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		&scannedBranch,
 		&encryptedData,
 		&header,
+		&clientMetadata,
 		&result.IsDeleted,
 		&result.CreatedAt,
 		&result.UpdatedAt,
@@ -79,6 +81,9 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 	}
 	if header.Valid {
 		result.Header = &header.String
+	}
+	if clientMetadata.Valid {
+		result.ClientMetadata = &clientMetadata.String
 	}
 	return result, nil
 }
@@ -108,7 +113,8 @@ func (r *Repository) DeleteSession(ctx context.Context, userID int64, sessionUUI
 	row := r.DB.QueryRowContext(ctx, `UPDATE llmchat_sessions
 		SET is_deleted = TRUE,
 			encrypted_data = NULL,
-			header = NULL
+			header = NULL,
+			client_metadata = NULL
 		WHERE session_uuid = $1 AND user_id = $2 AND is_deleted = FALSE
 		RETURNING session_uuid, updated_at`,
 		sessionUUID,
@@ -140,7 +146,7 @@ func (r *Repository) DeleteSession(ctx context.Context, userID int64, sessionUUI
 }
 
 func (r *Repository) GetSessionDiffPage(ctx context.Context, userID int64, sinceTime int64, sinceSessionUUID string, limit int16) ([]model.SessionDiffEntry, bool, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, root_session_uuid, branch_from_message_uuid, encrypted_data, header, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, root_session_uuid, branch_from_message_uuid, encrypted_data, header, client_metadata, created_at, updated_at
 		FROM llmchat_sessions
 		WHERE user_id = $1 AND is_deleted = FALSE AND (updated_at > $2 OR (updated_at = $2 AND session_uuid > $3::uuid))
 		ORDER BY updated_at, session_uuid
@@ -190,7 +196,7 @@ func (r *Repository) GetSessionTombstonesPage(ctx context.Context, userID int64,
 }
 
 func (r *Repository) GetSessionDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.SessionDiffEntry, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, root_session_uuid, branch_from_message_uuid, encrypted_data, header, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, root_session_uuid, branch_from_message_uuid, encrypted_data, header, client_metadata, created_at, updated_at
 		FROM llmchat_sessions
 		WHERE user_id = $1 AND is_deleted = FALSE AND updated_at > $2
 		ORDER BY updated_at, session_uuid
@@ -232,12 +238,14 @@ func convertRowsToSessionDiffEntries(rows *sql.Rows) ([]model.SessionDiffEntry, 
 	for rows.Next() {
 		var entry model.SessionDiffEntry
 		var branchFromMessageUUID sql.NullString
+		var clientMetadata sql.NullString
 		if err := rows.Scan(
 			&entry.SessionUUID,
 			&entry.RootSessionUUID,
 			&branchFromMessageUUID,
 			&entry.EncryptedData,
 			&entry.Header,
+			&clientMetadata,
 			&entry.CreatedAt,
 			&entry.UpdatedAt,
 		); err != nil {
@@ -245,6 +253,9 @@ func convertRowsToSessionDiffEntries(rows *sql.Rows) ([]model.SessionDiffEntry, 
 		}
 		if branchFromMessageUUID.Valid {
 			entry.BranchFromMessageUUID = &branchFromMessageUUID.String
+		}
+		if clientMetadata.Valid {
+			entry.ClientMetadata = &clientMetadata.String
 		}
 		entries = append(entries, entry)
 	}

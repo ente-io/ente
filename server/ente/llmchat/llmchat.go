@@ -33,6 +33,7 @@ type Session struct {
 	BranchFromMessageUUID *string `json:"branch_from_message_uuid"`
 	EncryptedData         *string `json:"encrypted_data"`
 	Header                *string `json:"header"`
+	ClientMetadata        *string `json:"client_metadata"`
 	IsDeleted             bool    `json:"is_deleted"`
 	CreatedAt             int64   `json:"created_at"`
 	UpdatedAt             int64   `json:"updated_at"`
@@ -47,6 +48,7 @@ type Message struct {
 	Attachments       []AttachmentMeta `json:"attachments"`
 	EncryptedData     *string          `json:"encrypted_data"`
 	Header            *string          `json:"header"`
+	ClientMetadata    *string          `json:"client_metadata"`
 	IsDeleted         bool             `json:"is_deleted"`
 	CreatedAt         int64            `json:"created_at"`
 	UpdatedAt         int64            `json:"updated_at"`
@@ -61,9 +63,9 @@ type UpsertSessionRequest struct {
 	SessionUUID           string  `json:"session_uuid" binding:"required"`
 	RootSessionUUID       string  `json:"root_session_uuid"`
 	BranchFromMessageUUID *string `json:"branch_from_message_uuid"`
-	CreatedAt             *int64  `json:"created_at"`
 	EncryptedData         string  `json:"encrypted_data" binding:"required"`
 	Header                string  `json:"header" binding:"required"`
+	ClientMetadata        *string `json:"client_metadata"`
 }
 
 type UpsertMessageRequest struct {
@@ -72,9 +74,9 @@ type UpsertMessageRequest struct {
 	ParentMessageUUID *string          `json:"parent_message_uuid"`
 	Sender            string           `json:"sender" binding:"required"`
 	Attachments       []AttachmentMeta `json:"attachments"`
-	CreatedAt         *int64           `json:"created_at"`
 	EncryptedData     string           `json:"encrypted_data" binding:"required"`
 	Header            string           `json:"header" binding:"required"`
+	ClientMetadata    *string          `json:"client_metadata"`
 }
 
 type KeyResponse struct {
@@ -90,6 +92,7 @@ type SessionResponse struct {
 	BranchFromMessageUUID *string `json:"branch_from_message_uuid"`
 	EncryptedData         string  `json:"encrypted_data"`
 	Header                string  `json:"header"`
+	ClientMetadata        *string `json:"client_metadata"`
 	CreatedAt             int64   `json:"created_at"`
 	UpdatedAt             int64   `json:"updated_at"`
 	IsDeleted             bool    `json:"is_deleted"`
@@ -103,6 +106,7 @@ type MessageResponse struct {
 	Attachments       []AttachmentMeta `json:"attachments"`
 	EncryptedData     string           `json:"encrypted_data"`
 	Header            string           `json:"header"`
+	ClientMetadata    *string          `json:"client_metadata"`
 	CreatedAt         int64            `json:"created_at"`
 	UpdatedAt         int64            `json:"updated_at"`
 	IsDeleted         bool             `json:"is_deleted"`
@@ -141,6 +145,7 @@ type SessionDiffEntry struct {
 	BranchFromMessageUUID *string `json:"branch_from_message_uuid"`
 	EncryptedData         string  `json:"encrypted_data"`
 	Header                string  `json:"header"`
+	ClientMetadata        *string `json:"client_metadata"`
 	CreatedAt             int64   `json:"created_at"`
 	UpdatedAt             int64   `json:"updated_at"`
 }
@@ -153,6 +158,7 @@ type MessageDiffEntry struct {
 	Attachments       []AttachmentMeta `json:"attachments"`
 	EncryptedData     string           `json:"encrypted_data"`
 	Header            string           `json:"header"`
+	ClientMetadata    *string          `json:"client_metadata"`
 	CreatedAt         int64            `json:"created_at"`
 	UpdatedAt         int64            `json:"updated_at"`
 }

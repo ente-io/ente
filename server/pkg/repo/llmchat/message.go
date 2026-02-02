@@ -13,8 +13,6 @@ import (
 )
 
 func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.UpsertMessageRequest) (model.Message, error) {
-	createdAt := sanitizeCreatedAt(req.CreatedAt)
-
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return model.Message{}, stacktrace.Propagate(err, "failed to begin transaction")
@@ -32,18 +30,20 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		sender,
 		encrypted_data,
 		header,
+		client_metadata,
 		is_deleted,
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE, COALESCE($8, now_utc_micro_seconds()))
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, now_utc_micro_seconds())
 	ON CONFLICT (message_uuid) DO UPDATE
 		SET session_uuid = EXCLUDED.session_uuid,
 			parent_message_uuid = EXCLUDED.parent_message_uuid,
 			sender = EXCLUDED.sender,
 			encrypted_data = EXCLUDED.encrypted_data,
 			header = EXCLUDED.header,
+			client_metadata = EXCLUDED.client_metadata,
 			is_deleted = FALSE
 		WHERE llmchat_messages.user_id = EXCLUDED.user_id
-	RETURNING message_uuid, user_id, session_uuid, parent_message_uuid, sender, encrypted_data, header, is_deleted, created_at, updated_at`,
+	RETURNING message_uuid, user_id, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, is_deleted, created_at, updated_at`,
 		req.MessageUUID,
 		userID,
 		req.SessionUUID,
@@ -51,13 +51,14 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		req.Sender,
 		req.EncryptedData,
 		req.Header,
-		createdAt,
+		req.ClientMetadata,
 	)
 
 	var result model.Message
 	var parentMessageUUID sql.NullString
 	var encryptedData sql.NullString
 	var header sql.NullString
+	var clientMetadata sql.NullString
 	if err := row.Scan(
 		&result.MessageUUID,
 		&result.UserID,
@@ -66,6 +67,7 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		&result.Sender,
 		&encryptedData,
 		&header,
+		&clientMetadata,
 		&result.IsDeleted,
 		&result.CreatedAt,
 		&result.UpdatedAt,
@@ -94,6 +96,9 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 	}
 	if header.Valid {
 		result.Header = &header.String
+	}
+	if clientMetadata.Valid {
+		result.ClientMetadata = &clientMetadata.String
 	}
 	if req.Attachments == nil {
 		result.Attachments = []model.AttachmentMeta{}
@@ -225,7 +230,8 @@ func (r *Repository) SoftDeleteMessagesForSession(ctx context.Context, userID in
 	res, err := tx.ExecContext(ctx, `UPDATE llmchat_messages
 		SET is_deleted = TRUE,
 			encrypted_data = NULL,
-			header = NULL
+			header = NULL,
+			client_metadata = NULL
 		WHERE user_id = $1 AND session_uuid = $2 AND is_deleted = FALSE`,
 		userID,
 		sessionUUID,
@@ -277,7 +283,8 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID int64, messageUUI
 	row := tx.QueryRowContext(ctx, `UPDATE llmchat_messages
 		SET is_deleted = TRUE,
 			encrypted_data = NULL,
-			header = NULL
+			header = NULL,
+			client_metadata = NULL
 		WHERE message_uuid = $1 AND user_id = $2 AND is_deleted = FALSE
 		RETURNING message_uuid, updated_at`,
 		messageUUID,
@@ -314,7 +321,7 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID int64, messageUUI
 }
 
 func (r *Repository) GetMessageDiffPage(ctx context.Context, userID int64, sinceTime int64, sinceMessageUUID string, limit int16) ([]model.MessageDiffEntry, bool, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, created_at, updated_at
 		FROM llmchat_messages
 		WHERE user_id = $1 AND is_deleted = FALSE AND (updated_at > $2 OR (updated_at = $2 AND message_uuid > $3::uuid))
 		ORDER BY updated_at, message_uuid
@@ -367,7 +374,7 @@ func (r *Repository) GetMessageTombstonesPage(ctx context.Context, userID int64,
 }
 
 func (r *Repository) GetMessageDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.MessageDiffEntry, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, created_at, updated_at
 		FROM llmchat_messages
 		WHERE user_id = $1 AND is_deleted = FALSE AND updated_at > $2
 		ORDER BY updated_at, message_uuid
@@ -416,6 +423,7 @@ func convertRowsToMessageDiffEntries(rows *sql.Rows) ([]model.MessageDiffEntry, 
 	for rows.Next() {
 		var entry model.MessageDiffEntry
 		var parentMessageUUID sql.NullString
+		var clientMetadata sql.NullString
 		if err := rows.Scan(
 			&entry.MessageUUID,
 			&entry.SessionUUID,
@@ -423,6 +431,7 @@ func convertRowsToMessageDiffEntries(rows *sql.Rows) ([]model.MessageDiffEntry, 
 			&entry.Sender,
 			&entry.EncryptedData,
 			&entry.Header,
+			&clientMetadata,
 			&entry.CreatedAt,
 			&entry.UpdatedAt,
 		); err != nil {
@@ -430,6 +439,9 @@ func convertRowsToMessageDiffEntries(rows *sql.Rows) ([]model.MessageDiffEntry, 
 		}
 		if parentMessageUUID.Valid {
 			entry.ParentMessageUUID = &parentMessageUUID.String
+		}
+		if clientMetadata.Valid {
+			entry.ClientMetadata = &clientMetadata.String
 		}
 		entries = append(entries, entry)
 	}
