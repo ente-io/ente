@@ -36,8 +36,8 @@ desktop.
 
 ### Can I access Locker from a web browser? {#locker-web-access}
 
-There is no web app for Ente Locker at this time. The mobile apps for iOS
-and Android are required to access your data.
+There is no web app for Ente Locker at this time. The mobile apps for iOS and
+Android are required to access your data.
 
 Public links to shared content can be viewed in any web browser.
 
@@ -56,12 +56,12 @@ Learn more in the [Sign up guide](/locker/getting-started/signup).
 
 ### Can I use my existing Ente Photos account? {#locker-existing-account}
 
-Yes. Ente Locker uses the same account system as Ente Photos and Ente Auth.
-If you already have an Ente account, sign in with your existing email and
+Yes. Ente Locker uses the same account system as Ente Photos and Ente Auth. If
+you already have an Ente account, sign in with your existing email and
 password.
 
-Your Locker data is stored separately from your Photos and Auth data, but
-they all use the same account.
+Your Locker data is stored separately from your Photos and Auth data, but they
+all use the same account.
 
 ### How do I log in on multiple devices? {#locker-multi-device}
 
@@ -69,14 +69,14 @@ they all use the same account.
 2. Tap **Sign in**
 3. Enter your Ente email and password
 4. If 2FA is enabled, enter your authentication code
-5. Wait for your data to sync
+5. Your items will be available
 
-All your documents will automatically appear on the new device.
+All items you've added will be accessible on the new device.
 
 ### Do I need separate accounts for different devices? {#locker-separate-accounts}
 
-No. Use the same Ente account on all your devices. Your data syncs
-automatically between all devices signed into the same account.
+No. Use the same Ente account on all your devices. Items you add are
+accessible on all devices signed into the same account.
 
 ### I'm not receiving the verification email. What should I do? {#locker-verification-email}
 
@@ -85,8 +85,199 @@ automatically between all devices signed into the same account.
 3. Wait a few minutes and try again
 4. If still not received, contact [support@ente.io](mailto:support@ente.io)
 
+## Pricing and Plans
+
+### Is Ente Locker free? {#locker-pricing-free}
+
+Yes, Ente Locker has a free tier with the following limits:
+
+- Up to 100 items
+- Up to 1GB total storage
+
+For most personal use, the free tier is sufficient.
+
+### How much does Ente Locker cost? {#locker-pricing}
+
+Locker's paid features are included with any Ente Photos subscription. When you
+subscribe to Ente Photos, your Locker limits automatically increase to:
+
+- Up to 1000 items
+- Up to 10GB total storage
+
+View pricing options at [ente.io/pricing](https://ente.io/pricing).
+
+### Is Locker storage separate from Photos storage? {#locker-storage-separate}
+
+Yes. Locker and Photos have separate storage quotas:
+
+- Your Photos subscription storage is for photos and videos only
+- Your Locker storage (1GB free, 10GB paid) is separate and only for Locker
+  items
+
+The two do not share or draw from the same pool.
+
+### Do I need Ente Photos to use Locker? {#locker-need-photos}
+
+No. You can use Ente Locker independently with a free account. You only need an
+Ente Photos subscription if you want the increased Locker limits (1000 items,
+10GB storage).
+
+## Account Limits
+
+### What are the storage limits? {#locker-account-limits}
+
+Locker has the following limits based on your subscription:
+
+- **Free plan**: Up to 100 items and 1GB total storage
+- **Paid plan** (any Ente subscription): Up to 1000 items and 10GB total storage
+
+### What counts as an item? {#locker-what-counts-item}
+
+Each of these counts as one item toward your limit:
+
+- Each uploaded document (PDF, image, scan)
+- Each personal note
+- Each set of account credentials
+- Each physical record entry
+
+### How do I check my usage? {#locker-check-usage}
+
+View your current usage in `Settings > Storage` to see how many items you have
+and how much storage you're using.
+
+### What happens when I reach the limit? {#locker-reach-limit}
+
+When you reach your item or storage limit:
+
+- You cannot add new items
+- Existing items remain accessible
+- You can delete items to free up space
+- Upgrade to a paid plan to increase your limits
+
+### How do I increase my limits? {#locker-increase-limits}
+
+Subscribe to any Ente Photos plan to increase your limits to 1000 items and
+10GB storage. Your Locker limits increase automatically when you subscribe.
+
+View plans at [ente.io/pricing](https://ente.io/pricing).
+
+## Export and Data
+
+### Can I export my Locker data? {#locker-export}
+
+Data export from Locker is not currently available. This feature is planned for
+a future release.
+
+Your data remains accessible as long as you have access to your account, and
+you can always view and copy individual items manually.
+
+### What happens to my data if I cancel my subscription? {#locker-cancel-subscription}
+
+If you cancel your Ente Photos subscription:
+
+- Your Locker limits return to free tier (100 items, 1GB)
+- If you're over the free limits, you cannot add new items
+- All existing items remain accessible and are not deleted
+- You can delete items to get back under the free limits
+
+### What happens if Ente shuts down? {#locker-ente-shutdown}
+
+Ente is committed to data portability and user ownership. If Ente were to shut
+down, we would provide advance notice and tools to export your data.
+
+Our code is open source, so the community could also maintain the service
+independently.
+
+## Locker, Photos, and Auth
+
+### Should I store document scans in Locker or Photos? {#locker-vs-photos}
+
+Use **Locker** for sensitive documents you need organized access to:
+
+- Identity documents (passports, IDs, licenses)
+- Financial documents (tax returns, statements, contracts)
+- Medical records
+- Legal documents
+- Insurance policies
+
+Use **Photos** for general scans that are part of your memory collection:
+
+- Handwritten letters and cards
+- Children's artwork
+- Old printed photos you're digitizing
+- Whiteboard notes from meetings
+- Receipts you want to remember but aren't critical
+
+**Key difference**: Locker is for documents you need to find and access by
+category. Photos is for memories you browse chronologically.
+
+### Should I store passwords in Locker or use a password manager? {#locker-vs-password-manager}
+
+**Locker complements your password manager** rather than replacing it.
+
+Use your **password manager** for:
+
+- Daily logins with browser autofill
+- Generating strong passwords
+- Accounts you access frequently
+
+Use **Locker** for:
+
+- Encrypted backup copies of your most critical passwords
+- Credentials you access infrequently but can't afford to lose
+- Sharing passwords securely with family members
+- Recovery codes and security questions
+
+This combination gives you the convenience of autofill for daily use plus a
+secure, encrypted backup for your most important credentials that can be passed
+on through Legacy.
+
+### Should I store 2FA codes in Locker or Auth? {#locker-vs-auth}
+
+Use **Ente Auth** for:
+
+- TOTP codes (the 6-digit codes that change every 30 seconds)
+- Any two-factor authentication secrets
+
+Use **Locker** for:
+
+- 2FA backup/recovery codes (the one-time codes you get when setting up 2FA)
+- Security questions and answers
+- Notes about account recovery options
+
+Auth is specifically designed for TOTP and has features like quick code copying
+and countdown timers. Locker is for static information that doesn't change.
+
+### What is Locker NOT designed for? {#locker-limitations}
+
+Locker is not intended as:
+
+- **A primary password manager**: No browser autofill or extensions
+- **Large file storage**: Has item and storage limits (100 items/1GB free)
+- **A replacement for physical originals**: Keep original documents safe;
+  Locker is for secure backup and quick access
+- **Photo storage**: Use Ente Photos for photos and videos
+- **2FA code generation**: Use Ente Auth for TOTP codes
+
+### Quick reference: Where to store what {#locker-where-to-store}
+
+| Item                  | Recommended App                  |
+| --------------------- | -------------------------------- |
+| Passport scan         | Locker                           |
+| Tax returns           | Locker                           |
+| Insurance cards       | Locker                           |
+| WiFi passwords        | Locker                           |
+| Bank login            | Locker                           |
+| 2FA backup codes      | Locker                           |
+| Family photos         | Photos                           |
+| Scanned old photos    | Photos                           |
+| Children's artwork    | Photos                           |
+| TOTP 2FA codes        | Auth                             |
+| Authenticator secrets | Auth                             |
+| Daily-use passwords   | Password manager + Locker backup |
+
 ## Related Features
 
 - [Installation guide](/locker/getting-started/installation)
 - [Sign up guide](/locker/getting-started/signup)
-- [Cross-device sync](/locker/features/security/sync)
+- [Family setup guide](/locker/getting-started/family-setup)

@@ -1,6 +1,6 @@
 ---
 title: Lock Screen
-description: Protect Ente Locker with biometric or PIN authentication
+description: Add an extra layer of security with Face ID, Touch ID, fingerprint, or PIN protection
 ---
 
 # Lock Screen

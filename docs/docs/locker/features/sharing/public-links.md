@@ -1,13 +1,15 @@
 ---
 title: Public Links
-description: Share Ente Locker content via public links
+description: Create secure, shareable links for documents with optional password protection and expiration
 ---
 
 # Public Links
 
-Public links let you share documents and collections with anyone, even if they
-don't have an Ente account. Recipients can view the content in their web
-browser.
+Public links let you share individual items with anyone, even if they don't have
+an Ente account. Recipients can view the content in their web browser.
+
+This is the way to share individual items with others. To share collections, use
+[Share with Ente users](/locker/features/sharing/share-with-users) instead.
 
 ## How it works
 
@@ -20,18 +22,7 @@ When you create a public link:
 
 ## Creating a public link
 
-### For a document
-
-1. Open the document
-2. Tap the share button
-3. Select **Create public link**
-4. Configure link options (optional)
-5. Tap **Create link**
-6. Copy and share the link
-
-### For a collection
-
-1. Open the collection
+1. Open the item you want to share
 2. Tap the share button
 3. Select **Create public link**
 4. Configure link options (optional)
@@ -76,13 +67,13 @@ When downloads are disabled, viewers can only view content in their browser.
 
 ### Viewing active links
 
-1. Open the document or collection
+1. Open the item
 2. Tap the share button
 3. View all active public links
 
 ### Editing link settings
 
-1. Open the shared document or collection
+1. Open the item
 2. Tap the share button
 3. Tap the link you want to edit
 4. Modify settings
@@ -90,7 +81,7 @@ When downloads are disabled, viewers can only view content in their browser.
 
 ### Revoking a link
 
-1. Open the shared document or collection
+1. Open the item
 2. Tap the share button
 3. Tap the link you want to revoke
 4. Select **Delete link**
