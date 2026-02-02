@@ -224,20 +224,20 @@ func (config *S3Config) GetLlmChatBucketID() string {
 	return bucket7
 }
 
-func (config *S3Config) GetLlmChatBucket() *string {
+func (config *S3Config) GetLlmChatBucket() (*string, error) {
 	bucket := config.buckets[bucket7]
 	if bucket == "" {
-		log.Fatal("Missing s3.b7.bucket configuration (required for llmchat attachments)")
+		return nil, fmt.Errorf("missing s3.b7.bucket configuration (required for llmchat attachments)")
 	}
-	return &bucket
+	return &bucket, nil
 }
 
-func (config *S3Config) GetLlmChatS3Client() *s3.S3 {
-	if config.buckets[bucket7] == "" {
-		log.Fatal("Missing s3.b7.bucket configuration (required for llmchat attachments)")
+func (config *S3Config) GetLlmChatS3Client() (*s3.S3, error) {
+	if _, err := config.GetLlmChatBucket(); err != nil {
+		return nil, err
 	}
 	s3Client := config.GetS3Client(bucket7)
-	return &s3Client
+	return &s3Client, nil
 }
 
 func (config *S3Config) GetDerivedStorageDataCenter() string {

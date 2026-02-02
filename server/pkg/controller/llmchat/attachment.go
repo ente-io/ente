@@ -49,6 +49,18 @@ func (c *AttachmentController) maxAttachmentStorage(userID int64) int64 {
 	return maxAttachmentStorageForUser(c.SubscriptionChecker, userID)
 }
 
+func (c *AttachmentController) llmChatBucketAndClient() (*string, *s3.S3, error) {
+	if c.S3Config == nil {
+		return nil, nil, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
+	}
+	bucket, err := c.S3Config.GetLlmChatBucket()
+	if err != nil {
+		return nil, nil, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
+	}
+	s3Client := c.S3Config.GetS3Client(c.S3Config.GetLlmChatBucketID())
+	return bucket, &s3Client, nil
+}
+
 func (c *AttachmentController) GetUploadURL(
 	ctx *gin.Context,
 	attachmentID string,
@@ -112,9 +124,11 @@ func (c *AttachmentController) GetUploadURL(
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	s3Client := c.S3Config.GetLlmChatS3Client()
+	bucket, s3Client, err := c.llmChatBucketAndClient()
+	if err != nil {
+		return model.AttachmentUploadURLResponse{}, err
+	}
 	dc := c.S3Config.GetLlmChatBucketID()
-	bucket := c.S3Config.GetLlmChatBucket()
 
 	putInput := &s3.PutObjectInput{
 		Bucket: bucket,
@@ -156,10 +170,12 @@ func (c *AttachmentController) attachmentExists(
 	attachmentID string,
 ) (bool, error) {
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetLlmChatBucket()
-	s3Client := c.S3Config.GetLlmChatS3Client()
+	bucket, s3Client, err := c.llmChatBucketAndClient()
+	if err != nil {
+		return false, err
+	}
 
-	_, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
+	_, err = s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
 		Key:    aws.String(objectKey),
 	})
@@ -192,8 +208,10 @@ func (c *AttachmentController) VerifyUploaded(
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetLlmChatBucket()
-	s3Client := c.S3Config.GetLlmChatS3Client()
+	bucket, s3Client, err := c.llmChatBucketAndClient()
+	if err != nil {
+		return err
+	}
 
 	out, err := s3Client.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
@@ -249,8 +267,10 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	s3Client := c.S3Config.GetLlmChatS3Client()
-	bucket := c.S3Config.GetLlmChatBucket()
+	bucket, s3Client, err := c.llmChatBucketAndClient()
+	if err != nil {
+		return "", err
+	}
 
 	getReq, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: bucket,
@@ -275,10 +295,12 @@ func (c *AttachmentController) Delete(ctx context.Context, userID int64, attachm
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket := c.S3Config.GetLlmChatBucket()
-	s3Client := c.S3Config.GetLlmChatS3Client()
+	bucket, s3Client, err := c.llmChatBucketAndClient()
+	if err != nil {
+		return err
+	}
 
-	_, err := s3Client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
+	_, err = s3Client.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
 		Bucket: bucket,
 		Key:    aws.String(objectKey),
 	})
