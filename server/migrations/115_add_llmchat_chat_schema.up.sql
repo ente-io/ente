@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS llmchat_sessions (
     encrypted_data          TEXT,
     header                  TEXT,
     client_metadata         TEXT,
-    client_id               TEXT,
     is_deleted              BOOLEAN NOT NULL DEFAULT FALSE,
     created_at              BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
     updated_at              BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
@@ -37,7 +36,6 @@ CREATE TABLE IF NOT EXISTS llmchat_messages (
     encrypted_data      TEXT,
     header              TEXT,
     client_metadata     TEXT,
-    client_id           TEXT,
     is_deleted          BOOLEAN NOT NULL DEFAULT FALSE,
     created_at          BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
     updated_at          BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
@@ -57,7 +55,6 @@ CREATE TABLE IF NOT EXISTS llmchat_attachments (
     message_uuid    uuid   NOT NULL,
     size            BIGINT NOT NULL,
     client_metadata TEXT,
-    client_id       TEXT,
     created_at      BIGINT NOT NULL DEFAULT now_utc_micro_seconds(),
     CONSTRAINT fk_llmchat_attachments_user_id FOREIGN KEY (user_id) REFERENCES llmchat_key (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_llmchat_attachments_message_uuid FOREIGN KEY (message_uuid) REFERENCES llmchat_messages (message_uuid) ON DELETE CASCADE,
@@ -69,15 +66,15 @@ CREATE INDEX IF NOT EXISTS llmchat_sessions_state_updated_at_index
     ON llmchat_sessions (user_id, is_deleted, updated_at);
 
 CREATE UNIQUE INDEX IF NOT EXISTS llmchat_sessions_client_id_index
-    ON llmchat_sessions (user_id, client_id)
-    WHERE client_id IS NOT NULL;
+    ON llmchat_sessions (user_id, (client_metadata::jsonb->>'clientId'))
+    WHERE client_metadata IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS llmchat_messages_state_updated_at_index
     ON llmchat_messages (user_id, is_deleted, updated_at);
 
 CREATE UNIQUE INDEX IF NOT EXISTS llmchat_messages_client_id_index
-    ON llmchat_messages (user_id, client_id)
-    WHERE client_id IS NOT NULL;
+    ON llmchat_messages (user_id, (client_metadata::jsonb->>'clientId'))
+    WHERE client_metadata IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS llmchat_attachments_user_message_index
     ON llmchat_attachments (user_id, message_uuid);
@@ -86,8 +83,8 @@ CREATE INDEX IF NOT EXISTS llmchat_attachments_user_attachment_index
     ON llmchat_attachments (user_id, attachment_id);
 
 CREATE UNIQUE INDEX IF NOT EXISTS llmchat_attachments_client_id_index
-    ON llmchat_attachments (user_id, client_id)
-    WHERE client_id IS NOT NULL;
+    ON llmchat_attachments (user_id, (client_metadata::jsonb->>'clientId'))
+    WHERE client_metadata IS NOT NULL;
 
 CREATE TRIGGER update_llmchat_sessions_updated_at
     BEFORE UPDATE

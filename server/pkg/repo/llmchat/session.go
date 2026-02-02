@@ -12,8 +12,7 @@ import (
 )
 
 func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.UpsertSessionRequest) (model.Session, error) {
-	clientID, err := ParseClientID(req.ClientMetadata)
-	if err != nil {
+	if _, err := ParseClientID(req.ClientMetadata); err != nil {
 		return model.Session{}, err
 	}
 
@@ -35,17 +34,15 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		encrypted_data,
 		header,
 		client_metadata,
-		client_id,
 		is_deleted,
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, now_utc_micro_seconds())
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE, now_utc_micro_seconds())
 	ON CONFLICT (session_uuid) DO UPDATE
 		SET root_session_uuid = EXCLUDED.root_session_uuid,
 			branch_from_message_uuid = EXCLUDED.branch_from_message_uuid,
 			encrypted_data = EXCLUDED.encrypted_data,
 			header = EXCLUDED.header,
 			client_metadata = EXCLUDED.client_metadata,
-			client_id = EXCLUDED.client_id,
 			is_deleted = FALSE
 		WHERE llmchat_sessions.user_id = EXCLUDED.user_id
 	RETURNING session_uuid, user_id, root_session_uuid, branch_from_message_uuid, encrypted_data, header, client_metadata, is_deleted, created_at, updated_at`,
@@ -56,7 +53,6 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		req.EncryptedData,
 		req.Header,
 		req.ClientMetadata,
-		clientID,
 	)
 
 	var result model.Session
@@ -120,7 +116,8 @@ func (r *Repository) GetSessionMeta(ctx context.Context, sessionUUID string) (Se
 func (r *Repository) GetSessionUUIDByClientID(ctx context.Context, userID int64, clientID string) (string, error) {
 	row := r.DB.QueryRowContext(ctx, `SELECT session_uuid
 		FROM llmchat_sessions
-		WHERE user_id = $1 AND client_id = $2`,
+		WHERE user_id = $1 AND client_metadata IS NOT NULL
+			AND client_metadata::jsonb->>'clientId' = $2`,
 		userID,
 		clientID,
 	)

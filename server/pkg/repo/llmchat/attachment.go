@@ -32,7 +32,8 @@ func buildAttachmentObjectKey(userID int64, attachmentID string) string {
 func (r *Repository) GetAttachmentByClientID(ctx context.Context, userID int64, clientID string) (*AttachmentClientRef, error) {
 	row := r.DB.QueryRowContext(ctx, `SELECT attachment_id, message_uuid
 		FROM llmchat_attachments
-		WHERE user_id = $1 AND client_id = $2`,
+		WHERE user_id = $1 AND client_metadata IS NOT NULL
+			AND client_metadata::jsonb->>'clientId' = $2`,
 		userID,
 		clientID,
 	)

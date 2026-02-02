@@ -13,8 +13,7 @@ import (
 )
 
 func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.UpsertMessageRequest) (model.Message, error) {
-	clientID, err := ParseClientID(req.ClientMetadata)
-	if err != nil {
+	if _, err := ParseClientID(req.ClientMetadata); err != nil {
 		return model.Message{}, err
 	}
 
@@ -36,10 +35,9 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		encrypted_data,
 		header,
 		client_metadata,
-		client_id,
 		is_deleted,
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE, now_utc_micro_seconds())
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, now_utc_micro_seconds())
 	ON CONFLICT (message_uuid) DO UPDATE
 		SET session_uuid = EXCLUDED.session_uuid,
 			parent_message_uuid = EXCLUDED.parent_message_uuid,
@@ -47,7 +45,6 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 			encrypted_data = EXCLUDED.encrypted_data,
 			header = EXCLUDED.header,
 			client_metadata = EXCLUDED.client_metadata,
-			client_id = EXCLUDED.client_id,
 			is_deleted = FALSE
 		WHERE llmchat_messages.user_id = EXCLUDED.user_id
 	RETURNING message_uuid, user_id, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, is_deleted, created_at, updated_at`,
@@ -59,7 +56,6 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		req.EncryptedData,
 		req.Header,
 		req.ClientMetadata,
-		clientID,
 	)
 
 	var result model.Message
@@ -163,9 +159,8 @@ func (r *Repository) replaceMessageAttachments(ctx context.Context, tx *sql.Tx, 
 			user_id,
 			message_uuid,
 			size,
-			client_metadata,
-			client_id
-		) VALUES ($1, $2, $3, $4, $5, $6)`, attachment.ID, userID, messageUUID, attachment.Size, attachment.ClientMetadata, input.clientID); err != nil {
+			client_metadata
+		) VALUES ($1, $2, $3, $4, $5)`, attachment.ID, userID, messageUUID, attachment.Size, attachment.ClientMetadata); err != nil {
 			return stacktrace.Propagate(err, "failed to insert llmchat attachment")
 		}
 		objectKey := buildAttachmentObjectKey(userID, attachment.ID)
@@ -202,7 +197,8 @@ func (r *Repository) GetMessageMeta(ctx context.Context, userID int64, messageUU
 func (r *Repository) GetMessageUUIDByClientID(ctx context.Context, userID int64, clientID string) (string, error) {
 	row := r.DB.QueryRowContext(ctx, `SELECT message_uuid
 		FROM llmchat_messages
-		WHERE user_id = $1 AND client_id = $2`,
+		WHERE user_id = $1 AND client_metadata IS NOT NULL
+			AND client_metadata::jsonb->>'clientId' = $2`,
 		userID,
 		clientID,
 	)
