@@ -108,11 +108,8 @@ func main() {
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
-	viper.SetDefault("llmchat.attachments.enabled", false)
-	viper.SetDefault("llmchat.attachments.cleanup", false)
-	viper.SetDefault("llmchat.max_json_body_bytes", int64(800*1024))
-	viper.SetDefault("llmchat.diff.default_limit", 500)
-	viper.SetDefault("llmchat.diff.maximum_limit", 2500)
+	llmChatAttachmentsEnabled := true
+	llmChatAttachmentsCleanup := true
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
@@ -120,7 +117,6 @@ func main() {
 	secretEncryptionKey := viper.GetString("key.encryption")
 	hashingKey := viper.GetString("key.hash")
 	jwtSecret := viper.GetString("jwt.secret")
-	llmChatAttachmentsCleanup := viper.GetBool("llmchat.attachments.cleanup")
 
 	secretEncryptionKeyBytes, err := b64.StdEncoding.DecodeString(secretEncryptionKey)
 	if err != nil {
@@ -161,7 +157,7 @@ func main() {
 	}, []string{"method"})
 
 	s3Config := s3config.NewS3Config()
-	if viper.GetBool("llmchat.attachments.enabled") {
+	if llmChatAttachmentsEnabled {
 		// Ensure llmchat bucket (b7) is configured. No fallback.
 		_ = s3Config.GetLlmChatBucket()
 	}
@@ -891,12 +887,12 @@ func main() {
 	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
 
 	var llmChatAttachmentController *llmchatCtrl.AttachmentController
-	if viper.GetBool("llmchat.attachments.enabled") {
+	if llmChatAttachmentsEnabled {
 		llmChatAttachmentController = &llmchatCtrl.AttachmentController{
 			S3Config:            s3Config,
 			Repo:                llmChatRepository,
 			SubscriptionChecker: billingController,
-			Enabled:             true,
+			Enabled:             llmChatAttachmentsEnabled,
 			UserRepo:            userRepo,
 			RemoteStoreRepo:     remoteStoreRepository,
 		}
@@ -906,8 +902,8 @@ func main() {
 		KeyCache:            llmChatKeyCache,
 		SubscriptionChecker: billingController,
 		AttachmentCtrl:      llmChatAttachmentController,
-		AttachmentsEnabled:  viper.GetBool("llmchat.attachments.enabled"),
-		CleanupAttachments:  llmChatAttachmentsCleanup && viper.GetBool("llmchat.attachments.enabled"),
+		AttachmentsEnabled:  llmChatAttachmentsEnabled,
+		CleanupAttachments:  llmChatAttachmentsCleanup && llmChatAttachmentsEnabled,
 		UserRepo:            userRepo,
 		RemoteStoreRepo:     remoteStoreRepository,
 	}
@@ -922,7 +918,7 @@ func main() {
 	privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
 	privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
 	privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
-	if viper.GetBool("llmchat.attachments.enabled") {
+	if llmChatAttachmentsEnabled {
 		privateAPI.POST("/llmchat/chat/attachment/:attachmentId/upload-url", llmChatHandler.GetAttachmentUploadURL)
 		privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
 	}

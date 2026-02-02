@@ -9,13 +9,9 @@ import (
 	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/llmchat"
 	llmchat "github.com/ente-io/museum/pkg/controller/llmchat"
-	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
-	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 // LlmChatHandler expose request handlers for llm chat endpoints.
@@ -31,73 +27,15 @@ const (
 )
 
 func llmChatMaxJSONBodyBytes() int64 {
-	v := viper.GetInt64("llmchat.max_json_body_bytes")
-	if v <= 0 {
-		return llmChatMaxJSONBodyBytesDefault
-	}
-	return v
+	return llmChatMaxJSONBodyBytesDefault
 }
 
 func llmChatDiffDefaultLimit() int16 {
-	v := viper.GetInt("llmchat.diff.default_limit")
-	if v <= 0 {
-		return llmChatDiffDefaultLimitDefault
-	}
-	if v > int(^uint16(0)>>1) {
-		return llmChatDiffDefaultLimitDefault
-	}
-	return int16(v)
+	return llmChatDiffDefaultLimitDefault
 }
 
 func llmChatDiffMaximumLimit() int16 {
-	v := viper.GetInt("llmchat.diff.maximum_limit")
-	if v <= 0 {
-		return llmChatDiffMaximumLimitDefault
-	}
-	if v > int(^uint16(0)>>1) {
-		return llmChatDiffMaximumLimitDefault
-	}
-	return int16(v)
-}
-
-func logLlmChatDiff(c *gin.Context, req model.GetDiffRequest, resp *model.GetDiffResponse) {
-	if resp == nil {
-		return
-	}
-	sessions := len(resp.Sessions)
-	messages := len(resp.Messages)
-	sessionTombstones := len(resp.Tombstones.Sessions)
-	messageTombstones := len(resp.Tombstones.Messages)
-	total := sessions + messages + sessionTombstones + messageTombstones
-	sinceTime := int64(0)
-	if req.SinceTime != nil {
-		sinceTime = *req.SinceTime
-	}
-	sinceType := ""
-	if req.SinceType != nil {
-		sinceType = *req.SinceType
-	}
-	sinceID := ""
-	if req.SinceID != nil {
-		sinceID = *req.SinceID
-	}
-	logrus.WithFields(logrus.Fields{
-		"req_id":             requestid.Get(c),
-		"user_id":            auth.GetUserID(c.Request.Header),
-		"since_time":         sinceTime,
-		"since_type":         sinceType,
-		"since_id":           sinceID,
-		"limit":              req.Limit,
-		"sessions":           sessions,
-		"messages":           messages,
-		"session_tombstones": sessionTombstones,
-		"message_tombstones": messageTombstones,
-		"total":              total,
-		"next_since_time":    resp.Cursor.SinceTime,
-		"next_since_type":    resp.Cursor.SinceType,
-		"next_since_id":      resp.Cursor.SinceID,
-		"timestamp":          resp.Timestamp,
-	}).Info("llm chat diff served")
+	return llmChatDiffMaximumLimitDefault
 }
 
 func bindJSONWithLimit(c *gin.Context, out interface{}, maxBytes int64) error {
@@ -268,6 +206,5 @@ func (h *LlmChatHandler) GetDiff(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to fetch llm chat diff"))
 		return
 	}
-	logLlmChatDiff(c, request, resp)
 	c.JSON(http.StatusOK, resp)
 }
