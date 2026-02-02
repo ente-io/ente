@@ -359,8 +359,12 @@ export const sidebar = [
                         link: "/locker/getting-started/signup",
                     },
                     {
-                        text: "First document",
+                        text: "First item",
                         link: "/locker/getting-started/first-document",
+                    },
+                    {
+                        text: "Family setup",
+                        link: "/locker/getting-started/family-setup",
                     },
                 ],
             },
@@ -369,12 +373,16 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
-                        text: "Information Types",
+                        text: "Item Types",
                         collapsed: true,
                         items: [
                             {
                                 text: "Overview",
                                 link: "/locker/features/information-types/",
+                            },
+                            {
+                                text: "Documents",
+                                link: "/locker/features/information-types/documents",
                             },
                             {
                                 text: "Personal Notes",
@@ -387,10 +395,6 @@ export const sidebar = [
                             {
                                 text: "Physical Records",
                                 link: "/locker/features/information-types/physical-records",
-                            },
-                            {
-                                text: "Emergency Contacts",
-                                link: "/locker/features/information-types/emergency-contacts",
                             },
                         ],
                     },
@@ -450,9 +454,15 @@ export const sidebar = [
                                 text: "Lock screen",
                                 link: "/locker/features/security/lock-screen",
                             },
+                        ],
+                    },
+                    {
+                        text: "Legacy",
+                        collapsed: true,
+                        items: [
                             {
-                                text: "Sync",
-                                link: "/locker/features/security/sync",
+                                text: "Overview",
+                                link: "/locker/features/legacy/",
                             },
                         ],
                     },
@@ -468,7 +478,7 @@ export const sidebar = [
                         link: "/locker/faq/getting-started",
                     },
                     {
-                        text: "Information Types",
+                        text: "Item Types",
                         link: "/locker/faq/information-types",
                     },
                     {
@@ -478,6 +488,10 @@ export const sidebar = [
                     {
                         text: "Sharing",
                         link: "/locker/faq/sharing",
+                    },
+                    {
+                        text: "Legacy",
+                        link: "/locker/faq/legacy",
                     },
                     {
                         text: "Security",

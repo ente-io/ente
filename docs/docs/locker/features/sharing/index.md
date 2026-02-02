@@ -1,46 +1,54 @@
 ---
 title: Sharing
-description: Overview of sharing features in Ente Locker
+description: Share documents securely with family members or create encrypted public links
 ---
 
 # Sharing
 
-Ente Locker lets you securely share your documents and collections with others.
-All shared data remains end-to-end encrypted.
+Ente Locker lets you securely share your collections and items with others. All
+shared data remains end-to-end encrypted.
 
 ## Ways to share
 
-### Share with Ente users
+### Share collections with Ente users
 
-Share directly with someone who has an Ente account. They'll receive
-notifications and can access shared content from their Locker app.
+Share collections directly with someone who has an Ente account. They'll receive
+notifications and can access shared collections from their Locker app.
 
-Learn more about [Sharing with users](/locker/features/sharing/share-with-users).
+Learn more about
+[Sharing collections with users](/locker/features/sharing/share-with-users).
 
-### Public links
+### Share items via public links
 
-Create shareable links that anyone can access in a web browser without needing
-an Ente account. Perfect for sharing with people who don't use Ente.
+Create shareable links for individual items that anyone can access in a web
+browser without needing an Ente account. Perfect for sharing specific documents
+with people who don't use Ente.
 
 Learn more about [Public links](/locker/features/sharing/public-links).
 
+## What you can share
+
+| Content     | Share with Ente users | Share via public link |
+| ----------- | --------------------- | --------------------- |
+| Collections | Yes                   | No                    |
+| Items       | No                    | Yes                   |
+
+To share with other Ente users, organize items into a collection and share the
+collection. To share individual items with anyone (including non-Ente users),
+create a public link.
+
 ## Security considerations
 
-### Sharing with Ente users
+### Sharing collections with Ente users
 
 When you share with another Ente user, the decryption keys are encrypted
 specifically for their account. Only they can decrypt and view the content.
 
 ### Public links
 
-Public links embed the decryption key in the URL. Anyone with the link can
-view the content. Use additional security options like passwords and
-expiration dates for sensitive information.
-
-## What you can share
-
-- **Individual documents**: Share a single note, credential, or other document
-- **Collections**: Share an entire collection of documents at once
+Public links embed the decryption key in the URL. Anyone with the link can view
+the content. Use additional security options like passwords and expiration dates
+for sensitive information.
 
 ## Related FAQs
 
