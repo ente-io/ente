@@ -68,10 +68,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final DateTime start = DateTime.now();
 
     final ui.Image decodedResult = await decodeImageFromList(bytes);
+    // Use PNG format to preserve transparency and avoid white edge artifacts
+    // that occur when ColorFilter.matrix creates semi-transparent edge pixels
+    // which composite against white when converted to JPEG.
     final result = await FlutterImageCompress.compressWithList(
       bytes,
       minWidth: decodedResult.width,
       minHeight: decodedResult.height,
+      format: CompressFormat.png,
     );
     _logger.info('Size after compression = ${result.length}');
     final Duration diff = DateTime.now().difference(start);
@@ -82,7 +86,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           path.basenameWithoutExtension(widget.originalFile.title!) +
               "_edited_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
-              ".JPEG";
+              ".PNG";
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
@@ -206,6 +210,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           ),
           configs: ProImageEditorConfigs(
             imageGeneration: const ImageGenerationConfigs(
+              outputFormat: OutputFormat.png,
               jpegQuality: 100,
               enableIsolateGeneration: true,
               pngLevel: 0,
