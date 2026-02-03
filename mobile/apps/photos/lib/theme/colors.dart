@@ -61,6 +61,30 @@ class EnteColorScheme {
   // Menu item icon stroke color
   final Color menuItemIconStroke;
 
+  final Color fill;
+  final Color fillDarker;
+  final Color fillDarkest;
+
+  final Color content;
+  final Color contentLighter;
+  final Color contentLightest;
+  final Color contentReverse;
+
+  final Color strokeSolid;
+  final Color strokeSolidDark;
+
+  final Color backgroundColour;
+
+  final Color greenBase;
+  final Color greenDark;
+  final Color greenDarker;
+  final Color greenLight;
+
+  final Color redBase;
+  final Color redDark;
+  final Color redDarker;
+  final Color redLight;
+
   const EnteColorScheme(
     this.backgroundBase,
     this.backgroundElevated,
@@ -88,7 +112,25 @@ class EnteColorScheme {
     this.blurStrokePressed,
     this.tabIcon,
     this.avatarColors,
-    this.menuItemIconStroke, {
+    this.menuItemIconStroke,
+    this.fill,
+    this.fillDarker,
+    this.fillDarkest,
+    this.content,
+    this.contentLighter,
+    this.contentLightest,
+    this.contentReverse,
+    this.strokeSolid,
+    this.strokeSolidDark,
+    this.backgroundColour,
+    this.greenBase,
+    this.greenDark,
+    this.greenDarker,
+    this.greenLight,
+    this.redBase,
+    this.redDark,
+    this.redDarker,
+    this.redLight, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -131,6 +173,24 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   tabIconLight,
   avatarLight,
   menuItemIconStrokeLight,
+  fillLight,
+  fillDarkerLight,
+  fillDarkestLight,
+  contentLight,
+  contentLighterLight,
+  contentLightestLight,
+  contentReverseLight,
+  strokeLight,
+  strokeDarkLight,
+  backgroundColourLight,
+  green,
+  greenDark,
+  greenDarker,
+  greenLightLight,
+  red,
+  redDark,
+  redDarker,
+  redLightLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -161,6 +221,24 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   tabIconDark,
   avatarDark,
   menuItemIconStrokeDark,
+  fillDark,
+  fillDarkerDark,
+  fillDarkestDark,
+  contentDark,
+  contentLighterDark,
+  contentLightestDark,
+  contentReverseDark,
+  strokeDark,
+  strokeDarkDark,
+  backgroundColourDark,
+  green,
+  greenDark,
+  greenDarker,
+  greenLightDark,
+  red,
+  redDark,
+  redDarker,
+  redLightDark,
 );
 
 // Background Colors
@@ -248,26 +326,6 @@ const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
 const Color _primary400 = Color.fromRGBO(38, 203, 95, 1);
 const Color _primary300 = Color.fromRGBO(1, 222, 77, 1);
 
-
-// Green Colors
-const Color green = Color.fromRGBO(8, 194, 37, 1);
-const Color greenLightLight = Color.fromRGBO(231, 246, 233, 1);
-const Color greenLightDark = Color.fromRGBO(33, 33, 33, 1);
-const Color greenDark = Color.fromRGBO(6, 157, 30, 1);
-const Color greenDarker = Color.fromRGBO(5, 124, 24, 1);
-
-// Red Colors
-const Color red = Color.fromRGBO(246, 58, 58, 1);
-const Color redLightLight = Color.fromRGBO(250, 235, 235, 1);
-const Color redLightDark = Color.fromRGBO(33, 33, 33, 1);
-const Color redDark = Color.fromRGBO(221, 52, 52, 1);
-const Color redDarker = Color.fromRGBO(197, 46, 46, 1);
-
-// Button Colors
-const Color buttonDisabledBg = Color(0xFFF5F5F5);
-const Color buttonDisabledText = Color(0xFF969696);
-const Color buttonTextOnColor = Color(0xFFFFFFFF);
-
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
@@ -330,3 +388,66 @@ const List<Color> avatarDark = [
   Color.fromRGBO(209, 132, 132, 1),
   Color.fromRGBO(120, 181, 167, 1),
 ];
+
+// Green Colors
+const Color green = Color.fromRGBO(8, 194, 37, 1);
+const Color greenLightLight = Color.fromRGBO(231, 246, 233, 1);
+const Color greenLightDark = Color.fromRGBO(33, 33, 33, 1);
+const Color greenDark = Color.fromRGBO(6, 157, 30, 1);
+const Color greenDarker = Color.fromRGBO(5, 124, 24, 1);
+
+// Red Colors
+const Color red = Color.fromRGBO(246, 58, 58, 1);
+const Color redLightLight = Color.fromRGBO(250, 235, 235, 1);
+const Color redLightDark = Color.fromRGBO(33, 33, 33, 1);
+const Color redDark = Color.fromRGBO(221, 52, 52, 1);
+const Color redDarker = Color.fromRGBO(197, 46, 46, 1);
+
+// Fill Colors
+const Color fillLight = Color.fromRGBO(255, 255, 255, 1);
+const Color fillDark = Color.fromRGBO(33, 33, 33, 1);
+
+const Color fillDarkLight = Color.fromRGBO(245, 245, 245, 1);
+const Color fillDarkDark = Color.fromRGBO(10, 10, 10, 1);
+
+const Color fillDarkerLight = Color.fromRGBO(233, 233, 233, 1);
+const Color fillDarkerDark = Color.fromRGBO(20, 20, 20, 1);
+
+const Color fillDarkestLight = Color.fromRGBO(210, 210, 210, 1);
+const Color fillDarkestDark = Color.fromRGBO(41, 41, 41, 1);
+
+const Color fillReverseLight = Color.fromRGBO(0, 0, 0, 1);
+const Color fillReverseDark = Color.fromRGBO(255, 255, 255, 1);
+
+// Content Colors
+const Color contentLight = Color.fromRGBO(0, 0, 0, 1);
+const Color contentDark = Color.fromRGBO(255, 255, 255, 1);
+
+const Color contentDarkLight = Color.fromRGBO(26, 26, 26, 1);
+const Color contentDarkDark = Color.fromRGBO(229, 229, 229, 1);
+
+const Color contentDarkerLight = Color.fromRGBO(21, 21, 21, 1);
+const Color contentDarkerDark = Color.fromRGBO(204, 204, 204, 1);
+
+const Color contentLightLight = Color.fromRGBO(102, 102, 102, 1);
+const Color contentLightDark = Color.fromRGBO(153, 153, 153, 1);
+
+const Color contentLighterLight = Color.fromRGBO(150, 150, 150, 1);
+const Color contentLighterDark = Color.fromRGBO(150, 150, 150, 1);
+
+const Color contentLightestLight = Color.fromRGBO(222, 222, 222, 1);
+const Color contentLightestDark = Color.fromRGBO(10, 10, 10, 1);
+
+const Color contentReverseLight = Color.fromRGBO(255, 255, 255, 1);
+const Color contentReverseDark = Color.fromRGBO(0, 0, 0, 1);
+
+// Stroke Colors
+const Color strokeLight = Color.fromRGBO(235, 235, 235, 1);
+const Color strokeDark = Color.fromRGBO(20, 20, 20, 1);
+
+const Color strokeDarkLight = Color.fromRGBO(224, 224, 224, 1);
+const Color strokeDarkDark = Color.fromRGBO(62, 62, 62, 1);
+
+// Background
+const Color backgroundColourLight = Color.fromRGBO(250, 250, 250, 1);
+const Color backgroundColourDark = Color.fromRGBO(22, 22, 22, 1);

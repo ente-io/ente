@@ -12,70 +12,43 @@ enum ButtonTypeV2 {
   neutral,
   critical,
   tertiaryCritical,
-  link,
-  trailingIcon,
-  trailingIconPrimary,
-  trailingIconSecondary,
-  tertiary;
-
-  bool get isPrimary =>
-      this == ButtonTypeV2.primary || this == ButtonTypeV2.trailingIconPrimary;
-
-  bool get hasTrailingIcon =>
-      this == ButtonTypeV2.trailingIcon ||
-      this == ButtonTypeV2.trailingIconPrimary ||
-      this == ButtonTypeV2.trailingIconSecondary;
-
-  bool get isSecondary =>
-      this == ButtonTypeV2.secondary ||
-      this == ButtonTypeV2.trailingIconSecondary;
-
-  bool get isCritical =>
-      this == ButtonTypeV2.critical || this == ButtonTypeV2.tertiaryCritical;
-
-  bool get isNeutral =>
-      this == ButtonTypeV2.neutral || this == ButtonTypeV2.trailingIcon;
+  link;
 
   ButtonTheme getColorPalette(EnteColorScheme colorScheme) {
     switch (this) {
       case ButtonTypeV2.primary:
-      case ButtonTypeV2.trailingIconPrimary:
-        return _primaryPalette;
+        return _primaryPalette(colorScheme);
       case ButtonTypeV2.critical:
-        return _criticalPalette;
+        return _criticalPalette(colorScheme);
       case ButtonTypeV2.secondary:
-      case ButtonTypeV2.trailingIconSecondary:
         return _secondaryPalette(colorScheme);
       case ButtonTypeV2.neutral:
-      case ButtonTypeV2.trailingIcon:
         return _neutralPalette(colorScheme);
       case ButtonTypeV2.tertiaryCritical:
         return _tertiaryCriticalPalette(colorScheme);
       case ButtonTypeV2.link:
         return _linkPalette(colorScheme);
-      case ButtonTypeV2.tertiary:
-        return _tertiaryPalette(colorScheme);
     }
   }
 }
 
-const _primaryPalette = ButtonTheme(
-  defaultBg: green,
-  hoverBg: greenDark,
-  pressedBg: greenDarker,
-  disabledBg: buttonDisabledBg,
-  foreground: buttonTextOnColor,
-  disabledForeground: buttonDisabledText,
-);
+ButtonTheme _primaryPalette(EnteColorScheme c) => ButtonTheme(
+      defaultBg: c.greenBase,
+      hoverBg: c.greenDark,
+      pressedBg: c.greenDarker,
+      disabledBg: c.fillBaseGrey,
+      foreground: c.contentReverse,
+      disabledForeground: c.contentLighter,
+    );
 
-const _criticalPalette = ButtonTheme(
-  defaultBg: red,
-  hoverBg: redDark,
-  pressedBg: redDarker,
-  disabledBg: buttonDisabledBg,
-  foreground: buttonTextOnColor,
-  disabledForeground: buttonDisabledText,
-);
+ButtonTheme _criticalPalette(EnteColorScheme c) => ButtonTheme(
+      defaultBg: c.redBase,
+      hoverBg: c.redDark,
+      pressedBg: c.redDarker,
+      disabledBg: c.fillBaseGrey,
+      foreground: c.contentReverse,
+      disabledForeground: c.contentLighter,
+    );
 
 ButtonTheme _secondaryPalette(EnteColorScheme c) => ButtonTheme(
       defaultBg: c.fillFaint,
@@ -90,20 +63,16 @@ ButtonTheme _secondaryPalette(EnteColorScheme c) => ButtonTheme(
       disabledIconColor: c.strokeMuted,
     );
 
-ButtonTheme _neutralPalette(EnteColorScheme c) {
-  final inverseForeground =
-      c.fillBase == fillBaseLight ? textBaseDark : textBaseLight;
-  return ButtonTheme(
-    defaultBg: c.fillBase,
-    hoverBg: c.fillStrong,
-    pressedBg: c.fillBasePressed,
-    disabledBg: c.fillFaint,
-    foreground: inverseForeground,
-    disabledForeground: c.textFaint,
-    disabledIconColor: c.strokeMuted,
-    checkmarkColor: c.primary500,
-  );
-}
+ButtonTheme _neutralPalette(EnteColorScheme c) => ButtonTheme(
+      defaultBg: c.fillBase,
+      hoverBg: c.fillStrong,
+      pressedBg: c.fillBasePressed,
+      disabledBg: c.fillFaint,
+      foreground: c.contentReverse,
+      disabledForeground: c.textFaint,
+      disabledIconColor: c.strokeMuted,
+      checkmarkColor: c.primary500,
+    );
 
 ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
       defaultBg: Colors.transparent,
@@ -111,10 +80,10 @@ ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
       pressedBg: c.warning700.withValues(alpha: 0.1),
       disabledBg: Colors.transparent,
       foreground: c.warning500,
-      disabledForeground: c.textFaint,
+      disabledForeground: c.contentLighter,
       defaultBorder: c.warning500,
-      disabledBorder: c.strokeMuted,
-      disabledIconColor: c.strokeMuted,
+      disabledBorder: c.fillBaseGrey,
+      disabledIconColor: c.contentLighter,
     );
 
 ButtonTheme _linkPalette(EnteColorScheme c) => ButtonTheme(
@@ -125,17 +94,6 @@ ButtonTheme _linkPalette(EnteColorScheme c) => ButtonTheme(
       foreground: c.primary500,
       hoverForeground: c.primary400,
       pressedForeground: c.primary700,
-      disabledForeground: c.textFaint,
-      disabledIconColor: c.strokeMuted,
-    );
-
-ButtonTheme _tertiaryPalette(EnteColorScheme c) => ButtonTheme(
-      defaultBg: Colors.transparent,
-      hoverBg: c.fillFaint,
-      pressedBg: c.fillFaintPressed,
-      disabledBg: Colors.transparent,
-      foreground: c.textBase,
-      pressedForeground: c.fillBasePressed,
       disabledForeground: c.textFaint,
       disabledIconColor: c.strokeMuted,
     );

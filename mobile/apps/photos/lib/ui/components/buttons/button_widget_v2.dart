@@ -20,12 +20,11 @@ class ButtonWidgetV2 extends StatefulWidget {
   final String? labelText;
   final FutureVoidCallback? onTap;
   final bool isDisabled;
-  final IconData? trailingIcon;
+  final Widget? trailingWidget;
   final bool shouldSurfaceExecutionStates;
   final bool shouldStickToDarkTheme;
   final ButtonSizeV2 buttonSize;
-  final IconData? icon;
-  final Widget? iconWidget;
+  final Widget? leadingWidget;
   final Color? iconColor;
   final ButtonAction? buttonAction;
   final bool isInAlert;
@@ -37,12 +36,11 @@ class ButtonWidgetV2 extends StatefulWidget {
     this.labelText,
     this.onTap,
     this.isDisabled = false,
-    this.trailingIcon,
+    this.trailingWidget,
     this.shouldSurfaceExecutionStates = true,
     this.shouldStickToDarkTheme = false,
     this.buttonSize = ButtonSizeV2.large,
-    this.icon,
-    this.iconWidget,
+    this.leadingWidget,
     this.iconColor,
     this.buttonAction,
     this.isInAlert = false,
@@ -86,9 +84,8 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
 
     final idleContentChanged = widget.buttonType != oldWidget.buttonType ||
         widget.labelText != oldWidget.labelText ||
-        widget.icon != oldWidget.icon ||
-        widget.iconWidget != oldWidget.iconWidget ||
-        widget.trailingIcon != oldWidget.trailingIcon;
+        widget.leadingWidget != oldWidget.leadingWidget ||
+        widget.trailingWidget != oldWidget.trailingWidget;
 
     if (widget.buttonSize != oldWidget.buttonSize ||
         (widget.buttonSize == ButtonSizeV2.small && idleContentChanged)) {
@@ -138,13 +135,11 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
     final isSmall = widget.buttonSize == ButtonSizeV2.small;
     final isScaledDown = _isFingerDown;
 
-    final double? height = isLink ? null : (isSmall ? null : 52);
-    final double borderRadius = isLink ? 0 : (isSmall ? 4 : 20);
+    final double? height = isLink ? null : 52;
+    final double borderRadius = isLink ? 0 : 20;
     final EdgeInsets padding = isLink
         ? const EdgeInsets.symmetric(vertical: 4)
-        : (isSmall
-            ? const EdgeInsets.symmetric(vertical: 14, horizontal: 16)
-            : const EdgeInsets.symmetric(horizontal: 24));
+        : const EdgeInsets.symmetric(vertical: 14, horizontal: 24);
 
     return MouseRegion(
       onEnter: (_) => _setHovered(true),
@@ -264,8 +259,8 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
   Widget _buildSuccessContent(ButtonColors colors) {
     return Center(
       key: const ValueKey('success'),
-      child: Icon(
-        Icons.check_rounded,
+      child: HugeIcon(
+        icon: HugeIcons.strokeRoundedTick02,
         color: colors.checkmarkColor,
         size: 24,
       ),
@@ -296,29 +291,27 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
           widget.buttonType == ButtonTypeV2.link ? colors.textColor : null,
     );
 
-    final hasLeadingIcon = widget.icon != null || widget.iconWidget != null;
+    final hasLeading = widget.leadingWidget != null;
     final hasLabel = widget.labelText != null;
 
-    if (widget.buttonType.hasTrailingIcon || widget.trailingIcon != null) {
+    if (widget.trailingWidget != null) {
       return Row(
         key: const ValueKey('idle'),
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: isSmall ? MainAxisSize.min : MainAxisSize.max,
         children: [
-          if (hasLeadingIcon) ...[
-            widget.iconWidget ??
-                Icon(
-                  widget.icon,
-                  color: colors.iconColor,
-                  size: 20,
-                ),
+          if (hasLeading) ...[
+            IconTheme(
+              data: IconThemeData(color: colors.iconColor, size: 20),
+              child: widget.leadingWidget!,
+            ),
             if (hasLabel) const SizedBox(width: 8),
           ],
           if (hasLabel)
             Flexible(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: hasLeadingIcon ? 0 : 8,
+                  horizontal: hasLeading ? 0 : 8,
                 ),
                 child: Text(
                   widget.labelText!,
@@ -328,12 +321,11 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
                 ),
               ),
             ),
-          if (widget.trailingIcon != null) ...[
+          if (widget.trailingWidget != null) ...[
             const SizedBox(width: 12),
-            Icon(
-              widget.trailingIcon,
-              color: colors.iconColor,
-              size: 20,
+            IconTheme(
+              data: IconThemeData(color: colors.iconColor, size: 20),
+              child: widget.trailingWidget!,
             ),
           ],
         ],
@@ -345,13 +337,11 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
       mainAxisSize: isSmall ? MainAxisSize.min : MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (hasLeadingIcon) ...[
-          widget.iconWidget ??
-              Icon(
-                widget.icon,
-                color: colors.iconColor,
-                size: 20,
-              ),
+        if (hasLeading) ...[
+          IconTheme(
+            data: IconThemeData(color: colors.iconColor, size: 20),
+            child: widget.leadingWidget!,
+          ),
           if (hasLabel) const SizedBox(width: 8),
         ],
         if (hasLabel)
