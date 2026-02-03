@@ -7,7 +7,7 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
-## v1.7.18 (desktop) - Jan 2025
+## v1.7.18 (desktop) - Jan 2026
 
 - Hide shared albums
 - Watch folders will now be marked as inaccessible if they can't be accessed, instead of completely removing them from the list
