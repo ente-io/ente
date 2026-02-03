@@ -62,10 +62,15 @@ class EnteColorScheme {
   final Color menuItemIconStroke;
 
   final Color fill;
+  final Color fillDark;
   final Color fillDarker;
   final Color fillDarkest;
+  final Color fillReverse;
 
   final Color content;
+  final Color contentDark;
+  final Color contentDarker;
+  final Color contentLight;
   final Color contentLighter;
   final Color contentLightest;
   final Color contentReverse;
@@ -114,9 +119,14 @@ class EnteColorScheme {
     this.avatarColors,
     this.menuItemIconStroke,
     this.fill,
+    this.fillDark,
     this.fillDarker,
     this.fillDarkest,
+    this.fillReverse,
     this.content,
+    this.contentDark,
+    this.contentDarker,
+    this.contentLight,
     this.contentLighter,
     this.contentLightest,
     this.contentReverse,
@@ -174,9 +184,14 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   avatarLight,
   menuItemIconStrokeLight,
   fillLight,
+  fillDarkLight,
   fillDarkerLight,
   fillDarkestLight,
+  fillReverseLight,
   contentLight,
+  contentDarkLight,
+  contentDarkerLight,
+  contentLightLight,
   contentLighterLight,
   contentLightestLight,
   contentReverseLight,
@@ -222,9 +237,14 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   avatarDark,
   menuItemIconStrokeDark,
   fillDark,
+  fillDarkDark,
   fillDarkerDark,
   fillDarkestDark,
+  fillReverseDark,
   contentDark,
+  contentDarkDark,
+  contentDarkerDark,
+  contentLightDark,
   contentLighterDark,
   contentLightestDark,
   contentReverseDark,
