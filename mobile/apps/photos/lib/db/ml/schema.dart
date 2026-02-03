@@ -154,3 +154,15 @@ CREATE TABLE IF NOT EXISTS $textEmbeddingsCacheTable (
 ''';
 
 const deleteTextEmbeddingsCacheTable = 'DELETE FROM $textEmbeddingsCacheTable';
+
+// ## OFFLINE FILE KEY MAP TABLE
+const offlineFileKeyMapTable = 'offline_file_key_map';
+const offlineFileKeyLocalIdColumn = 'local_id';
+const offlineFileKeyIntIdColumn = 'local_int_id';
+
+const createOfflineFileKeyMapTable = '''
+CREATE TABLE IF NOT EXISTS $offlineFileKeyMapTable (
+  $offlineFileKeyIntIdColumn INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  $offlineFileKeyLocalIdColumn TEXT NOT NULL UNIQUE
+);
+''';

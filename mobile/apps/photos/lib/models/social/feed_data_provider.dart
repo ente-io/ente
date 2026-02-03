@@ -40,7 +40,7 @@ class FeedDataProvider {
     final results = await Future.wait([
       _db.getReactionsOnFiles(excludeUserID: userID, limit: limit),
       _db.getCommentsOnFiles(excludeUserID: userID, limit: limit),
-      _db.getRepliesToUserComments(targetUserID: userID, limit: limit),
+      _db.getReplies(excludeUserID: userID, limit: limit),
       _db.getReactionsOnUserComments(targetUserID: userID, limit: limit),
       _db.getReactionsOnUserReplies(targetUserID: userID, limit: limit),
     ]);

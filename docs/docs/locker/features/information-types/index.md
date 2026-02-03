@@ -1,14 +1,22 @@
 ---
-title: Information Types
-description: Overview of the four information types in Ente Locker
+title: Item Types
+description: Store documents, notes, passwords, and track physical records securely in Ente Locker
 ---
 
-# Information Types
+# Item Types
 
-Ente Locker supports four types of information, each designed for specific use
-cases. All types are end-to-end encrypted and sync across your devices.
+Ente Locker supports multiple item types, each designed for specific use cases.
+All types are end-to-end encrypted.
 
 ## Available types
+
+### Documents
+
+Upload and store files securely including PDFs, images, and scans. Keep
+important documents like passports, contracts, receipts, and certificates
+encrypted and accessible.
+
+Learn more about [Documents](/locker/features/information-types/documents).
 
 ### Personal Notes
 
@@ -26,31 +34,22 @@ Learn more about [Account Credentials](/locker/features/information-types/accoun
 
 ### Physical Records
 
-Track where your physical documents are stored. Record locations for
-passports, birth certificates, property deeds, and other important papers.
+Track where your physical documents are stored. Record locations for passports,
+birth certificates, property deeds, and other important papers.
 
 Learn more about [Physical Records](/locker/features/information-types/physical-records).
 
-### Emergency Contacts
-
-Store critical contact information for emergencies. Keep phone numbers,
-addresses, and notes for doctors, family members, lawyers, and other
-important contacts.
-
-Learn more about [Emergency Contacts](/locker/features/information-types/emergency-contacts).
-
 ## Common features
 
-All information types share these features:
+All item types share these features:
 
 - **End-to-end encryption**: Data is encrypted before leaving your device
-- **Cross-device sync**: Access on all your mobile devices
-- **Collections**: Organize documents into groups
+- **Collections**: Organize items into groups
 - **Sharing**: Share with other Ente users or via public links
-- **Search**: Find documents by title or content
+- **Search**: Find items by title
 
 ## Related FAQs
 
 - [What types of information can I store?](/locker/faq/information-types#locker-what-types)
-- [Can I create custom information types?](/locker/faq/information-types#locker-custom-types)
+- [Can I create custom item types?](/locker/faq/information-types#locker-custom-types)
 - [How is my data encrypted?](/locker/faq/security#locker-encryption-method)

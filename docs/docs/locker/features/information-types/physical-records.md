@@ -29,7 +29,7 @@ and other papers you need to find when it matters.
     - **Name**: Document name (e.g., "Passport", "House Deed")
     - **Location**: Where it's stored (e.g., "Home safe, top drawer")
     - **Notes**: Any other relevant information (optional)
-5. Select a collection (optional)
+5. Select one or more collections
 6. Tap **Save**
 
 ## Features

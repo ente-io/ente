@@ -6,6 +6,7 @@ import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
@@ -17,6 +18,7 @@ import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
+import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -29,13 +31,15 @@ class SemanticSearchService {
 
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
-  late final mlDataDB = MLDataDB.instance;
+  MLDataDB get _mlDataDB =>
+      isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
 
   final _cacheLock = Lock();
   bool _imageEmbeddingsAreCached = false;
+  bool? _cachedEmbeddingsOffline;
   Timer? _embeddingsCacheTimer;
   final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
 
@@ -47,7 +51,7 @@ class SemanticSearchService {
       _logger.info("Initialized already");
       return;
     }
-    final hasGivenConsent = flagService.hasGrantedMLConsent;
+    final hasGivenConsent = hasGrantedMLConsent;
     if (!hasGivenConsent) return;
 
     _logger.info("init called");
@@ -64,7 +68,7 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return flagService.hasGrantedMLConsent && _textModelIsLoaded;
+    return hasGrantedMLConsent && _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -73,7 +77,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${flagService.hasGrantedMLConsent}, loaded: $_textModelIsLoaded ",
+          "ML global consent: $hasGrantedMLConsent, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -101,7 +105,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await mlDataDB.deleteClipIndexes();
+    await _mlDataDB.deleteClipIndexes();
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
@@ -111,15 +115,25 @@ class SemanticSearchService {
     return _cacheLock.synchronized(() async {
       _resetInactivityTimer();
       if (_imageEmbeddingsAreCached) {
+        if (_cachedEmbeddingsOffline != isOfflineMode) {
+          await MLComputer.instance.clearImageEmbeddingsCache();
+          _imageEmbeddingsAreCached = false;
+          _cachedEmbeddingsOffline = null;
+        } else {
+          return;
+        }
+      }
+      if (_imageEmbeddingsAreCached) {
         return;
       }
       final now = DateTime.now();
-      final imageEmbeddings = await mlDataDB.getAllClipVectors();
+      final imageEmbeddings = await _mlDataDB.getAllClipVectors();
       _logger.info(
         "read all ${imageEmbeddings.length} embeddings from DB in ${DateTime.now().difference(now).inMilliseconds} ms",
       );
       await MLComputer.instance.cacheImageEmbeddings(imageEmbeddings);
       _imageEmbeddingsAreCached = true;
+      _cachedEmbeddingsOffline = isOfflineMode;
       return;
     });
   }
@@ -160,6 +174,14 @@ class SemanticSearchService {
       fileIDToScoreMap[result.id] = result.score;
     }
 
+    if (isOfflineMode) {
+      return _getOfflineMatchingFiles(
+        queryResults,
+        fileIDToScoreMap,
+        showThreshold,
+      );
+    }
+
     final filesMap = await FilesDB.instance
         .getFileIDToFileFromIDs(queryResults.map((e) => e.id).toList());
 
@@ -187,7 +209,49 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(mlDataDB.deleteClipEmbeddings(deletedEntries));
+      unawaited(_mlDataDB.deleteClipEmbeddings(deletedEntries));
+    }
+
+    return results;
+  }
+
+  Future<List<EnteFile>> _getOfflineMatchingFiles(
+    List<QueryResult> queryResults,
+    Map<int, double> fileIDToScoreMap,
+    bool showThreshold,
+  ) async {
+    final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
+      queryResults.map((e) => e.id),
+    );
+    final allFiles = await SearchService.instance.getAllFilesForSearch();
+    final ignoredCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
+    final localIdToFile = <String, EnteFile>{};
+    for (final file in allFiles) {
+      final localId = file.localID;
+      if (localId != null) {
+        localIdToFile[localId] = file;
+      }
+    }
+
+    final results = <EnteFile>[];
+    final deletedEntries = <int>[];
+    for (final result in queryResults) {
+      final localId = localIdMap[result.id];
+      final file = localId != null ? localIdToFile[localId] : null;
+      if (file != null && !ignoredCollections.contains(file.collectionID)) {
+        if (showThreshold) {
+          file.debugCaption =
+              "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
+        }
+        results.add(file);
+      } else {
+        deletedEntries.add(result.id);
+      }
+    }
+
+    if (deletedEntries.isNotEmpty) {
+      unawaited(_mlDataDB.deleteClipEmbeddings(deletedEntries));
     }
 
     return results;
@@ -249,12 +313,12 @@ class SemanticSearchService {
       embedding: clipResult.embedding,
       version: clipMlVersion,
     );
-    await mlDataDB.putClip([embedding]);
+    await _mlDataDB.putClip([embedding]);
   }
 
   Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
     final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await mlDataDB.putClip([embedding]);
+    await _mlDataDB.putClip([embedding]);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {

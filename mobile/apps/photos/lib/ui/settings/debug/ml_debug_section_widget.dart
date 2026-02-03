@@ -625,12 +625,12 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             },
           ),
           trailingWidget: ToggleSwitchWidget(
-            value: () => flagService.hasGrantedMLConsent,
+            value: () => hasGrantedMLConsent,
             onChanged: () async {
               try {
-                final oldMlConsent = flagService.hasGrantedMLConsent;
+                final oldMlConsent = hasGrantedMLConsent;
                 final mlConsent = !oldMlConsent;
-                await flagService.setMLConsent(mlConsent);
+                await setMLConsent(mlConsent);
                 logger.info('ML consent turned ${mlConsent ? 'on' : 'off'}');
                 if (!mlConsent) {
                   MLService.instance.pauseIndexingAndClustering();
@@ -769,7 +769,11 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               MLService.instance.debugIndexingDisabled = false;
-              unawaited(MLService.instance.fetchAndIndexAllImages());
+              unawaited(
+                MLService.instance.fetchAndIndexAllImages(
+                  mode: isOfflineMode ? MLMode.offline : MLMode.online,
+                ),
+              );
             } catch (e, s) {
               logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
