@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 
 class DynamicFAB extends StatelessWidget {
   final bool? isKeypadOpen;
@@ -58,13 +59,13 @@ class DynamicFAB extends StatelessWidget {
         ),
       );
     } else {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: OutlinedButton(
-          onPressed:
-              isFormValid! ? onPressedFunction as void Function()? : null,
-          child: Text(buttonText!),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: buttonText!,
+          isDisabled: !isFormValid!,
+          onTap: isFormValid! ? onPressedFunction as Future<void> Function()? : null,
         ),
       );
     }

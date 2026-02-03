@@ -157,8 +157,8 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
           duration: Duration(milliseconds: isScaledDown ? 120 : 220),
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            curve: Curves.easeOutCubic,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOutCubic,
             height: height,
             width: isSmall ? _idleWidth : (isLink ? null : double.infinity),
             decoration: BoxDecoration(
