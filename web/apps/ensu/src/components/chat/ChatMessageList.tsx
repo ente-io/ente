@@ -62,102 +62,51 @@ export interface ChatMessageListProps {
     actionIconProps: IconProps;
 }
 
-interface ImagePreviewProps {
+interface AttachmentCardProps {
     attachment: ChatAttachment;
-    url?: string;
-    height: number;
-    scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
-    onRequestPreview: (attachment: ChatAttachment, sessionUuid: string) => void;
-    sessionUuid: string;
     onClick: () => void;
 }
 
-const ImagePreview = memo(
-    ({
-        attachment,
-        url,
-        height,
-        scrollContainerRef,
-        onRequestPreview,
-        sessionUuid,
-        onClick,
-    }: ImagePreviewProps) => {
-        const placeholderRef = useRef<HTMLDivElement | HTMLImageElement | null>(
-            null,
-        );
-        const requestedRef = useRef(false);
-
-        useEffect(() => {
-            if (url || requestedRef.current) return;
-            const node = placeholderRef.current;
-            if (!node) return;
-
-            if (typeof IntersectionObserver === "undefined") {
-                requestedRef.current = true;
-                onRequestPreview(attachment, sessionUuid);
-                return;
-            }
-
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    if (entries.some((entry) => entry.isIntersecting)) {
-                        requestedRef.current = true;
-                        onRequestPreview(attachment, sessionUuid);
-                        observer.disconnect();
-                    }
-                },
-                {
-                    root: scrollContainerRef.current ?? null,
-                    rootMargin: "200px",
-                },
-            );
-
-            observer.observe(node);
-            return () => observer.disconnect();
-        }, [
-            attachment,
-            onRequestPreview,
-            scrollContainerRef,
-            sessionUuid,
-            url,
-        ]);
-
-        if (url) {
-            return (
-                <Box
-                    ref={placeholderRef}
-                    component="img"
-                    src={url}
-                    alt={attachment.name ?? "Image"}
-                    sx={{
-                        width: "100%",
-                        height,
-                        objectFit: "cover",
-                        borderRadius: 2,
-                        cursor: "pointer",
-                    }}
-                    onClick={onClick}
-                />
-            );
-        }
-
+const AttachmentCard = memo(
+    ({ attachment, onClick }: AttachmentCardProps) => {
         return (
             <Box
-                ref={placeholderRef}
+                onClick={onClick}
                 sx={{
-                    width: "100%",
-                    height,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    px: 1.5,
+                    py: 1,
                     borderRadius: 2,
                     bgcolor: "fill.faint",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    cursor: "pointer",
+                    width: "fit-content",
+                    maxWidth: "100%",
+                    minWidth: 0,
                 }}
-            />
+            >
+                <Typography
+                    variant="small"
+                    sx={{
+                        color: "text.base",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        minWidth: 0,
+                    }}
+                >
+                    {attachment.name ?? "Attachment"}
+                </Typography>
+            </Box>
         );
     },
 );
 
 interface MessageRowProps {
     message: ChatMessage;
-    attachmentPreviews: Record<string, string>;
     branchSwitchers: Record<string, BranchSwitcher>;
     loadingPhrase: string | null;
     loadingDots: number;
@@ -188,7 +137,6 @@ interface MessageRowProps {
 const MessageRow = memo(
     ({
         message,
-        attachmentPreviews,
         branchSwitchers,
         loadingPhrase,
         loadingDots,
@@ -271,6 +219,29 @@ const MessageRow = memo(
                         minWidth: 0,
                     }}
                 >
+                    {imageAttachments.length > 0 && (
+                        <Stack
+                            sx={{
+                                gap: 1,
+                                mb: 1,
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                alignItems: isSelf
+                                    ? "flex-end"
+                                    : "flex-start",
+                            }}
+                        >
+                            {imageAttachments.map((attachment) => (
+                                <AttachmentCard
+                                    key={attachment.id}
+                                    attachment={attachment}
+                                    onClick={() =>
+                                        onOpenAttachment(message, attachment)
+                                    }
+                                />
+                            ))}
+                        </Stack>
+                    )}
                     {isSelf ? (
                         <Box
                             sx={{
@@ -285,41 +256,6 @@ const MessageRow = memo(
                                 wordBreak: "break-word",
                             }}
                         >
-                            {imageAttachments.length > 0 && (
-                                <Box
-                                    sx={{
-                                        display: "grid",
-                                        gridTemplateColumns:
-                                            "repeat(2, minmax(0, 1fr))",
-                                        gap: 1,
-                                        mb: 1,
-                                    }}
-                                >
-                                    {imageAttachments.map((attachment) => (
-                                        <ImagePreview
-                                            key={attachment.id}
-                                            attachment={attachment}
-                                            url={
-                                                attachmentPreviews[
-                                                    attachment.id
-                                                ]
-                                            }
-                                            height={140}
-                                            scrollContainerRef={
-                                                scrollContainerRef
-                                            }
-                                            onRequestPreview={onRequestPreview}
-                                            sessionUuid={message.sessionUuid}
-                                            onClick={() =>
-                                                onOpenAttachment(
-                                                    message,
-                                                    attachment,
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </Box>
-                            )}
                             <Typography
                                 variant="message"
                                 sx={userMessageTextSx}
@@ -341,41 +277,6 @@ const MessageRow = memo(
                                 ...(isStreaming ? streamingMessageSx : {}),
                             }}
                         >
-                            {imageAttachments.length > 0 && (
-                                <Box
-                                    sx={{
-                                        display: "grid",
-                                        gridTemplateColumns:
-                                            "repeat(2, minmax(0, 1fr))",
-                                        gap: 1,
-                                        mb: 1,
-                                    }}
-                                >
-                                    {imageAttachments.map((attachment) => (
-                                        <ImagePreview
-                                            key={attachment.id}
-                                            attachment={attachment}
-                                            url={
-                                                attachmentPreviews[
-                                                    attachment.id
-                                                ]
-                                            }
-                                            height={160}
-                                            scrollContainerRef={
-                                                scrollContainerRef
-                                            }
-                                            onRequestPreview={onRequestPreview}
-                                            sessionUuid={message.sessionUuid}
-                                            onClick={() =>
-                                                onOpenAttachment(
-                                                    message,
-                                                    attachment,
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </Box>
-                            )}
                             {isStreaming ? (
                                 showLoadingPlaceholder ? (
                                     <Typography
@@ -621,7 +522,7 @@ const MessageRow = memo(
 export const ChatMessageList = memo(
     ({
         messages,
-        attachmentPreviews,
+        attachmentPreviews: _attachmentPreviews,
         branchSwitchers,
         loadingPhrase,
         loadingDots,
@@ -682,7 +583,6 @@ export const ChatMessageList = memo(
                 return (
                     <MessageRow
                         message={message}
-                        attachmentPreviews={attachmentPreviews}
                         branchSwitchers={branchSwitchers}
                         loadingPhrase={isStreaming ? loadingPhrase : null}
                         loadingDots={isStreaming ? loadingDots : 0}
@@ -713,7 +613,6 @@ export const ChatMessageList = memo(
                 actionIconProps,
                 assistantMarkdownSx,
                 assistantTextSx,
-                attachmentPreviews,
                 branchSwitchers,
                 formatTime,
                 loadingDots,

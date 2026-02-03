@@ -1,10 +1,3 @@
-import "@fontsource-variable/inter";
-import "@fontsource/cormorant-garamond/400.css";
-import "@fontsource/cormorant-garamond/500.css";
-import "@fontsource/cormorant-garamond/600.css";
-import "@fontsource/jetbrains-mono/400.css";
-import "@fontsource/source-serif-4/400.css";
-import "@fontsource/source-serif-4/600.css";
 import "katex/dist/katex.min.css";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -53,20 +46,25 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             return !!target.closest('[contenteditable="true"]');
         };
 
-        const hasSelection = () => {
+        let hasSelection = false;
+        const updateSelection = () => {
             const selection = window.getSelection();
-            return !!selection && selection.toString().trim().length > 0;
+            hasSelection =
+                !!selection && selection.toString().trim().length > 0;
         };
+        updateSelection();
 
         const handleContextMenu = (event: MouseEvent) => {
-            if (isEditableTarget(event.target) || hasSelection()) {
+            if (isEditableTarget(event.target) || hasSelection) {
                 return;
             }
             event.preventDefault();
         };
         window.addEventListener("contextmenu", handleContextMenu);
+        document.addEventListener("selectionchange", updateSelection);
         return () => {
             window.removeEventListener("contextmenu", handleContextMenu);
+            document.removeEventListener("selectionchange", updateSelection);
         };
     }, []);
 

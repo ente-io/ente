@@ -46,7 +46,7 @@ export const getOrCreateChatKey = async (masterKeyB64: string) => {
 
     try {
         const remote = await getChatKey();
-        const chatKey = await wasm.crypto_decrypt_box(
+        const chatKey = await wasm.crypto_decrypt_blob(
             remote.encryptedKey,
             remote.header,
             masterKeyB64,
@@ -57,9 +57,9 @@ export const getOrCreateChatKey = async (masterKeyB64: string) => {
         if (!(e instanceof ChatKeyNotFoundError)) throw e;
 
         const chatKey = await wasm.crypto_generate_key();
-        const encrypted = await wasm.crypto_encrypt_box(chatKey, masterKeyB64);
+        const encrypted = await wasm.crypto_encrypt_blob(chatKey, masterKeyB64);
 
-        await createChatKey(encrypted.encrypted_data, encrypted.nonce);
+        await createChatKey(encrypted.encrypted_data, encrypted.decryption_header);
         localStorage.setItem(CHAT_KEY_LOCAL_STORAGE_KEY, chatKey);
         return chatKey;
     }

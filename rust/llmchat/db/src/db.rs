@@ -311,25 +311,7 @@ impl<B: Backend> ChatDb<B> {
     }
 
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
-        self.get_messages_for_sync(session_uuid, false)
-    }
-
-    pub fn get_messages_for_sync(
-        &self,
-        session_uuid: Uuid,
-        include_deleted: bool,
-    ) -> Result<Vec<Message>> {
-        let query = if include_deleted {
-            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
-             FROM messages WHERE session_uuid = ? ORDER BY created_at ASC, message_uuid ASC"
-        } else {
-            "SELECT message_uuid, session_uuid, parent_message_uuid, sender, text, attachments, created_at, needs_sync, deleted_at \
-             FROM messages WHERE session_uuid = ? AND deleted_at IS NULL ORDER BY created_at ASC, message_uuid ASC"
-        };
-        let rows = self
-            .backend
-            .query(query, &[Value::Text(session_uuid.to_string())])?;
-        rows.iter().map(|row| self.message_from_row(row)).collect()
+        self.get_messages_for_sync(session_uuid, false, false)
     }
 
     pub fn get_messages_needing_sync(&self, session_uuid: Uuid) -> Result<Vec<Message>> {

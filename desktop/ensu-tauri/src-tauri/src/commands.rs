@@ -27,7 +27,7 @@ pub struct LlmState {
 
 #[derive(Default)]
 pub struct ChatDbState {
-    inner: Mutex<Option<ChatDbHolder>>,
+    inner: Arc<Mutex<Option<ChatDbHolder>>>,
 }
 
 struct ChatDbHolder {
@@ -56,6 +56,14 @@ fn llm_error(message: impl Into<String>) -> ApiError {
 
 fn llm_thread_error() -> ApiError {
     ApiError::new("llm", "LLM task failed")
+}
+
+fn chat_db_thread_error() -> ApiError {
+    ApiError::new("db_thread", "Chat DB task failed")
+}
+
+fn fs_thread_error() -> ApiError {
+    ApiError::new("io_thread", "FS task failed")
 }
 
 fn default_llm_threads() -> i32 {
@@ -623,142 +631,151 @@ pub struct ChatDeletionDto {
 }
 
 #[tauri::command]
-pub fn chat_db_list_sessions(
-    state: State<ChatDbState>,
+pub async fn chat_db_list_sessions(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
 ) -> Result<Vec<ChatSessionDto>, ApiError> {
-    with_chat_db(&state, &app, &key_b64, |db| {
+    with_chat_db_async(&state, app, key_b64, |db| {
         Ok(db
             .list_sessions()?
             .into_iter()
             .map(ChatSessionDto::from)
             .collect())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_list_sessions_with_preview(
-    state: State<ChatDbState>,
+pub async fn chat_db_list_sessions_with_preview(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
 ) -> Result<Vec<ChatSessionPreviewDto>, ApiError> {
-    with_chat_db(&state, &app, &key_b64, |db| {
+    with_chat_db_async(&state, app, key_b64, |db| {
         Ok(db
             .list_sessions_with_preview()?
             .into_iter()
             .map(ChatSessionPreviewDto::from)
             .collect())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_get_session(
-    state: State<ChatDbState>,
+pub async fn chat_db_get_session(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
 ) -> Result<Option<ChatSessionDto>, ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         Ok(db.get_session(uuid)?.map(ChatSessionDto::from))
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_get_message(
-    state: State<ChatDbState>,
+pub async fn chat_db_get_message(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     message_uuid: String,
 ) -> Result<Option<ChatMessageDto>, ApiError> {
     let uuid = parse_uuid(&message_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         Ok(db.get_message(uuid)?.map(ChatMessageDto::from))
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_create_session(
-    state: State<ChatDbState>,
+pub async fn chat_db_create_session(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     title: String,
 ) -> Result<ChatSessionDto, ApiError> {
-    with_chat_db(&state, &app, &key_b64, |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         let session = db.create_session(&title)?;
         Ok(ChatSessionDto::from(session))
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_update_session_title(
-    state: State<ChatDbState>,
+pub async fn chat_db_update_session_title(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
     title: String,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.update_session_title(uuid, &title)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_delete_session(
-    state: State<ChatDbState>,
+pub async fn chat_db_delete_session(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.delete_session(uuid)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_get_messages(
-    state: State<ChatDbState>,
+pub async fn chat_db_get_messages(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
 ) -> Result<Vec<ChatMessageDto>, ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         Ok(db
             .get_messages(uuid)?
             .into_iter()
             .map(ChatMessageDto::from)
             .collect())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_get_messages_for_sync(
-    state: State<ChatDbState>,
+pub async fn chat_db_get_messages_for_sync(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
     include_deleted: bool,
 ) -> Result<Vec<ChatMessageDto>, ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         let messages = if include_deleted {
-            db.get_messages_for_sync(uuid, true)?
+            db.get_messages_for_sync(uuid, true, false)?
         } else {
             db.get_messages_needing_sync(uuid)?
         };
         Ok(messages.into_iter().map(ChatMessageDto::from).collect())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_insert_message(
-    state: State<ChatDbState>,
+pub async fn chat_db_insert_message(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     input: ChatMessageInsertInput,
@@ -778,53 +795,56 @@ pub fn chat_db_insert_message(
         .map(llmchat_db::Attachment::try_from)
         .collect::<Result<Vec<_>, ApiError>>()?;
 
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         let attachment_metas: Vec<llmchat_db::AttachmentMeta> =
             attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message(session_uuid, sender, &text, parent, attachment_metas)?;
         Ok(ChatMessageDto::from(message))
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_update_message_text(
-    state: State<ChatDbState>,
+pub async fn chat_db_update_message_text(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     message_uuid: String,
     text: String,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&message_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.update_message_text(uuid, &text)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_list_sessions_for_sync(
-    state: State<ChatDbState>,
+pub async fn chat_db_list_sessions_for_sync(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
 ) -> Result<Vec<ChatSessionDto>, ApiError> {
-    with_chat_db(&state, &app, &key_b64, |db| {
+    with_chat_db_async(&state, app, key_b64, |db| {
         Ok(db
             .get_sessions_needing_sync()?
             .into_iter()
             .map(ChatSessionDto::from)
             .collect())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_upsert_session(
-    state: State<ChatDbState>,
+pub async fn chat_db_upsert_session(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     input: ChatSessionUpsertInput,
 ) -> Result<ChatSessionDto, ApiError> {
     let uuid = parse_uuid(&input.session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         let session = db.upsert_session(
             uuid,
             &input.title,
@@ -836,11 +856,12 @@ pub fn chat_db_upsert_session(
         )?;
         Ok(ChatSessionDto::from(session))
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_insert_message_with_uuid(
-    state: State<ChatDbState>,
+pub async fn chat_db_insert_message_with_uuid(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     input: ChatMessageUpsertInput,
@@ -860,7 +881,7 @@ pub fn chat_db_insert_message_with_uuid(
         .map(llmchat_db::Attachment::try_from)
         .collect::<Result<Vec<_>, ApiError>>()?;
 
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         let attachment_metas: Vec<llmchat_db::AttachmentMeta> = attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message_with_uuid(
             message_uuid,
@@ -874,75 +895,80 @@ pub fn chat_db_insert_message_with_uuid(
         )?;
         Ok(ChatMessageDto::from(message))
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_mark_session_synced(
-    state: State<ChatDbState>,
+pub async fn chat_db_mark_session_synced(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
     remote_id: String,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.mark_session_synced(uuid, &remote_id)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_mark_session_deleted(
-    state: State<ChatDbState>,
+pub async fn chat_db_mark_session_deleted(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     session_uuid: String,
     deleted_at: i64,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.set_session_deleted_at(uuid, deleted_at)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_mark_message_deleted(
-    state: State<ChatDbState>,
+pub async fn chat_db_mark_message_deleted(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     message_uuid: String,
     deleted_at: i64,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&message_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.set_message_deleted_at(uuid, deleted_at)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_mark_attachment_uploaded(
-    state: State<ChatDbState>,
+pub async fn chat_db_mark_attachment_uploaded(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     message_uuid: String,
     attachment_id: String,
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&message_uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.mark_attachment_uploaded(uuid, &attachment_id)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_get_pending_deletions(
-    state: State<ChatDbState>,
+pub async fn chat_db_get_pending_deletions(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
 ) -> Result<Vec<ChatDeletionDto>, ApiError> {
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         let deletions = db.get_pending_deletions()?;
         Ok(deletions
             .into_iter()
@@ -955,11 +981,12 @@ pub fn chat_db_get_pending_deletions(
             })
             .collect())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_hard_delete(
-    state: State<ChatDbState>,
+pub async fn chat_db_hard_delete(
+    state: State<'_, ChatDbState>,
     app: AppHandle,
     key_b64: String,
     entity_type: String,
@@ -967,33 +994,39 @@ pub fn chat_db_hard_delete(
 ) -> Result<(), ApiError> {
     let entity_type = parse_entity_type(&entity_type)?;
     let uuid = parse_uuid(&uuid)?;
-    with_chat_db(&state, &app, &key_b64, move |db| {
+    with_chat_db_async(&state, app, key_b64, move |db| {
         db.hard_delete(entity_type, uuid)?;
         Ok(())
     })
+    .await
 }
 
 #[tauri::command]
-pub fn chat_db_reset(state: State<ChatDbState>, app: AppHandle) -> Result<(), ApiError> {
-    {
-        let mut guard = state
-            .inner
-            .lock()
-            .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
-        *guard = None;
-    }
-
-    let path = chat_db_path(&app)?;
-    let wal_path = PathBuf::from(format!("{}-wal", path.display()));
-    let shm_path = PathBuf::from(format!("{}-shm", path.display()));
-
-    for candidate in [path, wal_path, shm_path] {
-        if candidate.exists() {
-            fs::remove_file(&candidate).map_err(|err| ApiError::new("io", err.to_string()))?;
+pub async fn chat_db_reset(state: State<'_, ChatDbState>, app: AppHandle) -> Result<(), ApiError> {
+    let inner = state.inner.clone();
+    async_runtime::spawn_blocking(move || {
+        {
+            let mut guard = inner
+                .lock()
+                .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
+            *guard = None;
         }
-    }
 
-    Ok(())
+        let path = chat_db_path(&app)?;
+        let wal_path = PathBuf::from(format!("{}-wal", path.display()));
+        let shm_path = PathBuf::from(format!("{}-shm", path.display()));
+
+        for candidate in [path, wal_path, shm_path] {
+            if candidate.exists() {
+                fs::remove_file(&candidate)
+                    .map_err(|err| ApiError::new("io", err.to_string()))?;
+            }
+        }
+
+        Ok(())
+    })
+    .await
+    .map_err(|_| chat_db_thread_error())?
 }
 
 #[derive(Serialize, Clone)]
@@ -1234,41 +1267,52 @@ pub fn llm_cancel(job_id: i64) -> Result<(), ApiError> {
 }
 
 #[tauri::command]
-pub fn fs_file_size(path: String) -> Result<Option<u64>, ApiError> {
-    match fs::metadata(&path) {
+pub async fn fs_file_size(path: String) -> Result<Option<u64>, ApiError> {
+    async_runtime::spawn_blocking(move || match fs::metadata(&path) {
         Ok(metadata) => Ok(Some(metadata.len())),
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),
         Err(err) => Err(ApiError::new("io", err.to_string())),
-    }
+    })
+    .await
+    .map_err(|_| fs_thread_error())?
 }
 
 #[tauri::command]
-pub fn fs_read_head(path: String, length: usize) -> Result<Vec<u8>, ApiError> {
-    if length == 0 {
-        return Ok(Vec::new());
-    }
-    let mut file = fs::File::open(&path).map_err(|err| ApiError::new("io", err.to_string()))?;
-    let mut buffer = vec![0u8; length];
-    let bytes_read = file
-        .read(&mut buffer)
-        .map_err(|err| ApiError::new("io", err.to_string()))?;
-    buffer.truncate(bytes_read);
-    Ok(buffer)
+pub async fn fs_read_head(path: String, length: usize) -> Result<Vec<u8>, ApiError> {
+    async_runtime::spawn_blocking(move || {
+        if length == 0 {
+            return Ok(Vec::new());
+        }
+        let mut file =
+            fs::File::open(&path).map_err(|err| ApiError::new("io", err.to_string()))?;
+        let mut buffer = vec![0u8; length];
+        let bytes_read = file
+            .read(&mut buffer)
+            .map_err(|err| ApiError::new("io", err.to_string()))?;
+        buffer.truncate(bytes_read);
+        Ok(buffer)
+    })
+    .await
+    .map_err(|_| fs_thread_error())?
 }
 
 #[tauri::command]
-pub fn fs_append_bytes(path: String, bytes: Vec<u8>) -> Result<(), ApiError> {
-    if bytes.is_empty() {
-        return Ok(());
-    }
-    let mut file = fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&path)
-        .map_err(|err| ApiError::new("io", err.to_string()))?;
-    file.write_all(&bytes)
-        .map_err(|err| ApiError::new("io", err.to_string()))?;
-    Ok(())
+pub async fn fs_append_bytes(path: String, bytes: Vec<u8>) -> Result<(), ApiError> {
+    async_runtime::spawn_blocking(move || {
+        if bytes.is_empty() {
+            return Ok(());
+        }
+        let mut file = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)
+            .map_err(|err| ApiError::new("io", err.to_string()))?;
+        file.write_all(&bytes)
+            .map_err(|err| ApiError::new("io", err.to_string()))?;
+        Ok(())
+    })
+    .await
+    .map_err(|_| fs_thread_error())?
 }
 
 fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
@@ -1306,15 +1350,17 @@ fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
     Ok(dir.join("ensu_llmchat.db"))
 }
 
-fn with_chat_db<T>(
-    state: &ChatDbState,
+fn with_chat_db<T, F>(
+    inner: &Arc<Mutex<Option<ChatDbHolder>>>,
     app: &AppHandle,
     key_b64: &str,
-    f: impl FnOnce(&ChatDb<SqliteBackend>) -> Result<T, DbError>,
-) -> Result<T, ApiError> {
+    f: F,
+) -> Result<T, ApiError>
+where
+    F: FnOnce(&ChatDb<SqliteBackend>) -> Result<T, DbError>,
+{
     let db = {
-        let mut guard = state
-            .inner
+        let mut guard = inner
             .lock()
             .map_err(|_| ApiError::new("lock", "Failed to lock chat DB state"))?;
 
@@ -1341,4 +1387,20 @@ fn with_chat_db<T>(
     };
 
     f(db.as_ref()).map_err(ApiError::from)
+}
+
+async fn with_chat_db_async<T, F>(
+    state: &ChatDbState,
+    app: AppHandle,
+    key_b64: String,
+    f: F,
+) -> Result<T, ApiError>
+where
+    T: Send + 'static,
+    F: FnOnce(&ChatDb<SqliteBackend>) -> Result<T, DbError> + Send + 'static,
+{
+    let inner = state.inner.clone();
+    async_runtime::spawn_blocking(move || with_chat_db(&inner, &app, &key_b64, f))
+        .await
+        .map_err(|_| chat_db_thread_error())?
 }
