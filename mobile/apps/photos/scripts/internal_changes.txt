@@ -1,3 +1,9 @@
+- Ashil: Social notification improvements
+- Laurens: Notifications for comments and likes
+- Neeraj: Fix incorrect thumbnail for local files
+- Neeraj: QOL: Parse duration & always show video indicator/duration
+- Ashil: QOL: (i) Option to remove hidden files from outside of hidden
+- Neeraj: Show on device albums in search result
 - Ashil: Scroll to parent comment on tapping it in reply bubble
 - Ashil: (i)QOL: Support for hiding incoming shared albums
 - Neeraj: Searchable settings

@@ -69,6 +69,7 @@ import "package:photos/ui/home/start_backup_hook_widget.dart";
 import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/ui/rituals/ritual_privacy.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/social/feed_screen.dart";
@@ -1034,7 +1035,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
             ? int.tryParse(albumIdRaw)
             : null;
+        var canOpenRitual = true;
         if (ritualId.isNotEmpty) {
+          final ritual = findRitualById(ritualId);
+          canOpenRitual = ritual != null
+              ? await requestHiddenRitualAccess(context, ritual)
+              : await requestHiddenRitualAccessForAlbumId(context, albumId);
+          if (!mounted || !canOpenRitual) {
+            return;
+          }
           // Ensure the camera is stacked on top of the ritual page so the user
           // lands on the ritual details after adding photos via a notification.
           // ignore: unawaited_futures
@@ -1043,6 +1052,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             RitualPage(ritualId: ritualId),
           );
         }
+        if (!canOpenRitual) return;
         // ignore: unawaited_futures
         routeToPage(
           context,
@@ -1057,8 +1067,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (!Configuration.instance.isLoggedIn()) {
           return;
         }
+        final target = FeedNavigationTarget.fromUri(uri);
         // ignore: unawaited_futures
-        routeToPage(context, const FeedScreen());
+        routeToPage(
+          context,
+          FeedScreen(
+            initialTarget: target,
+          ),
+        );
         return;
       }
       if (payload.toLowerCase().contains("onthisday")) {
