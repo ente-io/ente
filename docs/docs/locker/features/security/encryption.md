@@ -1,82 +1,73 @@
 ---
 title: Encryption
-description: How end-to-end encryption works in Ente Locker
+description: How Ente Locker protects your data with end-to-end encryption so only you can access it
 ---
 
 # Encryption
 
-Ente Locker uses end-to-end encryption to protect your data. This means your
-information is encrypted on your device before being sent to our servers, and
-only you can decrypt it.
+Ente Locker uses end-to-end encryption to protect your data. Your information is
+encrypted on your device before being sent to our servers—we can't see your
+data, and neither can anyone else.
 
-## How encryption works
+## What this means for you
 
-### Your data flow
+- **Your data is private**: Only you (and people you share with) can see your
+  information
+- **We can't access your data**: Even Ente employees cannot read your content
+- **Your data is safe if we're breached**: Attackers would only get encrypted
+  data they can't read
 
-1. You create or edit a document
+## How it works
+
+1. You create or edit an item
 2. Your device encrypts the data using your encryption keys
 3. The encrypted data is uploaded to Ente's servers
 4. When you need the data, it's downloaded to your device
 5. Your device decrypts the data for you to view
 
-### What is encrypted
+## What is encrypted
 
 Everything in Locker is encrypted:
 
-- Document titles
-- Document content
+- Item titles and content
+- Uploaded files
 - Collection names
 - Metadata
 - Sharing information
 
-## Encryption algorithms
+## Your keys
 
-Ente Locker uses industry-standard, audited encryption:
+### Password
+
+Your password protects your account. Choose a strong, unique password.
+
+### Recovery key
+
+Your recovery key is a 24-word phrase that can recover your account if you
+forget your password. Store it securely—it's the only way to regain access.
+
+### Collection keys
+
+Each collection has its own encryption key. This allows secure sharing without
+exposing your main keys.
+
+## Security audits
+
+Ente's encryption has been audited by Cure53, a prominent German cybersecurity
+firm. Read more about our
+[security audits](https://ente.io/blog/cryptography-audit/).
+
+## Technical details
+
+For those interested in the specifics:
 
 - **Encryption**: XChaCha20 and XSalsa20
-- **Authentication**: Poly1305 message authentication code (MAC)
-- **Key derivation**: Argon2id with high memory and computation parameters
+- **Authentication**: Poly1305 MAC
+- **Key derivation**: Argon2id
 
 These algorithms are implemented using
 [libsodium](https://libsodium.gitbook.io/doc/), an externally audited
 cryptographic library.
-
-## Zero-knowledge architecture
-
-Ente operates on a zero-knowledge model:
-
-- **We never see your data**: Your encryption keys never leave your devices
-- **We can't read your content**: Even if servers were breached, your data
-  remains encrypted
-- **We can't recover your data**: Without your password or recovery key, your
-  data cannot be decrypted
-
-## Key management
-
-### Master key
-
-Your master key is derived from your password. This key encrypts all your
-other keys.
-
-### Collection keys
-
-Each collection has its own encryption key. This allows for secure sharing
-without exposing your master key.
-
-### Recovery key
-
-Your recovery key is a 24-word phrase that can decrypt your master key. This
-is the only way to recover your account if you forget your password.
-
-## Security audits
-
-Ente's apps have been audited by:
-
-- **Cure53**: A prominent German cybersecurity firm
-- **Symbolic Software**: Applied cryptography specialists
-- **CERN**: Technical assessment
-
-Read more about our [security audits](https://ente.io/blog/cryptography-audit/).
 
 ## Related FAQs
 

@@ -1,6 +1,6 @@
 ---
 title: Security
-description: Overview of security features in Ente Locker
+description: End-to-end encryption and zero-knowledge security for your private documents and passwords
 ---
 
 # Security
@@ -24,13 +24,6 @@ Protect access to your Locker app with biometric authentication (Face ID,
 Touch ID, fingerprint) or PIN code.
 
 Learn more about [Lock screen](/locker/features/security/lock-screen).
-
-### Cross-device sync
-
-Your encrypted data syncs securely across all your devices. Decryption only
-happens locally on your devices.
-
-Learn more about [Sync](/locker/features/security/sync).
 
 ## Account security
 

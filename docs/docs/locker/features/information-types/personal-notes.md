@@ -1,6 +1,6 @@
 ---
 title: Personal Notes
-description: Store free-form secure notes in Ente Locker
+description: Store private notes and sensitive information with end-to-end encryption
 ---
 
 # Personal Notes
@@ -24,7 +24,7 @@ Use them for sensitive information that doesn't fit into other categories.
 3. Select **Personal Notes**
 4. Enter a title for your note
 5. Write your note content in the text field
-6. Optionally, select a collection
+6. Select one or more collections
 7. Tap **Save**
 
 ## Features
@@ -53,11 +53,15 @@ title and content of your notes.
 
 ## Sharing notes
 
-Share individual notes with other Ente users or create public links:
+Share individual notes via public links:
 
 1. Open the note you want to share
 2. Tap the share button
-3. Choose to share with a specific Ente user or create a public link
+3. Select **Create public link**
+4. Configure options like password protection or expiration
+
+To share notes with another Ente user, add them to a collection and share the
+collection.
 
 Learn more about [Sharing](/locker/features/sharing/).
 

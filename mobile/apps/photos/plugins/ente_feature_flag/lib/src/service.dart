@@ -86,7 +86,6 @@ class FlagService {
       internalUser || _isServerFlagEnabled(_backupOptionsFlag);
 
   bool get facesTimeline => internalUser;
-  bool get cleanupHiddenActions => internalUser;
   bool get ritualsFlag => true;
 
   bool get stopStreamProcess => true;

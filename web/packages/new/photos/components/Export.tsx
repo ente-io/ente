@@ -96,7 +96,13 @@ export const Export: React.FC<ExportProps> = ({
             }
             const exportRecord =
                 await exportService.getExportRecord(exportFolder);
-            setExportStage(exportRecord.stage);
+            const currentStage = exportService.getCurrentExportStage();
+            const isRunning = Boolean(exportService.isExportInProgress());
+            const effectiveStage =
+                isRunning && currentStage !== ExportStage.init
+                    ? currentStage
+                    : exportRecord.stage;
+            setExportStage(effectiveStage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
             setPendingFiles(await exportService.pendingFiles(exportRecord));
         } catch (e) {

@@ -1,6 +1,6 @@
 ---
 title: Security FAQ
-description: Frequently asked questions about security and privacy in Ente Locker
+description: How Ente Locker protects your data with end-to-end encryption and zero-knowledge architecture
 ---
 
 # Security FAQ
@@ -127,51 +127,7 @@ biometric options depend on your device capabilities:
 - **iOS**: Face ID, Touch ID
 - **Android**: Fingerprint, face unlock (device dependent)
 
-## Sync and Offline
-
-### How long does initial sync take? {#locker-sync-time}
-
-Initial sync time depends on:
-
-- Number of documents you have
-- Your internet connection speed
-
-Typically, sync completes within seconds to a few minutes.
-
-### Can I use Locker offline? {#locker-offline-access}
-
-Yes. You can:
-
-- View all previously synced documents
-- Create and edit documents
-- Search your documents
-
-Changes sync automatically when you're back online.
-
-## Privacy
-
-### Does Ente track my activity? {#locker-activity-tracking}
-
-No. Ente does not track:
-
-- What documents you create or view
-- Your search queries
-- How you use the app
-
-We collect minimal analytics for app stability only.
-
-### Has Ente been audited? {#locker-security-audit}
-
-Yes. Ente's apps have been audited by:
-
-- Cure53 (German cybersecurity firm)
-- Symbolic Software (cryptography specialists)
-- CERN (technical assessment)
-
-Read more at [ente.io/blog/cryptography-audit](https://ente.io/blog/cryptography-audit/).
-
 ## Related Features
 
 - [Encryption](/locker/features/security/encryption)
 - [Lock screen](/locker/features/security/lock-screen)
-- [Sync](/locker/features/security/sync)
