@@ -5,6 +5,6 @@
 - Ashil: QOL: Option to remove hidden files from outside of hidden
 - Neeraj: Show on device albums in search result
 - Ashil: Scroll to parent comment on tapping it in reply bubble
-- Ashil: (i)QOL: Support for hiding incoming shared albums
+- Ashil: QOL: Support for hiding incoming shared albums
 - Prateek: (i) Always enable video streaming
 - Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)
