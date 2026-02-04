@@ -15,9 +15,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/api/collection/trash_item_request.dart';
-import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
+import "package:photos/models/freeable_space_info.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
@@ -375,11 +375,11 @@ Future<bool> deleteLocalFiles(
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    // In IOS, the library returns no error and fail to delete any file is
-    // there's any shared file. As a stop-gap solution, we initiate deletion in
-    // batches. Similar in Android, for large number of files, we have observed
-    // that the library fails to delete any file. So, we initiate deletion in
-    // batches.
+    // On iOS, PhotoManager.editor.deleteWithIds() silently fails when any
+    // asset in the batch belongs to an iCloud shared album. Shared album
+    // assets are now filtered out before reaching this point, but this
+    // fallback is kept as a safety net. On Android, large file counts can
+    // also cause batch deletion to fail.
     if (deletedIDs.isEmpty && Platform.isIOS) {
       deletedIDs.addAll(
         await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
@@ -453,11 +453,11 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    // In IOS, the library returns no error and fail to delete any file is
-    // there's any shared file. As a stop-gap solution, we initiate deletion in
-    // batches. Similar in Android, for large number of files, we have observed
-    // that the library fails to delete any file. So, we initiate deletion in
-    // batches.
+    // On iOS, PhotoManager.editor.deleteWithIds() silently fails when any
+    // asset in the batch belongs to an iCloud shared album. Shared album
+    // assets are now filtered out before reaching this point, but this
+    // fallback is kept as a safety net. On Android, large file counts can
+    // also cause batch deletion to fail.
     if (deletedIDs.isEmpty && Platform.isIOS) {
       deletedIDs.addAll(
         await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
@@ -510,11 +510,11 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     );
     await LocalSyncService.instance.sync();
 
-    late final BackupStatus status;
+    late final FreeableSpaceInfo status;
     final List<String> deletedIDs = [];
     final List<String> localAssetIDs = [];
     final List<String> localSharedMediaIDs = [];
-    status = await FilesService.instance.getBackupStatus();
+    status = await FilesService.instance.getFreeableSpaceInfo();
 
     for (String localID in status.localIDs) {
       if (localID.startsWith(sharedMediaIdentifier)) {
@@ -871,27 +871,32 @@ Future<void> showDeleteSheet(
   }
 }
 
+// TODO: Remove this fallback once we're confident iCloud shared album
+// files are fully excluded from the free-up-space list. With shared album
+// assets filtered out at the query level, this binary partitioning should
+// no longer be needed — the root cause was that PhotoManager.editor.deleteWithIds()
+// silently fails when any asset in the batch belongs to an iCloud shared album.
 Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
   BuildContext context,
   List<String> localAssetIDs,
 ) async {
-  final List<String> deletedIDs = [];
-
   _logger.info(
-    "Trying to delete local files in batches",
+    "iOS batch deletion fallback triggered for ${localAssetIDs.length} files",
   );
+
+  final List<String> deletedIDs = [];
   deletedIDs.addAll(
     await _deleteLocalFilesInBatchesRecursively(localAssetIDs, context),
   );
   if (deletedIDs.isEmpty) {
     _logger.warning(
-      "Failed to delete local files in recursively batches",
+      "Failed to delete local files in recursive batches",
     );
   }
 
-  _logger.severe(
-      "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs"
-      "in batches}");
+  _logger.info(
+    "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs in batches",
+  );
 
   return deletedIDs;
 }

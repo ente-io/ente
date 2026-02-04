@@ -105,11 +105,13 @@ class MemoriesCacheService {
     });
   }
 
-  String get _lastCacheUpdateKey =>
-      isOfflineMode ? "${_lastMemoriesCacheUpdateTimeKey}_offline" : _lastMemoriesCacheUpdateTimeKey;
+  String get _lastCacheUpdateKey => isOfflineMode
+      ? "${_lastMemoriesCacheUpdateTimeKey}_offline"
+      : _lastMemoriesCacheUpdateTimeKey;
 
-  String get _shouldUpdateKey =>
-      isOfflineMode ? "${_shouldUpdateCacheKey}_offline" : _shouldUpdateCacheKey;
+  String get _shouldUpdateKey => isOfflineMode
+      ? "${_shouldUpdateCacheKey}_offline"
+      : _shouldUpdateCacheKey;
 
   int get lastMemoriesCacheUpdateTime {
     return _prefs.getInt(_lastCacheUpdateKey) ?? 0;
@@ -137,7 +139,9 @@ class MemoriesCacheService {
       localSettings.isSmartMemoriesEnabled;
 
   bool get curatedMemoriesOption =>
-      showAnyMemories && hasGrantedMLConsent && localSettings.isMLLocalIndexingEnabled;
+      showAnyMemories &&
+      hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
@@ -402,8 +406,7 @@ class MemoriesCacheService {
       }
       final localIdToFile = <String, EnteFile>{};
       if (minimalLocalIntIds.isNotEmpty) {
-        final localIdMap =
-            await OfflineFilesDB.instance.getLocalIdsForIntIds(
+        final localIdMap = await OfflineFilesDB.instance.getLocalIdsForIntIds(
           minimalLocalIntIds,
         );
         final allFiles = await SearchService.instance.getAllFilesForSearch();

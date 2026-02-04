@@ -13,8 +13,7 @@ class TextEmbeddingsCacheService {
     final mlDataDB =
         isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
     // 1. Check database cache
-    final dbResult =
-        await mlDataDB.getRepeatedTextEmbeddingCache(query);
+    final dbResult = await mlDataDB.getRepeatedTextEmbeddingCache(query);
     if (dbResult != null) {
       _logger.info('Text embedding cache hit for query');
       return dbResult;

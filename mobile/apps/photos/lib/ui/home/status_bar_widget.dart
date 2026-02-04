@@ -81,8 +81,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
-        _showMlBanner = !hasGrantedMLConsent &&
-            !localSettings.hasSeenMLEnablingBanner;
+        _showMlBanner =
+            !hasGrantedMLConsent && !localSettings.hasSeenMLEnablingBanner;
         setState(() {});
       }
     });

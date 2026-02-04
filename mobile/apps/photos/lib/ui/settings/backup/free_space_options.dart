@@ -5,8 +5,8 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/backup_status.dart";
 import "package:photos/models/duplicate_files.dart";
+import "package:photos/models/freeable_space_info.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/deduplication_service.dart";
@@ -227,9 +227,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
   }
 
   Future<void> _onFreeUpDeviceSpaceTapped() async {
-    BackupStatus status;
+    FreeableSpaceInfo status;
     try {
-      status = await FilesService.instance.getBackupStatus();
+      status = await FilesService.instance.getFreeableSpaceInfo();
     } catch (e) {
       await showGenericErrorDialog(
         context: context,
@@ -317,7 +317,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
     }
   }
 
-  void _showSpaceFreedDialog(BackupStatus status) {
+  void _showSpaceFreedDialog(FreeableSpaceInfo status) {
     if (localSettings.shouldPromptToRateUs()) {
       localSettings.setRateUsShownCount(
         localSettings.getRateUsShownCount() + 1,

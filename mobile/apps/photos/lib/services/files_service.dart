@@ -1,17 +1,20 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import "package:flutter/material.dart";
 import "package:latlong2/latlong.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+import 'package:photo_manager/photo_manager.dart' hide LatLng;
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/device_files_db.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/freeable_space_info.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
@@ -72,15 +75,19 @@ class FilesService {
     }
   }
 
-  Future<BackupStatus> getBackupStatus({String? pathID}) async {
-    BackedUpFileIDs ids;
+  Future<FreeableSpaceInfo> getFreeableSpaceInfo({String? pathID}) async {
+    final excludeLocalIDs = await _getICloudSharedAlbumAssetIDs();
+    FreeableFileIDs ids;
     final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
     if (pathID == null) {
-      ids = await FilesDB.instance.getBackedUpIDs();
+      ids = await FilesDB.instance.getFreeableFileIDs(
+        excludeLocalIDs: excludeLocalIDs,
+      );
     } else {
-      ids = await FilesDB.instance.getBackedUpForDeviceCollection(
+      ids = await FilesDB.instance.getFreeableFileIDsForDeviceCollection(
         pathID,
         Configuration.instance.getUserID()!,
+        excludeLocalIDs: excludeLocalIDs,
       );
     }
     late int size;
@@ -89,7 +96,38 @@ class FilesService {
     } else {
       size = await _getFileSize(ids.uploadedIDs);
     }
-    return BackupStatus(ids.localIDs, size);
+    return FreeableSpaceInfo(ids.localIDs, size);
+  }
+
+  /// Returns local asset IDs that belong to iCloud shared albums on iOS.
+  /// These assets cannot be deleted via PhotoManager and must be excluded
+  /// from the free-up-space operation.
+  Future<Set<String>> _getICloudSharedAlbumAssetIDs() async {
+    if (!Platform.isIOS) return {};
+
+    final paths = await PhotoManager.getAssetPathList(
+      hasAll: false,
+      type: RequestType.common,
+      pathFilterOption: const PMPathFilter(
+        darwin: PMDarwinPathFilter(
+          type: [PMDarwinAssetCollectionType.album],
+          subType: [PMDarwinAssetCollectionSubtype.albumCloudShared],
+        ),
+      ),
+    );
+
+    final Set<String> sharedIDs = {};
+    for (final path in paths) {
+      final count = await path.assetCountAsync;
+      final assets = await path.getAssetListRange(start: 0, end: count);
+      for (final asset in assets) {
+        sharedIDs.add(asset.id);
+      }
+    }
+    _logger.info(
+      "Found ${sharedIDs.length} assets in iCloud shared albums",
+    );
+    return sharedIDs;
   }
 
   Future<int> _getFileSize(List<int> fileIDs) async {
