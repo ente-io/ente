@@ -345,7 +345,11 @@ const isAllowedRedirectScheme = (url: URL) =>
     url.protocol === "enteauth:" ||
     url.protocol === "entelocker:" ||
     url.protocol === "ensu:" ||
-    url.protocol === "ente-cli:";
+    url.protocol === "ente-cli:" ||
+    // Tauri's internal protocol (used by EnsU desktop) is not an OS-level
+    // deeplink scheme, but we may still get redirects to it when the accounts
+    // flow runs inside the app's WebView.
+    (url.protocol === "tauri:" && url.hostname === "localhost");
 
 export const isWhitelistedRedirect = (redirectURL: URL) => {
     if (!isAllowedRedirectScheme(redirectURL)) return false;
@@ -357,6 +361,7 @@ export const isWhitelistedRedirect = (redirectURL: URL) => {
         redirectURL.protocol === "entelocker:" ||
         redirectURL.protocol === "ensu:" ||
         redirectURL.protocol === "ente-cli:" ||
+        redirectURL.protocol === "tauri:" ||
         _isWhitelistedRedirect(redirectURL)
     );
 };
