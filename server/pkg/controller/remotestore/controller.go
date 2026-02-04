@@ -22,8 +22,10 @@ import (
 )
 
 const (
-	backupOptionsRolloutPercentage = 100
-	backupOptionsRolloutNonce      = "backup-options-v1"
+	backupOptionsRolloutPercentage  = 100
+	backupOptionsRolloutNonce       = "backup-options-v1"
+	videoStreamingRolloutPercentage = 20
+	videoStreamingRolloutNonce      = "video-streaming-v1"
 )
 
 // Controller is interface for exposing business logic related to for remote store
@@ -149,6 +151,11 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 	if response.InternalUser ||
 		rollout.IsInPercentageRollout(userID, backupOptionsRolloutNonce, backupOptionsRolloutPercentage) {
 		response.ServerApiFlag |= ente.BackupOptions
+	}
+
+	if response.InternalUser ||
+		rollout.IsInPercentageRollout(userID, videoStreamingRolloutNonce, videoStreamingRolloutPercentage) {
+		response.ServerApiFlag |= ente.VideoStreaming
 	}
 
 	return response, nil

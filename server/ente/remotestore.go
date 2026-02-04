@@ -55,6 +55,8 @@ const (
 	Comments int64 = 1 << 1
 	// BackupOptions gates new backup-related features.
 	BackupOptions int64 = 1 << 2
+	// VideoStreaming gates video streaming feature.
+	VideoStreaming int64 = 1 << 3
 )
 
 type FlagKey string
