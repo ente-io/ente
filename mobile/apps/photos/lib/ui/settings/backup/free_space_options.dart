@@ -91,7 +91,10 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                           bottom: 16,
                         ),
                         child: Text(
-                          AppLocalizations.of(context).freeUpDeviceSpaceDesc,
+                          AppLocalizations.of(context).freeUpDeviceSpaceDesc +
+                              (Platform.isIOS
+                                  ? " ${AppLocalizations.of(context).freeUpDeviceSpaceDescICloud}"
+                                  : ""),
                           style: textTheme.mini
                               .copyWith(color: colorScheme.textMuted),
                         ),

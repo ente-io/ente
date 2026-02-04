@@ -99,13 +99,11 @@ class FilesService {
     return FreeableSpaceInfo(ids.localIDs, size);
   }
 
-  /// Returns local asset IDs that belong to iCloud shared albums on iOS.
-  /// These assets cannot be deleted via PhotoManager and must be excluded
-  /// from the free-up-space operation.
-  Future<Set<String>> _getICloudSharedAlbumAssetIDs() async {
-    if (!Platform.isIOS) return {};
-
-    final paths = await PhotoManager.getAssetPathList(
+  /// Returns iCloud shared album paths on iOS.
+  /// Returns empty list on non-iOS platforms.
+  Future<List<AssetPathEntity>> _getICloudSharedAlbumPaths() async {
+    if (!Platform.isIOS) return [];
+    return PhotoManager.getAssetPathList(
       hasAll: false,
       type: RequestType.common,
       pathFilterOption: const PMPathFilter(
@@ -115,7 +113,13 @@ class FilesService {
         ),
       ),
     );
+  }
 
+  /// Returns local asset IDs that belong to iCloud shared albums on iOS.
+  /// These assets cannot be deleted via PhotoManager and must be excluded
+  /// from the free-up-space operation.
+  Future<Set<String>> _getICloudSharedAlbumAssetIDs() async {
+    final paths = await _getICloudSharedAlbumPaths();
     final Set<String> sharedIDs = {};
     for (final path in paths) {
       final count = await path.assetCountAsync;
@@ -133,17 +137,7 @@ class FilesService {
   /// Returns path IDs of iCloud shared albums on iOS.
   /// Returns empty set on non-iOS platforms.
   Future<Set<String>> getICloudSharedAlbumPathIDs() async {
-    if (!Platform.isIOS) return {};
-    final paths = await PhotoManager.getAssetPathList(
-      hasAll: false,
-      type: RequestType.common,
-      pathFilterOption: const PMPathFilter(
-        darwin: PMDarwinPathFilter(
-          type: [PMDarwinAssetCollectionType.album],
-          subType: [PMDarwinAssetCollectionSubtype.albumCloudShared],
-        ),
-      ),
-    );
+    final paths = await _getICloudSharedAlbumPaths();
     return paths.map((p) => p.id).toSet();
   }
 
