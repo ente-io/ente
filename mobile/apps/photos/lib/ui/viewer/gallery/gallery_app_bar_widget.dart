@@ -124,6 +124,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   bool isQuickLink = false;
   late GalleryType galleryType;
 
+  bool _isICloudSharedAlbum = false;
   final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
 
   @override
@@ -149,6 +150,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     _appBarTitle = widget.title;
     galleryType = widget.type;
+    if (Platform.isIOS &&
+        widget.type == GalleryType.localFolder &&
+        widget.deviceCollection != null) {
+      _checkIfICloudSharedAlbum();
+    }
+  }
+
+  Future<void> _checkIfICloudSharedAlbum() async {
+    final sharedPathIDs =
+        await FilesService.instance.getICloudSharedAlbumPathIDs();
+    if (mounted && sharedPathIDs.contains(widget.deviceCollection!.id)) {
+      setState(() {
+        _isICloudSharedAlbum = true;
+      });
+    }
   }
 
   @override
@@ -640,7 +656,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           value: AlbumPopupAction.leave,
           icon: Icons.logout,
         ),
-      if (galleryType == GalleryType.localFolder)
+      if (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum)
         EntePopupMenuItem(
           AppLocalizations.of(context).freeUpDeviceSpace,
           value: AlbumPopupAction.freeUpSpace,

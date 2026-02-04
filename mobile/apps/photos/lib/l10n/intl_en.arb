@@ -590,7 +590,7 @@
   "backedUpFolders": "Backed up folders",
   "backup": "Backup",
   "freeUpDeviceSpace": "Free up device space",
-  "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have been already backed up.",
+  "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have already been backed up. Files in iCloud shared albums cannot be cleared.",
   "allClear": "✨ All clear",
   "noDeviceThatCanBeDeleted": "You've no files on this device that can be deleted",
   "removeDuplicates": "Remove duplicates",

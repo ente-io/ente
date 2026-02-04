@@ -130,6 +130,23 @@ class FilesService {
     return sharedIDs;
   }
 
+  /// Returns path IDs of iCloud shared albums on iOS.
+  /// Returns empty set on non-iOS platforms.
+  Future<Set<String>> getICloudSharedAlbumPathIDs() async {
+    if (!Platform.isIOS) return {};
+    final paths = await PhotoManager.getAssetPathList(
+      hasAll: false,
+      type: RequestType.common,
+      pathFilterOption: const PMPathFilter(
+        darwin: PMDarwinPathFilter(
+          type: [PMDarwinAssetCollectionType.album],
+          subType: [PMDarwinAssetCollectionSubtype.albumCloudShared],
+        ),
+      ),
+    );
+    return paths.map((p) => p.id).toSet();
+  }
+
   Future<int> _getFileSize(List<int> fileIDs) async {
     try {
       final response = await _enteDio.post(
