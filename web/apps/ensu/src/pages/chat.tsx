@@ -15,6 +15,7 @@ import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
 import { ChatSidebar } from "components/chat/ChatSidebar";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
+import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
@@ -3418,6 +3419,19 @@ const Page: React.FC = () => {
         void router.push("/login");
     }, [router]);
 
+    const openPasskeysFromChat = useCallback(async () => {
+        try {
+            await openAccountsManagePasskeysPage();
+        } catch (e) {
+            log.error("Failed to open passkeys page", e);
+            showMiniDialog({
+                title: "Passkeys unavailable",
+                message:
+                    "We could not open the passkeys page. Please try again.",
+            });
+        }
+    }, [showMiniDialog]);
+
     const handleSend = useCallback(async () => {
         const trimmed = input.trim();
         const hasDocuments = pendingDocuments.length > 0;
@@ -3936,6 +3950,7 @@ const Page: React.FC = () => {
                 saveLogs={saveLogs}
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
+                openPasskeysFromChat={openPasskeysFromChat}
                 showComingSoon={showComingSoon}
                 setShowComingSoon={setShowComingSoon}
                 logoSrc={logoSrc}

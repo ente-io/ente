@@ -2,6 +2,7 @@ import {
     ArrowRight01Icon,
     Bug01Icon,
     Cancel01Icon,
+    Key01Icon,
     Login01Icon,
     Settings01Icon,
     SlidersHorizontalIcon,
@@ -29,9 +30,16 @@ import {
 } from "ente-new/photos/components/Notification";
 import React, { memo } from "react";
 
-type IconProps = { size: number; strokeWidth: number };
+interface IconProps {
+    size: number;
+    strokeWidth: number;
+}
 
-type SuggestedModel = { name: string; url: string; mmproj?: string };
+interface SuggestedModel {
+    name: string;
+    url: string;
+    mmproj?: string;
+}
 
 type ModelGateStatus =
     | "checking"
@@ -55,6 +63,7 @@ export interface ChatDialogsProps {
     saveLogs: () => void | Promise<void>;
     handleLogout: () => void;
     openLoginFromChat: () => void;
+    openPasskeysFromChat: () => void;
     showComingSoon: boolean;
     setShowComingSoon: React.Dispatch<React.SetStateAction<boolean>>;
     logoSrc: string;
@@ -117,6 +126,7 @@ export const ChatDialogs = memo(
         saveLogs,
         handleLogout,
         openLoginFromChat,
+        openPasskeysFromChat,
         showComingSoon,
         setShowComingSoon,
         logoSrc,
@@ -171,25 +181,33 @@ export const ChatDialogs = memo(
                 fullWidth
                 slotProps={{
                     paper: {
-                        sx: {
-                            ...dialogPaperSx,
-                            maxHeight:
-                                "min(500px, calc(var(--ensu-viewport-height, 100svh) - 32px))",
-                            display: "flex",
-                            flexDirection: "column",
-                        },
+                        sx: [
+                            ...(Array.isArray(dialogPaperSx)
+                                ? (dialogPaperSx as SxProps<Theme>[])
+                                : [dialogPaperSx]),
+                            {
+                                maxHeight:
+                                    "min(500px, calc(var(--ensu-viewport-height, 100svh) - 32px))",
+                                display: "flex",
+                                flexDirection: "column",
+                            },
+                        ],
                     },
                 }}
             >
                 <DialogTitle
-                    sx={{
-                        ...dialogTitleSx,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 1,
-                        pr: 1,
-                    }}
+                    sx={[
+                        ...(Array.isArray(dialogTitleSx)
+                            ? (dialogTitleSx as SxProps<Theme>[])
+                            : [dialogTitleSx]),
+                        {
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 1,
+                            pr: 1,
+                        },
+                    ]}
                 >
                     <Box component="span">Settings</Box>
                     <IconButton
@@ -244,16 +262,40 @@ export const ChatDialogs = memo(
                                     Save logs
                                 </Typography>
                             </ListItemButton>
+
+                            {isLoggedIn && (
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeSettingsModal();
+                                        openPasskeysFromChat();
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Key01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Passkeys
+                                    </Typography>
+                                </ListItemButton>
+                            )}
+
                             {isLoggedIn ? (
                                 <ListItemButton
                                     onClick={() => {
                                         closeSettingsModal();
                                         handleLogout();
                                     }}
-                                    sx={{
-                                        ...settingsItemSx,
-                                        color: "critical.main",
-                                    }}
+                                    sx={[
+                                        ...(Array.isArray(settingsItemSx)
+                                            ? (settingsItemSx as SxProps<Theme>[])
+                                            : [settingsItemSx]),
+                                        { color: "critical.main" },
+                                    ]}
                                 >
                                     <Typography
                                         variant="small"
