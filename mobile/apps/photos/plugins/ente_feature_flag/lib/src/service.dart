@@ -76,10 +76,6 @@ class FlagService {
 
   String get embedUrl => flags.embedUrl;
 
-  bool get addToAlbumFeature => internalUser;
-
-  bool get widgetSharedAlbums => internalUser;
-
   bool get useNativeVideoEditor => true;
 
   bool get enableOnlyBackupFuturePhotos =>
