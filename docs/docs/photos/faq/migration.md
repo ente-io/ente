@@ -58,6 +58,39 @@ This usually occurs due to a network connectivity issue:
 
 For more check: [Troubleshooting](https://ente.io/help/photos/faq/troubleshooting#desktop-app-issues)
 
+### How do I prevent duplicates while migrating from Google Photos? {#prevent-duplicates-migration}
+
+Ente detects duplicates by identical hash, file name and creation time.
+
+Duplicates can occur:
+
+1. **If editing is done in Google Photos.**
+   The original photo as well as edited copies are saved and exported separately in Google Takeout. They have different hash values and are thus not detected as duplicates by Ente.
+
+2. **If storage saver mode is enabled or compressed photos are stored in Google Photos.**
+   If the same photos are present locally in phone in original quality and are also backed up to Ente along with Google Takeout, Ente does not recognize these as duplicates due to different hash values.
+
+3. **If upload from Google Takeout on desktop and backup from mobile folders run simultaneously.**
+   When the same photos come in from two different sources at the same time, Ente may not detect they are duplicates and both copies may be uploaded.
+
+**Steps to prevent duplication due to the above reasons:**
+
+1. All required photo folders from mobile are backed up to Google Photos.
+2. Disable backup in Google Photos.
+3. Request Google Takeout.
+4. Empty any local photo folders which are part of Google Takeout and also need to be backed up post migration.
+   - External tools can be used to deduplicate Google Takeout before importing into Ente.
+5. Import Google Takeout using Ente desktop app.
+6. After successful import, enable desired photo folder backup on Ente mobile app.
+
+**If duplicates still arise after migration and upload:**
+
+- Use the [Remove duplicates](/photos/features/albums-and-organization/storage-optimization#remove-exact-duplicates) option.
+- Use the [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) option. (Ensure Machine Learning is enabled in Settings for similar-image detection)
+
+> [!TIP]
+>
+> Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
 ### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
 
 Yes, you can start fresh.
