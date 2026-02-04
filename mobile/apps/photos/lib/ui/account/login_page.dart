@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:email_validator/email_validator.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -5,13 +7,16 @@ import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/login_pwd_verification_page.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/ui/components/models/text_input_type_v2.dart";
+import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
@@ -23,24 +28,42 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _config = Configuration.instance;
+  final _emailController = TextEditingController();
   bool _emailIsValid = false;
+  bool _showValidationMessage = false;
   String? _email;
-  Color? _emailInputFieldColor;
+  Timer? _validationTimer;
   final Logger _logger = Logger('_LoginPageState');
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if ((_config.getEmail() ?? '').isNotEmpty) {
-      updateEmail(_config.getEmail()!);
+      _updateEmail(_config.getEmail()!);
     } else if (kDebugMode) {
-      updateEmail(const String.fromEnvironment("email"));
+      _updateEmail(const String.fromEnvironment("email"));
     }
+  }
+
+  void _updateEmail(String value) {
+    if (value.isEmpty) return;
+    _email = value.trim();
+    _emailController.text = _email!;
+    _emailIsValid = EmailValidator.validate(_email!);
+  }
+
+  @override
+  void dispose() {
+    _validationTimer?.cancel();
+    _emailController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -52,198 +75,169 @@ class _LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.content,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
+        title: Text(
+          "ente",
+          style: textTheme.h3Bold.copyWith(
+            fontFamily: "Montserrat",
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: _getBody(),
+      body: _getBody(colorScheme, textTheme),
       floatingActionButton: DynamicFAB(
         key: const ValueKey("logInButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
-        buttonText: AppLocalizations.of(context).logInLabel,
-        onPressedFunction: () async {
-          await UserService.instance.setEmail(_email!);
-          Configuration.instance.resetVolatilePassword();
-          SrpAttributes? attr;
-          bool isEmailVerificationEnabled = true;
-          try {
-            attr = await UserService.instance.getSrpAttributes(_email!);
-            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
-          } catch (e) {
-            if (e is! SrpSetupNotCompleteError) {
-              _logger.severe('Error getting SRP attributes', e);
-            }
-          }
-          if (attr != null && !isEmailVerificationEnabled) {
-            // ignore: unawaited_futures
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return LoginPasswordVerificationPage(
-                    srpAttributes: attr!,
-                  );
-                },
-              ),
-            );
-          } else {
-            await UserService.instance.sendOtt(
-              context,
-              _email!,
-              isCreateAccountScreen: false,
-              purpose: "login",
-            );
-          }
-          FocusScope.of(context).unfocus();
-        },
+        buttonText: AppLocalizations.of(context).continueLabel,
+        onPressedFunction: _onLoginPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
     );
   }
 
-  Widget _getBody() {
-    final l10n = context.l10n;
-    return Column(
-      children: [
-        Expanded(
-          child: AutofillGroup(
-            child: ListView(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(
-                    l10n.accountWelcomeBack,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: TextFormField(
-                    key: const ValueKey("emailInputField"),
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(
-                      fillColor: _emailInputFieldColor,
-                      filled: true,
-                      hintText: l10n.email,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
-                      ),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _emailIsValid
-                          ? Icon(
-                              Icons.check,
-                              size: 20,
-                              color: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .focusedBorder!
-                                  .borderSide
-                                  .color,
-                            )
-                          : null,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        updateEmail(value);
-                      });
-                    },
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    initialValue: _email,
-                    autofocus: true,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: StyledText(
-                          text: AppLocalizations.of(context).loginTerms,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 12),
-                          tags: {
-                            'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) =>
-                                  Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      AppLocalizations.of(context)
-                                          .termsOfServicesTitle,
-                                      "https://ente.io/terms",
-                                    );
-                                  },
-                                ),
-                              ),
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                            'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) =>
-                                  Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      AppLocalizations.of(context)
-                                          .privacyPolicyTitle,
-                                      "https://ente.io/privacy",
-                                    );
-                                  },
-                                ),
-                              ),
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          },
-                        ),
-                      ),
-                      const Expanded(
-                        flex: 1,
-                        child: SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+    return AutofillGroup(
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          const SizedBox(height: 20),
+          TextInputWidgetV2(
+            key: const ValueKey("emailInputField"),
+            label: AppLocalizations.of(context).email,
+            hintText: AppLocalizations.of(context).enterYourEmailAddress,
+            textEditingController: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            autoCorrect: false,
+            autoFocus: true,
+            isRequired: true,
+            onChange: _onEmailChanged,  
+            message: _showValidationMessage
+                ? (_emailIsValid
+                    ? AppLocalizations.of(context).validEmailAddress
+                    : AppLocalizations.of(context).invalidEmailAddress)
+                : null,
+            messageType: _showValidationMessage
+                ? (_emailIsValid
+                    ? TextInputMessageType.success
+                    : TextInputMessageType.alert)
+                : TextInputMessageType.guide,
           ),
-        ),
-        const Padding(padding: EdgeInsets.all(8)),
-      ],
+          const SizedBox(height: 20),
+          StyledText(
+            text: AppLocalizations.of(context).loginTerms,
+            style: textTheme.small.copyWith(
+              color: colorScheme.textMuted,
+            ),
+            tags: {
+              'u-terms': StyledTextActionTag(
+                (String? text, Map<String?, String?> attrs) =>
+                    Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return WebPage(
+                        AppLocalizations.of(context).termsOfServicesTitle,
+                        "https://ente.io/terms",
+                      );
+                    },
+                  ),
+                ),
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  color: colorScheme.textMuted,
+                ),
+              ),
+              'u-policy': StyledTextActionTag(
+                (String? text, Map<String?, String?> attrs) =>
+                    Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return WebPage(
+                        AppLocalizations.of(context).privacyPolicyTitle,
+                        "https://ente.io/privacy",
+                      );
+                    },
+                  ),
+                ),
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  color: colorScheme.textMuted,
+                ),
+              ),
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  void updateEmail(String value) {
-    _email = value.trim();
-    _emailIsValid = EmailValidator.validate(_email!);
-    if (_emailIsValid) {
-      _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
-    } else {
-      _emailInputFieldColor = getEnteColorScheme(context).fillFaint;
+  void _onEmailChanged(String value) {
+    _validationTimer?.cancel();
+
+    final trimmed = value.trim();
+    final isValid = EmailValidator.validate(trimmed);
+
+    setState(() {
+      _email = trimmed;
+      _emailIsValid = isValid;
+      _showValidationMessage = false;
+    });
+
+    if (trimmed.isNotEmpty) {
+      _validationTimer = Timer(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          setState(() {
+            _showValidationMessage = true;
+          });
+        }
+      });
     }
+  }
+
+  Future<void> _onLoginPressed() async {
+    await UserService.instance.setEmail(_email!);
+    Configuration.instance.resetVolatilePassword();
+    SrpAttributes? attr;
+    bool isEmailVerificationEnabled = true;
+    try {
+      attr = await UserService.instance.getSrpAttributes(_email!);
+      isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+    } catch (e) {
+      if (e is! SrpSetupNotCompleteError) {
+        _logger.severe('Error getting SRP attributes', e);
+      }
+    }
+    if (attr != null && !isEmailVerificationEnabled) {
+      // ignore: unawaited_futures
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return LoginPasswordVerificationPage(
+              srpAttributes: attr!,
+            );
+          },
+        ),
+      );
+    } else {
+      await UserService.instance.sendOtt(
+        context,
+        _email!,
+        isCreateAccountScreen: false,
+        purpose: "login",
+      );
+    }
+    FocusScope.of(context).unfocus();
   }
 }
