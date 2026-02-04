@@ -130,7 +130,7 @@ func cleanupUser(t *testing.T, userID int64) {
 func ensureKey(t *testing.T, repo *Repository, userID int64) {
 	t.Helper()
 
-	_, err := repo.CreateKey(context.Background(), userID, model.UpsertKeyRequest{
+	_, err := repo.CreateKey(context.Background(), userID, model.CreateKeyRequest{
 		EncryptedKey: "enc-key",
 		Header:       "hdr-key",
 	})

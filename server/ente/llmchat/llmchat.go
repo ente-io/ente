@@ -53,7 +53,7 @@ type Message struct {
 	UpdatedAt         int64            `json:"updatedAt"`
 }
 
-type UpsertKeyRequest struct {
+type CreateKeyRequest struct {
 	EncryptedKey string `json:"encryptedKey" binding:"required"`
 	Header       string `json:"header" binding:"required"`
 }

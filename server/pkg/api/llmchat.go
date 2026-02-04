@@ -51,7 +51,7 @@ func bindJSONWithLimit(c *gin.Context, out interface{}, maxBytes int64) error {
 }
 
 func (h *LlmChatHandler) CreateKey(c *gin.Context) {
-	var request model.UpsertKeyRequest
+	var request model.CreateKeyRequest
 	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
 		return

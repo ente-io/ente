@@ -56,7 +56,7 @@ func (c *Controller) attachmentsAllowed(ctx *gin.Context, userID int64) bool {
 	return isInternalUser(ctx.Request.Context(), userID, c.UserRepo, c.RemoteStoreRepo)
 }
 
-func (c *Controller) CreateKey(ctx *gin.Context, req model.UpsertKeyRequest) (*model.Key, error) {
+func (c *Controller) CreateKey(ctx *gin.Context, req model.CreateKeyRequest) (*model.Key, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
 	res, err := c.Repo.CreateKey(ctx, userID, req)
 	if err != nil {

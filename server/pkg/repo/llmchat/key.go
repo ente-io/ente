@@ -10,7 +10,7 @@ import (
 	"github.com/ente-io/stacktrace"
 )
 
-func (r *Repository) CreateKey(ctx context.Context, userID int64, req model.UpsertKeyRequest) (model.Key, error) {
+func (r *Repository) CreateKey(ctx context.Context, userID int64, req model.CreateKeyRequest) (model.Key, error) {
 	row := r.DB.QueryRowContext(ctx, `INSERT INTO llmchat_key(
 		user_id,
 		encrypted_key,
