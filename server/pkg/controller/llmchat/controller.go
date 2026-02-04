@@ -23,14 +23,11 @@ type SubscriptionChecker interface {
 }
 
 const (
-	llmChatMaxAttachmentsFree             = 4
-	llmChatMaxAttachmentsPaid             = 10
-	llmChatMaxAttachmentFree              = int64(25 * 1024 * 1024)  // 25MB
-	llmChatMaxAttachmentPaid              = int64(100 * 1024 * 1024) // 100MB
-	llmChatMaxAttachmentStorageFree       = int64(1 * 1024 * 1024 * 1024)
-	llmChatMaxAttachmentStoragePaid       = int64(10 * 1024 * 1024 * 1024)
-	llmChatMaxMessagesFree          int64 = 2000
-	llmChatMaxMessagesPaid          int64 = 50000
+	llmChatMaxAttachments             = 10
+	llmChatMaxAttachment        int64 = 100 * 1024 * 1024 // 100MB
+	llmChatMaxAttachmentStorage int64 = 10 * 1024 * 1024 * 1024
+	llmChatMaxMessagesFree      int64 = 2000
+	llmChatMaxMessagesPaid      int64 = 50000
 
 	llmChatDiffTypeSessions          = "sessions"
 	llmChatDiffTypeMessages          = "messages"
@@ -509,10 +506,7 @@ func (c *Controller) maxAttachmentSize(userID int64) int64 {
 }
 
 func (c *Controller) maxAttachments(userID int64) int {
-	if c.isPaidUser(userID) {
-		return llmChatMaxAttachmentsPaid
-	}
-	return llmChatMaxAttachmentsFree
+	return llmChatMaxAttachments
 }
 
 func (c *Controller) maxMessages(userID int64) int64 {

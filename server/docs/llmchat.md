@@ -24,9 +24,9 @@ Museum can store encrypted LLM chat sessions/messages.
 - Max request JSON size: `llmchat.max_json_body_bytes` (default: 819200 bytes / 800KB)
 - Diff page size: `llmchat.diff.default_limit` (default: 500), `llmchat.diff.maximum_limit` (default: 2500)
 - Messages per user (soft limit): 2000 (free), 50000 (paid)
-- Attachments per message: 4 (free), 10 (paid)
-- Attachment size: 25MB (free), 100MB (paid)
-- Total attachment storage: 1GB (free), 10GB (paid)
+- Attachments per message: 10
+- Attachment size: 100MB
+- Total attachment storage: 10GB
 
 ## Attachments
 
