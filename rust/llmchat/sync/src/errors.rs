@@ -27,6 +27,8 @@ pub enum SyncError {
     AttachmentMissing(String),
     #[error("invalid response: {0}")]
     InvalidResponse(String),
+    #[error("sync already in progress")]
+    SyncInProgress,
     #[error("serde error: {0}")]
     Serde(String),
     #[error("io error: {0}")]

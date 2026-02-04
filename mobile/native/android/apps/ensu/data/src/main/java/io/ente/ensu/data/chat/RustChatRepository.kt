@@ -18,15 +18,18 @@ import java.io.File
 
 class RustChatRepository(
     context: Context,
-    credentialStore: CredentialStore
+    private val credentialStore: CredentialStore
 ) : ChatRepository {
 
     private val filePaths = FilePathManager(context)
     private val attachmentsDir = filePaths.attachmentsDir
-    private val mainDbFile = filePaths.mainDbFile
-    private val attachmentsDbFile = filePaths.attachmentsDbFile
-    private val dbKey = credentialStore.getOrCreateChatDbKey()
-    private var db: LlmChatDb = openDb()
+    private val offlineDbFile = filePaths.mainDbFile
+    private val onlineDbFile = filePaths.onlineDbFile
+    private val syncDbFile = filePaths.syncDbFile
+    private var offlineDbKey = credentialStore.getOrCreateChatDbKey()
+    private var onlineDbKey: ByteArray? = null
+    private var usingOnlineDb = false
+    private var db: LlmChatDb = openDb(offlineDbFile, offlineDbKey)
 
     override fun listSessions(): List<ChatSession> = withDbRecovery {
         val sessions = db.listSessions()
@@ -134,25 +137,73 @@ class RustChatRepository(
         db.updateSessionTitle(sessionId, title)
     }
 
-    private fun openDb(): LlmChatDb {
+    override fun enterOnlineMode(chatKey: ByteArray) {
+        onlineDbKey = chatKey
+        usingOnlineDb = true
+        db = openDb(onlineDbFile, chatKey)
+    }
+
+    override fun exitOnlineMode() {
+        usingOnlineDb = false
+        onlineDbKey = null
+        offlineDbKey = credentialStore.getOrCreateChatDbKey()
+        db = openDb(offlineDbFile, offlineDbKey)
+    }
+
+    override fun deleteAllData() {
+        offlineDbFile.delete()
+        onlineDbFile.delete()
+        syncDbFile.delete()
+        filePaths.encryptedAttachmentsDir.deleteRecursively()
+        filePaths.syncMetaDir.deleteRecursively()
+        filePaths.attachmentsDir.deleteRecursively()
+        filePaths.plaintextAttachmentsDir.deleteRecursively()
+
+        filePaths.encryptedAttachmentsDir.mkdirs()
+        filePaths.syncMetaDir.mkdirs()
+        filePaths.attachmentsDir.mkdirs()
+        filePaths.plaintextAttachmentsDir.mkdirs()
+
+        usingOnlineDb = false
+        onlineDbKey = null
+        offlineDbKey = credentialStore.getOrCreateChatDbKey()
+        db = openDb(offlineDbFile, offlineDbKey)
+    }
+
+    private fun openDb(dbFile: File, key: ByteArray): LlmChatDb {
         return LlmChatDb.open(
-            mainDbFile.absolutePath,
-            attachmentsDbFile.absolutePath,
-            dbKey
+            dbFile.absolutePath,
+            syncDbFile.absolutePath,
+            key
         )
     }
 
     private fun <T> withDbRecovery(block: () -> T): T {
+        val targetDbFile = if (usingOnlineDb) onlineDbFile else offlineDbFile
+        if (!syncDbFile.exists() || !targetDbFile.exists()) {
+            reopenDb(targetDbFile)
+        }
         return try {
             block()
         } catch (error: DbException) {
+            if (isReadonlyDbError(error)) {
+                reopenDb(targetDbFile)
+                return block()
+            }
             if (shouldResetDb(error)) {
                 resetDb()
-                block()
-            } else {
-                throw error
+                return block()
             }
+            throw error
         }
+    }
+
+    private fun reopenDb(targetDbFile: File) {
+        targetDbFile.parentFile?.mkdirs()
+        syncDbFile.parentFile?.mkdirs()
+        targetDbFile.setWritable(true)
+        syncDbFile.setWritable(true)
+        db = openDb(targetDbFile, currentDbKey())
     }
 
     private fun shouldResetDb(error: DbException): Boolean {
@@ -163,9 +214,26 @@ class RustChatRepository(
         return ChatRecovery.shouldResetFromMessage(message)
     }
 
+    private fun isReadonlyDbError(error: DbException): Boolean {
+        val message = when (error) {
+            is DbException.Message -> error.v1
+            else -> error.message.orEmpty()
+        }
+        return message.contains("readonly database", ignoreCase = true)
+    }
+
+    private fun currentDbKey(): ByteArray {
+        return if (usingOnlineDb) {
+            onlineDbKey ?: throw IllegalStateException("Missing online DB key")
+        } else {
+            offlineDbKey
+        }
+    }
+
     private fun resetDb() {
-        mainDbFile.delete()
-        attachmentsDbFile.delete()
-        db = openDb()
+        val targetDbFile = if (usingOnlineDb) onlineDbFile else offlineDbFile
+        targetDbFile.delete()
+        syncDbFile.delete()
+        db = openDb(targetDbFile, currentDbKey())
     }
 }

@@ -6,7 +6,16 @@ import io.ente.ensu.data.network.NetworkConfiguration
 import io.ente.ensu.data.storage.CredentialStore
 import io.ente.ensu.data.storage.FilePathManager
 import io.ente.ensu.domain.chat.ChatSyncRepository
+import io.ente.ensu.domain.model.MigrationConfig as DomainMigrationConfig
+import io.ente.ensu.domain.model.MigrationPriority as DomainMigrationPriority
+import io.ente.ensu.domain.model.MigrationProgress as DomainMigrationProgress
+import io.ente.ensu.domain.model.MigrationState as DomainMigrationState
 import io.ente.labs.llmchat_sync.LlmChatSync
+import io.ente.labs.llmchat_sync.MigrationConfig as RustMigrationConfig
+import io.ente.labs.llmchat_sync.MigrationPriority as RustMigrationPriority
+import io.ente.labs.llmchat_sync.MigrationProgress as RustMigrationProgress
+import io.ente.labs.llmchat_sync.MigrationProgressCallback
+import io.ente.labs.llmchat_sync.MigrationState as RustMigrationState
 import io.ente.labs.llmchat_sync.SyncAuth
 import io.ente.labs.llmchat_sync.SyncException
 import kotlinx.coroutines.Dispatchers
@@ -21,16 +30,17 @@ class RustChatSyncRepository(
 
     private val filePaths = FilePathManager(context)
     private var syncEngine: LlmChatSync? = null
+    private var chatKey: ByteArray? = null
 
     override suspend fun sync() {
         withContext(Dispatchers.IO) {
             try {
-                syncEngine().sync(buildAuth())
+                ensureSyncEngine().sync(buildAuth())
             } catch (err: Throwable) {
                 if (shouldResetSync(err)) {
-                    resetSyncState()
+                    resetSyncStateInternal()
                     try {
-                        syncEngine().sync(buildAuth())
+                        ensureSyncEngine().sync(buildAuth())
                         return@withContext
                     } catch (retryErr: Throwable) {
                         throw IllegalStateException(syncErrorMessage(retryErr), retryErr)
@@ -41,21 +51,70 @@ class RustChatSyncRepository(
         }
     }
 
-    override suspend fun downloadAttachment(attachmentId: String, sessionId: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            syncEngine().downloadAttachment(attachmentId, sessionId, buildAuth())
+    override suspend fun syncWithProgress(
+        config: DomainMigrationConfig,
+        onProgress: (DomainMigrationProgress) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            val callback = object : MigrationProgressCallback {
+                override fun onProgress(progress: RustMigrationProgress) {
+                    onProgress(progress.toDomain())
+                }
+            }
+            ensureSyncEngine().syncWithProgress(buildAuth(), config.toRust(), callback)
         }
     }
 
-    private fun syncEngine(): LlmChatSync {
-        return syncEngine ?: buildSyncEngine().also { syncEngine = it }
+    override suspend fun checkMigrationStatusLocal(): DomainMigrationState? {
+        return withContext(Dispatchers.IO) {
+            runCatching { syncEngine?.checkMigrationStatusLocal() }
+                .getOrNull()
+                ?.toDomain()
+        }
     }
 
-    private fun buildSyncEngine(): LlmChatSync {
-        val dbKey = credentialStore.getOrCreateChatDbKey()
+    override suspend fun checkMigrationStatus(): DomainMigrationState {
+        return withContext(Dispatchers.IO) {
+            ensureSyncEngine().checkMigrationStatus(buildAuth()).toDomain()
+        }
+    }
+
+    override suspend fun downloadAttachment(attachmentId: String, sessionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            ensureSyncEngine().downloadAttachment(attachmentId, sessionId, buildAuth())
+        }
+    }
+
+    override suspend fun prepareOnlineDb(): ByteArray {
+        return withContext(Dispatchers.IO) {
+            resetSyncStateInternal()
+            val auth = buildAuth()
+            val key = io.ente.labs.llmchat_sync.fetchChatKey(auth, filePaths.syncDbFile.absolutePath)
+            chatKey = key
+            val engine = buildSyncEngine(key).also { syncEngine = it }
+            val offlineKey = credentialStore.getOrCreateChatDbKey()
+            engine.seedFromOffline(filePaths.mainDbFile.absolutePath, offlineKey)
+            key
+        }
+    }
+
+    override suspend fun resetSyncState() {
+        withContext(Dispatchers.IO) {
+            resetSyncStateInternal()
+        }
+    }
+
+    private suspend fun ensureSyncEngine(): LlmChatSync {
+        return syncEngine ?: run {
+            val key = chatKey ?: prepareOnlineDb()
+            buildSyncEngine(key).also { syncEngine = it }
+        }
+    }
+
+    private fun buildSyncEngine(dbKey: ByteArray): LlmChatSync {
         return LlmChatSync.open(
-            mainDbPath = filePaths.mainDbFile.absolutePath,
-            attachmentsDbPath = filePaths.attachmentsDbFile.absolutePath,
+            mainDbPath = filePaths.onlineDbFile.absolutePath,
+            attachmentsDbPath = filePaths.syncDbFile.absolutePath,
             dbKey = dbKey,
             attachmentsDir = filePaths.encryptedAttachmentsDir.absolutePath,
             metaDir = filePaths.syncMetaDir.absolutePath,
@@ -95,10 +154,16 @@ class RustChatSyncRepository(
         return ChatRecovery.shouldResetFromMessage(message)
     }
 
-    private fun resetSyncState() {
-        runCatching { filePaths.syncMetaDir.deleteRecursively() }
-        runCatching { filePaths.syncMetaDir.mkdirs() }
+    private fun resetSyncStateInternal() {
+        runCatching { syncEngine?.resetSyncState() }
         syncEngine = null
+        chatKey = null
+        filePaths.onlineDbFile.delete()
+        filePaths.syncDbFile.delete()
+        filePaths.syncMetaDir.deleteRecursively()
+        filePaths.encryptedAttachmentsDir.deleteRecursively()
+        filePaths.encryptedAttachmentsDir.mkdirs()
+        filePaths.syncMetaDir.mkdirs()
     }
 
     private fun syncErrorMessage(error: Throwable): String {
@@ -109,7 +174,42 @@ class RustChatSyncRepository(
             return syncMessage.v1
         }
 
+        val inProgress = generateSequence(error) { it.cause }
+            .filterIsInstance<SyncException.SyncInProgress>()
+            .firstOrNull()
+        if (inProgress != null) {
+            return "Sync already in progress"
+        }
+
         val rootCause = generateSequence(error) { it.cause }.lastOrNull() ?: error
         return rootCause.message ?: error.message ?: rootCause.toString()
+    }
+
+    private fun DomainMigrationConfig.toRust(): RustMigrationConfig {
+        return RustMigrationConfig(
+            batchSize = batchSize,
+            priority = when (priority) {
+                DomainMigrationPriority.RECENT_FIRST -> RustMigrationPriority.RECENT_FIRST
+                DomainMigrationPriority.OLDEST_FIRST -> RustMigrationPriority.OLDEST_FIRST
+            }
+        )
+    }
+
+    private fun RustMigrationState.toDomain(): DomainMigrationState {
+        return when (this) {
+            RustMigrationState.NOT_NEEDED -> DomainMigrationState.NOT_NEEDED
+            RustMigrationState.IN_PROGRESS -> DomainMigrationState.IN_PROGRESS
+            RustMigrationState.COMPLETE -> DomainMigrationState.COMPLETE
+            RustMigrationState.FAILED -> DomainMigrationState.FAILED
+        }
+    }
+
+    private fun RustMigrationProgress.toDomain(): DomainMigrationProgress {
+        return DomainMigrationProgress(
+            state = state.toDomain(),
+            processed = processed,
+            remaining = remaining,
+            total = total
+        )
     }
 }

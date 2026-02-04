@@ -43,6 +43,27 @@ impl<B: crate::Backend> LlmChatDb<B> {
         self.chat.delete_session(uuid)
     }
 
+    pub fn upsert_session(
+        &self,
+        session_uuid: Uuid,
+        title: &str,
+        created_at: i64,
+        updated_at: i64,
+        remote_id: Option<String>,
+        needs_sync: bool,
+        deleted_at: Option<i64>,
+    ) -> Result<Session> {
+        self.chat.upsert_session(
+            session_uuid,
+            title,
+            created_at,
+            updated_at,
+            remote_id,
+            needs_sync,
+            deleted_at,
+        )
+    }
+
     pub fn insert_message(
         &self,
         session_uuid: Uuid,
@@ -65,6 +86,31 @@ impl<B: crate::Backend> LlmChatDb<B> {
         }
 
         Ok(message)
+    }
+
+    pub fn insert_message_with_uuid_and_state(
+        &self,
+        message_uuid: Uuid,
+        session_uuid: Uuid,
+        sender: &str,
+        text: &str,
+        parent: Option<Uuid>,
+        attachments: Vec<AttachmentMeta>,
+        created_at: i64,
+        deleted_at: Option<i64>,
+        needs_sync: bool,
+    ) -> Result<Message> {
+        self.chat.insert_message_with_uuid_and_state(
+            message_uuid,
+            session_uuid,
+            sender,
+            text,
+            parent,
+            attachments,
+            created_at,
+            deleted_at,
+            needs_sync,
+        )
     }
 
     pub fn get_messages(&self, session_uuid: Uuid) -> Result<Vec<Message>> {
@@ -142,16 +188,68 @@ impl<B: crate::Backend> LlmChatDb<B> {
         self.chat.mark_session_synced(uuid, remote_id)
     }
 
+    pub fn get_session_remote_id(&self, uuid: Uuid) -> Result<Option<String>> {
+        self.chat.get_session_remote_id(uuid)
+    }
+
+    pub fn set_session_remote_id(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
+        self.chat.set_session_remote_id(uuid, remote_id)
+    }
+
+    pub fn get_session_uuid_by_remote_id(&self, remote_id: &str) -> Result<Option<Uuid>> {
+        self.chat.get_session_uuid_by_remote_id(remote_id)
+    }
+
     pub fn mark_message_synced(&self, uuid: Uuid) -> Result<()> {
         self.chat.mark_message_synced(uuid)
+    }
+
+    pub fn set_message_remote_id(&self, uuid: Uuid, remote_id: &str) -> Result<()> {
+        self.chat.set_message_remote_id(uuid, remote_id)
+    }
+
+    pub fn get_message_remote_id(&self, uuid: Uuid) -> Result<Option<String>> {
+        self.chat.get_message_remote_id(uuid)
+    }
+
+    pub fn get_message_uuid_by_remote_id(&self, remote_id: &str) -> Result<Option<Uuid>> {
+        self.chat.get_message_uuid_by_remote_id(remote_id)
     }
 
     pub fn get_sessions_needing_sync(&self) -> Result<Vec<Session>> {
         self.chat.get_sessions_needing_sync()
     }
 
+    pub fn count_needing_sync(&self) -> Result<i64> {
+        self.chat.count_needing_sync()
+    }
+
+    pub fn get_sessions_needing_sync_batch(
+        &self,
+        limit: i64,
+        order_desc: bool,
+    ) -> Result<Vec<Session>> {
+        self.chat.get_sessions_needing_sync_batch(limit, order_desc)
+    }
+
+    pub fn set_session_server_updated_at(&self, uuid: Uuid, updated_at: i64) -> Result<()> {
+        self.chat.set_session_server_updated_at(uuid, updated_at)
+    }
+
+    pub fn set_message_server_updated_at(&self, uuid: Uuid, updated_at: i64) -> Result<()> {
+        self.chat.set_message_server_updated_at(uuid, updated_at)
+    }
+
     pub fn get_pending_deletions(&self) -> Result<Vec<(EntityType, Uuid)>> {
         self.chat.get_pending_deletions()
+    }
+
+    pub fn get_deleted_sessions(&self) -> Result<Vec<(Uuid, i64)>> {
+        self.chat.get_deleted_sessions()
+    }
+
+    pub fn get_deleted_messages(&self) -> Result<Vec<(Uuid, i64)>> {
+        self.chat.get_deleted_messages()
     }
 
     pub fn hard_delete(&self, entity_type: EntityType, uuid: Uuid) -> Result<()> {
@@ -162,12 +260,13 @@ impl<B: crate::Backend> LlmChatDb<B> {
     pub fn upsert_session_from_remote(
         &self,
         session_uuid: Uuid,
+        remote_id: &str,
         title: &str,
         created_at: i64,
         updated_at: i64,
     ) -> Result<Session> {
         self.chat
-            .upsert_session_from_remote(session_uuid, title, created_at, updated_at)
+            .upsert_session_from_remote(session_uuid, remote_id, title, created_at, updated_at)
     }
 
     pub fn apply_session_tombstone(&self, session_uuid: Uuid, deleted_at: i64) -> Result<()> {
@@ -178,6 +277,7 @@ impl<B: crate::Backend> LlmChatDb<B> {
         &self,
         message_uuid: Uuid,
         session_uuid: Uuid,
+        remote_id: &str,
         sender: &str,
         text: &str,
         parent: Option<Uuid>,
@@ -187,6 +287,7 @@ impl<B: crate::Backend> LlmChatDb<B> {
         self.chat.upsert_message_from_remote(
             message_uuid,
             session_uuid,
+            remote_id,
             sender,
             text,
             parent,
@@ -237,6 +338,16 @@ impl<B: crate::Backend> LlmChatDb<B> {
 
     pub fn mark_all_needs_sync(&self) -> Result<()> {
         self.chat.mark_all_needs_sync()
+    }
+
+    pub fn clear_all_server_timestamps(&self) -> Result<()> {
+        self.chat.clear_all_server_timestamps()
+    }
+
+    pub fn reset_sync_state(&self) -> Result<()> {
+        self.chat.reset_sync_state()?;
+        self.attachments.reset_all_upload_state()?;
+        Ok(())
     }
 
     pub fn reset_attachment_sync_state(&self) -> Result<()> {

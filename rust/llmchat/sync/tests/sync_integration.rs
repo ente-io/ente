@@ -110,8 +110,6 @@ fn pull_applies_remote_sessions_and_messages() {
     let diff = DiffResponse {
         sessions: vec![RemoteSession {
             session_uuid: session_uuid.to_string(),
-            root_session_uuid: None,
-            branch_from_message_uuid: None,
             encrypted_data: encrypted_session.encrypted_data,
             header: encrypted_session.header,
             client_metadata: None,
@@ -257,8 +255,6 @@ fn tombstone_removes_messages() {
     let diff = DiffResponse {
         sessions: vec![RemoteSession {
             session_uuid: session_uuid.to_string(),
-            root_session_uuid: None,
-            branch_from_message_uuid: None,
             encrypted_data: encrypted_session.encrypted_data,
             header: encrypted_session.header,
             client_metadata: None,

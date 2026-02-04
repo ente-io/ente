@@ -7,5 +7,6 @@ data class AppState(
     val auth: AuthState = AuthState(),
     val chat: ChatState = ChatState(),
     val developerSettings: DeveloperSettingsState = DeveloperSettingsState(),
-    val modelSettings: ModelSettingsState = ModelSettingsState()
+    val modelSettings: ModelSettingsState = ModelSettingsState(),
+    val sync: SyncState = SyncState.Idle
 )

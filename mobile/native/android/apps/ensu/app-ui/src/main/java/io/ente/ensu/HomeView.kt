@@ -55,6 +55,7 @@ import io.ente.ensu.chat.SessionDrawer
 import io.ente.ensu.components.NativeChoiceDialog
 import io.ente.ensu.data.auth.EnsuAuthService
 import io.ente.ensu.data.logging.FileLogRepository
+import io.ente.ensu.data.storage.FilePathManager
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
@@ -452,13 +453,15 @@ fun HomeView(
     if (isShowingSignOutDialog) {
         NativeChoiceDialog(
             title = "Sign Out",
-            body = "This will stop syncing your sessions.",
+            body = "Signing out will remove your online chats from this device. Offline chats stay available.",
             firstButtonLabel = "Sign Out",
             secondButtonLabel = "Cancel",
             onFirst = {
-                authService.clearCredentials()
-                store.signOut()
-                isShowingSignOutDialog = false
+                scope.launch {
+                    authService.clearCredentials()
+                    store.signOut()
+                    isShowingSignOutDialog = false
+                }
             },
             onSecond = { isShowingSignOutDialog = false },
             onDismiss = { isShowingSignOutDialog = false }
@@ -507,10 +510,7 @@ private fun buildAttachmentFromUri(
     }
     val safeName = rawName.replace("/", "_")
 
-    val attachmentsDir = File(context.filesDir, "attachments")
-    if (!attachmentsDir.exists()) {
-        attachmentsDir.mkdirs()
-    }
+    val attachmentsDir = FilePathManager(context).attachmentsDir
 
     val attachmentId = UUID.randomUUID().toString()
     val destination = File(attachmentsDir, attachmentId)

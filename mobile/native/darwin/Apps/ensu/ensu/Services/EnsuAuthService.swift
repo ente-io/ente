@@ -64,15 +64,22 @@ final class EnsuAuthService {
     }
 
     func getSrpAttributes(email: String) async throws -> SrpAttributes {
-        let attrs = try await networkFactory.authentication.getSRPAttributes(email: email)
-        return SrpAttributes(
-            srpUserId: attrs.srpUserID,
-            srpSalt: attrs.srpSalt,
-            kekSalt: attrs.kekSalt,
-            memLimit: UInt32(attrs.memLimit),
-            opsLimit: UInt32(attrs.opsLimit),
-            isEmailMfaEnabled: attrs.isEmailMFAEnabled
-        )
+        do {
+            let attrs = try await networkFactory.authentication.getSRPAttributes(email: email)
+            return SrpAttributes(
+                srpUserId: attrs.srpUserID,
+                srpSalt: attrs.srpSalt,
+                kekSalt: attrs.kekSalt,
+                memLimit: UInt32(attrs.memLimit),
+                opsLimit: UInt32(attrs.opsLimit),
+                isEmailMfaEnabled: attrs.isEmailMFAEnabled
+            )
+        } catch let error as EnteError {
+            if case let .serverError(code, _) = error, code == 404 {
+                throw AccountNotFoundError()
+            }
+            throw error
+        }
     }
 
     func sendOtp(email: String) async throws {
@@ -243,6 +250,11 @@ final class EnsuAuthService {
         let secretKey = Data(secretKeyBytes)
         let token = Data(tokenBytes).base64URLPaddedEncodedString()
 
+        if !CredentialStore.shared.isSameUser(userId) {
+            CredentialStore.shared.clear()
+            ChatDataCleaner.deleteSyncState()
+        }
+
         try CredentialStore.shared.save(
             email: email,
             userId: userId,
@@ -286,3 +298,4 @@ private extension AuthResponsePayload {
 
 struct PasskeySessionNotVerifiedError: Error {}
 struct PasskeySessionExpiredError: Error {}
+struct AccountNotFoundError: Error {}

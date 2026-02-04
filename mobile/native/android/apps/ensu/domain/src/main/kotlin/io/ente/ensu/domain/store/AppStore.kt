@@ -43,7 +43,7 @@ class AppStore(
         modelSettingsActions = modelSettingsActions
     )
     private val authActions = AuthStoreActions(_state, logRepository) {
-        syncActions.syncNow()
+        syncActions.syncAfterLogin()
     }
 
     init {
@@ -111,7 +111,10 @@ class AppStore(
 
     fun signIn(email: String) = authActions.signIn(email)
 
-    fun signOut() = authActions.signOut()
+    fun signOut() {
+        authActions.signOut()
+        chatActions.handleLogout()
+    }
 
     fun syncNow(
         onSuccess: (() -> Unit)? = null,

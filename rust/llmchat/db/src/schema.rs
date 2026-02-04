@@ -2,13 +2,14 @@ pub const PRAGMA_FOREIGN_KEYS: &str = "PRAGMA foreign_keys = ON;";
 
 pub const CREATE_SESSIONS: &str = "
 CREATE TABLE IF NOT EXISTS sessions (
-  session_uuid TEXT PRIMARY KEY NOT NULL,
-  title        BLOB NOT NULL,
-  created_at   INTEGER NOT NULL,
-  updated_at   INTEGER NOT NULL,
-  remote_id    TEXT UNIQUE,
-  needs_sync   INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
-  deleted_at   INTEGER
+  session_uuid      TEXT PRIMARY KEY NOT NULL,
+  title             BLOB NOT NULL,
+  created_at        INTEGER NOT NULL,
+  updated_at        INTEGER NOT NULL,
+  server_updated_at INTEGER,
+  remote_id         TEXT UNIQUE,
+  needs_sync        INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
+  deleted_at        INTEGER
 );
 ";
 
@@ -21,6 +22,8 @@ CREATE TABLE IF NOT EXISTS messages (
   text                BLOB NOT NULL,
   attachments         TEXT,
   created_at          INTEGER NOT NULL,
+  remote_id           TEXT,
+  server_updated_at   INTEGER,
   needs_sync          INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
   deleted_at          INTEGER,
   FOREIGN KEY (session_uuid) REFERENCES sessions(session_uuid) ON DELETE CASCADE
@@ -36,13 +39,14 @@ pub const CREATE_ALL: &str = "
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS sessions (
-  session_uuid TEXT PRIMARY KEY NOT NULL,
-  title        BLOB NOT NULL,
-  created_at   INTEGER NOT NULL,
-  updated_at   INTEGER NOT NULL,
-  remote_id    TEXT UNIQUE,
-  needs_sync   INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
-  deleted_at   INTEGER
+  session_uuid      TEXT PRIMARY KEY NOT NULL,
+  title             BLOB NOT NULL,
+  created_at        INTEGER NOT NULL,
+  updated_at        INTEGER NOT NULL,
+  server_updated_at INTEGER,
+  remote_id         TEXT UNIQUE,
+  needs_sync        INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
+  deleted_at        INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -53,6 +57,8 @@ CREATE TABLE IF NOT EXISTS messages (
   text                BLOB NOT NULL,
   attachments         TEXT,
   created_at          INTEGER NOT NULL,
+  remote_id           TEXT,
+  server_updated_at   INTEGER,
   needs_sync          INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1)),
   deleted_at          INTEGER,
   FOREIGN KEY (session_uuid) REFERENCES sessions(session_uuid) ON DELETE CASCADE

@@ -73,21 +73,23 @@ struct DeveloperSettingsView: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.xxl) {
-            #if os(iOS)
-            NavigationLink {
-                ModelSettingsView(embeddedInNavigation: true)
-            } label: {
-                settingsRow(title: "Model settings", subtitle: "Model URL, mmproj, context length")
+            if EnsuFeatureFlags.enableModelSettings {
+                #if os(iOS)
+                NavigationLink {
+                    ModelSettingsView(embeddedInNavigation: true)
+                } label: {
+                    settingsRow(title: "Model settings", subtitle: "Model URL, mmproj, context length")
+                }
+                .buttonStyle(.plain)
+                #else
+                Button {
+                    showModelSettings = true
+                } label: {
+                    settingsRow(title: "Model settings", subtitle: "Model URL, mmproj, context length")
+                }
+                .buttonStyle(.plain)
+                #endif
             }
-            .buttonStyle(.plain)
-            #else
-            Button {
-                showModelSettings = true
-            } label: {
-                settingsRow(title: "Model settings", subtitle: "Model URL, mmproj, context length")
-            }
-            .buttonStyle(.plain)
-            #endif
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Server endpoint")

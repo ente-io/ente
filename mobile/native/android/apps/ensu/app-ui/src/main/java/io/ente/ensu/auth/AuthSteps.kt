@@ -68,7 +68,13 @@ internal fun EmailEntryView(
                 isLoading = authState.isLoading,
                 isEnabled = isEmailValid && !authState.isLoading
             ) {
-                authState.launch(onError = { "Failed to get account info: ${it.message}" }) {
+                authState.launch(onError = { error ->
+                    when (error) {
+                        is io.ente.ensu.data.auth.AccountNotFoundException ->
+                            "No account found for this email."
+                        else -> "Failed to get account info: ${error.message}"
+                    }
+                }) {
                     val trimmed = email.trim()
                     val srpAttrs = authService.getSrpAttributes(trimmed)
                     if (srpAttrs.isEmailMfaEnabled) {

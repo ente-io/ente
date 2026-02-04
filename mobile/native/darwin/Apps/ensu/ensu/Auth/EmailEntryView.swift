@@ -47,7 +47,10 @@ struct EmailEntryView: View {
     @MainActor
     private func continueTapped() async {
         await actionState.run(onError: { error in
-            "Failed to get account info: \(error.localizedDescription)"
+            if error is AccountNotFoundError {
+                return "No account found for this email."
+            }
+            return "Failed to get account info: \(error.localizedDescription)"
         }) {
             let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
             let srpAttrs = try await EnsuAuthService.shared.getSrpAttributes(email: trimmedEmail)

@@ -11,6 +11,7 @@ final class CredentialStore {
     private enum DefaultsKey {
         static let email = "ensu.email"
         static let userId = "ensu.userId"
+        static let lastUserId = "ensu.lastUserId"
     }
 
     private enum KeychainAccount {
@@ -94,12 +95,33 @@ final class CredentialStore {
     }
 
     func clear() {
+        let currentUserId = userId
         UserDefaults.standard.removeObject(forKey: DefaultsKey.email)
         UserDefaults.standard.removeObject(forKey: DefaultsKey.userId)
+        if let currentUserId {
+            UserDefaults.standard.set(NSNumber(value: currentUserId), forKey: DefaultsKey.lastUserId)
+        }
 
         try? KeychainStore.delete(service: keychainService, account: KeychainAccount.token)
         try? KeychainStore.delete(service: keychainService, account: KeychainAccount.masterKey)
         try? KeychainStore.delete(service: keychainService, account: KeychainAccount.secretKey)
         // Note: keep chatDbKey to preserve local chats across sign-out.
+    }
+
+    func clearAll() {
+        UserDefaults.standard.removeObject(forKey: DefaultsKey.email)
+        UserDefaults.standard.removeObject(forKey: DefaultsKey.userId)
+        UserDefaults.standard.removeObject(forKey: DefaultsKey.lastUserId)
+
+        try? KeychainStore.delete(service: keychainService, account: KeychainAccount.token)
+        try? KeychainStore.delete(service: keychainService, account: KeychainAccount.masterKey)
+        try? KeychainStore.delete(service: keychainService, account: KeychainAccount.secretKey)
+        try? KeychainStore.delete(service: keychainService, account: KeychainAccount.chatDbKey)
+    }
+
+    func isSameUser(_ newUserId: Int64) -> Bool {
+        let value = UserDefaults.standard.object(forKey: DefaultsKey.lastUserId) as? NSNumber
+        let lastUserId = value?.int64Value
+        return lastUserId == nil || lastUserId == newUserId
     }
 }

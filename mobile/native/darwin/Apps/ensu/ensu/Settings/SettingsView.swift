@@ -79,7 +79,7 @@ struct SettingsView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will stop syncing on this device.")
+                Text("Signing out will remove your online chats from this device. Offline chats stay available.")
             }
         }
     }

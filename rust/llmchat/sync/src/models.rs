@@ -56,10 +56,6 @@ impl ChatKeyPayload {
 pub struct RemoteSession {
     #[serde(rename = "sessionUUID", alias = "session_uuid")]
     pub session_uuid: String,
-    #[serde(rename = "rootSessionUUID", alias = "root_session_uuid")]
-    pub root_session_uuid: Option<String>,
-    #[serde(rename = "branchFromMessageUUID", alias = "branch_from_message_uuid")]
-    pub branch_from_message_uuid: Option<String>,
     #[serde(rename = "encryptedData", alias = "encrypted_data")]
     pub encrypted_data: String,
     pub header: String,

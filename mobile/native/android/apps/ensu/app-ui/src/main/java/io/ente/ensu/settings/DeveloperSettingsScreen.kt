@@ -32,6 +32,7 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
+import io.ente.ensu.utils.EnsuFeatureFlags
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -55,13 +56,15 @@ fun DeveloperSettingsScreen(
             .fillMaxSize()
             .padding(EnsuSpacing.pageHorizontal.dp)
     ) {
-        DeveloperSettingsRow(
-            title = "Model settings",
-            subtitle = "Model URL, mmproj, context length, max output",
-            onClick = onOpenModelSettings
-        )
+        if (EnsuFeatureFlags.enableModelSettings) {
+            DeveloperSettingsRow(
+                title = "Model settings",
+                subtitle = "Model URL, mmproj, context length, max output",
+                onClick = onOpenModelSettings
+            )
 
-        Spacer(modifier = Modifier.height(EnsuSpacing.xxl.dp))
+            Spacer(modifier = Modifier.height(EnsuSpacing.xxl.dp))
+        }
 
         Text(text = "Endpoint configuration", style = EnsuTypography.h3Bold, color = EnsuColor.textPrimary())
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))

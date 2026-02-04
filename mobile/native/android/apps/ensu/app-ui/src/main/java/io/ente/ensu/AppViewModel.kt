@@ -47,6 +47,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         context = application,
         endpointPreferences = endpointPreferences,
         credentialStore = credentialStore,
+        chatRepository = chatRepository,
+        chatSyncRepository = chatSyncRepository,
         logRepository = logRepository
     )
 

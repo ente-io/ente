@@ -53,7 +53,7 @@ internal class ChatStoreActions(
     private var overflowBypassMessageId: String? = null
 
     private val sessionSummarySystemPrompt =
-        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no markdown characters, no quotes, no emojis, no trailing punctuation, and output only the title."
+        "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
     private val sessionSummaryMaxWords = 7
 
     fun setScope(scope: CoroutineScope) {
@@ -371,6 +371,37 @@ internal class ChatStoreActions(
 
     fun cancelGenerationForDownload() {
         resetGenerationState()
+    }
+
+    fun handleLogout() {
+        resetGenerationState()
+        pendingOverflow = null
+        overflowBypassMessageId = null
+        streamingParentId = null
+        messageStore.clear()
+        branchSelections.clear()
+        sessionAccessTimes.clear()
+
+        state.update { appState ->
+            appState.copy(
+                chat = appState.chat.copy(
+                    sessions = emptyList(),
+                    currentSessionId = null,
+                    messages = emptyList(),
+                    branchSelections = emptyMap(),
+                    messageText = "",
+                    attachments = emptyList(),
+                    editingMessageId = null,
+                    isProcessingAttachments = false,
+                    attachmentDownloads = emptyList(),
+                    attachmentDownloadProgress = null,
+                    isAttachmentDownloadBlocked = false
+                )
+            )
+        }
+
+        attachmentActions.refreshAttachmentDownloadState()
+        loadSessionsFromDb()
     }
 
     fun loadSessionsFromDb() {
@@ -731,7 +762,9 @@ internal class ChatStoreActions(
         }
 
         val raw = sanitizeTitleText(buffer.toString())
-        if (raw.isBlank()) return null
+        if (raw.isBlank()) {
+            return sessionTitleFromText(fallback, fallback = fallback)
+        }
         val words = raw.split(" ")
             .map { word -> word.trim { ch -> !ch.isLetterOrDigit() } }
             .filter { it.isNotBlank() }

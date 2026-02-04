@@ -3,10 +3,16 @@ package io.ente.ensu.domain.store
 import io.ente.ensu.domain.chat.ChatSyncRepository
 import io.ente.ensu.domain.logging.LogRepository
 import io.ente.ensu.domain.model.LogLevel
+import io.ente.ensu.domain.model.MigrationConfig
+import io.ente.ensu.domain.model.MigrationPriority
+import io.ente.ensu.domain.model.MigrationProgress
+import io.ente.ensu.domain.model.MigrationState
 import io.ente.ensu.domain.state.AppState
+import io.ente.ensu.domain.state.SyncState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -20,6 +26,10 @@ internal class SyncStoreActions(
     private var pendingSyncErrorHandler: ((String) -> Unit)? = null
     private var pendingSyncSuccessHandler: (() -> Unit)? = null
     private var reloadSessions: (() -> Unit)? = null
+    private val migrationConfig = MigrationConfig(
+        batchSize = 25L,
+        priority = MigrationPriority.RECENT_FIRST
+    )
 
     fun setScope(scope: CoroutineScope) {
         this.scope = scope
@@ -34,6 +44,47 @@ internal class SyncStoreActions(
         onError: ((String) -> Unit)? = null
     ) {
         requestSync(onSuccess, onError)
+    }
+
+    fun syncAfterLogin() {
+        val scope = scope ?: return
+        scope.launch {
+            val repo = chatSyncRepository ?: return@launch
+            try {
+                val localStatus: MigrationState? = withContext(Dispatchers.IO) {
+                    repo.checkMigrationStatusLocal()
+                }
+                when (localStatus) {
+                    MigrationState.IN_PROGRESS -> performBatchedSync()
+                    MigrationState.NOT_NEEDED, MigrationState.COMPLETE -> performSyncInternal()
+                    MigrationState.FAILED -> {
+                        state.update { it.copy(sync = SyncState.Error("Migration failed")) }
+                    }
+                    else -> {
+                        val status: MigrationState = withContext(Dispatchers.IO) {
+                            repo.checkMigrationStatus()
+                        }
+                        when (status) {
+                            MigrationState.IN_PROGRESS -> performBatchedSync()
+                            MigrationState.NOT_NEEDED, MigrationState.COMPLETE -> performSyncInternal()
+                            MigrationState.FAILED -> {
+                                state.update { it.copy(sync = SyncState.Error("Migration failed")) }
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+            } catch (err: Throwable) {
+                val message = syncErrorMessage(err)
+                logRepository.log(
+                    LogLevel.Warning,
+                    "Migration status check failed",
+                    details = message,
+                    tag = "Sync",
+                    throwable = err
+                )
+            }
+        }
     }
 
     fun requestSync(
@@ -86,33 +137,83 @@ internal class SyncStoreActions(
     ) {
         val scope = scope ?: return
         scope.launch {
-            try {
-                logRepository.log(LogLevel.Info, "Sync started", tag = "Sync")
-                withContext(Dispatchers.IO) {
-                    chatSyncRepository?.sync()
+            performSyncInternal(onError, onSuccess)
+        }
+    }
+
+    private suspend fun performSyncInternal(
+        onError: ((String) -> Unit)? = null,
+        onSuccess: (() -> Unit)? = null
+    ) {
+        val repo = chatSyncRepository ?: return
+        if (!state.value.auth.isLoggedIn) {
+            state.update { it.copy(sync = SyncState.Idle) }
+            return
+        }
+        try {
+            state.update { it.copy(sync = SyncState.Syncing) }
+            logRepository.log(LogLevel.Info, "Sync started", tag = "Sync")
+            withContext(Dispatchers.IO) {
+                repo.sync()
+            }
+            reloadSessions?.invoke()
+            logRepository.log(LogLevel.Info, "Sync success", tag = "Sync")
+            state.update { it.copy(sync = SyncState.Idle) }
+            if (onSuccess != null) {
+                withContext(Dispatchers.Main) {
+                    onSuccess()
                 }
-                reloadSessions?.invoke()
-                logRepository.log(LogLevel.Info, "Sync success", tag = "Sync")
-                if (onSuccess != null) {
-                    withContext(Dispatchers.Main) {
-                        onSuccess()
-                    }
+            }
+        } catch (err: Throwable) {
+            val message = syncErrorMessage(err)
+            logRepository.log(
+                LogLevel.Error,
+                "Sync failed",
+                details = message,
+                tag = "Sync",
+                throwable = err
+            )
+            state.update { it.copy(sync = SyncState.Error(message)) }
+            if (onError != null) {
+                withContext(Dispatchers.Main) {
+                    onError(formatSyncErrorMessage(message))
                 }
-            } catch (err: Throwable) {
-                val message = syncErrorMessage(err)
-                logRepository.log(
-                    LogLevel.Error,
-                    "Sync failed",
-                    details = message,
-                    tag = "Sync",
-                    throwable = err
-                )
-                if (onError != null) {
-                    withContext(Dispatchers.Main) {
-                        onError("Sync failed: $message")
+            }
+        }
+    }
+
+    private fun formatSyncErrorMessage(message: String): String {
+        val normalized = message.trim().lowercase()
+        return if (normalized.contains("sync already in progress")) {
+            message
+        } else {
+            "Sync failed: $message"
+        }
+    }
+
+    private suspend fun performBatchedSync() {
+        val repo = chatSyncRepository ?: return
+        try {
+            state.update { it.copy(sync = SyncState.Migrating(0, 0)) }
+            withContext(Dispatchers.IO) {
+                repo.syncWithProgress(migrationConfig) { progress: MigrationProgress ->
+                    state.update {
+                        it.copy(sync = SyncState.Migrating(progress.processed, progress.total))
                     }
                 }
             }
+            reloadSessions?.invoke()
+            state.update { it.copy(sync = SyncState.Idle) }
+        } catch (err: Throwable) {
+            val message = syncErrorMessage(err)
+            logRepository.log(
+                LogLevel.Error,
+                "Migration sync failed",
+                details = message,
+                tag = "Sync",
+                throwable = err
+            )
+            state.update { it.copy(sync = SyncState.Error(message)) }
         }
     }
 

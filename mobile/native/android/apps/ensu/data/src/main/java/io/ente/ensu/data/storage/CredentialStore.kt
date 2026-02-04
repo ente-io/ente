@@ -29,7 +29,26 @@ class CredentialStore(context: Context) {
     }
 
     fun clear() {
+        val chatDbKey = prefs.getString(KEY_CHAT_DB_KEY, null)
+        val userId = getUserId()
         prefs.edit().clear().apply()
+        val editor = prefs.edit()
+        if (chatDbKey != null) {
+            editor.putString(KEY_CHAT_DB_KEY, chatDbKey)
+        }
+        if (userId != null) {
+            editor.putLong(KEY_LAST_USER_ID, userId)
+        }
+        editor.apply()
+    }
+
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
+    fun isSameUser(newUserId: Long): Boolean {
+        val lastId = prefs.getLong(KEY_LAST_USER_ID, -1L)
+        return lastId == -1L || lastId == newUserId
     }
 
     fun getEmail(): String? = prefs.getString(KEY_EMAIL, null)
@@ -89,5 +108,6 @@ class CredentialStore(context: Context) {
         private const val KEY_SECRET_KEY = "secret_key"
         private const val KEY_TOKEN = "token"
         private const val KEY_CHAT_DB_KEY = "chat_db_key"
+        private const val KEY_LAST_USER_ID = "last_user_id"
     }
 }

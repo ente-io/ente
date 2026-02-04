@@ -460,7 +460,7 @@ private fun UserMessageBubble(
                     text = message.text,
                     style = EnsuTypography.message,
                     color = EnsuColor.userMessageText(),
-                    textAlign = TextAlign.Right
+                    textAlign = TextAlign.Start
                 )
             }
 

@@ -1,91 +1,55 @@
-use crate::backend::{RowExt, Value};
+use crate::backend::RowExt;
 use crate::schema;
 use crate::{Backend, Error, Result};
 
-pub const LATEST_VERSION: i64 = 2;
+pub const LATEST_VERSION: i64 = 4;
 
 pub fn migrate<B: Backend>(backend: &B) -> Result<()> {
-    let version = user_version(backend)?;
-    let mut updated = false;
-    match version {
-        0 => {
-            backend.execute_batch(schema::CREATE_ALL)?;
-            updated = true;
-        }
-        1 => {
-            backend.execute(
-                "ALTER TABLE messages ADD COLUMN needs_sync INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1));",
-                &[],
-            )?;
-            backend.execute(
-                "UPDATE messages SET needs_sync = 0 WHERE session_uuid IN (SELECT session_uuid FROM sessions WHERE needs_sync = 0);",
-                &[],
-            )?;
-            updated = true;
-        }
-        LATEST_VERSION => {}
-        other => {
-            return Err(Error::Migration(format!(
-                "unsupported schema version {other}"
-            )));
-        }
-    }
+    let mut version = user_version(backend)?;
 
-    if ensure_needs_sync_columns(backend)? {
-        updated = true;
-    }
+    while version < LATEST_VERSION {
+        match version {
+            0 => {
+                backend.execute_batch(schema::CREATE_ALL)?;
+                version = LATEST_VERSION;
+            }
+            1 => {
+                backend.execute(
+                    "ALTER TABLE messages ADD COLUMN needs_sync INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1));",
+                    &[],
+                )?;
+                backend.execute(
+                    "UPDATE messages SET needs_sync = 0 WHERE session_uuid IN (SELECT session_uuid FROM sessions WHERE needs_sync = 0);",
+                    &[],
+                )?;
+                version = 2;
+            }
+            2 => {
+                backend.execute(
+                    "ALTER TABLE sessions ADD COLUMN server_updated_at INTEGER;",
+                    &[],
+                )?;
+                backend.execute(
+                    "ALTER TABLE messages ADD COLUMN server_updated_at INTEGER;",
+                    &[],
+                )?;
+                version = 3;
+            }
+            3 => {
+                backend.execute("ALTER TABLE messages ADD COLUMN remote_id TEXT;", &[])?;
+                version = 4;
+            }
+            other => {
+                return Err(Error::Migration(format!(
+                    "unsupported schema version {other}"
+                )));
+            }
+        }
 
-    if updated {
-        backend.execute("PRAGMA user_version = 2;", &[])?;
+        backend.execute(&format!("PRAGMA user_version = {version};"), &[])?;
     }
 
     Ok(())
-}
-
-fn ensure_needs_sync_columns<B: Backend>(backend: &B) -> Result<bool> {
-    if !table_exists(backend, "sessions")? || !table_exists(backend, "messages")? {
-        return Ok(false);
-    }
-
-    let mut updated = false;
-    if !column_exists(backend, "sessions", "needs_sync")? {
-        backend.execute(
-            "ALTER TABLE sessions ADD COLUMN needs_sync INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1));",
-            &[],
-        )?;
-        updated = true;
-    }
-
-    if !column_exists(backend, "messages", "needs_sync")? {
-        backend.execute(
-            "ALTER TABLE messages ADD COLUMN needs_sync INTEGER NOT NULL DEFAULT 1 CHECK(needs_sync IN (0,1));",
-            &[],
-        )?;
-        backend.execute(
-            "UPDATE messages SET needs_sync = 0 WHERE session_uuid IN (SELECT session_uuid FROM sessions WHERE needs_sync = 0);",
-            &[],
-        )?;
-        updated = true;
-    }
-
-    Ok(updated)
-}
-
-fn column_exists<B: Backend>(backend: &B, table: &str, column: &str) -> Result<bool> {
-    let rows = backend.query(&format!("PRAGMA table_info({table});"), &[])?;
-    Ok(rows.iter().any(|row| match row.get(1) {
-        Some(Value::Text(name)) => name == column,
-        _ => false,
-    }))
-}
-
-fn table_exists<B: Backend>(backend: &B, table: &str) -> Result<bool> {
-    Ok(backend
-        .query_row(
-            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
-            &[Value::Text(table.to_string())],
-        )?
-        .is_some())
 }
 
 fn user_version<B: Backend>(backend: &B) -> Result<i64> {

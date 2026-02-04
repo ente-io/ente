@@ -14,6 +14,7 @@ final class EnsuAppState: ObservableObject {
 
     func logout() {
         CredentialStore.shared.clear()
+        ChatDataCleaner.deleteSyncState()
         refreshLoginState()
     }
 }

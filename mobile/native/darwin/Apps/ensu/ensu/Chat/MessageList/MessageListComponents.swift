@@ -123,7 +123,7 @@ struct UserMessageBubbleView: View {
                         .font(EnsuTypography.message)
                         .foregroundStyle(EnsuColor.userMessageText)
                         .lineSpacing(EnsuLineHeight.spacing(fontSize: 15, lineHeight: 1.7))
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.leading)
                         .textSelection(.enabled)
                 }
                 .padding(EnsuSpacing.md)
@@ -581,8 +581,8 @@ struct MarkdownView: View {
         let showTrailingCursor = showCursor && (!inlineCursorSupported || blocks.isEmpty)
 
         VStack(alignment: .leading, spacing: EnsuSpacing.md) {
-            ForEach(Array(blocks.enumerated()), id: \.element.id) { index, block in
-                let isLast = index == blocks.count - 1
+            ForEach(blocks, id: \.id) { (block: MarkdownBlock) in
+                let isLast = block.id == (blocks.last?.id ?? -1)
                 switch block.kind {
                 case .heading(let level, let text):
                     let displayText = showCursor && isLast ? text + StreamingCursor.glyph : text
@@ -603,14 +603,11 @@ struct MarkdownView: View {
                 case .math(let text):
                     MathBlockView(text: text)
                 case .list(let items):
-                    let resolvedItems: [String]
-                    if showCursor && isLast {
-                        resolvedItems = items.enumerated().map { offset, item in
+                    let resolvedItems = (showCursor && isLast)
+                        ? items.enumerated().map { offset, item in
                             offset == items.count - 1 ? item + StreamingCursor.glyph : item
                         }
-                    } else {
-                        resolvedItems = items
-                    }
+                        : items
 
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(resolvedItems, id: \.self) { item in
