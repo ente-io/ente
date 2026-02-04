@@ -108,8 +108,6 @@ func main() {
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
-	llmChatAttachmentsEnabled := true
-	llmChatAttachmentsCleanup := true
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
@@ -157,12 +155,6 @@ func main() {
 	}, []string{"method"})
 
 	s3Config := s3config.NewS3Config()
-	if llmChatAttachmentsEnabled {
-		// Ensure llmchat bucket (b7) is configured. No fallback.
-		if _, err := s3Config.GetLlmChatBucket(); err != nil {
-			log.WithError(err).Warn("Llmchat bucket not configured")
-		}
-	}
 	passkeysRepo, err := passkey.NewRepository(db)
 	if err != nil {
 		panic(err)
@@ -889,23 +881,21 @@ func main() {
 	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
 
 	var llmChatAttachmentController *llmchatCtrl.AttachmentController
-	if llmChatAttachmentsEnabled {
-		llmChatAttachmentController = &llmchatCtrl.AttachmentController{
-			S3Config:            s3Config,
-			Repo:                llmChatRepository,
-			SubscriptionChecker: billingController,
-			Enabled:             llmChatAttachmentsEnabled,
-			UserRepo:            userRepo,
-			RemoteStoreRepo:     remoteStoreRepository,
-		}
+	llmChatAttachmentController = &llmchatCtrl.AttachmentController{
+		S3Config:            s3Config,
+		Repo:                llmChatRepository,
+		SubscriptionChecker: billingController,
+		Enabled:             true,
+		UserRepo:            userRepo,
+		RemoteStoreRepo:     remoteStoreRepository,
 	}
 	llmChatController := &llmchatCtrl.Controller{
 		Repo:                llmChatRepository,
 		KeyCache:            llmChatKeyCache,
 		SubscriptionChecker: billingController,
 		AttachmentCtrl:      llmChatAttachmentController,
-		AttachmentsEnabled:  llmChatAttachmentsEnabled,
-		CleanupAttachments:  llmChatAttachmentsCleanup && llmChatAttachmentsEnabled,
+		AttachmentsEnabled:  true,
+		CleanupAttachments:  true,
 		UserRepo:            userRepo,
 		RemoteStoreRepo:     remoteStoreRepository,
 	}
@@ -920,10 +910,8 @@ func main() {
 	privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
 	privateAPI.DELETE("/llmchat/chat/session", llmChatHandler.DeleteSession)
 	privateAPI.DELETE("/llmchat/chat/message", llmChatHandler.DeleteMessage)
-	if llmChatAttachmentsEnabled {
-		privateAPI.POST("/llmchat/chat/attachment/upload-url", llmChatHandler.GetAttachmentUploadURL)
-		privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
-	}
+	privateAPI.POST("/llmchat/chat/attachment/upload-url", llmChatHandler.GetAttachmentUploadURL)
+	privateAPI.GET("/llmchat/chat/attachment/:attachmentId", llmChatHandler.DownloadAttachment)
 	privateAPI.GET("/llmchat/chat/diff", llmChatHandler.GetDiff)
 
 	dataCleanupController := &dataCleanupCtrl.DeleteUserCleanupController{
@@ -968,7 +956,7 @@ func main() {
 	setupAndStartCrons(
 		userAuthRepo, collectionLinkRepo, fileLinkRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
-		embeddingController, healthCheckHandler, castDb, llmChatRepository, llmChatAttachmentController, llmChatAttachmentsCleanup)
+		embeddingController, healthCheckHandler, castDb, llmChatRepository, llmChatAttachmentController, true)
 
 	// Create a new collector, the name will be used as a label on the metrics
 	collector := sqlstats.NewStatsCollector("prod_db", db)
