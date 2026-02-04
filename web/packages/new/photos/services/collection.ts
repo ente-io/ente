@@ -7,6 +7,7 @@ import {
     encryptBox,
     generateKey,
 } from "ente-base/crypto";
+import { haveWindow } from "ente-base/env";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
@@ -486,9 +487,14 @@ export const savedNormalCollections = (): Promise<Collection[]> =>
 /**
  * Return all hidden collections that are present in our local database.
  */
-export const savedHiddenCollections = (): Promise<Collection[]> =>
+export const savedHiddenCollections = (
+    currentUserID?: number,
+): Promise<Collection[]> =>
     savedCollections().then(
-        (cs) => splitByPredicate(cs, isHiddenCollection)[0],
+        (cs) =>
+            splitByPredicate(cs, (c) =>
+                isHiddenCollection(c, currentUserID),
+            )[0],
     );
 
 /**
@@ -1350,9 +1356,24 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
  *
  * Hidden collections are those that have their visibility set to hidden for
  * the current user (owner or sharee).
+ *
+ * In one instance, the isHiddenCollection function is called outside of a window, like
+ * for the people tab's review suggestions, this function was trigged from a worker.
+ * In that case, since the worker has no access to the localStorage, we need to pass the currentUserID
+ * explicitly.
  */
-export const isHiddenCollection = (collection: Collection) => {
-    const userID = ensureLocalUser().id;
+export const isHiddenCollection = (
+    collection: Collection,
+    currentUserID?: number,
+) => {
+    const userID =
+        currentUserID ?? (haveWindow() ? ensureLocalUser().id : undefined);
+
+    if (userID === undefined) {
+        throw new Error(
+            "isHiddenCollection: currentUserID is required outside window context",
+        );
+    }
     if (collection.owner.id == userID) {
         return (
             collection.magicMetadata?.data.visibility == ItemVisibility.hidden
