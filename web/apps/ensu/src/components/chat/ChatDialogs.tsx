@@ -49,13 +49,15 @@ type ModelGateStatus =
     | "ready"
     | "error";
 
+type SxEntry = Exclude<SxProps<Theme>, readonly unknown[]>;
+
 export interface ChatDialogsProps {
     showSettingsModal: boolean;
     closeSettingsModal: () => void;
-    dialogPaperSx: SxProps<Theme>;
-    dialogTitleSx: SxProps<Theme>;
-    actionButtonSx: SxProps<Theme>;
-    settingsItemSx: SxProps<Theme>;
+    dialogPaperSx: SxEntry;
+    dialogTitleSx: SxEntry;
+    actionButtonSx: SxEntry;
+    settingsItemSx: SxEntry;
     smallIconProps: IconProps;
     compactIconProps: IconProps;
     isLoggedIn: boolean;
@@ -182,9 +184,7 @@ export const ChatDialogs = memo(
                 slotProps={{
                     paper: {
                         sx: [
-                            ...(Array.isArray(dialogPaperSx)
-                                ? (dialogPaperSx as SxProps<Theme>[])
-                                : [dialogPaperSx]),
+                            dialogPaperSx,
                             {
                                 maxHeight:
                                     "min(500px, calc(var(--ensu-viewport-height, 100svh) - 32px))",
@@ -197,9 +197,7 @@ export const ChatDialogs = memo(
             >
                 <DialogTitle
                     sx={[
-                        ...(Array.isArray(dialogTitleSx)
-                            ? (dialogTitleSx as SxProps<Theme>[])
-                            : [dialogTitleSx]),
+                        dialogTitleSx,
                         {
                             display: "flex",
                             alignItems: "center",
@@ -291,9 +289,7 @@ export const ChatDialogs = memo(
                                         handleLogout();
                                     }}
                                     sx={[
-                                        ...(Array.isArray(settingsItemSx)
-                                            ? (settingsItemSx as SxProps<Theme>[])
-                                            : [settingsItemSx]),
+                                        settingsItemSx,
                                         { color: "critical.main" },
                                     ]}
                                 >

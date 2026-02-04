@@ -508,7 +508,7 @@ const Page: React.FC = () => {
 
     const logoFilter = isDarkMode ? "none" : "invert(1)";
     const userBubbleBackground = isDarkMode ? "fill.faintHover" : "fill.faint";
-    const messageFontFamily = theme.typography.fontFamily;
+    const messageFontFamily = theme.typography.fontFamily ?? "inherit";
     const codeFontFamily =
         theme.typography.code?.fontFamily ??
         'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
