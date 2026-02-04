@@ -146,6 +146,9 @@ func (c *Controller) RemoveMember(ctx context.Context, adminID int64, id uuid.UU
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	if err = c.clearFamilyCustomDomain(ctx, familyMember.MemberUserID); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	go func() {
 		notificationErr := c.sendNotification(ctx, adminID, familyMember.MemberUserID, ente.REMOVED, nil)
 		if notificationErr != nil {

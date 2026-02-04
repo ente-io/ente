@@ -2,10 +2,12 @@ package ente
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/ente-io/stacktrace"
 	"golang.org/x/net/idna"
-	"regexp"
-	"strings"
 )
 
 type GetValueRequest struct {
@@ -131,14 +133,63 @@ func (k FlagKey) IsValidValue(value string) error {
 		return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", value)), "value not allowed")
 	}
 	if k == CustomDomain && value != "" {
-		if err := isValidDomainWithoutScheme(value); err != nil {
+		if _, _, isPointer, err := ParseFamilyCustomDomainPointer(value); err != nil {
 			return stacktrace.Propagate(err, "invalid custom domain")
+		} else if !isPointer {
+			if err := isValidDomainWithoutScheme(value); err != nil {
+				return stacktrace.Propagate(err, "invalid custom domain")
+			}
 		}
 	}
 	return nil
 }
 
 var domainRegex = regexp.MustCompile(`^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`)
+
+const customDomainFamilyPrefix = "_"
+
+// BuildFamilyCustomDomainPointer builds a member-scoped custom domain pointer
+// to keep the custom domain unique across family members.
+func BuildFamilyCustomDomainPointer(memberID int64, domain string) string {
+	return fmt.Sprintf("%s%d:%s", customDomainFamilyPrefix, memberID, domain)
+}
+
+// ParseFamilyCustomDomainPointer parses a custom domain pointer of the form _<userID>:<domain>.
+// Returns (userID, domain, isPointer, error).
+func ParseFamilyCustomDomainPointer(value string) (int64, string, bool, error) {
+	if !strings.HasPrefix(value, customDomainFamilyPrefix) {
+		return 0, "", false, nil
+	}
+	trimmed := strings.TrimPrefix(value, customDomainFamilyPrefix)
+	parts := strings.SplitN(trimmed, ":", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return 0, "", true, NewBadRequestWithMessage("invalid family custom domain format")
+	}
+	memberID, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil || memberID <= 0 {
+		return 0, "", true, NewBadRequestWithMessage("invalid family custom domain user id")
+	}
+	domain := parts[1]
+	if err := isValidDomainWithoutScheme(domain); err != nil {
+		return 0, "", true, err
+	}
+	return memberID, domain, true, nil
+}
+
+// ResolveCustomDomainValue returns the effective domain for a custom domain value.
+func ResolveCustomDomainValue(value string) (string, error) {
+	if value == "" {
+		return "", nil
+	}
+	_, domain, isPointer, err := ParseFamilyCustomDomainPointer(value)
+	if err != nil {
+		return "", err
+	}
+	if isPointer {
+		return domain, nil
+	}
+	return value, nil
+}
 
 func isValidDomainWithoutScheme(input string) error {
 	trimmed := strings.TrimSpace(input)
