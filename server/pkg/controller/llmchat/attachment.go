@@ -49,15 +49,18 @@ func (c *AttachmentController) maxAttachmentStorage(userID int64) int64 {
 	return maxAttachmentStorageForUser(c.SubscriptionChecker, userID)
 }
 
-func (c *AttachmentController) llmChatBucketAndClient() (*string, *s3.S3, error) {
+func (c *AttachmentController) llmChatBucketAndClient(bucketID string) (*string, *s3.S3, error) {
 	if c.S3Config == nil {
 		return nil, nil, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
-	bucket, err := c.S3Config.GetLlmChatBucket()
-	if err != nil {
+	if bucketID == "" {
+		bucketID = c.S3Config.GetLlmChatBucketID()
+	}
+	bucket := c.S3Config.GetBucket(bucketID)
+	if bucket == nil || *bucket == "" {
 		return nil, nil, stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
-	s3Client := c.S3Config.GetS3Client(c.S3Config.GetLlmChatBucketID())
+	s3Client := c.S3Config.GetS3Client(bucketID)
 	return bucket, &s3Client, nil
 }
 
@@ -98,7 +101,7 @@ func (c *AttachmentController) GetUploadURL(
 
 	attachmentID := uuid.NewString()
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket, s3Client, err := c.llmChatBucketAndClient()
+	bucket, s3Client, err := c.llmChatBucketAndClient("")
 	if err != nil {
 		return model.AttachmentUploadURLResponse{}, err
 	}
@@ -143,9 +146,10 @@ func (c *AttachmentController) attachmentExists(
 	ctx *gin.Context,
 	userID int64,
 	attachmentID string,
+	bucketID string,
 ) (bool, error) {
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket, s3Client, err := c.llmChatBucketAndClient()
+	bucket, s3Client, err := c.llmChatBucketAndClient(bucketID)
 	if err != nil {
 		return false, err
 	}
@@ -183,7 +187,7 @@ func (c *AttachmentController) VerifyUploaded(
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket, s3Client, err := c.llmChatBucketAndClient()
+	bucket, s3Client, err := c.llmChatBucketAndClient("")
 	if err != nil {
 		return err
 	}
@@ -230,7 +234,15 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 		return "", stacktrace.Propagate(ente.ErrNotFound, "attachment not found")
 	}
 
-	exists, err := c.attachmentExists(ctx, userID, attachmentID)
+	bucketID, err := c.Repo.GetAttachmentBucketID(ctx, userID, attachmentID)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to fetch attachment bucket")
+	}
+	if bucketID == "" {
+		bucketID = c.S3Config.GetLlmChatBucketID()
+	}
+
+	exists, err := c.attachmentExists(ctx, userID, attachmentID, bucketID)
 	if err != nil {
 		return "", err
 	}
@@ -242,7 +254,7 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 	}
 
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket, s3Client, err := c.llmChatBucketAndClient()
+	bucket, s3Client, err := c.llmChatBucketAndClient(bucketID)
 	if err != nil {
 		return "", err
 	}
@@ -259,6 +271,10 @@ func (c *AttachmentController) GetDownloadURL(ctx *gin.Context, attachmentID str
 }
 
 func (c *AttachmentController) Delete(ctx context.Context, userID int64, attachmentID string) error {
+	return c.DeleteWithBucket(ctx, userID, attachmentID, nil)
+}
+
+func (c *AttachmentController) DeleteWithBucket(ctx context.Context, userID int64, attachmentID string, bucketID *string) error {
 	if attachmentID == "" {
 		return stacktrace.Propagate(ente.ErrBadRequest, "missing attachmentId")
 	}
@@ -269,8 +285,16 @@ func (c *AttachmentController) Delete(ctx context.Context, userID int64, attachm
 		return stacktrace.Propagate(ente.ErrNotImplemented, "attachments not configured")
 	}
 
+	resolvedBucketID := ""
+	if bucketID != nil && *bucketID != "" {
+		resolvedBucketID = *bucketID
+	}
+	if resolvedBucketID == "" {
+		resolvedBucketID = c.S3Config.GetLlmChatBucketID()
+	}
+
 	objectKey := buildAttachmentObjectKey(userID, attachmentID)
-	bucket, s3Client, err := c.llmChatBucketAndClient()
+	bucket, s3Client, err := c.llmChatBucketAndClient(resolvedBucketID)
 	if err != nil {
 		return err
 	}
@@ -385,7 +409,7 @@ func (c *AttachmentController) CleanupDeletedAttachments(ctx context.Context, li
 		if referenced {
 			continue
 		}
-		if err := c.Delete(ctx, ref.UserID, ref.AttachmentID); err != nil {
+		if err := c.DeleteWithBucket(ctx, ref.UserID, ref.AttachmentID, ref.BucketID); err != nil {
 			continue
 		}
 		if err := c.Repo.DeleteAttachmentRecords(ctx, ref.UserID, ref.AttachmentID); err != nil {

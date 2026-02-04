@@ -14,6 +14,7 @@ type AttachmentMeta struct {
 	ID             string  `json:"id"`
 	Size           int64   `json:"size"`
 	ClientMetadata *string `json:"clientMetadata"`
+	BucketID       *string `json:"-"`
 }
 
 type GetAttachmentUploadURLRequest struct {

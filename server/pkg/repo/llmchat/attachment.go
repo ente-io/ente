@@ -8,11 +8,15 @@ import (
 	"github.com/ente-io/stacktrace"
 )
 
-const llmChatAttachmentPrefix = "llmchat/attachments"
+const (
+	llmChatAttachmentPrefix   = "llmchat/attachments"
+	llmChatAttachmentBucketID = "b7"
+)
 
 type AttachmentReference struct {
 	UserID       int64
 	AttachmentID string
+	BucketID     *string
 }
 
 type AttachmentClientRef struct {
@@ -64,6 +68,27 @@ func (r *Repository) GetAttachmentOwner(ctx context.Context, attachmentID string
 	return &owner, nil
 }
 
+func (r *Repository) GetAttachmentBucketID(ctx context.Context, userID int64, attachmentID string) (string, error) {
+	row := r.DB.QueryRowContext(ctx, `SELECT bucket_id
+		FROM llmchat_attachments
+		WHERE user_id = $1 AND attachment_id = $2::uuid
+		LIMIT 1`,
+		userID,
+		attachmentID,
+	)
+	var bucketID sql.NullString
+	if err := row.Scan(&bucketID); err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+		return "", stacktrace.Propagate(err, "failed to fetch llmchat attachment bucket")
+	}
+	if bucketID.Valid {
+		return bucketID.String, nil
+	}
+	return "", nil
+}
+
 func (r *Repository) GetActiveAttachmentUsage(ctx context.Context, userID int64) (int64, error) {
 	row := r.DB.QueryRowContext(ctx, `SELECT COALESCE(SUM(a.size), 0)
 		FROM llmchat_attachments a
@@ -108,7 +133,7 @@ func (r *Repository) GetDeletedAttachmentCandidates(ctx context.Context, limit i
 	if limit <= 0 {
 		limit = 1000
 	}
-	rows, err := r.DB.QueryContext(ctx, `SELECT DISTINCT a.user_id, a.attachment_id
+	rows, err := r.DB.QueryContext(ctx, `SELECT DISTINCT a.user_id, a.attachment_id, a.bucket_id
 		FROM llmchat_attachments a
 		JOIN llmchat_messages m ON m.message_uuid = a.message_uuid AND m.user_id = a.user_id
 		WHERE m.is_deleted = TRUE
@@ -124,8 +149,12 @@ func (r *Repository) GetDeletedAttachmentCandidates(ctx context.Context, limit i
 	refs := make([]AttachmentReference, 0)
 	for rows.Next() {
 		var ref AttachmentReference
-		if err := rows.Scan(&ref.UserID, &ref.AttachmentID); err != nil {
+		var bucketID sql.NullString
+		if err := rows.Scan(&ref.UserID, &ref.AttachmentID, &bucketID); err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan deleted llmchat attachments")
+		}
+		if bucketID.Valid {
+			ref.BucketID = &bucketID.String
 		}
 		refs = append(refs, ref)
 	}

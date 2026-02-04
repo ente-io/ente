@@ -16,37 +16,37 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		return model.Session{}, err
 	}
 
+	mergedClientMetadata, err := MergeEncryptedData(req.ClientMetadata, req.EncryptedData)
+	if err != nil {
+		return model.Session{}, err
+	}
+
 	row := r.DB.QueryRowContext(ctx, `INSERT INTO llmchat_sessions(
 		session_uuid,
 		user_id,
-		encrypted_data,
 		header,
 		client_metadata,
 		is_deleted,
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, FALSE, now_utc_micro_seconds())
+	) VALUES ($1, $2, $3, $4, FALSE, now_utc_micro_seconds())
 	ON CONFLICT (session_uuid) DO UPDATE
-		SET encrypted_data = EXCLUDED.encrypted_data,
-			header = EXCLUDED.header,
+		SET header = EXCLUDED.header,
 			client_metadata = EXCLUDED.client_metadata,
 			is_deleted = FALSE
 		WHERE llmchat_sessions.user_id = EXCLUDED.user_id
-	RETURNING session_uuid, user_id, encrypted_data, header, client_metadata, is_deleted, created_at, updated_at`,
+	RETURNING session_uuid, user_id, header, client_metadata, is_deleted, created_at, updated_at`,
 		req.SessionUUID,
 		userID,
-		req.EncryptedData,
 		req.Header,
-		req.ClientMetadata,
+		mergedClientMetadata,
 	)
 
 	var result model.Session
-	var encryptedData sql.NullString
 	var header sql.NullString
 	var clientMetadata sql.NullString
 	if err := row.Scan(
 		&result.SessionUUID,
 		&result.UserID,
-		&encryptedData,
 		&header,
 		&clientMetadata,
 		&result.IsDeleted,
@@ -58,9 +58,7 @@ func (r *Repository) UpsertSession(ctx context.Context, userID int64, req model.
 		}
 		return result, stacktrace.Propagate(err, "failed to upsert llmchat session")
 	}
-	if encryptedData.Valid {
-		result.EncryptedData = &encryptedData.String
-	}
+	result.EncryptedData = &req.EncryptedData
 	if header.Valid {
 		result.Header = &header.String
 	}
@@ -112,7 +110,6 @@ func (r *Repository) GetSessionUUIDByClientID(ctx context.Context, userID int64,
 func (r *Repository) DeleteSession(ctx context.Context, userID int64, sessionUUID string) (model.SessionTombstone, error) {
 	row := r.DB.QueryRowContext(ctx, `UPDATE llmchat_sessions
 		SET is_deleted = TRUE,
-			encrypted_data = NULL,
 			header = NULL,
 			client_metadata = NULL
 		WHERE session_uuid = $1 AND user_id = $2 AND is_deleted = FALSE
@@ -146,7 +143,12 @@ func (r *Repository) DeleteSession(ctx context.Context, userID int64, sessionUUI
 }
 
 func (r *Repository) GetSessionDiffPage(ctx context.Context, userID int64, sinceTime int64, sinceSessionUUID string, limit int16) ([]model.SessionDiffEntry, bool, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, encrypted_data, header, client_metadata, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid,
+		client_metadata::jsonb->>'encryptedData' AS encrypted_data,
+		header,
+		client_metadata,
+		created_at,
+		updated_at
 		FROM llmchat_sessions
 		WHERE user_id = $1 AND is_deleted = FALSE AND (updated_at > $2 OR (updated_at = $2 AND session_uuid > $3::uuid))
 		ORDER BY updated_at, session_uuid
@@ -196,7 +198,12 @@ func (r *Repository) GetSessionTombstonesPage(ctx context.Context, userID int64,
 }
 
 func (r *Repository) GetSessionDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.SessionDiffEntry, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid, encrypted_data, header, client_metadata, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT session_uuid,
+		client_metadata::jsonb->>'encryptedData' AS encrypted_data,
+		header,
+		client_metadata,
+		created_at,
+		updated_at
 		FROM llmchat_sessions
 		WHERE user_id = $1 AND is_deleted = FALSE AND updated_at > $2
 		ORDER BY updated_at, session_uuid
@@ -237,16 +244,24 @@ func convertRowsToSessionDiffEntries(rows *sql.Rows) ([]model.SessionDiffEntry, 
 	entries := make([]model.SessionDiffEntry, 0)
 	for rows.Next() {
 		var entry model.SessionDiffEntry
+		var encryptedData sql.NullString
+		var header sql.NullString
 		var clientMetadata sql.NullString
 		if err := rows.Scan(
 			&entry.SessionUUID,
-			&entry.EncryptedData,
-			&entry.Header,
+			&encryptedData,
+			&header,
 			&clientMetadata,
 			&entry.CreatedAt,
 			&entry.UpdatedAt,
 		); err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan llmchat session diff")
+		}
+		if encryptedData.Valid {
+			entry.EncryptedData = encryptedData.String
+		}
+		if header.Valid {
+			entry.Header = header.String
 		}
 		if clientMetadata.Valid {
 			entry.ClientMetadata = &clientMetadata.String

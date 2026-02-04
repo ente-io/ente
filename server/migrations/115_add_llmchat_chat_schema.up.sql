@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS llmchat_key (
 CREATE TABLE IF NOT EXISTS llmchat_sessions (
     session_uuid            uuid PRIMARY KEY NOT NULL,
     user_id                 BIGINT NOT NULL,
-    encrypted_data          TEXT,
     header                  TEXT,
     client_metadata         TEXT,
     is_deleted              BOOLEAN NOT NULL DEFAULT FALSE,
@@ -20,8 +19,8 @@ CREATE TABLE IF NOT EXISTS llmchat_sessions (
     updated_at              BIGINT  NOT NULL DEFAULT now_utc_micro_seconds(),
     CONSTRAINT fk_llmchat_sessions_user_id FOREIGN KEY (user_id) REFERENCES llmchat_key (user_id) ON DELETE CASCADE,
     CONSTRAINT llmchat_sessions_state_constraint CHECK (
-        (is_deleted IS TRUE AND encrypted_data IS NULL AND header IS NULL) OR
-        (is_deleted IS FALSE AND encrypted_data IS NOT NULL AND header IS NOT NULL)
+        (is_deleted IS TRUE AND header IS NULL AND client_metadata IS NULL) OR
+        (is_deleted IS FALSE AND header IS NOT NULL AND client_metadata IS NOT NULL)
     )
 );
 
@@ -31,7 +30,6 @@ CREATE TABLE IF NOT EXISTS llmchat_messages (
     session_uuid        uuid   NOT NULL,
     parent_message_uuid uuid,
     sender              TEXT   NOT NULL,
-    encrypted_data      TEXT,
     header              TEXT,
     client_metadata     TEXT,
     is_deleted          BOOLEAN NOT NULL DEFAULT FALSE,
@@ -40,8 +38,8 @@ CREATE TABLE IF NOT EXISTS llmchat_messages (
     CONSTRAINT fk_llmchat_messages_user_id FOREIGN KEY (user_id) REFERENCES llmchat_key (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_llmchat_messages_session_uuid FOREIGN KEY (session_uuid) REFERENCES llmchat_sessions (session_uuid),
     CONSTRAINT llmchat_messages_state_constraint CHECK (
-        (is_deleted IS TRUE AND encrypted_data IS NULL AND header IS NULL) OR
-        (is_deleted IS FALSE AND encrypted_data IS NOT NULL AND header IS NOT NULL)
+        (is_deleted IS TRUE AND header IS NULL AND client_metadata IS NULL) OR
+        (is_deleted IS FALSE AND header IS NOT NULL AND client_metadata IS NOT NULL)
     ),
     CONSTRAINT llmchat_messages_sender_constraint CHECK (sender IN ('self', 'other'))
 );
@@ -53,6 +51,7 @@ CREATE TABLE IF NOT EXISTS llmchat_attachments (
     message_uuid    uuid   NOT NULL,
     size            BIGINT NOT NULL,
     client_metadata TEXT,
+    bucket_id       TEXT   NOT NULL DEFAULT 'b7',
     created_at      BIGINT NOT NULL DEFAULT now_utc_micro_seconds(),
     CONSTRAINT fk_llmchat_attachments_user_id FOREIGN KEY (user_id) REFERENCES llmchat_key (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_llmchat_attachments_message_uuid FOREIGN KEY (message_uuid) REFERENCES llmchat_messages (message_uuid) ON DELETE CASCADE,

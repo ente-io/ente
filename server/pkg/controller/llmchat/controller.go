@@ -82,14 +82,11 @@ func (c *Controller) UpsertSession(ctx *gin.Context, req model.UpsertSessionRequ
 	if err != nil {
 		return nil, err
 	}
-	if err := c.Repo.RepairZeroUUIDs(ctx, userID); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to repair zero-uuid llmchat records")
-	}
 	if existingSessionUUID, err := c.Repo.GetSessionUUIDByClientID(ctx, userID, clientID); err != nil {
 		return nil, err
 	} else if existingSessionUUID != "" {
 		req.SessionUUID = existingSessionUUID
-	} else if req.SessionUUID == "" || req.SessionUUID == model.ZeroUUID {
+	} else if req.SessionUUID == "" {
 		req.SessionUUID = uuid.NewString()
 	}
 	if _, err := uuid.Parse(req.SessionUUID); err != nil {
@@ -111,14 +108,11 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 	if err != nil {
 		return nil, err
 	}
-	if err := c.Repo.RepairZeroUUIDs(ctx, userID); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to repair zero-uuid llmchat records")
-	}
 	if existingMessageUUID, err := c.Repo.GetMessageUUIDByClientID(ctx, userID, clientID); err != nil {
 		return nil, err
 	} else if existingMessageUUID != "" {
 		req.MessageUUID = existingMessageUUID
-	} else if req.MessageUUID == "" || req.MessageUUID == model.ZeroUUID {
+	} else if req.MessageUUID == "" {
 		req.MessageUUID = uuid.NewString()
 	}
 	if _, err := uuid.Parse(req.MessageUUID); err != nil {
@@ -131,7 +125,7 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 		return nil, err
 	}
 	if req.ParentMessageUUID != nil {
-		if *req.ParentMessageUUID == "" || *req.ParentMessageUUID == model.ZeroUUID {
+		if *req.ParentMessageUUID == "" {
 			req.ParentMessageUUID = nil
 		} else if _, err := uuid.Parse(*req.ParentMessageUUID); err != nil {
 			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid parentMessageUUID")
@@ -147,6 +141,12 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 	}
 	if !allowedAttachments {
 		req.Attachments = nil
+	}
+	if allowedAttachments && c.AttachmentCtrl != nil && c.AttachmentCtrl.S3Config != nil {
+		bucketID := c.AttachmentCtrl.S3Config.GetLlmChatBucketID()
+		for i := range req.Attachments {
+			req.Attachments[i].BucketID = &bucketID
+		}
 	}
 	if err := c.enforceMessageLimit(ctx, userID, req.MessageUUID); err != nil {
 		return nil, err
@@ -206,7 +206,7 @@ func (c *Controller) DeleteSession(ctx *gin.Context, sessionUUID string) (*model
 			if referenced {
 				continue
 			}
-			if delErr := c.AttachmentCtrl.Delete(ctx.Request.Context(), userID, attachment.ID); delErr != nil {
+			if delErr := c.AttachmentCtrl.DeleteWithBucket(ctx.Request.Context(), userID, attachment.ID, attachment.BucketID); delErr != nil {
 				logrus.WithError(delErr).WithField("user_id", userID).WithField("attachment_id", attachment.ID).Warn("Failed to delete llmchat attachment")
 				continue
 			}
@@ -259,7 +259,7 @@ func (c *Controller) DeleteMessage(ctx *gin.Context, messageUUID string) (*model
 			if referenced {
 				continue
 			}
-			if delErr := c.AttachmentCtrl.Delete(ctx.Request.Context(), userID, attachment.ID); delErr != nil {
+			if delErr := c.AttachmentCtrl.DeleteWithBucket(ctx.Request.Context(), userID, attachment.ID, attachment.BucketID); delErr != nil {
 				logrus.WithError(delErr).WithField("user_id", userID).WithField("attachment_id", attachment.ID).Warn("Failed to delete llmchat attachment")
 				continue
 			}

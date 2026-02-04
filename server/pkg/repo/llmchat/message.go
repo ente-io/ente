@@ -17,6 +17,11 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		return model.Message{}, err
 	}
 
+	mergedClientMetadata, err := MergeEncryptedData(req.ClientMetadata, req.EncryptedData)
+	if err != nil {
+		return model.Message{}, err
+	}
+
 	tx, err := r.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return model.Message{}, stacktrace.Propagate(err, "failed to begin transaction")
@@ -32,35 +37,31 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		session_uuid,
 		parent_message_uuid,
 		sender,
-		encrypted_data,
 		header,
 		client_metadata,
 		is_deleted,
 		created_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, now_utc_micro_seconds())
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE, now_utc_micro_seconds())
 	ON CONFLICT (message_uuid) DO UPDATE
 		SET session_uuid = EXCLUDED.session_uuid,
 			parent_message_uuid = EXCLUDED.parent_message_uuid,
 			sender = EXCLUDED.sender,
-			encrypted_data = EXCLUDED.encrypted_data,
 			header = EXCLUDED.header,
 			client_metadata = EXCLUDED.client_metadata,
 			is_deleted = FALSE
 		WHERE llmchat_messages.user_id = EXCLUDED.user_id
-	RETURNING message_uuid, user_id, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, is_deleted, created_at, updated_at`,
+	RETURNING message_uuid, user_id, session_uuid, parent_message_uuid, sender, header, client_metadata, is_deleted, created_at, updated_at`,
 		req.MessageUUID,
 		userID,
 		req.SessionUUID,
 		req.ParentMessageUUID,
 		req.Sender,
-		req.EncryptedData,
 		req.Header,
-		req.ClientMetadata,
+		mergedClientMetadata,
 	)
 
 	var result model.Message
 	var parentMessageUUID sql.NullString
-	var encryptedData sql.NullString
 	var header sql.NullString
 	var clientMetadata sql.NullString
 	if err := row.Scan(
@@ -69,7 +70,6 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 		&result.SessionUUID,
 		&parentMessageUUID,
 		&result.Sender,
-		&encryptedData,
 		&header,
 		&clientMetadata,
 		&result.IsDeleted,
@@ -95,9 +95,7 @@ func (r *Repository) UpsertMessage(ctx context.Context, userID int64, req model.
 	if parentMessageUUID.Valid {
 		result.ParentMessageUUID = &parentMessageUUID.String
 	}
-	if encryptedData.Valid {
-		result.EncryptedData = &encryptedData.String
-	}
+	result.EncryptedData = &req.EncryptedData
 	if header.Valid {
 		result.Header = &header.String
 	}
@@ -158,13 +156,18 @@ func (r *Repository) replaceMessageAttachments(ctx context.Context, tx *sql.Tx, 
 	}
 	for _, input := range inputs {
 		attachment := input.meta
+		bucketID := llmChatAttachmentBucketID
+		if attachment.BucketID != nil && *attachment.BucketID != "" {
+			bucketID = *attachment.BucketID
+		}
 		if _, err := tx.ExecContext(ctx, `INSERT INTO llmchat_attachments(
 			attachment_id,
 			user_id,
 			message_uuid,
 			size,
-			client_metadata
-		) VALUES ($1, $2, $3, $4, $5)`, attachment.ID, userID, messageUUID, attachment.Size, attachment.ClientMetadata); err != nil {
+			client_metadata,
+			bucket_id
+		) VALUES ($1, $2, $3, $4, $5, $6)`, attachment.ID, userID, messageUUID, attachment.Size, attachment.ClientMetadata, bucketID); err != nil {
 			return stacktrace.Propagate(err, "failed to insert llmchat attachment")
 		}
 		objectKey := buildAttachmentObjectKey(userID, attachment.ID)
@@ -217,7 +220,7 @@ func (r *Repository) GetMessageUUIDByClientID(ctx context.Context, userID int64,
 }
 
 func (r *Repository) GetMessageAttachments(ctx context.Context, userID int64, messageUUID string) ([]model.AttachmentMeta, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT attachment_id, size, client_metadata
+	rows, err := r.DB.QueryContext(ctx, `SELECT attachment_id, size, client_metadata, bucket_id
 		FROM llmchat_attachments
 		WHERE user_id = $1 AND message_uuid = $2
 		ORDER BY id`,
@@ -233,11 +236,15 @@ func (r *Repository) GetMessageAttachments(ctx context.Context, userID int64, me
 	for rows.Next() {
 		var attachment model.AttachmentMeta
 		var clientMetadata sql.NullString
-		if err := rows.Scan(&attachment.ID, &attachment.Size, &clientMetadata); err != nil {
+		var bucketID sql.NullString
+		if err := rows.Scan(&attachment.ID, &attachment.Size, &clientMetadata, &bucketID); err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan llmchat message attachments")
 		}
 		if clientMetadata.Valid {
 			attachment.ClientMetadata = &clientMetadata.String
+		}
+		if bucketID.Valid {
+			attachment.BucketID = &bucketID.String
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -258,7 +265,7 @@ func (r *Repository) GetActiveMessageCount(ctx context.Context, userID int64) (i
 }
 
 func (r *Repository) GetActiveSessionMessageAttachments(ctx context.Context, userID int64, sessionUUID string) ([]model.AttachmentMeta, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT a.attachment_id, a.size, a.client_metadata
+	rows, err := r.DB.QueryContext(ctx, `SELECT a.attachment_id, a.size, a.client_metadata, a.bucket_id
 		FROM llmchat_attachments a
 		JOIN llmchat_messages m ON m.message_uuid = a.message_uuid AND m.user_id = a.user_id
 		WHERE a.user_id = $1 AND m.session_uuid = $2 AND m.is_deleted = FALSE
@@ -275,11 +282,15 @@ func (r *Repository) GetActiveSessionMessageAttachments(ctx context.Context, use
 	for rows.Next() {
 		var attachment model.AttachmentMeta
 		var clientMetadata sql.NullString
-		if err := rows.Scan(&attachment.ID, &attachment.Size, &clientMetadata); err != nil {
+		var bucketID sql.NullString
+		if err := rows.Scan(&attachment.ID, &attachment.Size, &clientMetadata, &bucketID); err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan llmchat session message attachments")
 		}
 		if clientMetadata.Valid {
 			attachment.ClientMetadata = &clientMetadata.String
+		}
+		if bucketID.Valid {
+			attachment.BucketID = &bucketID.String
 		}
 		result = append(result, attachment)
 	}
@@ -301,7 +312,6 @@ func (r *Repository) SoftDeleteMessagesForSession(ctx context.Context, userID in
 
 	res, err := tx.ExecContext(ctx, `UPDATE llmchat_messages
 		SET is_deleted = TRUE,
-			encrypted_data = NULL,
 			header = NULL,
 			client_metadata = NULL
 		WHERE user_id = $1 AND session_uuid = $2 AND is_deleted = FALSE`,
@@ -315,6 +325,13 @@ func (r *Repository) SoftDeleteMessagesForSession(ctx context.Context, userID in
 	affected, err := res.RowsAffected()
 	if err != nil {
 		return rollback(stacktrace.Propagate(err, "failed to count deleted llmchat session messages"))
+	}
+
+	if _, err := tx.ExecContext(ctx, `DELETE FROM llmchat_attachments a
+		USING llmchat_messages m
+		WHERE a.user_id = $1 AND m.user_id = $1 AND m.session_uuid = $2
+			AND a.message_uuid = m.message_uuid`, userID, sessionUUID); err != nil {
+		return rollback(stacktrace.Propagate(err, "failed to delete llmchat session message attachments"))
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -352,9 +369,14 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID int64, messageUUI
 		return result, cause
 	}
 
+	deleteAttachments := func() error {
+		_, err := tx.ExecContext(ctx, `DELETE FROM llmchat_attachments
+			WHERE user_id = $1 AND message_uuid = $2`, userID, messageUUID)
+		return err
+	}
+
 	row := tx.QueryRowContext(ctx, `UPDATE llmchat_messages
 		SET is_deleted = TRUE,
-			encrypted_data = NULL,
 			header = NULL,
 			client_metadata = NULL
 		WHERE message_uuid = $1 AND user_id = $2 AND is_deleted = FALSE
@@ -365,6 +387,9 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID int64, messageUUI
 
 	err = row.Scan(&result.MessageUUID, &result.DeletedAt)
 	if err == nil {
+		if err := deleteAttachments(); err != nil {
+			return rollback(stacktrace.Propagate(err, "failed to delete llmchat message attachments"))
+		}
 		if err := tx.Commit(); err != nil {
 			return result, stacktrace.Propagate(err, "failed to commit transaction")
 		}
@@ -379,6 +404,9 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID int64, messageUUI
 		)
 		err = row.Scan(&result.MessageUUID, &result.DeletedAt)
 		if err == nil {
+			if err := deleteAttachments(); err != nil {
+				return rollback(stacktrace.Propagate(err, "failed to delete llmchat message attachments"))
+			}
 			if err := tx.Commit(); err != nil {
 				return result, stacktrace.Propagate(err, "failed to commit transaction")
 			}
@@ -393,7 +421,15 @@ func (r *Repository) DeleteMessage(ctx context.Context, userID int64, messageUUI
 }
 
 func (r *Repository) GetMessageDiffPage(ctx context.Context, userID int64, sinceTime int64, sinceMessageUUID string, limit int16) ([]model.MessageDiffEntry, bool, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid,
+		session_uuid,
+		parent_message_uuid,
+		sender,
+		client_metadata::jsonb->>'encryptedData' AS encrypted_data,
+		header,
+		client_metadata,
+		created_at,
+		updated_at
 		FROM llmchat_messages
 		WHERE user_id = $1 AND is_deleted = FALSE AND (updated_at > $2 OR (updated_at = $2 AND message_uuid > $3::uuid))
 		ORDER BY updated_at, message_uuid
@@ -446,7 +482,15 @@ func (r *Repository) GetMessageTombstonesPage(ctx context.Context, userID int64,
 }
 
 func (r *Repository) GetMessageDiff(ctx context.Context, userID int64, sinceTime int64, limit int16) ([]model.MessageDiffEntry, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, session_uuid, parent_message_uuid, sender, encrypted_data, header, client_metadata, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid,
+		session_uuid,
+		parent_message_uuid,
+		sender,
+		client_metadata::jsonb->>'encryptedData' AS encrypted_data,
+		header,
+		client_metadata,
+		created_at,
+		updated_at
 		FROM llmchat_messages
 		WHERE user_id = $1 AND is_deleted = FALSE AND updated_at > $2
 		ORDER BY updated_at, message_uuid
@@ -495,14 +539,16 @@ func convertRowsToMessageDiffEntries(rows *sql.Rows) ([]model.MessageDiffEntry, 
 	for rows.Next() {
 		var entry model.MessageDiffEntry
 		var parentMessageUUID sql.NullString
+		var encryptedData sql.NullString
+		var header sql.NullString
 		var clientMetadata sql.NullString
 		if err := rows.Scan(
 			&entry.MessageUUID,
 			&entry.SessionUUID,
 			&parentMessageUUID,
 			&entry.Sender,
-			&entry.EncryptedData,
-			&entry.Header,
+			&encryptedData,
+			&header,
 			&clientMetadata,
 			&entry.CreatedAt,
 			&entry.UpdatedAt,
@@ -511,6 +557,12 @@ func convertRowsToMessageDiffEntries(rows *sql.Rows) ([]model.MessageDiffEntry, 
 		}
 		if parentMessageUUID.Valid {
 			entry.ParentMessageUUID = &parentMessageUUID.String
+		}
+		if encryptedData.Valid {
+			entry.EncryptedData = encryptedData.String
+		}
+		if header.Valid {
+			entry.Header = header.String
 		}
 		if clientMetadata.Valid {
 			entry.ClientMetadata = &clientMetadata.String
@@ -557,7 +609,7 @@ func (r *Repository) populateMessageAttachments(ctx context.Context, userID int6
 		index[entries[i].MessageUUID] = i
 	}
 
-	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, attachment_id, size, client_metadata
+	rows, err := r.DB.QueryContext(ctx, `SELECT message_uuid, attachment_id, size, client_metadata, bucket_id
 		FROM llmchat_attachments
 		WHERE user_id = $1 AND message_uuid = ANY($2::uuid[])
 		ORDER BY id`,
@@ -573,11 +625,15 @@ func (r *Repository) populateMessageAttachments(ctx context.Context, userID int6
 		var messageUUID string
 		var attachment model.AttachmentMeta
 		var clientMetadata sql.NullString
-		if err := rows.Scan(&messageUUID, &attachment.ID, &attachment.Size, &clientMetadata); err != nil {
+		var bucketID sql.NullString
+		if err := rows.Scan(&messageUUID, &attachment.ID, &attachment.Size, &clientMetadata, &bucketID); err != nil {
 			return stacktrace.Propagate(err, "failed to scan llmchat message diff attachments")
 		}
 		if clientMetadata.Valid {
 			attachment.ClientMetadata = &clientMetadata.String
+		}
+		if bucketID.Valid {
+			attachment.BucketID = &bucketID.String
 		}
 		if idx, ok := index[messageUUID]; ok {
 			entries[idx].Attachments = append(entries[idx].Attachments, attachment)
