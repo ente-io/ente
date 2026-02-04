@@ -1,7 +1,6 @@
 import {
     ArrowLeft01Icon,
     ArrowRight01Icon,
-    Attachment01Icon,
     Copy01Icon,
     Edit01Icon,
     RepeatIcon,
@@ -10,8 +9,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { MarkdownRenderer } from "components/MarkdownRenderer";
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { Virtuoso } from "react-virtuoso";
+import React, { memo, useCallback, useMemo } from "react";
 import {
     STREAMING_SELECTION_KEY,
     type BranchSwitcher,
@@ -37,14 +35,10 @@ export interface ChatMessageListProps {
     loadingDots: number;
     stickToBottom: boolean;
     onStickToBottomChange: (value: boolean) => void;
-    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+    scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
     onScroll: () => void;
     onUserScrollIntent: () => void;
     onOpenAttachment: (
-        message: ChatMessage,
-        attachment: ChatAttachment,
-    ) => void;
-    onDownloadAttachment: (
         message: ChatMessage,
         attachment: ChatAttachment,
     ) => void;
@@ -57,7 +51,6 @@ export interface ChatMessageListProps {
     parseDocumentBlocks: (text: string) => ParsedDocuments;
     stripHiddenParts: (text: string) => string;
     formatTime: (timestamp: number) => string;
-    formatBytes: (size: number) => string;
     isDesktopOverlay: boolean;
     userBubbleBackground: string;
     userMessageTextSx: SxProps<Theme>;
@@ -69,110 +62,53 @@ export interface ChatMessageListProps {
     actionIconProps: IconProps;
 }
 
-interface ImagePreviewProps {
+interface AttachmentCardProps {
     attachment: ChatAttachment;
-    url?: string;
-    height: number;
-    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-    onRequestPreview: (attachment: ChatAttachment, sessionUuid: string) => void;
-    sessionUuid: string;
     onClick: () => void;
 }
 
-const ImagePreview = memo(
-    ({
-        attachment,
-        url,
-        height,
-        scrollContainerRef,
-        onRequestPreview,
-        sessionUuid,
-        onClick,
-    }: ImagePreviewProps) => {
-        const placeholderRef = useRef<HTMLDivElement | HTMLImageElement | null>(
-            null,
-        );
-        const requestedRef = useRef(false);
-
-        useEffect(() => {
-            if (url || requestedRef.current) return;
-            const node = placeholderRef.current;
-            if (!node) return;
-
-            if (typeof IntersectionObserver === "undefined") {
-                requestedRef.current = true;
-                onRequestPreview(attachment, sessionUuid);
-                return;
-            }
-
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    if (entries.some((entry) => entry.isIntersecting)) {
-                        requestedRef.current = true;
-                        onRequestPreview(attachment, sessionUuid);
-                        observer.disconnect();
-                    }
-                },
-                {
-                    root: scrollContainerRef.current ?? null,
-                    rootMargin: "200px",
-                },
-            );
-
-            observer.observe(node);
-            return () => observer.disconnect();
-        }, [
-            attachment,
-            onRequestPreview,
-            scrollContainerRef,
-            sessionUuid,
-            url,
-        ]);
-
-        if (url) {
-            return (
-                <Box
-                    ref={placeholderRef}
-                    component="img"
-                    src={url}
-                    alt={attachment.name ?? "Image"}
-                    sx={{
-                        width: "100%",
-                        height,
-                        objectFit: "cover",
-                        borderRadius: 2,
-                        cursor: "pointer",
-                    }}
-                    onClick={onClick}
-                />
-            );
-        }
-
-        return (
-            <Box
-                ref={placeholderRef}
+const AttachmentCard = memo(({ attachment, onClick }: AttachmentCardProps) => {
+    return (
+        <Box
+            onClick={onClick}
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                px: 1.5,
+                py: 1,
+                borderRadius: 2,
+                bgcolor: "fill.faint",
+                border: "1px solid",
+                borderColor: "divider",
+                cursor: "pointer",
+                width: "fit-content",
+                maxWidth: "100%",
+                minWidth: 0,
+            }}
+        >
+            <Typography
+                variant="small"
                 sx={{
-                    width: "100%",
-                    height,
-                    borderRadius: 2,
-                    bgcolor: "fill.faint",
+                    color: "text.base",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    minWidth: 0,
                 }}
-            />
-        );
-    },
-);
+            >
+                {attachment.name ?? "Attachment"}
+            </Typography>
+        </Box>
+    );
+});
 
 interface MessageRowProps {
     message: ChatMessage;
-    attachmentPreviews: Record<string, string>;
     branchSwitchers: Record<string, BranchSwitcher>;
     loadingPhrase: string | null;
     loadingDots: number;
     onOpenAttachment: (
-        message: ChatMessage,
-        attachment: ChatAttachment,
-    ) => void;
-    onDownloadAttachment: (
         message: ChatMessage,
         attachment: ChatAttachment,
     ) => void;
@@ -185,8 +121,7 @@ interface MessageRowProps {
     parseDocumentBlocks: (text: string) => ParsedDocuments;
     stripHiddenParts: (text: string) => string;
     formatTime: (timestamp: number) => string;
-    formatBytes: (size: number) => string;
-    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+    scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
     userBubbleBackground: string;
     userMessageTextSx: SxProps<Theme>;
     assistantTextSx: SxProps<Theme>;
@@ -200,12 +135,10 @@ interface MessageRowProps {
 const MessageRow = memo(
     ({
         message,
-        attachmentPreviews,
         branchSwitchers,
         loadingPhrase,
         loadingDots,
         onOpenAttachment,
-        onDownloadAttachment,
         onEditMessage,
         onCopyMessage,
         onRetryMessage,
@@ -215,7 +148,6 @@ const MessageRow = memo(
         parseDocumentBlocks,
         stripHiddenParts,
         formatTime,
-        formatBytes,
         scrollContainerRef,
         userBubbleBackground,
         userMessageTextSx,
@@ -234,32 +166,15 @@ const MessageRow = memo(
         const attachments = message.attachments ?? [];
         const assistantMessagePaddingX = "8px";
 
-        const {
-            displayText,
-            copyText,
-            documentAttachments,
-            imageAttachments,
-            documentCount,
-        } = useMemo(() => {
+        const { displayText, copyText, imageAttachments } = useMemo(() => {
             const imageAttachments = attachments.filter(
                 (attachment) => attachment.kind === "image",
-            );
-            const documentAttachments = attachments.filter(
-                (attachment) => attachment.kind === "document",
             );
             const parsedDocuments = isSelf
                 ? parseDocumentBlocks(message.text)
                 : { text: message.text, documents: [] };
-            const documentCount =
-                documentAttachments.length > 0
-                    ? documentAttachments.length
-                    : parsedDocuments.documents.length;
             const imageCount = imageAttachments.length;
-            const fallbackText = imageCount
-                ? "Attached images"
-                : documentCount > 0
-                  ? "Attached documents"
-                  : "";
+            const fallbackText = imageCount ? "Attached images" : "";
             const displayText = isSelf
                 ? parsedDocuments.text || fallbackText
                 : message.text || fallbackText;
@@ -267,13 +182,7 @@ const MessageRow = memo(
                 ? displayText
                 : stripHiddenParts(message.text);
 
-            return {
-                displayText,
-                copyText,
-                documentAttachments,
-                imageAttachments,
-                documentCount,
-            };
+            return { displayText, copyText, imageAttachments };
         }, [
             attachments,
             isSelf,
@@ -281,8 +190,6 @@ const MessageRow = memo(
             parseDocumentBlocks,
             stripHiddenParts,
         ]);
-
-        const showAttachments = !isStreaming && documentAttachments.length > 0;
         const showLoadingPlaceholder =
             !isSelf && isStreaming && !displayText.trim();
         const dots = ".".repeat(loadingDots);
@@ -292,20 +199,41 @@ const MessageRow = memo(
                 sx={{
                     display: "flex",
                     justifyContent: isSelf ? "flex-end" : "flex-start",
-                    pl: isSelf ? "80px" : 0,
-                    pr: isSelf ? 0 : "80px",
+                    pl: isSelf ? { xs: 0, lg: 10 } : 0,
+                    pr: isSelf ? 0 : { xs: 0, lg: 10 },
                     minWidth: 0,
                     maxWidth: "100%",
                 }}
             >
                 <Stack
                     sx={{
-                        maxWidth: "min(720px, 85%)",
+                        width: { xs: "100%", lg: "85%" },
+                        maxWidth: { xs: "100%", lg: 720 },
                         alignItems: isSelf ? "flex-end" : "flex-start",
                         minWidth: 0,
-                        width: "100%",
                     }}
                 >
+                    {imageAttachments.length > 0 && (
+                        <Stack
+                            sx={{
+                                gap: 1,
+                                mb: 1,
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                alignItems: isSelf ? "flex-end" : "flex-start",
+                            }}
+                        >
+                            {imageAttachments.map((attachment) => (
+                                <AttachmentCard
+                                    key={attachment.id}
+                                    attachment={attachment}
+                                    onClick={() =>
+                                        onOpenAttachment(message, attachment)
+                                    }
+                                />
+                            ))}
+                        </Stack>
+                    )}
                     {isSelf ? (
                         <Box
                             sx={{
@@ -316,43 +244,10 @@ const MessageRow = memo(
                                 alignSelf: "flex-end",
                                 maxWidth: "100%",
                                 minWidth: 0,
+                                overflowWrap: "break-word",
+                                wordBreak: "break-word",
                             }}
                         >
-                            {imageAttachments.length > 0 && (
-                                <Box
-                                    sx={{
-                                        display: "grid",
-                                        gridTemplateColumns:
-                                            "repeat(2, minmax(0, 1fr))",
-                                        gap: 1,
-                                        mb: 1,
-                                    }}
-                                >
-                                    {imageAttachments.map((attachment) => (
-                                        <ImagePreview
-                                            key={attachment.id}
-                                            attachment={attachment}
-                                            url={
-                                                attachmentPreviews[
-                                                    attachment.id
-                                                ]
-                                            }
-                                            height={140}
-                                            scrollContainerRef={
-                                                scrollContainerRef
-                                            }
-                                            onRequestPreview={onRequestPreview}
-                                            sessionUuid={message.sessionUuid}
-                                            onClick={() =>
-                                                onOpenAttachment(
-                                                    message,
-                                                    attachment,
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </Box>
-                            )}
                             <Typography
                                 variant="message"
                                 sx={userMessageTextSx}
@@ -369,44 +264,11 @@ const MessageRow = memo(
                                 width: "fit-content",
                                 maxWidth: "100%",
                                 minWidth: 0,
+                                overflowWrap: "break-word",
+                                wordBreak: "break-word",
                                 ...(isStreaming ? streamingMessageSx : {}),
                             }}
                         >
-                            {imageAttachments.length > 0 && (
-                                <Box
-                                    sx={{
-                                        display: "grid",
-                                        gridTemplateColumns:
-                                            "repeat(2, minmax(0, 1fr))",
-                                        gap: 1,
-                                        mb: 1,
-                                    }}
-                                >
-                                    {imageAttachments.map((attachment) => (
-                                        <ImagePreview
-                                            key={attachment.id}
-                                            attachment={attachment}
-                                            url={
-                                                attachmentPreviews[
-                                                    attachment.id
-                                                ]
-                                            }
-                                            height={160}
-                                            scrollContainerRef={
-                                                scrollContainerRef
-                                            }
-                                            onRequestPreview={onRequestPreview}
-                                            sessionUuid={message.sessionUuid}
-                                            onClick={() =>
-                                                onOpenAttachment(
-                                                    message,
-                                                    attachment,
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </Box>
-                            )}
                             {isStreaming ? (
                                 showLoadingPlaceholder ? (
                                     <Typography
@@ -445,102 +307,6 @@ const MessageRow = memo(
                                 </Box>
                             )}
                         </Box>
-                    )}
-
-                    {isSelf && documentCount > 0 && (
-                        <Typography
-                            variant="mini"
-                            sx={{ mt: 0.5, color: "text.muted" }}
-                        >
-                            {documentCount} document
-                            {documentCount === 1 ? "" : "s"} attached
-                        </Typography>
-                    )}
-
-                    {showAttachments && (
-                        <Stack
-                            sx={{
-                                mt: 1,
-                                gap: 0.5,
-                                alignSelf: isSelf ? "flex-end" : "flex-start",
-                            }}
-                        >
-                            {documentAttachments.map((attachment) => (
-                                <Box
-                                    key={attachment.id}
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() =>
-                                        onOpenAttachment(message, attachment)
-                                    }
-                                    onKeyDown={(event) => {
-                                        if (
-                                            event.key === "Enter" ||
-                                            event.key === " "
-                                        ) {
-                                            event.preventDefault();
-                                            onOpenAttachment(
-                                                message,
-                                                attachment,
-                                            );
-                                        }
-                                    }}
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1,
-                                        px: 1.5,
-                                        py: 0.75,
-                                        borderRadius: 1.5,
-                                        bgcolor: "fill.faint",
-                                        cursor: "pointer",
-                                        transition:
-                                            "background-color 120ms ease",
-                                        "&:hover": { bgcolor: "fill.light" },
-                                        "&:focus-visible": {
-                                            outline: "2px solid",
-                                            outlineColor: "primary.main",
-                                            outlineOffset: 2,
-                                        },
-                                    }}
-                                >
-                                    <Typography
-                                        variant="mini"
-                                        sx={{
-                                            flex: 1,
-                                            color: "text.base",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
-                                        }}
-                                    >
-                                        {attachment.name}
-                                    </Typography>
-                                    <Typography
-                                        variant="mini"
-                                        sx={{ color: "text.muted" }}
-                                    >
-                                        {formatBytes(attachment.size)}
-                                    </Typography>
-                                    <IconButton
-                                        aria-label="Download attachment"
-                                        sx={actionButtonSx}
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            onDownloadAttachment(
-                                                message,
-                                                attachment,
-                                            );
-                                        }}
-                                    >
-                                        <HugeiconsIcon
-                                            icon={Attachment01Icon}
-                                            {...smallIconProps}
-                                        />
-                                    </IconButton>
-                                </Box>
-                            ))}
-                        </Stack>
                     )}
 
                     <Stack
@@ -747,17 +513,15 @@ const MessageRow = memo(
 export const ChatMessageList = memo(
     ({
         messages,
-        attachmentPreviews,
+        attachmentPreviews: _attachmentPreviews,
         branchSwitchers,
         loadingPhrase,
         loadingDots,
-        stickToBottom,
         onStickToBottomChange,
         scrollContainerRef,
         onScroll,
         onUserScrollIntent,
         onOpenAttachment,
-        onDownloadAttachment,
         onEditMessage,
         onCopyMessage,
         onRetryMessage,
@@ -767,7 +531,6 @@ export const ChatMessageList = memo(
         parseDocumentBlocks,
         stripHiddenParts,
         formatTime,
-        formatBytes,
         isDesktopOverlay,
         userBubbleBackground,
         userMessageTextSx,
@@ -778,74 +541,8 @@ export const ChatMessageList = memo(
         smallIconProps,
         actionIconProps,
     }: ChatMessageListProps) => {
-        const Scroller = useMemo(() => {
-            return React.forwardRef<
-                HTMLDivElement,
-                React.HTMLAttributes<HTMLDivElement>
-            >(
-                (
-                    {
-                        style,
-                        onScroll: onScrollProp,
-                        onWheel,
-                        onTouchMove,
-                        ...rest
-                    },
-                    ref,
-                ) => (
-                    <Box
-                        ref={ref}
-                        {...rest}
-                        onScroll={(event) => {
-                            onScrollProp?.(event);
-                            onScroll();
-                        }}
-                        onWheel={(event) => {
-                            onWheel?.(event);
-                            onUserScrollIntent();
-                        }}
-                        onTouchMove={(event) => {
-                            onTouchMove?.(event);
-                            onUserScrollIntent();
-                        }}
-                        style={style}
-                        sx={{
-                            flex: 1,
-                            overflowY: "auto",
-                            overflowX: "hidden",
-                            px: { xs: 2, md: 4 },
-                            pt: isDesktopOverlay ? "calc(64px + 16px)" : 2,
-                            pb: 12,
-                            bgcolor: "background.paper",
-                            overscrollBehaviorY: "contain",
-                            minWidth: 0,
-                            width: "100%",
-                            maxWidth: "100%",
-                        }}
-                    />
-                ),
-            );
-        }, [isDesktopOverlay, onScroll, onUserScrollIntent]);
-
-        const List = useMemo(() => {
-            return React.forwardRef<
-                HTMLDivElement,
-                React.HTMLAttributes<HTMLDivElement>
-            >(({ style, ...rest }, ref) => (
-                <Stack
-                    ref={ref}
-                    {...rest}
-                    style={style}
-                    sx={{
-                        gap: 3,
-                        width: "100%",
-                        maxWidth: 900,
-                        mx: "auto",
-                        minWidth: 0,
-                    }}
-                />
-            ));
-        }, []);
+        const paddingTop = isDesktopOverlay ? 10 : 2;
+        const paddingBottom = 16;
 
         const EmptyPlaceholder = useCallback(() => {
             return (
@@ -857,8 +554,8 @@ export const ChatMessageList = memo(
                         justifyContent: "flex-start",
                         textAlign: "center",
                         width: "100%",
-                        maxWidth: 900,
-                        mx: "auto",
+                        maxWidth: { xs: "100%", lg: 900 },
+                        mx: { xs: 0, lg: "auto" },
                         pt: "150px",
                     }}
                 >
@@ -877,12 +574,10 @@ export const ChatMessageList = memo(
                 return (
                     <MessageRow
                         message={message}
-                        attachmentPreviews={attachmentPreviews}
                         branchSwitchers={branchSwitchers}
                         loadingPhrase={isStreaming ? loadingPhrase : null}
                         loadingDots={isStreaming ? loadingDots : 0}
                         onOpenAttachment={onOpenAttachment}
-                        onDownloadAttachment={onDownloadAttachment}
                         onEditMessage={onEditMessage}
                         onCopyMessage={onCopyMessage}
                         onRetryMessage={onRetryMessage}
@@ -892,7 +587,6 @@ export const ChatMessageList = memo(
                         parseDocumentBlocks={parseDocumentBlocks}
                         stripHiddenParts={stripHiddenParts}
                         formatTime={formatTime}
-                        formatBytes={formatBytes}
                         scrollContainerRef={scrollContainerRef}
                         userBubbleBackground={userBubbleBackground}
                         userMessageTextSx={userMessageTextSx}
@@ -910,14 +604,11 @@ export const ChatMessageList = memo(
                 actionIconProps,
                 assistantMarkdownSx,
                 assistantTextSx,
-                attachmentPreviews,
                 branchSwitchers,
-                formatBytes,
                 formatTime,
                 loadingDots,
                 loadingPhrase,
                 onCopyMessage,
-                onDownloadAttachment,
                 onEditMessage,
                 onNextBranch,
                 onOpenAttachment,
@@ -935,18 +626,65 @@ export const ChatMessageList = memo(
         );
 
         return (
-            <Virtuoso
-                data={messages}
-                itemContent={renderMessage}
-                scrollerRef={scrollContainerRef}
-                followOutput={stickToBottom ? "smooth" : false}
-                atBottomStateChange={onStickToBottomChange}
-                components={{ Scroller, List, EmptyPlaceholder }}
-                computeItemKey={(_index: number, message: ChatMessage) =>
-                    message.messageUuid
-                }
-                style={{ flex: 1, height: "100%" }}
-            />
+            <Box
+                ref={(ref) => {
+                    scrollContainerRef.current = ref;
+                }}
+                onScroll={() => {
+                    onScroll();
+                    const container = scrollContainerRef.current;
+                    if (!container) return;
+                    const distance =
+                        container.scrollHeight -
+                        container.scrollTop -
+                        container.clientHeight;
+                    onStickToBottomChange(distance <= 120);
+                }}
+                onWheel={() => {
+                    onUserScrollIntent();
+                }}
+                onTouchMove={() => {
+                    onUserScrollIntent();
+                }}
+                sx={{
+                    flex: 1,
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    bgcolor: "background.paper",
+                    overscrollBehaviorY: "contain",
+                    minWidth: 0,
+                    width: "100%",
+                    maxWidth: "100vw",
+                    boxSizing: "border-box",
+                    px: { xs: 2, sm: 2, md: 3, lg: 4 },
+                    pt: paddingTop,
+                    pb: paddingBottom,
+                    scrollPaddingTop: (theme) => theme.spacing(paddingTop),
+                    scrollPaddingBottom: (theme) =>
+                        theme.spacing(paddingBottom),
+                }}
+            >
+                {messages.length === 0 ? (
+                    <EmptyPlaceholder />
+                ) : (
+                    <Stack
+                        sx={{
+                            gap: 3,
+                            width: "100%",
+                            maxWidth: 900,
+                            mx: "auto",
+                            minWidth: 0,
+                            boxSizing: "border-box",
+                        }}
+                    >
+                        {messages.map((message, index) => (
+                            <React.Fragment key={message.messageUuid}>
+                                {renderMessage(index, message)}
+                            </React.Fragment>
+                        ))}
+                    </Stack>
+                )}
+            </Box>
         );
     },
 );

@@ -65,7 +65,7 @@ export interface ChatComposerProps {
     handleSend: () => void | Promise<void>;
     handleStopGeneration: () => void;
     showAttachmentPicker: boolean;
-    openAttachmentMenu: () => void;
+    openAttachmentMenu: (event: React.MouseEvent<HTMLElement>) => void;
     attachmentAnchor: HTMLElement | null;
     closeAttachmentMenu: () => void;
     handleAttachmentChoice: (choice: "image" | "document") => void;
@@ -138,13 +138,17 @@ export const ChatComposer = memo(
                         bottom: 16,
                         zIndex: 5,
                         pointerEvents: "none",
+                        width: "100%",
+                        boxSizing: "border-box",
                     }}
                 >
                     <Box
                         sx={{
                             maxWidth: 900,
+                            width: "100%",
                             mx: "auto",
                             pointerEvents: "auto",
+                            boxSizing: "border-box",
                         }}
                     >
                         {showModelGate ? (
@@ -540,8 +544,7 @@ export const ChatComposer = memo(
                                             minHeight: 48,
                                             display: "flex",
                                             alignItems: "center",
-                                            fontFamily:
-                                                '"Inter", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
+                                            fontFamily: "inherit",
                                             fontSize: "15px",
                                             lineHeight: 1.7,
                                             color: "text.base",
@@ -551,7 +554,7 @@ export const ChatComposer = memo(
                                             },
                                             "& code": {
                                                 fontFamily:
-                                                    '"JetBrains Mono", monospace',
+                                                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
                                             },
                                         }}
                                     />

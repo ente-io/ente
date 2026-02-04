@@ -101,7 +101,7 @@ export const ChatSidebar = memo(
                             onClick={handleNewChat}
                             variant="h2"
                             sx={{
-                                fontFamily: '"Montserrat", sans-serif',
+                                fontFamily: "inherit",
                                 fontWeight: 600,
                                 letterSpacing: "1px",
                                 textTransform: "lowercase",
@@ -122,7 +122,48 @@ export const ChatSidebar = memo(
                             e
                         </Typography>
                     </Stack>
-                    <Stack direction="row" sx={{ gap: 0.5 }}>
+                    <Stack
+                        direction="row"
+                        sx={{ gap: 0.75, alignItems: "center" }}
+                    >
+                        {isLoggedIn && (
+                            <Button
+                                onClick={() => {
+                                    void syncNow({ showToast: true });
+                                }}
+                                variant="outlined"
+                                startIcon={
+                                    <HugeiconsIcon
+                                        icon={ArrowReloadHorizontalIcon}
+                                        {...tinyIconProps}
+                                    />
+                                }
+                                sx={{
+                                    height: 36,
+                                    minHeight: 36,
+                                    px: 1.5,
+                                    textTransform: "none",
+                                    fontWeight: 600,
+                                    fontSize: "12px",
+                                    whiteSpace: "nowrap",
+                                    borderRadius: 2,
+                                    borderColor: "divider",
+                                    color: "text.base",
+                                    bgcolor: "fill.faint",
+                                    flexWrap: "nowrap",
+                                    "& .MuiButton-startIcon": {
+                                        marginRight: 0.5,
+                                        marginLeft: 0,
+                                    },
+                                    "&:hover": {
+                                        bgcolor: "fill.faintHover",
+                                        borderColor: "divider",
+                                    },
+                                }}
+                            >
+                                Sync
+                            </Button>
+                        )}
                         <IconButton
                             aria-label={
                                 drawerCollapsed
@@ -203,7 +244,7 @@ export const ChatSidebar = memo(
                                     sx={{
                                         flex: 1,
                                         color: "text.base",
-                                        fontFamily: '"Inter", sans-serif',
+                                        fontFamily: "inherit",
                                         fontSize: "13px",
                                         textAlign: "left",
                                         "& input": { textAlign: "left" },
@@ -272,57 +313,6 @@ export const ChatSidebar = memo(
                                     Search
                                 </Box>
                             </Button>
-                            {isLoggedIn && (
-                                <Button
-                                    onClick={() => {
-                                        void syncNow({ showToast: true });
-                                    }}
-                                    variant="outlined"
-                                    startIcon={
-                                        <HugeiconsIcon
-                                            icon={ArrowReloadHorizontalIcon}
-                                            {...tinyIconProps}
-                                        />
-                                    }
-                                    sx={{
-                                        flex: 1,
-                                        minWidth: 0,
-                                        height: 40,
-                                        minHeight: 40,
-                                        px: 1.5,
-                                        textTransform: "none",
-                                        fontWeight: 600,
-                                        fontSize: "13px",
-                                        whiteSpace: "nowrap",
-                                        textOverflow: "ellipsis",
-                                        overflow: "hidden",
-                                        borderRadius: 2,
-                                        borderColor: "divider",
-                                        color: "text.base",
-                                        bgcolor: "fill.faint",
-                                        flexWrap: "nowrap",
-                                        "& .MuiButton-startIcon": {
-                                            marginRight: 0.75,
-                                            marginLeft: 0,
-                                        },
-                                        "&:hover": {
-                                            bgcolor: "fill.faintHover",
-                                            borderColor: "divider",
-                                        },
-                                    }}
-                                >
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                        }}
-                                    >
-                                        Sync
-                                    </Box>
-                                </Button>
-                            )}
                             <Tooltip title="New Chat">
                                 <IconButton
                                     aria-label="New Chat"
@@ -395,8 +385,7 @@ export const ChatSidebar = memo(
                                                     variant="small"
                                                     sx={{
                                                         fontWeight: 600,
-                                                        fontFamily:
-                                                            '"Inter", sans-serif',
+                                                        fontFamily: "inherit",
                                                         whiteSpace: "nowrap",
                                                         overflow: "hidden",
                                                         textOverflow:
@@ -410,8 +399,7 @@ export const ChatSidebar = memo(
                                                 variant="mini"
                                                 sx={{
                                                     color: "text.muted",
-                                                    fontFamily:
-                                                        '"Inter", sans-serif',
+                                                    fontFamily: "inherit",
                                                     display: "-webkit-box",
                                                     WebkitLineClamp: 1,
                                                     WebkitBoxOrient: "vertical",

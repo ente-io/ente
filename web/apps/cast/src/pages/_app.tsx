@@ -1,4 +1,3 @@
-import "@fontsource-variable/inter";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";

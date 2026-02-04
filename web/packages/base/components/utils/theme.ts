@@ -597,7 +597,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * value, we alias it the same weight as regular, 500).
  */
 const baseTypography: TypographyVariantsOptions = {
-    fontFamily: '"Inter Variable", sans-serif',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,
@@ -628,40 +628,16 @@ const baseTypography: TypographyVariantsOptions = {
         fontSize: "13px",
         lineHeight: "1.45",
         fontWeight: 400,
-        fontFamily: '"JetBrains Mono", monospace',
+        fontFamily:
+            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
     },
     small: { fontSize: "14px", lineHeight: "17px" },
     mini: { fontSize: "12px", lineHeight: "15px" },
     tiny: { fontSize: "10px", lineHeight: "12px" },
 };
 
-const getTypography = (appName: AppName): TypographyVariantsOptions => {
-    if (appName !== "ensu") return baseTypography;
-
-    const serifFamily = '"Cormorant Garamond", serif';
-
-    const messageFamily = '"Source Serif 4", serif';
-    const codeFamily = '"JetBrains Mono", monospace';
-
-    return {
-        ...baseTypography,
-        h1: { ...baseTypography.h1, fontFamily: serifFamily, fontWeight: 500 },
-        h2: { ...baseTypography.h2, fontFamily: serifFamily, fontWeight: 500 },
-        h3: { ...baseTypography.h3, fontFamily: serifFamily, fontWeight: 500 },
-        h4: { ...baseTypography.h4, fontFamily: serifFamily, fontWeight: 500 },
-        h5: { ...baseTypography.h5, fontFamily: serifFamily, fontWeight: 500 },
-        h6: { ...baseTypography.h6, fontFamily: serifFamily, fontWeight: 500 },
-        message: {
-            ...(baseTypography.message ?? {}),
-            fontFamily: messageFamily,
-            fontWeight: 400,
-        },
-        code: {
-            ...(baseTypography.code ?? {}),
-            fontFamily: codeFamily,
-            fontWeight: 400,
-        },
-    };
+const getTypography = (_appName: AppName): TypographyVariantsOptions => {
+    return baseTypography;
 };
 
 // Use the base typography for component style overrides (Button sizing, etc.).
