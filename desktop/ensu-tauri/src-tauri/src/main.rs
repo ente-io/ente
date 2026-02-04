@@ -51,6 +51,7 @@ fn main() {
             commands::chat_db_get_pending_deletions,
             commands::chat_db_hard_delete,
             commands::chat_db_reset,
+            commands::chat_sync,
             commands::llm_init_backend,
             commands::llm_load_model,
             commands::llm_create_context,

@@ -7,4 +7,7 @@ pub mod models;
 pub mod sync;
 
 pub use errors::SyncError;
-pub use sync::{SyncEngine, SyncResult, SyncStats, SyncAuth};
+pub use sync::{
+    MigrationConfig, MigrationPriority, MigrationProgress, MigrationProgressCallback,
+    MigrationState, SyncAuth, SyncEngine, SyncResult, SyncStats, fetch_chat_key,
+};

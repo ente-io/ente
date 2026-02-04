@@ -8,7 +8,8 @@ use std::time::{Duration, Instant};
 use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
 use llmchat_db::backend::sqlite::SqliteBackend;
-use llmchat_db::{ChatDb, Error as DbError};
+use llmchat_db::{Error as DbError, LlmChatDb};
+use llmchat_sync as chat_sync;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
 use tauri::{AppHandle, State, Window};
@@ -32,7 +33,7 @@ pub struct ChatDbState {
 
 struct ChatDbHolder {
     key_b64: String,
-    db: Arc<ChatDb<SqliteBackend>>,
+    db: Arc<LlmChatDb<SqliteBackend>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -142,6 +143,18 @@ impl From<DbError> for ApiError {
         };
 
         ApiError::new(code, e.to_string())
+    }
+}
+
+fn map_sync_error(err: chat_sync::SyncError) -> ApiError {
+    match err {
+        chat_sync::SyncError::LimitReached { code, message } => {
+            let message = message.unwrap_or_else(|| "Sync limit reached".to_string());
+            ApiError::new(&code, message)
+        }
+        chat_sync::SyncError::Unauthorized => ApiError::new("unauthorized", err.to_string()),
+        chat_sync::SyncError::NotLoggedIn => ApiError::new("not_logged_in", err.to_string()),
+        other => ApiError::new("sync", other.to_string()),
     }
 }
 
@@ -517,6 +530,54 @@ pub struct ChatAttachmentInput {
     uploaded_at: Option<i64>,
 }
 
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatSyncInput {
+    key_b64: String,
+    base_url: String,
+    auth_token: String,
+    master_key_b64: String,
+    user_agent: Option<String>,
+    client_package: Option<String>,
+    client_version: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatSyncStatsDto {
+    sessions: i64,
+    messages: i64,
+}
+
+impl From<chat_sync::SyncStats> for ChatSyncStatsDto {
+    fn from(stats: chat_sync::SyncStats) -> Self {
+        Self {
+            sessions: stats.sessions,
+            messages: stats.messages,
+        }
+    }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatSyncResultDto {
+    pulled: ChatSyncStatsDto,
+    pushed: ChatSyncStatsDto,
+    uploaded_attachments: i64,
+    downloaded_attachments: i64,
+}
+
+impl From<chat_sync::SyncResult> for ChatSyncResultDto {
+    fn from(result: chat_sync::SyncResult) -> Self {
+        Self {
+            pulled: result.pulled.into(),
+            pushed: result.pushed.into(),
+            uploaded_attachments: result.uploaded_attachments,
+            downloaded_attachments: result.downloaded_attachments,
+        }
+    }
+}
+
 impl TryFrom<ChatAttachmentInput> for llmchat_db::Attachment {
     type Error = ApiError;
 
@@ -553,6 +614,49 @@ pub struct ChatMessageDto {
     created_at: i64,
     attachments: Vec<ChatAttachmentDto>,
     deleted_at: Option<i64>,
+}
+
+fn build_message_dto(
+    db: &LlmChatDb<SqliteBackend>,
+    message: llmchat_db::Message,
+) -> Result<ChatMessageDto, DbError> {
+    let uploads = db.get_uploads_for_message(message.uuid)?;
+    let mut uploads_by_id = HashMap::new();
+    for upload in uploads {
+        uploads_by_id.insert(upload.attachment_id, upload.uploaded_at);
+    }
+
+    let sender = match message.sender {
+        llmchat_db::Sender::SelfUser => "self",
+        llmchat_db::Sender::Other => "assistant",
+    };
+
+    let attachments = message
+        .attachments
+        .into_iter()
+        .map(|meta| {
+            let uploaded_at = uploads_by_id.get(&meta.id).and_then(|value| *value);
+            llmchat_db::Attachment {
+                id: meta.id,
+                kind: meta.kind,
+                size: meta.size,
+                name: meta.name,
+                uploaded_at,
+            }
+        })
+        .map(ChatAttachmentDto::from)
+        .collect();
+
+    Ok(ChatMessageDto {
+        message_uuid: message.uuid.to_string(),
+        session_uuid: message.session_uuid.to_string(),
+        parent_message_uuid: message.parent_message_uuid.map(|value| value.to_string()),
+        sender: sender.to_string(),
+        text: message.text,
+        created_at: message.created_at,
+        attachments,
+        deleted_at: message.deleted_at,
+    })
 }
 
 impl From<llmchat_db::Message> for ChatMessageDto {
@@ -674,7 +778,8 @@ pub fn chat_db_get_message(
 ) -> Result<Option<ChatMessageDto>, ApiError> {
     let uuid = parse_uuid(&message_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
-        Ok(db.get_message(uuid)?.map(ChatMessageDto::from))
+        let message = db.get_message(uuid)?;
+        message.map(|message| build_message_dto(db, message)).transpose()
     })
 }
 
@@ -729,11 +834,11 @@ pub fn chat_db_get_messages(
 ) -> Result<Vec<ChatMessageDto>, ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
-        Ok(db
-            .get_messages(uuid)?
+        let messages = db.get_messages(uuid)?;
+        messages
             .into_iter()
-            .map(ChatMessageDto::from)
-            .collect())
+            .map(|message| build_message_dto(db, message))
+            .collect()
     })
 }
 
@@ -752,7 +857,10 @@ pub fn chat_db_get_messages_for_sync(
         } else {
             db.get_messages_needing_sync(uuid)?
         };
-        Ok(messages.into_iter().map(ChatMessageDto::from).collect())
+        messages
+            .into_iter()
+            .map(|message| build_message_dto(db, message))
+            .collect()
     })
 }
 
@@ -782,7 +890,7 @@ pub fn chat_db_insert_message(
         let attachment_metas: Vec<llmchat_db::AttachmentMeta> =
             attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message(session_uuid, sender, &text, parent, attachment_metas)?;
-        Ok(ChatMessageDto::from(message))
+        build_message_dto(db, message)
     })
 }
 
@@ -861,18 +969,17 @@ pub fn chat_db_insert_message_with_uuid(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db(&state, &app, &key_b64, move |db| {
-        let attachment_metas: Vec<llmchat_db::AttachmentMeta> = attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message_with_uuid(
             message_uuid,
             session_uuid,
             sender,
             &input.text,
             parent,
-            attachment_metas,
+            attachments,
             input.created_at,
             input.deleted_at,
         )?;
-        Ok(ChatMessageDto::from(message))
+        build_message_dto(db, message)
     })
 }
 
@@ -901,7 +1008,7 @@ pub fn chat_db_mark_session_deleted(
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&session_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
-        db.set_session_deleted_at(uuid, deleted_at)?;
+        db.apply_session_tombstone(uuid, deleted_at)?;
         Ok(())
     })
 }
@@ -916,7 +1023,7 @@ pub fn chat_db_mark_message_deleted(
 ) -> Result<(), ApiError> {
     let uuid = parse_uuid(&message_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
-        db.set_message_deleted_at(uuid, deleted_at)?;
+        db.apply_message_tombstone(uuid, deleted_at)?;
         Ok(())
     })
 }
@@ -929,9 +1036,9 @@ pub fn chat_db_mark_attachment_uploaded(
     message_uuid: String,
     attachment_id: String,
 ) -> Result<(), ApiError> {
-    let uuid = parse_uuid(&message_uuid)?;
+    let _ = parse_uuid(&message_uuid)?;
     with_chat_db(&state, &app, &key_b64, move |db| {
-        db.mark_attachment_uploaded(uuid, &attachment_id)?;
+        db.mark_attachment_uploaded(&attachment_id)?;
         Ok(())
     })
 }
@@ -986,14 +1093,54 @@ pub fn chat_db_reset(state: State<ChatDbState>, app: AppHandle) -> Result<(), Ap
     let path = chat_db_path(&app)?;
     let wal_path = PathBuf::from(format!("{}-wal", path.display()));
     let shm_path = PathBuf::from(format!("{}-shm", path.display()));
+    let sync_path = sync_db_path(&app)?;
+    let sync_wal_path = PathBuf::from(format!("{}-wal", sync_path.display()));
+    let sync_shm_path = PathBuf::from(format!("{}-shm", sync_path.display()));
 
-    for candidate in [path, wal_path, shm_path] {
+    for candidate in [path, wal_path, shm_path, sync_path, sync_wal_path, sync_shm_path] {
         if candidate.exists() {
             fs::remove_file(&candidate).map_err(|err| ApiError::new("io", err.to_string()))?;
         }
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn chat_sync(app: AppHandle, input: ChatSyncInput) -> Result<ChatSyncResultDto, ApiError> {
+    async_runtime::spawn_blocking(move || {
+        let key = core_crypto::decode_b64(&input.key_b64).map_err(ApiError::from)?;
+        let master_key = core_crypto::decode_b64(&input.master_key_b64).map_err(ApiError::from)?;
+
+        let db_path = chat_db_path(&app)?;
+        let sync_path = sync_db_path(&app)?;
+        let attachments_dir = attachments_dir_path(&app)?;
+        let meta_dir = sync_meta_dir_path(&app)?;
+
+        let engine = chat_sync::SyncEngine::new(
+            db_path.to_string_lossy().to_string(),
+            sync_path.to_string_lossy().to_string(),
+            key,
+            attachments_dir.to_string_lossy().to_string(),
+            meta_dir.to_string_lossy().to_string(),
+            None,
+        )
+        .map_err(|err| ApiError::new("sync", err.to_string()))?;
+
+        let auth = chat_sync::SyncAuth {
+            base_url: input.base_url,
+            auth_token: input.auth_token,
+            master_key: master_key.into(),
+            user_agent: input.user_agent,
+            client_package: input.client_package,
+            client_version: input.client_version,
+        };
+
+        let result = engine.sync(auth).map_err(map_sync_error)?;
+        Ok(ChatSyncResultDto::from(result))
+    })
+    .await
+    .map_err(|_| ApiError::new("sync", "Sync task failed"))?
 }
 
 #[derive(Serialize, Clone)]
@@ -1306,11 +1453,41 @@ fn chat_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
     Ok(dir.join("ensu_llmchat.db"))
 }
 
+fn sync_db_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    let resolver = app.path_resolver();
+    let dir = resolver
+        .app_data_dir()
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
+    std::fs::create_dir_all(&dir).map_err(|err| ApiError::new("io", err.to_string()))?;
+    Ok(dir.join("llmchat_sync.db"))
+}
+
+fn attachments_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    let resolver = app.path_resolver();
+    let dir = resolver
+        .app_data_dir()
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
+    let attachments_dir = dir.join("ensu_llmchat_attachments");
+    std::fs::create_dir_all(&attachments_dir)
+        .map_err(|err| ApiError::new("io", err.to_string()))?;
+    Ok(attachments_dir)
+}
+
+fn sync_meta_dir_path(app: &AppHandle) -> Result<PathBuf, ApiError> {
+    let resolver = app.path_resolver();
+    let dir = resolver
+        .app_data_dir()
+        .ok_or_else(|| ApiError::new("path", "App data directory unavailable"))?;
+    let meta_dir = dir.join("sync_meta");
+    std::fs::create_dir_all(&meta_dir).map_err(|err| ApiError::new("io", err.to_string()))?;
+    Ok(meta_dir)
+}
+
 fn with_chat_db<T>(
     state: &ChatDbState,
     app: &AppHandle,
     key_b64: &str,
-    f: impl FnOnce(&ChatDb<SqliteBackend>) -> Result<T, DbError>,
+    f: impl FnOnce(&LlmChatDb<SqliteBackend>) -> Result<T, DbError>,
 ) -> Result<T, ApiError> {
     let db = {
         let mut guard = state
@@ -1326,7 +1503,9 @@ fn with_chat_db<T>(
         if needs_open {
             let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
             let path = chat_db_path(app)?;
-            let db = ChatDb::open_sqlite_with_defaults(path, key).map_err(ApiError::from)?;
+            let sync_path = sync_db_path(app)?;
+            let db = LlmChatDb::open_sqlite_with_defaults(path, sync_path, key)
+                .map_err(ApiError::from)?;
             *guard = Some(ChatDbHolder {
                 key_b64: key_b64.to_string(),
                 db: Arc::new(db),

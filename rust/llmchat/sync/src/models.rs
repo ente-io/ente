@@ -4,18 +4,33 @@ use crate::diff_cursor::SyncCursor;
 use llmchat_db::AttachmentKind;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct EncryptedPayload {
-    #[serde(alias = "encrypted_key", alias = "encryptedKey", alias = "encryptedData")]
+    #[serde(
+        alias = "encrypted_key",
+        alias = "encryptedKey",
+        alias = "encrypted_data",
+        alias = "encryptedData"
+    )]
     pub encrypted_data: String,
     pub header: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatKeyPayload {
-    #[serde(rename = "encrypted_key", default, skip_serializing_if = "Option::is_none", alias = "encryptedKey")]
+    #[serde(
+        rename = "encryptedKey",
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "encrypted_key"
+    )]
     pub encrypted_key: Option<String>,
-    #[serde(rename = "encrypted_data", default, skip_serializing_if = "Option::is_none", alias = "encryptedData")]
+    #[serde(
+        rename = "encryptedData",
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "encrypted_data"
+    )]
     pub encrypted_data: Option<String>,
     pub header: String,
 }
@@ -37,58 +52,96 @@ impl ChatKeyPayload {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct RemoteSession {
+    #[serde(rename = "sessionUUID", alias = "session_uuid")]
     pub session_uuid: String,
-    pub root_session_uuid: Option<String>,
-    pub branch_from_message_uuid: Option<String>,
+    #[serde(rename = "encryptedData", alias = "encrypted_data")]
     pub encrypted_data: String,
     pub header: String,
+    #[serde(
+        rename = "clientMetadata",
+        alias = "client_metadata",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_metadata: Option<String>,
+    #[serde(alias = "created_at")]
     pub created_at: i64,
+    #[serde(alias = "updated_at")]
     pub updated_at: i64,
+    #[serde(alias = "is_deleted")]
     pub is_deleted: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct RemoteMessage {
+    #[serde(rename = "messageUUID", alias = "message_uuid")]
     pub message_uuid: String,
+    #[serde(rename = "sessionUUID", alias = "session_uuid")]
     pub session_uuid: String,
+    #[serde(rename = "parentMessageUUID", alias = "parent_message_uuid")]
     pub parent_message_uuid: Option<String>,
     pub sender: String,
     pub attachments: Vec<RemoteAttachment>,
+    #[serde(rename = "encryptedData", alias = "encrypted_data")]
     pub encrypted_data: String,
     pub header: String,
+    #[serde(
+        rename = "clientMetadata",
+        alias = "client_metadata",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_metadata: Option<String>,
+    #[serde(alias = "created_at")]
     pub created_at: i64,
+    #[serde(alias = "updated_at")]
     pub updated_at: Option<i64>,
+    #[serde(alias = "is_deleted")]
     pub is_deleted: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct RemoteAttachment {
     pub id: String,
     pub size: i64,
-    pub encrypted_name: String,
+    #[serde(
+        rename = "clientMetadata",
+        alias = "client_metadata",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub client_metadata: Option<String>,
+    #[serde(
+        rename = "encryptedName",
+        alias = "encrypted_name",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub encrypted_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<AttachmentKind>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct SessionTombstone {
+    #[serde(rename = "sessionUUID", alias = "session_uuid")]
     pub session_uuid: String,
+    #[serde(alias = "deleted_at")]
     pub deleted_at: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct MessageTombstone {
+    #[serde(rename = "messageUUID", alias = "message_uuid")]
     pub message_uuid: String,
+    #[serde(alias = "deleted_at")]
     pub deleted_at: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct DiffTombstones {
     #[serde(default)]
     pub sessions: Vec<SessionTombstone>,
@@ -97,7 +150,7 @@ pub struct DiffTombstones {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct DiffResponse {
     #[serde(default)]
     pub sessions: Vec<RemoteSession>,
@@ -110,28 +163,35 @@ pub struct DiffResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UploadUrlRequest {
     pub content_length: i64,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "contentMD5",
+        alias = "content_md5",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub content_md5: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct UploadUrlResponse {
+    #[serde(rename = "attachmentId", alias = "attachment_id")]
+    pub attachment_id: String,
+    #[serde(rename = "objectKey", alias = "object_key")]
     pub object_key: String,
     pub url: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct SessionPayload {
     pub title: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub struct MessagePayload {
     pub text: String,
 }

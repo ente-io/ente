@@ -1,13 +1,16 @@
 use ente_core::crypto::{self, blob};
 use hkdf::Hkdf;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use sha2::Sha256;
 use uuid::Uuid;
 
 use crate::errors::SyncError;
 use crate::models::EncryptedPayload;
 
-pub fn encrypt_payload<T: Serialize>(payload: &T, key: &[u8]) -> Result<EncryptedPayload, SyncError> {
+pub fn encrypt_payload<T: Serialize>(
+    payload: &T,
+    key: &[u8],
+) -> Result<EncryptedPayload, SyncError> {
     let json = serde_json::to_vec(payload)?;
     let encrypted = blob::encrypt(&json, key)?;
     Ok(EncryptedPayload {
@@ -36,7 +39,10 @@ pub fn encrypt_chat_key(chat_key: &[u8], master_key: &[u8]) -> Result<EncryptedP
     })
 }
 
-pub fn decrypt_chat_key(payload: &EncryptedPayload, master_key: &[u8]) -> Result<Vec<u8>, SyncError> {
+pub fn decrypt_chat_key(
+    payload: &EncryptedPayload,
+    master_key: &[u8],
+) -> Result<Vec<u8>, SyncError> {
     let ciphertext = crypto::decode_b64(&payload.encrypted_data)?;
     let header = crypto::decode_b64(&payload.header)?;
     let plaintext = blob::decrypt(&ciphertext, &header, master_key)?;

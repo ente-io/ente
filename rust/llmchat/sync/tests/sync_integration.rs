@@ -2,8 +2,8 @@ use httpmock::Method::{DELETE, GET, POST};
 use httpmock::MockServer;
 use llmchat_db::LlmChatDb;
 use llmchat_db::crypto::KEY_BYTES;
-use llmchat_sync::SyncEngine;
 use llmchat_sync::SyncAuth;
+use llmchat_sync::SyncEngine;
 use llmchat_sync::crypto::{encrypt_chat_key, encrypt_payload};
 use llmchat_sync::models::{
     ChatKeyPayload, DiffResponse, DiffTombstones, MessagePayload, MessageTombstone, RemoteMessage,
@@ -100,22 +100,19 @@ fn pull_applies_remote_sessions_and_messages() {
     let session_payload = SessionPayload {
         title: "Remote Session".to_string(),
     };
-    let encrypted_session =
-        encrypt_payload(&session_payload, &chat_key).expect("encrypt session");
+    let encrypted_session = encrypt_payload(&session_payload, &chat_key).expect("encrypt session");
 
     let message_payload = MessagePayload {
         text: "hello".to_string(),
     };
-    let encrypted_message =
-        encrypt_payload(&message_payload, &chat_key).expect("encrypt message");
+    let encrypted_message = encrypt_payload(&message_payload, &chat_key).expect("encrypt message");
 
     let diff = DiffResponse {
         sessions: vec![RemoteSession {
             session_uuid: session_uuid.to_string(),
-            root_session_uuid: None,
-            branch_from_message_uuid: None,
             encrypted_data: encrypted_session.encrypted_data,
             header: encrypted_session.header,
+            client_metadata: None,
             created_at: 10,
             updated_at: 11,
             is_deleted: None,
@@ -128,6 +125,7 @@ fn pull_applies_remote_sessions_and_messages() {
             attachments: Vec::new(),
             encrypted_data: encrypted_message.encrypted_data,
             header: encrypted_message.header,
+            client_metadata: None,
             created_at: 12,
             updated_at: None,
             is_deleted: None,
@@ -247,22 +245,19 @@ fn tombstone_removes_messages() {
     let session_payload = SessionPayload {
         title: "Remote Session".to_string(),
     };
-    let encrypted_session =
-        encrypt_payload(&session_payload, &chat_key).expect("encrypt session");
+    let encrypted_session = encrypt_payload(&session_payload, &chat_key).expect("encrypt session");
 
     let message_payload = MessagePayload {
         text: "to delete".to_string(),
     };
-    let encrypted_message =
-        encrypt_payload(&message_payload, &chat_key).expect("encrypt message");
+    let encrypted_message = encrypt_payload(&message_payload, &chat_key).expect("encrypt message");
 
     let diff = DiffResponse {
         sessions: vec![RemoteSession {
             session_uuid: session_uuid.to_string(),
-            root_session_uuid: None,
-            branch_from_message_uuid: None,
             encrypted_data: encrypted_session.encrypted_data,
             header: encrypted_session.header,
+            client_metadata: None,
             created_at: 10,
             updated_at: 11,
             is_deleted: None,
@@ -275,6 +270,7 @@ fn tombstone_removes_messages() {
             attachments: Vec::new(),
             encrypted_data: encrypted_message.encrypted_data,
             header: encrypted_message.header,
+            client_metadata: None,
             created_at: 12,
             updated_at: None,
             is_deleted: None,

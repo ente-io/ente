@@ -1,3 +1,4 @@
+import { HTTPError } from "ente-base/http";
 import { ensureCryptoInit, enteWasm } from "../wasm";
 import { ChatKeyNotFoundError, createChatKey, getChatKey } from "./gateway";
 
@@ -59,9 +60,23 @@ export const getOrCreateChatKey = async (masterKeyB64: string) => {
         const chatKey = await wasm.crypto_generate_key();
         const encrypted = await wasm.crypto_encrypt_box(chatKey, masterKeyB64);
 
-        await createChatKey(encrypted.encrypted_data, encrypted.nonce);
-        localStorage.setItem(CHAT_KEY_LOCAL_STORAGE_KEY, chatKey);
-        return chatKey;
+        try {
+            await createChatKey(encrypted.encrypted_data, encrypted.nonce);
+            localStorage.setItem(CHAT_KEY_LOCAL_STORAGE_KEY, chatKey);
+            return chatKey;
+        } catch (error) {
+            if (error instanceof HTTPError && error.res.status === 409) {
+                const remote = await getChatKey();
+                const resolved = await wasm.crypto_decrypt_box(
+                    remote.encryptedKey,
+                    remote.header,
+                    masterKeyB64,
+                );
+                localStorage.setItem(CHAT_KEY_LOCAL_STORAGE_KEY, resolved);
+                return resolved;
+            }
+            throw error;
+        }
     }
 };
 

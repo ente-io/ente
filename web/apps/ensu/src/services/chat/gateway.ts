@@ -45,7 +45,7 @@ export const createChatKey = async (encryptedKey: string, header: string) => {
             ...(await authenticatedRequestHeaders()),
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ encrypted_key: encryptedKey, header }),
+        body: JSON.stringify({ encryptedKey, header }),
     });
 
     ensureOk(res);

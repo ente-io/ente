@@ -17,13 +17,18 @@ pub enum SyncError {
         code: Option<String>,
     },
     #[error("limit reached: {code}")]
-    LimitReached { code: String, message: Option<String> },
+    LimitReached {
+        code: String,
+        message: Option<String>,
+    },
     #[error("attachment API unavailable")]
     AttachmentApiUnavailable,
     #[error("attachment missing: {0}")]
     AttachmentMissing(String),
     #[error("invalid response: {0}")]
     InvalidResponse(String),
+    #[error("sync already in progress")]
+    SyncInProgress,
     #[error("serde error: {0}")]
     Serde(String),
     #[error("io error: {0}")]

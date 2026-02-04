@@ -1,18 +1,35 @@
-import log from "ente-base/log";
-import { authenticatedRequestHeaders, ensureOk, HTTPError } from "ente-base/http";
-import { apiURL } from "ente-base/origins";
-import { savedAuthToken } from "ente-base/token";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    HTTPError,
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiOrigin, apiURL } from "ente-base/origins";
+import { savedAuthToken } from "ente-base/token";
+import { masterKeyFromSession } from "../session";
+import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
+import { cachedLocalChatKey } from "./chatKey";
+import {
+    decryptChatField,
+    decryptChatPayload,
+    encryptChatField,
+    encryptChatPayload,
+} from "./crypto";
+import { computeMd5Base64 } from "./md5";
 import {
     attachmentBytesExists,
     getPendingDeletions,
     getSessionRecord,
     hardDeleteEntity,
     insertMessageFromRemote,
+    listMessageRemoteMap,
     listMessagesForSessionSync,
+    listSessionRemoteMap,
     listSessionsForSync,
     markAttachmentUploaded,
     markMessageDeletedAt,
+    markMessageSynced,
     markSessionDeletedAt,
     markSessionSynced,
     readAttachmentBytes,
@@ -22,15 +39,6 @@ import {
     type LocalMessageRecord,
     type LocalSessionRecord,
 } from "./store";
-import {
-    decryptChatField,
-    decryptChatPayload,
-    encryptChatField,
-    encryptChatPayload,
-} from "./crypto";
-import { computeMd5Base64 } from "./md5";
-import { cachedLocalChatKey } from "./chatKey";
-import { decryptAttachmentBytes, encryptAttachmentBytes } from "./attachments";
 
 const isTauriRuntime = () =>
     typeof window !== "undefined" &&
@@ -52,6 +60,8 @@ const DEFAULT_CURSOR: DiffCursor = {
     since_id: "00000000-0000-0000-0000-000000000000",
 };
 
+const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
+
 const DEDUPE_WINDOW_US = 2_000_000;
 const DIFF_PAGE_LIMIT = 500;
 const RETRY_DELAYS_MS = [2000, 5000, 10000];
@@ -70,6 +80,50 @@ const sleep = (ms: number) =>
     new Promise<void>((resolve) => {
         setTimeout(resolve, ms);
     });
+
+const extractErrorCode = (error: unknown) => {
+    if (!error || typeof error !== "object") return undefined;
+    const code = (error as { code?: unknown }).code;
+    return typeof code === "string" ? code : undefined;
+};
+
+const normalizeUuid = (value?: string | null) => {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === ZERO_UUID) return undefined;
+    return trimmed;
+};
+
+const decodeClientId = (metadata?: string | null) => {
+    if (!metadata) return undefined;
+    try {
+        const parsed = JSON.parse(metadata) as { clientId?: unknown };
+        if (typeof parsed.clientId === "string" && parsed.clientId.trim()) {
+            return parsed.clientId;
+        }
+    } catch {
+        return undefined;
+    }
+    return undefined;
+};
+
+const encodeClientMetadata = async (
+    clientId: string,
+    createdAt: number,
+    chatKey: string,
+) => {
+    const payload: { clientId: string; createdAt?: string } = { clientId };
+    if (createdAt > 0) {
+        payload.createdAt = await encryptChatField(String(createdAt), chatKey);
+    }
+    return JSON.stringify(payload);
+};
+
+const extractErrorMessage = (error: unknown) => {
+    if (!error || typeof error !== "object") return undefined;
+    const message = (error as { message?: unknown }).message;
+    return typeof message === "string" ? message : undefined;
+};
 
 const isRetryableError = (error: unknown) => {
     if (error instanceof ChatSyncLimitError) {
@@ -103,6 +157,44 @@ const withRetry = async (fn: () => Promise<void>) => {
 
 let syncPromise: Promise<void> | null = null;
 
+const syncChatNative = async (chatKey: string, token: string) => {
+    const masterKey = await masterKeyFromSession();
+    if (!masterKey) return;
+
+    const { invoke } = await import("@tauri-apps/api/tauri");
+    const { getName, getVersion } = await import("@tauri-apps/api/app");
+
+    const [baseUrl, clientPackage, clientVersion] = await Promise.all([
+        apiOrigin(),
+        getName(),
+        getVersion(),
+    ]);
+
+    try {
+        await invoke("chat_sync", {
+            keyB64: chatKey,
+            baseUrl,
+            authToken: token,
+            masterKeyB64: masterKey,
+            userAgent: "EnteTauri",
+            clientPackage,
+            clientVersion,
+        });
+    } catch (error) {
+        const code = extractErrorCode(error);
+        if (
+            code === "LLMCHAT_RATE_LIMIT_REACHED" ||
+            code === "LLMCHAT_TEMPORARY_LIMIT"
+        ) {
+            throw new ChatSyncLimitError(
+                code,
+                extractErrorMessage(error) ?? "Sync limit reached",
+            );
+        }
+        throw error;
+    }
+};
+
 export const syncChat = async (chatKey: string) => {
     if (!chatKey) return;
     const token = await savedAuthToken();
@@ -114,6 +206,11 @@ export const syncChat = async (chatKey: string) => {
 
     syncPromise = (async () => {
         try {
+            if (isTauriRuntime()) {
+                await withRetry(() => syncChatNative(chatKey, token));
+                return;
+            }
+
             await withRetry(async () => {
                 await pullChat(chatKey);
                 await pushChat(chatKey);
@@ -136,10 +233,7 @@ export const downloadAttachment = async (attachmentId: string) => {
 
     const res = await fetch(
         await apiURL(`/llmchat/chat/attachment/${attachmentId}`),
-        {
-            headers: await authenticatedRequestHeaders(),
-            redirect: "follow",
-        },
+        { headers: await authenticatedRequestHeaders(), redirect: "follow" },
     );
     ensureOk(res);
     const buffer = await res.arrayBuffer();
@@ -160,10 +254,7 @@ const loadCursor = (): DiffCursor => {
     if (!raw) return { ...DEFAULT_CURSOR };
     try {
         const parsed = JSON.parse(raw) as Partial<DiffCursor>;
-        return {
-            ...DEFAULT_CURSOR,
-            ...parsed,
-        };
+        return { ...DEFAULT_CURSOR, ...parsed };
     } catch (error) {
         log.error("Failed to parse chat sync cursor", error);
         return { ...DEFAULT_CURSOR };
@@ -222,7 +313,9 @@ const pushChat = async (chatKey: string) => {
                 await uploadPendingAttachments(messages, chatKey);
             } catch (error) {
                 if (error instanceof ChatSyncLimitError) {
-                    log.warn(`Attachment limit reached for session ${session.sessionUuid}; some messages might be blocked`);
+                    log.warn(
+                        `Attachment limit reached for session ${session.sessionUuid}; some messages might be blocked`,
+                    );
                 } else {
                     throw error;
                 }
@@ -239,15 +332,48 @@ const pushChat = async (chatKey: string) => {
                     !message.deletedAt && !blocked.has(message.messageUuid),
             );
 
-            await upsertRemoteSession(session, chatKey);
+            const sessionRemoteId = await upsertRemoteSession(session, chatKey);
+            const remoteIdsByLocal = new Map<string, string>();
+            for (const message of refreshedMessages) {
+                if (message.remoteId) {
+                    remoteIdsByLocal.set(message.messageUuid, message.remoteId);
+                }
+            }
 
             let sessionError: Error | null = null;
             for (const message of ordered) {
                 try {
-                    await upsertRemoteMessage(message, chatKey);
+                    const parentRemoteId = message.parentMessageUuid
+                        ? remoteIdsByLocal.get(message.parentMessageUuid)
+                        : undefined;
+                    if (message.parentMessageUuid && !parentRemoteId) {
+                        sessionError = new Error(
+                            `Missing parent remote id for ${message.messageUuid}`,
+                        );
+                        break;
+                    }
+                    const messageRemoteId = await upsertRemoteMessage(
+                        message,
+                        sessionRemoteId,
+                        parentRemoteId,
+                        chatKey,
+                    );
+                    if (messageRemoteId) {
+                        remoteIdsByLocal.set(
+                            message.messageUuid,
+                            messageRemoteId,
+                        );
+                        await markMessageSynced(
+                            message.messageUuid,
+                            messageRemoteId,
+                        );
+                    }
                 } catch (error) {
                     if (error instanceof ChatSyncLimitError) {
-                        log.error(`Message-specific limit reached for ${message.messageUuid}`, error);
+                        log.error(
+                            `Message-specific limit reached for ${message.messageUuid}`,
+                            error,
+                        );
                         sessionError = error as Error;
                         // For limit errors, we stop pushing further messages in this session
                         // to maintain causal consistency on the server.
@@ -258,14 +384,21 @@ const pushChat = async (chatKey: string) => {
             }
 
             if (blocked.size === 0 && !sessionError) {
-                await markSessionSynced(session.sessionUuid, session.sessionUuid, chatKey);
+                await markSessionSynced(
+                    session.sessionUuid,
+                    sessionRemoteId,
+                    chatKey,
+                );
             } else {
-                const existing = await getSessionRecord(session.sessionUuid, chatKey);
+                const existing = await getSessionRecord(
+                    session.sessionUuid,
+                    chatKey,
+                );
                 if (existing) {
                     await upsertSessionRecord(
                         {
                             ...existing,
-                            remoteId: existing.remoteId ?? session.sessionUuid,
+                            remoteId: existing.remoteId ?? sessionRemoteId,
                             needsSync: true,
                         },
                         chatKey,
@@ -275,7 +408,10 @@ const pushChat = async (chatKey: string) => {
         } catch (error) {
             log.error(`Failed to push session ${session.sessionUuid}`, error);
             // If it's a transient limit, we stop the whole push to respect backoff
-            if (error instanceof ChatSyncLimitError && isRetryableError(error)) {
+            if (
+                error instanceof ChatSyncLimitError &&
+                isRetryableError(error)
+            ) {
                 throw error;
             }
             // Otherwise we continue with other sessions
@@ -286,10 +422,15 @@ const pushChat = async (chatKey: string) => {
 const pushDeletions = async (chatKey: string) => {
     const deletions = await getPendingDeletions(chatKey);
     for (const deletion of deletions) {
+        const remoteId = normalizeUuid(deletion.remoteId);
+        if (!remoteId) {
+            await hardDeleteEntity(deletion, chatKey);
+            continue;
+        }
         const endpoint =
             deletion.type === "session"
-                ? `/llmchat/chat/session?id=${encodeURIComponent(deletion.uuid)}`
-                : `/llmchat/chat/message?id=${encodeURIComponent(deletion.uuid)}`;
+                ? `/llmchat/chat/session?id=${encodeURIComponent(remoteId)}`
+                : `/llmchat/chat/message?id=${encodeURIComponent(remoteId)}`;
         const res = await fetch(await apiURL(endpoint), {
             method: "DELETE",
             headers: await authenticatedRequestHeaders(),
@@ -311,9 +452,7 @@ const fetchDiff = async (cursor: DiffCursor) => {
     });
     const res = await fetch(
         await apiURL(`/llmchat/chat/diff?${query.toString()}`),
-        {
-            headers: await authenticatedRequestHeaders(),
-        },
+        { headers: await authenticatedRequestHeaders() },
     );
     await handleChatLimitError(res);
     ensureOk(res);
@@ -370,7 +509,10 @@ const handleChatLimitError = async (res: Response) => {
         };
         const code = payload.code;
         if (code && code.startsWith("LLMCHAT_")) {
-            throw new ChatSyncLimitError(code, chatLimitMessage(code, payload.message));
+            throw new ChatSyncLimitError(
+                code,
+                chatLimitMessage(code, payload.message),
+            );
         }
     } catch (error) {
         if (error instanceof ChatSyncLimitError) {
@@ -395,15 +537,31 @@ const chatLimitMessage = (code: string, fallback?: string) => {
 };
 
 const applyDiff = async (response: DiffResponse, chatKey: string) => {
+    const sessionRemoteMap = await listSessionRemoteMap();
+
     const sessions = response.sessions ?? [];
     for (const session of sessions) {
-        const sessionUuid = session.session_uuid ?? session.sessionUuid;
-        if (!sessionUuid) continue;
+        const remoteSessionId = normalizeUuid(
+            session.session_uuid ?? session.sessionUuid,
+        );
+        if (!remoteSessionId) continue;
+
+        const clientId = decodeClientId(
+            session.client_metadata ?? session.clientMetadata,
+        );
+        const existingByClient = clientId
+            ? await getSessionRecord(clientId, chatKey)
+            : null;
+        const localSessionId =
+            existingByClient?.sessionUuid ??
+            sessionRemoteMap.get(remoteSessionId) ??
+            remoteSessionId;
 
         if (session.is_deleted) {
             const deletedAt =
                 session.updated_at ?? session.created_at ?? Date.now() * 1000;
-            await markSessionDeletedAt(sessionUuid, deletedAt, chatKey);
+            await markSessionDeletedAt(localSessionId, deletedAt, chatKey);
+            sessionRemoteMap.set(remoteSessionId, localSessionId);
             continue;
         }
 
@@ -418,11 +576,14 @@ const applyDiff = async (response: DiffResponse, chatKey: string) => {
                 chatKey,
             )) as { title?: string };
         } catch (error) {
-            log.error(`Failed to decrypt session ${sessionUuid}; skipping`, error);
+            log.error(
+                `Failed to decrypt session ${remoteSessionId}; skipping`,
+                error,
+            );
             continue;
         }
 
-        const existing = await getSessionRecord(sessionUuid, chatKey);
+        const existing = await getSessionRecord(localSessionId, chatKey);
         const needsSync = existing?.needsSync ?? false;
         const createdAt = Math.min(
             existing?.createdAt ?? session.created_at ?? 0,
@@ -433,68 +594,114 @@ const applyDiff = async (response: DiffResponse, chatKey: string) => {
             session.updated_at ?? existing?.updatedAt ?? 0,
         );
         const remoteTitle = decrypted.title ?? "New chat";
-        const title = needsSync ? existing?.title ?? remoteTitle : remoteTitle;
+        const title = needsSync
+            ? (existing?.title ?? remoteTitle)
+            : remoteTitle;
 
         await upsertSessionRecord(
             {
-                sessionUuid,
+                sessionUuid: localSessionId,
                 title,
                 createdAt,
                 updatedAt,
-                remoteId: sessionUuid,
+                remoteId: remoteSessionId,
                 needsSync,
                 deletedAt: existing?.deletedAt ?? null,
             },
             chatKey,
         );
+        sessionRemoteMap.set(remoteSessionId, localSessionId);
     }
 
     const messages = response.messages ?? [];
     const grouped = new Map<string, RemoteMessage[]>();
     for (const message of messages) {
-        const sessionUuid = message.session_uuid ?? message.sessionUuid;
-        if (!sessionUuid) continue;
-        if (message.is_deleted) {
-            const messageUuid = message.message_uuid ?? message.messageUuid;
-            if (messageUuid) {
-                const deletedAt =
-                    message.updated_at ??
-                    message.created_at ??
-                    Date.now() * 1000;
-                await markMessageDeletedAt(messageUuid, deletedAt, chatKey);
-            }
-            continue;
-        }
-        const list = grouped.get(sessionUuid) ?? [];
+        const remoteSessionId = normalizeUuid(
+            message.session_uuid ?? message.sessionUuid,
+        );
+        if (!remoteSessionId) continue;
+        const list = grouped.get(remoteSessionId) ?? [];
         list.push(message);
-        grouped.set(sessionUuid, list);
+        grouped.set(remoteSessionId, list);
     }
 
-    for (const [sessionUuid, remoteMessages] of grouped.entries()) {
+    for (const [remoteSessionId, remoteMessages] of grouped.entries()) {
+        const localSessionId =
+            sessionRemoteMap.get(remoteSessionId) ?? remoteSessionId;
         const localMessages = await listMessagesForSessionSync(
-            sessionUuid,
+            localSessionId,
             chatKey,
             { includeDeleted: true },
         );
         const localById = new Map(
             localMessages.map((msg) => [msg.messageUuid, msg]),
         );
+        const localByRemoteId = new Map(
+            localMessages
+                .filter((msg) => msg.remoteId)
+                .map((msg) => [msg.remoteId as string, msg]),
+        );
+        const remoteToLocal = new Map<string, string>();
+        for (const msg of localMessages) {
+            if (msg.remoteId) {
+                remoteToLocal.set(msg.remoteId, msg.messageUuid);
+            } else {
+                remoteToLocal.set(msg.messageUuid, msg.messageUuid);
+            }
+        }
         const signatureMap = buildSignatureMap(localMessages);
 
         for (const remote of remoteMessages) {
-            const messageUuid = remote.message_uuid ?? remote.messageUuid;
-            if (!messageUuid) continue;
+            const remoteMessageId = normalizeUuid(
+                remote.message_uuid ?? remote.messageUuid,
+            );
+            if (!remoteMessageId) continue;
 
-            if (localById.has(messageUuid)) {
+            const clientId = decodeClientId(
+                remote.client_metadata ?? remote.clientMetadata,
+            );
+            const existingByClient = clientId ? localById.get(clientId) : null;
+            const existingByRemote =
+                localByRemoteId.get(remoteMessageId) ?? null;
+            const localMessageId =
+                existingByClient?.messageUuid ??
+                existingByRemote?.messageUuid ??
+                remoteMessageId;
+
+            const parentRemoteId = normalizeUuid(
+                remote.parent_message_uuid ?? remote.parentMessageUuid,
+            );
+            const parentLocalId = parentRemoteId
+                ? (remoteToLocal.get(parentRemoteId) ?? parentRemoteId)
+                : null;
+
+            if (remote.is_deleted) {
+                const deletedAt =
+                    remote.updated_at ?? remote.created_at ?? Date.now() * 1000;
+                await markMessageDeletedAt(localMessageId, deletedAt, chatKey);
+                continue;
+            }
+
+            const existing = localById.get(localMessageId);
+            if (existing) {
+                if (remoteMessageId && existing.remoteId !== remoteMessageId) {
+                    await markMessageSynced(localMessageId, remoteMessageId);
+                    existing.remoteId = remoteMessageId;
+                    localByRemoteId.set(remoteMessageId, existing);
+                    remoteToLocal.set(remoteMessageId, localMessageId);
+                }
                 for (const attachment of remote.attachments ?? []) {
                     try {
                         await markAttachmentUploaded(
-                            messageUuid,
+                            localMessageId,
                             attachment.id,
                             chatKey,
                         );
                     } catch (error) {
-                        log.error("Failed to reconcile attachment state", error);
+                        log.error(
+                            "Failed to reconcile attachment state",
+                            error,
+                        );
                     }
                 }
                 continue;
@@ -528,16 +735,14 @@ const applyDiff = async (response: DiffResponse, chatKey: string) => {
             if (isDuplicate) continue;
 
             const localMessage: LocalMessageRecord = {
-                messageUuid,
-                sessionUuid,
-                parentMessageUuid:
-                    remote.parent_message_uuid ??
-                    remote.parentMessageUuid ??
-                    null,
+                messageUuid: localMessageId,
+                sessionUuid: localSessionId,
+                parentMessageUuid: parentLocalId,
                 sender,
                 text,
                 createdAt: remote.created_at ?? 0,
                 attachments,
+                remoteId: remoteMessageId,
                 deletedAt: null,
             };
 
@@ -545,23 +750,39 @@ const applyDiff = async (response: DiffResponse, chatKey: string) => {
             const updatedList = signatureMap.get(signature) ?? [];
             updatedList.push(localMessage);
             signatureMap.set(signature, updatedList);
+
+            localById.set(localMessageId, localMessage);
+            localByRemoteId.set(remoteMessageId, localMessage);
+            remoteToLocal.set(remoteMessageId, localMessageId);
         }
     }
 
     const tombstones = response.tombstones;
     if (tombstones) {
         for (const session of tombstones.sessions ?? []) {
-            const sessionUuid = session.session_uuid ?? session.sessionUuid;
-            if (!sessionUuid) continue;
+            const remoteSessionId = normalizeUuid(
+                session.session_uuid ?? session.sessionUuid,
+            );
+            if (!remoteSessionId) continue;
             const deletedAt = session.deleted_at ?? session.deletedAt ?? 0;
-            await markSessionDeletedAt(sessionUuid, deletedAt, chatKey);
+            const localSessionId =
+                sessionRemoteMap.get(remoteSessionId) ?? remoteSessionId;
+            await markSessionDeletedAt(localSessionId, deletedAt, chatKey);
         }
 
-        for (const message of tombstones.messages ?? []) {
-            const messageUuid = message.message_uuid ?? message.messageUuid;
-            if (!messageUuid) continue;
-            const deletedAt = message.deleted_at ?? message.deletedAt ?? 0;
-            await markMessageDeletedAt(messageUuid, deletedAt, chatKey);
+        const messageTombstones = tombstones.messages ?? [];
+        if (messageTombstones.length) {
+            const messageRemoteMap = await listMessageRemoteMap();
+            for (const message of messageTombstones) {
+                const remoteMessageId = normalizeUuid(
+                    message.message_uuid ?? message.messageUuid,
+                );
+                if (!remoteMessageId) continue;
+                const deletedAt = message.deleted_at ?? message.deletedAt ?? 0;
+                const localMessageId =
+                    messageRemoteMap.get(remoteMessageId) ?? remoteMessageId;
+                await markMessageDeletedAt(localMessageId, deletedAt, chatKey);
+            }
         }
     }
 };
@@ -612,7 +833,11 @@ const reencryptPendingAttachments = async (
             try {
                 const bytes = await readAttachmentBytes(attachment.id);
                 try {
-                    await decryptAttachmentBytes(bytes, chatKey, message.sessionUuid);
+                    await decryptAttachmentBytes(
+                        bytes,
+                        chatKey,
+                        message.sessionUuid,
+                    );
                     continue;
                 } catch {
                     // fall through to local key
@@ -771,11 +996,17 @@ const ensureAttachmentEncryptedForUpload = async (
 const upsertRemoteSession = async (
     session: LocalSessionRecord,
     chatKey: string,
-) => {
+): Promise<string> => {
     const encrypted = await encryptChatPayload(
         { title: session.title },
         chatKey,
     );
+    const clientMetadata = await encodeClientMetadata(
+        session.sessionUuid,
+        session.createdAt,
+        chatKey,
+    );
+    const sessionUuid = normalizeUuid(session.remoteId) ?? "";
     const res = await fetch(await apiURL("/llmchat/chat/session"), {
         method: "POST",
         headers: {
@@ -783,22 +1014,30 @@ const upsertRemoteSession = async (
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            session_uuid: session.sessionUuid,
-            root_session_uuid: session.sessionUuid,
-            branch_from_message_uuid: null,
+            session_uuid: sessionUuid,
             encrypted_data: encrypted.encryptedData,
             header: encrypted.header,
-            created_at: session.createdAt,
+            client_metadata: clientMetadata,
         }),
     });
     await handleChatLimitError(res);
     ensureOk(res);
+    const payload = (await res.json()) as {
+        session_uuid?: string;
+        sessionUuid?: string;
+    };
+    return (
+        normalizeUuid(payload.session_uuid ?? payload.sessionUuid) ??
+        sessionUuid
+    );
 };
 
 const upsertRemoteMessage = async (
     message: LocalMessageRecord,
+    sessionRemoteId: string,
+    parentRemoteId: string | undefined,
     chatKey: string,
-) => {
+): Promise<string> => {
     const sanitizedText = message.attachments?.length
         ? stripDocumentBlocks(message.text)
         : message.text;
@@ -816,6 +1055,14 @@ const upsertRemoteMessage = async (
         })),
     );
 
+    const clientMetadata = await encodeClientMetadata(
+        message.messageUuid,
+        message.createdAt,
+        chatKey,
+    );
+    const messageUuid = normalizeUuid(message.remoteId) ?? "";
+    const parentMessageUuid = normalizeUuid(parentRemoteId);
+
     const res = await fetch(await apiURL("/llmchat/chat/message"), {
         method: "POST",
         headers: {
@@ -823,18 +1070,26 @@ const upsertRemoteMessage = async (
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            message_uuid: message.messageUuid,
-            session_uuid: message.sessionUuid,
-            parent_message_uuid: message.parentMessageUuid ?? null,
+            message_uuid: messageUuid,
+            session_uuid: sessionRemoteId,
+            parent_message_uuid: parentMessageUuid ?? null,
             sender: message.sender === "assistant" ? "other" : "self",
             attachments,
             encrypted_data: encrypted.encryptedData,
             header: encrypted.header,
-            created_at: message.createdAt,
+            client_metadata: clientMetadata,
         }),
     });
     await handleChatLimitError(res);
     ensureOk(res);
+    const payload = (await res.json()) as {
+        message_uuid?: string;
+        messageUuid?: string;
+    };
+    return (
+        normalizeUuid(payload.message_uuid ?? payload.messageUuid) ??
+        messageUuid
+    );
 };
 
 const stripDocumentBlocks = (text: string) =>
@@ -966,10 +1221,7 @@ const normalizeSender = (sender?: string) => {
 type DiffResponse = {
     sessions?: RemoteSession[];
     messages?: RemoteMessage[];
-    tombstones?: {
-        sessions?: RemoteTombstone[];
-        messages?: RemoteTombstone[];
-    };
+    tombstones?: { sessions?: RemoteTombstone[]; messages?: RemoteTombstone[] };
     cursor?: {
         base_since_time?: number;
         since_time?: number;
@@ -985,6 +1237,8 @@ type RemoteSession = {
     sessionUuid?: string;
     encrypted_data?: string;
     encryptedData?: string;
+    client_metadata?: string;
+    clientMetadata?: string;
     header: string;
     created_at?: number;
     updated_at?: number;
@@ -1002,6 +1256,8 @@ type RemoteMessage = {
     attachments?: RemoteAttachment[];
     encrypted_data?: string;
     encryptedData?: string;
+    client_metadata?: string;
+    clientMetadata?: string;
     header: string;
     created_at?: number;
     updated_at?: number;

@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { getLuminance, useTheme } from "@mui/material/styles";
 import { save } from "@tauri-apps/api/dialog";
-import { writeTextFile } from "@tauri-apps/api/fs";
 import { ChatComposer } from "components/chat/ChatComposer";
 import { ChatDialogs } from "components/chat/ChatDialogs";
 import { ChatMessageList } from "components/chat/ChatMessageList";
@@ -71,6 +70,7 @@ import {
 import {
     DESKTOP_IMAGE_ATTACHMENTS_ENABLED,
     DEVELOPER_SETTINGS_ENABLED,
+    MODEL_SETTINGS_ENABLED,
     SIGN_IN_ENABLED,
 } from "services/featureFlags";
 import { DEFAULT_MODEL, LlmProvider } from "services/llm/provider";
@@ -154,7 +154,9 @@ const CHAT_SYSTEM_PROMPT =
     "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$";
 
 const SESSION_TITLE_PROMPT =
-    "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words, no quotes, no emojis, no trailing punctuation, and output only the title.";
+    "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title.";
+
+const REPEAT_PENALTY = 1.18;
 
 type DocumentAttachment = {
     id: string;
@@ -203,7 +205,7 @@ const buildDocumentBlocks = (documents: DocumentAttachment[]) => {
         .map((doc, index) => {
             const name = doc.name || `Document ${index + 1}`;
             // Remove null bytes which are invalid in C strings used by llama.cpp
-            const content = doc.text.replace(/\0/g, '').trim();
+            const content = doc.text.replace(/\0/g, "").trim();
             return `----- BEGIN DOCUMENT: ${name} -----\n${content}\n----- END DOCUMENT: ${name} -----`;
         })
         .join("\n\n");
@@ -462,7 +464,7 @@ const Page: React.FC = () => {
     const userMessageTextSx = {
         ...messageTypographySx,
         color: "text.base",
-        textAlign: "right",
+        textAlign: "left",
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
         overflowWrap: "anywhere",
@@ -673,6 +675,7 @@ const Page: React.FC = () => {
     const isDraftSessionRef = useRef(false);
     const logoClickCountRef = useRef(0);
     const logoClickTimeoutRef = useRef<number | null>(null);
+    const toastTimeoutRef = useRef<number | null>(null);
     const streamingBufferRef = useRef("");
     const streamingChunksRef = useRef<string[]>([]);
     const streamingCreatedAtRef = useRef<number | null>(null);
@@ -1223,8 +1226,30 @@ const Page: React.FC = () => {
         [chatKey, currentSessionId],
     );
 
+    const showToast = useCallback(
+        (
+            attributes: NotificationAttributes & { autoHideDuration?: number },
+        ) => {
+            const { autoHideDuration, ...rest } = attributes;
+            setSyncNotification(rest);
+            setSyncNotificationOpen(true);
+            if (toastTimeoutRef.current) {
+                window.clearTimeout(toastTimeoutRef.current);
+                toastTimeoutRef.current = null;
+            }
+            if (autoHideDuration && typeof window !== "undefined") {
+                toastTimeoutRef.current = window.setTimeout(() => {
+                    setSyncNotificationOpen(false);
+                }, autoHideDuration);
+            }
+        },
+        [setSyncNotification, setSyncNotificationOpen],
+    );
+
     const syncNow = useCallback(
-        async ({ showToast = false }: { showToast?: boolean } = {}) => {
+        async ({
+            showToast: shouldShowToast = false,
+        }: { showToast?: boolean } = {}) => {
             if (!chatKey) return;
             const remoteKey = cachedChatKey();
             const canSync = isLoggedIn && !!remoteKey && remoteKey === chatKey;
@@ -1232,19 +1257,18 @@ const Page: React.FC = () => {
             if (canSync) {
                 try {
                     await syncChat(chatKey);
-                    if (showToast) {
-                        setSyncNotification({
+                    if (shouldShowToast) {
+                        showToast({
                             title: "Sync complete",
                             caption: "Your chats are up to date.",
                             color: "accent",
                             autoHideDuration: 3000,
                         });
-                        setSyncNotificationOpen(true);
                     }
                 } catch (error) {
                     log.error("Chat sync failed", error);
-                    if (showToast) {
-                        setSyncNotification({
+                    if (shouldShowToast) {
+                        showToast({
                             title: "Sync failed",
                             caption:
                                 error instanceof ChatSyncLimitError
@@ -1253,7 +1277,6 @@ const Page: React.FC = () => {
                             color: "critical",
                             autoHideDuration: 4000,
                         });
-                        setSyncNotificationOpen(true);
                     }
                     if (error instanceof ChatSyncLimitError) {
                         showMiniDialog({
@@ -1262,14 +1285,13 @@ const Page: React.FC = () => {
                         });
                     }
                 }
-            } else if (showToast) {
-                setSyncNotification({
+            } else if (shouldShowToast) {
+                showToast({
                     title: "Sync unavailable",
                     caption: "Encryption is still initializing.",
                     color: "critical",
                     autoHideDuration: 3000,
                 });
-                setSyncNotificationOpen(true);
             }
 
             await refreshSessions();
@@ -1281,8 +1303,7 @@ const Page: React.FC = () => {
             refreshMessages,
             refreshSessions,
             showMiniDialog,
-            setSyncNotification,
-            setSyncNotificationOpen,
+            showToast,
         ],
     );
 
@@ -1801,6 +1822,7 @@ const Page: React.FC = () => {
                     maxTokens: 64,
                     temperature: 0.2,
                     topP: 0.9,
+                    repeatPenalty: REPEAT_PENALTY,
                 },
                 (event) => {
                     if (event.type === "text") {
@@ -2348,11 +2370,6 @@ const Page: React.FC = () => {
         setPendingImages([]);
     }, []);
 
-    const showToast = useCallback((attributes: NotificationAttributes) => {
-        setSyncNotification(attributes);
-        setSyncNotificationOpen(true);
-    }, []);
-
     const handleCopyMessage = useCallback(
         async (text: string) => {
             try {
@@ -2412,15 +2429,7 @@ const Page: React.FC = () => {
                     await createDir(dir, { recursive: true });
                     const filePath = await join(dir, filename);
 
-                    if (!treatAsImage) {
-                        const text = new TextDecoder().decode(bytes);
-                        await writeTextFile(filePath, text);
-                    } else {
-                        await writeBinaryFile({
-                            path: filePath,
-                            contents: bytes,
-                        });
-                    }
+                    await writeBinaryFile({ path: filePath, contents: bytes });
 
                     const fileUrl = encodeURI(`file://${filePath}`);
                     await open(fileUrl);
@@ -2768,6 +2777,7 @@ const Page: React.FC = () => {
                         maxTokens,
                         temperature: 0.7,
                         topP: 0.9,
+                        repeatPenalty: REPEAT_PENALTY,
                     },
                     (event: GenerateEvent) => {
                         if (!isActiveGeneration()) {
@@ -3086,7 +3096,9 @@ const Page: React.FC = () => {
                     filters: [{ name: "Logs", extensions: ["txt"] }],
                 });
                 if (!path) return;
-                await writeTextFile({ path, contents: savedLogs() });
+                const { writeBinaryFile } = await import("@tauri-apps/api/fs");
+                const encoded = new TextEncoder().encode(savedLogs());
+                await writeBinaryFile({ path, contents: encoded });
                 return;
             } catch (error) {
                 log.error("Failed to export logs", error);
@@ -3102,7 +3114,10 @@ const Page: React.FC = () => {
         saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     }, [isTauriRuntime, showMiniDialog]);
 
-    const openModelSettings = useCallback(() => setShowModelSettings(true), []);
+    const openModelSettings = useCallback(() => {
+        if (!MODEL_SETTINGS_ENABLED) return;
+        setShowModelSettings(true);
+    }, []);
     const closeModelSettings = useCallback(
         () => setShowModelSettings(false),
         [],
@@ -3300,7 +3315,7 @@ const Page: React.FC = () => {
             closeAttachmentMenu();
             const images = files.map((file) => ({
                 id: createAttachmentId(),
-                name: file.name.replace(/\0/g, ''),
+                name: file.name.replace(/\0/g, ""),
                 size: file.size,
                 file,
             }));
@@ -3458,7 +3473,7 @@ const Page: React.FC = () => {
                         return {
                             id: doc.id,
                             kind: "document",
-                            name: doc.name.replace(/\0/g, ''),
+                            name: doc.name.replace(/\0/g, ""),
                             size: bytes.length,
                         } satisfies ChatAttachment;
                     }),
@@ -3485,7 +3500,7 @@ const Page: React.FC = () => {
                         return {
                             id: img.id,
                             kind: "image",
-                            name: img.name.replace(/\0/g, ''),
+                            name: img.name.replace(/\0/g, ""),
                             size: img.size,
                         } satisfies ChatAttachment;
                     }),
@@ -3908,6 +3923,7 @@ const Page: React.FC = () => {
                 logoSrc={logoSrc}
                 logoFilter={logoFilter}
                 developerSettingsEnabled={DEVELOPER_SETTINGS_ENABLED}
+                modelSettingsEnabled={MODEL_SETTINGS_ENABLED}
                 showDeveloperMenu={showDeveloperMenu}
                 closeDeveloperMenu={closeDeveloperMenu}
                 openModelSettings={openModelSettings}

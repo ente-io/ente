@@ -10,7 +10,7 @@ import {
 } from "./crypto";
 
 const DB_NAME = "ensu.chat.db";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export type AttachmentKind = "image" | "document";
 
@@ -52,6 +52,7 @@ interface StoredMessage {
     encryptedData: string;
     header: string;
     attachments?: StoredAttachment[];
+    remoteId?: string | null;
     deletedAt?: number | null;
     isDeleted?: boolean;
 }
@@ -105,10 +106,15 @@ export interface LocalMessageRecord {
     text: string;
     createdAt: number;
     attachments?: ChatAttachment[];
+    remoteId?: string | null;
     deletedAt?: number | null;
 }
 
-export type SyncDeletion = { type: "session" | "message"; uuid: string };
+export type SyncDeletion = {
+    type: "session" | "message";
+    uuid: string;
+    remoteId?: string | null;
+};
 
 interface NativeSession {
     sessionUuid: string;
@@ -137,6 +143,7 @@ interface NativeMessage {
     text: string;
     createdAt: number;
     attachments?: NativeAttachment[];
+    remoteId?: string | null;
     deletedAt?: number | null;
 }
 
@@ -249,7 +256,7 @@ const openChatDb = async () => {
                 const sessions = await sessionStore.getAll();
                 for (const session of sessions) {
                     session.needsSync = session.needsSync ?? true;
-                    session.remoteId = session.remoteId ?? null;
+                    session.remoteId = session.remoteId ?? session.sessionUuid;
                     session.deletedAt =
                         session.deletedAt ?? (session.isDeleted ? now : null);
                     await sessionStore.put(session);
@@ -261,6 +268,22 @@ const openChatDb = async () => {
                     message.attachments = message.attachments ?? [];
                     message.deletedAt =
                         message.deletedAt ?? (message.isDeleted ? now : null);
+                    await messageStore.put(message);
+                }
+            }
+
+            if (oldVersion < 3 && transaction) {
+                const sessionStore = transaction.objectStore("sessions");
+                const sessions = await sessionStore.getAll();
+                for (const session of sessions) {
+                    session.remoteId = session.remoteId ?? session.sessionUuid;
+                    await sessionStore.put(session);
+                }
+
+                const messageStore = transaction.objectStore("messages");
+                const messages = await messageStore.getAll();
+                for (const message of messages) {
+                    message.remoteId = message.remoteId ?? message.messageUuid;
                     await messageStore.put(message);
                 }
             }
@@ -754,6 +777,7 @@ export const addMessage = async (
         encryptedData: encrypted.encryptedData,
         header: encrypted.header,
         attachments: storedAttachments,
+        remoteId: null,
         deletedAt: null,
     };
 
@@ -1101,6 +1125,36 @@ export const getSessionRecord = async (
     };
 };
 
+export const listSessionRemoteMap = async (): Promise<Map<string, string>> => {
+    if (isTauriRuntime()) {
+        return new Map();
+    }
+    const db = await chatDb();
+    const sessions = await db.getAll("sessions");
+    const map = new Map<string, string>();
+    for (const session of sessions) {
+        if (session.remoteId) {
+            map.set(session.remoteId, session.sessionUuid);
+        }
+    }
+    return map;
+};
+
+export const listMessageRemoteMap = async (): Promise<Map<string, string>> => {
+    if (isTauriRuntime()) {
+        return new Map();
+    }
+    const db = await chatDb();
+    const messages = await db.getAll("messages");
+    const map = new Map<string, string>();
+    for (const message of messages) {
+        if (message.remoteId) {
+            map.set(message.remoteId, message.messageUuid);
+        }
+    }
+    return map;
+};
+
 export const listSessionsForSync = async (
     chatKey: string,
 ): Promise<LocalSessionRecord[]> => {
@@ -1173,6 +1227,7 @@ export const listMessagesForSessionSync = async (
                         size: attachment.size,
                         uploadedAt: attachment.uploadedAt ?? undefined,
                     })),
+                    remoteId: message.remoteId ?? null,
                 }));
         });
     }
@@ -1196,6 +1251,7 @@ export const listMessagesForSessionSync = async (
                 message.attachments,
                 chatKey,
             ),
+            remoteId: message.remoteId ?? null,
         })),
     );
 };
@@ -1283,6 +1339,7 @@ export const insertMessageFromRemote = async (
         encryptedData: encrypted.encryptedData,
         header: encrypted.header,
         attachments: storedAttachments,
+        remoteId: input.remoteId ?? null,
         deletedAt: input.deletedAt ?? null,
     };
 
@@ -1309,6 +1366,21 @@ export const markSessionSynced = async (
     session.remoteId = remoteId;
     session.needsSync = false;
     await db.put("sessions", session);
+};
+
+export const markMessageSynced = async (
+    messageUuid: string,
+    remoteId: string,
+) => {
+    if (isTauriRuntime()) {
+        return;
+    }
+
+    const db = await chatDb();
+    const message = await db.get("messages", messageUuid);
+    if (!message) return;
+    message.remoteId = remoteId;
+    await db.put("messages", message);
 };
 
 export const markSessionDeletedAt = async (
@@ -1432,16 +1504,24 @@ export const getPendingDeletions = async (
 
     const deletions: SyncDeletion[] = [];
     for (const session of sessions) {
-        if (session.deletedAt && session.remoteId && session.needsSync) {
-            deletions.push({ type: "session", uuid: session.sessionUuid });
+        if (session.deletedAt && session.needsSync) {
+            deletions.push({
+                type: "session",
+                uuid: session.sessionUuid,
+                remoteId: session.remoteId ?? null,
+            });
         }
     }
 
     for (const message of messages) {
         if (!message.deletedAt) continue;
         const session = sessionsById.get(message.sessionUuid);
-        if (!session?.remoteId || !session.needsSync) continue;
-        deletions.push({ type: "message", uuid: message.messageUuid });
+        if (!session?.needsSync) continue;
+        deletions.push({
+            type: "message",
+            uuid: message.messageUuid,
+            remoteId: message.remoteId ?? null,
+        });
     }
 
     return deletions;

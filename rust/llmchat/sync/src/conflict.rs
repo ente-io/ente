@@ -3,6 +3,79 @@ use std::collections::{HashMap, HashSet};
 use llmchat_db::{AttachmentMeta, Message, Sender};
 use uuid::Uuid;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConflictResolution {
+    LocalWins,
+    RemoteWins,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocalSyncState {
+    pub uuid: Uuid,
+    pub needs_sync: bool,
+    pub server_updated_at: Option<i64>,
+}
+
+pub fn resolve_session_conflict(
+    local: LocalSyncState,
+    remote_updated_at: i64,
+    remote_uuid: Uuid,
+) -> ConflictResolution {
+    if local.needs_sync && local.server_updated_at.is_none() {
+        return ConflictResolution::LocalWins;
+    }
+
+    let local_ts = local.server_updated_at.unwrap_or(0);
+    if local_ts > remote_updated_at {
+        ConflictResolution::LocalWins
+    } else if local_ts < remote_updated_at {
+        ConflictResolution::RemoteWins
+    } else if local.uuid > remote_uuid {
+        ConflictResolution::LocalWins
+    } else {
+        ConflictResolution::RemoteWins
+    }
+}
+
+pub fn should_accept_remote_session(
+    local: LocalSyncState,
+    remote_updated_at: i64,
+    remote_uuid: Uuid,
+) -> bool {
+    resolve_session_conflict(local, remote_updated_at, remote_uuid)
+        == ConflictResolution::RemoteWins
+}
+
+pub fn resolve_message_conflict(
+    local: LocalSyncState,
+    remote_updated_at: i64,
+    remote_uuid: Uuid,
+) -> ConflictResolution {
+    if local.needs_sync && local.server_updated_at.is_none() {
+        return ConflictResolution::LocalWins;
+    }
+
+    let local_ts = local.server_updated_at.unwrap_or(0);
+    if local_ts > remote_updated_at {
+        ConflictResolution::LocalWins
+    } else if local_ts < remote_updated_at {
+        ConflictResolution::RemoteWins
+    } else if local.uuid > remote_uuid {
+        ConflictResolution::LocalWins
+    } else {
+        ConflictResolution::RemoteWins
+    }
+}
+
+pub fn should_accept_remote_message(
+    local: LocalSyncState,
+    remote_updated_at: i64,
+    remote_uuid: Uuid,
+) -> bool {
+    resolve_message_conflict(local, remote_updated_at, remote_uuid)
+        == ConflictResolution::RemoteWins
+}
+
 pub fn find_duplicate_message(
     local_messages: &[Message],
     sender: &Sender,
@@ -117,30 +190,39 @@ mod tests {
             text: "hello".to_string(),
             attachments: vec![attachment.clone()],
             created_at: 10_000,
+            remote_id: None,
+            server_updated_at: None,
             needs_sync: true,
             deleted_at: None,
         };
 
-        let wrong_size = AttachmentMeta { size: 256, ..attachment.clone() };
-        assert!(find_duplicate_message(
-            &[local.clone()],
-            &Sender::SelfUser,
-            "hello",
-            &[wrong_size],
-            10_000,
-            Some(parent_uuid),
-        )
-        .is_none());
+        let wrong_size = AttachmentMeta {
+            size: 256,
+            ..attachment.clone()
+        };
+        assert!(
+            find_duplicate_message(
+                &[local.clone()],
+                &Sender::SelfUser,
+                "hello",
+                &[wrong_size],
+                10_000,
+                Some(parent_uuid),
+            )
+            .is_none()
+        );
 
-        assert!(find_duplicate_message(
-            &[local.clone()],
-            &Sender::SelfUser,
-            "hello",
-            &[attachment.clone()],
-            10_000,
-            None,
-        )
-        .is_none());
+        assert!(
+            find_duplicate_message(
+                &[local.clone()],
+                &Sender::SelfUser,
+                "hello",
+                &[attachment.clone()],
+                10_000,
+                None,
+            )
+            .is_none()
+        );
 
         assert_eq!(
             find_duplicate_message(

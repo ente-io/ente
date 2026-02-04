@@ -1,11 +1,11 @@
 use std::time::Duration;
 
+use reqwest::Url;
 use reqwest::blocking::{Client, Response};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, LOCATION};
 use reqwest::redirect::Policy;
-use reqwest::Url;
-use serde::de::DeserializeOwned;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use uuid::Uuid;
 
 use crate::errors::SyncError;
@@ -232,7 +232,11 @@ impl HttpClient {
         Url::parse(url).map_err(|_| SyncError::InvalidResponse("invalid url".to_string()))
     }
 
-    fn resolve_redirect(&self, current_url: &Url, location: &HeaderValue) -> Result<Url, SyncError> {
+    fn resolve_redirect(
+        &self,
+        current_url: &Url,
+        location: &HeaderValue,
+    ) -> Result<Url, SyncError> {
         let next = location
             .to_str()
             .map_err(|_| SyncError::InvalidResponse("invalid redirect location".to_string()))?;
@@ -282,7 +286,10 @@ impl HttpClient {
                 headers.insert("X-Client-Version", value);
             }
         }
-        headers.insert("x-request-id", HeaderValue::from_str(&Uuid::new_v4().to_string()).unwrap());
+        headers.insert(
+            "x-request-id",
+            HeaderValue::from_str(&Uuid::new_v4().to_string()).unwrap(),
+        );
         if let Ok(value) = HeaderValue::from_str(&self.auth_token) {
             headers.insert("X-Auth-Token", value);
         }

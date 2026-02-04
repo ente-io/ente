@@ -60,6 +60,7 @@ export interface ChatDialogsProps {
     logoSrc: string;
     logoFilter: string | undefined;
     developerSettingsEnabled: boolean;
+    modelSettingsEnabled: boolean;
     showDeveloperMenu: boolean;
     closeDeveloperMenu: () => void;
     openModelSettings: () => void;
@@ -121,6 +122,7 @@ export const ChatDialogs = memo(
         logoSrc,
         logoFilter,
         developerSettingsEnabled,
+        modelSettingsEnabled,
         showDeveloperMenu,
         closeDeveloperMenu,
         openModelSettings,
@@ -341,25 +343,30 @@ export const ChatDialogs = memo(
                     </DialogTitle>
                     <DialogContent>
                         <Stack sx={{ gap: 1 }}>
-                            <ListItemButton
-                                onClick={() => {
-                                    closeDeveloperMenu();
-                                    openModelSettings();
-                                }}
-                                sx={settingsItemSx}
-                            >
-                                <HugeiconsIcon
-                                    icon={Settings01Icon}
-                                    {...compactIconProps}
-                                />
-                                <Typography variant="small" sx={{ flex: 1 }}>
-                                    Model settings
-                                </Typography>
-                                <HugeiconsIcon
-                                    icon={ArrowRight01Icon}
-                                    {...smallIconProps}
-                                />
-                            </ListItemButton>
+                            {modelSettingsEnabled && (
+                                <ListItemButton
+                                    onClick={() => {
+                                        closeDeveloperMenu();
+                                        openModelSettings();
+                                    }}
+                                    sx={settingsItemSx}
+                                >
+                                    <HugeiconsIcon
+                                        icon={Settings01Icon}
+                                        {...compactIconProps}
+                                    />
+                                    <Typography
+                                        variant="small"
+                                        sx={{ flex: 1 }}
+                                    >
+                                        Model settings
+                                    </Typography>
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        {...smallIconProps}
+                                    />
+                                </ListItemButton>
+                            )}
                             <ListItemButton
                                 onClick={() => {
                                     closeDeveloperMenu();
@@ -424,195 +431,202 @@ export const ChatDialogs = memo(
                 </DialogActions>
             </Dialog>
 
-            <Dialog
-                open={showModelSettings}
-                onClose={closeModelSettings}
-                fullScreen={isSmall}
-                maxWidth="sm"
-                fullWidth
-                slotProps={{ paper: { sx: dialogPaperSx } }}
-            >
-                <DialogTitle sx={dialogTitleSx}>Model Settings</DialogTitle>
-                <DialogContent>
-                    <Stack sx={{ gap: 3 }}>
-                        <Stack sx={{ gap: 0.5 }}>
-                            <Typography
-                                variant="small"
-                                sx={{ color: "text.muted" }}
+            {modelSettingsEnabled && (
+                <Dialog
+                    open={showModelSettings}
+                    onClose={closeModelSettings}
+                    fullScreen={isSmall}
+                    maxWidth="sm"
+                    fullWidth
+                    slotProps={{ paper: { sx: dialogPaperSx } }}
+                >
+                    <DialogTitle sx={dialogTitleSx}>Model Settings</DialogTitle>
+                    <DialogContent>
+                        <Stack sx={{ gap: 3 }}>
+                            <Stack sx={{ gap: 0.5 }}>
+                                <Typography
+                                    variant="small"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    Selected model
+                                </Typography>
+                                <Typography variant="body">
+                                    {useCustomModel
+                                        ? "Custom model"
+                                        : defaultModelName}
+                                </Typography>
+                                <Typography
+                                    variant="mini"
+                                    sx={{
+                                        color: loadedModelName
+                                            ? "success.main"
+                                            : "text.muted",
+                                    }}
+                                >
+                                    {loadedModelName
+                                        ? `Loaded: ${loadedModelName}`
+                                        : "Not loaded"}
+                                </Typography>
+                            </Stack>
+
+                            <Divider />
+
+                            <Stack sx={{ gap: 1.5 }}>
+                                <Typography variant="small">
+                                    Custom Hugging Face model
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    label="Direct .gguf file URL"
+                                    placeholder="https://huggingface.co/..."
+                                    value={modelUrl}
+                                    onChange={(event) =>
+                                        setModelUrl(event.target.value)
+                                    }
+                                    error={!!modelUrlError}
+                                    helperText={modelUrlError ?? " "}
+                                />
+                                {allowMmproj && (
+                                    <TextField
+                                        fullWidth
+                                        label="mmproj .gguf file URL"
+                                        placeholder="(optional for multimodal)"
+                                        value={mmprojUrl}
+                                        onChange={(event) =>
+                                            setMmprojUrl(event.target.value)
+                                        }
+                                        error={!!mmprojError}
+                                        helperText={mmprojError ?? " "}
+                                    />
+                                )}
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    Suggested models:
+                                </Typography>
+                                <Stack sx={{ gap: 1 }}>
+                                    {suggestedModels.map((model) => (
+                                        <Box
+                                            key={model.name}
+                                            sx={{
+                                                border: "1px solid",
+                                                borderColor: "divider",
+                                                borderRadius: 2,
+                                                p: 1.5,
+                                            }}
+                                        >
+                                            <Stack
+                                                direction="row"
+                                                sx={{
+                                                    gap: 1,
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                <Box sx={{ flex: 1 }}>
+                                                    <Typography variant="small">
+                                                        {model.name}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="mini"
+                                                        sx={{
+                                                            color: "text.muted",
+                                                        }}
+                                                    >
+                                                        {isTauriRuntime &&
+                                                        model.mmproj
+                                                            ? "+ mmproj"
+                                                            : ""}
+                                                    </Typography>
+                                                </Box>
+                                                <Button
+                                                    size="small"
+                                                    onClick={() =>
+                                                        handleFillSuggestion(
+                                                            model.url,
+                                                            model.mmproj,
+                                                        )
+                                                    }
+                                                >
+                                                    Fill
+                                                </Button>
+                                            </Stack>
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            </Stack>
+
+                            <Divider />
+
+                            <Stack sx={{ gap: 1.5 }}>
+                                <Typography variant="small">
+                                    Custom limits (optional)
+                                </Typography>
+                                <Stack direction="row" sx={{ gap: 1.5 }}>
+                                    <TextField
+                                        fullWidth
+                                        label="Context length"
+                                        placeholder="8192"
+                                        value={contextLength}
+                                        onChange={(event) =>
+                                            setContextLength(event.target.value)
+                                        }
+                                        error={!!contextError}
+                                        helperText={contextError ?? " "}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Max output"
+                                        placeholder="2048"
+                                        value={maxTokens}
+                                        onChange={(event) =>
+                                            setMaxTokens(event.target.value)
+                                        }
+                                        error={!!maxTokensError}
+                                        helperText={maxTokensError ?? " "}
+                                    />
+                                </Stack>
+                                <Typography
+                                    variant="mini"
+                                    sx={{ color: "text.muted" }}
+                                >
+                                    Leave blank to use model defaults
+                                </Typography>
+                            </Stack>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions sx={{ px: 3, pb: 3 }}>
+                        <Stack sx={{ width: "100%", gap: 1.5 }}>
+                            <Button
+                                variant="contained"
+                                color="accent"
+                                disabled={
+                                    isSavingModel ||
+                                    modelGateStatus === "downloading"
+                                }
+                                onClick={handleSaveModel}
                             >
-                                Selected model
-                            </Typography>
-                            <Typography variant="body">
-                                {useCustomModel
-                                    ? "Custom model"
-                                    : defaultModelName}
-                            </Typography>
+                                Use Custom Model
+                            </Button>
+                            <Button
+                                onClick={handleUseDefaultModel}
+                                color="secondary"
+                            >
+                                Use Default Model
+                            </Button>
                             <Typography
                                 variant="mini"
                                 sx={{
-                                    color: loadedModelName
-                                        ? "success.main"
-                                        : "text.muted",
+                                    color: "text.muted",
+                                    textAlign: "center",
                                 }}
                             >
-                                {loadedModelName
-                                    ? `Loaded: ${loadedModelName}`
-                                    : "Not loaded"}
+                                Changes require re-downloading the model.
                             </Typography>
                         </Stack>
-
-                        <Divider />
-
-                        <Stack sx={{ gap: 1.5 }}>
-                            <Typography variant="small">
-                                Custom Hugging Face model
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                label="Direct .gguf file URL"
-                                placeholder="https://huggingface.co/..."
-                                value={modelUrl}
-                                onChange={(event) =>
-                                    setModelUrl(event.target.value)
-                                }
-                                error={!!modelUrlError}
-                                helperText={modelUrlError ?? " "}
-                            />
-                            {allowMmproj && (
-                                <TextField
-                                    fullWidth
-                                    label="mmproj .gguf file URL"
-                                    placeholder="(optional for multimodal)"
-                                    value={mmprojUrl}
-                                    onChange={(event) =>
-                                        setMmprojUrl(event.target.value)
-                                    }
-                                    error={!!mmprojError}
-                                    helperText={mmprojError ?? " "}
-                                />
-                            )}
-                            <Typography
-                                variant="mini"
-                                sx={{ color: "text.muted" }}
-                            >
-                                Suggested models:
-                            </Typography>
-                            <Stack sx={{ gap: 1 }}>
-                                {suggestedModels.map((model) => (
-                                    <Box
-                                        key={model.name}
-                                        sx={{
-                                            border: "1px solid",
-                                            borderColor: "divider",
-                                            borderRadius: 2,
-                                            p: 1.5,
-                                        }}
-                                    >
-                                        <Stack
-                                            direction="row"
-                                            sx={{
-                                                gap: 1,
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <Box sx={{ flex: 1 }}>
-                                                <Typography variant="small">
-                                                    {model.name}
-                                                </Typography>
-                                                <Typography
-                                                    variant="mini"
-                                                    sx={{ color: "text.muted" }}
-                                                >
-                                                    {isTauriRuntime &&
-                                                    model.mmproj
-                                                        ? "+ mmproj"
-                                                        : ""}
-                                                </Typography>
-                                            </Box>
-                                            <Button
-                                                size="small"
-                                                onClick={() =>
-                                                    handleFillSuggestion(
-                                                        model.url,
-                                                        model.mmproj,
-                                                    )
-                                                }
-                                            >
-                                                Fill
-                                            </Button>
-                                        </Stack>
-                                    </Box>
-                                ))}
-                            </Stack>
-                        </Stack>
-
-                        <Divider />
-
-                        <Stack sx={{ gap: 1.5 }}>
-                            <Typography variant="small">
-                                Custom limits (optional)
-                            </Typography>
-                            <Stack direction="row" sx={{ gap: 1.5 }}>
-                                <TextField
-                                    fullWidth
-                                    label="Context length"
-                                    placeholder="8192"
-                                    value={contextLength}
-                                    onChange={(event) =>
-                                        setContextLength(event.target.value)
-                                    }
-                                    error={!!contextError}
-                                    helperText={contextError ?? " "}
-                                />
-                                <TextField
-                                    fullWidth
-                                    label="Max output"
-                                    placeholder="2048"
-                                    value={maxTokens}
-                                    onChange={(event) =>
-                                        setMaxTokens(event.target.value)
-                                    }
-                                    error={!!maxTokensError}
-                                    helperText={maxTokensError ?? " "}
-                                />
-                            </Stack>
-                            <Typography
-                                variant="mini"
-                                sx={{ color: "text.muted" }}
-                            >
-                                Leave blank to use model defaults
-                            </Typography>
-                        </Stack>
-                    </Stack>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 3 }}>
-                    <Stack sx={{ width: "100%", gap: 1.5 }}>
-                        <Button
-                            variant="contained"
-                            color="accent"
-                            disabled={
-                                isSavingModel ||
-                                modelGateStatus === "downloading"
-                            }
-                            onClick={handleSaveModel}
-                        >
-                            Use Custom Model
-                        </Button>
-                        <Button
-                            onClick={handleUseDefaultModel}
-                            color="secondary"
-                        >
-                            Use Default Model
-                        </Button>
-                        <Typography
-                            variant="mini"
-                            sx={{ color: "text.muted", textAlign: "center" }}
-                        >
-                            Changes require re-downloading the model.
-                        </Typography>
-                    </Stack>
-                </DialogActions>
-            </Dialog>
+                    </DialogActions>
+                </Dialog>
+            )}
 
             <Notification
                 open={syncNotificationOpen}

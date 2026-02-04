@@ -1,0 +1,51 @@
+name: "Lint (ensu desktop)"
+
+on:
+    # Run on every pull request (open or push to it) that changes ensu desktop
+    pull_request:
+        paths:
+            - "desktop/ensu-tauri/**"
+            - "rust/core/**"
+            - "rust/llmchat/**"
+            - ".github/workflows/ensu-desktop-lint.yml"
+
+permissions:
+    contents: read
+
+# Cancel in-progress lint runs when a new commit is pushed.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    RUSTFLAGS: -D warnings
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: desktop/ensu-tauri/src-tauri
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      desktop/ensu-tauri/src-tauri/target
+                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('desktop/ensu-tauri/src-tauri/Cargo.lock') }}
+
+            - name: Install system dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+            - run: cargo fmt --check
+
+            - run: cargo clippy --all-targets --all-features
+
+            - run: cargo build
