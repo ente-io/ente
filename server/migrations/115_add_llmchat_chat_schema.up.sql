@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS llmchat_key (
 CREATE TABLE IF NOT EXISTS llmchat_sessions (
     session_uuid            uuid PRIMARY KEY NOT NULL,
     user_id                 BIGINT NOT NULL,
-    root_session_uuid       uuid   NOT NULL,
-    branch_from_message_uuid uuid,
     encrypted_data          TEXT,
     header                  TEXT,
     client_metadata         TEXT,

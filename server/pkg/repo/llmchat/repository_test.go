@@ -130,12 +130,12 @@ func cleanupUser(t *testing.T, userID int64) {
 func ensureKey(t *testing.T, repo *Repository, userID int64) {
 	t.Helper()
 
-	_, err := repo.UpsertKey(context.Background(), userID, model.UpsertKeyRequest{
+	_, err := repo.CreateKey(context.Background(), userID, model.UpsertKeyRequest{
 		EncryptedKey: "enc-key",
 		Header:       "hdr-key",
 	})
 	if err != nil {
-		t.Fatalf("failed to upsert llmchat key: %v", err)
+		t.Fatalf("failed to create llmchat key: %v", err)
 	}
 }
 
@@ -217,14 +217,12 @@ func TestSessionDiffAndTombstones(t *testing.T) {
 
 	sessionOne := uuid.NewString()
 	sessionTwo := uuid.NewString()
-	branchMessage := uuid.NewString()
 
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:     sessionOne,
-		RootSessionUUID: sessionOne,
-		EncryptedData:   "enc-1",
-		Header:          "hdr-1",
-		ClientMetadata:  newClientMetadata(),
+		SessionUUID:    sessionOne,
+		EncryptedData:  "enc-1",
+		Header:         "hdr-1",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session one: %v", err)
 	}
@@ -232,12 +230,10 @@ func TestSessionDiffAndTombstones(t *testing.T) {
 	time.Sleep(2 * time.Millisecond)
 
 	if _, err := repo.UpsertSession(ctx, userID, model.UpsertSessionRequest{
-		SessionUUID:           sessionTwo,
-		RootSessionUUID:       sessionOne,
-		BranchFromMessageUUID: &branchMessage,
-		EncryptedData:         "enc-2",
-		Header:                "hdr-2",
-		ClientMetadata:        newClientMetadata(),
+		SessionUUID:    sessionTwo,
+		EncryptedData:  "enc-2",
+		Header:         "hdr-2",
+		ClientMetadata: newClientMetadata(),
 	}); err != nil {
 		t.Fatalf("failed to upsert session two: %v", err)
 	}
@@ -249,33 +245,9 @@ func TestSessionDiffAndTombstones(t *testing.T) {
 	if len(diff) != 2 {
 		t.Fatalf("expected 2 session diff entries, got %d", len(diff))
 	}
-	expectedRoots := map[string]string{
-		sessionOne: sessionOne,
-		sessionTwo: sessionOne,
-	}
-	expectedBranches := map[string]*string{
-		sessionOne: nil,
-		sessionTwo: &branchMessage,
-	}
-
 	sessionsSeen := map[string]bool{}
 	for _, entry := range diff {
 		sessionsSeen[entry.SessionUUID] = true
-
-		if expectedRoot, ok := expectedRoots[entry.SessionUUID]; ok {
-			if entry.RootSessionUUID != expectedRoot {
-				t.Fatalf("expected session %s root uuid %s", entry.SessionUUID, expectedRoot)
-			}
-		}
-
-		expectedBranch := expectedBranches[entry.SessionUUID]
-		if expectedBranch == nil {
-			if entry.BranchFromMessageUUID != nil {
-				t.Fatalf("expected session %s to have nil branch uuid", entry.SessionUUID)
-			}
-		} else if entry.BranchFromMessageUUID == nil || *entry.BranchFromMessageUUID != *expectedBranch {
-			t.Fatalf("expected session %s branch uuid %s", entry.SessionUUID, *expectedBranch)
-		}
 	}
 	if !sessionsSeen[sessionOne] || !sessionsSeen[sessionTwo] {
 		t.Fatalf("expected session diff to include %s and %s", sessionOne, sessionTwo)
@@ -829,11 +801,10 @@ func TestUpsertAndDeleteIdempotency(t *testing.T) {
 
 	sessionUUID := uuid.NewString()
 	sessionReq := model.UpsertSessionRequest{
-		SessionUUID:     sessionUUID,
-		RootSessionUUID: sessionUUID,
-		EncryptedData:   "enc-session",
-		Header:          "hdr-session",
-		ClientMetadata:  newClientMetadata(),
+		SessionUUID:    sessionUUID,
+		EncryptedData:  "enc-session",
+		Header:         "hdr-session",
+		ClientMetadata: newClientMetadata(),
 	}
 
 	if _, err := repo.UpsertSession(ctx, userID, sessionReq); err != nil {

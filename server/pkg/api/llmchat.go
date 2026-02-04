@@ -50,15 +50,15 @@ func bindJSONWithLimit(c *gin.Context, out interface{}, maxBytes int64) error {
 	return nil
 }
 
-func (h *LlmChatHandler) UpsertKey(c *gin.Context) {
+func (h *LlmChatHandler) CreateKey(c *gin.Context) {
 	var request model.UpsertKeyRequest
 	if err := bindJSONWithLimit(c, &request, llmChatMaxJSONBodyBytes()); err != nil {
 		handler.Error(c, err)
 		return
 	}
-	resp, err := h.Controller.UpsertKey(c, request)
+	resp, err := h.Controller.CreateKey(c, request)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to upsert llm chat key"))
+		handler.Error(c, stacktrace.Propagate(err, "Failed to create llm chat key"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)

@@ -141,7 +141,11 @@ func (r *Repository) replaceMessageAttachments(ctx context.Context, tx *sql.Tx, 
 			return err
 		}
 		if existing != nil && (existing.AttachmentID != attachment.ID || existing.MessageUUID != messageUUID) {
-			return stacktrace.Propagate(ente.ErrBadRequest, "attachment clientId already exists")
+			if _, err := tx.ExecContext(ctx, `DELETE FROM llmchat_attachments
+				WHERE user_id = $1 AND client_metadata IS NOT NULL
+					AND client_metadata::jsonb->>'clientId' = $2`, userID, clientID); err != nil {
+				return stacktrace.Propagate(err, "failed to clear duplicate attachment clientId")
+			}
 		}
 		inputs = append(inputs, attachmentInput{meta: attachment, clientID: clientID})
 	}

@@ -56,11 +56,11 @@ func (c *Controller) attachmentsAllowed(ctx *gin.Context, userID int64) bool {
 	return isInternalUser(ctx.Request.Context(), userID, c.UserRepo, c.RemoteStoreRepo)
 }
 
-func (c *Controller) UpsertKey(ctx *gin.Context, req model.UpsertKeyRequest) (*model.Key, error) {
+func (c *Controller) CreateKey(ctx *gin.Context, req model.UpsertKeyRequest) (*model.Key, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
-	res, err := c.Repo.UpsertKey(ctx, userID, req)
+	res, err := c.Repo.CreateKey(ctx, userID, req)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to upsert llmchat key")
+		return nil, stacktrace.Propagate(err, "failed to create llmchat key")
 	}
 	c.setKeyCache(userID)
 	return &res, nil
@@ -85,28 +85,19 @@ func (c *Controller) UpsertSession(ctx *gin.Context, req model.UpsertSessionRequ
 	if err != nil {
 		return nil, err
 	}
+	if err := c.Repo.RepairZeroUUIDs(ctx, userID); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to repair zero-uuid llmchat records")
+	}
 	if existingSessionUUID, err := c.Repo.GetSessionUUIDByClientID(ctx, userID, clientID); err != nil {
 		return nil, err
 	} else if existingSessionUUID != "" {
 		req.SessionUUID = existingSessionUUID
+	} else if req.SessionUUID == "" || req.SessionUUID == model.ZeroUUID {
+		req.SessionUUID = uuid.NewString()
 	}
 	if _, err := uuid.Parse(req.SessionUUID); err != nil {
 		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid sessionUUID")
 	}
-	if req.RootSessionUUID == "" {
-		req.RootSessionUUID = req.SessionUUID
-	}
-	if _, err := uuid.Parse(req.RootSessionUUID); err != nil {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid rootSessionUUID")
-	}
-	if req.BranchFromMessageUUID != nil {
-		if *req.BranchFromMessageUUID == "" {
-			req.BranchFromMessageUUID = nil
-		} else if _, err := uuid.Parse(*req.BranchFromMessageUUID); err != nil {
-			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid branchFromMessageUUID")
-		}
-	}
-
 	res, err := c.Repo.UpsertSession(ctx, userID, req)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to upsert llmchat session")
@@ -123,10 +114,15 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 	if err != nil {
 		return nil, err
 	}
+	if err := c.Repo.RepairZeroUUIDs(ctx, userID); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to repair zero-uuid llmchat records")
+	}
 	if existingMessageUUID, err := c.Repo.GetMessageUUIDByClientID(ctx, userID, clientID); err != nil {
 		return nil, err
 	} else if existingMessageUUID != "" {
 		req.MessageUUID = existingMessageUUID
+	} else if req.MessageUUID == "" || req.MessageUUID == model.ZeroUUID {
+		req.MessageUUID = uuid.NewString()
 	}
 	if _, err := uuid.Parse(req.MessageUUID); err != nil {
 		return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid messageUUID")
@@ -138,7 +134,7 @@ func (c *Controller) UpsertMessage(ctx *gin.Context, req model.UpsertMessageRequ
 		return nil, err
 	}
 	if req.ParentMessageUUID != nil {
-		if *req.ParentMessageUUID == "" {
+		if *req.ParentMessageUUID == "" || *req.ParentMessageUUID == model.ZeroUUID {
 			req.ParentMessageUUID = nil
 		} else if _, err := uuid.Parse(*req.ParentMessageUUID); err != nil {
 			return nil, stacktrace.Propagate(ente.ErrBadRequest, "invalid parentMessageUUID")

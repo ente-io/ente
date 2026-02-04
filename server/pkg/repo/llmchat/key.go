@@ -10,16 +10,12 @@ import (
 	"github.com/ente-io/stacktrace"
 )
 
-func (r *Repository) UpsertKey(ctx context.Context, userID int64, req model.UpsertKeyRequest) (model.Key, error) {
+func (r *Repository) CreateKey(ctx context.Context, userID int64, req model.UpsertKeyRequest) (model.Key, error) {
 	row := r.DB.QueryRowContext(ctx, `INSERT INTO llmchat_key(
 		user_id,
 		encrypted_key,
 		header
 	) VALUES ($1, $2, $3)
-	ON CONFLICT (user_id) DO UPDATE
-		SET encrypted_key = EXCLUDED.encrypted_key,
-			header = EXCLUDED.header,
-			updated_at = now_utc_micro_seconds()
 	RETURNING user_id, encrypted_key, header, created_at, updated_at`,
 		userID,
 		req.EncryptedKey,
@@ -29,7 +25,10 @@ func (r *Repository) UpsertKey(ctx context.Context, userID int64, req model.Upse
 	var result model.Key
 	err := row.Scan(&result.UserID, &result.EncryptedKey, &result.Header, &result.CreatedAt, &result.UpdatedAt)
 	if err != nil {
-		return result, stacktrace.Propagate(err, "failed to upsert llmchat key")
+		if err.Error() == "pq: duplicate key value violates unique constraint \"llmchat_key_pkey\"" {
+			return result, ente.NewConflictError("Key already exists")
+		}
+		return result, stacktrace.Propagate(err, "failed to create llmchat key")
 	}
 	return result, nil
 }

@@ -914,7 +914,7 @@ func main() {
 		AttachmentController: llmChatAttachmentController,
 	}
 
-	privateAPI.POST("/llmchat/chat/key", llmChatHandler.UpsertKey)
+	privateAPI.POST("/llmchat/chat/key", llmChatHandler.CreateKey)
 	privateAPI.GET("/llmchat/chat/key", llmChatHandler.GetKey)
 	privateAPI.POST("/llmchat/chat/session", llmChatHandler.UpsertSession)
 	privateAPI.POST("/llmchat/chat/message", llmChatHandler.UpsertMessage)
