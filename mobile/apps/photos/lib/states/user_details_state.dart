@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/models/user_details.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/account/user_service.dart';
 
 class UserDetailsStateWidget extends StatefulWidget {
@@ -48,6 +49,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
       );
 
   void _fetchUserDetails() async {
+    if (isOfflineMode) return;
     _userDetails = await UserService.instance.getUserDetailsV2(
       memoryCount: true,
       shouldCache: true,

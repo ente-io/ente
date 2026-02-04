@@ -95,17 +95,40 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     items.addAll([
       ChangeLogEntry(
         context.l10n.cLTitle1,
-        context.l10n.cLDesc1,
+        items: [
+          context.l10n.cLDesc1Item1,
+          context.l10n.cLDesc1Item2,
+          context.l10n.cLDesc1Item3,
+        ],
         isFeature: true,
       ),
       ChangeLogEntry(
         context.l10n.cLTitle2,
-        context.l10n.cLDesc2,
+        items: [
+          context.l10n.cLDesc2Item1,
+          context.l10n.cLDesc2Item2,
+          context.l10n.cLDesc2Item3,
+          context.l10n.cLDesc2Item4,
+          context.l10n.cLDesc2Item5,
+          context.l10n.cLDesc2Item6,
+          context.l10n.cLDesc2Item7,
+          context.l10n.cLDesc2Item8,
+          context.l10n.cLDesc2Item9,
+          context.l10n.cLDesc2Item10,
+          context.l10n.cLDesc2Item11,
+          context.l10n.cLDesc2Item12,
+        ],
         isFeature: true,
       ),
       ChangeLogEntry(
         context.l10n.cLTitle3,
-        context.l10n.cLDesc3,
+        items: [
+          context.l10n.cLDesc3Item1,
+          context.l10n.cLDesc3Item2,
+          context.l10n.cLDesc3Item3,
+          context.l10n.cLDesc3Item4,
+          context.l10n.cLDesc3Item5,
+        ],
         isFeature: true,
       ),
     ]);

@@ -40,6 +40,7 @@ import 'package:photos/services/memory_lane/memory_lane_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/services/social_notification_coordinator.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
@@ -197,6 +198,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     // Misc Services
     await UserService.instance.init();
     NotificationService.instance.init(prefs);
+    SocialNotificationCoordinator.instance.init(prefs);
+    await NotificationService.instance.initializeForBackground();
 
     // Begin Execution
     // only runs for android
@@ -247,6 +250,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
+    await NotificationService.instance.initializeForBackground();
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
@@ -282,6 +286,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
     _logger.info("CollectionsService init done $tlog");
+    SocialNotificationCoordinator.instance.init(preferences);
 
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);

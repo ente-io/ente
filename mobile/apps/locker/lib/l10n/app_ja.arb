@@ -20,47 +20,195 @@
   "pleaseWait": "お待ち下さい",
   "downloading": "ダウンロード中…",
   "downloadingProgress": "ダウンロード中... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "ダウンロード失敗",
   "failedToDownloadOrDecrypt": "アイテムのダウンロードに失敗しました",
   "errorOpeningFile": "アイテムを開く際にエラーが発生しました",
   "errorOpeningFileMessage": "アイテムを開く際にエラーが発生しました: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "アイテムを開けませんでした: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes}分前",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours}時間前",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "昨日",
   "daysAgo": "{days}日前",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "コレクションの名前が正常に変更されました",
   "failedToRenameCollection": "コレクションの名前変更に失敗しました: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "このコレクションは削除できません",
   "collectionCannotBeEdited": "このコレクションは編集できません",
   "collectionCannotBeShared": "このコレクションは共有できません",
   "deleteCollection": "コレクションを削除",
   "deleteCollectionConfirmation": "「{collectionName}」を削除してもよろしいですか？",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "キャンセル",
   "collectionDeletedSuccessfully": "コレクションが正常に削除されました",
   "failedToDeleteCollection": "コレクションの削除に失敗しました: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "コレクション",
   "retry": "リトライ",
   "failedToSyncTrash": "ゴミ箱の同期に失敗しました: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "少なくとも1つのコレクションを選択してください",
   "unknownItemType": "不明なアイテムタイプ",
   "fileDeletedSuccessfully": "アイテムが正常に削除されました",
   "failedToDeleteFile": "アイテムの削除に失敗しました: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "アイテムが正常に更新されました！",
   "failedToUpdateFile": "アイテムの更新に失敗しました: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "変更はありませんでした",
   "noCollectionsAvailableForRestore": "復元可能なコレクションがありません",
   "trashClearedSuccessfully": "ゴミ箱が正常に空になりました",
   "failedToClearTrash": "ゴミ箱を空にできませんでした: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "ゴミ箱",
   "deletedPermanently": "「{fileName}」を完全に削除しました",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "「{fileName}」の復元に失敗しました: {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "新しいコレクションを作成",
   "create": "作成",
   "renameCollection": "コレクションの名前を変更",
   "save": "保存",
   "deleteFile": "アイテムを削除",
   "deleteFileConfirmation": "「{fileName}」を削除してもよろしいですか？",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "コレクションが見つかりません",
   "createYourFirstCollection": "最初のコレクションを作成して始めましょう",
   "createCollection": "コレクションを作成",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "+ボタンをクリックして始めましょう",
   "uploadDocument": "ドキュメントをアップロード",
   "items": "{count}個のアイテム",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{アイテムなし} =1{1個のアイテム} other{{count}個のアイテム}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "コレクションを作成",
   "uploadDocumentTooltip": "ドキュメントをアップロード",
   "restore": "復元",
   "restoreFile": "{fileName}を復元",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "利用可能なコレクションがありません",
   "emptyTrash": "ゴミ箱を空にする",
   "emptyTrashTooltip": "ゴミ箱を空にする",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "一致するものが見つかりません",
   "searchEmptyDescription": "別のキーワードで検索してみてください。",
   "searchEverywhereTitle": "「{query}」をすべての場所で検索",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "すべてのコレクションとファイルを検索します。",
   "noCollectionsFoundForQuery": "「{query}」に一致するコレクションが見つかりません",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "カテゴリなし",
   "syncingTrash": "ゴミ箱を同期中...",
   "restoring": "復元中...",
   "restoredFileToCollection": "「{fileName}」を「{collectionName}」に復元しました",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "ゴミ箱を空にしています...",
   "trashIsEmpty": "ゴミ箱は空です",
   "share": "共有",
@@ -157,15 +363,13 @@
   "reportABug": "バグを報告",
   "reportBug": "バグを報告",
   "logsDialogBodyLocker": "問題のデバッグに役立てるためにログを送信します。",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "SNS",
   "rateUsOnStore": "{storeName} で評価",
   "blog": "ブログ",
   "merchandise": "グッズ",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "情報",
   "saveInformation": "情報を保存",
   "saveToLocker": "Lockerに保存",
@@ -179,8 +383,17 @@
   "accountCredentials": "シークレット",
   "accountCredentialsDescription": "アカウント認証情報を保存します。",
   "editSecret": "シークレットを編集",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "位置情報を編集",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "メモを編集",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "緊急連絡先",
   "emergencyContactDescription": "緊急時の重要な連絡先を保存します。",
   "noteName": "タイトル",
@@ -259,6 +472,14 @@
   "expiredLinkInfo": "このリンクは期限切れです。新たな期限を設定するか、期限設定そのものを無くすか、選択してください",
   "linkExpiresOn": "リンクは {expiryTime} に期限切れになります",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {誰かと共有しましょう} =1 {1人と共有されています} other {{numberOfPeople} 人と共有されています}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "リンクは期限切れです",
   "publicLinkEnabled": "公開リンクを有効にしました",
   "shareALink": "リンクをシェアする",
@@ -273,14 +494,31 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "共同編集者は共有コレクションにアイテムを追加できます。",
   "enterEmail": "Eメールアドレスを入力してください",
   "viewersSuccessfullyAdded": "{count, plural, =0{0人の閲覧者を追加しました} =1{1人の閲覧者を追加しました} other{{count}人の閲覧者を追加しました}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {{count}人のコラボレーターを追加} =1 {{count}人のコラボレーターを追加} other {{count}人のコラボレーターを追加}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, =0{閲覧者を追加} =1{閲覧者を追加} other{閲覧者を追加}}",
   "addCollaborators": "{count, plural, =0{共同編集者を追加} =1{共同編集者を追加} other{共同編集者を追加}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "表示されているEメールアドレスを長押しして、暗号化を確認します。",
   "sharing": "共有中...",
   "invalidEmailAddress": "無効なEメールアドレス",
   "enterValidEmail": "有効なEメールアドレスを入力してください",
-  "oops": "Oops",
   "noItemsMatchSelectedFilters": "選択したフィルターに一致するアイテムがありません",
   "noCollections": "コレクションがありません",
   "youCannotShareWithYourself": "自分自身と共有することはできません",
@@ -291,6 +529,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "アルバムを共有している人はデバイス上で同じIDを見るはずです。",
   "howToViewShareeVerificationID": "設定画面でメールアドレスを長押しし、両デバイスのIDが一致していることを確認してください。",
   "thisIsPersonVerificationId": "これは {email} の確認用ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "確認用ID",
   "verifyEmailID": "{email} を確認",
   "emailNoEnteAccount": "{email}はEnteアカウントを持っていません。\n\nアイテムを共有するには招待を送信してください。",
@@ -303,6 +549,15 @@
   "yesConvertToViewer": "ビューアーに変換する",
   "changePermissions": "権限を変更",
   "cannotAddMoreFilesAfterBecomingViewer": "{name}は閲覧者になると、コレクションにアイテムを追加できなくなります。",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "削除しますか?",
   "removeParticipantBody": "{userEmail}はこの共有コレクションから削除されます\n\nその人が追加したアイテムもコレクションから削除されます",
   "yesRemove": "削除",
@@ -311,10 +566,27 @@
   "collaborator": "コラボレーター",
   "collaboratorsCanAddFilesToTheSharedAlbum": "共同編集者は共有コレクションにアイテムを追加できます。",
   "albumParticipantsCount": "{count, plural, =0 {参加者なし} =1 {1 参加者} other {{count} 参加者}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "さらに追加",
   "you": "あなた",
   "albumOwner": "所有者",
   "typeOfCollectionTypeIsNotSupportedForRename": "コレクションタイプ{collectionType}は名前変更に対応していません",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "コレクションから退出",
   "filesAddedByYouWillBeRemovedFromTheCollection": "あなたが追加したアイテムはコレクションから削除されます",
   "leaveSharedCollection": "共有コレクションから退出しますか？",
@@ -324,20 +596,79 @@
   "authToManageLegacy": "信頼する連絡先を管理するために認証してください",
   "uploadError": "アップロードエラー",
   "uploadStorageLimitErrorTitle": "ストレージ制限に達しました",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "ストレージ容量が不足しています。アップロードを続けるには空き容量を確保してください。",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "ファイル制限に達しました",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "ファイル制限に達しました。有料プランにアップグレードして、より多くのストレージを利用してください。",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "操作に失敗しました。ファイル制限に達しています。",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "ファイルが大きすぎます",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "このファイルはサポートされている最大アップロードサイズ10GBを超えています。",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "検索クエリを調整してみてください",
   "noFilesFoundForQuery": "「{query}」に一致するアイテムが見つかりません",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "選択解除",
   "selectAll": "全て選択",
   "unnamedCollection": "名前のないコレクション",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "{completed}/{total}個のアイテムをアップロード済み...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "{completed}/{total}個のアイテムをアップロード済み... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "利用可能なコレクションがありません",
   "createCollectionButton": "コレクションを作成",
   "collectionButtonLabel": "コレクション",
@@ -352,6 +683,15 @@
   "saveDocument": "ドキュメントを保存",
   "uploadFiles": "アイテムをアップロード",
   "filesSelected": "{count, plural, =0{アイテムが選択されていません} =1{1個のアイテムを選択中} other{{count}個のアイテムを選択中}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "コレクションに追加",
   "newCollection": "新しいコレクション",
   "title": "タイトル",
@@ -360,11 +700,50 @@
   "backToView": "表示に戻る",
   "back": "戻る",
   "failedToLoadCollections": "コレクションの読み込みに失敗しました: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "情報",
   "recordSavedToMultipleCollections": "レコードが{count, plural, =1{1個のコレクション} other{{count}個のコレクション}}に正常に保存されました",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "{fieldName}がクリップボードにコピーされました",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "「{query}」の検索結果: {count, plural, =1{1件} other{{count}件}}",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Enteアカウントにログイン",
   "unlockLockerNewUserTitle": "Lockerを使用するにはEnteに参加してください",
   "unlockLockerNewUserBody": "Lockerは現在、既存のEnteユーザーのみ利用可能です。Lockerを使用するには、Ente Photosでアカウントを作成してください。",
@@ -399,13 +778,60 @@
   "yesDeleteCollection": "はい、コレクションを削除",
   "yesDeleteFile": "はい、アイテムを削除",
   "deleteCollectionDialogBody": "「{collectionName}」は完全に削除されます。",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1個のコレクション} other{{count}個のコレクション}}が完全に削除されます。",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1個のアイテム} other{{count}個のアイテム}}が完全に削除されます。",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "すべての場所からアイテムも削除",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "はい、{count, plural, =1{コレクション} other{コレクション}}を削除",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "はい、{count, plural, =1{アイテム} other{アイテム}}を削除",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "使用量",
-  "fileCount": "{used} / {max}",
   "important": "重要",
   "unimportant": "重要でない",
   "removingFromImportant": "重要から削除中...",
@@ -413,9 +839,36 @@
   "fileMarkedAsImportant": "アイテムを重要としてマークしました",
   "fileRemovedFromImportant": "アイテムを重要から削除しました",
   "filesMarkedAsImportant": "{count, plural, =1{1個のアイテムを重要としてマークしました} other{{count}個のアイテムを重要としてマークしました}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "すべてのアイテムは既に重要としてマークされています",
   "failedToMarkFilesAsImportant": "アイテムを重要としてマークできませんでした: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "重要ステータスの更新に失敗しました: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "すみません",
   "subscribe": "サブスクライブ",
   "sharedWith": "共有先",

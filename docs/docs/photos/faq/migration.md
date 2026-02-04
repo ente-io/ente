@@ -91,3 +91,15 @@ Duplicates can occur:
 > [!TIP]
 >
 > Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
+### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
+
+Yes, you can start fresh.
+
+- Open home gallery view and press Ctrl + A to select everything, then delete all items.
+- After that, open Trash. It may take a little while for all deleted items to sync into Trash.
+- Once synced, empty Trash to permanently remove all items from your account.
+
+Once this is done, you can reupload your entire Google Takeout folder again using the desktop app.
+### Is there a way to remove partner sharing photos when importing via Google Takeout?
+
+There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.

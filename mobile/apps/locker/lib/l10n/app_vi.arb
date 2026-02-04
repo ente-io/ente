@@ -20,47 +20,195 @@
   "pleaseWait": "Vui lòng chờ...",
   "downloading": "Đang tải xuống...",
   "downloadingProgress": "Dang tai xuong... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "Tải xuống thất bại",
   "failedToDownloadOrDecrypt": "Khong the tai xuong muc",
   "errorOpeningFile": "Loi khi mo muc",
   "errorOpeningFileMessage": "Loi khi mo muc: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "Khong the mo muc: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes} phut truoc",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours} gio truoc",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "Hôm qua",
   "daysAgo": "{days} ngay truoc",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "Doi ten bo suu tap thanh cong",
   "failedToRenameCollection": "Khong the doi ten bo suu tap: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "Khong the xoa bo suu tap nay",
   "collectionCannotBeEdited": "Khong the chinh sua bo suu tap nay",
   "collectionCannotBeShared": "Khong the chia se bo suu tap nay",
   "deleteCollection": "Xoa bo suu tap",
   "deleteCollectionConfirmation": "Ban co chac chan muon xoa \"{collectionName}\" khong?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "Hủy",
   "collectionDeletedSuccessfully": "Xoa bo suu tap thanh cong",
   "failedToDeleteCollection": "Khong the xoa bo suu tap: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "Bo suu tap",
   "retry": "Thử lại",
   "failedToSyncTrash": "Khong the dong bo thung rac: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "Vui long chon it nhat mot bo suu tap",
   "unknownItemType": "Loai muc khong xac dinh",
   "fileDeletedSuccessfully": "Xoa muc thanh cong",
   "failedToDeleteFile": "Khong the xoa muc: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "Cap nhat muc thanh cong!",
   "failedToUpdateFile": "Khong the cap nhat muc: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "Khong co thay doi nao duoc thuc hien",
   "noCollectionsAvailableForRestore": "Khong co bo suu tap nao de khoi phuc",
   "trashClearedSuccessfully": "Da xoa sach thung rac",
   "failedToClearTrash": "Khong the xoa sach thung rac: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "Thùng rác",
   "deletedPermanently": "Da xoa vinh vien \"{fileName}\"",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "Khong the khoi phuc \"{fileName}\": {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "Tao bo suu tap moi",
   "create": "Tạo",
   "renameCollection": "Doi ten bo suu tap",
   "save": "Lưu",
   "deleteFile": "Xoa muc",
   "deleteFileConfirmation": "Ban co chac chan muon xoa \"{fileName}\" khong?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "Khong tim thay bo suu tap",
   "createYourFirstCollection": "Tao bo suu tap dau tien de bat dau",
   "createCollection": "Tao bo suu tap",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "Nhan nut + de bat dau",
   "uploadDocument": "Tai len tai lieu",
   "items": "{count} muc",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{khong co muc} =1{1 muc} other{{count} muc}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "Tao bo suu tap",
   "uploadDocumentTooltip": "Tai len tai lieu",
   "restore": "Khôi phục",
   "restoreFile": "Khoi phuc {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "Khong co bo suu tap",
   "emptyTrash": "Xoa sach thung rac",
   "emptyTrashTooltip": "Xoa sach thung rac",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "Khong tim thay ket qua",
   "searchEmptyDescription": "Thu tim kiem noi dung khac.",
   "searchEverywhereTitle": "Tim kiem moi noi cho \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "Tim kiem trong tat ca bo suu tap va tap tin.",
   "noCollectionsFoundForQuery": "Khong tim thay bo suu tap cho \"{query}\"",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "Chưa phân loại",
   "syncingTrash": "Dang dong bo thung rac...",
   "restoring": "Dang khoi phuc...",
   "restoredFileToCollection": "Da khoi phuc \"{fileName}\" vao \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "Dang xoa thung rac...",
   "trashIsEmpty": "Thung rac trong",
   "share": "Chia sẻ",
@@ -157,15 +363,12 @@
   "reportABug": "Báo lỗi",
   "reportBug": "Báo lỗi",
   "logsDialogBodyLocker": "Dieu nay se gui nhat ky de giup chung toi giai quyet van de cua ban.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Mạng xã hội",
   "rateUsOnStore": "Đánh giá chúng tôi trên {storeName}",
-  "blog": "Blog",
   "merchandise": "Vật phẩm",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "Thong tin",
   "saveInformation": "Luu thong tin",
   "saveToLocker": "Luu vao Locker",
@@ -179,8 +382,17 @@
   "accountCredentials": "Khóa bí mật",
   "accountCredentialsDescription": "Luu tru thong tin dang nhap tai khoan.",
   "editSecret": "Chinh sua bi mat",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "Chỉnh sửa vị trí",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "Chinh sua ghi chu",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Lien he khan cap",
   "emergencyContactDescription": "Luu thong tin lien lac cho nhung nguoi quan trong trong truong hop khan cap.",
   "noteName": "Tieu de",
@@ -259,6 +471,14 @@
   "expiredLinkInfo": "Liên kết này đã hết hạn. Vui lòng chọn thời gian hết hạn mới hoặc tắt tính năng hết hạn liên kết.",
   "linkExpiresOn": "Liên kết sẽ hết hạn vào {expiryTime}",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Chia sẻ với những người cụ thể} =1 {Chia sẻ với 1 người} other {Chia sẻ với {numberOfPeople} người}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "Liên kết đã hết hạn",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
@@ -273,7 +493,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "Cong tac vien co the them muc vao bo suu tap duoc chia se.",
   "enterEmail": "Nhập email",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Chưa thêm người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Chưa có cộng tác viên} =1 {Đã thêm 1 cộng tác viên} other {Đã thêm {count} cộng tác viên}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, =0 {Thêm người xem} =1 {Thêm người xem} other {Thêm người xem}}",
   "addCollaborators": "{count, plural, =0 {Thêm cộng tác viên} =1 {Thêm cộng tác viên} other {Thêm cộng tác viên}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Nhấn giữ một email để xác minh mã hóa đầu cuối.",
@@ -291,6 +529,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Ai đó chia sẻ album với bạn nên thấy cùng một ID trên thiết bị của họ.",
   "howToViewShareeVerificationID": "Hãy chỉ họ nhấn giữ địa chỉ email của họ trên màn hình cài đặt, và xác minh rằng ID trên cả hai thiết bị khớp nhau.",
   "thisIsPersonVerificationId": "Đây là ID xác minh của {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "ID xác minh",
   "verifyEmailID": "Xác minh {email}",
   "emailNoEnteAccount": "{email} khong co tai khoan Ente.\n\nGui loi moi de chia se muc.",
@@ -303,6 +549,15 @@
   "yesConvertToViewer": "Có, chuyển thành người xem",
   "changePermissions": "Thay doi quyen",
   "cannotAddMoreFilesAfterBecomingViewer": "{name} se khong con co the them muc vao bo suu tap sau khi tro thanh nguoi xem.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "Xóa?",
   "removeParticipantBody": "{userEmail} se bi xoa khoi bo suu tap duoc chia se nay\n\nCac muc do ho them cung se bi xoa khoi bo suu tap",
   "yesRemove": "Có, xóa",
@@ -311,10 +566,27 @@
   "collaborator": "Cộng tác viên",
   "collaboratorsCanAddFilesToTheSharedAlbum": "Cong tac vien co the them muc vao bo suu tap duoc chia se.",
   "albumParticipantsCount": "{count, plural, =0 {Không có người tham gia} =1 {1 người tham gia} other {{count} Người tham gia}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "Thêm nhiều hơn",
   "you": "Bạn",
   "albumOwner": "Chủ sở hữu",
   "typeOfCollectionTypeIsNotSupportedForRename": "Loai bo suu tap {collectionType} khong ho tro doi ten",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "Roi bo suu tap",
   "filesAddedByYouWillBeRemovedFromTheCollection": "Cac muc ban them se bi xoa khoi bo suu tap",
   "leaveSharedCollection": "Roi bo suu tap duoc chia se?",
@@ -324,20 +596,79 @@
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy",
   "uploadError": "Loi tai len",
   "uploadStorageLimitErrorTitle": "Da dat gioi han luu tru",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "Ban da het dung luong luu tru. Giai phong dung luong de tiep tuc tai len.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "Da dat gioi han tap tin",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "Ban da dat gioi han tap tin. Nang cap len goi tra phi de co them dung luong.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "Hanh dong that bai. Ban da dat gioi han tap tin.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "Tap tin qua lon",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "Tap tin nay lon hon kich thuoc tai len toi da duoc ho tro la 10GB.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Thu dieu chinh truy van tim kiem cua ban",
   "noFilesFoundForQuery": "Khong tim thay muc nao cho \"{query}\"",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "Bỏ chọn tất cả",
   "selectAll": "Chọn tất cả",
   "unnamedCollection": "Bo suu tap chua dat ten",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "Da tai len {completed}/{total} muc...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "Da tai len {completed}/{total} muc... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "Khong co bo suu tap",
   "createCollectionButton": "Tao bo suu tap",
   "collectionButtonLabel": "Bo suu tap",
@@ -352,6 +683,15 @@
   "saveDocument": "Luu tai lieu",
   "uploadFiles": "Tai len muc",
   "filesSelected": "{count, plural, =0{Chua chon muc nao} =1{Da chon 1 muc} other{Da chon {count} muc}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "Them vao bo suu tap",
   "newCollection": "Bo suu tap moi",
   "title": "Tieu de",
@@ -360,11 +700,50 @@
   "backToView": "Quay lai xem",
   "back": "Quay lại",
   "failedToLoadCollections": "Khong the tai bo suu tap: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "Thong tin",
   "recordSavedToMultipleCollections": "Ban ghi da duoc luu vao {count, plural, =1{1 bo suu tap} other{{count} bo suu tap}} thanh cong",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "Da sao chep {fieldName} vao clipboard",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "{count, plural, =1{1 ket qua} other{{count} ket qua}} cho \"{query}\"",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Dang nhap vao tai khoan Ente cua ban",
   "unlockLockerNewUserTitle": "Tham gia Ente de su dung Locker",
   "unlockLockerNewUserBody": "Locker hien chi danh cho nguoi dung Ente hien tai. Ban co the tao tai khoan tren Ente Photos de su dung Locker.",
@@ -374,7 +753,6 @@
   "featureSaveImportant": "Luu tai lieu va thong tin dang nhap quan trong cua ban",
   "featurePassAutomatically": "Tu dong chuyen giao chung trong truong hop khan cap",
   "featureShareAnytime": "Chia se bat cu luc nao",
-  "emailIdLabel": "Email",
   "emailIdHint": "Nhập địa chỉ email của bạn",
   "loginPasswordLabel": "Mật khẩu",
   "loginPasswordHint": "Nhập mật khẩu của bạn",
@@ -399,13 +777,60 @@
   "yesDeleteCollection": "Co, xoa bo suu tap",
   "yesDeleteFile": "Co, xoa muc",
   "deleteCollectionDialogBody": "{collectionName} se bi xoa vinh vien.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 bo suu tap} other{{count} bo suu tap}} se bi xoa vinh vien.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1 muc} other{{count} muc}} se bi xoa vinh vien.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "Cung xoa muc khoi moi noi",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Co, xoa {count, plural, =1{bo suu tap} other{bo suu tap}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "Co, xoa {count, plural, =1{muc} other{muc}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "Su dung",
-  "fileCount": "{used} / {max}",
   "important": "Quan trong",
   "unimportant": "Khong quan trong",
   "removingFromImportant": "Dang xoa khoi quan trong...",
@@ -413,9 +838,36 @@
   "fileMarkedAsImportant": "Muc da duoc danh dau quan trong",
   "fileRemovedFromImportant": "Muc da duoc xoa khoi quan trong",
   "filesMarkedAsImportant": "{count, plural, =1{1 muc da duoc danh dau quan trong} other{{count} muc da duoc danh dau quan trong}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "Tat ca muc da duoc danh dau quan trong",
   "failedToMarkFilesAsImportant": "Khong the danh dau muc quan trong: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "Khong the cap nhat trang thai quan trong: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Xin lỗi",
   "subscribe": "Đăng ký gói",
   "sharedWith": "Chia se voi",

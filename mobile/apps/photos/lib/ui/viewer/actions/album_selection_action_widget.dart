@@ -184,16 +184,13 @@ class _AlbumSelectionActionWidgetState
       }
 
       // Hide option for incoming collections (uses sharee metadata)
-      // Behind internal user flag
-      if (flagService.internalUser) {
-        items.add(
-          SelectionActionButton(
-            labelText: AppLocalizations.of(context).hide,
-            icon: Icons.visibility_off_outlined,
-            onTap: _onHideOrUnHideClick,
-          ),
-        );
-      }
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).hide,
+          icon: Icons.visibility_off_outlined,
+          onTap: _onHideOrUnHideClick,
+        ),
+      );
 
       items.add(
         SelectionActionButton(

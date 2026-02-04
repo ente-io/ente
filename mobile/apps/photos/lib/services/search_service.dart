@@ -12,13 +12,16 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/offline_files_db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -30,6 +33,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
+import 'package:photos/models/search/device_album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
@@ -195,6 +199,9 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
+    if (isOfflineMode) {
+      return <AlbumSearchResult>[];
+    }
     final List<Collection> collections = _collectionService.getCollectionsForUI(
       includedShared: true,
     );
@@ -224,6 +231,9 @@ class SearchService {
     int? limit,
   ) async {
     try {
+      if (isOfflineMode) {
+        return <AlbumSearchResult>[];
+      }
       final List<Collection> collections =
           _collectionService.getCollectionsForUI(
         includedShared: true,
@@ -246,6 +256,34 @@ class SearchService {
       return collectionSearchResults;
     } catch (e) {
       _logger.severe("error gettin allCollectionSearchResults", e);
+      return [];
+    }
+  }
+
+  Future<List<DeviceAlbumSearchResult>> getDeviceCollectionSearchResults(
+    String query,
+  ) async {
+    try {
+      final List<DeviceCollection> deviceCollections =
+          await FilesDB.instance.getDeviceCollections(
+        includeCoverThumbnail: true,
+      );
+
+      final List<DeviceAlbumSearchResult> results = [];
+
+      for (var dc in deviceCollections) {
+        if (results.length >= _maximumResultsLimit) {
+          break;
+        }
+
+        if (dc.name.toLowerCase().contains(query.toLowerCase())) {
+          results.add(DeviceAlbumSearchResult(dc));
+        }
+      }
+
+      return results;
+    } catch (e) {
+      _logger.severe("error getting deviceCollectionSearchResults", e);
       return [];
     }
   }
@@ -282,7 +320,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (flagService.hasGrantedMLConsent) {
+    if (hasGrantedMLConsent) {
       return magicCacheService.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];
@@ -855,6 +893,95 @@ class SearchService {
     bool showIgnoredOnly = false,
   }) async {
     try {
+      if (isOfflineMode) {
+        final effectiveMinClusterSize =
+            minClusterSize > 5 ? 5 : minClusterSize;
+        if (showIgnoredOnly) {
+          return [];
+        }
+        debugPrint("getting faces (offline)");
+        final offlineMlDb = MLDataDB.offlineInstance;
+        final Map<int, Set<String>> fileIdToClusterID =
+            await offlineMlDb.getFileIdToClusterIds();
+        if (fileIdToClusterID.isEmpty) {
+          return [];
+        }
+        final localIntIds = fileIdToClusterID.keys.toSet();
+        final localIdMap =
+            await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
+        final allFiles = await getAllFilesForSearch();
+        final localIdToFile = <String, EnteFile>{};
+        for (final file in allFiles) {
+          final localId = file.localID;
+          if (localId != null && localId.isNotEmpty) {
+            localIdToFile[localId] = file;
+          }
+        }
+        final Map<String, List<EnteFile>> clusterIdToFiles = {};
+        for (final entry in fileIdToClusterID.entries) {
+          final localId = localIdMap[entry.key];
+          if (localId == null) continue;
+          final file = localIdToFile[localId];
+          if (file == null) continue;
+          for (final cluster in entry.value) {
+            clusterIdToFiles.putIfAbsent(cluster, () => []).add(file);
+          }
+        }
+        final List<GenericSearchResult> facesResult = [];
+        final sortedClusterIds = clusterIdToFiles.keys.toList()
+          ..sort(
+            (a, b) => clusterIdToFiles[b]!
+                .length
+                .compareTo(clusterIdToFiles[a]!.length),
+          );
+        for (final clusterId in sortedClusterIds) {
+          final files = clusterIdToFiles[clusterId]!;
+          if (files.length < effectiveMinClusterSize) continue;
+          facesResult.add(
+            GenericSearchResult(
+              ResultType.faces,
+              "",
+              files,
+              params: {
+                kClusterParamId: clusterId,
+              },
+              onResultTap: (ctx) {
+                routeToPage(
+                  ctx,
+                  ClusterPage(
+                    files,
+                    tagPrefix: "${ResultType.faces.toString()}_$clusterId",
+                    clusterID: clusterId,
+                    showNamingBanner: false,
+                  ),
+                );
+              },
+              hierarchicalSearchFilter: FaceFilter(
+                personId: null,
+                clusterId: clusterId,
+                faceName: null,
+                faceFile: files.first,
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(files),
+              ),
+            ),
+          );
+        }
+        if (facesResult.isEmpty) return [];
+        sortPeopleFaces(
+          facesResult,
+          PeopleSortConfig(
+            sortKey: localSettings.peopleSortKey(),
+            nameSortAscending: localSettings.peopleNameSortAscending,
+            updatedSortAscending: localSettings.peopleUpdatedSortAscending,
+            photosSortAscending: localSettings.peoplePhotosSortAscending,
+          ),
+        );
+        if (limit != null) {
+          return facesResult.sublist(0, min(limit, facesResult.length));
+        }
+        return facesResult;
+      }
       debugPrint("getting faces");
       final Map<int, Set<String>> fileIdToClusterID =
           await mlDataDB.getFileIdToClusterIds();
@@ -1443,6 +1570,9 @@ class SearchService {
   Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
+    if (isOfflineMode) {
+      return <GenericSearchResult>[];
+    }
     final int ownerID = Configuration.instance.getUserID()!;
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];

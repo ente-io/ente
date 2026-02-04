@@ -196,18 +196,18 @@ smtp:
 
 ### Internal
 
-| Variable                                     | Description                                   | Default |
-| -------------------------------------------- | --------------------------------------------- | ------- |
-| `internal.silent`                            | Suppress external effects (e.g. email alerts) | `false` |
+| Variable                                     | Description                                                                                                                                                             | Default |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `internal.silent`                            | Suppress external effects (e.g. email alerts)                                                                                                                           | `false` |
 | `internal.trusted-client-ip-header`          | Request header trusted by gin’s `TrustedPlatform` when the server runs behind a proxy (leave empty to use gin’s default order: X-Forwarded-For, X-Real-IP, remote addr) |         |
-| `internal.health-check-url`                  | External healthcheck URL                      |         |
-| `internal.hardcoded-ott`                     | Predefined OTPs for testing                   |         |
-| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs          | `[]`    |
-| `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used  |         |
-| `internal.hardcoded-ott.local-domain-value`  | Hardcoded OTT value for the above suffix      |         |
-| `internal.admins`                            | List of admin user IDs                        | `[]`    |
-| `internal.admin`                             | Single admin user ID                          |         |
-| `internal.disable-registration`              | Disable user registration                     | `false` |
+| `internal.health-check-url`                  | External healthcheck URL                                                                                                                                                |         |
+| `internal.hardcoded-ott`                     | Predefined OTPs for testing                                                                                                                                             |         |
+| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs                                                                                                                                    | `[]`    |
+| `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used                                                                                                                            |         |
+| `internal.hardcoded-ott.local-domain-value`  | Hardcoded OTT value for the above suffix                                                                                                                                |         |
+| `internal.admins`                            | List of admin user IDs                                                                                                                                                  | `[]`    |
+| `internal.admin`                             | Single admin user ID                                                                                                                                                    |         |
+| `internal.disable-registration`              | Disable user registration                                                                                                                                               | `false` |
 
 ### Replication
 

@@ -19,6 +19,7 @@ import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/growth/referral_screen.dart";
+import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/about/about_us_page.dart";
 import "package:photos/ui/settings/account/account_settings_page.dart";
@@ -70,6 +71,8 @@ class _SettingsBody extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final hasLoggedIn = Configuration.instance.isLoggedIn();
+    final hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
+    final showLoginEntry = isOfflineMode && !hasConfiguredAccount;
 
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
@@ -89,7 +92,11 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildEmailHeader(context, colorScheme, textTheme),
                 const SizedBox(height: 16),
-                if (hasLoggedIn) ...[
+                if (showLoginEntry) ...[
+                  _buildLoginCard(context, colorScheme),
+                  const SizedBox(height: 8),
+                ],
+                if (hasLoggedIn && !isOfflineMode) ...[
                   const StorageCardWidget(),
                   const SizedBox(height: 16),
                   _buildAccountCard(context, colorScheme),
@@ -101,19 +108,23 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildAppearanceCard(context, colorScheme),
                 const SizedBox(height: 8),
-                if (hasLoggedIn) ...[
+                if (isOfflineMode) ...[
+                  _buildOfflineFeaturesCard(context, colorScheme),
+                  const SizedBox(height: 8),
+                ],
+                if (hasLoggedIn && !isOfflineMode) ...[
                   _buildPersonalFeaturesCard(context, colorScheme),
                   const SizedBox(height: 8),
                   _buildFeaturesAndPlansCard(context, colorScheme),
                   const SizedBox(height: 8),
-                  _buildEngagementCard(context, colorScheme),
-                  const SizedBox(height: 8),
                 ],
+                _buildEngagementCard(context, colorScheme),
+                const SizedBox(height: 8),
                 _buildHelpSupportCard(context, colorScheme),
                 const SizedBox(height: 8),
                 _buildAboutUsCard(context, colorScheme),
                 const SizedBox(height: 8),
-                if (hasLoggedIn) ...[
+                if (hasLoggedIn && !isOfflineMode) ...[
                   _buildLogoutCard(context, colorScheme),
                 ],
                 const Padding(
@@ -122,6 +133,7 @@ class _SettingsBody extends StatelessWidget {
                 ),
                 const AppVersionWidget(),
                 if (hasLoggedIn &&
+                    !isOfflineMode &&
                     (flagService.flags.internalUser || kDebugMode)) ...[
                   _buildDebugCard(context, colorScheme),
                   const SizedBox(height: 8),
@@ -249,6 +261,23 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
+  Widget _buildLoginCard(BuildContext context, EnteColorScheme colorScheme) {
+    final title =
+        "${AppLocalizations.of(context).existingUser} / ${AppLocalizations.of(context).newToEnte}";
+    return MenuItemWidgetNew(
+      title: title,
+      leadingIconWidget: _buildIconWidget(
+        HugeIcons.strokeRoundedUser,
+        colorScheme,
+      ),
+      trailingIcon: Icons.chevron_right_outlined,
+      trailingIconIsMuted: true,
+      onTap: () async {
+        await routeToPage(context, const LandingPageWidget());
+      },
+    );
+  }
+
   Widget _buildBackupCard(BuildContext context, EnteColorScheme colorScheme) {
     return MenuItemWidgetNew(
       title: AppLocalizations.of(context).backup,
@@ -261,6 +290,69 @@ class _SettingsBody extends StatelessWidget {
       onTap: () async {
         await routeToPage(context, const BackupSettingsPage());
       },
+    );
+  }
+
+  Widget _buildOfflineFeaturesCard(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+  ) {
+    return SettingsGroupedCard(
+      children: [
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).machineLearning,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedMagicWand01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MachineLearningSettingsPage());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).memories,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedSparkles,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MemoriesSettingsScreen());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).notifications,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedNotification01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const NotificationSettingsScreen());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).widgets,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedAlignBoxBottomRight,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const WidgetSettingsScreen());
+          },
+        ),
+        _buildMapsMenuItem(context, colorScheme),
+      ],
     );
   }
 
@@ -449,30 +541,34 @@ class _SettingsBody extends StatelessWidget {
             await routeToPage(context, const VideoStreamingSettingsPage());
           },
         ),
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).maps,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedMaping,
-            colorScheme,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => flagService.mapEnabled,
-            onChanged: () async {
-              final isEnabled = flagService.mapEnabled;
-              try {
-                await flagService.setMapEnabled(!isEnabled);
-              } catch (e) {
-                showShortToast(
-                  context,
-                  AppLocalizations.of(context).somethingWentWrong,
-                );
-                rethrow;
-              }
-            },
-          ),
-        ),
+        _buildMapsMenuItem(context, colorScheme),
       ],
+    );
+  }
+
+  Widget _buildMapsMenuItem(BuildContext context, EnteColorScheme colorScheme) {
+    return MenuItemWidgetNew(
+      title: AppLocalizations.of(context).maps,
+      borderRadius: 0,
+      leadingIconWidget: _buildIconWidget(
+        HugeIcons.strokeRoundedMaping,
+        colorScheme,
+      ),
+      trailingWidget: ToggleSwitchWidget(
+        value: () => mapEnabled,
+        onChanged: () async {
+          final isEnabled = mapEnabled;
+          try {
+            await setMapEnabled(!isEnabled);
+          } catch (e) {
+            showShortToast(
+              context,
+              AppLocalizations.of(context).somethingWentWrong,
+            );
+            rethrow;
+          }
+        },
+      ),
     );
   }
 

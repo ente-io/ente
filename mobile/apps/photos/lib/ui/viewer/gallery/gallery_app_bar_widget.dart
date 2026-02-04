@@ -572,7 +572,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           context.l10n.playOnTv,
           icon: Icons.tv_outlined,
         ),
-      if (flagService.hasGrantedMLConsent &&
+      if (hasGrantedMLConsent &&
           (widget.collection?.canAutoAdd(userId) ?? false))
         EntePopupMenuItemAsync(
           (value) => (value?[widget.collection!.id]?.personIDs.isEmpty ?? true)
@@ -623,8 +623,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? Icons.unarchive
               : Icons.archive_outlined,
         ),
-      if (galleryType == GalleryType.sharedCollection &&
-          flagService.internalUser)
+      if (galleryType == GalleryType.sharedCollection)
         EntePopupMenuItem(
           widget.collection!.hasShareeHidden()
               ? AppLocalizations.of(context).unhide
@@ -836,9 +835,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> showOnMap() async {
-    if (!flagService.mapEnabled) {
+    if (!mapEnabled) {
       try {
-        await flagService.setMapEnabled(true);
+        await setMapEnabled(true);
       } catch (e) {
         showShortToast(
           context,
