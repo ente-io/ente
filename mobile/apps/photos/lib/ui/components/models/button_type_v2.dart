@@ -71,17 +71,19 @@ ButtonTheme _neutralPalette(EnteColorScheme c) => ButtonTheme(
       foreground: c.contentReverse,
       disabledForeground: c.textFaint,
       disabledIconColor: c.strokeMuted,
-      checkmarkColor: c.primary500,
+      checkmarkColor: c.greenBase,
     );
 
 ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
       defaultBg: Colors.transparent,
-      hoverBg: c.warning500.withValues(alpha: 0.08),
-      pressedBg: c.warning700.withValues(alpha: 0.1),
+      hoverBg: Colors.transparent,
+      pressedBg: Colors.transparent,
       disabledBg: Colors.transparent,
-      foreground: c.warning500,
+      foreground: c.redBase,
+      hoverForeground: c.redDark,
+      pressedForeground: c.redDarker,
       disabledForeground: c.contentLighter,
-      defaultBorder: c.warning500,
+      defaultBorder: c.redBase,
       disabledBorder: c.fillBaseGrey,
       disabledIconColor: c.contentLighter,
     );
@@ -91,11 +93,11 @@ ButtonTheme _linkPalette(EnteColorScheme c) => ButtonTheme(
       hoverBg: Colors.transparent,
       pressedBg: Colors.transparent,
       disabledBg: Colors.transparent,
-      foreground: c.primary500,
-      hoverForeground: c.primary400,
-      pressedForeground: c.primary700,
-      disabledForeground: c.textFaint,
-      disabledIconColor: c.strokeMuted,
+      foreground: c.greenBase,
+      hoverForeground: c.greenDark,
+      pressedForeground: c.greenDarker,
+      disabledForeground: c.contentLighter,
+      disabledIconColor: c.contentLighter,
     );
 
 class ButtonTheme {
