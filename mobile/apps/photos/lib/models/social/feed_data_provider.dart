@@ -6,6 +6,7 @@ import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/services/collections_service.dart";
+import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/services/social_sync_service.dart";
 
 /// Provider for feed data.
@@ -39,7 +40,7 @@ class FeedDataProvider {
     final results = await Future.wait([
       _db.getReactionsOnFiles(excludeUserID: userID, limit: limit),
       _db.getCommentsOnFiles(excludeUserID: userID, limit: limit),
-      _db.getRepliesToUserComments(targetUserID: userID, limit: limit),
+      _db.getReplies(excludeUserID: userID, limit: limit),
       _db.getReactionsOnUserComments(targetUserID: userID, limit: limit),
       _db.getReactionsOnUserReplies(targetUserID: userID, limit: limit),
     ]);
@@ -101,6 +102,9 @@ class FeedDataProvider {
   Future<void> syncAllSharedCollections() async {
     try {
       await SocialSyncService.instance.syncAllSharedCollections();
+      await SocialNotificationCoordinator.instance.notifyAfterSocialSync(
+        trigger: SocialNotificationTrigger.feedRefresh,
+      );
     } catch (e) {
       _logger.warning('Failed to sync shared collections', e);
     }

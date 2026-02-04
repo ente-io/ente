@@ -81,6 +81,39 @@ class NotificationSettingsScreen extends StatelessWidget {
                         ),
                       ),
                       MenuItemWidgetNew(
+                        title: AppLocalizations.of(context).socialNotifications,
+                        trailingWidget: ToggleSwitchWidget(
+                          value: () =>
+                              NotificationService.instance
+                                  .hasGrantedPermissions() &&
+                              NotificationService.instance
+                                  .shouldShowSocialNotifications(),
+                          onChanged: () async {
+                            await NotificationService.instance
+                                .requestPermissions();
+                            await NotificationService.instance
+                                .setShouldShowSocialNotifications(
+                              !NotificationService.instance
+                                  .shouldShowSocialNotifications(),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                          bottom: 16,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)
+                              .socialNotificationsExplanation,
+                          style: textTheme.mini
+                              .copyWith(color: colorScheme.textMuted),
+                        ),
+                      ),
+                      MenuItemWidgetNew(
                         title: AppLocalizations.of(context).onThisDayMemories,
                         trailingWidget: ToggleSwitchWidget(
                           value: () =>

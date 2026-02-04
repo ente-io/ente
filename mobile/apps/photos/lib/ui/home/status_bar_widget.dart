@@ -42,8 +42,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  bool _showMlBanner = !flagService.hasGrantedMLConsent &&
-      flagService.hasSyncedAccountFlags() &&
+  bool _showMlBanner = !hasGrantedMLConsent &&
+      (isOfflineMode || flagService.hasSyncedAccountFlags()) &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
 
@@ -81,7 +81,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
-        _showMlBanner = !flagService.hasGrantedMLConsent &&
+        _showMlBanner = !hasGrantedMLConsent &&
             !localSettings.hasSeenMLEnablingBanner;
         setState(() {});
       }

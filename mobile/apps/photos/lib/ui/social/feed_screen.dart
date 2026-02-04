@@ -2,12 +2,14 @@ import "dart:async";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -15,11 +17,67 @@ import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 
+final _logger = Logger("FeedScreen");
+
+class FeedNavigationTarget {
+  final FeedItemType type;
+  final int collectionID;
+  final int? fileID;
+  final String? commentID;
+
+  const FeedNavigationTarget({
+    required this.type,
+    required this.collectionID,
+    this.fileID,
+    this.commentID,
+  });
+
+  static FeedNavigationTarget? fromUri(Uri uri) {
+    final typeRaw = uri.queryParameters['type'];
+    final collectionRaw = uri.queryParameters['collectionID'];
+    if (typeRaw == null || collectionRaw == null) {
+      _logger.warning("Invalid feed URI: missing type or collectionID in $uri");
+      return null;
+    }
+    final collectionID = int.tryParse(collectionRaw);
+    if (collectionID == null) {
+      _logger
+          .warning("Invalid feed URI: invalid collectionID '$collectionRaw'");
+      return null;
+    }
+    FeedItemType type;
+    try {
+      type = FeedItemType.values.byName(typeRaw);
+    } catch (_) {
+      _logger.warning("Invalid feed URI: unknown type '$typeRaw'");
+      return null;
+    }
+    final fileIDRaw = uri.queryParameters['fileID'];
+    final fileID = fileIDRaw != null && fileIDRaw.isNotEmpty
+        ? int.tryParse(fileIDRaw)
+        : null;
+    final commentIDRaw = uri.queryParameters['commentID'];
+    final commentID =
+        commentIDRaw != null && commentIDRaw.isNotEmpty ? commentIDRaw : null;
+    return FeedNavigationTarget(
+      type: type,
+      collectionID: collectionID,
+      fileID: fileID,
+      commentID: commentID,
+    );
+  }
+}
+
 /// Screen that displays the user's activity feed.
 ///
 /// Shows likes, comments, and replies on the user's photos and comments.
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+  final FeedNavigationTarget? initialTarget;
+
+  const FeedScreen({
+    super.key,
+    this.initialTarget,
+  });
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
@@ -29,6 +87,9 @@ class _FeedScreenState extends State<FeedScreen> {
   List<FeedItem> _feedItems = [];
   bool _isLoading = true;
   late final int _currentUserID;
+  FeedNavigationTarget? _pendingNavigationTarget;
+  bool _didHandleNavigationTarget = false;
+  bool _isOpeningNavigationTarget = false;
 
   /// Map of collectionID -> (anonUserID -> displayName)
   Map<int, Map<String, String>> _anonDisplayNamesByCollection = {};
@@ -37,6 +98,8 @@ class _FeedScreenState extends State<FeedScreen> {
   void initState() {
     super.initState();
     _currentUserID = Configuration.instance.getUserID() ?? 0;
+    _pendingNavigationTarget = widget.initialTarget;
+    unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
     _loadFeedItems();
   }
 
@@ -56,6 +119,7 @@ class _FeedScreenState extends State<FeedScreen> {
         _isLoading = false;
       });
     }
+    _tryOpenNavigationTarget();
 
     // Sync in background and refresh
     unawaited(_syncAndRefresh());
@@ -97,6 +161,7 @@ class _FeedScreenState extends State<FeedScreen> {
           _anonDisplayNamesByCollection = freshAnonNames;
         });
       }
+      _tryOpenNavigationTarget();
     } catch (_) {
       // Ignore sync errors, local data is already displayed
     }
@@ -104,6 +169,90 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _onRefresh() async {
     await _syncAndRefresh();
+  }
+
+  void _tryOpenNavigationTarget() {
+    if (_didHandleNavigationTarget || _isOpeningNavigationTarget) {
+      return;
+    }
+    final target = _pendingNavigationTarget;
+    if (target == null) return;
+    _isOpeningNavigationTarget = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) {
+        _isOpeningNavigationTarget = false;
+        return;
+      }
+      final opened = await _openNavigationTarget(target);
+      if (opened && mounted) {
+        _didHandleNavigationTarget = true;
+      }
+      _isOpeningNavigationTarget = false;
+    });
+  }
+
+  Future<bool> _openNavigationTarget(FeedNavigationTarget target) async {
+    if (!mounted) return false;
+    if (target.type == FeedItemType.photoLike) {
+      final fileID = target.fileID;
+      if (fileID == null) return false;
+      final file = await FilesDB.instance.getUploadedFile(
+        fileID,
+        target.collectionID,
+      );
+      if (file == null || !mounted) return false;
+      unawaited(
+        routeToPage(
+          context,
+          DetailPage(
+            DetailPageConfiguration(
+              [file],
+              0,
+              "feed_item",
+            ),
+          ),
+          forceCustomPageRoute: true,
+        ),
+      );
+      return true;
+    }
+
+    var fileID = target.fileID;
+    if (fileID == null && target.commentID != null) {
+      final comment =
+          await SocialDataProvider.instance.getCommentById(target.commentID!);
+      fileID = comment?.fileID;
+    }
+    if (fileID == null) return false;
+    final file = await FilesDB.instance.getUploadedFile(
+      fileID,
+      target.collectionID,
+    );
+    if (file == null || !mounted) return false;
+    final capturedFileID = fileID;
+    final highlightID = target.commentID;
+    unawaited(
+      routeToPage(
+        context,
+        DetailPage(
+          DetailPageConfiguration(
+            [file],
+            0,
+            "feed_comment",
+            onPageReady: (detailContext) {
+              showFileCommentsBottomSheet(
+                detailContext,
+                collectionID: target.collectionID,
+                fileID: capturedFileID,
+                highlightCommentID: highlightID,
+              );
+            },
+          ),
+        ),
+        forceCustomPageRoute: true,
+      ),
+    );
+    return true;
   }
 
   @override

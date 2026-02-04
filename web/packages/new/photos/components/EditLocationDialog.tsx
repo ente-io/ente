@@ -272,6 +272,8 @@ const EditableMap: React.FC<EditableMapProps> = ({
     const [showResults, setShowResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const searchRequestIdRef = useRef(0);
+    const searchAbortRef = useRef<AbortController | null>(null);
 
     // Manual coordinate input state
     const [manualLat, setManualLat] = useState<string | null>(null);
@@ -290,28 +292,46 @@ const EditableMap: React.FC<EditableMapProps> = ({
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
+        if (searchAbortRef.current) {
+            searchAbortRef.current.abort();
+            searchAbortRef.current = null;
+        }
 
         if (query.trim().length < 3) {
             setSearchResults([]);
             setShowResults(false);
+            setIsSearching(false);
             return;
         }
 
         searchTimeoutRef.current = setTimeout(async () => {
+            const requestId = searchRequestIdRef.current + 1;
+            searchRequestIdRef.current = requestId;
+            const abortController = new AbortController();
+            searchAbortRef.current = abortController;
             setIsSearching(true);
             try {
                 const response = await fetch(
                     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
-                    { headers: { "Accept-Language": "en" } },
+                    {
+                        headers: { "Accept-Language": "en" },
+                        signal: abortController.signal,
+                    },
                 );
                 const data = (await response.json()) as NominatimResult[];
+                if (searchRequestIdRef.current !== requestId) return;
                 setSearchResults(data);
                 setShowResults(data.length > 0);
             } catch (error) {
+                if (abortController.signal.aborted) return;
+                if (searchRequestIdRef.current !== requestId) return;
                 console.error("Search failed:", error);
                 setSearchResults([]);
+                setShowResults(false);
             } finally {
-                setIsSearching(false);
+                if (searchRequestIdRef.current === requestId) {
+                    setIsSearching(false);
+                }
             }
         }, 300);
     };
@@ -382,6 +402,17 @@ const EditableMap: React.FC<EditableMapProps> = ({
     const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
     const attribution =
         '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+            if (searchAbortRef.current) {
+                searchAbortRef.current.abort();
+            }
+        };
+    }, []);
 
     useEffect(() => {
         const mapContainer = mapContainerRef.current;

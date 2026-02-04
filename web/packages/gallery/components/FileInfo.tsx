@@ -957,6 +957,9 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
 const openStreetMapLink = ({ latitude, longitude }: Location) =>
     `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
 
+const leafletAttributionPrefix =
+    '<a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer">Leaflet</a>';
+
 interface MapBoxProps {
     location: Location;
     mapEnabled: boolean;
@@ -965,7 +968,7 @@ interface MapBoxProps {
 const MapBox: React.FC<MapBoxProps> = ({ location, mapEnabled }) => {
     const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
     const attribution =
-        '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+        '&copy; <a target="_blank" rel="noopener noreferrer" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     const zoom = 16;
 
     const mapBoxContainerRef = useRef<HTMLDivElement>(null);
@@ -990,6 +993,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location, mapEnabled }) => {
         if (!mapRef.current) {
             // @ts-ignore
             const map = leaflet.map(mapContainer).setView(position, zoom);
+            map.attributionControl.setPrefix(leafletAttributionPrefix);
             // @ts-ignore
             leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
             // @ts-ignore

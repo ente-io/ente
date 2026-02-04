@@ -583,11 +583,16 @@ export default function PublicCollectionGallery() {
             ) : (
                 <>
                     <NavbarBase
-                        sx={{
-                            mb: "16px",
-                            px: "24px",
-                            "@media (width < 720px)": { px: "4px" },
-                        }}
+                        sx={[
+                            {
+                                mb: "16px",
+                                px: "24px",
+                                "@media (width < 720px)": { px: "4px" },
+                            },
+                            selected.count > 0 && {
+                                borderColor: "accent.main",
+                            },
+                        ]}
                     >
                         {selected.count > 0 ? (
                             <SelectedFileOptions
@@ -795,7 +800,13 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 }) => (
     <Stack
         direction="row"
-        sx={{ flex: 1, gap: 2, alignItems: "center", mr: 1 }}
+        sx={{
+            flex: 1,
+            gap: 1,
+            alignItems: "center",
+            mx: -2,
+            "@media (width < 720px)": { mx: -1 },
+        }}
     >
         <IconButton onClick={clearSelection}>
             <CloseIcon />
@@ -858,9 +869,13 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
                 <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ alignItems: "center" }}
+                    sx={{
+                        alignItems: "center",
+                        mr: -1.5,
+                        "@media (width < 720px)": { mr: -1 },
+                    }}
                 >
-                    {onShowFeed && (
+                    {onShowFeed && !hasSelection && (
                         <IconButton onClick={onShowFeed}>
                             <Box
                                 sx={{

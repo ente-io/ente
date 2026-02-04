@@ -21,5 +21,5 @@ export const getEnteURL = (isTouchscreen: boolean): string => {
         // For other touchscreen devices, fall back to web
     }
     // For desktop or other platforms, redirect to ente.io
-    return "https://ente.io";
+    return "https://web.ente.io";
 };

@@ -118,6 +118,13 @@
       "title": "availity"
     },
     {
+      "title": "Avenue",
+      "altNames": [
+        "avenue.us",
+        "Avenue Securities"
+      ]
+    },
+    {
       "title": "AvistaZ.to",
       "slug": "avistaz"
     },
@@ -958,6 +965,13 @@
       "slug": "lark",
       "altNames": [
         "飞书"
+      ]
+    },
+    {
+      "title": "Laneros",
+      "slug": "laneros",
+      "altNames": [
+        "laneros.com"
       ]
     },
     {

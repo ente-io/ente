@@ -2081,10 +2081,29 @@
   "hoorayyyy": "Viscaaaa!",
   "nothingToTidyUpHere": "Res a endreçar aquí",
   "deletingDash": "Esborrant - ",
-  "cLTitle1": "Comentaris i reaccions",
-  "cLDesc1": "Estem introduint comentaris i reaccions a les fotos compartides. Pots reaccionar o comentar una foto obrint-la i utilitzant les accions a la part inferior. Tots els comentaris i reaccions entrants seran visibles a la pestanya Compartit.",
-  "cLTitle2": "Administrador d'àlbums",
-  "cLDesc2": "Ara pots assignar un altre usuari d'Ente com a administrador del teu àlbum. Amb això, podran afegir altres espectadors i col·laboradors, eliminar fotos dels àlbums, i fins i tot suggerir als participants que eliminin les seves fotos.",
+  "cLTitle1": "Redisseny",
+  "cLDesc1Item1": "Redisseny de la pantalla de configuració",
+  "cLDesc1Item2": "Barra de cerca moguda a dalt",
+  "cLDesc1Item3": "Redisseny de la pàgina de resultats de cerca",
+  "cLTitle2": "Millores",
+  "cLDesc2Item1": "Cerca dins de la configuració",
+  "cLDesc2Item2": "Càrrega més ràpida de la pestanya de cerca",
+  "cLDesc2Item3": "Cerca dins de descobriment, ubicació i tipus de fitxer",
+  "cLDesc2Item4": "Permetre als administradors i propietaris d'àlbums eliminar comentaris",
+  "cLDesc2Item5": "Pessiga per fer zoom en vídeos",
+  "cLDesc2Item6": "Veure totes les persones ignorades",
+  "cLDesc2Item7": "Flux de fusió millorat",
+  "cLDesc2Item8": "Cerca i ordenació personalitzada a la pàgina de persones",
+  "cLDesc2Item9": "Ordenació consistent dels contactes",
+  "cLDesc2Item10": "Imatges de previsualització per a formats d'imatge no compatibles",
+  "cLDesc2Item11": "Intercanviar fotos i tocar per reemplaçar al creador de collages",
+  "cLDesc2Item12": "Millora de rendiment al full d'informació del fitxer",
+  "cLTitle3": "Correccions d'errors",
+  "cLDesc3Item1": "Correcció de la pausa de música en obrir l'aplicació",
+  "cLDesc3Item2": "Correcció del problema de lliscar per seleccionar en dispositius Samsung S",
+  "cLDesc3Item3": "Correcció del problema de la pantalla d'inici després de restaurar la còpia de seguretat",
+  "cLDesc3Item4": "Correcció de problemes de galeria en tauletes i mode horitzontal",
+  "cLDesc3Item5": "Correcció de la pàgina sense categoria que no s'actualitzava després de moure",
   "closeBy": "A prop",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2402,7 +2421,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, one {}=0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
+  "commentsCount": "{count, plural, =0{Sense comentaris} =1{1 comentari} other{{count} comentaris}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {

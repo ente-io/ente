@@ -67,3 +67,6 @@ Yes, you can start fresh.
 - Once synced, empty Trash to permanently remove all items from your account.
 
 Once this is done, you can reupload your entire Google Takeout folder again using the desktop app.
+### Is there a way to remove partner sharing photos when importing via Google Takeout?
+
+There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.

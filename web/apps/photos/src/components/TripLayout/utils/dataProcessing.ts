@@ -144,6 +144,17 @@ export const generateNeededThumbnails = async ({
         return { thumbnailUpdates };
     }
 
+    const filesById = new Map(files.map((file) => [file.id, file]));
+    const includedIds = new Set<number>();
+
+    const addIfUnique = (group: EnteFile[], fileId: number) => {
+        const file = filesById.get(fileId);
+        if (!file) return;
+        if (includedIds.has(file.id)) return;
+        includedIds.add(file.id);
+        group.push(file);
+    };
+
     // Define priority groups with specific file collections
     const priorityGroups: EnteFile[][] = [];
 
@@ -153,10 +164,7 @@ export const generateNeededThumbnails = async ({
     const firstLocationsFiles: EnteFile[] = [];
     photoClusters.slice(0, 3).forEach((cluster) => {
         cluster.slice(0, 3).forEach((photo) => {
-            const file = files.find((f) => f.id === photo.fileId);
-            if (file && !firstLocationsFiles.includes(file)) {
-                firstLocationsFiles.push(file);
-            }
+            addIfUnique(firstLocationsFiles, photo.fileId);
         });
     });
     if (firstLocationsFiles.length > 0) {
@@ -168,14 +176,7 @@ export const generateNeededThumbnails = async ({
     photoClusters.forEach((cluster) => {
         if (cluster.length > 0 && cluster[0]) {
             const firstPhoto = cluster[0];
-            const file = files.find((f) => f.id === firstPhoto.fileId);
-            if (
-                file &&
-                !firstLocationsFiles.includes(file) &&
-                !mapMarkerFiles.includes(file)
-            ) {
-                mapMarkerFiles.push(file);
-            }
+            addIfUnique(mapMarkerFiles, firstPhoto.fileId);
         }
     });
     if (mapMarkerFiles.length > 0) {
@@ -186,15 +187,7 @@ export const generateNeededThumbnails = async ({
     const remainingLocationFiles: EnteFile[] = [];
     photoClusters.slice(3).forEach((cluster) => {
         cluster.slice(0, 3).forEach((photo) => {
-            const file = files.find((f) => f.id === photo.fileId);
-            if (
-                file &&
-                !firstLocationsFiles.includes(file) &&
-                !mapMarkerFiles.includes(file) &&
-                !remainingLocationFiles.includes(file)
-            ) {
-                remainingLocationFiles.push(file);
-            }
+            addIfUnique(remainingLocationFiles, photo.fileId);
         });
     });
     if (remainingLocationFiles.length > 0) {

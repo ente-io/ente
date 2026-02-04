@@ -20,47 +20,195 @@
   "pleaseWait": "Lütfen bekleyiniz...",
   "downloading": "İndiriliyor...",
   "downloadingProgress": "İndiriliyor... %{percentage}",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
   "downloadFailed": "İndirme başarısız",
   "failedToDownloadOrDecrypt": "Öğe indirilemedi",
   "errorOpeningFile": "Öğe açılırken hata oluştu",
   "errorOpeningFileMessage": "Öğe açılırken hata: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening an item fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Item not found"
+      }
+    }
+  },
   "couldNotOpenFile": "Öğe açılamadı: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when item cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
   "minutesAgo": "{minutes}dk önce",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "hoursAgo": "{hours}sa önce",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "yesterday": "Dün",
   "daysAgo": "{days}g önce",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "collectionRenamedSuccessfully": "Koleksiyon başarıyla yeniden adlandırıldı",
   "failedToRenameCollection": "Koleksiyon yeniden adlandırılamadı: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collectionCannotBeDeleted": "Bu koleksiyon silinemez",
   "collectionCannotBeEdited": "Bu koleksiyon düzenlenemez",
   "collectionCannotBeShared": "Bu koleksiyon paylaşılamaz",
   "deleteCollection": "Koleksiyonu sil",
   "deleteCollectionConfirmation": "\"{collectionName}\" koleksiyonunu silmek istediğinizden emin misiniz?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
   "cancel": "İptal et",
   "collectionDeletedSuccessfully": "Koleksiyon başarıyla silindi",
   "failedToDeleteCollection": "Koleksiyon silinemedi: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "collections": "Koleksiyonlar",
   "retry": "Tekrar dene",
   "failedToSyncTrash": "Çöp kutusu senkronize edilemedi: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "pleaseSelectAtLeastOneCollection": "Lütfen en az bir koleksiyon seçin",
   "unknownItemType": "Bilinmeyen öğe türü",
   "fileDeletedSuccessfully": "Öğe başarıyla silindi",
   "failedToDeleteFile": "Öğe silinemedi: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when item deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "fileUpdatedSuccessfully": "Öğe başarıyla güncellendi!",
   "failedToUpdateFile": "Öğe güncellenemedi: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when item update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noChangesWereMade": "Hiçbir değişiklik yapılmadı",
   "noCollectionsAvailableForRestore": "Geri yüklenecek koleksiyon yok",
   "trashClearedSuccessfully": "Çöp kutusu başarıyla temizlendi",
   "failedToClearTrash": "Çöp kutusu temizlenemedi: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "trash": "Cöp kutusu",
   "deletedPermanently": "\"{fileName}\" kalıcı olarak silindi",
+  "@deletedPermanently": {
+    "description": "Message when item is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "failedToRestoreFile": "\"{fileName}\" geri yüklenemedi: {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when item restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "createNewCollection": "Yeni koleksiyon oluştur",
   "create": "Oluştur",
   "renameCollection": "Koleksiyonu yeniden adlandır",
   "save": "Kaydet",
   "deleteFile": "Öğeyi sil",
   "deleteFileConfirmation": "\"{fileName}\" öğesini silmek istediğinizden emin misiniz?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for item deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsFound": "Koleksiyon bulunamadı",
   "createYourFirstCollection": "Başlamak için ilk koleksiyonunuzu oluşturun",
   "createCollection": "Koleksiyon oluştur",
@@ -74,11 +222,38 @@
   "homeLockerEmptySubtitle": "Başlamak için + düğmesine tıklayın",
   "uploadDocument": "Belge yükle",
   "items": "{count} öğe",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "files": "{count, plural, =0{öğe yok} =1{1 öğe} other{{count} öğe}}",
+  "@files": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "createCollectionTooltip": "Koleksiyon oluştur",
   "uploadDocumentTooltip": "Belge yükle",
   "restore": "Geri yükle",
   "restoreFile": "{fileName} geri yükle",
+  "@restoreFile": {
+    "description": "Dialog title for restoring an item from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
   "noCollectionsAvailable": "Kullanılabilir koleksiyon yok",
   "emptyTrash": "Çöp kutusunu boşalt",
   "emptyTrashTooltip": "Çöp kutusunu boşalt",
@@ -92,12 +267,43 @@
   "searchEmptyTitle": "Eşleşme bulunamadı",
   "searchEmptyDescription": "Başka bir şey aramayı deneyin.",
   "searchEverywhereTitle": "Her yerde \"{query}\" ara",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
   "searchEverywhereSubtitle": "Tüm koleksiyonlarda ve dosyalarda ara.",
   "noCollectionsFoundForQuery": "\"{query}\" için koleksiyon bulunamadı",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "uncategorized": "Kategorisiz",
   "syncingTrash": "Çöp kutusu senkronize ediliyor...",
   "restoring": "Geri yükleniyor...",
   "restoredFileToCollection": "\"{fileName}\" \"{collectionName}\" koleksiyonuna geri yüklendi",
+  "@restoredFileToCollection": {
+    "description": "Success message when an item is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
   "clearingTrash": "Çöp kutusu temizleniyor...",
   "trashIsEmpty": "Çöp kutusu boş",
   "share": "Paylaş",
@@ -157,15 +363,12 @@
   "reportABug": "Hata bildir",
   "reportBug": "Hata bildir",
   "logsDialogBodyLocker": "Bu, sorununuzu çözmemize yardımcı olmak için günlükleri gönderecektir.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Sosyal Medya",
   "rateUsOnStore": "Bizi {storeName} üzerinden değerlendirin",
-  "blog": "Blog",
   "merchandise": "Ürünler",
-  "twitter": "Twitter",
-  "mastodon": "Mastodon",
-  "matrix": "Matrix",
-  "discord": "Discord",
-  "reddit": "Reddit",
   "information": "Bilgi",
   "saveInformation": "Bilgiyi kaydet",
   "saveToLocker": "Locker'a kaydet",
@@ -179,8 +382,17 @@
   "accountCredentials": "Gizli",
   "accountCredentialsDescription": "Hesap kimlik bilgilerini saklayın.",
   "editSecret": "Gizliyi düzenle",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
   "editLocation": "Konumu düzenle",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
   "editNote": "Notu düzenle",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Acil durum kişisi",
   "emergencyContactDescription": "Kriz durumlarında önemli kişilerin iletişim bilgilerini saklayın.",
   "noteName": "Başlık",
@@ -259,6 +471,14 @@
   "expiredLinkInfo": "Bu bağlantının süresi dolmuştur. Lütfen yeni bir süre belirleyin veya bağlantı süresini devre dışı bırakın.",
   "linkExpiresOn": "Bu bağlantı {expiryTime} tarihinden itibaren geçersiz olacaktır",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Belirli kişilerle paylaş} =1 {1 kişiyle paylaşıldı} other {{numberOfPeople} kişiyle paylaşıldı}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "linkHasExpired": "Bağlantının süresi dolmuş",
   "publicLinkEnabled": "Herkese açık bağlantı aktive edildi",
   "shareALink": "Bir bağlantı paylaş",
@@ -273,7 +493,25 @@
   "collaboratorsCanAddFilesToTheSharedCollection": "İşbirlikçiler paylaşılan koleksiyona öğe ekleyebilir.",
   "enterEmail": "E-postanızı giriniz",
   "viewersSuccessfullyAdded": "{count, plural, =0 {0 izleyici eklendi} =1 {1 izleyici eklendi} other {{count} izleyici eklendi}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 işbirlikçi eklendi} =1 {1 işbirlikçi eklendi} other {{count} işbirlikçi eklendi}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
   "addViewers": "{count, plural, =0 {Görüntüleyen ekle} =1 {Görüntüleyen ekle} other {Görüntüleyen ekle}}",
   "addCollaborators": "{count, plural, =0 {Ortak çalışan ekle} =1 {Ortak çalışan ekle} other {Ortak çalışan ekle}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Uçtan uca şifrelemeyi doğrulamak için bir e-postaya uzun basın.",
@@ -291,6 +529,14 @@
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Size albümleri paylaşan biri, kendi cihazında aynı kimliği görmelidir.",
   "howToViewShareeVerificationID": "Lütfen onlardan ayarlar ekranında e-posta adresine uzun süre basmalarını ve her iki cihazdaki kimliklerin eşleştiğini doğrulamalarını isteyin.",
   "thisIsPersonVerificationId": "Bu, {email}'in Doğrulama Kimliği",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
   "verificationId": "Doğrulama kimliği",
   "verifyEmailID": "{email} doğrula",
   "emailNoEnteAccount": "{email} bir Ente hesabına sahip değil.\n\nÖğe paylaşmak için davet gönderin.",
@@ -303,6 +549,15 @@
   "yesConvertToViewer": "Evet, görüntüleyici olarak dönüştür",
   "changePermissions": "İzinleri değiştir",
   "cannotAddMoreFilesAfterBecomingViewer": "{name} görüntüleyici olduktan sonra koleksiyona öğe ekleyemeyecek.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
   "removeWithQuestionMark": "Kaldırılsın mı?",
   "removeParticipantBody": "{userEmail} bu paylaşılan koleksiyondan kaldırılacak\n\nOnun eklediği öğeler de koleksiyondan kaldırılacak",
   "yesRemove": "Evet, sil",
@@ -311,10 +566,27 @@
   "collaborator": "Düzenleyici",
   "collaboratorsCanAddFilesToTheSharedAlbum": "İşbirlikçiler paylaşılan koleksiyona öğe ekleyebilir.",
   "albumParticipantsCount": "{count, plural, =0 {Katılımcı Yok} =1 {1 Katılımcı} other {{count} Katılımcı}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "addMore": "Daha fazla ekle",
   "you": "Sen",
   "albumOwner": "Sahip",
   "typeOfCollectionTypeIsNotSupportedForRename": "{collectionType} türündeki koleksiyon yeniden adlandırma için desteklenmiyor",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
   "leaveCollection": "Koleksiyondan ayrıl",
   "filesAddedByYouWillBeRemovedFromTheCollection": "Sizin eklediğiniz öğeler koleksiyondan kaldırılacak",
   "leaveSharedCollection": "Paylaşılan koleksiyondan ayrıl?",
@@ -324,20 +596,79 @@
   "authToManageLegacy": "Güvenilir kişilerinizi yönetmek için lütfen kimlik doğrulaması yapın",
   "uploadError": "Yükleme hatası",
   "uploadStorageLimitErrorTitle": "Depolama limitine ulaşıldı",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
   "uploadStorageLimitErrorBody": "Depolama alanınız tükendi. Yüklemeye devam etmek için yer açın.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
   "uploadFileCountLimitErrorTitle": "Dosya limitine ulaşıldı",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorBody": "Dosya limitinize ulaştınız. Daha fazla depolama için ücretli plana yükseltin.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileCountLimitErrorToast": "İşlem başarısız. Dosya limitinize ulaştınız.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
   "uploadFileTooLargeErrorTitle": "Dosya çok büyük",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
   "uploadFileTooLargeErrorBody": "Bu dosya desteklenen maksimum yükleme boyutu olan 10GB'dan büyük.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Arama sorgunuzu ayarlamayı deneyin",
   "noFilesFoundForQuery": "\"{query}\" için öğe bulunamadı",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no items match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "deselectAll": "Tüm seçimi kaldır",
   "selectAll": "Hepsini seç",
   "unnamedCollection": "İsimsiz Koleksiyon",
-  "enteLocker": "ente Locker",
   "uploadedFilesProgress": "{completed}/{total} öğe yüklendi...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded items",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "uploadedFilesProgressWithError": "{completed}/{total} öğe yüklendi... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded items with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "noCollectionsAvailableForSelection": "Kullanılabilir koleksiyon yok",
   "createCollectionButton": "Koleksiyon oluştur",
   "collectionButtonLabel": "Koleksiyon",
@@ -352,6 +683,15 @@
   "saveDocument": "Belgeyi kaydet",
   "uploadFiles": "Öğe yükle",
   "filesSelected": "{count, plural, =0{Öğe seçilmedi} =1{1 öğe seçildi} other{{count} öğe seçildi}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "addToCollection": "Koleksiyona ekle",
   "newCollection": "Yeni koleksiyon",
   "title": "Başlık",
@@ -360,11 +700,50 @@
   "backToView": "Görünüme geri dön",
   "back": "Geri",
   "failedToLoadCollections": "Koleksiyonlar yüklenemedi: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "informationCollectionName": "Bilgi",
   "recordSavedToMultipleCollections": "Kayıt başarıyla {count, plural, =1{1 koleksiyona} other{{count} koleksiyona}} kaydedildi",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "copiedToClipboard": "{fieldName} panoya kopyalandı",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
   "searchResultsCount": "\"{query}\" için {count, plural, =1{1 sonuç} other{{count} sonuç}}",
-  "locker": "Locker",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
   "loginToEnteAccount": "Ente hesabınıza giriş yapın",
   "unlockLockerNewUserTitle": "Locker'ı kullanmak için Ente'ye katılın",
   "unlockLockerNewUserBody": "Locker şu anda yalnızca mevcut Ente kullanıcıları için kullanılabilir. Locker'ı kullanmak için Ente Photos'ta hesap oluşturabilirsiniz.",
@@ -399,13 +778,60 @@
   "yesDeleteCollection": "Evet, koleksiyonu sil",
   "yesDeleteFile": "Evet, öğeyi sil",
   "deleteCollectionDialogBody": "{collectionName} kalıcı olarak silinecek.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
   "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 koleksiyon} other{{count} koleksiyon}} kalıcı olarak silinecek.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteMultipleFilesDialogBody": "{count, plural, =1{1 öğe} other{{count} öğe}} kalıcı olarak silinecek.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "deleteCollectionFromEverywhere": "Öğeleri her yerden de sil",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Evet, {count, plural, =1{koleksiyonu} other{koleksiyonları}} sil",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "yesDeleteFiles": "Evet, {count, plural, =1{öğeyi} other{öğeleri}} sil",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "usage": "Kullanım",
-  "fileCount": "{used} / {max}",
   "important": "Önemli",
   "unimportant": "Önemsiz",
   "removingFromImportant": "Önemlilerden kaldırılıyor...",
@@ -413,9 +839,36 @@
   "fileMarkedAsImportant": "Öğe önemli olarak işaretlendi",
   "fileRemovedFromImportant": "Öğe önemlilerden kaldırıldı",
   "filesMarkedAsImportant": "{count, plural, =1{1 öğe önemli olarak işaretlendi} other{{count} öğe önemli olarak işaretlendi}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
   "allFilesAlreadyMarkedAsImportant": "Tüm öğeler zaten önemli olarak işaretli",
   "failedToMarkFilesAsImportant": "Öğeler önemli olarak işaretlenemedi: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "failedToUpdateImportantStatus": "Önemlilik durumu güncellenemedi: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
   "sorry": "Üzgünüz",
   "subscribe": "Abone ol",
   "sharedWith": "Paylaşılan",
