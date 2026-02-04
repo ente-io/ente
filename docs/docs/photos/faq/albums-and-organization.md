@@ -196,7 +196,7 @@ The Uncategorized section shows all photos that aren't in any other album you ow
 
 For detailed guides, see [Hide](/photos/features/albums-and-organization/hide) and [Archive](/photos/features/albums-and-organization/archive).
 
-### Can I hide albums that are shared with me? {#hide-shared}
+### Can I hide albums or photos that are shared with me? {#hide-shared}
 
 You can hide an album shared with you, but you can't hide an individual photo shared with you.
 
