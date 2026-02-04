@@ -116,9 +116,6 @@ class VideoPreviewService {
     if (isOfflineMode) {
       return false;
     }
-    if (flagService.internalUser) {
-      return true;
-    }
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
         flagService.streamEnabledByDefault;
   }
