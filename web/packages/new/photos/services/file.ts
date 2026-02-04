@@ -65,8 +65,10 @@ export const computeAllCollectionFilesFromSaved = async () =>
  * The long name and the "compute" in it is to signal that this is not just a DB
  * read, and that it also does some potentially non-trivial computation.
  */
-export const computeNormalCollectionFilesFromSaved = async () => {
-    const hiddenCollections = await savedHiddenCollections();
+export const computeNormalCollectionFilesFromSaved = async (
+    currentUserID?: number,
+) => {
+    const hiddenCollections = await savedHiddenCollections(currentUserID);
     const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
 
     const collectionFiles = await savedCollectionFiles();
