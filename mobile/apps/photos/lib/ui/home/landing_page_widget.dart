@@ -11,12 +11,15 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import 'package:photos/theme/colors.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
@@ -34,146 +37,140 @@ class LandingPageWidget extends StatefulWidget {
 
 class _LandingPageWidgetState extends State<LandingPageWidget> {
   static const kDeveloperModeTapCountThreshold = 7;
+  static const _featureCount = 3;
 
   double _featureIndex = 0;
+  int _currentPage = 0;
   int _developerModeTapCount = 0;
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     Future(_showAutoLogoutDialogIfRequired);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GestureDetector(
-        onTap: () async {
-          _developerModeTapCount++;
-          if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
-            _developerModeTapCount = 0;
-            final result = await showChoiceDialog(
-              context,
-              title: AppLocalizations.of(context).developerSettings,
-              firstButtonLabel: AppLocalizations.of(context).yes,
-              body: AppLocalizations.of(context).developerSettingsWarning,
-              isDismissible: false,
-            );
-            if (result?.action == ButtonAction.first) {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const DeveloperSettingsPage();
-                  },
-                ),
-              );
-              setState(() {});
-            }
-          }
-        },
-        child: _getBody(),
-      ),
-      resizeToAvoidBottomInset: false,
-    );
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
-  Widget _getBody() {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            kDebugMode
-                ? GestureDetector(
-                    child: const Align(
-                      alignment: Alignment.topRight,
-                      child: Text("Lang"),
-                    ),
-                    onTap: () async {
-                      final locale = (await getLocale())!;
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        LanguageSelectorPage(
-                          appSupportedLocales,
-                          (locale) async {
-                            await setLocale(locale);
-                            EnteApp.setLocale(context, locale);
-                            unawaited(AppLocalizations.delegate.load(locale));
-                          },
-                          locale,
+  @override
+  Widget build(BuildContext context) {
+    if (isOfflineMode) {
+      return _buildOfflineScaffold();
+    }
+    return _buildOnlineScaffold();
+  }
+
+  Widget _buildOnlineScaffold() {
+    return Scaffold(
+      body: GestureDetector(
+        onTap: _handleDeveloperModeTap,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                kDebugMode
+                    ? GestureDetector(
+                        child: const Align(
+                          alignment: Alignment.topRight,
+                          child: Text("Lang"),
                         ),
-                      ).then((value) {
-                        setState(() {});
-                      });
-                    },
-                  )
-                : const SizedBox(),
-            const Padding(padding: EdgeInsets.all(12)),
-            const Text(
-              "ente",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Montserrat',
-                fontSize: 42,
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(28),
-            ),
-            _getFeatureSlider(),
-            const Padding(
-              padding: EdgeInsets.all(12),
-            ),
-            DotsIndicator(
-              dotsCount: 3,
-              position: _featureIndex,
-              decorator: DotsDecorator(
-                activeColor:
-                    Theme.of(context).colorScheme.dotsIndicatorActiveColor,
-                color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
-                activeShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
+                        onTap: () async {
+                          final locale = (await getLocale())!;
+                          // ignore: unawaited_futures
+                          routeToPage(
+                            context,
+                            LanguageSelectorPage(
+                              appSupportedLocales,
+                              (locale) async {
+                                await setLocale(locale);
+                                EnteApp.setLocale(context, locale);
+                                unawaited(
+                                  AppLocalizations.delegate.load(locale),
+                                );
+                              },
+                              locale,
+                            ),
+                          ).then((value) {
+                            setState(() {});
+                          });
+                        },
+                      )
+                    : const SizedBox(),
+                const Padding(padding: EdgeInsets.all(12)),
+                const Text(
+                  "ente",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                    fontSize: 42,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(3),
+                const Padding(
+                  padding: EdgeInsets.all(28),
                 ),
-                size: const Size(100, 5),
-                activeSize: const Size(100, 5),
-                spacing: const EdgeInsets.all(3),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(28),
-            ),
-            _getSignUpButton(context),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-              child: Hero(
-                tag: "log_in",
-                child: ElevatedButton(
-                  key: const ValueKey("signInButton"),
-                  style:
-                      Theme.of(context).colorScheme.optionalActionButtonStyle,
-                  onPressed: _navigateToSignInPage,
-                  child: Text(
-                    AppLocalizations.of(context).existingUser,
-                    style: const TextStyle(
-                      color: Colors.black, // same for both themes
+                _getFeatureSlider(),
+                const Padding(
+                  padding: EdgeInsets.all(12),
+                ),
+                DotsIndicator(
+                  dotsCount: 3,
+                  position: _featureIndex,
+                  decorator: DotsDecorator(
+                    activeColor:
+                        Theme.of(context).colorScheme.dotsIndicatorActiveColor,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .dotsIndicatorInactiveColor,
+                    activeShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    size: const Size(100, 5),
+                    activeSize: const Size(100, 5),
+                    spacing: const EdgeInsets.all(3),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(28),
+                ),
+                _getSignUpButton(context),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                  child: Hero(
+                    tag: "log_in",
+                    child: ElevatedButton(
+                      key: const ValueKey("signInButton"),
+                      style: Theme.of(context)
+                          .colorScheme
+                          .optionalActionButtonStyle,
+                      onPressed: _navigateToSignInPage,
+                      child: Text(
+                        AppLocalizations.of(context).existingUser,
+                        style: const TextStyle(
+                          color: Colors.black, // same for both themes
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const DeveloperSettingsWidget(),
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                ),
+              ],
             ),
-            // const DeveloperSettingsWidget() does not refresh when the endpoint is changed
-            // ignore: prefer_const_constructors
-            DeveloperSettingsWidget(),
-            const Padding(
-              padding: EdgeInsets.all(20),
-            ),
-          ],
+          ),
         ),
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 
@@ -221,6 +218,196 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         },
       ),
     );
+  }
+
+  Widget _buildOfflineScaffold() {
+    final textTheme = getEnteTextTheme(context);
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: green,
+        leading: const SizedBox(),
+        title: Text(
+          "ente",
+          style: textTheme.h3Bold.copyWith(
+            fontFamily: "Montserrat",
+          ),
+        ),
+        centerTitle: true,
+      ),
+      backgroundColor: green,
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: _handleDeveloperModeTap,
+          child: Column(
+            children: [
+              if (kDebugMode) _buildDebugLanguageButton(),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildFeatureCarousel(),
+                    const SizedBox(height: 12),
+                    _buildPageIndicator(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    ButtonWidgetV2(
+                      buttonType: ButtonTypeV2.neutral,
+                      labelText:
+                          AppLocalizations.of(context).createAnEnteAccount,
+                      onTap: _navigateToSignUpPage,
+                      shouldStickToLightTheme: true,
+                    ),
+                    const SizedBox(height: 12),
+                    ButtonWidgetV2(
+                      buttonType: ButtonTypeV2.secondary,
+                      labelText:
+                          AppLocalizations.of(context).continueWithoutAccount,
+                      onTap: _navigateWithoutAccount,
+                      shouldStickToLightTheme: true,
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () {
+                        _navigateToSignInPage();
+                      },
+                      child: Text(
+                        AppLocalizations.of(context).loginToExistingAccount,
+                        style: getEnteTextTheme(context).body.copyWith(
+                              decoration: TextDecoration.underline,
+                              color: Colors.white,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const DeveloperSettingsWidget(),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDebugLanguageButton() {
+    return GestureDetector(
+      child: const Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: EdgeInsets.only(right: 16),
+          child: Text(
+            "Lang",
+            style: TextStyle(color: Colors.black54),
+          ),
+        ),
+      ),
+      onTap: () async {
+        final locale = (await getLocale())!;
+        // ignore: unawaited_futures
+        routeToPage(
+          context,
+          LanguageSelectorPage(
+            appSupportedLocales,
+            (locale) async {
+              await setLocale(locale);
+              EnteApp.setLocale(context, locale);
+              unawaited(AppLocalizations.delegate.load(locale));
+            },
+            locale,
+          ),
+        ).then((value) {
+          setState(() {});
+        });
+      },
+    );
+  }
+
+  Widget _buildFeatureCarousel() {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 320),
+      child: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentPage = index;
+          });
+        },
+        children: [
+          FeatureItemWidget(
+            "assets/onboarding_lock.png",
+            AppLocalizations.of(context).privateBackups,
+            AppLocalizations.of(context).forYourMemories,
+            AppLocalizations.of(context).endtoendEncryptedByDefault,
+          ),
+          FeatureItemWidget(
+            "assets/onboarding_safe.png",
+            AppLocalizations.of(context).safelyStored,
+            AppLocalizations.of(context).atAFalloutShelter,
+            AppLocalizations.of(context).designedToOutlive,
+          ),
+          FeatureItemWidget(
+            "assets/onboarding_sync.png",
+            AppLocalizations.of(context).available,
+            AppLocalizations.of(context).everywhere,
+            Platform.isAndroid
+                ? AppLocalizations.of(context).androidIosWebDesktop
+                : AppLocalizations.of(context).mobileWebDesktop,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPageIndicator() {
+    return DotsIndicator(
+      dotsCount: _featureCount,
+      position: _currentPage.toDouble(),
+      decorator: DotsDecorator(
+        activeColor: Colors.white,
+        color: Colors.white.withValues(alpha: 0.32),
+        activeShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        size: const Size(10, 10),
+        activeSize: const Size(20, 10),
+        spacing: const EdgeInsets.all(6),
+      ),
+    );
+  }
+
+  Future<void> _handleDeveloperModeTap() async {
+    _developerModeTapCount++;
+    if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
+      _developerModeTapCount = 0;
+      final result = await showChoiceDialog(
+        context,
+        title: AppLocalizations.of(context).developerSettings,
+        firstButtonLabel: AppLocalizations.of(context).yes,
+        body: AppLocalizations.of(context).developerSettingsWarning,
+        isDismissible: false,
+      );
+      if (result?.action == ButtonAction.first) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const DeveloperSettingsPage();
+            },
+          ),
+        );
+        setState(() {});
+      }
+    }
   }
 
   Future<void> _navigateToSignUpPage() async {
@@ -280,6 +467,10 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         },
       ),
     );
+  }
+
+  Future<void> _navigateWithoutAccount() async {
+    // TODO: Implement navigation for continue without account
   }
 
   Future<void> _showAutoLogoutDialogIfRequired() async {
