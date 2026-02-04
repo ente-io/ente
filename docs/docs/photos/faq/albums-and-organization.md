@@ -198,7 +198,7 @@ For detailed guides, see [Hide](/photos/features/albums-and-organization/hide) a
 
 ### Can I hide albums or photos that are shared with me? {#hide-shared}
 
-You can hide an album shared with you, but you can't hide an individual photo shared with you.
+You can hide an album shared with you, but you can't hide an individual photo shared with you since hiding of individual files only works for files you own.
 
 ### Do archived photos appear in search results? {#archive-search}
 
