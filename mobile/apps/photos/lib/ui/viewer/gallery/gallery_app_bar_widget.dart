@@ -150,14 +150,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     _appBarTitle = widget.title;
     galleryType = widget.type;
-    if (Platform.isIOS &&
-        widget.type == GalleryType.localFolder &&
-        widget.deviceCollection != null) {
-      _checkIfICloudSharedAlbum();
-    }
+    _checkIfICloudSharedAlbum();
   }
 
   Future<void> _checkIfICloudSharedAlbum() async {
+    if (!Platform.isIOS ||
+        widget.type != GalleryType.localFolder ||
+        widget.deviceCollection == null) {
+      return;
+    }
     final sharedPathIDs =
         await FilesService.instance.getICloudSharedAlbumPathIDs();
     if (mounted && sharedPathIDs.contains(widget.deviceCollection!.id)) {
