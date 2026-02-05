@@ -96,6 +96,8 @@ class SocialSyncService {
           await _db.getReactionsSyncTime(collectionID)) {
         await _db.setReactionsSyncTime(collectionID, maxReactionsUpdatedAt);
       }
+
+      await _db.resolveParentCommentUserIDs(collectionID);
     } catch (e) {
       _logger.severe('Failed to sync collection $collectionID', e);
       rethrow;
@@ -143,6 +145,8 @@ class SocialSyncService {
         final reactions = _decryptReactions(response.reactions, collectionID);
         await _db.upsertReactions(reactions);
       }
+
+      await _db.resolveParentCommentUserIDs(collectionID);
     } catch (e) {
       _logger.warning('Failed to sync social data for file $fileID', e);
       // Don't rethrow - this is a non-critical operation
