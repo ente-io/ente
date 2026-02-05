@@ -273,6 +273,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     if (hasYearlyPlans) {
       widgets.add(
         SubscriptionToggle(
+          initialIsYearly: showYearlyPlan,
           onToggle: (p0) {
             showYearlyPlan = p0;
             _filterStorePlansForUi();

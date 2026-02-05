@@ -221,6 +221,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(
       SubscriptionToggle(
+        initialIsYearly: _showYearlyPlan,
         onToggle: (p0) {
           _showYearlyPlan = p0;
           _filterStripeForUI();
