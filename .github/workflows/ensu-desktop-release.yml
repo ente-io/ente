@@ -46,7 +46,9 @@ jobs:
 
             - name: Set macOS deployment target
               if: matrix.platform.os == 'macos-latest'
-              run: echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+              run: |
+                  echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+                  echo "CMAKE_OSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
 
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
@@ -90,6 +92,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
                   TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
+                  CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
               with:
                   projectPath: desktop/ensu-tauri
                   tagName: ${{ github.ref_name }}
