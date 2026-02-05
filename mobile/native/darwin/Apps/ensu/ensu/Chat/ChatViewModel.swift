@@ -1834,16 +1834,32 @@ final class ChatViewModel: ObservableObject {
                 guard let self else { return }
                 if Task.isCancelled { return }
 
+                let previousSessionId = self.currentSessionId
+                let shouldPreserveMessages = resolved == previousSessionId && !self.messages.isEmpty
+                let preservedMessages = self.messages
+                let preservedMessageStore = self.messageStore
+                let preservedBranchSelections = self.branchSelections
+
                 self.sessions = refreshed
                 self.currentSessionId = resolved
-                self.messages = []
                 self.messageStore = [:]
                 self.branchSelections = [:]
                 self.childrenByParentCache = [:]
 
                 for session in refreshed {
-                    self.messageStore[session.id] = []
-                    self.branchSelections[session.id] = [:]
+                    if shouldPreserveMessages, session.id == resolved, let nodes = preservedMessageStore[session.id] {
+                        self.messageStore[session.id] = nodes
+                        self.branchSelections[session.id] = preservedBranchSelections[session.id] ?? [:]
+                    } else {
+                        self.messageStore[session.id] = []
+                        self.branchSelections[session.id] = [:]
+                    }
+                }
+
+                if shouldPreserveMessages {
+                    self.messages = preservedMessages
+                } else {
+                    self.messages = []
                 }
 
                 if let current = resolved {
