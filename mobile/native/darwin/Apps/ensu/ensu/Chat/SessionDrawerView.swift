@@ -149,7 +149,7 @@ struct SessionDrawerView: View {
         return HStack(alignment: .center, spacing: EnsuSpacing.sm) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(session.id == currentSessionId ? EnsuFont.ui(size: 16, weight: .semibold) : EnsuTypography.small)
+                    .font(EnsuTypography.small)
                     .foregroundStyle(EnsuColor.textPrimary)
                 Text(session.lastMessage.isEmpty ? "Nothing here" : session.lastMessage)
                     .font(EnsuTypography.mini)
