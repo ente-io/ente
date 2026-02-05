@@ -1,3 +1,4 @@
+- Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
 - Ashil: Social notification improvements
 - Laurens: Notifications for comments and likes
 - Neeraj: Fix incorrect thumbnail for local files

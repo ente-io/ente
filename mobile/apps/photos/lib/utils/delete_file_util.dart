@@ -15,9 +15,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/api/collection/trash_item_request.dart';
-import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
+import "package:photos/models/freeable_space_info.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
@@ -375,14 +375,9 @@ Future<bool> deleteLocalFiles(
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    // In IOS, the library returns no error and fail to delete any file is
-    // there's any shared file. As a stop-gap solution, we initiate deletion in
-    // batches. Similar in Android, for large number of files, we have observed
-    // that the library fails to delete any file. So, we initiate deletion in
-    // batches.
     if (deletedIDs.isEmpty && Platform.isIOS) {
-      deletedIDs.addAll(
-        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
+      _logger.warning(
+        "Deletion failed in deleteLocalFiles for ${localAssetIDs.length} files, on iOS",
       );
     }
 
@@ -453,14 +448,10 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    // In IOS, the library returns no error and fail to delete any file is
-    // there's any shared file. As a stop-gap solution, we initiate deletion in
-    // batches. Similar in Android, for large number of files, we have observed
-    // that the library fails to delete any file. So, we initiate deletion in
-    // batches.
+
     if (deletedIDs.isEmpty && Platform.isIOS) {
-      deletedIDs.addAll(
-        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
+      _logger.warning(
+        "Deletion failed in deleteLocalFilesAfterRemovingAlreadyDeletedIDs for ${localAssetIDs.length} files, on iOS",
       );
     }
 
@@ -510,11 +501,11 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     );
     await LocalSyncService.instance.sync();
 
-    late final BackupStatus status;
+    late final FreeableSpaceInfo status;
     final List<String> deletedIDs = [];
     final List<String> localAssetIDs = [];
     final List<String> localSharedMediaIDs = [];
-    status = await FilesService.instance.getBackupStatus();
+    status = await FilesService.instance.getFreeableSpaceInfo();
 
     for (String localID in status.localIDs) {
       if (localID.startsWith(sharedMediaIdentifier)) {
@@ -869,88 +860,4 @@ Future<void> showDeleteSheet(
   } else {
     selectedFiles.clearAll();
   }
-}
-
-Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
-  BuildContext context,
-  List<String> localAssetIDs,
-) async {
-  final List<String> deletedIDs = [];
-
-  _logger.info(
-    "Trying to delete local files in batches",
-  );
-  deletedIDs.addAll(
-    await _deleteLocalFilesInBatchesRecursively(localAssetIDs, context),
-  );
-  if (deletedIDs.isEmpty) {
-    _logger.warning(
-      "Failed to delete local files in recursively batches",
-    );
-  }
-
-  _logger.severe(
-      "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs"
-      "in batches}");
-
-  return deletedIDs;
-}
-
-Future<List<String>> _deleteLocalFilesInBatchesRecursively(
-  List<String> localAssetIDs,
-  BuildContext context,
-) async {
-  if (localAssetIDs.isEmpty) return [];
-
-  final deletedIDs = await _deleteLocalFiles(localAssetIDs, context);
-  if (deletedIDs.isNotEmpty) {
-    return deletedIDs;
-  }
-
-  if (localAssetIDs.length == 1) {
-    _logger.warning("Failed to delete file " + localAssetIDs.first);
-    return [];
-  }
-
-  final midIndex = localAssetIDs.length ~/ 2;
-  final left = localAssetIDs.sublist(0, midIndex);
-  final right = localAssetIDs.sublist(midIndex);
-
-  final leftDeleted =
-      await _deleteLocalFilesInBatchesRecursively(left, context);
-  final rightDeleted =
-      await _deleteLocalFilesInBatchesRecursively(right, context);
-
-  return [...leftDeleted, ...rightDeleted];
-}
-
-Future<List<String>> _deleteLocalFiles(
-  List<String> localIDs,
-  BuildContext context,
-) async {
-  _logger.info(
-    "Trying to delete batch of size " +
-        localIDs.length.toString() +
-        "  :  " +
-        localIDs.toString(),
-  );
-
-  final dialog = createProgressDialog(
-    context,
-    "Deleting " + localIDs.length.toString() + " backed up files...",
-  );
-  await dialog.show();
-
-  final List<String> deletedIDs = [];
-  try {
-    deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
-    _logger.info("Deleted " + localIDs.toString());
-  } catch (e, s) {
-    _logger.severe("Could not delete batch " + localIDs.toString(), e, s);
-    await showGenericErrorDialog(context: context, error: e);
-  }
-
-  await dialog.hide();
-
-  return deletedIDs;
 }

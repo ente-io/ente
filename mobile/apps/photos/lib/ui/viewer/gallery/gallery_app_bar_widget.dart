@@ -21,11 +21,11 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/gateways/cast_gw.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/models/backup_status.dart';
 import "package:photos/models/button_result.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/file.dart";
+import 'package:photos/models/freeable_space_info.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
@@ -124,6 +124,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   bool isQuickLink = false;
   late GalleryType galleryType;
 
+  bool _isICloudSharedAlbum = false;
   final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
 
   @override
@@ -149,6 +150,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     _appBarTitle = widget.title;
     galleryType = widget.type;
+    _checkIfICloudSharedAlbum();
+  }
+
+  Future<void> _checkIfICloudSharedAlbum() async {
+    if (!Platform.isIOS ||
+        widget.type != GalleryType.localFolder ||
+        widget.deviceCollection == null) {
+      return;
+    }
+    final sharedPathIDs =
+        await FilesService.instance.getICloudSharedAlbumPathIDs();
+    if (mounted && sharedPathIDs.contains(widget.deviceCollection!.id)) {
+      setState(() {
+        _isICloudSharedAlbum = true;
+      });
+    }
   }
 
   @override
@@ -323,10 +340,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog =
         createProgressDialog(context, AppLocalizations.of(context).calculating);
     await dialog.show();
-    BackupStatus status;
+    FreeableSpaceInfo status;
     try {
       status = await FilesService.instance
-          .getBackupStatus(pathID: widget.deviceCollection!.id);
+          .getFreeableSpaceInfo(pathID: widget.deviceCollection!.id);
     } catch (e) {
       await dialog.hide();
       unawaited(showGenericErrorDialog(context: context, error: e));
@@ -351,7 +368,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
-  void _showSpaceFreedDialog(BackupStatus status) {
+  void _showSpaceFreedDialog(FreeableSpaceInfo status) {
     showChoiceDialog(
       context,
       title: AppLocalizations.of(context).success,
@@ -639,7 +656,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           value: AlbumPopupAction.leave,
           icon: Icons.logout,
         ),
-      if (galleryType == GalleryType.localFolder)
+      if (galleryType == GalleryType.localFolder && !_isICloudSharedAlbum)
         EntePopupMenuItem(
           AppLocalizations.of(context).freeUpDeviceSpace,
           value: AlbumPopupAction.freeUpSpace,

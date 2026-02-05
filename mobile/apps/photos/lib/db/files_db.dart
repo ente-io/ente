@@ -9,10 +9,10 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/db/common/base.dart";
 import "package:photos/db/common/conflict_algo.dart";
-import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/freeable_space_info.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -660,7 +660,9 @@ class FilesDB with SqlDbBase {
     return (ids, hash);
   }
 
-  Future<BackedUpFileIDs> getBackedUpIDs() async {
+  Future<FreeableFileIDs> getFreeableFileIDs({
+    Set<String> excludeLocalIDs = const {},
+  }) async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       'SELECT $columnLocalID, $columnUploadedFileID, $columnFileSize FROM $filesTable'
@@ -671,14 +673,15 @@ class FilesDB with SqlDbBase {
     int localSize = 0;
     for (final result in results) {
       final String localID = result[columnLocalID] as String;
+      if (excludeLocalIDs.contains(localID)) continue;
       final int? fileSize = result[columnFileSize] as int?;
       if (!localIDs.contains(localID) && fileSize != null) {
         localSize += fileSize;
       }
-      localIDs.add(result[columnLocalID] as String);
+      localIDs.add(localID);
       uploadedIDs.add(result[columnUploadedFileID] as int);
     }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
+    return FreeableFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
   }
 
   Future<FileLoadResult> getAllPendingOrUploadedFiles(

@@ -1,11 +1,11 @@
-class BackupStatus {
+class FreeableSpaceInfo {
   final List<String> localIDs;
   final int size;
 
-  BackupStatus(this.localIDs, this.size);
+  FreeableSpaceInfo(this.localIDs, this.size);
 }
 
-class BackedUpFileIDs {
+class FreeableFileIDs {
   final List<String> localIDs;
   final List<int> uploadedIDs;
   // localSize indicates the approximate size of the files on the device.
@@ -13,5 +13,5 @@ class BackedUpFileIDs {
   // uploaded
   final int localSize;
 
-  BackedUpFileIDs(this.localIDs, this.uploadedIDs, this.localSize);
+  FreeableFileIDs(this.localIDs, this.uploadedIDs, this.localSize);
 }
