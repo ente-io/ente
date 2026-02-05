@@ -2401,6 +2401,7 @@
     "description": "Notification title when someone likes a shared photo or comment."
   },
   "likedYourPhoto": "Liked your photo",
+  "likedAPhoto": "Liked a photo",
   "likedYourVideo": "Liked your video",
   "commentedOnYourPhoto": "Commented on your photo",
   "commentedOnAPhoto": "Commented on a photo",
@@ -2408,8 +2409,10 @@
   "commentedOnAVideo": "Commented on a video",
   "repliedToYourComment": "Replied to your comment",
   "repliedToAComment": "Replied to a comment",
-  "likedYourComment": "Liked a comment",
-  "likedYourReply": "Liked a reply",
+  "likedYourComment": "Liked your comment",
+  "likedAComment": "Liked a comment",
+  "likedYourReply": "Liked your reply",
+  "likedAReply": "Liked a reply",
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {
