@@ -25,6 +25,7 @@ struct MessageListView: View {
     @State private var isUserDragging = false
     @State private var lastContentHeight: CGFloat = 0
     @State private var lastScrollChange = ScrollChange()
+    @State private var didInitialScroll = false
     #if os(iOS)
     @State private var haptic: UIImpactFeedbackGenerator?
     #endif
@@ -77,7 +78,8 @@ struct MessageListView: View {
                     #if os(iOS)
                     prepareHaptic()
                     #endif
-                    scrollToBottom(scrollProxy, force: true, animated: false)
+                    didInitialScroll = false
+                    scheduleInitialScroll(scrollProxy)
                 }
             }
         }
@@ -103,12 +105,17 @@ struct MessageListView: View {
         lastScrollChange = newValue
 
         if newValue.messagesCount != previous.messagesCount {
-            scrollToBottom(scrollProxy, animated: newValue.isGenerating)
+            if !didInitialScroll {
+                scheduleInitialScroll(scrollProxy)
+            } else {
+                scrollToBottom(scrollProxy, animated: newValue.isGenerating)
+            }
         }
 
         if newValue.sessionId != previous.sessionId {
             autoScrollEnabled = true
-            scrollToBottom(scrollProxy, force: true, animated: false)
+            didInitialScroll = false
+            scheduleInitialScroll(scrollProxy)
         }
 
         if newValue.streamingLength != previous.streamingLength {
@@ -269,6 +276,14 @@ struct MessageListView: View {
         let measuredPadding = inputBarHeight > 0 ? inputBarHeight + EnsuSpacing.md : fallbackPadding
         let basePadding = max(fallbackPadding, measuredPadding)
         return basePadding
+    }
+
+    private func scheduleInitialScroll(_ proxy: ScrollViewProxy) {
+        guard !didInitialScroll else { return }
+        DispatchQueue.main.async {
+            scrollToBottom(proxy, force: true, animated: false)
+            didInitialScroll = true
+        }
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy, force: Bool = false, animated: Bool = true) {
