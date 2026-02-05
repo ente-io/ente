@@ -1,5 +1,6 @@
-- Ashil: Fix likes on someone else's photo coming up as your in feed + improvements in feed (ownership aware copies for comments and replies)
-- Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
+- Ashil: Fix subscription page showing monthly plan + yearly toggle selected on opening if user is on monthly plan
+- Ashil: Fix likes on someone else's photo coming up as yours in feed + improvements in feed (ownership aware copies for comments and replies)
+- Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists
 - Ashil: Social notification improvements
 - Laurens: Notifications for comments and likes
 - Neeraj: Fix incorrect thumbnail for local files
