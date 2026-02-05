@@ -1,3 +1,4 @@
+#if canImport(EnteCore)
 import SwiftUI
 
 struct PrimaryButton: View {
@@ -220,3 +221,146 @@ struct MacSheetHeader<Leading: View, Center: View, Trailing: View>: View {
         .background(EnsuColor.backgroundBase)
     }
 }
+#else
+import SwiftUI
+
+struct PrimaryButton: View {
+    let text: String
+    var isLoading: Bool = false
+    var isEnabled: Bool = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(text) {
+            action()
+        }
+        .disabled(!isEnabled || isLoading)
+    }
+}
+
+struct TextLink: View {
+    let text: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(text)
+                .underline()
+        }
+    }
+}
+
+struct ActionButton: View {
+    let icon: String
+    var isSystemSymbol: Bool = false
+    var tooltip: String? = nil
+    var color: Color = .primary
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isSystemSymbol {
+                    Image(systemName: icon)
+                } else {
+                    Image(icon)
+                }
+            }
+            .frame(width: 36, height: 36)
+        }
+        .accessibilityLabel(tooltip ?? "")
+    }
+}
+
+struct TextActionButton: View {
+    let text: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(text)
+                .padding(.horizontal, 4)
+                .frame(height: 36)
+        }
+    }
+}
+
+struct AttachmentChip: View {
+    let name: String
+    let size: String
+    let icon: String
+    var isUploading: Bool = false
+    var onDelete: (() -> Void)? = nil
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 14, height: 14)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                    .lineLimit(1)
+                Text(size)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: 180, alignment: .leading)
+
+            if isUploading {
+                ProgressView()
+                    .scaleEffect(0.7)
+            }
+
+            if let onDelete {
+                Button(action: onDelete) {
+                    Image(systemName: "xmark")
+                }
+                .frame(width: 32, height: 32)
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+    }
+}
+
+struct ToastView: View {
+    let message: String
+
+    var body: some View {
+        Text(message)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+    }
+}
+
+struct MacSheetHeader<Leading: View, Center: View, Trailing: View>: View {
+    let leading: Leading
+    let center: Center
+    let trailing: Trailing
+
+    init(
+        @ViewBuilder leading: () -> Leading,
+        @ViewBuilder center: () -> Center,
+        @ViewBuilder trailing: () -> Trailing
+    ) {
+        self.leading = leading()
+        self.center = center()
+        self.trailing = trailing()
+    }
+
+    var body: some View {
+        ZStack {
+            center
+
+            HStack {
+                leading
+                Spacer()
+                trailing
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+}
+#endif
