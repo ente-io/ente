@@ -424,7 +424,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
         await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
     for (final file in files) {
       if (!(await _localFileExist(file))) {
-        _logger.warning("Already deleted " + file.toString());
+        _logger.warning("Already deleted ${file.tag}");
         alreadyDeletedIDs.add(file.localID!);
       } else if (file.localID!.startsWith(sharedMediaIdentifier)) {
         localSharedMediaIDs.add(file.localID!);
@@ -611,12 +611,12 @@ Future<List<String>> deleteLocalFilesInBatches(
     final ids = localIDs
         .getRange(index, min(localIDs.length, index + batchSize))
         .toList();
-    _logger.info("Trying to delete " + ids.toString());
+    _logger.info("Trying to delete ${ids.length} files");
     try {
       deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
-      _logger.info("Deleted " + ids.toString());
+      _logger.info("Deleted ${ids.length} files");
     } catch (e, s) {
-      _logger.severe("Could not delete batch " + ids.toString(), e, s);
+      _logger.severe("Could not delete batch of ${ids.length} files", e, s);
       for (final id in ids) {
         try {
           deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
