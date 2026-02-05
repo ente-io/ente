@@ -1,3 +1,4 @@
+- Ashil: Fix likes on someone else's photo coming up as yours in feed + improvements in feed (ownership aware copies for comments and replies)
 - Ashil: Social notification improvements
 - Laurens: Notifications for comments and likes
 - Neeraj: Fix incorrect thumbnail for local files
