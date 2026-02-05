@@ -375,6 +375,12 @@ final class MigrationProgressHandler: MigrationProgressCallback {
     }
 }
 
+private struct OnlineStorePreparation {
+    let chatKey: Data
+    let chatDb: LlmChatDb
+    let syncEngine: LlmChatSync
+}
+
 @MainActor
 final class ChatViewModel: ObservableObject {
     private static let defaultTemperature: Float = 0.5
@@ -456,6 +462,7 @@ final class ChatViewModel: ObservableObject {
     private var childrenByParentCache: [UUID: [UUID: [MessageNode]]] = [:]
     private var sessionSummaries: [String: String] = [:]
     private var sessionSummaryTask: Task<Void, Never>?
+    private var reloadTask: Task<Void, Never>?
     private let rootId = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
     private var generationTask: Task<Void, Never>?
     private var modelDownloadTask: Task<Void, Never>?
@@ -604,31 +611,61 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    private func resetOnlineStores() {
-        if FileManager.default.fileExists(atPath: syncDbPath) {
-            try? syncEngine.resetSyncState()
-        }
-        try? FileManager.default.removeItem(atPath: onlineDbPath)
-        ChatDataCleaner.deleteSyncState()
-        try? FileManager.default.createDirectory(
-            at: syncMetaDir,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-        try? FileManager.default.createDirectory(
-            at: encryptedAttachmentsDir,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-    }
+    private func prepareOnlineStores(auth: SyncAuth) async throws {
+        let syncDbPath = syncDbPath
+        let onlineDbPath = onlineDbPath
+        let offlineDbPath = offlineDbPath
+        let offlineDbKey = offlineDbKey
+        let syncMetaDir = syncMetaDir
+        let encryptedAttachmentsDir = encryptedAttachmentsDir
+        let attachmentsDir = attachmentsDir
+        let existingSyncEngine = syncEngine
 
-    private func prepareOnlineStores(auth: SyncAuth) throws {
-        resetOnlineStores()
-        let chatKey = try fetchChatKey(auth: auth, syncDbPath: syncDbPath)
-        onlineDbKey = chatKey
+        let preparation = try await Task.detached {
+            if FileManager.default.fileExists(atPath: syncDbPath) {
+                try? existingSyncEngine.resetSyncState()
+            }
+            try? FileManager.default.removeItem(atPath: onlineDbPath)
+            ChatDataCleaner.deleteSyncState()
+            try? FileManager.default.createDirectory(
+                at: syncMetaDir,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+            try? FileManager.default.createDirectory(
+                at: encryptedAttachmentsDir,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+            try? FileManager.default.createDirectory(
+                at: attachmentsDir,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+
+            let chatKey = try fetchChatKey(auth: auth, syncDbPath: syncDbPath)
+
+            let chatDb = try LlmChatDb.open(
+                mainDbPath: onlineDbPath,
+                attachmentsDbPath: syncDbPath,
+                key: chatKey
+            )
+            let newSyncEngine = try LlmChatSync.open(
+                mainDbPath: onlineDbPath,
+                attachmentsDbPath: syncDbPath,
+                dbKey: chatKey,
+                attachmentsDir: encryptedAttachmentsDir.path,
+                metaDir: syncMetaDir.path,
+                plaintextDir: attachmentsDir.path
+            )
+            try newSyncEngine.seedFromOffline(offlineDbPath: offlineDbPath, offlineDbKey: offlineDbKey)
+            return OnlineStorePreparation(chatKey: chatKey, chatDb: chatDb, syncEngine: newSyncEngine)
+        }.value
+
+        onlineDbKey = preparation.chatKey
         isOnlineMode = true
-        reopenSyncStoresIfNeeded(force: true)
-        try syncEngine.seedFromOffline(offlineDbPath: offlineDbPath, offlineDbKey: offlineDbKey)
+        chatDb = preparation.chatDb
+        syncEngine = preparation.syncEngine
     }
 
     func handleLogout() {
@@ -879,27 +916,24 @@ final class ChatViewModel: ObservableObject {
 
     private func performBatchedSync(auth: SyncAuth) async {
         let config = MigrationConfig(batchSize: 25, priority: .recentFirst)
-        await MainActor.run {
-            self.syncState = .migrating(processed: 0, total: 0)
-        }
+        syncState = .migrating(processed: 0, total: 0)
 
+        let syncEngine = syncEngine
         do {
             let handler = MigrationProgressHandler { [weak self] progress in
                 Task { @MainActor in
                     self?.syncState = .migrating(processed: progress.processed, total: progress.total)
                 }
             }
-            _ = try syncEngine.syncWithProgress(auth: auth, config: config, callback: handler)
-            await MainActor.run {
-                self.syncState = .idle
-                self.reloadFromDb()
-            }
+            try await Task.detached {
+                _ = try syncEngine.syncWithProgress(auth: auth, config: config, callback: handler)
+            }.value
+            syncState = .idle
+            reloadFromDb()
         } catch {
             let message = syncErrorMessage(from: error)
-            await MainActor.run {
-                self.syncState = .error(message)
-                self.syncErrorMessage = formatSyncErrorMessage(message)
-            }
+            syncState = .error(message)
+            syncErrorMessage = formatSyncErrorMessage(message)
         }
     }
 
@@ -1780,31 +1814,44 @@ final class ChatViewModel: ObservableObject {
     }
 
     private func reloadFromDb() {
+        reloadTask?.cancel()
         reopenSyncStoresIfNeeded()
-        let loaded = (try? chatDb.listSessions()) ?? []
-        let refreshed = Self.buildSessions(from: loaded, chatDb: chatDb, summaries: sessionSummaries)
-
+        let chatDb = chatDb
+        let summaries = sessionSummaries
         let selected = currentSessionId
-        let resolved = selected.flatMap { id in
-            refreshed.first(where: { $0.id == id })?.id
-        } ?? (selected == nil ? nil : refreshed.first?.id)
 
-        sessions = refreshed
-        currentSessionId = resolved
-        messages = []
-        messageStore = [:]
-        branchSelections = [:]
-        childrenByParentCache = [:]
+        reloadTask = Task.detached { [weak self, chatDb, summaries, selected] in
+            let loaded = (try? chatDb.listSessions()) ?? []
+            let refreshed = Self.buildSessions(from: loaded, chatDb: chatDb, summaries: summaries)
 
-        for session in refreshed {
-            messageStore[session.id] = []
-            branchSelections[session.id] = [:]
-        }
+            let resolved = selected.flatMap { id in
+                refreshed.first(where: { $0.id == id })?.id
+            } ?? (selected == nil ? nil : refreshed.first?.id)
 
-        if let current = resolved {
-            loadMessagesFromDb(for: current)
-        } else {
-            refreshAttachmentDownloadState()
+            if Task.isCancelled { return }
+
+            await MainActor.run {
+                guard let self else { return }
+                if Task.isCancelled { return }
+
+                self.sessions = refreshed
+                self.currentSessionId = resolved
+                self.messages = []
+                self.messageStore = [:]
+                self.branchSelections = [:]
+                self.childrenByParentCache = [:]
+
+                for session in refreshed {
+                    self.messageStore[session.id] = []
+                    self.branchSelections[session.id] = [:]
+                }
+
+                if let current = resolved {
+                    self.loadMessagesFromDb(for: current)
+                } else {
+                    self.refreshAttachmentDownloadState()
+                }
+            }
         }
     }
 
