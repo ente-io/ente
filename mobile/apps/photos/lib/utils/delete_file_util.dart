@@ -612,9 +612,12 @@ Future<List<String>> deleteLocalFilesInBatches(
         .getRange(index, min(localIDs.length, index + batchSize))
         .toList();
     _logger.info("Trying to delete ${ids.length} files");
+    final int countBefore = deletedIDs.length;
     try {
       deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
-      _logger.info("Deleted ${ids.length} files");
+      _logger.info(
+        "Deleted ${deletedIDs.length - countBefore} of ${ids.length} files",
+      );
     } catch (e, s) {
       _logger.severe("Could not delete batch of ${ids.length} files", e, s);
       for (final id in ids) {
