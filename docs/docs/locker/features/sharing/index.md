@@ -47,8 +47,7 @@ specifically for their account. Only they can decrypt and view the content.
 ### Public links
 
 Public links embed the decryption key in the URL. Anyone with the link can view
-the content. Use additional security options like passwords and expiration dates
-for sensitive information.
+the content. Delete links when no longer needed.
 
 ## Related FAQs
 

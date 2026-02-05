@@ -78,7 +78,7 @@ Jump to a category:
 ### Specific Types
 
 - [What file formats are supported for documents?](/locker/faq/information-types#locker-document-formats)
-- [Can I format text in Personal Notes?](/locker/faq/information-types#locker-notes-formatting)
+- [Can I format text in Notes?](/locker/faq/information-types#locker-notes-formatting)
 - [Does Locker have browser integration for passwords?](/locker/faq/information-types#locker-browser-integration)
 - [Can I attach photos of physical documents?](/locker/faq/information-types#locker-attach-photos)
 
