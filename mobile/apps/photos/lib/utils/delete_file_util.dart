@@ -375,14 +375,9 @@ Future<bool> deleteLocalFiles(
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    // On iOS, PhotoManager.editor.deleteWithIds() silently fails when any
-    // asset in the batch belongs to an iCloud shared album. Shared album
-    // assets are now filtered out before reaching this point, but this
-    // fallback is kept as a safety net. On Android, large file counts can
-    // also cause batch deletion to fail.
     if (deletedIDs.isEmpty && Platform.isIOS) {
-      deletedIDs.addAll(
-        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
+      _logger.warning(
+        "Deletion failed in deleteLocalFiles for ${localAssetIDs.length} files, on iOS",
       );
     }
 
@@ -453,14 +448,10 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    // On iOS, PhotoManager.editor.deleteWithIds() silently fails when any
-    // asset in the batch belongs to an iCloud shared album. Shared album
-    // assets are now filtered out before reaching this point, but this
-    // fallback is kept as a safety net. On Android, large file counts can
-    // also cause batch deletion to fail.
+
     if (deletedIDs.isEmpty && Platform.isIOS) {
-      deletedIDs.addAll(
-        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
+      _logger.warning(
+        "Deletion failed in deleteLocalFilesAfterRemovingAlreadyDeletedIDs for ${localAssetIDs.length} files, on iOS",
       );
     }
 
@@ -869,93 +860,4 @@ Future<void> showDeleteSheet(
   } else {
     selectedFiles.clearAll();
   }
-}
-
-// TODO: Remove this fallback once we're confident iCloud shared album
-// files are fully excluded from the free-up-space list. With shared album
-// assets filtered out at the query level, this binary partitioning should
-// no longer be needed — the root cause was that PhotoManager.editor.deleteWithIds()
-// silently fails when any asset in the batch belongs to an iCloud shared album.
-Future<List<String>> _iosDeleteLocalFilesInBatchesFallback(
-  BuildContext context,
-  List<String> localAssetIDs,
-) async {
-  _logger.info(
-    "iOS batch deletion fallback triggered for ${localAssetIDs.length} files",
-  );
-
-  final List<String> deletedIDs = [];
-  deletedIDs.addAll(
-    await _deleteLocalFilesInBatchesRecursively(localAssetIDs, context),
-  );
-  if (deletedIDs.isEmpty) {
-    _logger.warning(
-      "Failed to delete local files in recursive batches",
-    );
-  }
-
-  _logger.info(
-    "iOS free-space fallback, deleted ${deletedIDs.length} files with distinct localIDs in batches",
-  );
-
-  return deletedIDs;
-}
-
-Future<List<String>> _deleteLocalFilesInBatchesRecursively(
-  List<String> localAssetIDs,
-  BuildContext context,
-) async {
-  if (localAssetIDs.isEmpty) return [];
-
-  final deletedIDs = await _deleteLocalFiles(localAssetIDs, context);
-  if (deletedIDs.isNotEmpty) {
-    return deletedIDs;
-  }
-
-  if (localAssetIDs.length == 1) {
-    _logger.warning("Failed to delete file " + localAssetIDs.first);
-    return [];
-  }
-
-  final midIndex = localAssetIDs.length ~/ 2;
-  final left = localAssetIDs.sublist(0, midIndex);
-  final right = localAssetIDs.sublist(midIndex);
-
-  final leftDeleted =
-      await _deleteLocalFilesInBatchesRecursively(left, context);
-  final rightDeleted =
-      await _deleteLocalFilesInBatchesRecursively(right, context);
-
-  return [...leftDeleted, ...rightDeleted];
-}
-
-Future<List<String>> _deleteLocalFiles(
-  List<String> localIDs,
-  BuildContext context,
-) async {
-  _logger.info(
-    "Trying to delete batch of size " +
-        localIDs.length.toString() +
-        "  :  " +
-        localIDs.toString(),
-  );
-
-  final dialog = createProgressDialog(
-    context,
-    "Deleting " + localIDs.length.toString() + " backed up files...",
-  );
-  await dialog.show();
-
-  final List<String> deletedIDs = [];
-  try {
-    deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
-    _logger.info("Deleted " + localIDs.toString());
-  } catch (e, s) {
-    _logger.severe("Could not delete batch " + localIDs.toString(), e, s);
-    await showGenericErrorDialog(context: context, error: e);
-  }
-
-  await dialog.hide();
-
-  return deletedIDs;
 }
