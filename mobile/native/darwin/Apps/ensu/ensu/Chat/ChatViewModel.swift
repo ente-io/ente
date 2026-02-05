@@ -789,7 +789,7 @@ final class ChatViewModel: ObservableObject {
         Task.detached { [weak self] in
             guard let self else { return }
             do {
-                try self.prepareOnlineStores(auth: auth)
+                try await self.prepareOnlineStores(auth: auth)
             } catch {
                 await MainActor.run {
                     self.syncState = .error("Failed to prepare online chats")
@@ -801,7 +801,7 @@ final class ChatViewModel: ObservableObject {
                 self.reloadFromDb()
             }
 
-            let syncEngine = self.syncEngine
+            let syncEngine = await self.syncEngine
             if let localStatus = syncEngine.checkMigrationStatusLocal() {
                 await self.handleMigrationStatus(localStatus, auth: auth)
                 return
@@ -870,7 +870,7 @@ final class ChatViewModel: ObservableObject {
                 await MainActor.run {
                     self.syncState = .error(userMessage)
                     if showErrors {
-                        self.syncErrorMessage = formatSyncErrorMessage(userMessage)
+                        self.syncErrorMessage = self.formatSyncErrorMessage(userMessage)
                     }
                 }
             }
