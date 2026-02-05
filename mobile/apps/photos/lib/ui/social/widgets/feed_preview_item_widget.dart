@@ -313,17 +313,18 @@ class _PreviewTextContent extends StatelessWidget {
 
   String _getActionDescription(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isOwn = feedItem.isOwnedByCurrentUser;
     switch (feedItem.type) {
       case FeedItemType.photoLike:
-        return l10n.likedYourPhoto;
+        return isOwn ? l10n.likedYourPhoto : l10n.likedAPhoto;
       case FeedItemType.comment:
-        return l10n.commentedOnYourPhoto;
+        return isOwn ? l10n.commentedOnYourPhoto : l10n.commentedOnAPhoto;
       case FeedItemType.reply:
-        return l10n.repliedToYourComment;
+        return isOwn ? l10n.repliedToYourComment : l10n.repliedToAComment;
       case FeedItemType.commentLike:
-        return l10n.likedYourComment;
+        return isOwn ? l10n.likedYourComment : l10n.likedAComment;
       case FeedItemType.replyLike:
-        return l10n.likedYourReply;
+        return isOwn ? l10n.likedYourReply : l10n.likedAReply;
     }
   }
 
