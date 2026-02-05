@@ -2,6 +2,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/social_db.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/reaction.dart";
@@ -51,22 +52,46 @@ class FeedDataProvider {
     final commentLikeReactions = results[3] as List<Reaction>;
     final replyLikeReactions = results[4] as List<Reaction>;
 
+    // Collect all fileIDs for batch loading to resolve ownership
+    final fileIDs = <int>{};
+    for (final r in photoLikeReactions) {
+      if (r.fileID != null) fileIDs.add(r.fileID!);
+    }
+    for (final c in fileComments) {
+      if (c.fileID != null) fileIDs.add(c.fileID!);
+    }
+    final filesByID = fileIDs.isNotEmpty
+        ? await FilesDB.instance.getFileIDToFileFromIDs(fileIDs.toList())
+        : <int, EnteFile>{};
+
     // Aggregate photo likes by file
     feedItems.addAll(
-      _aggregateReactionsByFile(photoLikeReactions, FeedItemType.photoLike),
+      _aggregateReactionsByFile(
+        photoLikeReactions,
+        FeedItemType.photoLike,
+        filesByID: filesByID,
+        userID: userID,
+      ),
     );
 
     // Aggregate comments by file
-    feedItems.addAll(_aggregateCommentsByFile(fileComments));
+    feedItems.addAll(
+      _aggregateCommentsByFile(
+        fileComments,
+        filesByID: filesByID,
+        userID: userID,
+      ),
+    );
 
     // Aggregate replies by parent comment
-    feedItems.addAll(_aggregateRepliesByParent(replies));
+    feedItems.addAll(_aggregateRepliesByParent(replies, userID: userID));
 
     // Aggregate comment likes by comment
     feedItems.addAll(
       await _aggregateReactionsByComment(
         commentLikeReactions,
         FeedItemType.commentLike,
+        userID: userID,
       ),
     );
 
@@ -75,6 +100,7 @@ class FeedDataProvider {
       await _aggregateReactionsByComment(
         replyLikeReactions,
         FeedItemType.replyLike,
+        userID: userID,
       ),
     );
 
@@ -113,8 +139,10 @@ class FeedDataProvider {
   /// Aggregates reactions on files by (collectionID, fileID).
   List<FeedItem> _aggregateReactionsByFile(
     List<Reaction> reactions,
-    FeedItemType type,
-  ) {
+    FeedItemType type, {
+    required Map<int, EnteFile> filesByID,
+    required int userID,
+  }) {
     final groupedByFile = <String, List<Reaction>>{};
 
     for (final reaction in reactions) {
@@ -140,19 +168,26 @@ class FeedDataProvider {
         }
       }
 
+      final fileID = reactions.first.fileID;
       return FeedItem(
         type: type,
         collectionID: reactions.first.collectionID,
-        fileID: reactions.first.fileID,
+        fileID: fileID,
         actorUserIDs: uniqueUserIDs,
         actorAnonIDs: uniqueAnonIDs,
         createdAt: reactions.first.createdAt,
+        isOwnedByCurrentUser:
+            fileID != null && filesByID[fileID]?.ownerID == userID,
       );
     }).toList();
   }
 
   /// Aggregates comments on files by (collectionID, fileID).
-  List<FeedItem> _aggregateCommentsByFile(List<Comment> comments) {
+  List<FeedItem> _aggregateCommentsByFile(
+    List<Comment> comments, {
+    required Map<int, EnteFile> filesByID,
+    required int userID,
+  }) {
     final groupedByFile = <String, List<Comment>>{};
 
     for (final comment in comments) {
@@ -178,20 +213,26 @@ class FeedDataProvider {
         }
       }
 
+      final fileID = comments.first.fileID;
       return FeedItem(
         type: FeedItemType.comment,
         collectionID: comments.first.collectionID,
-        fileID: comments.first.fileID,
+        fileID: fileID,
         commentID: comments.first.id,
         actorUserIDs: uniqueUserIDs,
         actorAnonIDs: uniqueAnonIDs,
         createdAt: comments.first.createdAt,
+        isOwnedByCurrentUser:
+            fileID != null && filesByID[fileID]?.ownerID == userID,
       );
     }).toList();
   }
 
   /// Aggregates replies by parent comment ID.
-  List<FeedItem> _aggregateRepliesByParent(List<Comment> replies) {
+  List<FeedItem> _aggregateRepliesByParent(
+    List<Comment> replies, {
+    required int userID,
+  }) {
     final groupedByParent = <String, List<Comment>>{};
 
     for (final reply in replies) {
@@ -225,6 +266,7 @@ class FeedDataProvider {
         actorUserIDs: uniqueUserIDs,
         actorAnonIDs: uniqueAnonIDs,
         createdAt: replies.first.createdAt,
+        isOwnedByCurrentUser: replies.first.parentCommentUserID == userID,
       );
     }).toList();
   }
@@ -232,8 +274,9 @@ class FeedDataProvider {
   /// Aggregates reactions by comment ID.
   Future<List<FeedItem>> _aggregateReactionsByComment(
     List<Reaction> reactions,
-    FeedItemType type,
-  ) async {
+    FeedItemType type, {
+    required int userID,
+  }) async {
     if (reactions.isEmpty) return [];
 
     final groupedByComment = <String, List<Reaction>>{};
@@ -282,6 +325,7 @@ class FeedDataProvider {
             actorUserIDs: uniqueUserIDs,
             actorAnonIDs: uniqueAnonIDs,
             createdAt: reactions.first.createdAt,
+            isOwnedByCurrentUser: comment.userID == userID,
           );
         })
         .whereType<FeedItem>()
