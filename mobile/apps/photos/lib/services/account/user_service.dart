@@ -80,7 +80,7 @@ class UserService {
     emailValueNotifier =
         ValueNotifier<String?>(Configuration.instance.getEmail());
     _preferences = await SharedPreferences.getInstance();
-    if (Configuration.instance.isLoggedIn()) {
+    if (Configuration.instance.isLoggedIn() && !isOfflineMode) {
       // add artificial delay in refreshing 2FA status
       Future.delayed(
         const Duration(seconds: 5),

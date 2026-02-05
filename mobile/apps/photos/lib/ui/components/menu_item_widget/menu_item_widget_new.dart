@@ -123,6 +123,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     return widget.isGestureDetectorDisabled || !hasPassedGestureCallbacks()
         ? _buildMenuItemContainer(context)
         : GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: widget.onTap == null ? null : _onTap,
             onDoubleTap: widget.onDoubleTap,
             onLongPress: widget.onLongPress,
@@ -179,7 +180,6 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
             trailingIconIsMuted: widget.trailingIconIsMuted,
             trailingExtraMargin: widget.trailingExtraMargin,
             showExecutionStates: widget.surfaceExecutionStates,
-            key: ValueKey(widget.trailingIcon.hashCode),
           ),
         ],
       ),
@@ -191,6 +191,8 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
+    final shouldSurfaceExecutionStates =
+        widget.surfaceExecutionStates || widget.alwaysShowSuccessState;
     _debouncer.run(
       () => Future(() {
         executionStateNotifier.value = ExecutionState.inProgress;
@@ -215,7 +217,7 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
       return;
     }
     if (executionStateNotifier.value == ExecutionState.inProgress) {
-      if (widget.showOnlyLoadingState) {
+      if (widget.showOnlyLoadingState || !shouldSurfaceExecutionStates) {
         executionStateNotifier.value = ExecutionState.idle;
       } else {
         executionStateNotifier.value = ExecutionState.successful;
@@ -233,9 +235,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     }
     setState(() {
       if (widget.pressedColor == null) {
-        hasPassedGestureCallbacks()
-            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
-            : menuItemColor = widget.menuItemColor;
+        if (hasPassedGestureCallbacks()) {
+          final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+          // Pressed color: Light #F5F5F5, Dark #2C2C2C
+          // These are the result of overlaying fillFaintPressed on the base color
+          menuItemColor =
+              isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF5F5F5);
+        } else {
+          menuItemColor = widget.menuItemColor;
+        }
       } else {
         menuItemColor = widget.pressedColor;
       }
@@ -255,9 +263,13 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
     }
     Future.delayed(
       const Duration(milliseconds: 100),
-      () => setState(() {
-        menuItemColor = widget.menuItemColor;
-      }),
+      () {
+        if (mounted) {
+          setState(() {
+            menuItemColor = widget.menuItemColor;
+          });
+        }
+      },
     );
   }
 
@@ -266,8 +278,15 @@ class _MenuItemWidgetNewState extends State<MenuItemWidgetNew> {
         executionStateNotifier.value == ExecutionState.successful) {
       return;
     }
-    setState(() {
-      menuItemColor = widget.menuItemColor;
-    });
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () {
+        if (mounted) {
+          setState(() {
+            menuItemColor = widget.menuItemColor;
+          });
+        }
+      },
+    );
   }
 }

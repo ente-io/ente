@@ -20,7 +20,6 @@ import "package:visibility_detector/visibility_detector.dart";
 
 class PersonClustersPage extends StatefulWidget {
   final PersonEntity person;
-
   const PersonClustersPage(
     this.person, {
     super.key,
@@ -206,6 +205,11 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
                     files,
                     clusterID,
                     widget.person,
+                    onClusterRemoved: () {
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
                   );
                 },
               );
@@ -226,22 +230,62 @@ class _ClusterWrapperForGird extends StatefulWidget {
   final List<EnteFile> files;
   final String clusterID;
   final PersonEntity person;
+  final VoidCallback onClusterRemoved;
 
   const _ClusterWrapperForGird(
     this.files,
     this.clusterID,
-    this.person,
-  );
+    this.person, {
+    required this.onClusterRemoved,
+  });
 
   @override
   State<_ClusterWrapperForGird> createState() => __ClusterWrapperForGirdState();
 }
 
 class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
+  final Logger _logger = Logger("__ClusterWrapperForGirdState");
   bool _isVisible = false;
+  bool _isRemoving = false;
+
+  Future<void> _removeClusterFromPerson() async {
+    if (_isRemoving) {
+      return;
+    }
+    setState(() {
+      _isRemoving = true;
+    });
+    try {
+      await PersonService.instance.removeClusterToPerson(
+        personID: widget.person.remoteID,
+        clusterID: widget.clusterID,
+      );
+      _logger.info(
+        "Removed cluster ${widget.clusterID} from person ${widget.person.remoteID}",
+      );
+      Bus.instance.fire(PeopleChangedEvent());
+      if (mounted) {
+        widget.onClusterRemoved();
+      }
+    } catch (e, s) {
+      _logger.severe(
+        "removing cluster from person",
+        e,
+        s,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRemoving = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loadingColor = getEnteColorScheme(context).strokeMuted;
+    final colorScheme = getEnteColorScheme(context);
+    final loadingColor = colorScheme.strokeMuted;
     return VisibilityDetector(
       key: ValueKey(widget.clusterID),
       onVisibilityChanged: (info) {
@@ -271,14 +315,52 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: FaceThumbnailSquircleClip(
-                      child: widget.files.isNotEmpty
-                          ? PersonFaceWidget(
-                              clusterID: widget.clusterID,
-                            )
-                          : const NoThumbnailWidget(
-                              addBorder: false,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      fit: StackFit.expand,
+                      children: [
+                        FaceThumbnailSquircleClip(
+                          child: widget.files.isNotEmpty
+                              ? PersonFaceWidget(
+                                  clusterID: widget.clusterID,
+                                )
+                              : const NoThumbnailWidget(
+                                  addBorder: false,
+                                ),
+                        ),
+                        Positioned(
+                          top: -5,
+                          right: -5,
+                          child: AbsorbPointer(
+                            absorbing: _isRemoving,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: _removeClusterFromPerson,
+                              child: AnimatedOpacity(
+                                duration: const Duration(milliseconds: 150),
+                                opacity: _isRemoving ? 0.5 : 1,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.warning500,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: colorScheme.backgroundBase,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.remove,
+                                    size: 12,
+                                    color: colorScheme.backgroundBase,
+                                  ),
+                                ),
+                              ),
                             ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),

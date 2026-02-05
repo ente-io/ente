@@ -1,4 +1,4 @@
-import { CleanIcon } from "@hugeicons/core-free-icons";
+import { CleanIcon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CheckIcon from "@mui/icons-material/Check";
@@ -452,9 +452,9 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     // unique key.
     switch (collectionSummaryType) {
         case "trash":
-            menuOptions = [
-                <EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />,
-            ];
+            menuOptions = fileCount
+                ? [<EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />]
+                : [];
             break;
 
         case "userFavorites":
@@ -541,6 +541,26 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                         {t("archive_album")}
                     </OverflowMenuOption>
                 ),
+
+                activeCollection ? (
+                    isHiddenCollection(activeCollection) ? (
+                        <OverflowMenuOption
+                            key="unhide"
+                            onClick={unhideAlbum}
+                            startIcon={<VisibilityOutlinedIcon />}
+                        >
+                            {t("unhide_collection")}
+                        </OverflowMenuOption>
+                    ) : (
+                        <OverflowMenuOption
+                            key="hide"
+                            onClick={hideAlbum}
+                            startIcon={<VisibilityOffOutlinedIcon />}
+                        >
+                            {t("hide_collection")}
+                        </OverflowMenuOption>
+                    )
+                ) : undefined,
                 <OverflowMenuOption
                     key="leave"
                     startIcon={<LogoutIcon />}
@@ -770,13 +790,13 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     </Stack>
 );
 
-const showEmptyTrashQuickOption = ({ type }: CollectionSummary) =>
-    type == "trash";
+const showEmptyTrashQuickOption = ({ type, fileCount }: CollectionSummary) =>
+    type == "trash" && fileCount > 0;
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("empty_trash")}>
         <IconButton onClick={onClick}>
-            <DeleteOutlinedIcon />
+            <HugeiconsIcon icon={Delete02Icon} size={22} strokeWidth={1.5} />
         </IconButton>
     </Tooltip>
 );
@@ -965,7 +985,9 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
 const EmptyTrashOption: React.FC<OptionProps> = ({ onClick }) => (
     <OverflowMenuOption
         color="critical"
-        startIcon={<DeleteOutlinedIcon />}
+        startIcon={
+            <HugeiconsIcon icon={Delete02Icon} size={20} strokeWidth={1.5} />
+        }
         onClick={onClick}
     >
         {t("empty_trash")}

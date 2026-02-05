@@ -78,7 +78,7 @@ func (c *ReactionsController) Upsert(ctx *gin.Context, req UpsertReactionRequest
 
 	var targetComment *socialentity.Comment
 	if req.CommentID != nil {
-		targetComment, err = c.CommentsRepo.GetByID(ctx.Request.Context(), *req.CommentID)
+		targetComment, err = c.CommentsRepo.GetByID(ctx, *req.CommentID)
 		if err != nil {
 			return "", stacktrace.Propagate(err, "")
 		}
@@ -112,7 +112,7 @@ func (c *ReactionsController) Upsert(ctx *gin.Context, req UpsertReactionRequest
 		// file_id to validate that the caller has consistent context.
 		reaction.FileID = nil
 	}
-	id, err := c.Repo.Upsert(ctx.Request.Context(), reaction)
+	id, err := c.Repo.Upsert(ctx, reaction)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
@@ -133,13 +133,13 @@ func (c *ReactionsController) Diff(ctx *gin.Context, req ReactionDiffRequest) ([
 			return nil, false, stacktrace.Propagate(err, "")
 		}
 	}
-	return c.Repo.GetDiff(ctx.Request.Context(), req.CollectionID, req.Since, req.Limit, req.FileID, req.CommentID)
+	return c.Repo.GetDiff(ctx, req.CollectionID, req.Since, req.Limit, req.FileID, req.CommentID)
 }
 
 // Delete removes a reaction if the actor owns it.
 func (c *ReactionsController) Delete(ctx *gin.Context, req ReactionDeleteRequest) error {
 	userID, hasUserID := req.Actor.UserIDValue()
-	reaction, err := c.Repo.GetByID(ctx.Request.Context(), req.ReactionID)
+	reaction, err := c.Repo.GetByID(ctx, req.ReactionID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -168,7 +168,7 @@ func (c *ReactionsController) Delete(ctx *gin.Context, req ReactionDeleteRequest
 	if hasUserID {
 		repoUserID = userID
 	}
-	return c.Repo.SoftDeleteByID(ctx.Request.Context(), req.ReactionID, repoUserID, req.Actor.AnonUserID)
+	return c.Repo.SoftDeleteByID(ctx, req.ReactionID, repoUserID, req.Actor.AnonUserID)
 }
 
 func validateCommentReactionContext(comment *socialentity.Comment, requestedFileID *int64) error {

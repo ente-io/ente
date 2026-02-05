@@ -3,18 +3,19 @@ import "dart:async";
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/device_album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import 'package:photos/models/search/search_result.dart';
+import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/device_folder_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 
@@ -35,7 +36,7 @@ class SearchSuggestionsWidget extends StatefulWidget {
 class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   Stream<List<SearchResult>>? resultsStream;
   final queueOfSearchResults = <List<SearchResult>>[];
-  var searchResultWidgets = <Widget>[];
+  final Map<_SearchResultsSection, List<SearchResult>> _sectionedResults = {};
   StreamSubscription<List<SearchResult>>? subscription;
   Timer? timer;
 
@@ -50,7 +51,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       IndexOfStackNotifier().searchState = SearchState.searching;
       final resultsStream = SearchWidgetState.searchResultsStreamNotifier.value;
 
-      searchResultWidgets.clear();
+      _sectionedResults.clear();
       releaseResources();
 
       subscription = resultsStream!.listen(
@@ -70,7 +71,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
           Future.delayed(
               const Duration(milliseconds: _surfaceNewResultsInterval + 20),
               () {
-            if (searchResultWidgets.isEmpty) {
+            if (_resultsCount == 0) {
               IndexOfStackNotifier().searchState = SearchState.empty;
             }
           });
@@ -85,6 +86,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   void releaseResources() {
     subscription?.cancel();
     timer?.cancel();
+    queueOfSearchResults.clear();
   }
 
   ///This method generates searchResultsWidgets from the queueOfEvents by checking
@@ -96,14 +98,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
         const Duration(milliseconds: _surfaceNewResultsInterval), (timer) {
       if (queueOfSearchResults.isNotEmpty) {
         for (List<SearchResult> event in queueOfSearchResults) {
-          for (SearchResult result in event) {
-            searchResultWidgets.add(
-              SearchResultsWidgetGenerator(result).animate().fadeIn(
-                    duration: const Duration(milliseconds: 80),
-                    curve: Curves.easeIn,
-                  ),
-            );
-          }
+          _addResultsToSections(event);
         }
         queueOfSearchResults.clear();
         setState(() {});
@@ -119,55 +114,40 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    String title;
-    final resultsCount = searchResultWidgets.length;
-    title = AppLocalizations.of(context).searchResultCount(count: resultsCount);
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          onPressed: () {
-            Bus.instance.fire(ClearAndUnfocusSearchBar());
-          },
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final resultsBackground = EnteTheme.isDark(context)
+        ? const Color.fromRGBO(22, 22, 22, 1)
+        : colorScheme.backgroundElevated2;
+    final sectionWidgets = _buildSectionWidgets(context);
+    if (_resultsCount > 0) {
+      sectionWidgets.insert(
+        0,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 12),
+          child: Text(
+            AppLocalizations.of(context).searchResultCount(
+              count: _resultsCount,
+            ),
+            style: textTheme.smallBold.copyWith(color: colorScheme.textMuted),
+          ),
         ),
-      ),
+      );
+    }
+    return Scaffold(
+      backgroundColor: resultsBackground,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 44,
-              child: SearchWidgetState.isLoading.value
-                  ? EnteLoadingWidget(
-                      size: 14,
-                      padding: 4,
-                      color: getEnteColorScheme(context).strokeMuted,
-                      alignment: Alignment.topLeft,
-                    )
-                  : Text(
-                      title,
-                      style: getEnteTextTheme(context).largeBold,
-                    ).animate().fadeIn(
-                        duration: const Duration(milliseconds: 60),
-                        curve: Curves.easeIn,
-                      ),
-            ),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ListView.separated(
-                  itemBuilder: (context, index) {
-                    return searchResultWidgets[index];
-                  },
-                  separatorBuilder: (context, index) {
-                    return const SizedBox(height: 12);
-                  },
-                  itemCount: searchResultWidgets.length,
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.only(
-                    bottom: (MediaQuery.sizeOf(context).height / 2) + 50,
-                  ),
+              child: ListView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.only(
+                  bottom: (MediaQuery.sizeOf(context).height / 2) + 50,
                 ),
+                children: sectionWidgets,
               ),
             ),
           ],
@@ -175,11 +155,55 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       ),
     );
   }
+
+  int get _resultsCount {
+    int count = 0;
+    for (final results in _sectionedResults.values) {
+      count += results.length;
+    }
+    return count;
+  }
+
+  void _addResultsToSections(List<SearchResult> results) {
+    for (final result in results) {
+      final section = _sectionForResult(result);
+      _sectionedResults.putIfAbsent(section, () => <SearchResult>[]);
+      _sectionedResults[section]!.add(result);
+    }
+  }
+
+  List<Widget> _buildSectionWidgets(BuildContext context) {
+    final widgets = <Widget>[];
+    for (final section in _sectionOrder) {
+      final results = _sectionedResults[section] ?? [];
+      if (results.isEmpty) {
+        continue;
+      }
+      if (widgets.isNotEmpty) {
+        widgets.add(const SizedBox(height: 18));
+      }
+      widgets.add(
+        _SearchResultsSectionWidget(
+          title: _sectionTitle(context, section),
+          icon: _sectionIcon(section),
+          results: results,
+        ),
+      );
+    }
+    return widgets;
+  }
 }
 
 class SearchResultsWidgetGenerator extends StatelessWidget {
   final SearchResult result;
-  const SearchResultsWidgetGenerator(this.result, {super.key});
+  final BorderRadius borderRadius;
+  final bool showTypeLabel;
+  const SearchResultsWidgetGenerator(
+    this.result, {
+    this.borderRadius = BorderRadius.zero,
+    this.showTypeLabel = true,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -190,6 +214,8 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
         resultCount: CollectionsService.instance.getFileCount(
           albumSearchResult.collectionWithThumbnail.collection,
         ),
+        borderRadius: borderRadius,
+        showTypeLabel: showTypeLabel,
         onResultTap: () => routeToPage(
           context,
           CollectionPage(
@@ -198,9 +224,23 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
           ),
         ),
       );
+    } else if (result is DeviceAlbumSearchResult) {
+      final deviceResult = result as DeviceAlbumSearchResult;
+      return SearchResultWidget(
+        result,
+        resultCount: Future.value(deviceResult.deviceCollection.count),
+        borderRadius: borderRadius,
+        showTypeLabel: showTypeLabel,
+        onResultTap: () => routeToPage(
+          context,
+          DeviceFolderPage(deviceResult.deviceCollection),
+        ),
+      );
     } else if (result is GenericSearchResult) {
       return SearchResultWidget(
         result,
+        borderRadius: borderRadius,
+        showTypeLabel: showTypeLabel,
         onResultTap: (result as GenericSearchResult).onResultTap != null
             ? () => (result as GenericSearchResult).onResultTap!(context)
             : null,
@@ -209,5 +249,164 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
       Logger('SearchResultsWidgetGenerator').info("Invalid/Unsupported value");
       return const SizedBox.shrink();
     }
+  }
+}
+
+enum _SearchResultsSection {
+  people,
+  shared,
+  albums,
+  magic,
+  files,
+  locations,
+  moments,
+}
+
+const List<_SearchResultsSection> _sectionOrder = [
+  _SearchResultsSection.files,
+  _SearchResultsSection.moments,
+  _SearchResultsSection.albums,
+  _SearchResultsSection.locations,
+  _SearchResultsSection.people,
+  _SearchResultsSection.shared,
+  _SearchResultsSection.magic,
+];
+
+_SearchResultsSection _sectionForResult(SearchResult result) {
+  switch (result.type()) {
+    case ResultType.faces:
+      return _SearchResultsSection.people;
+    case ResultType.shared:
+      return _SearchResultsSection.shared;
+    case ResultType.collection:
+    case ResultType.deviceCollection:
+      return _SearchResultsSection.albums;
+    case ResultType.magic:
+      return _SearchResultsSection.magic;
+    case ResultType.location:
+    case ResultType.locationSuggestion:
+      return _SearchResultsSection.locations;
+    case ResultType.year:
+    case ResultType.month:
+    case ResultType.event:
+      return _SearchResultsSection.moments;
+    case ResultType.file:
+    case ResultType.fileType:
+    case ResultType.fileExtension:
+    case ResultType.fileCaption:
+    case ResultType.uploader:
+    case ResultType.cameraMake:
+    case ResultType.cameraModel:
+      return _SearchResultsSection.files;
+  }
+}
+
+String _sectionTitle(BuildContext context, _SearchResultsSection section) {
+  switch (section) {
+    case _SearchResultsSection.people:
+      return AppLocalizations.of(context).people;
+    case _SearchResultsSection.shared:
+      return AppLocalizations.of(context).searchResultShared;
+    case _SearchResultsSection.albums:
+      return AppLocalizations.of(context).albums;
+    case _SearchResultsSection.magic:
+      return AppLocalizations.of(context).magic;
+    case _SearchResultsSection.files:
+      return AppLocalizations.of(context).files;
+    case _SearchResultsSection.locations:
+      return AppLocalizations.of(context).locations;
+    case _SearchResultsSection.moments:
+      return AppLocalizations.of(context).moments;
+  }
+}
+
+List<List<dynamic>> _sectionIcon(_SearchResultsSection section) {
+  switch (section) {
+    case _SearchResultsSection.people:
+      return HugeIcons.strokeRoundedUserMultiple;
+    case _SearchResultsSection.shared:
+      return HugeIcons.strokeRoundedShare08;
+    case _SearchResultsSection.albums:
+      return HugeIcons.strokeRoundedImage01;
+    case _SearchResultsSection.magic:
+      return HugeIcons.strokeRoundedSparkles;
+    case _SearchResultsSection.files:
+      return HugeIcons.strokeRoundedFile01;
+    case _SearchResultsSection.locations:
+      return HugeIcons.strokeRoundedMaping;
+    case _SearchResultsSection.moments:
+      return HugeIcons.strokeRoundedStar;
+  }
+}
+
+class _SearchResultsSectionWidget extends StatelessWidget {
+  final String title;
+  final List<List<dynamic>> icon;
+  final List<SearchResult> results;
+
+  const _SearchResultsSectionWidget({
+    required this.title,
+    required this.icon,
+    required this.results,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final showTypeLabel = results.length > 1;
+    final children = <Widget>[];
+    for (int i = 0; i < results.length; i++) {
+      final radius = BorderRadius.circular(20);
+      children.add(
+        Material(
+          color: colorScheme.backgroundElevated,
+          borderRadius: radius,
+          clipBehavior: Clip.antiAlias,
+          child: SearchResultsWidgetGenerator(
+            results[i],
+            borderRadius: radius,
+            showTypeLabel: showTypeLabel,
+          ).animate().fadeIn(
+                duration: const Duration(milliseconds: 80),
+                curve: Curves.easeIn,
+              ),
+        ),
+      );
+      if (i != results.length - 1) {
+        children.add(const SizedBox(height: 4));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 8, 4, 10),
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.strokeFainter,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(6),
+                child: HugeIcon(
+                  icon: icon,
+                  color: colorScheme.strokeBase,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+        Column(children: children),
+      ],
+    );
   }
 }

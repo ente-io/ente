@@ -113,8 +113,8 @@ class VideoPreviewService {
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
 
   bool get isVideoStreamingEnabled {
-    if (flagService.internalUser) {
-      return true;
+    if (isOfflineMode) {
+      return false;
     }
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
         flagService.streamEnabledByDefault;

@@ -296,7 +296,6 @@
   "failedToApplyCode": "Nepavyko pritaikyti kodo.",
   "enterReferralCode": "Įveskite rekomendacijos kodą",
   "codeAppliedPageTitle": "Pritaikytas kodas",
-  "changeYourReferralCode": "Keisti savo rekomendacijos kodą",
   "change": "Keisti",
   "unavailableReferralCode": "Atsiprašome, šis kodas nepasiekiamas.",
   "codeChangeLimitReached": "Atsiprašome, pasiekėte kodo pakeitimų ribą.",
@@ -314,11 +313,9 @@
   "claimFreeStorage": "Gaukite nemokamos saugyklos",
   "inviteYourFriends": "Kviesti savo draugus",
   "failedToFetchReferralDetails": "Nepavyksta gauti rekomendacijos išsamios informacijos. Bandykite dar kartą vėliau.",
-  "referralStep1": "1. Duokite šį kodą savo draugams",
   "referralStep2": "2. Jie užsiregistruoja mokamą planą",
   "referralStep3": "3. Abu gaunate {storageInGB} GB* nemokamai",
   "referralsAreCurrentlyPaused": "Šiuo metu rekomendacijos yra pristabdytos",
-  "youCanAtMaxDoubleYourStorage": "* Galite daugiausiai padvigubinti savo saugyklą.",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Jūsų šeima gavo {storageAmountInGb} GB iki šiol} false {Jūs gavote {storageAmountInGb} GB iki šiol} other {Jūs gavote {storageAmountInGb} GB iki šiol.}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1116,7 +1113,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} laisva",
-  "appVersion": "Versija: {versionValue}",
   "verifyIDLabel": "Patvirtinti",
   "fileInfoAddDescHint": "Pridėti aprašymą...",
   "editLocationTagTitle": "Redaguoti vietovę",
@@ -1417,7 +1413,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Įtraukta 0 žiūrėtojų} one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1502,7 +1498,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, =0 {0 nuotraukų} one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {

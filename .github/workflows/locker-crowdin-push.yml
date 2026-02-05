@@ -8,6 +8,8 @@ on:
             - "mobile/apps/locker/lib/l10n/app_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/locker-crowdin-push.yml"
+    # Allow manual runs from any branch (useful to push translations from a feature branch)
+    workflow_dispatch:
 
 permissions:
     contents: write

@@ -25,6 +25,7 @@ import "package:photos/utils/share_util.dart";
 
 enum ResultType {
   collection,
+  deviceCollection,
   file,
   uploader,
   location,
@@ -289,6 +290,8 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.album:
         return [Bus.instance.on<CollectionUpdatedEvent>()];
       case SectionType.face:
+        return [Bus.instance.on<PeopleChangedEvent>()];
+      case SectionType.contacts:
         return [Bus.instance.on<PeopleChangedEvent>()];
       default:
         return [];

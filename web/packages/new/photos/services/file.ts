@@ -65,8 +65,10 @@ export const computeAllCollectionFilesFromSaved = async () =>
  * The long name and the "compute" in it is to signal that this is not just a DB
  * read, and that it also does some potentially non-trivial computation.
  */
-export const computeNormalCollectionFilesFromSaved = async () => {
-    const hiddenCollections = await savedHiddenCollections();
+export const computeNormalCollectionFilesFromSaved = async (
+    currentUserID?: number,
+) => {
+    const hiddenCollections = await savedHiddenCollections(currentUserID);
     const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
 
     const collectionFiles = await savedCollectionFiles();
@@ -274,3 +276,27 @@ const putFilesPublicMagicMetadata = async (
             body: JSON.stringify(updateRequest),
         }),
     );
+
+/**
+ * Update the location (latitude and longitude) for a list of files on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * The location of an {@link EnteFile} is stored in its public magic metadata
+ * as the `lat` and `long` fields.
+ *
+ * @param files The list of files whose location we want to update.
+ *
+ * @param lat The new latitude.
+ *
+ * @param long The new longitude.
+ */
+export const updateFilesLocation = async (
+    files: EnteFile[],
+    lat: number,
+    long: number,
+): Promise<void> => {
+    await batched(files, (b) =>
+        updateFilesPublicMagicMetadata(b, { lat, long }),
+    );
+};

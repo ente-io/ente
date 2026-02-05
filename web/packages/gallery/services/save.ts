@@ -57,6 +57,24 @@ const getDownloadLimits = (): DownloadLimits => {
     return cachedLimits;
 };
 
+const shouldIncludeZipNumber = (
+    files: EnteFile[],
+    maxZipSize: number,
+): boolean => {
+    let totalSize = 0;
+    for (const file of files) {
+        const size = file.info?.fileSize;
+        if (size == null) {
+            return true;
+        }
+        totalSize += size;
+        if (totalSize > maxZipSize) {
+            return true;
+        }
+    }
+    return false;
+};
+
 /**
  * Save the given {@link files} to the user's device.
  *
@@ -149,6 +167,15 @@ const downloadAndSave = async (
             );
         }
     }
+
+    const shouldZipOnWeb =
+        !electron &&
+        (files.length > 1 ||
+            (files.length === 1 &&
+                files[0]?.metadata.fileType === FileType.livePhoto));
+    const includeZipNumber =
+        shouldZipOnWeb &&
+        shouldIncludeZipNumber(files, getDownloadLimits().maxZipSize);
 
     const canceller = new AbortController();
     const failedFiles: EnteFile[] = [];
@@ -268,6 +295,7 @@ const downloadAndSave = async (
                     canceller,
                     updateSaveGroup,
                     nextZipBatchIndex,
+                    includeZipNumber,
                 );
             }
 
@@ -293,6 +321,7 @@ const downloadAndSave = async (
         isHiddenCollectionSummary,
         downloadDirPath,
         total,
+        includeZipNumber,
         canceller,
         retry,
     });
@@ -312,6 +341,7 @@ class ZipBatcher {
     private usedNames = new Set<string>();
     private baseName: string;
     private maxZipSize: number;
+    private includePartNumber: boolean;
     private onStateChange?: (
         isDownloading: boolean,
         partNumber: number,
@@ -322,11 +352,13 @@ class ZipBatcher {
         maxZipSize: number,
         startingBatchIndex = 1,
         onStateChange?: (isDownloading: boolean, partNumber: number) => void,
+        includePartNumber = false,
     ) {
         this.baseName = baseName;
         this.maxZipSize = maxZipSize;
         this.batchIndex = startingBatchIndex;
         this.onStateChange = onStateChange;
+        this.includePartNumber = includePartNumber || startingBatchIndex > 1;
     }
 
     /**
@@ -357,6 +389,7 @@ class ZipBatcher {
             this.currentBatchSize > 0 &&
             this.currentBatchSize + size > this.maxZipSize
         ) {
+            this.includePartNumber = true;
             await this.downloadCurrentBatch();
             // Notify that we're now preparing a new part
             this.onStateChange?.(false, this.batchIndex);
@@ -387,7 +420,14 @@ class ZipBatcher {
                 this.currentFileCount === 1
                     ? "1 file"
                     : `${this.currentFileCount} files`;
-            const zipName = `${this.baseName} Part ${this.batchIndex} - ${fileLabel}.zip`;
+            const baseName = this.baseName.trim();
+            const nameBase = this.includePartNumber
+                ? `${baseName} Part ${this.batchIndex}`
+                : baseName;
+            const zipName =
+                baseName.toLowerCase() === fileLabel.toLowerCase()
+                    ? `${nameBase}.zip`
+                    : `${nameBase} - ${fileLabel}.zip`;
 
             const url = URL.createObjectURL(zipBlob);
             saveAsFileAndRevokeObjectURL(url, zipName);
@@ -485,6 +525,7 @@ const saveAsZip = async (
     canceller: AbortController,
     updateSaveGroup: UpdateSaveGroup,
     startingBatchIndex = 1,
+    includePartNumber = false,
 ): Promise<number> => {
     const { concurrency, maxZipSize } = getDownloadLimits();
     const batcher = new ZipBatcher(
@@ -497,6 +538,7 @@ const saveAsZip = async (
                 isDownloadingZip: isDownloading,
                 currentPart: partNumber,
             })),
+        includePartNumber,
     );
 
     // Set initial part number

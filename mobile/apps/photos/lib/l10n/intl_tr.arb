@@ -301,7 +301,6 @@
   "failedToApplyCode": "Uygulanırken hata oluştu",
   "enterReferralCode": "Davet kodunuzu girin",
   "codeAppliedPageTitle": "Kod kabul edildi",
-  "changeYourReferralCode": "Referans kodunuzu değiştirin",
   "change": "Değiştir",
   "unavailableReferralCode": "Üzgünüz, bu kod mevcut değil.",
   "codeChangeLimitReached": "Üzgünüz, kod değişikliklerinin sınırına ulaştınız.",
@@ -319,11 +318,9 @@
   "claimFreeStorage": "Bedava alan kazanın",
   "inviteYourFriends": "Arkadaşlarını davet et",
   "failedToFetchReferralDetails": "Davet ayrıntıları çekilemedi. Iütfen daha sonra deneyin.",
-  "referralStep1": "1. Bu kodu arkadaşlarınıza verin",
   "referralStep2": "2. Ücretli bir plan için kaydolsunlar",
   "referralStep3": "3. İkinizde bedava {storageInGB} GB alın",
   "referralsAreCurrentlyPaused": "Davetler şu anda durmuş durumda",
-  "youCanAtMaxDoubleYourStorage": "* Alanınızı en fazla ikiye katlayabilirsiniz",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Şu ana kadar aileniz {storageAmountInGb} GB aldı} false {Şu ana kadar {storageAmountInGb} GB aldınız} other {Şu ana kadar {storageAmountInGb} GB aldınız!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
@@ -1121,7 +1118,6 @@
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
   "availableStorageSpace": "{freeAmount} {storageUnit} ücretsiz",
-  "appVersion": "Sürüm: {versionValue}",
   "verifyIDLabel": "Doğrula",
   "fileInfoAddDescHint": "Bir açıklama ekle...",
   "editLocationTagTitle": "Konumu düzenle",
@@ -1837,5 +1833,28 @@
   "closeBy": "Kapat",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "cLTitle1": "Yeniden Tasarım",
+  "cLDesc1Item1": "Ayarlar ekranı yeniden tasarlandı",
+  "cLDesc1Item2": "Arama çubuğu üste taşındı",
+  "cLDesc1Item3": "Arama sonuçları sayfası yeniden tasarlandı",
+  "cLTitle2": "İyileştirmeler",
+  "cLDesc2Item1": "Ayarlar içinde arama",
+  "cLDesc2Item2": "Arama sekmesi daha hızlı yükleniyor",
+  "cLDesc2Item3": "Keşif, konum ve dosya türü bölümlerinde arama",
+  "cLDesc2Item4": "Yöneticiler ve albüm sahipleri yorumları silebilir",
+  "cLDesc2Item5": "Videoda sıkıştırarak yakınlaştırma",
+  "cLDesc2Item6": "Tüm göz ardı edilen kişileri görüntüle",
+  "cLDesc2Item7": "Geliştirilmiş birleştirme akışı",
+  "cLDesc2Item8": "Kişiler sayfasında arama ve özel sıralama",
+  "cLDesc2Item9": "Tutarlı kişi sıralaması",
+  "cLDesc2Item10": "Desteklenmeyen görüntü formatları için önizleme resimleri",
+  "cLDesc2Item11": "Kolaj oluşturucuda fotoğraf değiştirme ve dokunarak değiştirme",
+  "cLDesc2Item12": "Dosya bilgi sayfasında performans iyileştirmesi",
+  "cLTitle3": "Hata Düzeltmeleri",
+  "cLDesc3Item1": "Uygulamayı açarken müziğin durması sorunu düzeltildi",
+  "cLDesc3Item2": "Samsung S cihazlarda kaydırarak seçme sorunu düzeltildi",
+  "cLDesc3Item3": "Yedek geri yüklemeden sonra açılış ekranı sorunu düzeltildi",
+  "cLDesc3Item4": "Tabletlerde ve yatay modda galeri sorunları düzeltildi",
+  "cLDesc3Item5": "Taşımadan sonra kategorisiz sayfanın güncellenmemesi sorunu düzeltildi"
 }

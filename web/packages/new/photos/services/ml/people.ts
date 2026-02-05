@@ -487,6 +487,7 @@ export interface PersonSuggestionsAndChoices {
  */
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
+    currentUserID: number,
 ): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();
 
@@ -565,7 +566,8 @@ export const _suggestionsAndChoicesForPerson = async (
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
-    const normalCollectionFiles = await computeNormalCollectionFilesFromSaved();
+    const normalCollectionFiles =
+        await computeNormalCollectionFilesFromSaved(currentUserID);
     const fileByID = new Map(normalCollectionFiles.map((f) => [f.id, f]));
 
     const toPreviewable = (cluster: FaceCluster) => {

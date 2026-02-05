@@ -217,7 +217,7 @@ func main() {
 	stripeClients := billing.GetStripeClients()
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, commonBillController, discordController)
+		billingRepo, fileRepo, userRepo, remoteStoreRepository, commonBillController, discordController)
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -226,7 +226,12 @@ func main() {
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+	remoteStoreController := &remoteStoreCtrl.Controller{
+		Repo:        remoteStoreRepository,
+		BillingCtrl: billingController,
+		UserRepo:    userRepo,
+		FamilyRepo:  familyRepo,
+	}
 
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
@@ -322,11 +327,12 @@ func main() {
 	}
 
 	familyController := &family.Controller{
-		FamilyRepo:    familyRepo,
-		BillingCtrl:   billingController,
-		UserRepo:      userRepo,
-		UserCacheCtrl: userCacheCtrl,
-		UsageRepo:     usageRepo,
+		FamilyRepo:      familyRepo,
+		BillingCtrl:     billingController,
+		UserRepo:        userRepo,
+		UserCacheCtrl:   userCacheCtrl,
+		UsageRepo:       usageRepo,
+		RemoteStoreRepo: remoteStoreRepository,
 	}
 
 	collectionLinkCtrl := &publicCtrl.CollectionLinkController{
@@ -366,6 +372,7 @@ func main() {
 		CollectionLinkCtrl:    collectionLinkCtrl,
 		UserRepo:              userRepo,
 		FileRepo:              fileRepo,
+		TrashRepo:             trashRepo,
 		CastRepo:              &castDb,
 		BillingCtrl:           billingController,
 		QueueRepo:             queueRepo,

@@ -15,6 +15,7 @@ import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart" show isOfflineMode;
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -108,6 +109,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
     if (widget.selectedFiles.files.isNotEmpty ||
+        isOfflineMode ||
         !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }

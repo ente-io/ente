@@ -28,6 +28,9 @@ func (c *Controller) LeaveFamily(ctx context.Context, userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+	if err = c.clearFamilyCustomDomain(ctx, userID); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	go func() {
 		notificationErr := c.sendNotification(ctx, *user.FamilyAdminID, userID, ente.LEFT, nil)
 		if notificationErr != nil {

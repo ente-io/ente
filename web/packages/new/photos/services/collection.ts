@@ -7,6 +7,7 @@ import {
     encryptBox,
     generateKey,
 } from "ente-base/crypto";
+import { haveWindow } from "ente-base/env";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
@@ -49,7 +50,6 @@ import {
     savedCollections,
     savedCollectionsUpdationTime,
 } from "./photos-fdb";
-import { settingsSnapshot } from "./settings";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -67,6 +67,16 @@ const favoritesCollectionName = "Favorites";
  */
 export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
+
+/**
+ * Create a new hidden album on remote, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param albumName The name to use for the new hidden album.
+ */
+export const createHiddenAlbum = (albumName: string) =>
+    createCollection(albumName, "album", { visibility: ItemVisibility.hidden });
 
 /**
  * Create a new collection on remote, and return its local representation.
@@ -477,9 +487,14 @@ export const savedNormalCollections = (): Promise<Collection[]> =>
 /**
  * Return all hidden collections that are present in our local database.
  */
-export const savedHiddenCollections = (): Promise<Collection[]> =>
+export const savedHiddenCollections = (
+    currentUserID?: number,
+): Promise<Collection[]> =>
     savedCollections().then(
-        (cs) => splitByPredicate(cs, isHiddenCollection)[0],
+        (cs) =>
+            splitByPredicate(cs, (c) =>
+                isHiddenCollection(c, currentUserID),
+            )[0],
     );
 
 /**
@@ -1339,11 +1354,35 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
 /**
  * Return `true` if the given collection is hidden.
  *
- * Hidden collections are those that have their visibility set to hidden in the
- * collection's owner's private magic metadata.
+ * Hidden collections are those that have their visibility set to hidden for
+ * the current user (owner or sharee).
+ *
+ * In one instance, the isHiddenCollection function is called outside of a window, like
+ * for the people tab's review suggestions, this function was trigged from a worker.
+ * In that case, since the worker has no access to the localStorage, we need to pass the currentUserID
+ * explicitly.
  */
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+export const isHiddenCollection = (
+    collection: Collection,
+    currentUserID?: number,
+) => {
+    const userID =
+        currentUserID ?? (haveWindow() ? ensureLocalUser().id : undefined);
+
+    if (userID === undefined) {
+        throw new Error(
+            "isHiddenCollection: currentUserID is required outside window context",
+        );
+    }
+    if (collection.owner.id == userID) {
+        return (
+            collection.magicMetadata?.data.visibility == ItemVisibility.hidden
+        );
+    }
+    return (
+        collection.sharedMagicMetadata?.data.visibility == ItemVisibility.hidden
+    );
+};
 
 /**
  * Return `true` if the given collection is archived.
@@ -1464,8 +1503,7 @@ export const createPublicURL = async (
     collectionID: number,
     attributes?: CreatePublicURLAttributes,
 ): Promise<PublicURL> => {
-    // Only enable comments by default if the feature flag is enabled.
-    const enableComment = settingsSnapshot().isCommentsEnabled;
+    const enableComment = true;
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
