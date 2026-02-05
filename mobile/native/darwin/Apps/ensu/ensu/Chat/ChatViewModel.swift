@@ -387,7 +387,7 @@ final class ChatViewModel: ObservableObject {
     private static let systemPrompt = "You are a helpful assistant. Use Markdown **bold** to emphasize important terms and key points. For math equations, put $$ on its own line (never inline). Example:\n$$\nx^2 + y^2 = z^2\n$$"
     private static let overflowSafetyTokens = 128
     private static let imageTokenEstimate = 768
-    private static let sessionTitleMaxLength = 40
+    private nonisolated static let sessionTitleMaxLength = 40
     private static let sessionSummaryMaxWords = 7
     private static let sessionSummaryStoreKey = "ensu.session_summaries"
     private static let sessionSummarySystemPrompt = "You create concise chat titles. Given the provided message, summarize the user's goal in 5-7 words. Use plain words. Don't use markdown characters in the title. No quotes, no emojis, no trailing punctuation, and output only the title."
@@ -1788,7 +1788,7 @@ final class ChatViewModel: ObservableObject {
         startNextAttachmentDownloads()
     }
 
-    private static func buildSessions(
+    private nonisolated static func buildSessions(
         from loaded: [LlmChatSession],
         chatDb: LlmChatDb,
         summaries: [String: String]
@@ -2135,14 +2135,14 @@ final class ChatViewModel: ObservableObject {
         return summaryWords.joined(separator: " ")
     }
 
-    private static func sanitizeTitleText(_ text: String) -> String {
+    private nonisolated static func sanitizeTitleText(_ text: String) -> String {
         text
             .replacingOccurrences(of: "[\\r\\n\\t]+", with: " ", options: .regularExpression)
             .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    static func sessionTitle(from text: String, fallback: String = "New chat") -> String {
+    nonisolated static func sessionTitle(from text: String, fallback: String = "New chat") -> String {
         let trimmed = sanitizeTitleText(text)
         guard !trimmed.isEmpty else { return fallback }
         if trimmed.count <= Self.sessionTitleMaxLength {
