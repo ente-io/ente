@@ -88,7 +88,7 @@ Duplicates can occur:
 - Use the [Remove duplicates](/photos/features/albums-and-organization/storage-optimization#remove-exact-duplicates) option.
 - Use the [Remove similar images](/photos/features/albums-and-organization/storage-optimization#remove-similar-images) option. (Ensure Machine Learning is enabled in Settings for similar-image detection)
 
-> [!TIP]
+> [!NOTE]
 >
 > Special mention to l1br3770 for his [detailed guide](https://www.reddit.com/r/enteio/comments/1jyxk4b/howto_migration_from_google_photos_pitfalls/).
 ### Can I reupload the Google Takeout in case I did not upload it correctly the first time?
