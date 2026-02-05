@@ -540,6 +540,15 @@ class _FileCommentsBottomSheetState extends State<FileCommentsBottomSheet> {
           }
         });
         _textController.clear();
+
+        // Scroll to the newly added comment (position 0 in reversed list)
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
       }
     } catch (e) {
       _sendLoadingTimer?.cancel();
