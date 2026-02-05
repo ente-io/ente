@@ -22,7 +22,7 @@ env:
 
 jobs:
     lint:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         defaults:
             run:
                 working-directory: desktop/ensu-tauri/src-tauri
@@ -43,6 +43,14 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+            - name: Fetch Rust dependencies
+              run: cargo fetch
+
+            - name: Patch llama.cpp mtmd sources
+              shell: bash
+              working-directory: .
+              run: rust/llmchat/inference/tool/patch_llama_mtmd.sh
 
             - run: cargo fmt --check
 

@@ -71,6 +71,15 @@ jobs:
               working-directory: desktop/ensu-tauri
               run: yarn install
 
+            - name: Fetch Rust dependencies
+              shell: bash
+              working-directory: desktop/ensu-tauri/src-tauri
+              run: cargo fetch
+
+            - name: Patch llama.cpp mtmd sources
+              shell: bash
+              run: rust/llmchat/inference/tool/patch_llama_mtmd.sh
+
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
               env:

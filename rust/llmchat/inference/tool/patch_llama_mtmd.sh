@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  PYTHON_BIN=python
+fi
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE_DIR="$(
-  python3 - <<PY
+  "$PYTHON_BIN" - <<PY
 import json
 import os
 import subprocess
@@ -70,7 +75,7 @@ fi
 
 CLIP_CPP="$MTMD_DIR/clip.cpp"
 if [[ -f "$CLIP_CPP" ]]; then
-  python3 - <<PY
+  "$PYTHON_BIN" - <<PY
 from pathlib import Path
 import sys
 
