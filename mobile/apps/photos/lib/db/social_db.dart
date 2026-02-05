@@ -409,6 +409,25 @@ class SocialDB {
     await batch.commit(noResult: true);
   }
 
+  /// Resolves `parent_comment_user_id` for reply comments by looking up the
+  /// parent comment's `user_id`. Only processes rows where the field is still
+  /// NULL, making it idempotent.
+  Future<void> resolveParentCommentUserIDs(int collectionID) async {
+    final db = await database;
+    await db.rawUpdate(
+      '''
+      UPDATE $_commentsTable SET parent_comment_user_id = (
+        SELECT c2.user_id FROM $_commentsTable c2
+        WHERE c2.id = $_commentsTable.parent_comment_id
+      )
+      WHERE collection_id = ?
+        AND parent_comment_id IS NOT NULL
+        AND parent_comment_user_id IS NULL
+      ''',
+      [collectionID],
+    );
+  }
+
   Future<void> upsertReactions(List<Reaction> reactions) async {
     if (reactions.isEmpty) return;
     final db = await database;
