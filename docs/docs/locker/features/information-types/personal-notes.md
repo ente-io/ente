@@ -1,11 +1,11 @@
 ---
-title: Personal Notes
+title: Note
 description: Store private notes and sensitive information with end-to-end encryption
 ---
 
-# Personal Notes
+# Note
 
-Personal Notes let you store any text securely with end-to-end encryption.
+Notes let you store any text securely with end-to-end encryption.
 Use them for sensitive information that doesn't fit into other categories.
 
 ## Use cases
@@ -17,11 +17,11 @@ Use them for sensitive information that doesn't fit into other categories.
 - Encrypted drafts
 - Confidential information
 
-## Creating a personal note
+## Creating a note
 
 1. Open Ente Locker
 2. Tap the **+** button
-3. Select **Personal Notes**
+3. Select **Note**
 4. Enter a title for your note
 5. Write your note content in the text field
 6. Select one or more collections
@@ -31,8 +31,8 @@ Use them for sensitive information that doesn't fit into other categories.
 
 ### Rich text content
 
-Personal Notes support plain text content. Write as much as you need - there's
-no character limit.
+Notes support plain text content. Write as much as you need - there's no
+character limit.
 
 ### Organization
 
@@ -41,8 +41,8 @@ a "Work" collection for work-related notes or "Personal" for private entries.
 
 ### Search
 
-Find notes quickly using the search function. Search matches against both the
-title and content of your notes.
+Find notes quickly using the search function. Search matches against the title
+of your notes.
 
 ## Editing notes
 
@@ -55,10 +55,9 @@ title and content of your notes.
 
 Share individual notes via public links:
 
-1. Open the note you want to share
+1. Long press on the note you want to share
 2. Tap the share button
-3. Select **Create public link**
-4. Configure options like password protection or expiration
+3. Tap **Share link**
 
 To share notes with another Ente user, add them to a collection and share the
 collection.

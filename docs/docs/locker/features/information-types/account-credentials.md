@@ -1,12 +1,12 @@
 ---
-title: Account Credentials
+title: Secret
 description: Securely store your most important account credentials with end-to-end encryption
 ---
 
-# Account Credentials
+# Secret
 
-Account Credentials let you securely store login information for websites and
-services. Keep your usernames and passwords in one encrypted place.
+Secrets let you securely store login information for websites and services.
+Keep your usernames and passwords in one encrypted place.
 
 ## What you can store
 
@@ -15,11 +15,11 @@ services. Keep your usernames and passwords in one encrypted place.
 - **Password**: Your account password
 - **Notes**: Additional information about the account (optional)
 
-## Creating account credentials
+## Creating a secret
 
 1. Open Ente Locker
 2. Tap the **+** button
-3. Select **Account Credentials**
+3. Select **Secret**
 4. Fill in the fields:
     - **Name**: A recognizable name (e.g., "Gmail", "Bank Account")
     - **Username**: Your username or email for the account

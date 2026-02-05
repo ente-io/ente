@@ -13,25 +13,25 @@ learn how to add information and organize it into collections.
 1. Open Ente Locker
 2. Tap the **+** button at the bottom of the screen
 3. Select the type of item you want to add:
-   - **Documents**: Upload PDFs, images, and scans
-   - **Personal Notes**: Free-form text for any secure notes
-   - **Account Credentials**: Usernames and passwords
-   - **Physical Records**: Track where physical documents are stored
+   - **Document**: Upload PDFs, images, and scans
+   - **Note**: Free-form text for any secure notes
+   - **Secret**: Usernames and passwords
+   - **Thing**: Track where physical documents are stored
 
 ## Example: Uploading a document
 
 1. Tap the **+** button
-2. Select **Documents**
+2. Select **Document**
 3. Choose a file from your device (PDF, image, or scan)
 4. Add a descriptive title (e.g., "Passport Scan")
 5. Add notes if needed (optional)
 6. Select one or more collections to organize this item
 7. Tap **Save**
 
-## Example: Adding account credentials
+## Example: Adding a secret
 
 1. Tap the **+** button
-2. Select **Account Credentials**
+2. Select **Secret**
 3. Fill in the fields:
    - **Name**: A name for this entry (e.g., "Bank Account")
    - **Username**: Your username or email
@@ -58,9 +58,8 @@ Learn more about [Collections](/locker/features/organization/collections).
 
 From the home screen:
 
-- **Recent**: Shows your most recently accessed items
+- **Search**: Find items by title
 - **Collections**: Browse items organized by collection
-- **Search**: Find items by title or content
 
 ## Next steps
 
