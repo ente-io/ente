@@ -21,15 +21,21 @@ struct PrimaryButton: View {
                         .foregroundStyle(EnsuColor.backgroundBase)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, EnsuSpacing.buttonVertical)
         }
-        .buttonStyle(.plain)
-        .background(EnsuColor.accentGradient)
-        .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.button, style: .continuous))
-        .contentShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.button, style: .continuous))
+        .buttonStyle(PrimaryButtonStyle())
         .opacity(isEnabled ? 1 : 0.5)
-        .allowsHitTesting(isEnabled && !isLoading)
+        .disabled(!isEnabled || isLoading)
+    }
+}
+
+private struct PrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.vertical, EnsuSpacing.buttonVertical)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .background(EnsuColor.accentGradient)
+            .clipShape(RoundedRectangle(cornerRadius: EnsuCornerRadius.button, style: .continuous))
+            .contentShape(Rectangle())
     }
 }
 
@@ -156,9 +162,10 @@ struct AttachmentChip: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 10, height: 10)
-                        .padding(4)
                 }
                 .buttonStyle(.plain)
+                .frame(width: 32, height: 32)
+                .contentShape(Rectangle())
             }
         }
         .padding(.horizontal, 10)
