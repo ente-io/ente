@@ -778,6 +778,7 @@ final class ChatViewModel: ObservableObject {
         }
         logger.info("Session deleted", details: "id=\(session.id.uuidString)")
         try? chatDb.deleteSession(uuid: session.id.uuidString)
+        deleteOfflineSessionIfNeeded(session.id)
         sessionSummaries.removeValue(forKey: sessionSummaryKey(session.id))
         persistSessionSummaries()
 
@@ -797,6 +798,20 @@ final class ChatViewModel: ObservableObject {
             }
         }
         syncNow()
+    }
+
+    private func deleteOfflineSessionIfNeeded(_ sessionId: UUID) {
+        guard isOnlineMode else { return }
+        do {
+            let offlineDb = try LlmChatDb.open(
+                mainDbPath: offlineDbPath,
+                attachmentsDbPath: syncDbPath,
+                key: offlineDbKey
+            )
+            try offlineDb.deleteSession(uuid: sessionId.uuidString)
+        } catch {
+            logger.warning("Failed to delete offline session", details: "id=\(sessionId.uuidString) error=\(error)")
+        }
     }
 
     func syncNow(showErrors: Bool = true, showSuccess: Bool = false) {
@@ -1793,24 +1808,27 @@ final class ChatViewModel: ObservableObject {
         chatDb: LlmChatDb,
         summaries: [String: String]
     ) -> [ChatSession] {
-        loaded.compactMap { session in
+        let sessions = loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
             let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
             let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
             let firstUserMessage = sortedMessages.first(where: { $0.sender == .selfUser })?.text ?? ""
-            let lastMessage = sortedMessages.last?.text ?? ""
+            let lastMessageNode = sortedMessages.last
+            let lastMessage = lastMessageNode?.text ?? ""
             let summary = summaries[session.uuid.lowercased()]
             let isPlaceholderTitle = session.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                 session.title.caseInsensitiveCompare("New chat") == .orderedSame
             let seedTitle = summary ?? (isPlaceholderTitle ? firstUserMessage : session.title)
             let title = Self.sessionTitle(from: seedTitle, fallback: session.title)
+            let updatedAtUs = lastMessageNode?.createdAtUs ?? session.updatedAtUs
             return ChatSession(
                 id: id,
                 title: title,
                 lastMessage: lastMessage,
-                updatedAt: Date(timeIntervalSince1970: Double(session.updatedAtUs) / 1_000_000.0)
+                updatedAt: Date(timeIntervalSince1970: Double(updatedAtUs) / 1_000_000.0)
             )
         }
+        return sessions.sorted { $0.updatedAt > $1.updatedAt }
     }
 
     private func reloadFromDb() {
