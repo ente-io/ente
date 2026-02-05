@@ -41,6 +41,11 @@ if [[ -z "$CRATE_DIR" ]]; then
   exit 1
 fi
 
+PY_CRATE_DIR="$CRATE_DIR"
+if command -v cygpath >/dev/null 2>&1; then
+  PY_CRATE_DIR="$(cygpath -w "$CRATE_DIR")"
+fi
+
 TOOLS_DIR="$CRATE_DIR/llama.cpp/tools"
 MTMD_DIR="$TOOLS_DIR/mtmd"
 CMAKE_FILE="$TOOLS_DIR/CMakeLists.txt"
@@ -75,11 +80,13 @@ fi
 
 CLIP_CPP="$MTMD_DIR/clip.cpp"
 if [[ -f "$CLIP_CPP" ]]; then
-  "$PYTHON_BIN" - <<PY
+  PY_CRATE_DIR="$PY_CRATE_DIR" "$PYTHON_BIN" - <<PY
+import os
 from pathlib import Path
 import sys
 
-path = Path("$CLIP_CPP")
+crate_dir = os.environ["PY_CRATE_DIR"]
+path = Path(crate_dir) / "llama.cpp" / "tools" / "mtmd" / "clip.cpp"
 text = path.read_text()
 
 replacements = {
@@ -110,11 +117,11 @@ if missing:
     sys.stderr.write(f"File: {path}\n")
     sys.exit(1)
 
-marker = Path("$CRATE_DIR") / "llama.cpp" / "CMakeMtmdPatch.txt"
+marker = Path(crate_dir) / "llama.cpp" / "CMakeMtmdPatch.txt"
 needs_rebuild = applied or not marker.exists()
 if needs_rebuild:
     marker.write_text("# mtmd patch applied\n")
-    cmake_root = Path("$CRATE_DIR") / "llama.cpp" / "CMakeLists.txt"
+    cmake_root = Path(crate_dir) / "llama.cpp" / "CMakeLists.txt"
     if cmake_root.exists():
         cmake_root.touch()
 

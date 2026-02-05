@@ -44,6 +44,10 @@ jobs:
               with:
                   targets: ${{ matrix.platform.rust-target }}
 
+            - name: Set macOS deployment target
+              if: matrix.platform.os == 'macos-latest'
+              run: echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
               run: |
