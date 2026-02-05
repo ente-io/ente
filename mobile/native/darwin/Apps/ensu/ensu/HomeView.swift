@@ -1,3 +1,4 @@
+#if canImport(EnteCore)
 import SwiftUI
 
 struct HomeView: View {
@@ -28,3 +29,12 @@ struct HomeView: View {
             }
     }
 }
+#else
+import SwiftUI
+
+struct HomeView: View {
+    var body: some View {
+        Text("Home unavailable")
+    }
+}
+#endif
