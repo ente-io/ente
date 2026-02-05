@@ -103,3 +103,13 @@ Once this is done, you can reupload your entire Google Takeout folder again usin
 ### Is there a way to remove partner sharing photos when importing via Google Takeout?
 
 There is currently no built-in filter to automatically remove partner-shared photos when importing from Google Takeout.
+
+## Importing from Apple Photos
+
+### Why do some photos migrated from Apple Photos (desktop) show incorrect or missing metadata?
+
+Some photos may not have EXIF metadata embedded directly within the image file. In these cases, Apple Photos exports metadata into separate `.XMP` sidecar files instead of writing it into the photo itself.
+
+Currently, the desktop app does not read metadata from separate XMP sidecar files— it can only recognize metadata that is embedded within the file.
+
+We recommend to upload the photos using the iPhone app as iOS exports typically include embedded metadata, which ensures dates and other details are preserved correctly.
