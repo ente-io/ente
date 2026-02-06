@@ -85,12 +85,21 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  static const _kInitialFeedLimit = 50;
+  static const _kFeedLoadMoreStep = 50;
+  static const _kMaxFeedLimit = 500;
+  static const _kLoadMoreThresholdPx = 200.0;
+
   List<FeedItem> _feedItems = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentLimit = _kInitialFeedLimit;
   late final int _currentUserID;
   FeedNavigationTarget? _pendingNavigationTarget;
   bool _didHandleNavigationTarget = false;
   bool _isOpeningNavigationTarget = false;
+  final ScrollController _scrollController = ScrollController();
 
   /// Map of collectionID -> (anonUserID -> displayName)
   Map<int, Map<String, String>> _anonDisplayNamesByCollection = {};
@@ -100,15 +109,38 @@ class _FeedScreenState extends State<FeedScreen> {
     super.initState();
     _currentUserID = Configuration.instance.getUserID() ?? 0;
     _pendingNavigationTarget = widget.initialTarget;
+    _scrollController.addListener(_onScroll);
     unawaited(SocialNotificationCoordinator.instance.markSocialSeen());
     _loadFeedItems();
   }
 
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - _kLoadMoreThresholdPx) {
+      unawaited(_loadMore());
+    }
+  }
+
   Future<void> _loadFeedItems() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _isLoadingMore = false;
+      _currentLimit = _kInitialFeedLimit;
+      _hasMore = true;
+    });
 
     // Load local data first
-    final items = await FeedDataProvider.instance.getFeedItems(limit: 50);
+    final items = await FeedDataProvider.instance.getFeedItems(
+      limit: _currentLimit,
+    );
 
     // Load anon display names for all collections in feed
     final anonNames = await _loadAnonDisplayNames(items);
@@ -118,6 +150,8 @@ class _FeedScreenState extends State<FeedScreen> {
         _feedItems = items;
         _anonDisplayNamesByCollection = anonNames;
         _isLoading = false;
+        _hasMore =
+            _currentLimit < _kMaxFeedLimit && items.length >= _currentLimit;
       });
     }
     _tryOpenNavigationTarget();
@@ -152,8 +186,9 @@ class _FeedScreenState extends State<FeedScreen> {
       if (!hasNewSocialData) return;
 
       // Reload feed items after sync
-      final freshItems =
-          await FeedDataProvider.instance.getFeedItems(limit: 50);
+      final freshItems = await FeedDataProvider.instance.getFeedItems(
+        limit: _currentLimit,
+      );
 
       // Reload anon display names for new items
       final freshAnonNames = await _loadAnonDisplayNames(freshItems);
@@ -162,6 +197,8 @@ class _FeedScreenState extends State<FeedScreen> {
         setState(() {
           _feedItems = freshItems;
           _anonDisplayNamesByCollection = freshAnonNames;
+          _hasMore = _currentLimit < _kMaxFeedLimit &&
+              freshItems.length >= _currentLimit;
         });
       }
       _tryOpenNavigationTarget();
@@ -171,7 +208,72 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   Future<void> _onRefresh() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _isLoadingMore = false;
+        _currentLimit = _kInitialFeedLimit;
+        _hasMore = true;
+      });
+    }
+
+    final items = await FeedDataProvider.instance.getFeedItems(
+      limit: _currentLimit,
+    );
+    final anonNames = await _loadAnonDisplayNames(items);
+
+    if (mounted) {
+      setState(() {
+        _feedItems = items;
+        _anonDisplayNamesByCollection = anonNames;
+        _isLoading = false;
+        _hasMore =
+            _currentLimit < _kMaxFeedLimit && items.length >= _currentLimit;
+      });
+    }
+    _tryOpenNavigationTarget();
+
     await _syncAndRefresh();
+  }
+
+  Future<void> _loadMore() async {
+    if (!mounted || _isLoading || _isLoadingMore || !_hasMore) {
+      return;
+    }
+
+    final nextLimit = (_currentLimit + _kFeedLoadMoreStep).clamp(
+      _kInitialFeedLimit,
+      _kMaxFeedLimit,
+    );
+    if (nextLimit <= _currentLimit) {
+      if (mounted) {
+        setState(() => _hasMore = false);
+      }
+      return;
+    }
+
+    setState(() => _isLoadingMore = true);
+    try {
+      final items = await FeedDataProvider.instance.getFeedItems(
+        limit: nextLimit,
+      );
+      final anonNames = await _loadAnonDisplayNames(items);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _currentLimit = nextLimit;
+        _feedItems = items;
+        _anonDisplayNamesByCollection = anonNames;
+        _hasMore =
+            _currentLimit < _kMaxFeedLimit && items.length >= _currentLimit;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingMore = false);
+      }
+    }
   }
 
   void _tryOpenNavigationTarget() {
@@ -287,13 +389,22 @@ class _FeedScreenState extends State<FeedScreen> {
               : RefreshIndicator(
                   onRefresh: _onRefresh,
                   child: ListView.builder(
+                    controller: _scrollController,
                     padding: EdgeInsets.only(
                       left: 15,
                       right: 15,
                       bottom: MediaQuery.paddingOf(context).bottom,
                     ),
-                    itemCount: _feedItems.length,
+                    itemCount: _feedItems.length + (_isLoadingMore ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (index >= _feedItems.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: EnteLoadingWidget(size: 20),
+                          ),
+                        );
+                      }
                       final item = _feedItems[index];
                       final isLastItem = index == _feedItems.length - 1;
                       return FeedItemWidget(
