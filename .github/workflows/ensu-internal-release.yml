@@ -1,0 +1,88 @@
+name: "Internal release (ensu mobile)"
+
+on:
+    workflow_dispatch: # Allow manually running the action
+
+env:
+    RUST_VERSION: "1.83"
+    NDK_VERSION: "27.0.12077973"
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: mobile/native/android/apps/ensu
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'temurin'
+                  java-version: '17'
+
+            - name: Setup Android SDK
+              uses: android-actions/setup-android@v3
+
+            - name: Install NDK
+              run: |
+                  echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
+                  echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> $GITHUB_ENV
+
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+            - name: Install cargo-ndk
+              run: cargo install cargo-ndk
+
+            - name: Build Rust libraries
+              run: |
+                  cd ../../../packages/rust/tool
+                  ./build_android.sh
+              env:
+                  ANDROID_HOME: ${{ env.ANDROID_HOME }}
+                  NDK_VERSION: ${{ env.NDK_VERSION }}
+
+            - name: Setup signing keys
+              run: |
+                  echo "${{ secrets.SIGNING_KEY_ENSU }}" | base64 -d > ensu-release.keystore
+                  cat > key.properties << EOF
+                  storeFile=ensu-release.keystore
+                  storePassword=${{ secrets.SIGNING_STORE_PASSWORD_ENSU }}
+                  keyAlias=${{ secrets.SIGNING_KEY_ALIAS_ENSU }}
+                  keyPassword=${{ secrets.SIGNING_KEY_PASSWORD_ENSU }}
+                  EOF
+
+            - name: Build PlayStore AAB
+              run: ./gradlew :app-ui:bundleRelease
+
+            - name: Upload AAB to PlayStore
+              uses: r0adkll/upload-google-play@v1
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  packageName: io.ente.ensu
+                  releaseFiles: mobile/native/android/apps/ensu/app-ui/build/outputs/bundle/release/app-ui-release.aab
+                  track: internal
+                  status: draft
+
+            - name: Notify Discord
+              if: success()
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  nodetail: true
+                  title: "🤖 Internal draft release available for Ensu"
+                  description: "Draft release uploaded to Play Store internal track"
+                  color: 0x4CAF50
