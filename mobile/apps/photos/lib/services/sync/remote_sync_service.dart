@@ -792,7 +792,6 @@ class RemoteSyncService {
         localButUpdatedOnDevice = 0,
         remoteNewFile = 0;
     final int userID = _config.getUserID()!;
-    await _normalizeAddedTimeForDiff(diff, userID);
     bool needsGalleryReload = false;
     // this is required when same file is uploaded twice in the same
     // collection. Without this check, if both remote files are part of same
@@ -925,112 +924,6 @@ class RemoteSyncService {
     if (needsGalleryReload) {
       // 'force reload home gallery'
       Bus.instance.fire(ForceReloadHomeGalleryEvent("remoteSync"));
-    }
-  }
-
-  Future<void> _normalizeAddedTimeForDiff(
-    List<EnteFile> diff,
-    int userID,
-  ) async {
-    final candidatesByUploadedFileID =
-        <int, List<_CollectAddedTimeCandidate>>{};
-
-    for (final remoteFile in diff) {
-      final parsedAddedTime = remoteFile.addedTime;
-      remoteFile.addedTime = -1;
-
-      if (remoteFile.ownerID != userID) {
-        if (parsedAddedTime != null && parsedAddedTime > 0) {
-          remoteFile.addedTime = parsedAddedTime;
-        }
-        continue;
-      }
-
-      if (!remoteFile.isCollect) {
-        continue;
-      }
-
-      final uploadedFileID = remoteFile.uploadedFileID;
-      final collectionID = remoteFile.collectionID;
-      if (uploadedFileID == null ||
-          collectionID == null ||
-          parsedAddedTime == null ||
-          parsedAddedTime <= 0) {
-        continue;
-      }
-
-      candidatesByUploadedFileID
-          .putIfAbsent(uploadedFileID, () => <_CollectAddedTimeCandidate>[])
-          .add(
-            _CollectAddedTimeCandidate(
-              file: remoteFile,
-              collectionID: collectionID,
-              addedTime: parsedAddedTime,
-            ),
-          );
-    }
-
-    if (candidatesByUploadedFileID.isEmpty) {
-      return;
-    }
-
-    final existingRowsByUploadedFileID =
-        await _db.getOwnedAddedTimeRowsForUploadedFiles(
-      candidatesByUploadedFileID.keys.toSet(),
-      userID,
-    );
-
-    for (final entry in candidatesByUploadedFileID.entries) {
-      final uploadedFileID = entry.key;
-      final candidates = entry.value;
-      if (candidates.isEmpty) {
-        continue;
-      }
-
-      candidates.sort(
-        (a, b) => a.addedTime != b.addedTime
-            ? a.addedTime.compareTo(b.addedTime)
-            : a.collectionID.compareTo(b.collectionID),
-      );
-
-      final bestIncoming = candidates.first;
-      final existingRows = existingRowsByUploadedFileID[uploadedFileID] ?? [];
-
-      ({int collectionID, int addedTime})? selectedExisting;
-      for (final row in existingRows) {
-        if (selectedExisting == null ||
-            row.addedTime < selectedExisting.addedTime ||
-            (row.addedTime == selectedExisting.addedTime &&
-                row.collectionID < selectedExisting.collectionID)) {
-          selectedExisting = row;
-        }
-      }
-
-      if (selectedExisting == null ||
-          bestIncoming.addedTime < selectedExisting.addedTime) {
-        await _db.resetOwnedAddedTimeForUploadedFile(uploadedFileID, userID);
-        bestIncoming.file.addedTime = bestIncoming.addedTime;
-        continue;
-      }
-
-      _CollectAddedTimeCandidate? matchingIncoming;
-      for (final candidate in candidates) {
-        if (candidate.collectionID == selectedExisting.collectionID) {
-          matchingIncoming = candidate;
-          break;
-        }
-      }
-
-      if (matchingIncoming != null) {
-        matchingIncoming.file.addedTime =
-            min(selectedExisting.addedTime, matchingIncoming.addedTime);
-      }
-
-      await _db.resetOwnedAddedTimeForUploadedFile(
-        uploadedFileID,
-        userID,
-        preserveCollectionID: selectedExisting.collectionID,
-      );
     }
   }
 
@@ -1204,16 +1097,4 @@ class RemoteSyncService {
       _logger.severe("Social sync failed, continuing", e);
     }
   }
-}
-
-class _CollectAddedTimeCandidate {
-  final EnteFile file;
-  final int collectionID;
-  final int addedTime;
-
-  const _CollectAddedTimeCandidate({
-    required this.file,
-    required this.collectionID,
-    required this.addedTime,
-  });
 }

@@ -5,9 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/generated/l10n.dart';
+import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/collections_service.dart";
@@ -120,6 +122,7 @@ class DiffFetcher {
       final diff = response.data["diff"] as List;
       final bool hasMore = response.data["hasMore"] as bool;
       final startTime = DateTime.now();
+      final currentUserID = Configuration.instance.getUserID();
       late Set<int> existingUploadIDs;
       if (diff.isNotEmpty) {
         existingUploadIDs =
@@ -127,6 +130,8 @@ class DiffFetcher {
       }
       final deletedFiles = <EnteFile>[];
       final updatedFiles = <EnteFile>[];
+      final ownCollectCandidatesByUploadID =
+          <int, List<_OwnCollectCandidate>>{};
 
       for (final item in diff) {
         final file = EnteFile();
@@ -150,10 +155,7 @@ class DiffFetcher {
         file.ownerID = item["ownerID"];
         file.encryptedKey = item["encryptedKey"];
         file.keyDecryptionNonce = item["keyDecryptionNonce"];
-        final collectionAddedAt = item["collectionAddedAt"];
-        if (collectionAddedAt != null) {
-          file.addedTime = collectionAddedAt as int;
-        }
+        final collectionAddedAt = item["collectionAddedAt"] as int?;
         file.fileDecryptionHeader = item["file"]["decryptionHeader"];
         file.thumbnailDecryptionHeader = item["thumbnail"]["decryptionHeader"];
         file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
@@ -191,8 +193,44 @@ class DiffFetcher {
           file.pubMagicMetadata =
               PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
         }
+        if (collectionAddedAt != null && collectionAddedAt > 0) {
+          final isShared =
+              currentUserID != null && file.ownerID != currentUserID;
+          final isOwnCollect = currentUserID != null &&
+              file.ownerID == currentUserID &&
+              file.isCollect;
+          if (isShared) {
+            file.addedTime = collectionAddedAt;
+          } else if (isOwnCollect) {
+            file.addedTime = collectionAddedAt;
+            ownCollectCandidatesByUploadID
+                .putIfAbsent(
+                  file.uploadedFileID!,
+                  () => <_OwnCollectCandidate>[],
+                )
+                .add(
+                  _OwnCollectCandidate(
+                    file: file,
+                    collectionAddedAt: collectionAddedAt,
+                  ),
+                );
+          } else {
+            file.addedTime = -1;
+          }
+        } else {
+          file.addedTime = -1;
+        }
         updatedFiles.add(file);
       }
+
+      if (currentUserID != null) {
+        await _reconcileOwnCollectAddedTime(
+          collectionID: collectionID,
+          currentUserID: currentUserID,
+          ownCollectCandidatesByUploadID: ownCollectCandidatesByUploadID,
+        );
+      }
+
       _logger.info('[Collection-$collectionID] parsed ${diff.length} '
           'diff items ( ${updatedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
       return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
@@ -200,6 +238,83 @@ class DiffFetcher {
       _logger.severe(e, s);
       rethrow;
     }
+  }
+
+  Future<void> _reconcileOwnCollectAddedTime({
+    required int collectionID,
+    required int currentUserID,
+    required Map<int, List<_OwnCollectCandidate>>
+        ownCollectCandidatesByUploadID,
+  }) async {
+    if (ownCollectCandidatesByUploadID.isEmpty) {
+      return;
+    }
+
+    final incomingMinByUploadID = <int, int>{};
+    for (final entry in ownCollectCandidatesByUploadID.entries) {
+      final minIncoming = entry.value
+          .map((candidate) => candidate.collectionAddedAt)
+          .reduce(min);
+      incomingMinByUploadID[entry.key] = minIncoming;
+    }
+
+    final dbMinByUploadID =
+        await FilesDB.instance.getMinPositiveAddedTimeForUploadedFiles(
+      incomingMinByUploadID.keys.toSet(),
+      currentUserID,
+    );
+
+    var collectCandidatesCount = 0;
+    var keptIncomingCount = 0;
+    var suppressedIncomingCount = 0;
+    final uploadsToReset = <int>{};
+
+    for (final entry in ownCollectCandidatesByUploadID.entries) {
+      final uploadedFileID = entry.key;
+      final candidates = entry.value;
+      collectCandidatesCount += candidates.length;
+      final incomingMin = incomingMinByUploadID[uploadedFileID]!;
+      final dbMin = dbMinByUploadID[uploadedFileID];
+
+      if (dbMin != null && dbMin <= incomingMin) {
+        for (final candidate in candidates) {
+          candidate.file.addedTime = -1;
+        }
+        suppressedIncomingCount += candidates.length;
+        continue;
+      }
+
+      if (dbMin != null && dbMin > incomingMin) {
+        uploadsToReset.add(uploadedFileID);
+      }
+
+      var keptForUploadID = false;
+      for (final candidate in candidates) {
+        if (!keptForUploadID && candidate.collectionAddedAt == incomingMin) {
+          candidate.file.addedTime = incomingMin;
+          keptForUploadID = true;
+          keptIncomingCount++;
+        } else {
+          candidate.file.addedTime = -1;
+          suppressedIncomingCount++;
+        }
+      }
+    }
+
+    if (uploadsToReset.isNotEmpty) {
+      await FilesDB.instance.resetPositiveAddedTimeForUploadedFiles(
+        uploadsToReset,
+        currentUserID,
+      );
+    }
+
+    _logger.info(
+      '[Collection-$collectionID] own_collect_added_time_reconcile '
+      'candidates=$collectCandidatesCount '
+      'uploads=${ownCollectCandidatesByUploadID.length} '
+      'kept=$keptIncomingCount suppressed=$suppressedIncomingCount '
+      'dbResets=${uploadsToReset.length}',
+    );
   }
 }
 
@@ -215,4 +330,14 @@ class Diff {
     this.hasMore,
     this.latestUpdatedAtTime,
   );
+}
+
+class _OwnCollectCandidate {
+  final EnteFile file;
+  final int collectionAddedAt;
+
+  const _OwnCollectCandidate({
+    required this.file,
+    required this.collectionAddedAt,
+  });
 }

@@ -90,7 +90,6 @@ class FilesDB with SqlDbBase {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
-    ...resetAddedTimeValues(),
   ];
 
   static const List<String> _columnNames = [
@@ -414,14 +413,6 @@ class FilesDB with SqlDbBase {
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
       '''
-    ];
-  }
-
-  static List<String> resetAddedTimeValues() {
-    return [
-      '''
-        UPDATE $filesTable SET $columnAddedTime = -1;
-      ''',
     ];
   }
 
@@ -1750,71 +1741,77 @@ class FilesDB with SqlDbBase {
     return collectionIDsOfFile;
   }
 
-  Future<Map<int, List<({int collectionID, int addedTime})>>>
-      getOwnedAddedTimeRowsForUploadedFiles(
+  Future<Map<int, int>> getMinPositiveAddedTimeForUploadedFiles(
     Set<int> uploadedFileIDs,
     int ownerID,
   ) async {
     if (uploadedFileIDs.isEmpty) {
       return {};
     }
+
     final db = await instance.sqliteAsyncDB;
-    final inParam = uploadedFileIDs.join(',');
-    final rows = await db.getAll(
-      '''
-      SELECT $columnUploadedFileID, $columnCollectionID, $columnAddedTime
-      FROM $filesTable
-      WHERE $columnOwnerID = ?
-      AND $columnUploadedFileID IN ($inParam)
-      AND $columnAddedTime > 0
-      ''',
-      [ownerID],
-    );
+    final result = <int, int>{};
+    const maxInParams = 900;
+    final uploadIDs = uploadedFileIDs.toList(growable: false);
 
-    final result = <int, List<({int collectionID, int addedTime})>>{};
-    for (final row in rows) {
-      final uploadedFileID = row[columnUploadedFileID] as int?;
-      final collectionID = row[columnCollectionID] as int?;
-      final addedTime = row[columnAddedTime] as int?;
-      if (uploadedFileID == null || collectionID == null || addedTime == null) {
-        continue;
+    for (var i = 0; i < uploadIDs.length; i += maxInParams) {
+      final end = (i + maxInParams > uploadIDs.length)
+          ? uploadIDs.length
+          : i + maxInParams;
+      final chunk = uploadIDs.sublist(i, end);
+      final inParam = chunk.join(',');
+      final rows = await db.getAll(
+        '''
+        SELECT $columnUploadedFileID, MIN($columnAddedTime) AS min_added_time
+        FROM $filesTable
+        WHERE $columnOwnerID = ?
+        AND $columnUploadedFileID IN ($inParam)
+        AND $columnAddedTime > 0
+        GROUP BY $columnUploadedFileID
+        ''',
+        [ownerID],
+      );
+      for (final row in rows) {
+        final uploadedFileID = row[columnUploadedFileID] as int?;
+        final minAddedTime = row['min_added_time'] as int?;
+        if (uploadedFileID == null || minAddedTime == null) {
+          continue;
+        }
+        result[uploadedFileID] = minAddedTime;
       }
-      result
-          .putIfAbsent(
-        uploadedFileID,
-        () => <({int collectionID, int addedTime})>[],
-      )
-          .add((collectionID: collectionID, addedTime: addedTime));
     }
-
     return result;
   }
 
-  Future<void> resetOwnedAddedTimeForUploadedFile(
-    int uploadedFileID,
-    int ownerID, {
-    int? preserveCollectionID,
-  }) async {
-    final db = await instance.sqliteAsyncDB;
-    final whereClauses = <String>[
-      '$columnUploadedFileID = ?',
-      '$columnOwnerID = ?',
-      '$columnAddedTime > 0',
-    ];
-    final args = <Object>[uploadedFileID, ownerID];
-    if (preserveCollectionID != null) {
-      whereClauses.add('$columnCollectionID != ?');
-      args.add(preserveCollectionID);
+  Future<void> resetPositiveAddedTimeForUploadedFiles(
+    Set<int> uploadedFileIDs,
+    int ownerID,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return;
     }
 
-    await db.execute(
-      '''
-      UPDATE $filesTable
-      SET $columnAddedTime = -1
-      WHERE ${whereClauses.join(' AND ')}
-      ''',
-      args,
-    );
+    final db = await instance.sqliteAsyncDB;
+    const maxInParams = 900;
+    final uploadIDs = uploadedFileIDs.toList(growable: false);
+
+    for (var i = 0; i < uploadIDs.length; i += maxInParams) {
+      final end = (i + maxInParams > uploadIDs.length)
+          ? uploadIDs.length
+          : i + maxInParams;
+      final chunk = uploadIDs.sublist(i, end);
+      final inParam = chunk.join(',');
+      await db.execute(
+        '''
+        UPDATE $filesTable
+        SET $columnAddedTime = -1
+        WHERE $columnUploadedFileID IN ($inParam)
+        AND $columnOwnerID = ?
+        AND $columnAddedTime > 0
+        ''',
+        [ownerID],
+      );
+    }
   }
 
   ///Each collectionIDs in list aren't necessarily unique
