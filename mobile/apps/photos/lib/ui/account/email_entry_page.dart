@@ -87,10 +87,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).createAccount,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

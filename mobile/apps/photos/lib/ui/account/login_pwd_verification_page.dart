@@ -85,10 +85,8 @@ class _LoginPasswordVerificationPageState
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).logInLabel,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

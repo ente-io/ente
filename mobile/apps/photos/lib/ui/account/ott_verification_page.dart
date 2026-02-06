@@ -82,10 +82,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).verifyEmail,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

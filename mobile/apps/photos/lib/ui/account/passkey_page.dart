@@ -162,10 +162,8 @@ class _PasskeyPageState extends State<PasskeyPage> {
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).passkey,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

@@ -68,10 +68,8 @@ class _TwoFactorAuthenticationPageState
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).twoFAVerification,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

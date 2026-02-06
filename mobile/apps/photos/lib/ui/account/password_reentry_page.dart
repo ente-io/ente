@@ -86,10 +86,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).enterPassword,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

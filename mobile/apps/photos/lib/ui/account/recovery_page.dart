@@ -48,10 +48,8 @@ class _RecoveryPageState extends State<RecoveryPage> {
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).recoverAccount,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),

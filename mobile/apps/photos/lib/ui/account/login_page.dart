@@ -83,10 +83,8 @@ class _LoginPageState extends State<LoginPage> {
           },
         ),
         title: Text(
-          "ente",
-          style: textTheme.h3Bold.copyWith(
-            fontFamily: "Montserrat",
-          ),
+          AppLocalizations.of(context).logInLabel,
+          style: textTheme.largeBold,
         ),
         centerTitle: true,
       ),
