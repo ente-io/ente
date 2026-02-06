@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -434,7 +435,7 @@ class FeedDataProvider {
       return [];
     }
     final sharedPhotoFeedCutoffTime =
-        await localSettings.getOrCreateSharedPhotoFeedCutoffTime();
+        kDebugMode ? 0 : localSettings.getOrCreateSharedPhotoFeedCutoffTime();
 
     // Build collection ID -> name map for display
     final allCollections = CollectionsService.instance.getCollectionsForUI(

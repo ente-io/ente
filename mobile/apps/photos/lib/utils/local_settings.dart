@@ -379,7 +379,7 @@ class LocalSettings {
     await _prefs.setBool(_kInternalUserDisabled, value);
   }
 
-  Future<int> getOrCreateSharedPhotoFeedCutoffTime() async {
+  int getOrCreateSharedPhotoFeedCutoffTime() {
     final existingCutoff = _prefs.getInt(_kSharedPhotoFeedCutoffTime);
     if (existingCutoff != null) {
       return existingCutoff;
@@ -387,7 +387,7 @@ class LocalSettings {
 
     // files.added_time is stored in microseconds since epoch.
     final cutoff = DateTime.now().microsecondsSinceEpoch;
-    await _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff);
+    _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff).ignore();
     return cutoff;
   }
 
