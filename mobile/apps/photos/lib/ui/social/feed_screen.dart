@@ -145,9 +145,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _syncAndRefresh() async {
     try {
-      await FeedDataProvider.instance.syncAllSharedCollections();
+      final hasNewSocialData =
+          await FeedDataProvider.instance.syncAllSharedCollections();
 
       if (!mounted) return;
+      if (!hasNewSocialData) return;
 
       // Reload feed items after sync
       final freshItems =

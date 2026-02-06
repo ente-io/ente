@@ -589,52 +589,46 @@ class FilesDB with SqlDbBase {
 
   /// Checks which (fileID, collectionID) pairs exist in the database.
   ///
-  /// Returns a set of keys in the format "collectionID_fileID" for files that exist.
-  /// This is more efficient than calling getUploadedFile() for each pair.
-  Future<Set<String>> getExistingFileKeys(
+  /// Returns a map keyed by collection ID, with each value containing
+  /// the existing file IDs for that collection.
+  Future<Map<int, Set<int>>> getExistingFileIDsByCollection(
     Set<(int fileID, int collectionID)> pairs,
   ) async {
     if (pairs.isEmpty) return {};
 
     final db = await instance.sqliteAsyncDB;
-    final existingKeys = <String>{};
+    final existing = <int, Set<int>>{};
+    final fileIDsByCollection = <int, Set<int>>{};
+    for (final (fileID, collectionID) in pairs) {
+      fileIDsByCollection.putIfAbsent(collectionID, () => {}).add(fileID);
+    }
 
-    // Build a query with OR conditions for each pair
-    // SQLite has a limit on compound SELECT statements, so we batch
-    const batchSize = 100;
-    final pairsList = pairs.toList();
+    // Keep placeholders under common SQLite variable limits.
+    const maxInParams = 900;
 
-    for (var i = 0; i < pairsList.length; i += batchSize) {
-      final batch = pairsList.sublist(
-        i,
-        i + batchSize > pairsList.length ? pairsList.length : i + batchSize,
-      );
-
-      final conditions = batch
-          .map(
-            (_) => '($columnUploadedFileID = ? AND $columnCollectionID = ?)',
-          )
-          .join(' OR ');
-
-      final args = <Object>[];
-      for (final (fileID, collectionID) in batch) {
-        args.add(fileID);
-        args.add(collectionID);
-      }
-
-      final results = await db.getAll(
-        'SELECT $columnUploadedFileID, $columnCollectionID FROM $filesTable WHERE $conditions',
-        args,
-      );
-
-      for (final row in results) {
-        final fileID = row[columnUploadedFileID] as int;
-        final collectionID = row[columnCollectionID] as int;
-        existingKeys.add('${collectionID}_$fileID');
+    for (final entry in fileIDsByCollection.entries) {
+      final collectionID = entry.key;
+      final fileIDs = entry.value.toList(growable: false);
+      for (var i = 0; i < fileIDs.length; i += maxInParams) {
+        final end = (i + maxInParams > fileIDs.length)
+            ? fileIDs.length
+            : i + maxInParams;
+        final chunk = fileIDs.sublist(i, end);
+        final placeholders = List.filled(chunk.length, '?').join(',');
+        final results = await db.getAll(
+          'SELECT $columnUploadedFileID FROM $filesTable '
+          'WHERE $columnCollectionID = ? '
+          'AND $columnUploadedFileID IN ($placeholders)',
+          [collectionID, ...chunk],
+        );
+        for (final row in results) {
+          final fileID = row[columnUploadedFileID] as int;
+          existing.putIfAbsent(collectionID, () => {}).add(fileID);
+        }
       }
     }
 
-    return existingKeys;
+    return existing;
   }
 
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(

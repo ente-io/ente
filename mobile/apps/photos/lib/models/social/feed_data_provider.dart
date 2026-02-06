@@ -26,6 +26,12 @@ class FeedDataProvider {
   static const _kSharedPhotoFetchMaxPages = 5;
   static const _kSharedPhotoFetchMaxRows =
       _kSharedPhotoFetchPageSize * _kSharedPhotoFetchMaxPages;
+  static const _kFeedItemsCacheTtlMs = 3000;
+  Future<List<FeedItem>>? _inFlightFeedItemsFuture;
+  String? _inFlightFeedItemsKey;
+  List<FeedItem>? _lastFeedItems;
+  String? _lastFeedItemsKey;
+  int? _lastFeedItemsAtMs;
 
   /// Gets feed items aggregated from local database.
   ///
@@ -34,6 +40,51 @@ class FeedDataProvider {
   /// Items from hidden collections or associated with deleted files are filtered out.
   Future<List<FeedItem>> getFeedItems({
     int limit = 50,
+    bool includeSharedPhotos = true,
+    bool verifyFileExistence = true,
+  }) async {
+    final requestKey = '$limit|$includeSharedPhotos|$verifyFileExistence';
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+
+    if (_inFlightFeedItemsFuture != null &&
+        _inFlightFeedItemsKey == requestKey) {
+      return _inFlightFeedItemsFuture!;
+    }
+
+    final lastAtMs = _lastFeedItemsAtMs;
+    if (_lastFeedItems != null &&
+        _lastFeedItemsKey == requestKey &&
+        lastAtMs != null &&
+        (nowMs - lastAtMs) <= _kFeedItemsCacheTtlMs) {
+      return List<FeedItem>.from(_lastFeedItems!);
+    }
+
+    final future = _computeFeedItems(
+      limit: limit,
+      includeSharedPhotos: includeSharedPhotos,
+      verifyFileExistence: verifyFileExistence,
+    );
+    _inFlightFeedItemsFuture = future;
+    _inFlightFeedItemsKey = requestKey;
+
+    try {
+      final items = await future;
+      _lastFeedItems = List<FeedItem>.from(items);
+      _lastFeedItemsKey = requestKey;
+      _lastFeedItemsAtMs = DateTime.now().millisecondsSinceEpoch;
+      return items;
+    } finally {
+      if (identical(_inFlightFeedItemsFuture, future)) {
+        _inFlightFeedItemsFuture = null;
+        _inFlightFeedItemsKey = null;
+      }
+    }
+  }
+
+  Future<List<FeedItem>> _computeFeedItems({
+    required int limit,
+    required bool includeSharedPhotos,
+    required bool verifyFileExistence,
   }) async {
     final userID = Configuration.instance.getUserID();
     if (userID == null) {
@@ -111,10 +162,19 @@ class FeedDataProvider {
     );
 
     // Aggregate shared photos (files added by others to user's collections)
-    feedItems.addAll(await _getSharedPhotoFeedItems(userID: userID));
+    if (includeSharedPhotos) {
+      feedItems.addAll(
+        await _getSharedPhotoFeedItems(
+          userID: userID,
+          limit: limit,
+        ),
+      );
+    }
 
     // Filter out items where the associated file doesn't exist or collection is hidden
-    final validItems = await _filterFeedItems(feedItems);
+    final validItems = verifyFileExistence
+        ? await _filterFeedItems(feedItems)
+        : _filterHiddenCollectionsOnly(feedItems);
 
     // Sort by most recent activity
     validItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -129,20 +189,40 @@ class FeedDataProvider {
 
   /// Gets a single feed item for preview display.
   Future<FeedItem?> getLatestFeedItem() async {
-    final items = await getFeedItems(limit: 1);
+    final items = await getFeedItems(
+      limit: 1,
+      includeSharedPhotos: false,
+      verifyFileExistence: false,
+    );
     return items.isNotEmpty ? items.first : null;
   }
 
   /// Triggers background sync for all shared collections.
-  Future<void> syncAllSharedCollections() async {
+  Future<bool> syncAllSharedCollections() async {
     try {
-      await SocialSyncService.instance.syncAllSharedCollections();
+      final hasNewData =
+          await SocialSyncService.instance.syncAllSharedCollections();
       await SocialNotificationCoordinator.instance.notifyAfterSocialSync(
         trigger: SocialNotificationTrigger.feedRefresh,
       );
+      return hasNewData;
     } catch (e) {
       _logger.warning('Failed to sync shared collections', e);
+      return false;
     }
+  }
+
+  List<FeedItem> _filterHiddenCollectionsOnly(
+    List<FeedItem> items,
+  ) {
+    if (items.isEmpty) {
+      return items;
+    }
+    final hiddenCollectionIds =
+        CollectionsService.instance.getHiddenCollectionIds();
+    return items
+        .where((item) => !hiddenCollectionIds.contains(item.collectionID))
+        .toList();
   }
 
   /// Aggregates reactions on files by (collectionID, fileID).
@@ -353,7 +433,6 @@ class FeedDataProvider {
     if (!flagService.internalUser) {
       return [];
     }
-
     final sharedPhotoFeedCutoffTime =
         await localSettings.getOrCreateSharedPhotoFeedCutoffTime();
 
@@ -476,8 +555,8 @@ class FeedDataProvider {
   /// - The associated file no longer exists in FilesDB
   /// - The collection is hidden
   ///
-  /// For sharedPhoto items, filters out deleted files from sharedFileIDs
-  /// and only removes the item if ALL shared files are deleted.
+  /// For sharedPhoto items, validates only the representative fileID.
+  /// The underlying shared list comes from live files-table rows.
   Future<List<FeedItem>> _filterFeedItems(
     List<FeedItem> items,
   ) async {
@@ -487,15 +566,10 @@ class FeedDataProvider {
     final hiddenCollectionIds =
         CollectionsService.instance.getHiddenCollectionIds();
 
-    // Collect unique (fileID, collectionID) pairs - include all sharedFileIDs
+    // Collect unique (fileID, collectionID) pairs
     final filesToCheck = <(int, int)>{};
     for (final item in items) {
-      if (item.type == FeedItemType.sharedPhoto && item.sharedFileIDs != null) {
-        // For shared items, check all files in the list
-        for (final fileID in item.sharedFileIDs!) {
-          filesToCheck.add((fileID, item.collectionID));
-        }
-      } else if (item.fileID != null) {
+      if (item.fileID != null) {
         filesToCheck.add((item.fileID!, item.collectionID));
       }
     }
@@ -508,35 +582,14 @@ class FeedDataProvider {
     }
 
     // Check which files exist using batch query (single DB call)
-    final existingFiles =
-        await FilesDB.instance.getExistingFileKeys(filesToCheck);
+    final existingFilesByCollection =
+        await FilesDB.instance.getExistingFileIDsByCollection(filesToCheck);
 
     // Filter and transform items
     final result = <FeedItem>[];
     for (final item in items) {
       // Exclude hidden collections
       if (hiddenCollectionIds.contains(item.collectionID)) {
-        continue;
-      }
-
-      // Handle sharedPhoto items specially
-      if (item.type == FeedItemType.sharedPhoto && item.sharedFileIDs != null) {
-        // Filter to only existing files
-        final existingSharedFiles = item.sharedFileIDs!.where((fileID) {
-          final key = '${item.collectionID}_$fileID';
-          return existingFiles.contains(key);
-        }).toList();
-
-        // Only keep item if at least one file still exists
-        if (existingSharedFiles.isNotEmpty) {
-          // Update item with filtered sharedFileIDs and new fileID
-          result.add(
-            item.copyWith(
-              sharedFileIDs: existingSharedFiles,
-              fileID: existingSharedFiles.first,
-            ),
-          );
-        }
         continue;
       }
 
@@ -547,8 +600,8 @@ class FeedDataProvider {
       }
 
       // Exclude items where file no longer exists
-      final key = '${item.collectionID}_${item.fileID}';
-      if (existingFiles.contains(key)) {
+      final existingInCollection = existingFilesByCollection[item.collectionID];
+      if (existingInCollection?.contains(item.fileID) ?? false) {
         result.add(item);
       }
     }
