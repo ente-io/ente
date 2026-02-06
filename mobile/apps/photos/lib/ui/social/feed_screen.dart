@@ -6,10 +6,12 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import "package:photos/services/collections_service.dart";
 import 'package:photos/services/social_notification_coordinator.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -17,6 +19,7 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/comments_screen.dart";
 import "package:photos/ui/social/widgets/feed_item_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 
 final _logger = Logger("FeedScreen");
 
@@ -418,6 +421,13 @@ class _FeedScreenState extends State<FeedScreen> {
                                 const {},
                         isLastItem: isLastItem,
                         onTap: () => _handleFeedItemTap(item),
+                        onSharedHeaderTap: () => _openSharedCollection(
+                          item,
+                          jumpToFileID: item.sharedFileIDs != null &&
+                                  item.sharedFileIDs!.isNotEmpty
+                              ? item.sharedFileIDs!.first
+                              : null,
+                        ),
                         onSharedPhotoTap: (fileID) => _openSharedPhotos(
                           item,
                           initialFileID: fileID,
@@ -473,6 +483,54 @@ class _FeedScreenState extends State<FeedScreen> {
         _openComments(item);
         break;
     }
+  }
+
+  Future<void> _openSharedCollection(
+    FeedItem item, {
+    int? jumpToFileID,
+  }) async {
+    var collection = CollectionsService.instance.getCollectionByID(
+      item.collectionID,
+    );
+    if (collection == null) {
+      try {
+        collection = await CollectionsService.instance.fetchCollectionByID(
+          item.collectionID,
+        );
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to fetch collection ${item.collectionID} for feed shared item",
+          e,
+          s,
+        );
+      }
+    }
+
+    if (collection == null || !mounted) {
+      // Fallback to shared-photos viewer if collection metadata isn't available.
+      await _openSharedPhotos(item, initialFileID: jumpToFileID);
+      return;
+    }
+
+    EnteFile? fileToJumpTo;
+    if (jumpToFileID != null) {
+      fileToJumpTo = await FilesDB.instance.getUploadedFile(
+        jumpToFileID,
+        item.collectionID,
+      );
+    }
+
+    if (!mounted) return;
+    unawaited(
+      routeToPage(
+        context,
+        CollectionPage(
+          CollectionWithThumbnail(collection, null),
+          fileToJumpTo: fileToJumpTo,
+        ),
+        forceCustomPageRoute: true,
+      ),
+    );
   }
 
   /// Opens the photo viewer for the feed item, then shows the comments sheet.

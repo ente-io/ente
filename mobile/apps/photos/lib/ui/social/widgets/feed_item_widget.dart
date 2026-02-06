@@ -25,6 +25,9 @@ class FeedItemWidget extends StatelessWidget {
   /// Called when the user taps a specific shared photo in the shared grid.
   final ValueChanged<int>? onSharedPhotoTap;
 
+  /// Called when the user taps shared-feed header text/avatar area.
+  final VoidCallback? onSharedHeaderTap;
+
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
 
@@ -36,6 +39,7 @@ class FeedItemWidget extends StatelessWidget {
     required this.currentUserID,
     this.onTap,
     this.onSharedPhotoTap,
+    this.onSharedHeaderTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
     super.key,
@@ -156,10 +160,17 @@ class FeedItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     // Text content
-                    _FeedTextContent(
-                      feedItem: feedItem,
-                      currentUserID: currentUserID,
-                      anonDisplayNames: anonDisplayNames,
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onSharedHeaderTap,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: _FeedTextContent(
+                          feedItem: feedItem,
+                          currentUserID: currentUserID,
+                          anonDisplayNames: anonDisplayNames,
+                        ),
+                      ),
                     ),
                   ],
                 ),
