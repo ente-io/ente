@@ -13,6 +13,7 @@ const yarnBin = process.platform === "win32" ? "yarn.cmd" : "yarn";
 const child = spawn(yarnBin, ["build:ensu"], {
     cwd: webDir,
     stdio: "inherit",
+    shell: process.platform === "win32",
     env: {
         ...process.env,
         ENTE_TAURI: "1",
