@@ -418,6 +418,10 @@ class _FeedScreenState extends State<FeedScreen> {
                                 const {},
                         isLastItem: isLastItem,
                         onTap: () => _handleFeedItemTap(item),
+                        onSharedPhotoTap: (fileID) => _openSharedPhotos(
+                          item,
+                          initialFileID: fileID,
+                        ),
                       );
                     },
                   ),
@@ -549,7 +553,7 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   /// Opens a gallery view of the shared photos.
-  Future<void> _openSharedPhotos(FeedItem item) async {
+  Future<void> _openSharedPhotos(FeedItem item, {int? initialFileID}) async {
     final fileIDs = item.sharedFileIDs;
     if (fileIDs == null || fileIDs.isEmpty) return;
 
@@ -562,13 +566,22 @@ class _FeedScreenState extends State<FeedScreen> {
 
     if (files.isEmpty || !mounted) return;
 
+    var initialIndex = 0;
+    if (initialFileID != null) {
+      final tappedIndex =
+          files.indexWhere((file) => file.uploadedFileID == initialFileID);
+      if (tappedIndex >= 0) {
+        initialIndex = tappedIndex;
+      }
+    }
+
     unawaited(
       routeToPage(
         context,
         DetailPage(
           DetailPageConfiguration(
             files,
-            0,
+            initialIndex,
             "feed_shared_photos",
           ),
         ),

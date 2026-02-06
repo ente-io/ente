@@ -23,6 +23,9 @@ class SharedPhotosGrid extends StatefulWidget {
   /// Called when user taps on the grid.
   final VoidCallback? onTap;
 
+  /// Called when user taps an individual photo thumbnail.
+  final ValueChanged<int>? onPhotoTap;
+
   /// Size of the grid (width). Height is calculated based on layout.
   final double gridSize;
 
@@ -30,6 +33,7 @@ class SharedPhotosGrid extends StatefulWidget {
     required this.fileIDs,
     required this.collectionID,
     this.onTap,
+    this.onPhotoTap,
     this.gridSize = 300,
     super.key,
   });
@@ -248,12 +252,21 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildSharedPhotoThumbnail(EnteFile file) {
-    return ThumbnailWidget(
+    final thumbnail = ThumbnailWidget(
       file,
       fit: BoxFit.cover,
       rawThumbnail: true,
       thumbnailSize: thumbnailLargeSize,
       useRequestedThumbnailSizeForLocalCache: true,
+    );
+    final fileID = file.uploadedFileID;
+    if (widget.onPhotoTap == null || fileID == null) {
+      return thumbnail;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => widget.onPhotoTap!(fileID),
+      child: thumbnail,
     );
   }
 

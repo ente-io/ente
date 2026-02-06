@@ -22,6 +22,9 @@ class FeedItemWidget extends StatelessWidget {
   /// Called when the user taps anywhere on the feed item.
   final VoidCallback? onTap;
 
+  /// Called when the user taps a specific shared photo in the shared grid.
+  final ValueChanged<int>? onSharedPhotoTap;
+
   /// Map of anonUserID -> decrypted display name for the collection.
   final Map<String, String> anonDisplayNames;
 
@@ -32,6 +35,7 @@ class FeedItemWidget extends StatelessWidget {
     required this.feedItem,
     required this.currentUserID,
     this.onTap,
+    this.onSharedPhotoTap,
     this.anonDisplayNames = const {},
     this.isLastItem = false,
     super.key,
@@ -171,6 +175,7 @@ class FeedItemWidget extends StatelessWidget {
                 fileIDs: feedItem.sharedFileIDs!,
                 collectionID: feedItem.collectionID,
                 onTap: onTap,
+                onPhotoTap: onSharedPhotoTap,
               ),
             ),
         ],
