@@ -44,6 +44,12 @@ jobs:
               with:
                   targets: ${{ matrix.platform.rust-target }}
 
+            - name: Set macOS deployment target
+              if: matrix.platform.os == 'macos-latest'
+              run: |
+                  echo "MACOSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+                  echo "CMAKE_OSX_DEPLOYMENT_TARGET=10.15" >> $GITHUB_ENV
+
             - name: Install dependencies (Ubuntu only)
               if: matrix.platform.os == 'ubuntu-22.04'
               run: |
@@ -71,12 +77,23 @@ jobs:
               working-directory: desktop/ensu-tauri
               run: yarn install
 
+            - name: Fetch Rust dependencies
+              shell: bash
+              working-directory: desktop/ensu-tauri/src-tauri
+              run: cargo fetch
+
+            - name: Patch llama.cpp mtmd sources
+              shell: bash
+              run: rust/llmchat/inference/tool/patch_llama_mtmd.sh
+
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
                   TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
+                  CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
               with:
                   projectPath: desktop/ensu-tauri
                   tagName: ${{ github.ref_name }}

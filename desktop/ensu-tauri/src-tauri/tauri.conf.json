@@ -1,7 +1,7 @@
 {
   "build": {
     "beforeDevCommand": "cd ../../web && yarn build:wasm && yarn workspace ensu next dev -p 3010",
-    "beforeBuildCommand": "cd ../../web && ENTE_TAURI=1 yarn build:ensu",
+    "beforeBuildCommand": "node scripts/tauri-build-web.mjs",
     "devPath": "http://localhost:3010",
     "distDir": "../../../web/apps/ensu/out"
   },
