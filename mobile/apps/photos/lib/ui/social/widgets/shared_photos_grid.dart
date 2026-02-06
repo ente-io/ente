@@ -1,5 +1,6 @@
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -137,11 +138,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
   }
 
   Widget _buildSinglePhoto(EnteFile file) {
-    return ThumbnailWidget(
-      file,
-      fit: BoxFit.cover,
-      rawThumbnail: true,
-    );
+    return _buildSharedPhotoThumbnail(file);
   }
 
   Widget _buildTwoPhotos(List<EnteFile> files) {
@@ -153,21 +150,13 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
         SizedBox(
           height: itemHeight,
           width: widget.gridSize,
-          child: ThumbnailWidget(
-            files[0],
-            fit: BoxFit.cover,
-            rawThumbnail: true,
-          ),
+          child: _buildSharedPhotoThumbnail(files[0]),
         ),
         const SizedBox(height: gap),
         SizedBox(
           height: itemHeight,
           width: widget.gridSize,
-          child: ThumbnailWidget(
-            files[1],
-            fit: BoxFit.cover,
-            rawThumbnail: true,
-          ),
+          child: _buildSharedPhotoThumbnail(files[1]),
         ),
       ],
     );
@@ -186,21 +175,13 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
             SizedBox(
               height: itemHeight,
               width: itemWidth,
-              child: ThumbnailWidget(
-                files[0],
-                fit: BoxFit.cover,
-                rawThumbnail: true,
-              ),
+              child: _buildSharedPhotoThumbnail(files[0]),
             ),
             const SizedBox(width: gap),
             SizedBox(
               height: itemHeight,
               width: itemWidth,
-              child: ThumbnailWidget(
-                files[1],
-                fit: BoxFit.cover,
-                rawThumbnail: true,
-              ),
+              child: _buildSharedPhotoThumbnail(files[1]),
             ),
           ],
         ),
@@ -209,11 +190,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
         SizedBox(
           height: itemHeight,
           width: widget.gridSize,
-          child: ThumbnailWidget(
-            files[2],
-            fit: BoxFit.cover,
-            rawThumbnail: true,
-          ),
+          child: _buildSharedPhotoThumbnail(files[2]),
         ),
       ],
     );
@@ -232,21 +209,13 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
             SizedBox(
               height: itemHeight,
               width: itemWidth,
-              child: ThumbnailWidget(
-                files[0],
-                fit: BoxFit.cover,
-                rawThumbnail: true,
-              ),
+              child: _buildSharedPhotoThumbnail(files[0]),
             ),
             const SizedBox(width: gap),
             SizedBox(
               height: itemHeight,
               width: itemWidth,
-              child: ThumbnailWidget(
-                files[1],
-                fit: BoxFit.cover,
-                rawThumbnail: true,
-              ),
+              child: _buildSharedPhotoThumbnail(files[1]),
             ),
           ],
         ),
@@ -257,11 +226,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
             SizedBox(
               height: itemHeight,
               width: itemWidth,
-              child: ThumbnailWidget(
-                files[2],
-                fit: BoxFit.cover,
-                rawThumbnail: true,
-              ),
+              child: _buildSharedPhotoThumbnail(files[2]),
             ),
             const SizedBox(width: gap),
             // Fourth photo with optional +N overlay
@@ -271,11 +236,7 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ThumbnailWidget(
-                    files[3],
-                    fit: BoxFit.cover,
-                    rawThumbnail: true,
-                  ),
+                  _buildSharedPhotoThumbnail(files[3]),
                   if (extraCount > 0) _buildExtraCountOverlay(extraCount),
                 ],
               ),
@@ -283,6 +244,16 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildSharedPhotoThumbnail(EnteFile file) {
+    return ThumbnailWidget(
+      file,
+      fit: BoxFit.cover,
+      rawThumbnail: true,
+      thumbnailSize: thumbnailLargeSize,
+      useRequestedThumbnailSizeForLocalCache: true,
     );
   }
 
