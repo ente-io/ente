@@ -3,6 +3,10 @@ import 'package:flutter/services.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import "package:pinput/pinput.dart";
 
@@ -19,15 +23,6 @@ class TwoFactorAuthenticationPage extends StatefulWidget {
 class _TwoFactorAuthenticationPageState
     extends State<TwoFactorAuthenticationPage> {
   final _pinController = TextEditingController();
-
-  final _pinPutDecoration = PinTheme(
-    height: 45,
-    width: 45,
-    decoration: BoxDecoration(
-      border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
-      borderRadius: BorderRadius.circular(15.0),
-    ),
-  );
   String _code = "";
   late LifecycleEventHandler _lifecycleEventHandler;
 
@@ -50,116 +45,134 @@ class _TwoFactorAuthenticationPageState
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(_lifecycleEventHandler);
+    _pinController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).twofactorAuthenticationPageTitle,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
+        title: Text(
+          "ente",
+          style: textTheme.h3Bold.copyWith(
+            fontFamily: "Montserrat",
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: _getBody(),
+      body: _getBody(colorScheme, textTheme),
     );
   }
 
-  Widget _getBody() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Text(
-          AppLocalizations.of(context)
-              .enterThe6digitCodeFromnyourAuthenticatorApp,
-          style: const TextStyle(
-            height: 1.4,
-            fontSize: 16,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const Padding(padding: EdgeInsets.all(32)),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: Pinput(
-            length: 6,
-            onCompleted: (String code) {
-              _verifyTwoFactorCode(code);
-            },
-            onChanged: (String pin) {
-              setState(() {
-                _code = pin;
-              });
-            },
-            autofocus: true,
-            controller: _pinController,
-            defaultPinTheme: _pinPutDecoration,
-            submittedPinTheme: _pinPutDecoration.copyWith(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
-                border: Border.all(
-                  color: const Color.fromRGBO(45, 194, 98, 0.5),
-                ),
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+    final defaultPinTheme = PinTheme(
+      height: 52,
+      width: 48,
+      textStyle: textTheme.body.copyWith(color: colorScheme.textBase),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.strokeMuted),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyWith(
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.greenBase, width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    final submittedPinTheme = defaultPinTheme.copyWith(
+      textStyle: textTheme.h3Bold.copyWith(color: colorScheme.greenBase),
+      decoration: BoxDecoration(
+        color: colorScheme.greenLight,
+        border: Border.all(color: colorScheme.greenBase, width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            Text(
+              AppLocalizations.of(context).twoFAVerification,
+              style: textTheme.body.copyWith(color: colorScheme.textBase),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              AppLocalizations.of(context)
+                  .enterThe6digitCodeFromnyourAuthenticatorApp,
+              style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: Pinput(
+                length: 6,
+                onCompleted: (String code) {
+                  _verifyTwoFactorCode(code);
+                },
+                onChanged: (String pin) {
+                  setState(() {
+                    _code = pin;
+                  });
+                },
+                autofocus: true,
+                controller: _pinController,
+                defaultPinTheme: defaultPinTheme,
+                focusedPinTheme: focusedPinTheme,
+                submittedPinTheme: submittedPinTheme,
+                followingPinTheme: defaultPinTheme,
               ),
             ),
-            followingPinTheme: _pinPutDecoration.copyWith(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(
-                  color: const Color.fromRGBO(45, 194, 98, 0.5),
-                ),
+            const Spacer(),
+            ButtonWidgetV2(
+              buttonType: ButtonTypeV2.primary,
+              labelText: AppLocalizations.of(context).verify,
+              isDisabled: _code.length != 6,
+              onTap: () async {
+                await _verifyTwoFactorCode(_code);
+              },
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ButtonWidgetV2(
+                buttonType: ButtonTypeV2.link,
+                labelText: AppLocalizations.of(context).lostDevice,
+                buttonSize: ButtonSizeV2.small,
+                onTap: () async {
+                  // ignore: unawaited_futures
+                  UserService.instance.recoverTwoFactor(
+                    context,
+                    widget.sessionID,
+                    TwoFactorType.totp,
+                  );
+                },
               ),
             ),
-            focusedPinTheme: _pinPutDecoration.copyWith(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.0),
-                border: Border.all(
-                  color: const Color.fromRGBO(45, 194, 98, 0.5),
-                ),
-              ),
-            ),
-          ),
+            const SizedBox(height: 24),
+          ],
         ),
-        const Padding(padding: EdgeInsets.all(24)),
-        Container(
-          padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-          width: double.infinity,
-          height: 64,
-          child: OutlinedButton(
-            onPressed: _code.length == 6
-                ? () async {
-                    await _verifyTwoFactorCode(_code);
-                  }
-                : null,
-            child: Text(AppLocalizations.of(context).verify),
-          ),
-        ),
-        const Padding(padding: EdgeInsets.all(30)),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            UserService.instance.recoverTwoFactor(
-              context,
-              widget.sessionID,
-              TwoFactorType.totp,
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Center(
-              child: Text(
-                AppLocalizations.of(context).lostDevice,
-                style: const TextStyle(
-                  decoration: TextDecoration.underline,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
