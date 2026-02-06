@@ -650,7 +650,6 @@ const Page: React.FC = () => {
     const [showSessionSearch, setShowSessionSearch] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [showDeveloperMenu, setShowDeveloperMenu] = useState(false);
-    const [showComingSoon, setShowComingSoon] = useState(false);
     const [isDraftSession, setIsDraftSession] = useState(false);
     const [stickToBottom, setStickToBottom] = useState(true);
     const [showDevSettings, setShowDevSettings] = useState(false);
@@ -3019,6 +3018,10 @@ const Page: React.FC = () => {
 
     const openDeveloperMenu = useCallback(() => {
         if (!DEVELOPER_SETTINGS_ENABLED) return;
+        if (!MODEL_SETTINGS_ENABLED) {
+            setShowDevSettings(true);
+            return;
+        }
         setShowDeveloperMenu(true);
     }, []);
     const closeDeveloperMenu = useCallback(
@@ -3412,10 +3415,6 @@ const Page: React.FC = () => {
     );
 
     const openLoginFromChat = useCallback(() => {
-        if (!SIGN_IN_ENABLED) {
-            setShowComingSoon(true);
-            return;
-        }
         void router.push("/login");
     }, [router]);
 
@@ -3844,7 +3843,7 @@ const Page: React.FC = () => {
                                 </Box>
                             </Stack>
                         </Stack>
-                        {!isLoggedIn && (
+                        {!isLoggedIn && SIGN_IN_ENABLED && (
                             <Button
                                 onClick={openLoginFromChat}
                                 color="inherit"
@@ -3951,10 +3950,7 @@ const Page: React.FC = () => {
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}
-                showComingSoon={showComingSoon}
-                setShowComingSoon={setShowComingSoon}
-                logoSrc={logoSrc}
-                logoFilter={logoFilter}
+                signInEnabled={SIGN_IN_ENABLED}
                 developerSettingsEnabled={DEVELOPER_SETTINGS_ENABLED}
                 modelSettingsEnabled={MODEL_SETTINGS_ENABLED}
                 showDeveloperMenu={showDeveloperMenu}

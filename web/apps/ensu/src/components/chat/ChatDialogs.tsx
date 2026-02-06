@@ -66,10 +66,7 @@ export interface ChatDialogsProps {
     handleLogout: () => void;
     openLoginFromChat: () => void;
     openPasskeysFromChat: () => void;
-    showComingSoon: boolean;
-    setShowComingSoon: React.Dispatch<React.SetStateAction<boolean>>;
-    logoSrc: string;
-    logoFilter: string | undefined;
+    signInEnabled: boolean;
     developerSettingsEnabled: boolean;
     modelSettingsEnabled: boolean;
     showDeveloperMenu: boolean;
@@ -129,10 +126,7 @@ export const ChatDialogs = memo(
         handleLogout,
         openLoginFromChat,
         openPasskeysFromChat,
-        showComingSoon,
-        setShowComingSoon,
-        logoSrc,
-        logoFilter,
+        signInEnabled,
         developerSettingsEnabled,
         modelSettingsEnabled,
         showDeveloperMenu,
@@ -282,7 +276,7 @@ export const ChatDialogs = memo(
                                 </ListItemButton>
                             )}
 
-                            {isLoggedIn ? (
+                            {isLoggedIn && (
                                 <ListItemButton
                                     onClick={() => {
                                         closeSettingsModal();
@@ -300,7 +294,9 @@ export const ChatDialogs = memo(
                                         Sign Out
                                     </Typography>
                                 </ListItemButton>
-                            ) : (
+                            )}
+
+                            {!isLoggedIn && signInEnabled && (
                                 <ListItemButton
                                     onClick={() => {
                                         closeSettingsModal();
@@ -325,49 +321,7 @@ export const ChatDialogs = memo(
                 </DialogContent>
             </Dialog>
 
-            <Dialog
-                open={showComingSoon}
-                onClose={() => setShowComingSoon(false)}
-                maxWidth="xs"
-                fullWidth
-                slotProps={{ paper: { sx: dialogPaperSx } }}
-            >
-                <DialogContent>
-                    <Stack sx={{ alignItems: "center", gap: 2, py: 2 }}>
-                        <Box
-                            component="img"
-                            src={logoSrc}
-                            alt="Coming soon"
-                            sx={{
-                                height: 48,
-                                width: "auto",
-                                filter: logoFilter,
-                            }}
-                        />
-                        <Typography variant="h2" sx={dialogTitleSx}>
-                            Sign in
-                        </Typography>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted", textAlign: "center" }}
-                        >
-                            Coming soon
-                        </Typography>
-                    </Stack>
-                </DialogContent>
-                <DialogActions sx={{ px: 3, pb: 3 }}>
-                    <Button
-                        variant="contained"
-                        color="accent"
-                        fullWidth
-                        onClick={() => setShowComingSoon(false)}
-                    >
-                        Got it
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {developerSettingsEnabled && (
+            {developerSettingsEnabled && modelSettingsEnabled && (
                 <Dialog
                     open={showDeveloperMenu}
                     onClose={closeDeveloperMenu}
