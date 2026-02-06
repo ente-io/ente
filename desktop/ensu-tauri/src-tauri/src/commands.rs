@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{Read, Write};
 use std::path::PathBuf;
+use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -51,6 +52,13 @@ impl ApiError {
     }
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemInfo {
+    platform: String,
+    total_memory_bytes: Option<u64>,
+}
+
 fn llm_error(message: impl Into<String>) -> ApiError {
     ApiError::new("llm", message)
 }
@@ -74,6 +82,24 @@ fn default_llm_threads() -> i32 {
     let half = available / 2;
     let threads = if half == 0 { 1 } else { half };
     i32::try_from(threads).unwrap_or(1)
+}
+
+#[cfg(target_os = "macos")]
+fn macos_total_memory_bytes() -> Option<u64> {
+    let output = Command::new("sysctl")
+        .args(["-n", "hw.memsize"])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let text = String::from_utf8(output.stdout).ok()?;
+    text.trim().parse::<u64>().ok()
+}
+
+#[cfg(not(target_os = "macos"))]
+fn macos_total_memory_bytes() -> Option<u64> {
+    None
 }
 
 impl From<core_auth::AuthError> for ApiError {
@@ -1308,6 +1334,14 @@ impl llm::EventSink for LlmEventSink {
                     .emit("llm-event", LlmEvent::Error { job_id, message });
             }
         }
+    }
+}
+
+#[tauri::command]
+pub fn system_info() -> SystemInfo {
+    SystemInfo {
+        platform: std::env::consts::OS.to_string(),
+        total_memory_bytes: macos_total_memory_bytes(),
     }
 }
 

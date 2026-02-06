@@ -76,6 +76,7 @@ import type {
     DownloadProgress,
     GenerateEvent,
     LlmMessage,
+    ModelInfo,
     ModelSettings,
 } from "services/llm/types";
 import {
@@ -655,6 +656,8 @@ const Page: React.FC = () => {
     const [showDevSettings, setShowDevSettings] = useState(false);
     const [showModelSettings, setShowModelSettings] = useState(false);
     const [useCustomModel, setUseCustomModel] = useState(false);
+    const [resolvedDefaultModel, setResolvedDefaultModel] =
+        useState<ModelInfo>(DEFAULT_MODEL);
     const [modelUrl, setModelUrl] = useState("");
     const [mmprojUrl, setMmprojUrl] = useState("");
     const [contextLength, setContextLength] = useState("");
@@ -1740,16 +1743,16 @@ const Page: React.FC = () => {
         if (useCustomModel) {
             return "Approx. size varies by model";
         }
-        if (DEFAULT_MODEL.sizeBytes) {
+        if (resolvedDefaultModel.sizeBytes) {
             const extraBytes = allowMmproj
-                ? (DEFAULT_MODEL.mmprojSizeBytes ?? 0)
+                ? (resolvedDefaultModel.mmprojSizeBytes ?? 0)
                 : 0;
-            return `Approx. ${formatBytes(DEFAULT_MODEL.sizeBytes + extraBytes)}`;
+            return `Approx. ${formatBytes(resolvedDefaultModel.sizeBytes + extraBytes)}`;
         }
-        return DEFAULT_MODEL.sizeHuman
-            ? `Approx. ${DEFAULT_MODEL.sizeHuman}`
+        return resolvedDefaultModel.sizeHuman
+            ? `Approx. ${resolvedDefaultModel.sizeHuman}`
             : "Approx. size varies by model";
-    }, [allowMmproj, useCustomModel]);
+    }, [allowMmproj, resolvedDefaultModel, useCustomModel]);
 
     const downloadStatusLabel = useMemo(() => {
         if (!showDownloadProgress) return null;
@@ -1791,6 +1794,7 @@ const Page: React.FC = () => {
             providerRef.current = new LlmProvider();
         }
         await providerRef.current.initialize();
+        setResolvedDefaultModel(providerRef.current.getDefaultModel());
         return providerRef.current;
     }, []);
 
@@ -1843,10 +1847,18 @@ const Page: React.FC = () => {
     const trimToWords = useCallback((text: string, maxWords: number) => {
         const normalized = text
             .replace(/\u0000/g, "")
+            .replace(/[\r\n\t]+/g, " ")
             .replace(/\s+/g, " ")
             .trim();
         if (!normalized) return "";
-        const words = normalized.split(" ").filter(Boolean);
+
+        const words = normalized
+            .split(" ")
+            .map((word) =>
+                word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ""),
+            )
+            .filter(Boolean);
+
         return words.slice(0, maxWords).join(" ");
     }, []);
 
@@ -3965,7 +3977,7 @@ const Page: React.FC = () => {
                 showModelSettings={showModelSettings}
                 closeModelSettings={closeModelSettings}
                 useCustomModel={useCustomModel}
-                defaultModelName={DEFAULT_MODEL.name}
+                defaultModelName={resolvedDefaultModel.name}
                 loadedModelName={loadedModelName}
                 allowMmproj={allowMmproj}
                 isTauriRuntime={isTauriRuntime}
