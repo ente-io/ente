@@ -90,6 +90,7 @@ class FilesDB with SqlDbBase {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...resetAddedTimeValues(),
   ];
 
   static const List<String> _columnNames = [
@@ -413,6 +414,14 @@ class FilesDB with SqlDbBase {
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
       '''
+    ];
+  }
+
+  static List<String> resetAddedTimeValues() {
+    return [
+      '''
+        UPDATE $filesTable SET $columnAddedTime = -1;
+      ''',
     ];
   }
 
@@ -1741,6 +1750,73 @@ class FilesDB with SqlDbBase {
     return collectionIDsOfFile;
   }
 
+  Future<Map<int, List<({int collectionID, int addedTime})>>>
+      getOwnedAddedTimeRowsForUploadedFiles(
+    Set<int> uploadedFileIDs,
+    int ownerID,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return {};
+    }
+    final db = await instance.sqliteAsyncDB;
+    final inParam = uploadedFileIDs.join(',');
+    final rows = await db.getAll(
+      '''
+      SELECT $columnUploadedFileID, $columnCollectionID, $columnAddedTime
+      FROM $filesTable
+      WHERE $columnOwnerID = ?
+      AND $columnUploadedFileID IN ($inParam)
+      AND $columnAddedTime > 0
+      ''',
+      [ownerID],
+    );
+
+    final result = <int, List<({int collectionID, int addedTime})>>{};
+    for (final row in rows) {
+      final uploadedFileID = row[columnUploadedFileID] as int?;
+      final collectionID = row[columnCollectionID] as int?;
+      final addedTime = row[columnAddedTime] as int?;
+      if (uploadedFileID == null || collectionID == null || addedTime == null) {
+        continue;
+      }
+      result
+          .putIfAbsent(
+        uploadedFileID,
+        () => <({int collectionID, int addedTime})>[],
+      )
+          .add((collectionID: collectionID, addedTime: addedTime));
+    }
+
+    return result;
+  }
+
+  Future<void> resetOwnedAddedTimeForUploadedFile(
+    int uploadedFileID,
+    int ownerID, {
+    int? preserveCollectionID,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    final whereClauses = <String>[
+      '$columnUploadedFileID = ?',
+      '$columnOwnerID = ?',
+      '$columnAddedTime > 0',
+    ];
+    final args = <Object>[uploadedFileID, ownerID];
+    if (preserveCollectionID != null) {
+      whereClauses.add('$columnCollectionID != ?');
+      args.add(preserveCollectionID);
+    }
+
+    await db.execute(
+      '''
+      UPDATE $filesTable
+      SET $columnAddedTime = -1
+      WHERE ${whereClauses.join(' AND ')}
+      ''',
+      args,
+    );
+  }
+
   ///Each collectionIDs in list aren't necessarily unique
   Future<List<int>> getAllCollectionIDsOfFiles(
     List<int> uploadedFileIDs,
@@ -2141,7 +2217,7 @@ class FilesDB with SqlDbBase {
       file.pubMmdEncodedJson ?? '{}',
       file.pubMmdVersion,
       file.fileSize,
-      file.addedTime ?? DateTime.now().microsecondsSinceEpoch,
+      file.addedTime ?? -1,
     ]);
 
     if (omitCollectionId) {
