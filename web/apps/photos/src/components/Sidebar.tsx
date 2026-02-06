@@ -236,6 +236,11 @@ type FreeUpSpaceAction = Extract<
     "freeUpSpace.deduplicate" | "freeUpSpace.largeFiles"
 >;
 
+type UtilitiesAction = Extract<
+    SidebarActionID,
+    "utilities.collage" | "utilities.cast"
+>;
+
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
@@ -248,7 +253,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onShowExport,
     onAuthenticateUser,
 }) => {
-    const { show: showCollage, props: collageVisibilityProps } =
+    const { show: showUtilities, props: utilitiesVisibilityProps } =
         useModalVisibility();
     const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
     const { show: showAccount, props: accountVisibilityProps } =
@@ -267,6 +272,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [pendingHelpAction, setPendingHelpAction] = useState<HelpAction>();
     const [pendingFreeUpSpaceAction, setPendingFreeUpSpaceAction] =
         useState<FreeUpSpaceAction>();
+    const [pendingUtilitiesAction, setPendingUtilitiesAction] =
+        useState<UtilitiesAction>();
 
     const handleLogout = useCallback(
         () =>
@@ -298,7 +305,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClose,
                 onShowCollectionSummary,
                 onShowPlanSelector,
-                showCollage,
+                showUtilities,
                 showAccount,
                 showPreferences,
                 showHelp,
@@ -324,6 +331,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     setPendingFreeUpSpaceAction(
                         a as FreeUpSpaceAction | undefined,
                     ),
+                setPendingUtilitiesAction: (a) =>
+                    setPendingUtilitiesAction(
+                        a as UtilitiesAction | undefined,
+                    ),
             } as SidebarActionContext),
         [
             handleLogout,
@@ -332,7 +343,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onShowCollectionSummary,
             onShowPlanSelector,
             onShowExport,
-            showCollage,
+            showUtilities,
             showAccount,
             showFreeUpSpace,
             showHelp,
@@ -382,8 +393,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {...{
                         onShowExport,
                         onAuthenticateUser,
-                        showCollage,
-                        collageVisibilityProps,
+                        showUtilities,
+                        utilitiesVisibilityProps,
                         showAccount,
                         accountVisibilityProps,
                         showPreferences,
@@ -403,6 +414,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onHelpActionHandled: setPendingHelpAction,
                         pendingFreeUpSpaceAction,
                         onFreeUpSpaceActionHandled: setPendingFreeUpSpaceAction,
+                        pendingUtilitiesAction,
+                        onUtilitiesActionHandled: setPendingUtilitiesAction,
                     }}
                 />
                 <Divider sx={{ my: "2px" }} />
@@ -792,8 +805,8 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 
 type UtilitySectionProps = SectionProps &
     Pick<SidebarProps, "onShowExport" | "onAuthenticateUser"> & {
-        showCollage: () => void;
-        collageVisibilityProps: ModalVisibilityProps;
+        showUtilities: () => void;
+        utilitiesVisibilityProps: ModalVisibilityProps;
         showAccount: () => void;
         accountVisibilityProps: ModalVisibilityProps;
         showPreferences: () => void;
@@ -813,14 +826,16 @@ type UtilitySectionProps = SectionProps &
         onHelpActionHandled: (action?: HelpAction) => void;
         pendingFreeUpSpaceAction?: FreeUpSpaceAction;
         onFreeUpSpaceActionHandled: (action?: FreeUpSpaceAction) => void;
+        pendingUtilitiesAction?: UtilitiesAction;
+        onUtilitiesActionHandled: (action?: UtilitiesAction) => void;
     };
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({
     onCloseSidebar,
     onShowExport,
     onAuthenticateUser,
-    showCollage,
-    collageVisibilityProps,
+    showUtilities,
+    utilitiesVisibilityProps,
     showAccount,
     accountVisibilityProps,
     showPreferences,
@@ -840,6 +855,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     onHelpActionHandled,
     pendingFreeUpSpaceAction,
     onFreeUpSpaceActionHandled,
+    pendingUtilitiesAction,
+    onUtilitiesActionHandled,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -850,11 +867,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
 
     return (
         <>
-            <RowButton
-                variant="secondary"
-                label={t("collage")}
-                onClick={showCollage}
-            />
             <RowButton
                 variant="secondary"
                 label={t("account")}
@@ -871,6 +883,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 variant="secondary"
                 label={t("free_up_space")}
                 onClick={showFreeUpSpace}
+            />
+            <RowButton
+                variant="secondary"
+                label={t("utilities")}
+                onClick={showUtilities}
             />
             <RowButton
                 variant="secondary"
@@ -892,9 +909,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 }
                 onClick={handleExport}
             />
-            <Collage
-                {...collageVisibilityProps}
+            <Utilities
+                {...utilitiesVisibilityProps}
                 onRootClose={onCloseSidebar}
+                pendingAction={pendingUtilitiesAction}
+                onActionHandled={onUtilitiesActionHandled}
             />
             <Help
                 {...helpVisibilityProps}
@@ -1860,17 +1879,24 @@ const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
     );
 };
 
-const Collage: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+type UtilitiesProps = NestedSidebarDrawerVisibilityProps & {
+    pendingAction?: UtilitiesAction;
+    onActionHandled?: (action?: UtilitiesAction) => void;
+};
+
+const Utilities: React.FC<UtilitiesProps> = ({
     open,
     onClose,
     onRootClose,
+    pendingAction,
+    onActionHandled,
 }) => {
     const handleRootClose = () => {
         onClose();
         onRootClose();
     };
 
-    const handleCollageHelp = useCallback(
+    const handleCollage = useCallback(
         () =>
             openURL(
                 "https://ente.io/help/photos/features/utilities/collage#collage-mobile",
@@ -1878,18 +1904,42 @@ const Collage: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         [],
     );
 
+    const handleCast = useCallback(
+        () => openURL("https://cast.ente.io"),
+        [],
+    );
+
+    useEffect(() => {
+        if (!open || !pendingAction) return;
+        switch (pendingAction) {
+            case "utilities.collage":
+                handleCollage();
+                break;
+            case "utilities.cast":
+                handleCast();
+                break;
+        }
+        onActionHandled?.();
+    }, [handleCast, handleCollage, open, onActionHandled, pendingAction]);
+
     return (
         <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={t("collage")}
+            title={t("utilities")}
         >
             <Stack sx={{ px: 2, py: 1, gap: 3 }}>
                 <RowButtonGroup>
                     <RowButton
                         endIcon={<NorthEastIcon />}
                         label={t("collage")}
-                        onClick={handleCollageHelp}
+                        onClick={handleCollage}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        endIcon={<NorthEastIcon />}
+                        label={t("cast_to_tv")}
+                        onClick={handleCast}
                     />
                 </RowButtonGroup>
             </Stack>

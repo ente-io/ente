@@ -21,7 +21,7 @@ export interface SidebarActionContext {
         collectionSummaryID: number,
         isHidden?: boolean,
     ) => Promise<void>;
-    showCollage: () => void;
+    showUtilities: () => void;
     showAccount: () => void;
     showPreferences: () => void;
     showHelp: () => void;
@@ -42,6 +42,7 @@ export interface SidebarActionContext {
     setPendingPreferencesAction: (a: SidebarActionID | undefined) => void;
     setPendingHelpAction: (a: SidebarActionID | undefined) => void;
     setPendingFreeUpSpaceAction: (a: SidebarActionID | undefined) => void;
+    setPendingUtilitiesAction: (a: SidebarActionID | undefined) => void;
 }
 
 // Construct sidebar actions at call time so we always use initialized i18n
@@ -90,10 +91,22 @@ const sidebarActions = (): SidebarAction[] => {
             keywords: ["trash", "bin", "deleted"],
         },
         {
-            id: "utility.collage",
+            id: "utility.utilities",
+            label: t("utilities"),
+            path: [preferencesCategory, t("utilities")],
+            keywords: ["utilities", "tools"],
+        },
+        {
+            id: "utilities.collage",
             label: t("collage"),
-            path: [preferencesCategory, t("collage")],
+            path: [preferencesCategory, t("utilities"), t("collage")],
             keywords: ["collage", "layout", "combine", "photos"],
+        },
+        {
+            id: "utilities.cast",
+            label: t("cast_to_tv"),
+            path: [preferencesCategory, t("utilities"), t("cast_to_tv")],
+            keywords: ["cast", "tv", "chromecast", "play"],
         },
         {
             id: "utility.account",
@@ -352,8 +365,14 @@ export const performSidebarAction = async (
                 .onShowCollectionSummary(ctx.pseudoIDs.trash, false)
                 .then(() => ctx.onClose());
 
-        case "utility.collage":
-            ctx.showCollage();
+        case "utility.utilities":
+            ctx.showUtilities();
+            return Promise.resolve();
+
+        case "utilities.collage":
+        case "utilities.cast":
+            ctx.setPendingUtilitiesAction(actionID);
+            ctx.showUtilities();
             return Promise.resolve();
 
         case "utility.account":
