@@ -1,0 +1,53 @@
+name: "Lint (ensu web)"
+
+on:
+    # Run on every pull request (open or push to it) that changes ensu web app
+    pull_request:
+        paths:
+            - "web/apps/ensu/**"
+            - "web/packages/**"
+            - "rust/core/**"
+            - ".github/workflows/ensu-web-lint.yml"
+
+permissions:
+    contents: read
+
+# Cancel in-progress lint runs when a new commit is pushed.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: web
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - run: yarn install --frozen-lockfile
+
+            - run: yarn build:wasm
+
+            - run: yarn lint
+
+            - run: yarn test:run
+
+            - name: Audit dependencies
+              run: |
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
+                      echo "::error::Yarn audit found critical issues"
+                      exit 1
+                  fi

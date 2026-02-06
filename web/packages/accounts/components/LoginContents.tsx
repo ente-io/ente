@@ -1,5 +1,6 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
 import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
+import { appName } from "ente-base/app";
 import {
     replaceSavedLocalUser,
     saveSRPAttributes,
@@ -41,6 +42,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
 }) => {
     const router = useRouter();
     const [isJoinAlbumContext, setIsJoinAlbumContext] = useState(false);
+    const isEnsu = appName === "ensu";
 
     useEffect(() => {
         // Check if we're in a join album context
@@ -132,9 +134,15 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
             </form>
             <AccountsPageFooter>
                 <Stack sx={{ gap: 3, textAlign: "center" }}>
-                    <LinkButton onClick={onSignUp}>
-                        {t("no_account")}
-                    </LinkButton>
+                    {isEnsu ? (
+                        <LinkButton onClick={() => void router.push("/chat")}>
+                            {t("cancel")}
+                        </LinkButton>
+                    ) : (
+                        <LinkButton onClick={onSignUp}>
+                            {t("no_account")}
+                        </LinkButton>
+                    )}
                     <Typography
                         variant="mini"
                         sx={{ color: "text.faint", minHeight: "16px" }}

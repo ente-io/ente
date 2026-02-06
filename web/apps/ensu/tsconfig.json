@@ -1,0 +1,11 @@
+{
+    "extends": "../../packages/build-config/tsconfig-next.json",
+    "compilerOptions": { "baseUrl": "./src" },
+    "include": [
+        "src",
+        "next-env.d.ts",
+        "next.config.mjs",
+        "../../packages/base/global-electron.d.ts",
+        "../../packages/base/components/utils/mui-theme.d.ts"
+    ]
+}
