@@ -44,6 +44,10 @@ class TextInputWidgetV2 extends StatefulWidget {
   final IconData? messageIcon;
   final bool isDisabled;
   final bool shouldStickToDarkTheme;
+  final List<String>? autofillHints;
+  final int? maxLines;
+  final int? minLines;
+  final bool finishAutofillContextOnEditingComplete;
 
   const TextInputWidgetV2({
     this.onSubmit,
@@ -79,6 +83,10 @@ class TextInputWidgetV2 extends StatefulWidget {
     this.messageIcon,
     this.isDisabled = false,
     this.shouldStickToDarkTheme = false,
+    this.autofillHints,
+    this.maxLines,
+    this.minLines,
+    this.finishAutofillContextOnEditingComplete = false,
     super.key,
   });
 
@@ -241,6 +249,10 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
       _executionState == ExecutionState.successful &&
       widget.shouldSurfaceExecutionStates;
 
+  bool get _isMultiline =>
+      !widget.isPasswordInput &&
+      (widget.maxLines == null || (widget.maxLines ?? 1) > 1);
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = widget.shouldStickToDarkTheme
@@ -292,9 +304,13 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
           onTap: widget.isDisabled ? null : _focusNode.requestFocus,
           behavior: HitTestBehavior.opaque,
           child: Container(
-            height: _kHeight,
-            padding:
-                const EdgeInsets.symmetric(horizontal: _kHorizontalPadding),
+            height: _isMultiline ? null : _kHeight,
+            constraints:
+                _isMultiline ? const BoxConstraints(minHeight: _kHeight) : null,
+            padding: EdgeInsets.symmetric(
+              horizontal: _kHorizontalPadding,
+              vertical: _isMultiline ? 16 : 0,
+            ),
             decoration: BoxDecoration(
               color: colors.backgroundColor,
               borderRadius: BorderRadius.circular(_kRadius),
@@ -315,9 +331,12 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
                     textCapitalization: widget.textCapitalization!,
                     autofocus: widget.autoFocus ?? false,
                     autocorrect: widget.autoCorrect,
-                    autofillHints: widget.isPasswordInput
-                        ? const [AutofillHints.password]
-                        : const [],
+                    maxLines: widget.isPasswordInput ? 1 : widget.maxLines,
+                    minLines: widget.isPasswordInput ? null : widget.minLines,
+                    autofillHints: widget.autofillHints ??
+                        (widget.isPasswordInput
+                            ? const [AutofillHints.password]
+                            : const []),
                     inputFormatters: widget.textInputFormatter ??
                         (widget.maxLength != null
                             ? [
@@ -476,6 +495,9 @@ class _TextInputWidgetV2State extends State<TextInputWidgetV2>
   }
 
   void _handleEditingComplete() {
+    if (widget.finishAutofillContextOnEditingComplete) {
+      TextInput.finishAutofillContext();
+    }
     if (widget.onSubmit == null) {
       if (widget.shouldUnfocusOnClearOrSubmit) {
         FocusScope.of(context).unfocus();

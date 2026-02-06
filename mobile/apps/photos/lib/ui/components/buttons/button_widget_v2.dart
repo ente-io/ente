@@ -23,6 +23,7 @@ class ButtonWidgetV2 extends StatefulWidget {
   final Widget? trailingWidget;
   final bool shouldSurfaceExecutionStates;
   final bool shouldStickToDarkTheme;
+  final bool shouldStickToLightTheme;
   final ButtonSizeV2 buttonSize;
   final Widget? leadingWidget;
   final Color? iconColor;
@@ -39,6 +40,7 @@ class ButtonWidgetV2 extends StatefulWidget {
     this.trailingWidget,
     this.shouldSurfaceExecutionStates = true,
     this.shouldStickToDarkTheme = false,
+    this.shouldStickToLightTheme = false,
     this.buttonSize = ButtonSizeV2.large,
     this.leadingWidget,
     this.iconColor,
@@ -109,12 +111,16 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = widget.shouldStickToDarkTheme
-        ? darkScheme
-        : getEnteColorScheme(context);
-    final textTheme = widget.shouldStickToDarkTheme
-        ? darkTextTheme
-        : getEnteTextTheme(context);
+    final colorScheme = widget.shouldStickToLightTheme
+        ? lightScheme
+        : widget.shouldStickToDarkTheme
+            ? darkScheme
+            : getEnteColorScheme(context);
+    final textTheme = widget.shouldStickToLightTheme
+        ? lightTextTheme
+        : widget.shouldStickToDarkTheme
+            ? darkTextTheme
+            : getEnteTextTheme(context);
 
     final showLoading = _executionState == ExecutionState.inProgress &&
         widget.shouldSurfaceExecutionStates;
@@ -282,13 +288,11 @@ class _ButtonWidgetV2State extends State<ButtonWidgetV2>
       });
     }
 
-    final labelStyle = textTheme.bodyBold.copyWith(
+    final isLink = widget.buttonType == ButtonTypeV2.link;
+    final labelStyle = (isLink ? textTheme.body : textTheme.bodyBold).copyWith(
       color: colors.textColor,
-      decoration: widget.buttonType == ButtonTypeV2.link
-          ? TextDecoration.underline
-          : null,
-      decorationColor:
-          widget.buttonType == ButtonTypeV2.link ? colors.textColor : null,
+      decoration: isLink ? TextDecoration.underline : null,
+      decorationColor: isLink ? colors.textColor : null,
     );
 
     final hasLeading = widget.leadingWidget != null;

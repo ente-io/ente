@@ -36,8 +36,8 @@ ButtonTheme _primaryPalette(EnteColorScheme c) => ButtonTheme(
       defaultBg: c.greenBase,
       hoverBg: c.greenDark,
       pressedBg: c.greenDarker,
-      disabledBg: c.fillBaseGrey,
-      foreground: c.contentReverse,
+      disabledBg: c.fillDark,
+      foreground: Colors.white,
       disabledForeground: c.contentLighter,
     );
 
@@ -45,33 +45,33 @@ ButtonTheme _criticalPalette(EnteColorScheme c) => ButtonTheme(
       defaultBg: c.redBase,
       hoverBg: c.redDark,
       pressedBg: c.redDarker,
-      disabledBg: c.fillBaseGrey,
+      disabledBg: c.fillDark,
       foreground: c.contentReverse,
       disabledForeground: c.contentLighter,
     );
 
 ButtonTheme _secondaryPalette(EnteColorScheme c) => ButtonTheme(
-      defaultBg: c.fillFaint,
-      hoverBg: c.fillFaintPressed,
-      pressedBg: c.fillMuted,
-      disabledBg: c.fillFaint,
-      foreground: c.textBase,
-      disabledForeground: c.textFaint,
-      defaultBorder: c.strokeFaint,
-      disabledBorder: c.strokeFaint,
-      iconColor: c.strokeBase,
-      disabledIconColor: c.strokeMuted,
+      defaultBg: c.fillDark,
+      hoverBg: c.fillDarker,
+      pressedBg: c.fillDarkest,
+      disabledBg: c.fillDark,
+      foreground: c.content,
+      disabledForeground: c.contentLighter,
+      iconColor: c.content,
+      disabledIconColor: c.contentLighter,
+      checkmarkColor: c.content,
     );
 
 ButtonTheme _neutralPalette(EnteColorScheme c) => ButtonTheme(
-      defaultBg: c.fillBase,
-      hoverBg: c.fillStrong,
-      pressedBg: c.fillBasePressed,
-      disabledBg: c.fillFaint,
+      defaultBg: c.fillReverse,
+      hoverBg: c.fillReverse,
+      pressedBg: c.fillReverse,
+      disabledBg: c.fillDark,
       foreground: c.contentReverse,
-      disabledForeground: c.textFaint,
-      disabledIconColor: c.strokeMuted,
-      checkmarkColor: c.greenBase,
+      disabledForeground: c.contentLighter,
+      iconColor: c.contentReverse,
+      disabledIconColor: c.contentLighter,
+      checkmarkColor: c.contentReverse,
     );
 
 ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
@@ -84,7 +84,7 @@ ButtonTheme _tertiaryCriticalPalette(EnteColorScheme c) => ButtonTheme(
       pressedForeground: c.redDarker,
       disabledForeground: c.contentLighter,
       defaultBorder: c.redBase,
-      disabledBorder: c.fillBaseGrey,
+      disabledBorder: c.fillDark,
       disabledIconColor: c.contentLighter,
     );
 
