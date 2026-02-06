@@ -618,6 +618,11 @@ func (c *ObjectCleanupController) clearOrphanObjectsVersionOrDeleteMarker(od Obj
 		"last_modified": lastModified,
 	})
 
+	// Skip llmchat attachments; llmchat handles cleanup.
+	if strings.HasPrefix(objectKey, "llmchat/attachments/") {
+		return
+	}
+
 	exists, err := c.ObjectRepo.DoesObjectOrTempObjectExist(objectKey)
 	if err != nil {
 		logger.Error(stacktrace.Propagate(err, "Failed to determine if object already exists in DB"))

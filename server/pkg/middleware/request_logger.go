@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ente-io/museum/pkg/utils/network"
@@ -42,6 +43,18 @@ func shouldSkipBodyLog(method string, path string) bool {
 		return true
 	}
 	if path == "/admin/user/terminate-session" {
+		return true
+	}
+	if strings.HasPrefix(path, "/llmchat/chat/attachment/") && method == "POST" {
+		return true
+	}
+	if path == "/llmchat/chat/message" && method == "POST" {
+		return true
+	}
+	if path == "/llmchat/chat/session" && method == "POST" {
+		return true
+	}
+	if path == "/llmchat/chat/key" && method == "POST" {
 		return true
 	}
 	return false

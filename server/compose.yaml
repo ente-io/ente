@@ -69,6 +69,7 @@ services:
           mc mb -p b2-eu-cen
           mc mb -p wasabi-eu-central-2-v3
           mc mb -p scw-eu-fr-v3
+          mc mb -p b7
           '
 
 configs:
@@ -104,6 +105,13 @@ configs:
               endpoint: localhost:3200
               region: eu-central-2
               bucket: scw-eu-fr-v3
+
+          b7:
+              key: changeme
+              secret: changeme1234
+              endpoint: localhost:3200
+              region: eu-central-2
+              bucket: b7
 
 volumes:
   postgres-data:
