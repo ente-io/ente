@@ -30,6 +30,7 @@ import "package:photos/utils/thumbnail_util.dart";
 final _logger = Logger("MlUtil");
 
 enum FileDataForML { thumbnailData, fileData }
+
 enum MLMode { online, offline }
 
 class IndexStatus {
@@ -236,10 +237,16 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
       continue;
     }
     queuedFileIDs.add(localIntId);
-    final shouldRunFaces =
-        _shouldRunIndexingWithFileId(localIntId, faceIndexedFileIDs, faceMlVersion);
-    final shouldRunClip =
-        _shouldRunIndexingWithFileId(localIntId, clipIndexedFileIDs, clipMlVersion);
+    final shouldRunFaces = _shouldRunIndexingWithFileId(
+      localIntId,
+      faceIndexedFileIDs,
+      faceMlVersion,
+    );
+    final shouldRunClip = _shouldRunIndexingWithFileId(
+      localIntId,
+      clipIndexedFileIDs,
+      clipMlVersion,
+    );
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
@@ -266,8 +273,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   if (mode == MLMode.offline) {
     final List<FileMLInstruction> filesToIndex =
         await getOfflineFilesForMlIndexing();
-    final List<List<FileMLInstruction>> chunks =
-        filesToIndex.chunks(yieldSize);
+    final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(yieldSize);
     for (final batch in chunks) {
       yield batch;
     }
@@ -420,7 +426,7 @@ Future<int> _getIndexableFileCount({required MLMode mode}) async {
     return files
         .where(
           (file) =>
-          (file.localID ?? '').isNotEmpty &&
+              (file.localID ?? '').isNotEmpty &&
               (file.uploadedFileID == null || file.uploadedFileID == -1) &&
               file.fileType != FileType.other,
         )

@@ -266,13 +266,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           final localIntIds = allFaces
               .map((faceID) => getFileIdFromFaceId<int>(faceID))
               .toSet();
-          final localIdMap = await OfflineFilesDB.instance
-              .getLocalIdsForIntIds(localIntIds);
+          final localIdMap =
+              await OfflineFilesDB.instance.getLocalIdsForIntIds(localIntIds);
           for (final faceID in allFaces) {
             final localIntId = getFileIdFromFaceId<int>(faceID);
             final localId = localIdMap[localIntId];
-            final candidate =
-                localId != null ? localIdToFile[localId] : null;
+            final candidate = localId != null ? localIdToFile[localId] : null;
             if (candidate != null) {
               fileForFaceCrop = candidate;
               fixedFaceID = faceID;
