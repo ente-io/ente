@@ -255,7 +255,10 @@ class _SharedPhotosGridState extends State<SharedPhotosGrid> {
     final thumbnail = ThumbnailWidget(
       file,
       fit: BoxFit.cover,
-      rawThumbnail: true,
+      rawThumbnail: false,
+      shouldShowFavoriteIcon: false,
+      shouldShowSyncStatus: false,
+      shouldShowLivePhotoOverlay: true,
       thumbnailSize: thumbnailLargeSize,
       useRequestedThumbnailSizeForLocalCache: true,
     );
