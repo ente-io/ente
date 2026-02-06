@@ -11,6 +11,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/social/widgets/shared_photos_grid.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 /// Widget that displays a single feed item.
@@ -38,6 +39,15 @@ class FeedItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // SharedPhoto has a different layout with photos grid below
+    if (feedItem.type == FeedItemType.sharedPhoto) {
+      return _buildSharedPhotoLayout(context);
+    }
+
+    return _buildDefaultLayout(context);
+  }
+
+  Widget _buildDefaultLayout(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
     return Padding(
@@ -109,6 +119,64 @@ class FeedItemWidget extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildSharedPhotoLayout(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header row: Icon + Avatar + Text
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Feed type icon with timeline line
+              _FeedTypeIconWithTimeline(
+                type: feedItem.type,
+                showTimeline: !isLastItem,
+                timelineExtensionHeight: 400, // Longer for shared photo layout
+              ),
+              const SizedBox(width: 10),
+              // Avatar and text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Avatar
+                    _StackedAvatars(
+                      feedItem: feedItem,
+                      currentUserID: currentUserID,
+                      anonDisplayNames: anonDisplayNames,
+                    ),
+                    const SizedBox(height: 4),
+                    // Text content
+                    _FeedTextContent(
+                      feedItem: feedItem,
+                      currentUserID: currentUserID,
+                      anonDisplayNames: anonDisplayNames,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // Photos grid below with left padding to align with text
+          if (feedItem.sharedFileIDs != null &&
+              feedItem.sharedFileIDs!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 42, top: 12),
+              child: SharedPhotosGrid(
+                fileIDs: feedItem.sharedFileIDs!,
+                collectionID: feedItem.collectionID,
+                onTap: onTap,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Displays the feed type icon with optional timeline line passing through center.
@@ -120,7 +188,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
 
   /// Height of the timeline line extending below the icon.
   /// Extends from icon center through text content and padding to next item's icon.
-  static const double _timelineExtensionHeight = 95;
+  final double timelineExtensionHeight;
 
   /// Width of the dashed timeline line.
   static const double _timelineWidth = 1.5;
@@ -128,6 +196,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
   const _FeedTypeIconWithTimeline({
     required this.type,
     required this.showTimeline,
+    this.timelineExtensionHeight = 95,
   });
 
   @override
@@ -150,7 +219,7 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
               left: (32 - _timelineWidth) / 2, // Center the line
               top: 16, // Start from icon center
               child: CustomPaint(
-                size: const Size(_timelineWidth, _timelineExtensionHeight),
+                size: Size(_timelineWidth, timelineExtensionHeight),
                 painter: _DashedLinePainter(color: timelineColor),
               ),
             ),
@@ -232,6 +301,12 @@ class _FeedTypeIconWithTimeline extends StatelessWidget {
               ),
             ),
           ],
+        );
+      case FeedItemType.sharedPhoto:
+        return Icon(
+          Icons.add_box_outlined,
+          size: 18,
+          color: getEnteColorScheme(context).textMuted,
         );
     }
   }
@@ -461,6 +536,20 @@ class _FeedTextContent extends StatelessWidget {
         return isOwn ? l10n.likedYourComment : l10n.likedAComment;
       case FeedItemType.replyLike:
         return isOwn ? l10n.likedYourReply : l10n.likedAReply;
+      case FeedItemType.sharedPhoto:
+        return _getSharedPhotoDescription(context);
+    }
+  }
+
+  String _getSharedPhotoDescription(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final count = feedItem.sharedFileCount;
+    final albumName = feedItem.collectionName ?? l10n.albums;
+
+    if (count == 1) {
+      return l10n.addedAMemoryTo(albumName: albumName);
+    } else {
+      return l10n.addedNMemoriesTo(count: count, albumName: albumName);
     }
   }
 

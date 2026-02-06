@@ -866,6 +866,77 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
+  /// Gets multiple uploaded files by their IDs in a single query.
+  ///
+  /// Returns files in the same order as [fileIDs], with null for missing files.
+  /// More efficient than calling [getUploadedFile] multiple times.
+  Future<List<EnteFile?>> getUploadedFilesBatch(
+    List<int> fileIDs,
+    int collectionID,
+  ) async {
+    if (fileIDs.isEmpty) return [];
+
+    final db = await instance.sqliteAsyncDB;
+    final placeholders = fileIDs.map((_) => '?').join(',');
+    final query = '''
+      SELECT * FROM $filesTable
+      WHERE $columnUploadedFileID IN ($placeholders)
+        AND $columnCollectionID = ?
+    ''';
+
+    final results = await db.getAll(query, [...fileIDs, collectionID]);
+    final files = convertToFiles(results);
+
+    // Build a map for O(1) lookup
+    final fileMap = <int, EnteFile>{};
+    for (final file in files) {
+      if (file.uploadedFileID != null) {
+        fileMap[file.uploadedFileID!] = file;
+      }
+    }
+
+    // Return in same order as input, with null for missing
+    return fileIDs.map((id) => fileMap[id]).toList();
+  }
+
+  /// Gets files added by other users to user's collections.
+  ///
+  /// Returns files where owner_id != currentUserID, ordered by added_time DESC.
+  /// Used to populate the feed with shared photo items.
+  /// Hidden collections are filtered downstream in _filterFeedItems.
+  /// Offset is supported for paged fetches while aggregating feed groups.
+  Future<List<EnteFile>> getRecentlySharedFiles({
+    required int currentUserID,
+    int limit = 100,
+    int offset = 0,
+    int? addedTimeAfterOrEqualTo,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    final whereClauses = <String>[
+      '$columnOwnerID IS NOT NULL',
+      '$columnOwnerID != ?',
+      '$columnAddedTime > 0',
+      '$columnUploadedFileID IS NOT NULL',
+    ];
+    final args = <Object>[currentUserID];
+    if (addedTimeAfterOrEqualTo != null) {
+      whereClauses.add('$columnAddedTime >= ?');
+      args.add(addedTimeAfterOrEqualTo);
+    }
+    args.add(limit);
+    args.add(offset);
+
+    final query = '''
+      SELECT * FROM $filesTable
+      WHERE ${whereClauses.join('\n        AND ')}
+      ORDER BY $columnAddedTime DESC, $columnUploadedFileID DESC
+      LIMIT ?
+      OFFSET ?
+    ''';
+    final results = await db.getAll(query, args);
+    return convertToFiles(results);
+  }
+
   Future<FileLoadResult> getFilesInCollections(
     List<int> collectionIDs,
     int startTime,

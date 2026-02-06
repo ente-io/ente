@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/social/feed_data_provider.dart";
 import "package:photos/models/social/feed_item.dart";
 import "package:photos/models/social/social_data_provider.dart";
@@ -303,9 +304,7 @@ class _FeedScreenState extends State<FeedScreen> {
                             _anonDisplayNamesByCollection[item.collectionID] ??
                                 const {},
                         isLastItem: isLastItem,
-                        onTap: () => item.type == FeedItemType.photoLike
-                            ? _openPhoto(item)
-                            : _openComments(item),
+                        onTap: () => _handleFeedItemTap(item),
                       );
                     },
                   ),
@@ -340,6 +339,23 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
     );
+  }
+
+  void _handleFeedItemTap(FeedItem item) {
+    switch (item.type) {
+      case FeedItemType.photoLike:
+        _openPhoto(item);
+        break;
+      case FeedItemType.sharedPhoto:
+        _openSharedPhotos(item);
+        break;
+      case FeedItemType.comment:
+      case FeedItemType.reply:
+      case FeedItemType.commentLike:
+      case FeedItemType.replyLike:
+        _openComments(item);
+        break;
+    }
   }
 
   /// Opens the photo viewer for the feed item, then shows the comments sheet.
@@ -412,6 +428,35 @@ class _FeedScreenState extends State<FeedScreen> {
             [file],
             0,
             "feed_item",
+          ),
+        ),
+        forceCustomPageRoute: true,
+      ),
+    );
+  }
+
+  /// Opens a gallery view of the shared photos.
+  Future<void> _openSharedPhotos(FeedItem item) async {
+    final fileIDs = item.sharedFileIDs;
+    if (fileIDs == null || fileIDs.isEmpty) return;
+
+    // Load all files using batch query
+    final loadedFiles = await FilesDB.instance.getUploadedFilesBatch(
+      fileIDs,
+      item.collectionID,
+    );
+    final files = loadedFiles.whereType<EnteFile>().toList();
+
+    if (files.isEmpty || !mounted) return;
+
+    unawaited(
+      routeToPage(
+        context,
+        DetailPage(
+          DetailPageConfiguration(
+            files,
+            0,
+            "feed_shared_photos",
           ),
         ),
         forceCustomPageRoute: true,
