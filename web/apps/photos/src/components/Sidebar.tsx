@@ -248,6 +248,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onShowExport,
     onAuthenticateUser,
 }) => {
+    const { show: showCollage, props: collageVisibilityProps } =
+        useModalVisibility();
     const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
@@ -296,6 +298,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClose,
                 onShowCollectionSummary,
                 onShowPlanSelector,
+                showCollage,
                 showAccount,
                 showPreferences,
                 showHelp,
@@ -329,6 +332,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onShowCollectionSummary,
             onShowPlanSelector,
             onShowExport,
+            showCollage,
             showAccount,
             showFreeUpSpace,
             showHelp,
@@ -378,6 +382,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {...{
                         onShowExport,
                         onAuthenticateUser,
+                        showCollage,
+                        collageVisibilityProps,
                         showAccount,
                         accountVisibilityProps,
                         showPreferences,
@@ -786,6 +792,8 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
 
 type UtilitySectionProps = SectionProps &
     Pick<SidebarProps, "onShowExport" | "onAuthenticateUser"> & {
+        showCollage: () => void;
+        collageVisibilityProps: ModalVisibilityProps;
         showAccount: () => void;
         accountVisibilityProps: ModalVisibilityProps;
         showPreferences: () => void;
@@ -811,6 +819,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
     onCloseSidebar,
     onShowExport,
     onAuthenticateUser,
+    showCollage,
+    collageVisibilityProps,
     showAccount,
     accountVisibilityProps,
     showPreferences,
@@ -840,6 +850,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
 
     return (
         <>
+            <RowButton
+                variant="secondary"
+                label={t("collage")}
+                onClick={showCollage}
+            />
             <RowButton
                 variant="secondary"
                 label={t("account")}
@@ -876,6 +891,10 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                     )
                 }
                 onClick={handleExport}
+            />
+            <Collage
+                {...collageVisibilityProps}
+                onRootClose={onCloseSidebar}
             />
             <Help
                 {...helpVisibilityProps}
@@ -1834,6 +1853,43 @@ const FreeUpSpace: React.FC<FreeUpSpaceProps> = ({
                     <RowButton
                         label={t("large_files_title")}
                         onClick={handleLargeFiles}
+                    />
+                </RowButtonGroup>
+            </Stack>
+        </TitledNestedSidebarDrawer>
+    );
+};
+
+const Collage: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleCollageHelp = useCallback(
+        () =>
+            openURL(
+                "https://ente.io/help/photos/features/utilities/collage#collage-mobile",
+            ),
+        [],
+    );
+
+    return (
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("collage")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<NorthEastIcon />}
+                        label={t("collage")}
+                        onClick={handleCollageHelp}
                     />
                 </RowButtonGroup>
             </Stack>

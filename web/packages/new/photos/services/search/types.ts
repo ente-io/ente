@@ -28,6 +28,7 @@ export type SidebarActionID =
     | "shortcuts.archive"
     | "shortcuts.hidden"
     | "shortcuts.trash"
+    | "utility.collage"
     | "utility.account"
     | "utility.watchFolders"
     | "utility.freeUpSpace"

@@ -21,6 +21,7 @@ export interface SidebarActionContext {
         collectionSummaryID: number,
         isHidden?: boolean,
     ) => Promise<void>;
+    showCollage: () => void;
     showAccount: () => void;
     showPreferences: () => void;
     showHelp: () => void;
@@ -87,6 +88,12 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("section_trash"),
             path: [shortcutsCategory, t("section_trash")],
             keywords: ["trash", "bin", "deleted"],
+        },
+        {
+            id: "utility.collage",
+            label: t("collage"),
+            path: [preferencesCategory, t("collage")],
+            keywords: ["collage", "layout", "combine", "photos"],
         },
         {
             id: "utility.account",
@@ -344,6 +351,10 @@ export const performSidebarAction = async (
             return ctx
                 .onShowCollectionSummary(ctx.pseudoIDs.trash, false)
                 .then(() => ctx.onClose());
+
+        case "utility.collage":
+            ctx.showCollage();
+            return Promise.resolve();
 
         case "utility.account":
             ctx.showAccount();
