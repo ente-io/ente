@@ -2417,6 +2417,25 @@
   "likedAComment": "Liked a comment",
   "likedYourReply": "Liked your reply",
   "likedAReply": "Liked a reply",
+  "addedAMemoryTo": "Added a memory to {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Added {count} memories to {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {

@@ -325,6 +325,14 @@ class _PreviewTextContent extends StatelessWidget {
         return isOwn ? l10n.likedYourComment : l10n.likedAComment;
       case FeedItemType.replyLike:
         return isOwn ? l10n.likedYourReply : l10n.likedAReply;
+      case FeedItemType.sharedPhoto:
+        final count = feedItem.sharedFileCount;
+        final albumName = feedItem.collectionName ?? l10n.albums;
+        if (count == 1) {
+          return l10n.addedAMemoryTo(albumName: albumName);
+        } else {
+          return l10n.addedNMemoriesTo(count: count, albumName: albumName);
+        }
     }
   }
 
