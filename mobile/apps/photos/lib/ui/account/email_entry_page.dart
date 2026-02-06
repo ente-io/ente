@@ -217,6 +217,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             isRequired: true,
             autoCorrect: false,
             autofillHints: const [],
+            finishAutofillContextOnEditingComplete: true,
             message: confirmPasswordMessage,
             messageType: confirmPasswordMessageType,
             onChange: (cnfPassword) {
