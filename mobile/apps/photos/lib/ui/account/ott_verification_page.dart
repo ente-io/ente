@@ -4,6 +4,7 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:pinput/pinput.dart";
 
@@ -29,6 +30,23 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   final _pinController = TextEditingController();
   String _code = "";
 
+  Future<void> _onVerifyPressed() async {
+    if (widget.isChangeEmail) {
+      await UserService.instance.changeEmail(
+        context,
+        widget.email,
+        _pinController.text,
+      );
+    } else {
+      await UserService.instance.verifyEmail(
+        context,
+        _pinController.text,
+        isResettingPasswordScreen: widget.isResetPasswordScreen,
+      );
+    }
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   void dispose() {
     _pinController.dispose();
@@ -37,11 +55,20 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
+    FloatingActionButtonLocation? fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: isKeypadOpen,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -63,6 +90,15 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
+      floatingActionButton: DynamicFAB(
+        key: const ValueKey("verifyOttButton"),
+        isKeypadOpen: isKeypadOpen,
+        isFormValid: _code.length == 6,
+        buttonText: AppLocalizations.of(context).verify,
+        onPressedFunction: _onVerifyPressed,
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
     );
   }
 
@@ -85,7 +121,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
     );
 
     final submittedPinTheme = defaultPinTheme.copyWith(
-      textStyle: textTheme.body.copyWith(color: colorScheme.greenBase),
+      textStyle: textTheme.h3Bold.copyWith(color: colorScheme.greenBase),
       decoration: BoxDecoration(
         color: colorScheme.greenLight,
         border: Border.all(color: colorScheme.greenBase, width: 2),
@@ -93,103 +129,77 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       ),
     );
 
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/ott.png',
-                  height: 96,
-                ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            Center(
+              child: Image.asset(
+                'assets/ott.png',
+                height: 96,
               ),
-              const SizedBox(height: 24),
-              Text(
-                AppLocalizations.of(context)
-                    .weHaveSentCodeTo(email: widget.email),
-                style: textTheme.body.copyWith(color: colorScheme.textBase),
-                textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              AppLocalizations.of(context)
+                  .weHaveSentCodeTo(email: widget.email),
+              style: textTheme.body.copyWith(color: colorScheme.textBase),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.isResetPasswordScreen
+                  ? AppLocalizations.of(context).toResetVerifyEmail
+                  : AppLocalizations.of(context).checkInboxAndSpamFolder,
+              style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: Pinput(
+                length: 6,
+                controller: _pinController,
+                autofocus: true,
+                defaultPinTheme: defaultPinTheme,
+                focusedPinTheme: focusedPinTheme,
+                submittedPinTheme: submittedPinTheme,
+                followingPinTheme: defaultPinTheme,
+                keyboardType: TextInputType.number,
+                onChanged: (String pin) {
+                  setState(() {
+                    _code = pin;
+                  });
+                },
+                onCompleted: (value) {
+                  if (value.length == 6) {
+                    _onVerifyPressed();
+                  }
+                },
               ),
-              const SizedBox(height: 8),
-              Text(
-                widget.isResetPasswordScreen
-                    ? AppLocalizations.of(context).toResetVerifyEmail
-                    : AppLocalizations.of(context).checkInboxAndSpamFolder,
-                style: textTheme.body.copyWith(color: colorScheme.textMuted),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Center(
-                child: Pinput(
-                  length: 6,
-                  controller: _pinController,
-                  autofocus: true,
-                  defaultPinTheme: defaultPinTheme,
-                  focusedPinTheme: focusedPinTheme,
-                  submittedPinTheme: submittedPinTheme,
-                  followingPinTheme: defaultPinTheme,
-                  keyboardType: TextInputType.number,
-                  onChanged: (String pin) {
-                    setState(() {
-                      _code = pin;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ButtonWidgetV2(
-                  buttonType: ButtonTypeV2.link,
-                  labelText: AppLocalizations.of(context).resendCode,
-                  buttonSize: ButtonSizeV2.small,
-                  onTap: () async {
-                    // ignore: unawaited_futures
-                    UserService.instance.sendOtt(
-                      context,
-                      widget.email,
-                      isCreateAccountScreen: widget.isCreateAccountScreen,
-                      isResetPasswordScreen: widget.isResetPasswordScreen,
-                      isChangeEmail: widget.isChangeEmail,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ButtonWidgetV2(
-              key: const ValueKey("verifyOttButton"),
-              buttonType: ButtonTypeV2.primary,
-              labelText: AppLocalizations.of(context).verify,
-              isDisabled: _code.length != 6,
-              onTap: () async {
-                if (widget.isChangeEmail) {
+            ),
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ButtonWidgetV2(
+                buttonType: ButtonTypeV2.link,
+                labelText: AppLocalizations.of(context).resendCode,
+                buttonSize: ButtonSizeV2.small,
+                onTap: () async {
                   // ignore: unawaited_futures
-                  UserService.instance.changeEmail(
+                  UserService.instance.sendOtt(
                     context,
                     widget.email,
-                    _pinController.text,
+                    isCreateAccountScreen: widget.isCreateAccountScreen,
+                    isResetPasswordScreen: widget.isResetPasswordScreen,
+                    isChangeEmail: widget.isChangeEmail,
                   );
-                } else {
-                  // ignore: unawaited_futures
-                  UserService.instance.verifyEmail(
-                    context,
-                    _pinController.text,
-                    isResettingPasswordScreen: widget.isResetPasswordScreen,
-                  );
-                }
-                FocusScope.of(context).unfocus();
-              },
+                },
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
