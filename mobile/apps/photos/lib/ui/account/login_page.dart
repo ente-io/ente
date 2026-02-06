@@ -14,10 +14,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/login_pwd_verification_page.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
-import 'package:photos/ui/common/web_page.dart';
 import "package:photos/ui/components/models/text_input_type_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
-import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,7 +25,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _config = Configuration.instance;
   final _emailController = TextEditingController();
   bool _emailIsValid = false;
   bool _showValidationMessage = false;
@@ -38,9 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if ((_config.getEmail() ?? '').isNotEmpty) {
-      _updateEmail(_config.getEmail()!);
-    } else if (kDebugMode) {
+    if (kDebugMode) {
       _updateEmail(const String.fromEnvironment("email"));
     }
   }
@@ -110,75 +105,35 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
     return AutofillGroup(
-      child: ListView(
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          const SizedBox(height: 20),
-          TextInputWidgetV2(
-            key: const ValueKey("emailInputField"),
-            label: AppLocalizations.of(context).email,
-            hintText: AppLocalizations.of(context).enterYourEmailAddress,
-            textEditingController: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            autoCorrect: false,
-            autoFocus: true,
-            isRequired: true,
-            onChange: _onEmailChanged,  
-            message: _showValidationMessage
-                ? (_emailIsValid
-                    ? AppLocalizations.of(context).validEmailAddress
-                    : AppLocalizations.of(context).invalidEmailAddress)
-                : null,
-            messageType: _showValidationMessage
-                ? (_emailIsValid
-                    ? TextInputMessageType.success
-                    : TextInputMessageType.alert)
-                : TextInputMessageType.guide,
-          ),
-          const SizedBox(height: 20),
-          StyledText(
-            text: AppLocalizations.of(context).loginTerms,
-            style: textTheme.small.copyWith(
-              color: colorScheme.textMuted,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            TextInputWidgetV2(
+              key: const ValueKey("emailInputField"),
+              label: AppLocalizations.of(context).email,
+              hintText: AppLocalizations.of(context).enterYourEmailAddress,
+              textEditingController: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              autoCorrect: false,
+              autoFocus: true,
+              isRequired: true,
+              onChange: _onEmailChanged,
+              message: _showValidationMessage
+                  ? (_emailIsValid
+                      ? AppLocalizations.of(context).validEmailAddress
+                      : AppLocalizations.of(context).invalidEmailAddress)
+                  : null,
+              messageType: _showValidationMessage
+                  ? (_emailIsValid
+                      ? TextInputMessageType.success
+                      : TextInputMessageType.alert)
+                  : TextInputMessageType.guide,
             ),
-            tags: {
-              'u-terms': StyledTextActionTag(
-                (String? text, Map<String?, String?> attrs) =>
-                    Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return WebPage(
-                        AppLocalizations.of(context).termsOfServicesTitle,
-                        "https://ente.io/terms",
-                      );
-                    },
-                  ),
-                ),
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  color: colorScheme.textMuted,
-                ),
-              ),
-              'u-policy': StyledTextActionTag(
-                (String? text, Map<String?, String?> attrs) =>
-                    Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return WebPage(
-                        AppLocalizations.of(context).privacyPolicyTitle,
-                        "https://ente.io/privacy",
-                      );
-                    },
-                  ),
-                ),
-                style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  color: colorScheme.textMuted,
-                ),
-              ),
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

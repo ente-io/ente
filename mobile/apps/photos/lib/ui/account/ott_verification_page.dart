@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
-import 'package:step_progress_indicator/step_progress_indicator.dart';
-import "package:styled_text/styled_text.dart";
+import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:pinput/pinput.dart";
 
 class OTTVerificationPage extends StatefulWidget {
   final String email;
@@ -26,198 +26,170 @@ class OTTVerificationPage extends StatefulWidget {
 }
 
 class _OTTVerificationPageState extends State<OTTVerificationPage> {
-  final _verificationCodeController = TextEditingController();
+  final _pinController = TextEditingController();
+  String _code = "";
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: colorScheme.content,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        title: widget.isCreateAccountScreen
-            ? Material(
-                type: MaterialType.transparency,
-                child: StepProgressIndicator(
-                  totalSteps: 4,
-                  currentStep: 2,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
-                  roundedEdges: const Radius.circular(10),
-                  unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
-                ),
-              )
-            : null,
+        title: Text(
+          "ente",
+          style: textTheme.h3Bold.copyWith(
+            fontFamily: "Montserrat",
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("verifyOttButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _verificationCodeController.text.isNotEmpty,
-        buttonText: AppLocalizations.of(context).verify,
-        onPressedFunction: () {
-          if (widget.isChangeEmail) {
-            UserService.instance.changeEmail(
-              context,
-              widget.email,
-              _verificationCodeController.text,
-            );
-          } else {
-            UserService.instance.verifyEmail(
-              context,
-              _verificationCodeController.text,
-              isResettingPasswordScreen: widget.isResetPasswordScreen,
-            );
-          }
-          FocusScope.of(context).unfocus();
-        },
-      ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      body: _getBody(colorScheme, textTheme),
     );
   }
 
-  Widget _getBody() {
-    return ListView(
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+    final defaultPinTheme = PinTheme(
+      height: 52,
+      width: 48,
+      textStyle: textTheme.body.copyWith(color: colorScheme.textBase),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.strokeMuted),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyWith(
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.greenBase, width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    final submittedPinTheme = defaultPinTheme.copyWith(
+      textStyle: textTheme.body.copyWith(color: colorScheme.greenBase),
+      decoration: BoxDecoration(
+        color: colorScheme.greenLight,
+        border: Border.all(color: colorScheme.greenBase, width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+
+    return Column(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
-              child: Text(
-                AppLocalizations.of(context).verifyEmail,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                          child: StyledText(
-                            text: AppLocalizations.of(context)
-                                .weHaveSendEmailTo(email: widget.email),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontSize: 14),
-                            tags: {
-                              'green': StyledTextTag(
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .greenAlternative,
-                                ),
-                              ),
-                            },
-                          ),
-                        ),
-                        widget.isResetPasswordScreen
-                            ? Text(
-                                AppLocalizations.of(context).toResetVerifyEmail,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(fontSize: 14),
-                              )
-                            : Text(
-                                AppLocalizations.of(context)
-                                    .checkInboxAndSpamFolder,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(fontSize: 14),
-                              ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    height: 1,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: TextFormField(
-                key: const ValueKey("ottVerificationInputField"),
-                style: Theme.of(context).textTheme.titleMedium,
-                decoration: InputDecoration(
-                  filled: true,
-                  hintText: AppLocalizations.of(context).tapToEnterCode,
-                  contentPadding: const EdgeInsets.all(15),
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  fillColor: getEnteColorScheme(context).fillFaint,
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/ott.png',
+                  height: 96,
                 ),
-                controller: _verificationCodeController,
-                autofocus: false,
-                autocorrect: false,
-                keyboardType: TextInputType.number,
-                onChanged: (_) {
-                  setState(() {});
-                },
               ),
-            ),
-            Divider(
-              thickness: 1,
-              color: getEnteColorScheme(context).strokeFaint,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      UserService.instance.sendOtt(
-                        context,
-                        widget.email,
-                        isCreateAccountScreen: widget.isCreateAccountScreen,
-                        isResetPasswordScreen: widget.isResetPasswordScreen,
-                        isChangeEmail: widget.isChangeEmail,
-                      );
-                    },
-                    child: Text(
-                      AppLocalizations.of(context).resendEmail,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
-                          ),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context)
+                    .weHaveSentCodeTo(email: widget.email),
+                style: textTheme.body.copyWith(color: colorScheme.textBase),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 8),
+              Text(
+                widget.isResetPasswordScreen
+                    ? AppLocalizations.of(context).toResetVerifyEmail
+                    : AppLocalizations.of(context).checkInboxAndSpamFolder,
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: Pinput(
+                  length: 6,
+                  controller: _pinController,
+                  autofocus: true,
+                  defaultPinTheme: defaultPinTheme,
+                  focusedPinTheme: focusedPinTheme,
+                  submittedPinTheme: submittedPinTheme,
+                  followingPinTheme: defaultPinTheme,
+                  keyboardType: TextInputType.number,
+                  onChanged: (String pin) {
+                    setState(() {
+                      _code = pin;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ButtonWidgetV2(
+                  buttonType: ButtonTypeV2.link,
+                  labelText: AppLocalizations.of(context).resendCode,
+                  buttonSize: ButtonSizeV2.small,
+                  onTap: () async {
+                    // ignore: unawaited_futures
+                    UserService.instance.sendOtt(
+                      context,
+                      widget.email,
+                      isCreateAccountScreen: widget.isCreateAccountScreen,
+                      isResetPasswordScreen: widget.isResetPasswordScreen,
+                      isChangeEmail: widget.isChangeEmail,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ButtonWidgetV2(
+              key: const ValueKey("verifyOttButton"),
+              buttonType: ButtonTypeV2.primary,
+              labelText: AppLocalizations.of(context).verify,
+              isDisabled: _code.length != 6,
+              onTap: () async {
+                if (widget.isChangeEmail) {
+                  // ignore: unawaited_futures
+                  UserService.instance.changeEmail(
+                    context,
+                    widget.email,
+                    _pinController.text,
+                  );
+                } else {
+                  // ignore: unawaited_futures
+                  UserService.instance.verifyEmail(
+                    context,
+                    _pinController.text,
+                    isResettingPasswordScreen: widget.isResetPasswordScreen,
+                  );
+                }
+                FocusScope.of(context).unfocus();
+              },
             ),
-          ],
+          ),
         ),
       ],
     );
-    // );
   }
 }
