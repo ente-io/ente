@@ -291,12 +291,9 @@
   "claimMore": "Peroleh lebih banyak!",
   "theyAlsoGetXGb": "Ia juga mendapat {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB setiap kali orang mendaftar dengan paket berbayar lalu menerapkan kode milikmu",
-  "shareTextReferralCode": "Kode rujukan Ente: {referralCode} \n\nTerapkan pada Pengaturan → Umum → Rujukan untuk mendapatkan {referralStorageInGB} GB gratis setelah kamu mendaftar paket berbayar\n\nhttps://ente.io",
   "claimFreeStorage": "Peroleh kuota gratis",
   "inviteYourFriends": "Undang teman-temanmu",
   "failedToFetchReferralDetails": "Tidak dapat mengambil kode rujukan. Harap ulang lagi nanti.",
-  "referralStep2": "2. Ia perlu daftar ke paket berbayar",
-  "referralStep3": "3. Kalian berdua mendapat {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Rujukan sedang dijeda",
   "claimedStorageSoFar": "{isFamilyMember, select, true {Keluargamu saat ini telah memperoleh {storageAmountInGb} GB} false {Kamu saat ini telah memperoleh {storageAmountInGb} GB} other {Kamu saat ini telah memperoleh {storageAmountInGb} GB!}}",
   "@claimedStorageSoFar": {
