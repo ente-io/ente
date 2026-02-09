@@ -14,6 +14,7 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/banners/offline_settings_banner.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
@@ -93,7 +94,15 @@ class _SettingsBody extends StatelessWidget {
                 _buildEmailHeader(context, colorScheme, textTheme),
                 const SizedBox(height: 16),
                 if (showLoginEntry) ...[
-                  _buildLoginCard(context, colorScheme),
+                  OfflineSettingsBanner(
+                    onGetStarted: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const LandingPageWidget(),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 8),
                 ],
                 if (hasLoggedIn && !isOfflineMode) ...[
@@ -257,23 +266,6 @@ class _SettingsBody extends StatelessWidget {
       trailingIconIsMuted: true,
       onTap: () async {
         await routeToPage(context, const AccountSettingsPage());
-      },
-    );
-  }
-
-  Widget _buildLoginCard(BuildContext context, EnteColorScheme colorScheme) {
-    final title =
-        "${AppLocalizations.of(context).existingUser} / ${AppLocalizations.of(context).newToEnte}";
-    return MenuItemWidgetNew(
-      title: title,
-      leadingIconWidget: _buildIconWidget(
-        HugeIcons.strokeRoundedUser,
-        colorScheme,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
-      onTap: () async {
-        await routeToPage(context, const LandingPageWidget());
       },
     );
   }

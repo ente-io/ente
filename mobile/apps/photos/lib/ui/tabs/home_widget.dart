@@ -806,10 +806,15 @@ class _HomeWidgetState extends State<HomeWidget> {
                         : colorScheme.backgroundElevated2;
                     final isSearchResults =
                         isOnSearchTab && IndexOfStackNotifier().index == 1;
+                    final isOnLandingPage =
+                        !Configuration.instance.hasConfiguredAccount() &&
+                            !isOfflineMode;
                     return AppBar(
-                      backgroundColor: isSearchResults
-                          ? resultsBackground
-                          : colorScheme.backgroundBase,
+                      backgroundColor: isOnLandingPage
+                          ? colorScheme.greenBase
+                          : isSearchResults
+                              ? resultsBackground
+                              : colorScheme.backgroundBase,
                     );
                   },
                 );

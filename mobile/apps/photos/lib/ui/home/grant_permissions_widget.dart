@@ -2,6 +2,7 @@ import "dart:async";
 
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/event_bus.dart";
@@ -13,6 +14,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/gradient_button.dart";
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:styled_text/styled_text.dart";
@@ -40,6 +42,10 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (isOfflineMode) {
+      return _buildOfflinePermissionScreen(context);
+    }
+
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     final headerText = _getHeaderText(context);
 
@@ -209,6 +215,25 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     }
   }
 
+  Future<void> _onTapOfflineGrantPermission() async {
+    try {
+      final state = await permissionService.requestPhotoMangerPermissions();
+      _logger.info("Offline permission state: $state");
+      if (state == PermissionState.authorized ||
+          state == PermissionState.limited) {
+        await permissionService.onUpdatePermission(state);
+        Bus.instance.fire(PermissionGrantedEvent());
+      } else {
+        await _showPermissionDeniedDialog();
+      }
+    } catch (e) {
+      _logger.severe(
+        "Failed to request permission: ${e.toString()}",
+        e,
+      );
+    }
+  }
+
   Future<void> _onTapSkip() async {
     await backupPreferenceService.setOnboardingPermissionSkipped(true);
     final state = await permissionService.getPermissionState();
@@ -298,6 +323,177 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                   .textTheme
                   .bodySmall!
                   .copyWith(decoration: TextDecoration.underline),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfflinePermissionScreen(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          _buildSkeletonGallery(context),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    colorScheme.contentReverse.withValues(alpha: 0.4),
+                    colorScheme.contentReverse,
+                  ],
+                  stops: const [0.0, 0.55],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    height: 52,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedMenu01,
+                          size: 24,
+                          color: colorScheme.strokeBase,
+                        ),
+                        Text(
+                          "ente",
+                          style: textTheme.h3Bold.copyWith(
+                            fontFamily: "Montserrat",
+                          ),
+                        ),
+                        HugeIcon(
+                          icon: HugeIcons.strokeRoundedUpload01,
+                          size: 24,
+                          color: colorScheme.strokeBase,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Image.asset(
+                          "assets/ducky_permission.png",
+                          height: 164,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const SizedBox(height: 164);
+                          },
+                        ),
+                        const SizedBox(height: 22),
+                        Text(
+                          AppLocalizations.of(context).welcome,
+                          style: TextStyle(
+                            fontFamily: "Nunito",
+                            fontWeight: FontWeight.w900,
+                            fontSize: 32,
+                            letterSpacing: -1.4,
+                            color: colorScheme.textBase,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          AppLocalizations.of(context)
+                              .grantGalleryPermissionDesc,
+                          textAlign: TextAlign.center,
+                          style: textTheme.body.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ButtonWidgetV2(
+                          buttonType: ButtonTypeV2.neutral,
+                          labelText:
+                              AppLocalizations.of(context).grantPermission,
+                          onTap: _onTapOfflineGrantPermission,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonGallery(BuildContext context) {
+    const skeletonColor = Color.fromRGBO(217, 217, 217, 0.4);
+    const memoryAspectRatio = 0.75;
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding + 56, left: 16, right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AspectRatio(
+            aspectRatio: 3 * memoryAspectRatio,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                childAspectRatio: memoryAspectRatio,
+              ),
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: skeletonColor,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 72,
+            height: 20,
+            decoration: BoxDecoration(
+              color: skeletonColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+              ),
+              itemCount: 9,
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: skeletonColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                );
+              },
             ),
           ),
         ],
