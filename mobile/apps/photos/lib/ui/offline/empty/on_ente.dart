@@ -20,38 +20,42 @@ class EmptyOnEnteSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Container(
-        height: 156,
-        width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 24),
         decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated,
+          color: colorScheme.backgroundColour,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.offlineEnableBackupTitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: "Nunito",
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-                height: 20 / 16,
-                letterSpacing: -1.0,
-                color: colorScheme.textBase,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200),
+              child: Text(
+                l10n.offlineEnableBackupTitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "Nunito",
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  height: 20 / 16,
+                  letterSpacing: -1.0,
+                  color: colorScheme.textBase,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              l10n.offlineEnableBackupDesc,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: "Inter",
-                fontWeight: FontWeight.w500,
-                fontSize: 10,
-                height: 16 / 10,
-                color: colorScheme.textBase.withValues(alpha: 0.6),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 235),
+              child: Text(
+                l10n.offlineEnableBackupDesc,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "Inter",
+                  fontWeight: FontWeight.w500,
+                  fontSize: 10,
+                  height: 16 / 10,
+                  color: colorScheme.textBase.withValues(alpha: 0.6),
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -64,12 +68,12 @@ class EmptyOnEnteSection extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 36,
                 decoration: BoxDecoration(
-                  color: getEnteColorScheme(context).greenBase,
+                  color: colorScheme.greenBase,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                alignment: Alignment.center,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
                 child: const Text(
                   "Start with 10 GB FREE",
                   style: TextStyle(

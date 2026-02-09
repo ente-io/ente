@@ -2585,7 +2585,7 @@
   "deleteOnDeviceFiles": "Delete on device files",
   "noHiddenFilesOnDevice": "No hidden files on device",
   "welcome": "Welcome",
-  "grantGalleryPermissionDesc": "Grant gallery access and enable People and Pets to end-to-end encrypt, recognise, and organise your photos.",
+  "grantGalleryPermissionDesc": "Grant permission to access and organize photos with face recognition.\n\nAll processing happens on your device.",
   "grantPermission": "Grant permission",
   "privateAI": "Private AI",
   "privateAIDescription": "Ente uses on-device AI to analyze your photos for faces, objects, locations, and text. This data is used to power features like face recognition and smart search. Everything is processed and stored locally on your device — nothing is ever uploaded to our servers.",

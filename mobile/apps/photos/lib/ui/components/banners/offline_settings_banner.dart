@@ -73,7 +73,7 @@ class OfflineSettingsBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 235),
+                    constraints: const BoxConstraints(maxWidth: 200),
                     child: Text(
                       l10n.offlineSettingsBannerDesc,
                       style: descriptionStyle,
@@ -107,7 +107,7 @@ class OfflineSettingsBanner extends StatelessWidget {
               child: IgnorePointer(
                 child: Image.asset(
                   "assets/ducky_settings.png",
-                  height: 120,
+                  height: 100,
                   fit: BoxFit.contain,
                 ),
               ),

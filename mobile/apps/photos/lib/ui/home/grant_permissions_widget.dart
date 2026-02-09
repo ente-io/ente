@@ -12,11 +12,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/gradient_button.dart";
-import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -427,8 +424,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                               AppLocalizations.of(context).grantPermission,
                           onTap: _onTapOfflineGrantPermission,
                         ),
-                        const SizedBox(height: 20),
-                        _buildTermsFooter(context, colorScheme, textTheme),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -502,60 +497,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTermsFooter(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    final linkColor = colorScheme.textFaint;
-
-    return SizedBox(
-      child: StyledText(
-        text: AppLocalizations.of(context).byAgreeing,
-        textAlign: TextAlign.center,
-        style: textTheme.small.copyWith(
-          color: colorScheme.textFaint,
-        ),
-        tags: {
-          'terms': StyledTextActionTag(
-            (String? text, Map<String?, String?> attrs) =>
-                Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return WebPage(
-                    AppLocalizations.of(context).termsOfServicesTitle,
-                    "https://ente.io/terms",
-                  );
-                },
-              ),
-            ),
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              color: linkColor,
-            ),
-          ),
-          'policy': StyledTextActionTag(
-            (String? text, Map<String?, String?> attrs) =>
-                Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return WebPage(
-                    AppLocalizations.of(context).privacyPolicyTitle,
-                    "https://ente.io/privacy",
-                  );
-                },
-              ),
-            ),
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              color: linkColor,
-            ),
-          ),
-        },
       ),
     );
   }

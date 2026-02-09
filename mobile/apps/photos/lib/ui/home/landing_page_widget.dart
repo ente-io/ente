@@ -352,7 +352,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     ];
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 400),
+      constraints: const BoxConstraints(maxHeight: 320),
       child: PageView.builder(
         controller: _pageController,
         itemBuilder: (context, index) {
