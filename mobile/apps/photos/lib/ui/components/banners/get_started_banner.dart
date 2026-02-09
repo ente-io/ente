@@ -119,12 +119,12 @@ class GetStartedBanner extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 32,
-            bottom: 16,
+            right: 12,
+            bottom: 0,
             child: IgnorePointer(
               child: Image.asset(
                 "assets/ducky_get_started.png",
-                height: 108,
+                height: 100,
                 fit: BoxFit.contain,
               ),
             ),

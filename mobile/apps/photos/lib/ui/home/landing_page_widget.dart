@@ -6,9 +6,9 @@ import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import "package:photos/app.dart";
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -17,7 +17,6 @@ import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
-import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
@@ -109,116 +108,16 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (isOfflineMode) {
-      return _buildOfflineScaffold();
-    }
-    return _buildOnlineScaffold();
-  }
-
-  Widget _buildOnlineScaffold() {
-    final textTheme = getEnteTextTheme(context);
-    return Scaffold(
-      body: GestureDetector(
-        onTap: _handleDeveloperModeTap,
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                kDebugMode
-                    ? GestureDetector(
-                        child: const Align(
-                          alignment: Alignment.topRight,
-                          child: Text("Lang"),
-                        ),
-                        onTap: () async {
-                          final locale = (await getLocale())!;
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            LanguageSelectorPage(
-                              appSupportedLocales,
-                              (locale) async {
-                                await setLocale(locale);
-                                EnteApp.setLocale(context, locale);
-                                unawaited(
-                                  AppLocalizations.delegate.load(locale),
-                                );
-                              },
-                              locale,
-                            ),
-                          ).then((value) {
-                            setState(() {});
-                          });
-                        },
-                      )
-                    : const SizedBox(),
-                const Padding(padding: EdgeInsets.all(12)),
-                Text(
-                  "ente",
-                  style: textTheme.h3Bold.copyWith(
-                    fontFamily: "Montserrat",
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(28),
-                ),
-                _buildFeatureCarousel(),
-                const SizedBox(height: 20),
-                _buildPageIndicator(),
-                const Padding(
-                  padding: EdgeInsets.all(28),
-                ),
-                _getSignUpButton(context),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                  child: Hero(
-                    tag: "log_in",
-                    child: ElevatedButton(
-                      key: const ValueKey("signInButton"),
-                      style: Theme.of(context)
-                          .colorScheme
-                          .optionalActionButtonStyle,
-                      onPressed: _navigateToSignInPage,
-                      child: Text(
-                        AppLocalizations.of(context).existingUser,
-                        style: const TextStyle(
-                          color: Colors.black, // same for both themes
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const DeveloperSettingsWidget(),
-                const Padding(
-                  padding: EdgeInsets.all(20),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      resizeToAvoidBottomInset: false,
-    );
-  }
-
-  Widget _getSignUpButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GradientButton(
-        onTap: _navigateToSignUpPage,
-        text: AppLocalizations.of(context).newToEnte,
-      ),
-    );
-  }
-
-  Widget _buildOfflineScaffold() {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.greenBase,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: colorScheme.greenBase,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
         leading: const SizedBox(),
         title: Text(
           "ente",
@@ -258,7 +157,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       onTap: _navigateToSignUpPage,
                       shouldStickToLightTheme: true,
                     ),
-                    if (Platform.isAndroid) ...[
+                    if (isOfflineMode && Platform.isAndroid) ...[
                       const SizedBox(height: 12),
                       ButtonWidgetV2(
                         buttonType: ButtonTypeV2.secondary,
@@ -275,11 +174,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       },
                       child: Text(
                         AppLocalizations.of(context).loginToExistingAccount,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              decoration: TextDecoration.underline,
-                              decorationColor: Colors.white,
-                              color: Colors.white,
-                            ),
+                        style: textTheme.body.copyWith(
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -376,12 +275,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Widget _buildPageIndicator() {
-    final activeColor = isOfflineMode
-        ? const Color.fromRGBO(33, 144, 50, 1)
-        : Theme.of(context).colorScheme.dotsIndicatorActiveColor;
-    final inactiveColor = isOfflineMode
-        ? Colors.white.withValues(alpha: 0.32)
-        : Theme.of(context).colorScheme.dotsIndicatorInactiveColor;
+    const activeColor = Color.fromRGBO(33, 144, 50, 1);
+    final inactiveColor = Colors.white.withValues(alpha: 0.32);
     return DotsIndicator(
       dotsCount: _featureCount,
       position: _activeDotIndex.toDouble(),
