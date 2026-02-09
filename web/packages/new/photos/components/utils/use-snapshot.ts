@@ -3,6 +3,7 @@ import {
     hlsGenerationStatusSubscribe,
 } from "ente-gallery/services/video";
 import { useSyncExternalStore } from "react";
+import { appLockSnapshot, appLockSubscribe } from "../../services/app-lock";
 import {
     mlStatusSnapshot,
     mlStatusSubscribe,
@@ -14,6 +15,13 @@ import {
     userDetailsSnapshot,
     userDetailsSubscribe,
 } from "../../services/user-details";
+
+/**
+ * A convenience hook that returns {@link appLockSnapshot}, and also subscribes
+ * to updates.
+ */
+export const useAppLockSnapshot = () =>
+    useSyncExternalStore(appLockSubscribe, appLockSnapshot, appLockSnapshot);
 
 /**
  * A convenience hook that returns {@link settingsSnapshot}, and also

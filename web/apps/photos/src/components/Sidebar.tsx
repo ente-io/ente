@@ -70,6 +70,7 @@ import {
 } from "ente-gallery/services/video";
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
+import { AppLockSettings } from "ente-new/photos/components/sidebar/AppLockSettings";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
 import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
@@ -956,6 +957,8 @@ const Account: React.FC<AccountProps> = ({
         useModalVisibility();
     const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
         useModalVisibility();
+    const { show: showAppLock, props: appLockVisibilityProps } =
+        useModalVisibility();
 
     const handleRootClose = () => {
         onClose();
@@ -978,6 +981,11 @@ const Account: React.FC<AccountProps> = ({
         await onAuthenticateUser();
         showSessions();
     }, [onAuthenticateUser, showSessions]);
+
+    const handleAppLock = useCallback(async () => {
+        await onAuthenticateUser();
+        showAppLock();
+    }, [onAuthenticateUser, showAppLock]);
 
     useEffect(() => {
         if (!open || !pendingAction) return;
@@ -1050,6 +1058,14 @@ const Account: React.FC<AccountProps> = ({
                         onClick={handleActiveSessions}
                     />
                 </RowButtonGroup>
+                {isDesktop && (
+                    <RowButtonGroup>
+                        <RowButton
+                            label={t("app_lock")}
+                            onClick={handleAppLock}
+                        />
+                    </RowButtonGroup>
+                )}
                 <RowButtonGroup>
                     <RowButton
                         label={t("change_password")}
@@ -1084,6 +1100,10 @@ const Account: React.FC<AccountProps> = ({
             <DeleteAccount
                 {...deleteAccountVisibilityProps}
                 {...{ onAuthenticateUser }}
+            />
+            <AppLockSettings
+                {...appLockVisibilityProps}
+                onRootClose={onRootClose}
             />
         </TitledNestedSidebarDrawer>
     );

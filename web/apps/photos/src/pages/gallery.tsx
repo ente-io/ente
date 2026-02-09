@@ -35,6 +35,7 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { subscribeMainWindowFocus } from "ente-base/electron";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -374,6 +375,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         const electron = globalThis.electron;
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
+        let unsubscribeMainWindowFocus = () => {};
 
         void (async () => {
             if (!haveMasterKeyInSession() || !(await savedAuthToken())) {
@@ -467,7 +469,7 @@ const Page: React.FC = () => {
             );
 
             if (electron) {
-                electron.onMainWindowFocus(() => {
+                unsubscribeMainWindowFocus = subscribeMainWindowFocus(() => {
                     remotePull({ silent: true });
                     void watcher.checkAccessibility();
                 });
@@ -477,7 +479,7 @@ const Page: React.FC = () => {
 
         return () => {
             clearInterval(syncIntervalID);
-            if (electron) electron.onMainWindowFocus(undefined);
+            unsubscribeMainWindowFocus();
         };
     }, []);
 

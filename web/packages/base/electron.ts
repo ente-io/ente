@@ -23,3 +23,51 @@ export const ensureElectron = (): Electron => {
         "Attempting to assert globalThis.electron in a non-electron context",
     );
 };
+
+type MainWindowFocusListener = () => void;
+
+const mainWindowFocusListeners = new Set<MainWindowFocusListener>();
+let hasAttachedMainWindowFocusBridge = false;
+
+const emitMainWindowFocus = () => {
+    for (const listener of mainWindowFocusListeners) {
+        listener();
+    }
+};
+
+const attachMainWindowFocusBridgeIfNeeded = () => {
+    if (hasAttachedMainWindowFocusBridge) return;
+    const electron = globalThis.electron;
+    if (!electron) return;
+    electron.onMainWindowFocus(emitMainWindowFocus);
+    hasAttachedMainWindowFocusBridge = true;
+};
+
+const detachMainWindowFocusBridgeIfNeeded = () => {
+    if (!hasAttachedMainWindowFocusBridge || mainWindowFocusListeners.size > 0) {
+        return;
+    }
+
+    const electron = globalThis.electron;
+    if (electron) {
+        electron.onMainWindowFocus(undefined);
+    }
+    hasAttachedMainWindowFocusBridge = false;
+};
+
+/**
+ * Subscribe to main window focus events on Electron.
+ *
+ * This helper multiplexes listeners over Electron's single-callback API,
+ * allowing multiple consumers to listen concurrently.
+ */
+export const subscribeMainWindowFocus = (
+    listener: MainWindowFocusListener,
+): (() => void) => {
+    mainWindowFocusListeners.add(listener);
+    attachMainWindowFocusBridgeIfNeeded();
+    return () => {
+        mainWindowFocusListeners.delete(listener);
+        detachMainWindowFocusBridgeIfNeeded();
+    };
+};

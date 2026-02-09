@@ -9,6 +9,7 @@ import {
     savedPartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import { isDesktop, staticAppTitle } from "ente-base/app";
+import { subscribeMainWindowFocus } from "ente-base/electron";
 import { CenteredRow } from "ente-base/components/containers";
 import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
 import {
@@ -31,6 +32,7 @@ import {
     initVideoProcessing,
     isHLSGenerationSupported,
 } from "ente-gallery/services/video";
+import { AppLockOverlay } from "ente-new/photos/components/AppLockOverlay";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
@@ -38,6 +40,8 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "ente-new/photos/components/utils/download";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
+import { initAppLock, lock } from "ente-new/photos/services/app-lock";
+import { useAppLockSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
 import { initML, isMLSupported } from "ente-new/photos/services/ml";
@@ -46,7 +50,7 @@ import { PhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
@@ -64,11 +68,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
 
     const [watchFolderView, setWatchFolderView] = useState(false);
+    const appLock = useAppLockSnapshot();
+    const autoLockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
         logStartupBanner(savedLocalUser()?.id);
+        if (isDesktop) initAppLock();
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
@@ -156,6 +163,73 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Auto-lock when the tab/window becomes hidden (desktop only).
+    useEffect(() => {
+        if (!isDesktop || !appLock.enabled) return;
+
+        const handleVisibilityChange = () => {
+            if (document.hidden && !appLock.isLocked) {
+                autoLockTimerRef.current = setTimeout(() => {
+                    lock();
+                }, appLock.autoLockTimeMs);
+            }
+            if (!document.hidden && autoLockTimerRef.current) {
+                clearTimeout(autoLockTimerRef.current);
+                autoLockTimerRef.current = null;
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange,
+            );
+            if (autoLockTimerRef.current) {
+                clearTimeout(autoLockTimerRef.current);
+                autoLockTimerRef.current = null;
+            }
+        };
+    }, [appLock.enabled, appLock.isLocked, appLock.autoLockTimeMs]);
+
+    // Blur main content when tab is hidden to prevent content from appearing
+    // in tab previews and Alt+Tab thumbnails (desktop only).
+    useEffect(() => {
+        if (!isDesktop || !appLock.hideContentOnBlur) return;
+
+        const el = document.getElementById("__next");
+        if (!el) return;
+
+        const handleVisibilityChange = () => {
+            el.style.filter = document.hidden ? "blur(30px)" : "";
+        };
+
+        handleVisibilityChange();
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange,
+            );
+            el.style.filter = "";
+        };
+    }, [appLock.hideContentOnBlur]);
+
+    // On Electron, clear the auto-lock timer when the main window regains focus.
+    useEffect(() => {
+        if (!appLock.enabled) return;
+
+        const handleFocus = () => {
+            if (autoLockTimerRef.current) {
+                clearTimeout(autoLockTimerRef.current);
+                autoLockTimerRef.current = null;
+            }
+        };
+
+        return subscribeMainWindowFocus(handleFocus);
+    }, [appLock.enabled]);
+
     const baseContext = useMemo(
         () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
@@ -197,6 +271,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                         <>
                             {isChangingRoute && <TranslucentLoadingOverlay />}
                             <Component {...pageProps} />
+                            {isDesktop && <AppLockOverlay />}
                         </>
                     )}
                 </PhotosAppContext>
