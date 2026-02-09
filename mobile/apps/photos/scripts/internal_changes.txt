@@ -1,3 +1,5 @@
+- Neeraj: (i) Show incoming photos in feed
+- Neeraj: Remove internal-user gating for extended collage layouts
 - Ashil: Fix likes on someone else's photo coming up as your in feed + improvements in feed (ownership aware copies for comments and replies)
 - Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
 - Ashil: Social notification improvements
