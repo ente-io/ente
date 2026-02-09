@@ -336,8 +336,7 @@ class SmartMemoriesService {
     return filtered;
   }
 
-  Future<(Set<EnteFile>, Map<int, EnteFile>)>
-      _getFilesAndMapForMemories({
+  Future<(Set<EnteFile>, Map<int, EnteFile>)> _getFilesAndMapForMemories({
     bool useGeneratedIds = false,
     bool requireLocalId = false,
     bool useLocalIntIds = false,
@@ -582,8 +581,7 @@ class SmartMemoriesService {
     }
 
     // Filler memories
-    final fillerMemories =
-        await _getFillerResults(
+    final fillerMemories = await _getFillerResults(
       allFiles,
       now,
       seenTimes: seenTimes,
@@ -1907,30 +1905,26 @@ class SmartMemoriesService {
       final diff = fileTimeInYear.difference(currentTime);
       if (!diff.isNegative && diff < kMemoriesUpdateFrequency) {
         final yearsAgo = currentYear - fileDate.year;
-        yearsAgoToMemories
-            .putIfAbsent(yearsAgo, () => [])
-            .add(
-          Memory.fromFile(
-            file,
-            seenTimes,
-            seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
-          ),
-        );
+        yearsAgoToMemories.putIfAbsent(yearsAgo, () => []).add(
+              Memory.fromFile(
+                file,
+                seenTimes,
+                seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+              ),
+            );
       } else if (almostYearEnd) {
         final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
               currentTime,
             );
         if (!altDiff.isNegative && altDiff < kMemoriesUpdateFrequency) {
           final yearsAgo = currentYear - fileDate.year + 1;
-          yearsAgoToMemories
-              .putIfAbsent(yearsAgo, () => [])
-              .add(
-            Memory.fromFile(
-              file,
-              seenTimes,
-              seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
-            ),
-          );
+          yearsAgoToMemories.putIfAbsent(yearsAgo, () => []).add(
+                Memory.fromFile(
+                  file,
+                  seenTimes,
+                  seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+                ),
+              );
         }
       }
     }
@@ -2031,30 +2025,26 @@ class SmartMemoriesService {
       final fileTimeInYear = fileDate.copyWith(year: currentYear);
       final diff = fileTimeInYear.difference(startPoint);
       if (!diff.isNegative && diff < diffThreshold) {
-        daysToMemories
-            .putIfAbsent(diff.inDays, () => [])
-            .add(
-          Memory.fromFile(
-            file,
-            seenTimes,
-            seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
-          ),
-        );
+        daysToMemories.putIfAbsent(diff.inDays, () => []).add(
+              Memory.fromFile(
+                file,
+                seenTimes,
+                seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+              ),
+            );
         daysToYears.putIfAbsent(diff.inDays, () => []).add(fileDate.year);
       } else if (almostYearEnd) {
         final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
               currentTime,
             );
         if (!altDiff.isNegative && altDiff < diffThreshold) {
-          daysToMemories
-              .putIfAbsent(altDiff.inDays, () => [])
-              .add(
-            Memory.fromFile(
-              file,
-              seenTimes,
-              seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
-            ),
-          );
+          daysToMemories.putIfAbsent(altDiff.inDays, () => []).add(
+                Memory.fromFile(
+                  file,
+                  seenTimes,
+                  seenTimeKey: _seenTimeKeyForFile(file, localIdToIntId),
+                ),
+              );
           daysToYears.putIfAbsent(altDiff.inDays, () => []).add(fileDate.year);
         }
       }

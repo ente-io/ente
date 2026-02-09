@@ -96,6 +96,8 @@ class SocialSyncService {
           await _db.getReactionsSyncTime(collectionID)) {
         await _db.setReactionsSyncTime(collectionID, maxReactionsUpdatedAt);
       }
+
+      await _db.resolveParentCommentUserIDs(collectionID);
     } catch (e) {
       _logger.severe('Failed to sync collection $collectionID', e);
       rethrow;
@@ -143,6 +145,8 @@ class SocialSyncService {
         final reactions = _decryptReactions(response.reactions, collectionID);
         await _db.upsertReactions(reactions);
       }
+
+      await _db.resolveParentCommentUserIDs(collectionID);
     } catch (e) {
       _logger.warning('Failed to sync social data for file $fileID', e);
       // Don't rethrow - this is a non-critical operation
@@ -154,14 +158,14 @@ class SocialSyncService {
   /// Called during background sync to keep social data up to date.
   /// Uses the /comments-reactions/updated-at endpoint to determine which
   /// collections actually need syncing, avoiding unnecessary API calls.
-  Future<void> syncAllSharedCollections() async {
+  Future<bool> syncAllSharedCollections() async {
     if (!flagService.isSocialEnabled) {
       _logger.info('Social features disabled, skipping sync');
-      return;
+      return false;
     }
     if (_isSyncing) {
       _logger.info('Sync already in progress, skipping');
-      return;
+      return false;
     }
 
     _isSyncing = true;
@@ -169,7 +173,7 @@ class SocialSyncService {
       final userID = Configuration.instance.getUserID();
       if (userID == null) {
         _logger.info('User not logged in, skipping social sync');
-        return;
+        return false;
       }
 
       // Get latest update timestamps from server
@@ -177,7 +181,7 @@ class SocialSyncService {
 
       if (latestUpdates.updates.isEmpty) {
         _logger.info('No collections have social activity');
-        return;
+        return false;
       }
 
       _logger.info(
@@ -251,8 +255,10 @@ class SocialSyncService {
           ),
         );
       }
+      return syncedCount > 0;
     } catch (e) {
       _logger.severe('Failed to fetch latest updates', e);
+      return false;
     } finally {
       _isSyncing = false;
     }

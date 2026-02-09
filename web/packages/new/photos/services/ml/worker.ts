@@ -339,8 +339,11 @@ export class MLWorker {
     /**
      * Return suggestions and choices for the given cgroup {@link person}.
      */
-    async suggestionsAndChoicesForPerson(person: CGroupPerson) {
-        return _suggestionsAndChoicesForPerson(person);
+    async suggestionsAndChoicesForPerson(
+        person: CGroupPerson,
+        currentUserID: number,
+    ) {
+        return _suggestionsAndChoicesForPerson(person, currentUserID);
     }
 }
 

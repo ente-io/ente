@@ -5,15 +5,14 @@ description: Frequently asked questions about sharing in Ente Locker
 
 # Sharing FAQ
 
-Answers to common questions about sharing documents and collections in Ente
-Locker.
+Answers to common questions about sharing items and collections in Ente Locker.
 
 ## Sharing with Users
 
-### How do I share my emergency contacts with family? {#locker-share-family}
+### How do I share items with family? {#locker-share-family}
 
-1. Create a collection for emergency contacts (or use an existing one)
-2. Add all relevant emergency contacts to the collection
+1. Create a collection for the items you want to share (or use an existing one)
+2. Add all relevant items to the collection
 3. Open the collection and tap the share button
 4. Select **Share with Ente user**
 5. Enter your family member's Ente email address
@@ -24,26 +23,27 @@ Your family member will receive the shared collection in their Locker app.
 
 ### Can I share with non-Ente users? {#locker-share-non-users}
 
-Yes, using public links. Create a public link that can be opened in any
-web browser:
+Yes, using public links for individual items. Create a public link that can be
+opened in any web browser:
 
-1. Open the document or collection
+1. Long press on the item
 2. Tap the share button
-3. Select **Create public link**
+3. Tap **Share link**
 4. Copy and share the link
+
+Note: Collections cannot be shared via public links—only with other Ente users.
 
 Learn more about [Public links](/locker/features/sharing/public-links).
 
-### What happens when I update a shared document? {#locker-update-shared}
+### What happens when I update a shared item? {#locker-update-shared}
 
-When you update a document shared with Ente users:
+When you update an item shared with Ente users:
 
-- Changes sync automatically to all recipients
+- Recipients see the updated content next time they view the item
 - They see the updated content next time they open it
 - No notification is sent for updates
 
-For public links, viewers see the current version when they access the
-link.
+For public links, viewers see the current version when they access the link.
 
 ### What happens if I revoke access to shared content? {#locker-revoke-access}
 
@@ -53,6 +53,16 @@ When you remove someone's access:
 - The content disappears from their Locker
 - Any public links are unaffected (must be revoked separately)
 
+### Can I share individual items with Ente users? {#locker-share-individual-items}
+
+Not directly. To share an individual item with another Ente user:
+
+1. Add the item to a collection
+2. Share the collection with them
+
+Alternatively, create a [public link](/locker/features/sharing/public-links) for
+the item that anyone can access in a browser.
+
 ### Can viewers add items to shared content? {#locker-viewer-edit}
 
 No. Viewers can only view content. To allow adding items, share with
@@ -60,47 +70,55 @@ Collaborator permissions instead.
 
 ### Can I see who has access to my shared content? {#locker-access-tracking}
 
-Yes. Open the shared document or collection, tap the share button, and
-view the list of people with access.
+Yes. Long press on the shared item or open the collection, tap the share button,
+and view the list of people with access.
+
+### What happens if I delete a shared collection? {#locker-delete-shared-collection}
+
+When you delete a collection you've shared with others:
+
+- **If you're the owner**: The collection is removed from all shared users'
+  accounts. They lose access to the items.
+- **If you're a viewer/collaborator**: You remove yourself from the shared
+  collection. Other users and the owner retain access.
+
+Items in a deleted shared collection follow the same rules as regular
+collections—you can choose to keep or delete the items when deleting the
+collection.
+
+### What happens to shared items if the owner deletes their account? {#locker-owner-deletes-account}
+
+If an account owner deletes their Ente account, all their shared collections
+become inaccessible to shared users. Collaborators and viewers lose access to
+all content shared by that user.
+
+If you need continued access to shared content, consider:
+
+- Asking the owner to transfer ownership before account deletion
+- Creating your own copies of important shared items
 
 ## Public Links
 
 ### Are public links end-to-end encrypted? {#locker-public-link-encryption}
 
 Yes and no. The content remains encrypted on Ente's servers. However, the
-decryption key is embedded in the URL, so anyone with the link can
-decrypt and view the content.
-
-For sensitive information, use password protection on public links.
+decryption key is embedded in the URL, so anyone with the link can decrypt and
+view the content.
 
 ### Can I see who viewed my public link? {#locker-link-analytics}
 
-No. Ente does not track who views public links to maintain privacy.
-We can tell you how many devices have accessed a link, but not who.
+No. Ente does not track who views public links to maintain privacy. We can tell
+you how many devices have accessed a link, but not who.
 
 ### What happens if I share a sensitive password via public link? {#locker-sensitive-public}
 
-Anyone with the link can view the password. For sensitive content:
+Anyone with the link can view the password. Delete the link after use.
 
-1. Add a password to the link
-2. Set an expiration date
-3. Share the link password through a separate channel
-4. Revoke the link after use
+### How do I delete a public link? {#locker-revoke-link}
 
-### Can I set a public link to expire? {#locker-link-expiry}
-
-Yes. When creating or editing a public link:
-
-1. Tap **Set expiration**
-2. Choose when the link should expire
-3. After expiration, the link stops working
-
-### How do I revoke a public link? {#locker-revoke-link}
-
-1. Open the shared document or collection
+1. Long press on the item
 2. Tap the share button
-3. Find the public link you want to revoke
-4. Tap it and select **Delete link**
+3. Tap **Delete link**
 
 The link immediately stops working.
 
@@ -122,15 +140,13 @@ For public links:
 
 ### Is it safe to share passwords via Locker? {#locker-safe-password-sharing}
 
-When sharing with Ente users, yes. The end-to-end encryption protects
-the content.
+When sharing with Ente users, yes. The end-to-end encryption protects the
+content.
 
 When using public links, be cautious:
 
-- Add a password to the link
-- Set an expiration date
 - Share the link through secure channels
-- Revoke after use
+- Delete the link after use
 
 ## Related Features
 

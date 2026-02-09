@@ -9,7 +9,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/type.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";

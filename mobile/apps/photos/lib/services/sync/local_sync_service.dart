@@ -165,7 +165,7 @@ class LocalSyncService {
 
   Future<bool> syncAll() async {
     if (!Configuration.instance.isLoggedIn()) {
-      if(!isOfflineMode) {
+      if (!isOfflineMode) {
         _logger.warning("syncAll called when user is not logged in");
         return false;
       }

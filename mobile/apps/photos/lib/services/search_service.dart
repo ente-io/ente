@@ -894,8 +894,7 @@ class SearchService {
   }) async {
     try {
       if (isOfflineMode) {
-        final effectiveMinClusterSize =
-            minClusterSize > 5 ? 5 : minClusterSize;
+        final effectiveMinClusterSize = minClusterSize > 5 ? 5 : minClusterSize;
         if (showIgnoredOnly) {
           return [];
         }

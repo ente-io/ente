@@ -609,7 +609,11 @@
   "backedUpFolders": "Backed up folders",
   "backup": "Backup",
   "freeUpDeviceSpace": "Free up device space",
-  "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have been already backed up.",
+  "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have already been backed up.",
+  "freeUpDeviceSpaceDescICloud": "Files in iCloud shared albums cannot be cleared.",
+  "@freeUpDeviceSpaceDescICloud": {
+    "description": "Here 'cleared' means 'deleted' from the device"
+  },
   "allClear": "✨ All clear",
   "noDeviceThatCanBeDeleted": "You've no files on this device that can be deleted",
   "removeDuplicates": "Remove duplicates",
@@ -659,12 +663,8 @@
   "notifications": "Notifications",
   "sharedPhotoNotifications": "New shared photos",
   "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
-  "commentNotifications": "Comments",
-  "commentNotificationsExplanation": "Receive notifications when someone comments on your shared photos",
-  "likeNotifications": "Likes",
-  "likeNotificationsExplanation": "Receive notifications when someone likes your photos",
-  "replyNotifications": "Replies",
-  "replyNotificationsExplanation": "Receive notifications when someone replies to your comments",
+  "socialNotifications": "Likes and comments",
+  "socialNotificationsExplanation": "Receive notifications for likes on your photos and comments on albums you're a part of",
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
@@ -2417,11 +2417,38 @@
   "@newLikeNotificationTitle": {
     "description": "Notification title when someone likes a shared photo or comment."
   },
-  "likedYourPhoto": "Liked a photo",
-  "commentedOnYourPhoto": "Commented on a photo",
-  "repliedToYourComment": "Replied to a comment",
-  "likedYourComment": "Liked a comment",
-  "likedYourReply": "Liked a reply",
+  "likedYourPhoto": "Liked your photo",
+  "likedAPhoto": "Liked a photo",
+  "likedYourVideo": "Liked your video",
+  "commentedOnYourPhoto": "Commented on your photo",
+  "commentedOnAPhoto": "Commented on a photo",
+  "commentedOnYourVideo": "Commented on your video",
+  "commentedOnAVideo": "Commented on a video",
+  "repliedToYourComment": "Replied to your comment",
+  "repliedToAComment": "Replied to a comment",
+  "likedYourComment": "Liked your comment",
+  "likedAComment": "Liked a comment",
+  "likedYourReply": "Liked your reply",
+  "likedAReply": "Liked a reply",
+  "addedAMemoryTo": "Added a memory to {albumName}",
+  "@addedAMemoryTo": {
+    "placeholders": {
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
+  "addedNMemoriesTo": "Added {count} memories to {albumName}",
+  "@addedNMemoriesTo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "albumName": {
+        "type": "String"
+      }
+    }
+  },
   "and1Other": "and 1 other",
   "andXOthers": "and {count} others",
   "@andXOthers": {

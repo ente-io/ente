@@ -6,6 +6,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/social_db.dart';
 import 'package:photos/extensions/user_extension.dart';
 import 'package:photos/generated/l10n.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/social/comment.dart';
 import 'package:photos/models/social/feed_item.dart';
 import 'package:photos/models/social/reaction.dart';
@@ -80,9 +81,7 @@ class SocialNotificationCoordinator {
 
   bool _shouldShowSocialNotifications(SharedPreferences prefs) {
     return prefs.containsKey(kIsFirstRemoteSyncDoneKey) &&
-        (NotificationService.instance.shouldShowCommentNotifications() ||
-            NotificationService.instance.shouldShowLikeNotifications() ||
-            NotificationService.instance.shouldShowReplyNotifications());
+        NotificationService.instance.shouldShowSocialNotifications();
   }
 
   int _getCutoffTime(SharedPreferences prefs) {
@@ -116,12 +115,6 @@ class SocialNotificationCoordinator {
 
     final hiddenCollectionIds = _collectionsService.getHiddenCollectionIds();
     final latestByKey = <String, _SocialActivityCandidate>{};
-    final bool enableCommentNotifications =
-        NotificationService.instance.shouldShowCommentNotifications();
-    final bool enableLikeNotifications =
-        NotificationService.instance.shouldShowLikeNotifications();
-    final bool enableReplyNotifications =
-        NotificationService.instance.shouldShowReplyNotifications();
 
     void considerCandidate(_SocialActivityCandidate candidate) {
       if (!_isSocialNotificationEnabledForType(candidate.type)) {
@@ -147,12 +140,10 @@ class SocialNotificationCoordinator {
 
     final db = SocialDB.instance;
 
-    final List<Comment> fileComments = enableCommentNotifications
-        ? await db.getCommentsOnFilesSince(
-            excludeUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Comment>[];
+    final List<Comment> fileComments = await db.getCommentsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
     for (final comment in fileComments) {
       considerCandidate(
         _SocialActivityCandidate(
@@ -167,49 +158,40 @@ class SocialNotificationCoordinator {
       );
     }
 
-    final List<Comment> replies = enableReplyNotifications
-        ? await db.getRepliesToUserCommentsSince(
-            targetUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Comment>[];
-    final List<Reaction> photoLikes = enableLikeNotifications
-        ? await db.getReactionsOnFilesSince(
-            excludeUserID: userID,
-            sinceTime: cutoffTime,
-          )
-        : <Reaction>[];
-
-    final repliesNeedingOwnerCheck = <Comment>[];
-    final fileIDsNeedingOwnership = <int>{};
+    final List<Comment> replies = await db.getRepliesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
+    final List<Reaction> photoLikes = await db.getReactionsOnFilesSince(
+      excludeUserID: userID,
+      sinceTime: cutoffTime,
+    );
 
     for (final reply in replies) {
-      if (reply.parentCommentUserID == userID) {
-        considerCandidate(
-          _SocialActivityCandidate(
-            type: FeedItemType.reply,
-            collectionID: reply.collectionID,
-            fileID: reply.fileID,
-            commentID: reply.id,
-            createdAt: reply.createdAt,
-            actorUserID: reply.userID,
-            actorAnonID: reply.anonUserID,
-          ),
-        );
-      } else if (reply.fileID != null) {
-        repliesNeedingOwnerCheck.add(reply);
-        fileIDsNeedingOwnership.add(reply.fileID!);
-      }
+      considerCandidate(
+        _SocialActivityCandidate(
+          type: FeedItemType.reply,
+          collectionID: reply.collectionID,
+          fileID: reply.fileID,
+          commentID: reply.id,
+          createdAt: reply.createdAt,
+          actorUserID: reply.userID,
+          actorAnonID: reply.anonUserID,
+          parentCommentUserID: reply.parentCommentUserID,
+        ),
+      );
     }
 
+    final allFileIDs = <int>{};
     for (final reaction in photoLikes) {
-      if (reaction.fileID != null) {
-        fileIDsNeedingOwnership.add(reaction.fileID!);
-      }
+      if (reaction.fileID != null) allFileIDs.add(reaction.fileID!);
+    }
+    for (final comment in fileComments) {
+      if (comment.fileID != null) allFileIDs.add(comment.fileID!);
     }
 
     final filesByID =
-        await _filesDb.getFileIDToFileFromIDs(fileIDsNeedingOwnership.toList());
+        await _filesDb.getFileIDToFileFromIDs(allFileIDs.toList());
 
     bool isOwnedByUser(int? fileID) {
       if (fileID == null) {
@@ -235,23 +217,6 @@ class SocialNotificationCoordinator {
       );
     }
 
-    for (final reply in repliesNeedingOwnerCheck) {
-      if (!isOwnedByUser(reply.fileID)) {
-        continue;
-      }
-      considerCandidate(
-        _SocialActivityCandidate(
-          type: FeedItemType.reply,
-          collectionID: reply.collectionID,
-          fileID: reply.fileID,
-          commentID: reply.id,
-          createdAt: reply.createdAt,
-          actorUserID: reply.userID,
-          actorAnonID: reply.anonUserID,
-        ),
-      );
-    }
-
     if (latestByKey.isEmpty) {
       return;
     }
@@ -267,10 +232,19 @@ class SocialNotificationCoordinator {
         continue;
       }
       try {
+        final fileType = filesByID[fileID]?.fileType;
+        final isOwn = switch (candidate.type) {
+          FeedItemType.photoLike => isOwnedByUser(fileID),
+          FeedItemType.comment => isOwnedByUser(fileID),
+          FeedItemType.reply => candidate.parentCommentUserID == userID,
+          FeedItemType.commentLike => false,
+          FeedItemType.replyLike => false,
+          FeedItemType.sharedPhoto => false,
+        };
         final title = await _getSocialNotificationTitle(candidate);
         await NotificationService.instance.showNotification(
           title,
-          _getSocialNotificationBody(candidate.type, s),
+          _getSocialNotificationBody(candidate.type, s, fileType, isOwn),
           channelID: 'social_activity',
           channelName: 'Ente Feed',
           payload: _buildSocialNotificationPayload(candidate),
@@ -301,14 +275,13 @@ class SocialNotificationCoordinator {
   bool _isSocialNotificationEnabledForType(FeedItemType type) {
     switch (type) {
       case FeedItemType.comment:
-        return NotificationService.instance.shouldShowCommentNotifications();
       case FeedItemType.reply:
-        return NotificationService.instance.shouldShowReplyNotifications();
       case FeedItemType.photoLike:
-        return NotificationService.instance.shouldShowLikeNotifications();
+        return true;
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
-        return false; // Currently not notifying for comment/reply likes
+      case FeedItemType.sharedPhoto:
+        return false;
     }
   }
 
@@ -320,6 +293,7 @@ class SocialNotificationCoordinator {
       case FeedItemType.photoLike:
       case FeedItemType.commentLike:
       case FeedItemType.replyLike:
+      case FeedItemType.sharedPhoto:
         return _SocialNotificationGroup.like;
     }
   }
@@ -357,25 +331,36 @@ class SocialNotificationCoordinator {
   String _getSocialNotificationBody(
     FeedItemType type,
     AppLocalizations s,
+    FileType? fileType,
+    bool isOwn,
   ) {
-    return _getSocialNotificationDetail(type, s);
+    return _getSocialNotificationDetail(type, s, fileType, isOwn);
   }
 
   String _getSocialNotificationDetail(
     FeedItemType type,
     AppLocalizations s,
+    FileType? fileType,
+    bool isOwn,
   ) {
+    final isVideo = fileType == FileType.video;
     switch (type) {
       case FeedItemType.photoLike:
-        return s.likedYourPhoto;
+        return isVideo ? s.likedYourVideo : s.likedYourPhoto;
       case FeedItemType.comment:
-        return s.commentedOnYourPhoto;
+        if (isOwn) {
+          return isVideo ? s.commentedOnYourVideo : s.commentedOnYourPhoto;
+        }
+        return isVideo ? s.commentedOnAVideo : s.commentedOnAPhoto;
       case FeedItemType.reply:
-        return s.repliedToYourComment;
+        return isOwn ? s.repliedToYourComment : s.repliedToAComment;
       case FeedItemType.commentLike:
         return s.likedYourComment;
       case FeedItemType.replyLike:
         return s.likedYourReply;
+      case FeedItemType.sharedPhoto:
+        // Shared photos don't trigger notifications
+        return '';
     }
   }
 
@@ -406,6 +391,7 @@ class _SocialActivityCandidate {
   final int createdAt;
   final int actorUserID;
   final String? actorAnonID;
+  final int? parentCommentUserID;
 
   _SocialActivityCandidate({
     required this.type,
@@ -415,6 +401,7 @@ class _SocialActivityCandidate {
     this.fileID,
     this.commentID,
     this.actorAnonID,
+    this.parentCommentUserID,
   });
 }
 

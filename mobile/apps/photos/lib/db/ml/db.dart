@@ -282,7 +282,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     }
   }
 
-
   @override
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
     String clusterID, {
@@ -1353,8 +1352,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
           "Got ${fileIDs.length} valid embeddings, $weirdCount weird embeddings",
         );
 
-        await _clipVectorDB
-            .bulkInsertEmbeddings(fileIDs: fileIDs, embeddings: embeddings);
+        await _clipVectorDB.bulkInsertEmbeddings(
+          fileIDs: fileIDs,
+          embeddings: embeddings,
+        );
         _logger.info("Inserted ${fileIDs.length} embeddings to ClipVectorDB");
         processedCount += fileIDs.length;
         offset += batchSize;

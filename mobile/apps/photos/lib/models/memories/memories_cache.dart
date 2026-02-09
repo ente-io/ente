@@ -203,8 +203,7 @@ class ToShowMemory {
     return {
       'title': title,
       'fileUploadedIDs': fileUploadedIDs.toList(),
-      if (fileLocalIntIDs != null)
-        'fileLocalIntIDs': fileLocalIntIDs!.toList(),
+      if (fileLocalIntIDs != null) 'fileLocalIntIDs': fileLocalIntIDs!.toList(),
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,

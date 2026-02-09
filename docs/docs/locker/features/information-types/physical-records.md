@@ -1,13 +1,13 @@
 ---
-title: Physical Records
+title: Thing
 description: Track physical document locations in Ente Locker
 ---
 
-# Physical Records
+# Thing
 
-Physical Records help you remember where important physical documents are
-stored. Track the location of passports, birth certificates, property deeds,
-and other papers you need to find when it matters.
+Things help you remember where important physical documents are stored. Track
+the location of passports, birth certificates, property deeds, and other papers
+you need to find when it matters.
 
 ## Use cases
 
@@ -20,16 +20,16 @@ and other papers you need to find when it matters.
 - Wills and legal documents
 - Vehicle registration papers
 
-## Creating a physical record
+## Creating a thing
 
 1. Open Ente Locker
 2. Tap the **+** button
-3. Select **Physical Records**
+3. Select **Thing**
 4. Fill in the fields:
     - **Name**: Document name (e.g., "Passport", "House Deed")
     - **Location**: Where it's stored (e.g., "Home safe, top drawer")
     - **Notes**: Any other relevant information (optional)
-5. Select a collection (optional)
+5. Select one or more collections
 6. Tap **Save**
 
 ## Features
@@ -57,8 +57,8 @@ licenses, or insurance policies.
 - **Group by type**: Create collections like "Identity Documents", "Property",
   "Financial"
 - **Include access info**: Note if someone else has keys or access
-- **Cross-reference**: Link to related Account Credentials for safe
-  combinations or account access
+- **Cross-reference**: Link to related Secrets for safe combinations or account
+  access
 
 ## Related FAQs
 

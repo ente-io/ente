@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## v1.7.18 (unreleased)
+## v1.7.19 (unreleased)
+
+-
+
+## v1.7.18
 
 - Hide shared albums
 - Watch folders will now be marked as inaccessible if they can't be accessed, instead of completely removing them from the list
@@ -18,6 +22,7 @@
 - Edit location
 - Better sort for albums list
 - Improved UI for login, sign-up, etc, pages
+- Improved Map View Rendering Logic
 - Public album improvements
 - Upload to hidden albums
 

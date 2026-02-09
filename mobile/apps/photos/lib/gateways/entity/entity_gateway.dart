@@ -1,7 +1,7 @@
 import "package:dio/dio.dart";
-import "package:photos/models/api/entity/data.dart";
-import "package:photos/models/api/entity/key.dart";
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/data.dart";
+import "package:photos/gateways/entity/models/key.dart";
+import "package:photos/gateways/entity/models/type.dart";
 
 class EntityGateway {
   final Dio _enteDio;

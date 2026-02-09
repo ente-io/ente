@@ -7,40 +7,6 @@ description: Solutions to common issues with Ente Locker
 
 Solutions to common problems and issues with Ente Locker.
 
-## Sync Issues
-
-### Why aren't my changes syncing? {#locker-sync-issues}
-
-If changes aren't appearing on your other devices:
-
-1. **Check internet connection**: Ensure both devices are connected
-2. **Pull to refresh**: Pull down on the main screen to force sync
-3. **Check account**: Verify you're logged into the same account on both
-   devices
-4. **Restart the app**: Close and reopen Locker
-5. **Check for errors**: Open Settings to see if any sync errors are shown
-
-### Why is sync slow? {#locker-sync-slow}
-
-Slow sync can be caused by:
-
-- Poor internet connection
-- Large number of documents during initial sync
-- Server maintenance (rare)
-
-Try:
-
-1. Connect to a faster network (WiFi instead of mobile data)
-2. Wait for initial sync to complete
-3. Check [status.ente.io](https://status.ente.io) for service status
-
-### Documents are showing on one device but not another {#locker-missing-documents}
-
-1. Verify both devices are logged into the same Ente account
-2. Pull down to force a sync on the device missing documents
-3. Wait a few moments for sync to complete
-4. If still missing, try logging out and back in
-
 ## App Issues
 
 ### The app is crashing. What should I do? {#locker-app-crash}
@@ -64,19 +30,18 @@ To improve performance:
 3. Update to the latest app version
 4. Restart the app
 
-### Why isn't my document appearing in search? {#locker-search-missing}
+### Why isn't my item appearing in search? {#locker-search-missing}
 
-Documents may not appear in search because:
+Items may not appear in search because:
 
-- **Search scope**: Search matches document titles and names, not the full
-  content within documents
+- **Search scope**: Search matches item titles and names, not the full content
+  within items
 - **Recently created**: Wait a moment for indexing
 - **In Trash**: Search doesn't include trashed items
 - **Spelling**: Check your search query for typos
-- **Not synced**: Pull to refresh to ensure latest sync
 
-Try searching for the document's title or name. Use descriptive titles to make
-documents easier to find.
+Try searching for the item's title or name. Use descriptive titles to make
+items easier to find.
 
 ## Login Issues
 
@@ -90,12 +55,11 @@ documents easier to find.
 
 ### I'm locked out and don't have my recovery key {#locker-locked-out}
 
-Unfortunately, without your recovery key and password, your account cannot
-be recovered. This is an intentional security feature of end-to-end
-encryption.
+Unfortunately, without your recovery key and password, your account cannot be
+recovered. This is an intentional security feature of end-to-end encryption.
 
-To prevent this in the future, always save your recovery key in multiple
-secure locations when creating an account.
+To prevent this in the future, always save your recovery key in multiple secure
+locations when creating an account.
 
 ### 2FA is not accepting my code {#locker-2fa-issues}
 
@@ -115,11 +79,11 @@ secure locations when creating an account.
 
 ### I forgot my Locker PIN {#locker-forgot-pin}
 
-If you configured biometric authentication, use that to access the app,
-then change your PIN in `Settings > Security`.
+If you configured biometric authentication, use that to access the app, then
+change your PIN in `Settings > Security`.
 
-If you only have a PIN and forgot it, you may need to reinstall the app
-and log in again with your Ente credentials.
+If you only have a PIN and forgot it, you may need to reinstall the app and log
+in again with your Ente credentials.
 
 ## Getting Help
 
@@ -153,8 +117,17 @@ Include:
 
 Logs help us diagnose issues but contain no personal data.
 
+## Connectivity
+
+### Can I use Locker offline? {#locker-offline}
+
+Locker requires an internet connection to function. You cannot view or create
+items while offline.
+
+If you need access to critical information during travel or in areas with poor
+connectivity, consider keeping physical copies of essential documents.
+
 ## Related Features
 
-- [Sync](/locker/features/security/sync)
 - [Lock screen](/locker/features/security/lock-screen)
 - [Security FAQ](/locker/faq/security)

@@ -1,6 +1,6 @@
 ---
 title: Create Account and Log In
-description: Guide to creating an Ente account and logging in to Ente Locker
+description: Create your Ente account and set up secure access to your encrypted document vault
 ---
 
 # Create Account and Log In
@@ -34,7 +34,7 @@ If you already use Ente Photos or Ente Auth:
 1. Open Ente Locker
 2. Tap **Sign in**
 3. Enter your existing Ente email and password
-4. Your Locker data will sync across all devices
+4. Your Locker data is securely stored
 
 ## Recovery key
 
@@ -50,10 +50,39 @@ This is critical for account recovery.
 
 Learn more about [security in Ente Locker](/locker/features/security/).
 
+## Account limits
+
+Locker has storage limits based on your subscription:
+
+- **Free plan**: Up to 100 items and 1GB total storage
+- **Paid plan** (any Ente subscription): Up to 1000 items and 10GB total storage
+
+### What counts as an item
+
+Each of these counts as one item toward your limit:
+
+- Each uploaded document (PDF, image, scan)
+- Each personal note
+- Each set of account credentials
+- Each physical record entry
+
+### Checking your usage
+
+View your current usage in `Settings > Storage` to see how many items you have
+and how much storage you're using.
+
+### Upgrading your plan
+
+If you reach your item or storage limit, upgrade to any Ente paid plan to
+increase your limits to 1000 items and 10GB storage.
+
+Learn more about
+[account limits FAQ](/locker/faq/getting-started#locker-account-limits).
+
 ## Next steps
 
 Now that you're logged in, learn how to
-[create your first document](/locker/getting-started/first-document).
+[create your first item](/locker/getting-started/first-document).
 
 ## Related FAQs
 
