@@ -61,7 +61,7 @@ class SharedEmptyOfflineStateWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  l10n.offlineEnableSharingAction,
+                  l10n.offlineEnableBackupAction,
                   style: const TextStyle(
                     fontFamily: "Montserrat",
                     fontWeight: FontWeight.bold,
