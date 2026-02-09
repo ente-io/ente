@@ -24,9 +24,8 @@ learn how to add information and organize it into collections.
 2. Select **Document**
 3. Choose a file from your device (PDF, image, or scan)
 4. Add a descriptive title (e.g., "Passport Scan")
-5. Add notes if needed (optional)
-6. Select one or more collections to organize this item
-7. Tap **Save**
+5. Select one or more collections to organize this item
+6. Tap **Save**
 
 ## Example: Adding a secret
 
