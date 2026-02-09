@@ -25,7 +25,6 @@ class SharedEmptyOfflineStateWidget extends StatelessWidget {
                 return const SizedBox(height: 180);
               },
             ),
-            const SizedBox(height: 24),
             Text(
               l10n.offlineEnableSharingTitle,
               style: TextStyle(

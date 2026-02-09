@@ -19,7 +19,6 @@ import "package:photos/ui/common/gradient_button.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/settings/privacy/private_ai_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:styled_text/styled_text.dart";
 
@@ -548,20 +547,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                     AppLocalizations.of(context).privacyPolicyTitle,
                     "https://ente.io/privacy",
                   );
-                },
-              ),
-            ),
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              color: linkColor,
-            ),
-          ),
-          'ai': StyledTextActionTag(
-            (String? text, Map<String?, String?> attrs) =>
-                Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const PrivateAIPage();
                 },
               ),
             ),
