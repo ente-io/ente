@@ -585,7 +585,6 @@ export default function PublicCollectionGallery() {
                     <NavbarBase
                         sx={[
                             {
-                                mb: "16px",
                                 px: "24px",
                                 "@media (width < 720px)": { px: "4px" },
                             },
@@ -824,7 +823,7 @@ interface FileListHeaderProps {
 /**
  * The fixed height (in px) of {@link FileListHeader}.
  */
-const fileListHeaderHeight = 68;
+const fileListHeaderHeight = 84;
 
 /**
  * A header shown before the listing of files.
@@ -850,7 +849,7 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         );
 
     return (
-        <GalleryItemsHeaderAdapter>
+        <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
             <SpacedRow>
                 <GalleryItemsSummary
                     name={publicCollection.name}
