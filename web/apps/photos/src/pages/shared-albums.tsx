@@ -585,7 +585,6 @@ export default function PublicCollectionGallery() {
                     <NavbarBase
                         sx={[
                             {
-                                mb: "16px",
                                 px: "24px",
                                 "@media (width < 720px)": { px: "4px" },
                             },
@@ -711,32 +710,22 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const isSmallWidth = useIsSmallWidth();
 
     return (
-        <Box>
-            {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>
+        <FocusVisibleButton
+            color="secondary"
+            startIcon={
+                isSmallWidth ? undefined : (
                     <HugeiconsIcon
                         icon={ImageAdd02Icon}
-                        size={22}
+                        size={20}
                         strokeWidth={1.8}
                     />
-                </IconButton>
-            ) : (
-                <FocusVisibleButton
-                    color="secondary"
-                    startIcon={
-                        <HugeiconsIcon
-                            icon={ImageAdd02Icon}
-                            size={20}
-                            strokeWidth={1.8}
-                        />
-                    }
-                    sx={{ borderRadius: "16px" }}
-                    {...{ onClick, disabled }}
-                >
-                    {t("add_photos")}
-                </FocusVisibleButton>
-            )}
-        </Box>
+                )
+            }
+            sx={{ borderRadius: "16px" }}
+            {...{ onClick, disabled }}
+        >
+            {t("add_photos")}
+        </FocusVisibleButton>
     );
 };
 
@@ -782,7 +771,7 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 
     return (
         <GreenButton color="accent" onClick={handleGetEnte}>
-            {t("get_ente")}
+            {t("try_ente")}
         </GreenButton>
     );
 };
@@ -834,7 +823,7 @@ interface FileListHeaderProps {
 /**
  * The fixed height (in px) of {@link FileListHeader}.
  */
-const fileListHeaderHeight = 68;
+const fileListHeaderHeight = 84;
 
 /**
  * A header shown before the listing of files.
@@ -860,12 +849,15 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
         );
 
     return (
-        <GalleryItemsHeaderAdapter>
+        <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
             <SpacedRow>
-                <GalleryItemsSummary
-                    name={publicCollection.name}
-                    fileCount={publicFiles.length}
-                />
+                <Box sx={{ minWidth: 0 }}>
+                    <GalleryItemsSummary
+                        name={publicCollection.name}
+                        fileCount={publicFiles.length}
+                        nameProps={{ noWrap: true }}
+                    />
+                </Box>
                 <Stack
                     direction="row"
                     spacing={1}
