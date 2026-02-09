@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 43;
+  static const currentChangeLogVersion = 44;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -28,6 +28,7 @@ class UpdateService {
   }
 
   Future<bool> showChangeLog() async {
+    return true;
     // fetch the change log version which was last shown to user.
     final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
     return lastShownAtVersion < currentChangeLogVersion;
