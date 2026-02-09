@@ -1,4 +1,4 @@
-import "package:photos/models/api/metadata.dart";
+import "package:photos/gateways/collections/models/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
 
 class CreateRequest {

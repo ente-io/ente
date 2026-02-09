@@ -1,4 +1,4 @@
-import "package:photos/models/api/storage_bonus/bonus.dart";
+import "package:photos/gateways/storage_bonus/models/bonus.dart";
 
 class ReferralView {
   PlanInfo planInfo;

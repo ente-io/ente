@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart';
+import "package:dio/dio.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:ente_pure_utils/ente_pure_utils.dart';
 import 'package:flutter/foundation.dart';
@@ -16,7 +16,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network/network.dart';
+import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/backup_updated_event.dart";
@@ -24,8 +24,9 @@ import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/gateways/collections/models/metadata.dart";
+import "package:photos/gateways/files/file_upload_gateway.dart";
 import "package:photos/main.dart" show isProcessBg, kLastBGTaskHeartBeatTime;
-import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/models/file/file.dart';
@@ -61,7 +62,7 @@ class FileUploader {
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
-  final _enteDio = NetworkClient.instance.enteDio;
+  FileUploadGateway get _gateway => fileUploadGateway;
   final LinkedHashMap<String, FileUploadItem> _queue =
       LinkedHashMap<String, FileUploadItem>();
   final LinkedHashMap<String, BackupItem> _allBackups =
@@ -136,7 +137,7 @@ class FileUploader {
       _pollBackgroundUploadStatus();
     }
     _multiPartUploader = MultiPartUploader(
-      _enteDio,
+      _dio, // legacy parameter, not used by MultiPartUploader
       _dio,
       UploadLocksDB.instance,
       flagService,
@@ -1261,31 +1262,21 @@ class FileUploader {
     MetadataRequest? pubMetadata,
     int attempt = 1,
   }) async {
-    final request = {
-      "collectionID": collectionID,
-      "encryptedKey": encryptedKey,
-      "keyDecryptionNonce": keyDecryptionNonce,
-      "file": {
-        "objectKey": fileObjectKey,
-        "decryptionHeader": fileDecryptionHeader,
-        "size": fileSize,
-      },
-      "thumbnail": {
-        "objectKey": thumbnailObjectKey,
-        "decryptionHeader": thumbnailDecryptionHeader,
-        "size": thumbnailSize,
-      },
-      "metadata": {
-        "encryptedData": encryptedMetadata,
-        "decryptionHeader": metadataDecryptionHeader,
-      },
-    };
-    if (pubMetadata != null) {
-      request["pubMagicMetadata"] = pubMetadata;
-    }
     try {
-      final response = await _enteDio.post("/files", data: request);
-      final data = response.data;
+      final data = await _gateway.createFile(
+        collectionID: collectionID,
+        encryptedKey: encryptedKey,
+        keyDecryptionNonce: keyDecryptionNonce,
+        fileObjectKey: fileObjectKey,
+        fileDecryptionHeader: fileDecryptionHeader,
+        fileSize: fileSize,
+        thumbnailObjectKey: thumbnailObjectKey,
+        thumbnailDecryptionHeader: thumbnailDecryptionHeader,
+        thumbnailSize: thumbnailSize,
+        encryptedMetadata: encryptedMetadata,
+        metadataDecryptionHeader: metadataDecryptionHeader,
+        pubMagicMetadata: pubMetadata?.toJson(),
+      );
       file.uploadedFileID = data["id"];
       file.collectionID = collectionID;
       file.updationTime = data["updationTime"];
@@ -1343,26 +1334,18 @@ class FileUploader {
     String metadataDecryptionHeader, {
     int attempt = 1,
   }) async {
-    final request = {
-      "id": file.uploadedFileID,
-      "file": {
-        "objectKey": fileObjectKey,
-        "decryptionHeader": fileDecryptionHeader,
-        "size": fileSize,
-      },
-      "thumbnail": {
-        "objectKey": thumbnailObjectKey,
-        "decryptionHeader": thumbnailDecryptionHeader,
-        "size": thumbnailSize,
-      },
-      "metadata": {
-        "encryptedData": encryptedMetadata,
-        "decryptionHeader": metadataDecryptionHeader,
-      },
-    };
     try {
-      final response = await _enteDio.put("/files/update", data: request);
-      final data = response.data;
+      final data = await _gateway.updateFile(
+        fileID: file.uploadedFileID!,
+        fileObjectKey: fileObjectKey,
+        fileDecryptionHeader: fileDecryptionHeader,
+        fileSize: fileSize,
+        thumbnailObjectKey: thumbnailObjectKey,
+        thumbnailDecryptionHeader: thumbnailDecryptionHeader,
+        thumbnailSize: thumbnailSize,
+        encryptedMetadata: encryptedMetadata,
+        metadataDecryptionHeader: metadataDecryptionHeader,
+      );
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.fileDecryptionHeader = fileDecryptionHeader;
@@ -1419,15 +1402,9 @@ class FileUploader {
     required int contentLength,
     required String contentMd5,
   }) async {
-    final response = await _enteDio.post(
-      "/files/upload-url",
-      data: {
-        "contentLength": contentLength,
-        "contentMD5": contentMd5,
-      },
-    );
-    return UploadURL.fromMap(
-      (response.data as Map).cast<String, dynamic>(),
+    return _gateway.getUploadUrl(
+      contentLength: contentLength,
+      contentMd5: contentMd5,
     );
   }
 
@@ -1480,15 +1457,7 @@ class FileUploader {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
         final requestCount = math.min(42, fileCount * 2);
-        final response = await _enteDio.get(
-          "/files/upload-urls",
-          queryParameters: {
-            "count": requestCount, // m4gic number
-          },
-        );
-        final urls = (response.data["urls"] as List)
-            .map((e) => UploadURL.fromMap(e))
-            .toList();
+        final urls = await _gateway.getUploadUrls(requestCount);
         _uploadURLs.addAll(urls);
       } on DioException catch (e, s) {
         if (e.response != null) {
