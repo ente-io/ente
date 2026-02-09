@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -8,6 +7,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import 'package:photos/ui/notification/update/change_log_strings.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -91,44 +91,26 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
 
   Widget _getChangeLog(BuildContext ctx) {
     final scrollController = ScrollController();
+    final strings = ChangeLogStrings.forLocale(Localizations.localeOf(context));
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        context.l10n.cLTitle1,
+        strings.title1,
+        description: strings.desc1,
         items: [
-          context.l10n.cLDesc1Item1,
-          context.l10n.cLDesc1Item2,
-          context.l10n.cLDesc1Item3,
+          strings.desc1Item1,
+          strings.desc1Item2,
         ],
         isFeature: true,
       ),
       ChangeLogEntry(
-        context.l10n.cLTitle2,
-        items: [
-          context.l10n.cLDesc2Item1,
-          context.l10n.cLDesc2Item2,
-          context.l10n.cLDesc2Item3,
-          context.l10n.cLDesc2Item4,
-          context.l10n.cLDesc2Item5,
-          context.l10n.cLDesc2Item6,
-          context.l10n.cLDesc2Item7,
-          context.l10n.cLDesc2Item8,
-          context.l10n.cLDesc2Item9,
-          context.l10n.cLDesc2Item10,
-          context.l10n.cLDesc2Item11,
-          context.l10n.cLDesc2Item12,
-        ],
+        strings.title2,
+        description: strings.desc2,
         isFeature: true,
       ),
       ChangeLogEntry(
-        context.l10n.cLTitle3,
-        items: [
-          context.l10n.cLDesc3Item1,
-          context.l10n.cLDesc3Item2,
-          context.l10n.cLDesc3Item3,
-          context.l10n.cLDesc3Item4,
-          context.l10n.cLDesc3Item5,
-        ],
+        strings.title3,
+        description: strings.desc3,
         isFeature: true,
       ),
     ]);
