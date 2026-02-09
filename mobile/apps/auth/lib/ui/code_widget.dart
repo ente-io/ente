@@ -420,6 +420,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                                   fontSize: widget.isCompactMode ? 12 : 18,
                                   color: Colors.grey,
                                 ),
+                                textDirection: TextDirection.ltr,
                               ),
                             );
                           },
