@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import "package:photos/models/api/entity/type.dart";
+import "package:photos/gateways/entity/models/type.dart";
 
 @immutable
 class EntityKey {

@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/extensions/user_extension.dart";
-import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";

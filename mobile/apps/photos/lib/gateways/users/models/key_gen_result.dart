@@ -1,7 +1,7 @@
 import "dart:typed_data";
 
-import 'package:photos/models/api/user/key_attributes.dart';
-import 'package:photos/models/api/user/private_key_attributes.dart';
+import 'package:photos/gateways/users/models/key_attributes.dart';
+import 'package:photos/gateways/users/models/private_key_attributes.dart';
 
 class KeyGenResult {
   final KeyAttributes keyAttributes;

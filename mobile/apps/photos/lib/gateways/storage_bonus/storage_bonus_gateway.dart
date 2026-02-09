@@ -1,5 +1,5 @@
 import "package:dio/dio.dart";
-import "package:photos/models/api/storage_bonus/storage_bonus.dart";
+import "package:photos/gateways/storage_bonus/models/storage_bonus.dart";
 
 class StorageBonusGateway {
   final Dio _enteDio;

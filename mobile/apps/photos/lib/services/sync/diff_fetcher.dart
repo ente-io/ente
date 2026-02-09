@@ -1,24 +1,22 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");
-  final _enteDio = NetworkClient.instance.enteDio;
 
   Future<List<EnteFile>> getPublicFiles(
     BuildContext context,
@@ -33,14 +31,13 @@ class DiffFetcher {
       int sinceTime = 0;
 
       do {
-        final response = await _enteDio.get(
-          "/public-collection/diff",
-          options: Options(headers: headers),
-          queryParameters: {"sinceTime": sinceTime},
+        final responseData = await collectionShareGateway.getPublicDiff(
+          headers: headers,
+          sinceTime: sinceTime,
         );
 
-        final diff = response.data["diff"] as List;
-        hasMore = response.data["hasMore"] as bool;
+        final diff = responseData["diff"] as List;
+        hasMore = responseData["hasMore"] as bool;
 
         for (final item in diff) {
           final file = EnteFile();
@@ -111,16 +108,13 @@ class DiffFetcher {
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
     try {
-      final response = await _enteDio.get(
-        "/collections/v2/diff",
-        queryParameters: {
-          "collectionID": collectionID,
-          "sinceTime": sinceTime,
-        },
+      final response = await collectionsGateway.getDiff(
+        collectionID: collectionID,
+        sinceTime: sinceTime,
       );
       int latestUpdatedAtTime = 0;
-      final diff = response.data["diff"] as List;
-      final bool hasMore = response.data["hasMore"] as bool;
+      final diff = response["diff"] as List;
+      final bool hasMore = response["hasMore"] as bool;
       final startTime = DateTime.now();
       final currentUserID = Configuration.instance.getUserID();
       late Set<int> existingUploadIDs;
