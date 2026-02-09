@@ -851,10 +851,13 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
     return (
         <GalleryItemsHeaderAdapter sx={{ pt: "16px" }}>
             <SpacedRow>
-                <GalleryItemsSummary
-                    name={publicCollection.name}
-                    fileCount={publicFiles.length}
-                />
+                <Box sx={{ minWidth: 0 }}>
+                    <GalleryItemsSummary
+                        name={publicCollection.name}
+                        fileCount={publicFiles.length}
+                        nameProps={{ noWrap: true }}
+                    />
+                </Box>
                 <Stack
                     direction="row"
                     spacing={1}
