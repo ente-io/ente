@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "io.ente.locker"
     compileSdk = 35
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

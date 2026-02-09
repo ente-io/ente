@@ -208,7 +208,10 @@ class AndroidEnvironment {
     return null;
   }
 
-  String _canonicalize(String filePath) => File(filePath).absolute.path;
+  String _canonicalize(String filePath) {
+    final normalized = Uri.file(filePath).normalizePath();
+    return normalized.toFilePath(windows: Platform.isWindows);
+  }
 
   String _join(List<String> parts) {
     final normalized = parts

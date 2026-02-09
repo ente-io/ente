@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "io.ente.auth"
     compileSdk 36
-    ndkVersion "28.0.13004108"
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         // Flag to enable support for the new language APIs
