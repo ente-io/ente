@@ -8,11 +8,10 @@
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import {
-    Backdrop,
     Box,
     CircularProgress,
+    Modal,
     Paper,
-    Portal,
     Stack,
     TextField,
     Typography,
@@ -21,7 +20,6 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { useBaseContext } from "ente-base/context";
-import { subscribeMainWindowFocus } from "ente-base/electron";
 import log from "ente-base/log";
 import { t } from "i18next";
 import React, {
@@ -31,10 +29,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {
-    attemptUnlock,
-    type UnlockResult,
-} from "../services/app-lock";
+import { attemptUnlock, type UnlockResult } from "../services/app-lock";
 import { useAppLockSnapshot } from "./utils/use-snapshot";
 
 /**
@@ -45,51 +40,37 @@ import { useAppLockSnapshot } from "./utils/use-snapshot";
  */
 export const AppLockOverlay: React.FC = () => {
     const appLock = useAppLockSnapshot();
-    const { logout, showMiniDialog } = useBaseContext();
-    const [now, setNow] = useState(() => Date.now());
-
-    const handleLogout = useCallback(
-        () =>
-            showMiniDialog({
-                message: t("logout_message"),
-                continue: {
-                    text: t("logout"),
-                    color: "critical",
-                    action: logout,
-                },
-                buttonDirection: "row",
-            }),
-        [logout, showMiniDialog],
-    );
-
-    useEffect(() => {
-        if (appLock.cooldownExpiresAt <= Date.now()) {
-            setNow(Date.now());
-            return;
-        }
-
-        const interval = setInterval(() => setNow(Date.now()), 1000);
-        return () => clearInterval(interval);
-    }, [appLock.cooldownExpiresAt]);
-
-    const isInCooldown = appLock.cooldownExpiresAt > now;
+    const { logout } = useBaseContext();
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     if (!appLock.isLocked) return null;
 
     return (
-        <Portal>
-            <Backdrop
-                open
-                role="dialog"
-                aria-modal="true"
-                aria-label={t("app_lock")}
-                style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+        <Modal
+            open
+            disableEscapeKeyDown
+            aria-label={t("app_lock")}
+            slotProps={{
+                backdrop: {
+                    sx: {
+                        backgroundColor:
+                            "var(--mui-palette-background-default)",
+                    },
+                },
+            }}
+            sx={{ zIndex: "calc(var(--mui-zIndex-tooltip) + 1)" }}
+        >
+            <Box
                 sx={{
-                    zIndex: "calc(var(--mui-zIndex-tooltip) + 1)",
-                    backgroundColor: "var(--mui-palette-background-default)",
+                    position: "fixed",
+                    inset: 0,
+                    display: "flex",
                     flexDirection: "column",
-                    pointerEvents: "auto",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    outline: "none",
                 }}
+                style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
             >
                 {/* Top bar: logo centered, logout button at top-right */}
                 <Box
@@ -105,12 +86,12 @@ export const AppLockOverlay: React.FC = () => {
                     }}
                 >
                     <EnteLogo />
-                    {!isInCooldown && (
+                    {!showLogoutConfirm && (
                         <FocusVisibleButton
                             variant="text"
                             color="secondary"
                             size="small"
-                            onClick={handleLogout}
+                            onClick={() => setShowLogoutConfirm(true)}
                             sx={{
                                 textTransform: "none",
                                 position: "absolute",
@@ -125,15 +106,26 @@ export const AppLockOverlay: React.FC = () => {
 
                 {/* Centered form content */}
                 {appLock.lockType === "pin" ? (
-                    <PinUnlockForm appLock={appLock} onLogout={handleLogout} />
+                    <PinUnlockForm
+                        appLock={appLock}
+                        onLogout={() => setShowLogoutConfirm(true)}
+                    />
                 ) : (
                     <PasswordUnlockForm
                         appLock={appLock}
-                        onLogout={handleLogout}
+                        onLogout={() => setShowLogoutConfirm(true)}
                     />
                 )}
-            </Backdrop>
-        </Portal>
+
+                {/* Logout confirmation overlays on top */}
+                {showLogoutConfirm && (
+                    <LogoutConfirmation
+                        onConfirm={logout}
+                        onCancel={() => setShowLogoutConfirm(false)}
+                    />
+                )}
+            </Box>
+        </Modal>
     );
 };
 
@@ -208,60 +200,6 @@ const useCooldownState = (
     };
 };
 
-/**
- * Keep an input focused (with a visible caret) across mount and window/tab
- * visibility/focus transitions.
- */
-const useRestoreInputFocus = (
-    getInput: () => HTMLInputElement | null | undefined,
-) => {
-    useEffect(() => {
-        const focusInput = () => {
-            const input = getInput();
-            if (!input) return;
-
-            input.focus({ preventScroll: true });
-            // Explicitly place caret to avoid "focused but no cursor" states
-            // seen after window minimize/restore in desktop.
-            try {
-                const pos = input.value.length;
-                input.setSelectionRange(pos, pos);
-            } catch {
-                // Some input modes/types may not support selection APIs.
-            }
-        };
-
-        const refocus = () => {
-            focusInput();
-            requestAnimationFrame(focusInput);
-            setTimeout(focusInput, 0);
-        };
-
-        const timer = setTimeout(refocus, 100);
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === "visible") {
-                refocus();
-            }
-        };
-
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        window.addEventListener("focus", refocus);
-        window.addEventListener("pageshow", refocus);
-        const unsubscribeMainWindowFocus = subscribeMainWindowFocus(refocus);
-
-        return () => {
-            clearTimeout(timer);
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange,
-            );
-            window.removeEventListener("focus", refocus);
-            window.removeEventListener("pageshow", refocus);
-            unsubscribeMainWindowFocus();
-        };
-    }, [getInput]);
-};
-
 // -- PIN unlock form --
 
 const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
@@ -273,10 +211,6 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const cooldown = useCooldownState(appLock.cooldownExpiresAt);
     const cooldownText = cooldown.text;
-
-    useRestoreInputFocus(
-        useCallback(() => inputRefs.current[0], []),
-    );
 
     const handlePinChange = useCallback(
         (index: number, value: string) => {
@@ -306,20 +240,17 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
     );
 
     const fullPin = useMemo(() => pin.join(""), [pin]);
-    const focusPinInput = useCallback(
-        (index: number) => {
-            const input = inputRefs.current[index];
-            if (!input) return;
-            input.focus({ preventScroll: true });
-            try {
-                const pos = input.value.length;
-                input.setSelectionRange(pos, pos);
-            } catch {
-                // Ignore if selection range isn't supported.
-            }
-        },
-        [],
-    );
+    const focusPinInput = useCallback((index: number) => {
+        const input = inputRefs.current[index];
+        if (!input) return;
+        input.focus({ preventScroll: true });
+        try {
+            const pos = input.value.length;
+            input.setSelectionRange(pos, pos);
+        } catch {
+            // Ignore if selection range isn't supported.
+        }
+    }, []);
     const focusFirstEmptyPinInput = useCallback(() => {
         const firstEmptyIndex = pin.findIndex((digit) => !digit);
         focusPinInput(firstEmptyIndex === -1 ? 0 : firstEmptyIndex);
@@ -386,6 +317,8 @@ const PinUnlockForm: React.FC<UnlockFormProps> = ({ appLock, onLogout }) => {
                         <TextField
                             key={i}
                             hiddenLabel
+                            autoFocus={i === 0}
+                            error={!!error}
                             inputRef={(el: HTMLInputElement | null) => {
                                 inputRefs.current[i] = el;
                             }}
@@ -445,8 +378,6 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
     const cooldown = useCooldownState(appLock.cooldownExpiresAt);
     const cooldownText = cooldown.text;
 
-    useRestoreInputFocus(useCallback(() => inputRef.current, []));
-
     const handleSubmit = useCallback(
         async (e?: React.FormEvent) => {
             e?.preventDefault();
@@ -463,6 +394,7 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
             }
 
             setPassword("");
+            inputRef.current?.focus();
         },
         [password, loading, logout],
     );
@@ -499,6 +431,8 @@ const PasswordUnlockForm: React.FC<UnlockFormProps> = ({
                     inputRef={inputRef}
                     fullWidth
                     hiddenLabel
+                    autoFocus
+                    error={!!error}
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => {
@@ -545,21 +479,83 @@ interface ErrorMessageProps {
     attemptCount: number;
 }
 
-const ErrorMessage: React.FC<ErrorMessageProps> = ({
-    error,
-    attemptCount,
-}) => {
+const ErrorMessage: React.FC<ErrorMessageProps> = ({ error, attemptCount }) => {
     if (error) {
         return (
-            <Typography variant="small" color="critical.main" textAlign="center">
+            <Typography
+                variant="small"
+                color="critical.main"
+                textAlign="center"
+            >
                 {error}
-                {attemptCount > 0 &&
-                    ` (${String(attemptCount)}/10)`}
+                {attemptCount > 0 && ` (${String(attemptCount)}/10)`}
             </Typography>
         );
     }
     return null;
 };
+
+interface LogoutConfirmationProps {
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
+    onConfirm,
+    onCancel,
+}) => (
+    <Box
+        sx={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 1,
+        }}
+        onClick={onCancel}
+    >
+        <Paper
+            elevation={0}
+            sx={{
+                width: "min(420px, 85vw)",
+                px: { xs: 3, sm: 5 },
+                py: 4,
+                borderRadius: "20px",
+                boxShadow: "var(--mui-palette-boxShadow-paper)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+        >
+            <Stack spacing={3} alignItems="center" sx={{ width: "100%" }}>
+                <Typography variant="h3">{t("logout")}</Typography>
+                <Typography
+                    variant="small"
+                    color="text.muted"
+                    textAlign="center"
+                >
+                    {t("logout_message")}
+                </Typography>
+                <Stack direction="row" spacing={1.5} sx={{ width: "100%" }}>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        onClick={onCancel}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="critical"
+                        onClick={onConfirm}
+                    >
+                        {t("logout")}
+                    </FocusVisibleButton>
+                </Stack>
+            </Stack>
+        </Paper>
+    </Box>
+);
 
 interface CooldownScreenProps {
     remainingMs: number;
@@ -586,11 +582,12 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
             : 0;
     const nextAttemptCount = attemptCount + 1;
     const nextCooldownMs = cooldownDurationMs(nextAttemptCount);
-    const attemptsLabel = attemptCount === 1 ? "time" : "times";
     const nextAttemptMessage =
         nextAttemptCount >= 10
-            ? "One more wrong attempt will log you out."
-            : `After the next wrong attempt, you'll need to wait ${formatCooldown(nextCooldownMs)}.`;
+            ? t("one_more_wrong_attempt_logout")
+            : t("next_wrong_attempt_wait", {
+                  time: formatCooldown(nextCooldownMs),
+              });
 
     return (
         <Stack
@@ -598,7 +595,7 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
             useFlexGap
             alignItems="center"
             justifyContent="center"
-            sx={{ maxWidth: 340, width: "100%", px: 2 }}
+            sx={{ maxWidth: 380, width: "100%", px: 2 }}
         >
             <Typography
                 variant="h3"
@@ -637,14 +634,18 @@ const CooldownScreen: React.FC<CooldownScreenProps> = ({
                         justifyContent: "center",
                     }}
                 >
-                    <Typography variant="body" color="critical.main" textAlign="center">
+                    <Typography
+                        variant="body"
+                        color="critical.main"
+                        textAlign="center"
+                    >
                         {cooldownText}
                     </Typography>
                 </Box>
             </Box>
 
             <Typography variant="small" color="text.muted" textAlign="center">
-                {`You've entered the wrong unlock code ${String(attemptCount)} ${attemptsLabel}.`}
+                {t("wrong_unlock_code", { count: attemptCount })}
             </Typography>
             <Typography
                 variant="mini"

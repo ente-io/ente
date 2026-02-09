@@ -2,6 +2,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
     DialogActions,
+    Slider,
     Stack,
     TextField,
     Typography,
@@ -29,7 +30,7 @@ import {
     setHideContentOnBlur,
 } from "../../services/app-lock";
 import { t } from "i18next";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAppLockSnapshot } from "../utils/use-snapshot";
 
 export const AppLockSettings: React.FC<
@@ -40,7 +41,6 @@ export const AppLockSettings: React.FC<
     const [pinDialogOpen, setPinDialogOpen] = useState(false);
     const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
     const [autoLockDialogOpen, setAutoLockDialogOpen] = useState(false);
-
     const { showMiniDialog } = useBaseContext();
 
     const handleRootClose = () => {
@@ -112,7 +112,7 @@ export const AppLockSettings: React.FC<
                                 </Typography>
                                 <RowButtonGroup>
                                     <RowButton
-                                        label="PIN"
+                                        label={t("PIN")}
                                         endIcon={
                                             state.lockType === "pin" ? (
                                                 <CheckIcon
@@ -188,18 +188,18 @@ export const AppLockSettings: React.FC<
 
 // -- Auto-lock duration helpers --
 
-const autoLockOptions: { label: string; ms: number }[] = [
-    { label: "Immediately", ms: 0 },
-    { label: "5 seconds", ms: 5_000 },
-    { label: "15 seconds", ms: 15_000 },
-    { label: "1 minute", ms: 60_000 },
-    { label: "5 minutes", ms: 300_000 },
-    { label: "30 minutes", ms: 1_800_000 },
+const autoLockOptions: { labelKey: string; ms: number }[] = [
+    { labelKey: "auto_lock_immediately", ms: 0 },
+    { labelKey: "auto_lock_5_seconds", ms: 5_000 },
+    { labelKey: "auto_lock_15_seconds", ms: 15_000 },
+    { labelKey: "auto_lock_1_minute", ms: 60_000 },
+    { labelKey: "auto_lock_5_minutes", ms: 300_000 },
+    { labelKey: "auto_lock_30_minutes", ms: 1_800_000 },
 ];
 
 const autoLockLabel = (ms: number): string => {
     const option = autoLockOptions.find((o) => o.ms === ms);
-    return option?.label ?? "Immediately";
+    return t(option?.labelKey ?? "auto_lock_immediately");
 };
 
 // -- PIN Setup Dialog --
@@ -304,6 +304,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         values: string[],
         refs: React.RefObject<(HTMLInputElement | null)[]>,
         isConfirm: boolean,
+        hasError?: boolean,
     ) => (
         <Stack
             direction="row"
@@ -313,6 +314,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                 <TextField
                     key={i}
                     hiddenLabel
+                    error={hasError}
                     value={digit}
                     onChange={(e) =>
                         handlePinDigitChange(i, e.target.value, isConfirm)
@@ -345,7 +347,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
         <TitledMiniDialog
             open={open}
             onClose={handleClose}
-            title="Set PIN"
+            title={t("app_lock_set_pin")}
             sx={{
                 "& .MuiDialogTitle-root": { pb: 0 },
                 "& .MuiDialogTitle-root + .MuiDialogContent-root": { pt: 0 },
@@ -372,7 +374,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                         <Typography sx={{ color: "text.muted", textAlign: "left" }}>
                             {t("confirm_pin")}
                         </Typography>
-                        {renderPinInputs(confirmPin, confirmInputRefs, true)}
+                        {renderPinInputs(confirmPin, confirmInputRefs, true, !!error)}
                         {error && (
                             <Typography
                                 variant="small"
@@ -381,14 +383,7 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                                 {error}
                             </Typography>
                         )}
-                        <Stack direction="row" sx={{ gap: 1.5, width: "100%" }}>
-                            <FocusVisibleButton
-                                fullWidth
-                                color="secondary"
-                                onClick={handleBack}
-                            >
-                                {t("go_back")}
-                            </FocusVisibleButton>
+                        <Stack sx={{ gap: 1.5, width: "100%" }}>
                             <FocusVisibleButton
                                 fullWidth
                                 color="accent"
@@ -396,6 +391,13 @@ const PinSetupDialog: React.FC<SetupDialogProps> = ({
                                 onClick={() => void handleConfirm()}
                             >
                                 {t("confirm")}
+                            </FocusVisibleButton>
+                            <FocusVisibleButton
+                                fullWidth
+                                color="secondary"
+                                onClick={handleBack}
+                            >
+                                {t("go_back")}
                             </FocusVisibleButton>
                         </Stack>
                     </>
@@ -419,6 +421,15 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState("");
 
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (open) {
+            setTimeout(() => passwordInputRef.current?.focus(), 300);
+        }
+    }, [open]);
+
     const resetState = useCallback(() => {
         setStep("enter");
         setPassword("");
@@ -436,12 +447,14 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     const handleNext = useCallback(() => {
         if (!password) return;
         setStep("confirm");
+        setTimeout(() => confirmPasswordInputRef.current?.focus(), 300);
     }, [password]);
 
     const handleBack = useCallback(() => {
         setStep("enter");
         setConfirmPassword("");
         setError("");
+        setTimeout(() => passwordInputRef.current?.focus(), 300);
     }, []);
 
     const handleConfirm = useCallback(async () => {
@@ -460,23 +473,27 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
             open={open}
             onClose={handleClose}
             title={t("app_lock_set_password")}
+            sx={{
+                "& .MuiDialogTitle-root": { pb: 0 },
+                "& .MuiDialogTitle-root + .MuiDialogContent-root": { pt: 0 },
+            }}
         >
             <Stack sx={{ gap: 2, py: 1 }}>
                 {step === "enter" ? (
                     <>
-                        <Typography sx={{ color: "text.muted" }}>
-                            {t("app_lock_enter_password")}
-                        </Typography>
                         <TextField
                             fullWidth
+                            label={t("app_lock_enter_password")}
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => {
                                 setPassword(e.target.value);
                                 setError("");
                             }}
-                            autoFocus
                             slotProps={{
+                                htmlInput: {
+                                    ref: passwordInputRef,
+                                },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -500,19 +517,21 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                     </>
                 ) : (
                     <>
-                        <Typography sx={{ color: "text.muted" }}>
-                            {t("app_lock_confirm_password")}
-                        </Typography>
                         <TextField
                             fullWidth
+                            label={t("app_lock_confirm_password")}
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
+                            error={!!error}
+                            helperText={error || undefined}
                             onChange={(e) => {
                                 setConfirmPassword(e.target.value);
                                 setError("");
                             }}
-                            autoFocus
                             slotProps={{
+                                htmlInput: {
+                                    ref: confirmPasswordInputRef,
+                                },
                                 input: {
                                     endAdornment: (
                                         <ShowHidePasswordInputAdornment
@@ -527,25 +546,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 },
                             }}
                         />
-                        {error && (
-                            <Typography
-                                variant="small"
-                                sx={{
-                                    color: "critical.main",
-                                    textAlign: "center",
-                                }}
-                            >
-                                {error}
-                            </Typography>
-                        )}
-                        <Stack direction="row" sx={{ gap: 1.5, width: "100%" }}>
-                            <FocusVisibleButton
-                                fullWidth
-                                color="secondary"
-                                onClick={handleBack}
-                            >
-                                {t("go_back")}
-                            </FocusVisibleButton>
+                        <Stack sx={{ gap: 1.5, width: "100%" }}>
                             <FocusVisibleButton
                                 fullWidth
                                 color="accent"
@@ -553,6 +554,13 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
                                 onClick={() => void handleConfirm()}
                             >
                                 {t("confirm")}
+                            </FocusVisibleButton>
+                            <FocusVisibleButton
+                                fullWidth
+                                color="secondary"
+                                onClick={handleBack}
+                            >
+                                {t("go_back")}
                             </FocusVisibleButton>
                         </Stack>
                     </>
@@ -562,7 +570,7 @@ const PasswordSetupDialog: React.FC<SetupDialogProps> = ({
     );
 };
 
-// -- Auto-Lock Duration Dialog --
+// -- Auto-Lock Dialog with Slider --
 
 interface AutoLockDialogProps {
     open: boolean;
@@ -570,39 +578,72 @@ interface AutoLockDialogProps {
     currentValue: number;
 }
 
+const autoLockMarks = autoLockOptions.map((_, i) => ({ value: i }));
+
 const AutoLockDialog: React.FC<AutoLockDialogProps> = ({
     open,
     onClose,
     currentValue,
 }) => {
-    const handleSelect = (ms: number) => {
-        setAutoLockTime(ms);
-        onClose();
+    const currentIndex = autoLockOptions.findIndex(
+        (o) => o.ms === currentValue,
+    );
+
+    const handleChange = (_: Event, newValue: number | number[]) => {
+        const index = newValue as number;
+        const option = autoLockOptions[index];
+        if (option) setAutoLockTime(option.ms);
     };
+
+    const firstLabel = t(autoLockOptions[0]!.labelKey);
+    const lastLabel = t(autoLockOptions[autoLockOptions.length - 1]!.labelKey);
 
     return (
         <TitledMiniDialog open={open} onClose={onClose} title={t("auto_lock")}>
-            <Stack sx={{ gap: 0.5, py: 1 }}>
-                {autoLockOptions.map(({ label, ms }) => (
-                    <RowButton
-                        key={ms}
-                        label={label}
-                        endIcon={
-                            currentValue === ms ? (
-                                <CheckIcon sx={{ color: "accent.main" }} />
-                            ) : undefined
-                        }
-                        onClick={() => handleSelect(ms)}
+            <Stack sx={{ gap: 2, py: 1 }}>
+                <Typography
+                    variant="small"
+                    color="accent.main"
+                    textAlign="center"
+                >
+                    {autoLockLabel(currentValue)}
+                </Typography>
+                <Stack sx={{ px: 1 }}>
+                    <Slider
+                        value={currentIndex === -1 ? 0 : currentIndex}
+                        min={0}
+                        max={autoLockOptions.length - 1}
+                        step={null}
+                        marks={autoLockMarks}
+                        onChange={handleChange}
+                        sx={{
+                            color: "accent.main",
+                            "& .MuiSlider-markActive": {
+                                backgroundColor: "accent.main",
+                            },
+                        }}
                     />
-                ))}
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        sx={{ mt: -0.5 }}
+                    >
+                        <Typography variant="mini" color="text.faint">
+                            {firstLabel}
+                        </Typography>
+                        <Typography variant="mini" color="text.faint">
+                            {lastLabel}
+                        </Typography>
+                    </Stack>
+                </Stack>
             </Stack>
             <DialogActions>
                 <FocusVisibleButton
                     fullWidth
-                    color="secondary"
+                    color="accent"
                     onClick={onClose}
                 >
-                    {t("cancel")}
+                    {t("done")}
                 </FocusVisibleButton>
             </DialogActions>
         </TitledMiniDialog>
