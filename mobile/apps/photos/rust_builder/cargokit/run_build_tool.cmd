@@ -21,7 +21,7 @@ set BUILD_TOOL_PKG_DIR_POSIX=%BUILD_TOOL_PKG_DIR:\=/%
     echo publish_to: none
     echo.
     echo environment:
-    echo   sdk: '^>=3.0.0 ^<4.0.0'
+    echo   sdk: '^>=3.10.0 ^<4.0.0'
     echo.
     echo dependencies:
     echo   build_tool:

@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "io.ente.auth"
     compileSdk 36
-    ndkVersion flutter.ndkVersion
+    ndkVersion "28.0.13004108"
 
     compileOptions {
         // Flag to enable support for the new language APIs
@@ -102,6 +102,12 @@ android {
               arguments "-DANDROID_PACKAGE_NAME=${android.defaultConfig.applicationId}${applicationIdSuffix}"
             }
           }
+        }
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging false
         }
     }
 

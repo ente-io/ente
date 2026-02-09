@@ -5,7 +5,7 @@ important documents in the cloud with secure sharing capabilities.
 
 ## 🧑‍💻 Build from source
 
-1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
+1. [Install Flutter v3.38.0](https://flutter.dev/docs/get-started/install).
 
 2. Pull in all submodules with `git submodule update --init --recursive`
 

@@ -111,6 +111,12 @@ android {
         }
     }
 
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
     android.applicationVariants.all { variant ->
         if (variant.flavorName == "fdroid") {
             variant.outputs.all { output ->

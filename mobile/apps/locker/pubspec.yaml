@@ -3,7 +3,7 @@ description: "Ente Locker – Safe space for your important documents"
 publish_to: "none"
 version: 0.1.5+83
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
   adaptive_theme: ^3.6.0

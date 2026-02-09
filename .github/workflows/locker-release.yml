@@ -9,7 +9,7 @@ on:
             - "locker-v*"
 
 env:
-    FLUTTER_VERSION: "3.32.8"
+    FLUTTER_VERSION: "3.38.0"
 
 permissions:
     contents: write
