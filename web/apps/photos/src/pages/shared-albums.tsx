@@ -771,7 +771,7 @@ const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
 
     return (
         <GreenButton color="accent" onClick={handleGetEnte}>
-            {t("get_ente")}
+            {t("try_ente")}
         </GreenButton>
     );
 };
