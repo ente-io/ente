@@ -1809,28 +1809,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Redesign",
-  "cLDesc1Item1": "Redesign do ecrã de definições",
-  "cLDesc1Item2": "Barra de pesquisa movida para o topo",
-  "cLDesc1Item3": "Redesign da página de resultados de pesquisa",
-  "cLTitle2": "Melhorias",
-  "cLDesc2Item1": "Pesquisa nas definições",
-  "cLDesc2Item2": "Carregamento mais rápido do separador de pesquisa",
-  "cLDesc2Item3": "Pesquisa em descoberta, localização e tipo de ficheiro",
-  "cLDesc2Item4": "Permitir que administradores e proprietários de álbuns eliminem comentários",
-  "cLDesc2Item5": "Beliscar para ampliar em vídeos",
-  "cLDesc2Item6": "Ver todas as pessoas ignoradas",
-  "cLDesc2Item7": "Fluxo de fusão melhorado",
-  "cLDesc2Item8": "Pesquisa e ordenação personalizada na página de pessoas",
-  "cLDesc2Item9": "Ordenação consistente de contactos",
-  "cLDesc2Item10": "Imagens de pré-visualização para formatos de imagem não suportados",
-  "cLDesc2Item11": "Trocar fotos e tocar para substituir no criador de colagem",
-  "cLDesc2Item12": "Melhoria de desempenho na folha de informações do ficheiro",
-  "cLTitle3": "Correções de erros",
-  "cLDesc3Item1": "Correção para música a pausar ao abrir a aplicação",
-  "cLDesc3Item2": "Correção para problema de deslizar para selecionar em dispositivos Samsung S",
-  "cLDesc3Item3": "Correção para problema do ecrã inicial após restauro de cópia de segurança",
-  "cLDesc3Item4": "Correção para problemas de galeria em tablets e modo paisagem",
-  "cLDesc3Item5": "Correção para página sem categoria não atualizar após mover"
+  }
 }
