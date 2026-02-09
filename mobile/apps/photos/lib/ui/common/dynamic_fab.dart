@@ -2,13 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/ui/components/buttons/button_widget_v2.dart';
 
 class DynamicFAB extends StatelessWidget {
   final bool? isKeypadOpen;
   final bool? isFormValid;
   final String? buttonText;
-  final Function? onPressedFunction;
+  final FutureVoidCallback? onPressedFunction;
 
   const DynamicFAB({
     super.key,
@@ -43,7 +44,9 @@ class DynamicFAB extends StatelessWidget {
               foregroundColor:
                   Theme.of(context).colorScheme.dynamicFABTextColor,
               onPressed: isFormValid!
-                  ? onPressedFunction as void Function()?
+                  ? () {
+                      onPressedFunction!();
+                    }
                   : () {
                       FocusScope.of(context).unfocus();
                     },
@@ -65,7 +68,7 @@ class DynamicFAB extends StatelessWidget {
           buttonType: ButtonTypeV2.primary,
           labelText: buttonText!,
           isDisabled: !isFormValid!,
-          onTap: isFormValid! ? onPressedFunction as Future<void> Function()? : null,
+          onTap: isFormValid! ? onPressedFunction : null,
         ),
       );
     }

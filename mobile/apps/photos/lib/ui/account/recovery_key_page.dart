@@ -62,13 +62,15 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: colorScheme.backgroundColour,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: colorScheme.content,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
+        leading: widget.isOnboarding
+            ? const SizedBox.shrink()
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                color: colorScheme.content,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
       ),
       body: _getBody(recoveryKey, colorScheme, textTheme),
     );

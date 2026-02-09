@@ -48,6 +48,17 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Timer? _confirmPasswordTimer;
 
   @override
+  void initState() {
+    super.initState();
+    final storedEmail = _config.getEmail();
+    if (storedEmail != null && storedEmail.isNotEmpty) {
+      _email = storedEmail;
+      _emailController.text = storedEmail;
+      _emailIsValid = EmailValidator.validate(storedEmail);
+    }
+  }
+
+  @override
   void dispose() {
     _emailValidationTimer?.cancel();
     _passwordStrengthTimer?.cancel();

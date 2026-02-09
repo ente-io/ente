@@ -30,12 +30,15 @@ class _LoginPageState extends State<LoginPage> {
   bool _showValidationMessage = false;
   String? _email;
   Timer? _validationTimer;
+  final _config = Configuration.instance;
   final Logger _logger = Logger('_LoginPageState');
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (kDebugMode) {
+    if ((_config.getEmail() ?? '').isNotEmpty) {
+      _updateEmail(_config.getEmail()!);
+    } else if (kDebugMode) {
       _updateEmail(const String.fromEnvironment("email"));
     }
   }
