@@ -711,32 +711,22 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     const isSmallWidth = useIsSmallWidth();
 
     return (
-        <Box>
-            {isSmallWidth ? (
-                <IconButton {...{ onClick, disabled }}>
+        <FocusVisibleButton
+            color="secondary"
+            startIcon={
+                isSmallWidth ? undefined : (
                     <HugeiconsIcon
                         icon={ImageAdd02Icon}
-                        size={22}
+                        size={20}
                         strokeWidth={1.8}
                     />
-                </IconButton>
-            ) : (
-                <FocusVisibleButton
-                    color="secondary"
-                    startIcon={
-                        <HugeiconsIcon
-                            icon={ImageAdd02Icon}
-                            size={20}
-                            strokeWidth={1.8}
-                        />
-                    }
-                    sx={{ borderRadius: "16px" }}
-                    {...{ onClick, disabled }}
-                >
-                    {t("add_photos")}
-                </FocusVisibleButton>
-            )}
-        </Box>
+                )
+            }
+            sx={{ borderRadius: "16px" }}
+            {...{ onClick, disabled }}
+        >
+            {t("add_photos")}
+        </FocusVisibleButton>
     );
 };
 
