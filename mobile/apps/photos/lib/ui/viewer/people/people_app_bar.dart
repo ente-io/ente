@@ -17,6 +17,8 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
@@ -566,7 +568,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   Future<void> _ignorePerson(BuildContext context) async {
-    await showChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson,
       body: AppLocalizations.of(context).thePersonWillNotBeDisplayed,
@@ -587,11 +589,18 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               person: updatedPerson,
             ),
           );
-          Navigator.of(context).pop();
         } catch (e, s) {
           _logger.severe('Ignoring/showing person failed', e, s);
+          rethrow;
         }
       },
+    );
+    if (!mounted || result?.action != ButtonAction.error) {
+      return;
+    }
+    showShortToast(
+      context,
+      AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
     );
   }
 

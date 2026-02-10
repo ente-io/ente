@@ -65,9 +65,9 @@ class _PeopleSelectionActionWidgetState
         .toList();
   }
 
-  List<String> _getSelectedClusterIds(Map<String, PersonEntity> personMap) {
+  List<String> _getSelectedClusterIds() {
     return widget.selectedPeople.personIds
-        .where((id) => id.startsWith('cluster_') || !personMap.containsKey(id))
+        .where((id) => id.startsWith('cluster_'))
         .toList();
   }
 
@@ -101,7 +101,7 @@ class _PeopleSelectionActionWidgetState
         final personMap = snapshot.data!;
         final List<SelectionActionButton> items = [];
         final selectedPersonIds = _getSelectedPersonIds(personMap);
-        final selectedClusterIds = _getSelectedClusterIds(personMap);
+        final selectedClusterIds = _getSelectedClusterIds();
         final onlyOnePerson =
             selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
         final onlyPersonSelected =
@@ -418,7 +418,7 @@ class _PeopleSelectionActionWidgetState
   Future<void> _onIgnore() async {
     final personMap = await personEntitiesMapFuture;
     final selectedPersonIds = _getSelectedPersonIds(personMap);
-    final selectedClusterIds = _getSelectedClusterIds(personMap);
+    final selectedClusterIds = _getSelectedClusterIds();
     if (selectedPersonIds.isEmpty && selectedClusterIds.isEmpty) return;
     final multiple = (selectedPersonIds.length + selectedClusterIds.length) > 1;
 
@@ -574,7 +574,7 @@ class _PeopleSelectionActionWidgetState
   Future<void> _onMerge() async {
     final personMap = await personEntitiesMapFuture;
     final selectedPersonIds = _getSelectedPersonIds(personMap);
-    final selectedClusterIds = _getSelectedClusterIds(personMap);
+    final selectedClusterIds = _getSelectedClusterIds();
     if (selectedClusterIds.isEmpty) return;
 
     if (!mounted) return;
