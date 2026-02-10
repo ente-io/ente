@@ -343,7 +343,6 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
     int? maxResults,
   }) async {
-    final startTime = DateTime.now();
     // Uncomment if needed for debugging: print query embeddings
     // if (kDebugMode) {
     //   for (final queryText in textQueryToEmbeddingMap.keys) {
@@ -352,6 +351,7 @@ class SemanticSearchService {
     //   }
     // }
     if (await _canUseVectorDbForSearch()) {
+      final startTime = DateTime.now();
       final queryResults = await ClipVectorDB.instance.computeBulkSimilarities(
         textQueryToEmbeddingMap,
         minimumSimilarityMap,
@@ -368,6 +368,7 @@ class SemanticSearchService {
     }
 
     await _cacheClipVectors();
+    final startTime = DateTime.now();
     final Map<String, List<QueryResult>> queryResults =
         await MLComputer.instance.computeBulkSimilarities(
       textQueryToEmbeddingMap,
@@ -388,8 +389,8 @@ class SemanticSearchService {
     List<double> textEmbedding,
     double minimumSimilarity,
   ) async {
-    final startTime = DateTime.now();
     if (await _canUseVectorDbForSearch()) {
+      final startTime = DateTime.now();
       final queryResults =
           await ClipVectorDB.instance.searchApproxSimilaritiesWithinThreshold(
         textEmbedding,
@@ -406,6 +407,7 @@ class SemanticSearchService {
     }
 
     await _cacheClipVectors();
+    final startTime = DateTime.now();
     final queryResults = await MLComputer.instance.computeBulkSimilarities(
       {query: textEmbedding},
       {query: minimumSimilarity},
