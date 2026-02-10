@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/theme/ente_theme.dart";
 
 Future<T?> showBaseBottomSheet<T>(
@@ -89,30 +90,43 @@ class BaseBottomSheet extends StatelessWidget {
                   children: [
                     Text(title, style: textTheme.largeBold),
                     if (showCloseButton)
-                      GestureDetector(
-                        onTap: onClose ?? () => Navigator.of(context).pop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: colorScheme.fillFaint,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            size: 24,
-                            color: colorScheme.textBase,
-                          ),
-                        ),
-                      )
+                      BottomSheetCloseButton(onTap: onClose)
                     else
                       const SizedBox.shrink(),
                   ],
                 ),
-                SizedBox(height: headerSpacing),
+                if (headerSpacing > 0) SizedBox(height: headerSpacing),
                 child,
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class BottomSheetCloseButton extends StatelessWidget {
+  final VoidCallback? onTap;
+
+  const BottomSheetCloseButton({super.key, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return GestureDetector(
+      onTap: onTap ?? () => Navigator.of(context).pop(),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: colorScheme.fillFaint,
+        ),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedCancel01,
+          size: 24,
+          color: colorScheme.textBase,
         ),
       ),
     );
