@@ -3,6 +3,8 @@ use usearch::{Index, IndexOptions, MetricKind, ScalarKind};
 
 use std::path::PathBuf;
 
+const FAST_SEARCH_STEP_COUNTS: [usize; 5] = [200, 500, 2000, 5000, 10000];
+
 #[frb(opaque)]
 pub struct VectorDB {
     index: Index,
@@ -128,38 +130,97 @@ impl VectorDB {
         (matches.keys, matches.distances)
     }
 
-    pub fn exact_search_vectors_within_similarity(
+    pub fn approx_search_vectors_within_similarity(
         &self,
         query: &[f32],
         minimum_similarity: f32,
     ) -> (Vec<u64>, Vec<f32>) {
-        let count = self.index.size();
-        if count == 0 {
+        let index_size = self.index.size();
+        if index_size == 0 || !minimum_similarity.is_finite() {
             return (Vec::new(), Vec::new());
         }
 
         let max_distance = 1.0_f32 - minimum_similarity;
-        if max_distance < 0.0 {
+        if !max_distance.is_finite() || max_distance < 0.0 {
             return (Vec::new(), Vec::new());
         }
 
-        let matches = self
-            .index
-            .exact_search(query, count)
-            .expect("Failed to exact search vectors");
+        self.fast_search_vectors_within_distance(query, max_distance)
+    }
 
-        let mut keys = Vec::new();
-        let mut distances = Vec::new();
+    fn fast_search_vectors_within_distance(
+        &self,
+        query: &[f32],
+        max_distance: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let index_size = self.index.size();
+        if index_size == 0 {
+            return (Vec::new(), Vec::new());
+        }
 
-        for (key, distance) in matches.keys.iter().zip(matches.distances.iter()) {
-            if *distance <= max_distance {
-                keys.push(*key);
-                distances.push(*distance);
-            } else {
-                break;
+        let mut previous_count = 0_usize;
+        for step_count in FAST_SEARCH_STEP_COUNTS {
+            let count = step_count.min(index_size);
+            if count <= previous_count {
+                continue;
+            }
+            previous_count = count;
+
+            let matches = self
+                .index
+                .search(query, count)
+                .expect("Failed to search vectors");
+
+            let should_expand =
+                count < index_size && matches.distances.iter().all(|d| *d <= max_distance);
+            if should_expand {
+                continue;
+            }
+
+            return Self::retain_matches_within_distance(
+                matches.keys,
+                matches.distances,
+                max_distance,
+            );
+        }
+
+        if previous_count < index_size {
+            let matches = self
+                .index
+                .search(query, index_size)
+                .expect("Failed to search vectors");
+            return Self::retain_matches_within_distance(
+                matches.keys,
+                matches.distances,
+                max_distance,
+            );
+        }
+
+        (Vec::new(), Vec::new())
+    }
+
+    fn retain_matches_within_distance(
+        mut keys: Vec<u64>,
+        mut distances: Vec<f32>,
+        max_distance: f32,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let aligned_len = keys.len().min(distances.len());
+        keys.truncate(aligned_len);
+        distances.truncate(aligned_len);
+
+        let mut write_idx = 0;
+        for read_idx in 0..aligned_len {
+            if distances[read_idx] <= max_distance {
+                if write_idx != read_idx {
+                    keys[write_idx] = keys[read_idx];
+                    distances[write_idx] = distances[read_idx];
+                }
+                write_idx += 1;
             }
         }
 
+        keys.truncate(write_idx);
+        distances.truncate(write_idx);
         (keys, distances)
     }
 

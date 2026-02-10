@@ -391,13 +391,13 @@ class SemanticSearchService {
     final startTime = DateTime.now();
     if (await _canUseVectorDbForSearch()) {
       final queryResults =
-          await ClipVectorDB.instance.searchExactSimilaritiesWithinThreshold(
+          await ClipVectorDB.instance.searchApproxSimilaritiesWithinThreshold(
         textEmbedding,
         minimumSimilarity,
       );
       final endTime = DateTime.now();
       _logger.info(
-        "computingSimilarities (usearch exact) took for 1 query " +
+        "computingSimilarities (usearch approximate) took for 1 query " +
             (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
                 .toString() +
             "ms",

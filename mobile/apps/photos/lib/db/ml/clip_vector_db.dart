@@ -217,13 +217,13 @@ class ClipVectorDB {
     }
   }
 
-  Future<List<QueryResult>> searchExactSimilaritiesWithinThreshold(
+  Future<List<QueryResult>> searchApproxSimilaritiesWithinThreshold(
     List<double> query,
     double minimumSimilarity,
   ) async {
     final db = await _vectorDB;
     try {
-      final result = await db.exactSearchVectorsWithinSimilarity(
+      final result = await db.approxSearchVectorsWithinSimilarity(
         query: query,
         minimumSimilarity: minimumSimilarity,
       );
@@ -235,7 +235,7 @@ class ClipVectorDB {
       }
       return queryResults;
     } catch (e, s) {
-      _logger.severe("Error searching exact similarities", e, s);
+      _logger.severe("Error searching approximate similarities", e, s);
       rethrow;
     }
   }
