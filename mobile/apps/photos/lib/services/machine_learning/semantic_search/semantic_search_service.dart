@@ -66,7 +66,7 @@ class SemanticSearchService {
     });
 
     if (flagService.usearchForSearch) {
-      unawaited(mlDataDB.checkMigrateFillClipVectorDB());
+      unawaited(_mlDataDB.checkMigrateFillClipVectorDB());
     }
 
     unawaited(_loadTextModel(delay: true));
