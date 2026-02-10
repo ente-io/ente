@@ -1808,7 +1808,7 @@ final class ChatViewModel: ObservableObject {
         chatDb: LlmChatDb,
         summaries: [String: String]
     ) -> [ChatSession] {
-        let sessions = loaded.compactMap { session in
+        let sessions: [ChatSession] = loaded.compactMap { session in
             guard let id = UUID(uuidString: session.uuid) else { return nil }
             let messages = (try? chatDb.getMessages(sessionUuid: session.uuid)) ?? []
             let sortedMessages = messages.sorted { $0.createdAtUs < $1.createdAtUs }
