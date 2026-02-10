@@ -62,44 +62,93 @@ class FileMagicService {
     Map<String, dynamic>? newMetadataUpdate, {
     Map<int, Map<String, dynamic>>? metadataUpdateMap,
   }) async {
-    final metadataList = <UpdateMagicMetadataRequest>[];
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      for (final file in files) {
-        if (file.uploadedFileID == null) {
-          throw AssertionError(
-            "operation is only supported on backed up files",
+      await _updatePublicMagicMetadataOnce(
+        files,
+        ownerID,
+        newMetadataUpdate,
+        metadataUpdateMap: metadataUpdateMap,
+      );
+    } on DioException catch (e, s) {
+      if (e.response?.statusCode != 409) {
+        rethrow;
+      }
+
+      _logger.warning(
+        "conflict while syncing public magic metadata, syncing and retrying once",
+        e,
+        s,
+      );
+      await RemoteSyncService.instance.sync(silently: true);
+      await _refreshPublicMetadataFromDB(files);
+
+      try {
+        await _updatePublicMagicMetadataOnce(
+          files,
+          ownerID,
+          newMetadataUpdate,
+          metadataUpdateMap: metadataUpdateMap,
+        );
+      } on DioException catch (retryError, retryStack) {
+        if (retryError.response?.statusCode == 409) {
+          // keep DB fresh so the caller can continue with the latest state
+          RemoteSyncService.instance.sync(silently: true).ignore();
+          _logger.warning(
+            "public magic metadata conflict persisted after retry",
+            retryError,
+            retryStack,
           );
-        } else if (file.ownerID != ownerID) {
-          throw AssertionError("cannot modify memories not owned by you");
         }
-        // read the existing magic metadata and apply new updates to existing data
-        // current update is simple replace. This will be enhanced in the future,
-        // as required.
-        final newUpdates = metadataUpdateMap != null
-            ? metadataUpdateMap[file.uploadedFileID]
-            : newMetadataUpdate;
-        assert(
-          newUpdates != null && newUpdates.isNotEmpty,
-          "can not apply empty updates",
-        );
-        final Map<String, dynamic> jsonToUpdate =
-            jsonDecode(file.pubMmdEncodedJson ?? '{}');
-        newUpdates!.forEach((key, value) {
-          jsonToUpdate[key] = value;
-        });
+        rethrow;
+      }
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
 
-        // update the local information so that it's reflected on UI
-        file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
-        file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
+  Future<void> _updatePublicMagicMetadataOnce(
+    List<EnteFile> files,
+    int ownerID,
+    Map<String, dynamic>? newMetadataUpdate, {
+    Map<int, Map<String, dynamic>>? metadataUpdateMap,
+  }) async {
+    final pendingUpdates = <_PendingPublicMetadataUpdate>[];
+    for (final file in files) {
+      if (file.uploadedFileID == null) {
+        throw AssertionError("operation is only supported on backed up files");
+      } else if (file.ownerID != ownerID) {
+        throw AssertionError("cannot modify memories not owned by you");
+      }
 
-        final fileKey = getFileKey(file);
-        final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)),
-          fileKey,
-        );
-        metadataList.add(
-          UpdateMagicMetadataRequest(
+      final newUpdates = metadataUpdateMap != null
+          ? metadataUpdateMap[file.uploadedFileID]
+          : newMetadataUpdate;
+      if (newUpdates == null || newUpdates.isEmpty) {
+        throw AssertionError("can not apply empty updates");
+      }
+
+      final Map<String, dynamic> jsonToUpdate = jsonDecode(
+        file.pubMmdEncodedJson ?? '{}',
+      );
+      newUpdates.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      final encodedJson = jsonEncode(jsonToUpdate);
+      final fileKey = getFileKey(file);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+        utf8.encode(encodedJson),
+        fileKey,
+      );
+      pendingUpdates.add(
+        _PendingPublicMetadataUpdate(
+          file: file,
+          encodedJson: encodedJson,
+          metadata: PubMagicMetadata.fromJson(jsonToUpdate),
+          nextVersion: file.pubMmdVersion + 1,
+          request: UpdateMagicMetadataRequest(
             id: file.uploadedFileID!,
             magicMetadata: MetadataRequest(
               version: file.pubMmdVersion,
@@ -108,23 +157,38 @@ class FileMagicService {
               header: CryptoUtil.bin2base64(encryptedMMd.header!),
             ),
           ),
-        );
-        file.pubMmdVersion = file.pubMmdVersion + 1;
-      }
+        ),
+      );
+    }
 
-      await _gateway.updatePublicMagicMetadata(metadataList);
-      // update the state of the selected file. Same file in other collection
-      // should be eventually synced after remote sync has completed
-      await _filesDB.insertMultiple(files);
-      RemoteSyncService.instance.sync(silently: true).ignore();
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.statusCode == 409) {
-        RemoteSyncService.instance.sync(silently: true).ignore();
+    await _gateway.updatePublicMagicMetadata(
+      pendingUpdates.map((update) => update.request).toList(growable: false),
+    );
+
+    for (final update in pendingUpdates) {
+      update.file.pubMmdEncodedJson = update.encodedJson;
+      update.file.pubMagicMetadata = update.metadata;
+      update.file.pubMmdVersion = update.nextVersion;
+    }
+
+    await _filesDB.insertMultiple(files);
+    RemoteSyncService.instance.sync(silently: true).ignore();
+  }
+
+  Future<void> _refreshPublicMetadataFromDB(List<EnteFile> files) async {
+    for (final file in files) {
+      final uploadedFileID = file.uploadedFileID;
+      if (uploadedFileID == null) {
+        continue;
       }
-      rethrow;
-    } catch (e, s) {
-      _logger.severe("failed to sync magic metadata", e, s);
-      rethrow;
+      final latestFile = await _filesDB.getAnyUploadedFile(uploadedFileID);
+      if (latestFile == null) {
+        continue;
+      }
+      file.ownerID = latestFile.ownerID;
+      file.pubMmdEncodedJson = latestFile.pubMmdEncodedJson;
+      file.pubMagicMetadata = latestFile.pubMagicMetadata;
+      file.pubMmdVersion = latestFile.pubMmdVersion;
     }
   }
 
@@ -148,8 +212,9 @@ class FileMagicService {
           // read the existing magic metadata and apply new updates to existing data
           // current update is simple replace. This will be enhanced in the future,
           // as required.
-          final Map<String, dynamic> jsonToUpdate =
-              jsonDecode(file.mMdEncodedJson ?? '{}');
+          final Map<String, dynamic> jsonToUpdate = jsonDecode(
+            file.mMdEncodedJson ?? '{}',
+          );
           newMetadataUpdate.forEach((key, value) {
             jsonToUpdate[key] = value;
           });
@@ -194,4 +259,20 @@ class FileMagicService {
       rethrow;
     }
   }
+}
+
+class _PendingPublicMetadataUpdate {
+  const _PendingPublicMetadataUpdate({
+    required this.file,
+    required this.request,
+    required this.encodedJson,
+    required this.metadata,
+    required this.nextVersion,
+  });
+
+  final EnteFile file;
+  final UpdateMagicMetadataRequest request;
+  final String encodedJson;
+  final PubMagicMetadata metadata;
+  final int nextVersion;
 }
