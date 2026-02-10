@@ -461,15 +461,15 @@ class LocalSettings {
     await _prefs.setBool(_kMLProgressBannerDismissed, value);
   }
 
-  bool get isOfflineFacesBannerDismissed => false;
-      // _prefs.getBool(_kOfflineFacesBannerDismissed) ?? false;
+  bool get isOfflineFacesBannerDismissed =>
+      _prefs.getBool(_kOfflineFacesBannerDismissed) ?? false;
 
   Future<void> setOfflineFacesBannerDismissed(bool value) async {
     await _prefs.setBool(_kOfflineFacesBannerDismissed, value);
   }
 
-  bool get isOfflineNameFaceBannerDismissed => false;
-      // _prefs.getBool(_kOfflineNameFaceBannerDismissed) ?? false;
+  bool get isOfflineNameFaceBannerDismissed =>
+      _prefs.getBool(_kOfflineNameFaceBannerDismissed) ?? false;
 
   Future<void> setOfflineNameFaceBannerDismissed(bool value) async {
     await _prefs.setBool(_kOfflineNameFaceBannerDismissed, value);
