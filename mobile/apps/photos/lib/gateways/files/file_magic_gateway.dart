@@ -42,7 +42,8 @@ class FileMagicGateway {
     );
   }
 
-  /// Fetch latest public magic metadata for a file in a specific collection.
+  /// Fetch latest file object (including public magic metadata) for a file in
+  /// a specific collection.
   ///
   /// GET /files/public-magic-metadata
   Future<Map<String, dynamic>> getPublicMagicMetadata({

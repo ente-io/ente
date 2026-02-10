@@ -189,7 +189,7 @@ class FileMagicService {
         file.ownerID = ownerID;
       }
 
-      final metadataValue = latest["magicMetadata"];
+      final metadataValue = latest["pubMagicMetadata"];
       if (metadataValue == null) {
         file.pubMmdEncodedJson = null;
         file.pubMagicMetadata = null;

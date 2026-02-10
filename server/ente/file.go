@@ -155,15 +155,6 @@ type UpdateMultipleMagicMetadataRequest struct {
 	SkipVersion  *bool                 `json:"skipVersion"`
 }
 
-// PublicMagicMetadataResponse contains latest public magic metadata for a
-// file within a collection.
-type PublicMagicMetadataResponse struct {
-	ID            int64          `json:"id"`
-	CollectionID  int64          `json:"collectionID"`
-	OwnerID       int64          `json:"ownerID"`
-	MagicMetadata *MagicMetadata `json:"magicMetadata,omitempty"`
-}
-
 // UploadURL represents the upload url for a specific object
 type UploadURL struct {
 	ObjectKey string `json:"objectKey"`

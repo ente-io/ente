@@ -634,9 +634,9 @@ func (c *FileController) UpdateMagicMetadata(ctx *gin.Context, req ente.UpdateMu
 	return nil
 }
 
-// GetPublicMagicMetadata returns latest public magic metadata for a file in the
-// given collection if the actor has access to the collection.
-func (c *FileController) GetPublicMagicMetadata(ctx *gin.Context, fileID int64, collectionID int64) (*ente.PublicMagicMetadataResponse, error) {
+// GetPublicMagicMetadata returns latest file object with public magic metadata
+// for a file in the given collection if the actor has access to the collection.
+func (c *FileController) GetPublicMagicMetadata(ctx *gin.Context, fileID int64, collectionID int64) (*ente.File, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
 	_, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: collectionID,
@@ -646,14 +646,17 @@ func (c *FileController) GetPublicMagicMetadata(ctx *gin.Context, fileID int64, 
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	resp, err := c.FileRepo.GetCollectionFilePublicMagicMetadata(collectionID, fileID)
+	files, err := c.CollectionRepo.GetFile(collectionID, fileID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	if resp == nil {
+	if len(files) == 0 {
 		return nil, stacktrace.Propagate(&ente.ErrFileNotFoundInAlbum, "")
 	}
-	return resp, nil
+	if files[0].IsDeleted {
+		return nil, stacktrace.Propagate(&ente.ErrFileNotFoundInAlbum, "")
+	}
+	return &files[0], nil
 }
 
 // UpdateThumbnail updates thumbnail of a file

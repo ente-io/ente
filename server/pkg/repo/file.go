@@ -623,25 +623,6 @@ func (repo *FileRepository) GetOwnerAndMagicMetadata(fileID int64, publicMetadat
 	return ownerID, magicMetadata, stacktrace.Propagate(err, "")
 }
 
-// GetCollectionFilePublicMagicMetadata returns latest public magic metadata for
-// a file in the given collection.
-func (repo *FileRepository) GetCollectionFilePublicMagicMetadata(collectionID int64, fileID int64) (*ente.PublicMagicMetadataResponse, error) {
-	row := repo.DB.QueryRow(`SELECT f.file_id, f.owner_id, cf.collection_id, f.pub_magic_metadata
-		FROM files f
-		JOIN collection_files cf ON cf.file_id = f.file_id
-		WHERE cf.collection_id = $1 AND cf.file_id = $2 AND cf.is_deleted = false`, collectionID, fileID)
-
-	result := &ente.PublicMagicMetadataResponse{}
-	err := row.Scan(&result.ID, &result.OwnerID, &result.CollectionID, &result.MagicMetadata)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, stacktrace.Propagate(err, "")
-	}
-	return result, nil
-}
-
 // GetSize returns the size of files indicated by fileIDs that are owned by the given userID.
 func (repo *FileRepository) GetSize(userID int64, fileIDs []int64) (int64, error) {
 	row := repo.DB.QueryRow(`

@@ -417,8 +417,8 @@ func (h *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// GetPublicMagicMetadata returns latest public magic metadata for a single file
-// in a given collection if caller has access.
+// GetPublicMagicMetadata returns latest file object (with public magic
+// metadata) for a single file in a given collection if caller has access.
 func (h *FileHandler) GetPublicMagicMetadata(c *gin.Context) {
 	fileID, err := strconv.ParseInt(c.Query("fileID"), 10, 64)
 	if err != nil || fileID <= 0 {
