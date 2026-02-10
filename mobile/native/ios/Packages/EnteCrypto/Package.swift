@@ -16,29 +16,33 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../EnteCore"),
-        .package(path: "../EnteNetwork"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-        .package(url: "https://github.com/jedisct1/swift-sodium.git", from: "0.9.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),
     ],
     targets: [
+        .binaryTarget(
+            name: "EnteRustCryptoFFI",
+            path: "Binaries/EnteRustCryptoFFI.xcframework"
+        ),
         .target(
             name: "EnteCrypto",
             dependencies: [
                 "EnteCore",
+                "EnteRustCryptoFFI",
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "Sodium", package: "swift-sodium"),
                 .product(name: "BigInt", package: "BigInt"),
+            ],
+            linkerSettings: [
+                .linkedFramework("SystemConfiguration", .when(platforms: [.macOS])),
             ]
         ),
         .testTarget(
             name: "EnteCryptoTests",
             dependencies: [
                 "EnteCrypto",
-                "EnteCore",
-                "EnteNetwork"
+                "EnteCore"
             ]
         ),
     ]

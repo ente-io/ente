@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DACC3DAB2E604C9C00DAF993 /* Sodium in Frameworks */ = {isa = PBXBuildFile; productRef = DA72BCAB2E5F87B000D128FF /* Sodium */; };
 		DACC3DC92E618D6A00DAF993 /* EnteCrypto in Frameworks */ = {isa = PBXBuildFile; productRef = DACC3DC82E618D6A00DAF993 /* EnteCrypto */; };
 		DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = DAF584662E61BB8300F8A08F /* ZIPFoundation */; };
 /* End PBXBuildFile section */
@@ -61,7 +60,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DACC3DAB2E604C9C00DAF993 /* Sodium in Frameworks */,
 				DACC3DC92E618D6A00DAF993 /* EnteCrypto in Frameworks */,
 				DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
 			);
@@ -130,7 +128,6 @@
 			);
 			name = cast;
 			packageProductDependencies = (
-				DA72BCAB2E5F87B000D128FF /* Sodium */,
 				DACC3DC82E618D6A00DAF993 /* EnteCrypto */,
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 			);
@@ -211,7 +208,6 @@
 			mainGroup = DA72BC582E5F87A000D128FF;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				DA72BCAA2E5F87B000D128FF /* XCRemoteSwiftPackageReference "swift-sodium" */,
 				DACC3DC62E618D5300DAF993 /* XCLocalSwiftPackageReference "../../Packages/EnteCrypto" */,
 				DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
@@ -596,14 +592,6 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DA72BCAA2E5F87B000D128FF /* XCRemoteSwiftPackageReference "swift-sodium" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jedisct1/swift-sodium.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.1;
-			};
-		};
 		DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
@@ -615,11 +603,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		DA72BCAB2E5F87B000D128FF /* Sodium */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DA72BCAA2E5F87B000D128FF /* XCRemoteSwiftPackageReference "swift-sodium" */;
-			productName = Sodium;
-		};
 		DACC3DC82E618D6A00DAF993 /* EnteCrypto */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = EnteCrypto;
