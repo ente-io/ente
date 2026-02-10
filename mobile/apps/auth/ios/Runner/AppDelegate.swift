@@ -29,8 +29,7 @@ import app_links
   }
 }
 #else
-import UIKit
+import Foundation
 
-@main
-@objc class AppDelegate: UIResponder, UIApplicationDelegate {}
+final class AppDelegateFallback {}
 #endif
