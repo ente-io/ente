@@ -96,6 +96,7 @@ class FileUploader {
   // as it can result in clearing files which are still being force uploaded.
   bool _hasInitiatedForceUpload = false;
   late MultiPartUploader _multiPartUploader;
+  StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -147,7 +148,11 @@ class FileUploader {
       await removeStaleFiles();
       await _prefs.setInt(_lastStaleFileCleanupTime, currentTime);
     }
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    if (_localPhotosUpdatedSubscription != null) {
+      await _localPhotosUpdatedSubscription!.cancel();
+    }
+    _localPhotosUpdatedSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere) {
         removeFromQueueWhere(

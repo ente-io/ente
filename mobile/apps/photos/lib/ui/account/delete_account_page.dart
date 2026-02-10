@@ -38,6 +38,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   ];
 
   @override
+  void dispose() {
+    _feedbackTextCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     _defaultSelection = AppLocalizations.of(context).selectReason;
     _dropdownValue ??= _defaultSelection;

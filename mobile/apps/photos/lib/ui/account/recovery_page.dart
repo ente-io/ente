@@ -18,6 +18,12 @@ class _RecoveryPageState extends State<RecoveryPage> {
   final _recoveryKey = TextEditingController();
 
   @override
+  void dispose() {
+    _recoveryKey.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     FloatingActionButtonLocation? fabLocation() {

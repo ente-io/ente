@@ -29,6 +29,12 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   final _verificationCodeController = TextEditingController();
 
   @override
+  void dispose() {
+    _verificationCodeController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 

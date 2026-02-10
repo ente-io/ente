@@ -28,6 +28,12 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
   final _recoveryKey = TextEditingController();
   final Logger _logger = Logger((_VerifyRecoveryPageState).toString());
 
+  @override
+  void dispose() {
+    _recoveryKey.dispose();
+    super.dispose();
+  }
+
   void _verifyRecoveryKey() async {
     final dialog = createProgressDialog(
       context,

@@ -58,6 +58,7 @@ class CollectionsService {
   late FilesDB _filesDB;
   late Configuration _config;
   late SharedPreferences _prefs;
+  StreamSubscription<CollectionUpdatedEvent>? _collectionUpdatedSubscription;
 
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
@@ -99,7 +100,11 @@ class CollectionsService {
       // ignore: deprecated_member_use_from_same_package
       _cacheCollectionAttributes(collection);
     }
-    Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+    if (_collectionUpdatedSubscription != null) {
+      await _collectionUpdatedSubscription!.cancel();
+    }
+    _collectionUpdatedSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _collectionIDToNewestFileTime = null;
       if (event.collectionID != null) {
         _coverCache.removeWhere(

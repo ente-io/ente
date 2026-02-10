@@ -66,6 +66,8 @@ class UserService {
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
   late SharedPreferences _preferences;
+  StreamSubscription<TwoFactorStatusChangeEvent>?
+      _twoFactorStatusChangeSubscription;
 
   UsersGateway get _gateway => usersGateway;
 
@@ -86,7 +88,11 @@ class UserService {
         () => {setTwoFactor(fetchTwoFactorStatus: true).ignore()},
       );
     }
-    Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
+    if (_twoFactorStatusChangeSubscription != null) {
+      await _twoFactorStatusChangeSubscription!.cancel();
+    }
+    _twoFactorStatusChangeSubscription =
+        Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
       setTwoFactor(value: event.status);
     });
   }

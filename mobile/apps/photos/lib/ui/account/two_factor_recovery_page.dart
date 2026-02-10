@@ -27,6 +27,12 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
   final _recoveryKey = TextEditingController();
 
   @override
+  void dispose() {
+    _recoveryKey.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

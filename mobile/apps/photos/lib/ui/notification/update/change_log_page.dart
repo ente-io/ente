@@ -19,6 +19,14 @@ class ChangeLogPage extends StatefulWidget {
 }
 
 class _ChangeLogPageState extends State<ChangeLogPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
@@ -90,7 +98,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   }
 
   Widget _getChangeLog(BuildContext ctx) {
-    final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
@@ -135,10 +142,11 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
-        controller: scrollController,
+        controller: _scrollController,
         thumbVisibility: true,
         thickness: 2.0,
         child: ListView.builder(
+          controller: _scrollController,
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
