@@ -75,6 +75,15 @@ class FileMagicService {
         rethrow;
       }
 
+      if (files.length != 1) {
+        _logger.warning(
+          "public magic metadata conflict on bulk update, skipping per-file recovery",
+          e,
+          s,
+        );
+        rethrow;
+      }
+
       _logger.warning(
         "conflict while syncing public magic metadata, fetching latest metadata and retrying once",
         e,
