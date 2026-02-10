@@ -26,6 +26,9 @@ import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
 
+const kShowUnnamedIgnoredPersonEventSource =
+    "_AppBarWidgetState._showPersonUnnamedDelete";
+
 class PeopleAppBar extends StatefulWidget {
   final GalleryType type;
   final String? title;
@@ -605,7 +608,12 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         try {
           if (isUnnamedIgnoredPerson) {
             await PersonService.instance.deletePerson(person.remoteID);
-            Bus.instance.fire(PeopleChangedEvent());
+            Bus.instance.fire(
+              PeopleChangedEvent(
+                source: kShowUnnamedIgnoredPersonEventSource,
+                person: person,
+              ),
+            );
             shouldCloseDetailPage = true;
           } else {
             final updatedPerson = await PersonService.instance.updateAttributes(

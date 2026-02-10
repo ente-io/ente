@@ -71,6 +71,7 @@ class _PeoplePageState extends State<PeoplePage> {
   ValueNotifier<Set<String>>? _timelineNotifier;
   VoidCallback? _timelineListener;
   bool _memoryLanePrewarmStarted = false;
+  bool _isTryingToPopDeletedPersonPage = false;
 
   bool get _memoryLaneEnabled => flagService.facesTimeline;
 
@@ -80,6 +81,11 @@ class _PeoplePageState extends State<PeoplePage> {
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.source == kShowUnnamedIgnoredPersonEventSource &&
+          event.person?.remoteID == _person.remoteID) {
+        unawaited(_popDeletedPersonPageWhenCurrentRoute());
+        return;
+      }
       if (event.type == PeopleEventType.saveOrEditPerson) {
         if (event.person != null &&
             event.person!.remoteID == _person.remoteID) {
@@ -172,6 +178,28 @@ class _PeoplePageState extends State<PeoplePage> {
         frameCount: 6,
       ),
     );
+  }
+
+  Future<void> _popDeletedPersonPageWhenCurrentRoute() async {
+    if (_isTryingToPopDeletedPersonPage) {
+      return;
+    }
+    _isTryingToPopDeletedPersonPage = true;
+    try {
+      // Wait for any stacked dialog (e.g. confirmation) to close first.
+      for (var i = 0; i < 30; i++) {
+        if (!mounted) {
+          return;
+        }
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          await Navigator.of(context).maybePop();
+          return;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+      }
+    } finally {
+      _isTryingToPopDeletedPersonPage = false;
+    }
   }
 
   Future<void> _openMemoryLanePage() async {
