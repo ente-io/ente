@@ -634,9 +634,9 @@ func (c *FileController) UpdateMagicMetadata(ctx *gin.Context, req ente.UpdateMu
 	return nil
 }
 
-// GetPublicMagicMetadata returns latest file object with public magic metadata
-// for a file in the given collection if the actor has access to the collection.
-func (c *FileController) GetPublicMagicMetadata(ctx *gin.Context, fileID int64, collectionID int64) (*ente.File, error) {
+// GetFileInCollection returns latest file object for a file in the given
+// collection if the actor has access to the collection.
+func (c *FileController) GetFileInCollection(ctx *gin.Context, fileID int64, collectionID int64) (*ente.File, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
 	_, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: collectionID,

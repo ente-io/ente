@@ -180,7 +180,7 @@ class FileMagicService {
         continue;
       }
 
-      final latest = await _gateway.getPublicMagicMetadata(
+      final latest = await _gateway.getFileInCollection(
         fileID: fileID,
         collectionID: collectionID,
       );

@@ -417,9 +417,9 @@ func (h *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// GetPublicMagicMetadata returns latest file object (with public magic
-// metadata) for a single file in a given collection if caller has access.
-func (h *FileHandler) GetPublicMagicMetadata(c *gin.Context) {
+// GetFileInCollection returns latest file object for a single file in a given
+// collection if caller has access.
+func (h *FileHandler) GetFileInCollection(c *gin.Context) {
 	fileID, err := strconv.ParseInt(c.Query("fileID"), 10, 64)
 	if err != nil || fileID <= 0 {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "invalid fileID"))
@@ -431,7 +431,7 @@ func (h *FileHandler) GetPublicMagicMetadata(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.Controller.GetPublicMagicMetadata(c, fileID, collectionID)
+	resp, err := h.Controller.GetFileInCollection(c, fileID, collectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
