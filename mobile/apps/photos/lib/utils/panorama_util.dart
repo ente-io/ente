@@ -42,7 +42,7 @@ bool checkPanoramaFromXMP(Map<String, dynamic> xmpData) {
 
 // guardedCheckPanorama() method is used to check if the file is a panorama image.
 Future<void> guardedCheckPanorama(EnteFile file) async {
-  if (file.isPanorama() != null) {
+  if (!file.canEditMetaInfo || file.isPanorama() != null) {
     return;
   }
   _logger.info(

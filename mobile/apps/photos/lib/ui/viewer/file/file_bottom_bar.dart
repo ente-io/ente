@@ -120,7 +120,9 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.file.canBePanorama() && widget.file.isPanorama() == null) {
+    if (widget.file.canEditMetaInfo &&
+        widget.file.canBePanorama() &&
+        widget.file.isPanorama() == null) {
       if (lastFileGenID != widget.file.generatedID) {
         lastFileGenID = widget.file.generatedID;
         guardedCheckPanorama(widget.file).ignore();

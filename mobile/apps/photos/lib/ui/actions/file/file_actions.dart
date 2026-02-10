@@ -144,7 +144,7 @@ Future<void> showSingleFileDeleteSheet(
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
-  if (file.isUploaded && file.isPanorama() == null) {
+  if (file.canEditMetaInfo && file.isPanorama() == null) {
     guardedCheckPanorama(file).ignore();
   }
   Bus.instance.fire(
