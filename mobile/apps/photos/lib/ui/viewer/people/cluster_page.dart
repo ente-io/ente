@@ -17,6 +17,7 @@ import "package:photos/service_locator.dart" show isOfflineMode;
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/ui/components/banners/name_face_banner.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -223,31 +224,32 @@ class _ClusterPageState extends State<ClusterPage> {
       enableFileGrouping: widget.enableGrouping,
       initialFiles: files,
       header: widget.showNamingBanner &&
-              !isOfflineMode &&
               files.isNotEmpty &&
               !_isNamingBannerDismissed
-          ? SavePersonBanner(
-              faceWidget: PersonFaceWidget(
-                clusterID: widget.clusterID,
-              ),
-              text: AppLocalizations.of(context).savePerson,
-              subText: AppLocalizations.of(context).findThemQuickly,
-              primaryActionLabel: AppLocalizations.of(context).save,
-              secondaryActionLabel: AppLocalizations.of(context).merge,
-              onPrimaryTap: _handleSavePerson,
-              onSecondaryTap: _handleMergePerson,
-              onDismissed: () {
-                if (!mounted) {
-                  return;
-                }
-                setState(() {
-                  _isNamingBannerDismissed = true;
-                });
-              },
-              dismissibleKey: ValueKey(
-                "save-person-banner-${widget.clusterID}",
-              ),
-            )
+          ? isOfflineMode
+              ? const NameFaceBanner()
+              : SavePersonBanner(
+                  faceWidget: PersonFaceWidget(
+                    clusterID: widget.clusterID,
+                  ),
+                  text: AppLocalizations.of(context).savePerson,
+                  subText: AppLocalizations.of(context).findThemQuickly,
+                  primaryActionLabel: AppLocalizations.of(context).save,
+                  secondaryActionLabel: AppLocalizations.of(context).merge,
+                  onPrimaryTap: _handleSavePerson,
+                  onSecondaryTap: _handleMergePerson,
+                  onDismissed: () {
+                    if (!mounted) {
+                      return;
+                    }
+                    setState(() {
+                      _isNamingBannerDismissed = true;
+                    });
+                  },
+                  dismissibleKey: ValueKey(
+                    "save-person-banner-${widget.clusterID}",
+                  ),
+                )
           : null,
     );
     return GalleryBoundariesProvider(

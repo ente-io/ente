@@ -2592,5 +2592,19 @@
   "shareYourMemories": "Share your Memories",
   "shareYourMemoriesDesc": "Share your albums, create links, collect photos and drop a comment",
   "privateAndSecureBackups": "Private and Secure Backups",
-  "privateAndSecureBackupsDesc": "End-to-End encrypted, triple replication, open source, and independently audited"
+  "privateAndSecureBackupsDesc": "End-to-End encrypted, triple replication, open source, and independently audited",
+  "mlProgressBannerTitle": "Hang tight!",
+  "mlProgressBannerDescription": "Your photos are getting processed on device to detect faces, objects and more.",
+  "mlProgressBannerStatus": "{indexed} out of {total} photos processed",
+  "@mlProgressBannerStatus": {
+    "placeholders": {
+      "indexed": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "offlineFacesBannerTitle": "Want to save these faces?",
+  "offlineFacesBannerSubtitle": "Sign up to tag people and easily find them later.",
+  "offlineNameFaceBannerTitle": "Give this face a name",
+  "offlineNameFaceBannerSubtitle": "Sign up to tag them and easily find their photos later.",
+  "signUp": "Sign up"
 }

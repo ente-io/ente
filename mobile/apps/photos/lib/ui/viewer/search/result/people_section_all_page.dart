@@ -7,7 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/events/people_sort_order_change_event.dart";
-import "package:photos/generated/l10n.dart";
+import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -21,6 +21,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/banners/save_faces_banner.dart";
 import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
@@ -727,6 +728,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 showAllFaces && filteredExtraFaces.isNotEmpty;
             slivers.addAll(
               [
+                if (isOfflineMode)
+                  const SliverToBoxAdapter(
+                    child: SaveFacesBanner(),
+                  ),
                 (!userDismissedPersonGallerySuggestion &&
                         !widget.namedOnly &&
                         !_showingIgnoredPeople)

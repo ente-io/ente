@@ -34,15 +34,15 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
           color: colorScheme.backgroundColour,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Stack(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 220),
+                  Expanded(
                     child: Text(
                       l10n.offlineFacesBannerTitle,
                       textAlign: TextAlign.center,
@@ -56,67 +56,64 @@ class _SaveFacesBannerState extends State<SaveFacesBanner> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 250),
-                    child: Text(
-                      l10n.offlineFacesBannerSubtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: "Inter",
-                        fontWeight: FontWeight.w500,
-                        fontSize: 10,
-                        height: 16 / 10,
-                        color: colorScheme.textBase.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const LandingPageWidget(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.greenBase,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 18,
-                      ),
-                      child: Text(
-                        l10n.signUp,
-                        style: const TextStyle(
-                          fontFamily: "Montserrat",
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
-                          height: 12 / 10,
-                          color: Colors.white,
-                        ),
+                    onTap: _onDismiss,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCancel01,
+                        color: colorScheme.contentLight,
+                        size: 18,
+                        strokeWidth: 2,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            Positioned(
-              top: 0,
-              right: 16,
-              child: GestureDetector(
-                onTap: _onDismiss,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedCancel01,
-                    color: colorScheme.textFaint,
-                    size: 20,
-                    strokeWidth: 2,
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 250),
+              child: Text(
+                l10n.offlineFacesBannerSubtitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "Inter",
+                  fontWeight: FontWeight.w500,
+                  fontSize: 10,
+                  height: 16 / 10,
+                  color: colorScheme.contentLight,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const LandingPageWidget(),
+                  ),
+                );
+              },
+              child: Container(
+                width: 140,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colorScheme.greenBase,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 18,
+                ),
+                child: Text(
+                  l10n.signUp,
+                  style: const TextStyle(
+                    fontFamily: "Montserrat",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                    height: 12 / 10,
+                    color: Colors.white,
                   ),
                 ),
               ),

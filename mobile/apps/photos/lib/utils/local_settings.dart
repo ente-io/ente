@@ -74,6 +74,11 @@ class LocalSettings {
   static const _kAppModeEnvKey = "app_mode";
   static const _kOfflineGetStartedBannerDismissed =
       "ls.offline_get_started_banner_dismissed";
+  static const _kMLProgressBannerDismissed = "ls.ml_progress_banner_dismissed";
+  static const _kOfflineFacesBannerDismissed =
+      "ls.offline_faces_banner_dismissed";
+  static const _kOfflineNameFaceBannerDismissed =
+      "ls.offline_name_face_banner_dismissed";
 
   final SharedPreferences _prefs;
 
@@ -447,5 +452,26 @@ class LocalSettings {
 
   Future<void> setOfflineGetStartedBannerDismissed(bool value) async {
     await _prefs.setBool(_kOfflineGetStartedBannerDismissed, value);
+  }
+
+  bool get isMLProgressBannerDismissed =>
+      _prefs.getBool(_kMLProgressBannerDismissed) ?? false;
+
+  Future<void> setMLProgressBannerDismissed(bool value) async {
+    await _prefs.setBool(_kMLProgressBannerDismissed, value);
+  }
+
+  bool get isOfflineFacesBannerDismissed => false;
+      // _prefs.getBool(_kOfflineFacesBannerDismissed) ?? false;
+
+  Future<void> setOfflineFacesBannerDismissed(bool value) async {
+    await _prefs.setBool(_kOfflineFacesBannerDismissed, value);
+  }
+
+  bool get isOfflineNameFaceBannerDismissed => false;
+      // _prefs.getBool(_kOfflineNameFaceBannerDismissed) ?? false;
+
+  Future<void> setOfflineNameFaceBannerDismissed(bool value) async {
+    await _prefs.setBool(_kOfflineNameFaceBannerDismissed, value);
   }
 }
