@@ -54,6 +54,9 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
 
   Future<void> init() async {
     final data = await extractXmp(filePath: widget.file.path);
+    if (!mounted) {
+      return;
+    }
     double? cWidth =
         double.tryParse(data["GPano:CroppedAreaImageWidthPixels"] ?? "");
     double? cHeight =
