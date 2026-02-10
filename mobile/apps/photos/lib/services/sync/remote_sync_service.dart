@@ -53,6 +53,7 @@ class RemoteSyncService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
+  StreamSubscription<LocalPhotosUpdatedEvent>? _localPhotosUpdatedSubscription;
 
   // _hasCleanupStaleEntry is used to track if we have already cleaned up
   // statle db entries in this sync session.
@@ -86,7 +87,9 @@ class RemoteSyncService {
   void init(SharedPreferences preferences) {
     _prefs = preferences;
 
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
+    _localPhotosUpdatedSubscription?.cancel();
+    _localPhotosUpdatedSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
         if (_existingSync == null) {
           // ignore: unawaited_futures
