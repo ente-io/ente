@@ -16,8 +16,8 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
-import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
@@ -87,7 +87,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
@@ -100,16 +99,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       title = AppLocalizations.of(context).encryptionKeys;
     }
 
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final isFormValid = _passwordsMatch && _isPasswordValid;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -135,21 +128,27 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           : _getBody(colorScheme, textTheme),
       floatingActionButton: _volatilePassword != null
           ? null
-          : DynamicFAB(
-              isKeypadOpen: isKeypadOpen,
-              isFormValid: _passwordsMatch && _isPasswordValid,
-              buttonText: title,
-              onPressedFunction: () async {
-                if (widget.mode == PasswordEntryMode.set) {
-                  await _showRecoveryCodeDialog(_passwordController1.text);
-                } else {
-                  _updatePassword();
-                }
-                FocusScope.of(context).unfocus();
-              },
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ButtonWidgetV2(
+                buttonType: ButtonTypeV2.primary,
+                labelText: title,
+                isDisabled: !isFormValid,
+                onTap: isFormValid
+                    ? () async {
+                        if (widget.mode == PasswordEntryMode.set) {
+                          await _showRecoveryCodeDialog(
+                            _passwordController1.text,
+                          );
+                        } else {
+                          _updatePassword();
+                        }
+                        FocusScope.of(context).unfocus();
+                      }
+                    : null,
+              ),
             ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -354,7 +353,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 
@@ -412,7 +411,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         } catch (e, s) {
           _logger.severe(e, s);
           await dialog.hide();
-          await showGenericErrorDialog(context: context, error: e);
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
       }
 
@@ -431,14 +430,15 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       await dialog.hide();
       if (e is UnsupportedError) {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).insecureDevice,
-          AppLocalizations.of(context)
+          title: AppLocalizations.of(context).insecureDevice,
+          message: AppLocalizations.of(context)
               .sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
+          assetPath: 'assets/warning-green.png',
         );
       } else {
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }

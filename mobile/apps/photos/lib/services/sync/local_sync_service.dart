@@ -41,6 +41,8 @@ class LocalSyncService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   late Debouncer _changeCallbackDebouncer;
+  StreamSubscription<PermissionGrantedEvent>? _permissionGrantedSubscription;
+  bool _isChangeCallbackRegistered = false;
   final Lock _lock = Lock();
 
   static const kDbUpdationTimeKey = "db_updation_time";
@@ -59,7 +61,11 @@ class LocalSyncService {
     if (permissionService.hasGrantedPermissions()) {
       _registerChangeCallback();
     } else {
-      Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+      if (_permissionGrantedSubscription != null) {
+        await _permissionGrantedSubscription!.cancel();
+      }
+      _permissionGrantedSubscription =
+          Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
         _registerChangeCallback();
       });
     }
@@ -393,6 +399,10 @@ class LocalSyncService {
   }
 
   void _registerChangeCallback() {
+    if (_isChangeCallbackRegistered) {
+      return;
+    }
+    _isChangeCallbackRegistered = true;
     _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 500));
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.

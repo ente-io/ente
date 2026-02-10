@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -70,6 +71,7 @@ class _PeoplePageState extends State<PeoplePage> {
   ValueNotifier<Set<String>>? _timelineNotifier;
   VoidCallback? _timelineListener;
   bool _memoryLanePrewarmStarted = false;
+  bool _isTryingToPopDeletedPersonPage = false;
 
   bool get _memoryLaneEnabled => flagService.facesTimeline;
 
@@ -79,6 +81,11 @@ class _PeoplePageState extends State<PeoplePage> {
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.source == kShowUnnamedIgnoredPersonEventSource &&
+          event.person?.remoteID == _person.remoteID) {
+        unawaited(_popDeletedPersonPageWhenCurrentRoute());
+        return;
+      }
       if (event.type == PeopleEventType.saveOrEditPerson) {
         if (event.person != null &&
             event.person!.remoteID == _person.remoteID) {
@@ -137,7 +144,11 @@ class _PeoplePageState extends State<PeoplePage> {
       includeManualAssigned: true,
       sortOnTime: true,
     );
+    final previousCount = files?.length;
     files = sortedFiles;
+    if (mounted && previousCount != sortedFiles.length) {
+      setState(() {});
+    }
     return sortedFiles;
   }
 
@@ -169,6 +180,28 @@ class _PeoplePageState extends State<PeoplePage> {
     );
   }
 
+  Future<void> _popDeletedPersonPageWhenCurrentRoute() async {
+    if (_isTryingToPopDeletedPersonPage) {
+      return;
+    }
+    _isTryingToPopDeletedPersonPage = true;
+    try {
+      // Wait for any stacked dialog (e.g. confirmation) to close first.
+      for (var i = 0; i < 30; i++) {
+        if (!mounted) {
+          return;
+        }
+        if (ModalRoute.of(context)?.isCurrent ?? false) {
+          await Navigator.of(context).maybePop();
+          return;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+      }
+    } finally {
+      _isTryingToPopDeletedPersonPage = false;
+    }
+  }
+
   Future<void> _openMemoryLanePage() async {
     if (!_memoryLaneEnabled) return;
     _timelineLogger.info("banner_tap person=${_person.remoteID}");
@@ -177,6 +210,28 @@ class _PeoplePageState extends State<PeoplePage> {
       return;
     }
     setState(() {});
+  }
+
+  bool _shouldShowMemoryCountTitleForIgnoredPerson() {
+    final normalizedName = _person.data.name.trim();
+    return _person.data.isIgnored &&
+        (normalizedName.isEmpty ||
+            normalizedName == "(ignored)" ||
+            normalizedName == "(hidden)");
+  }
+
+  String _getPeoplePageTitle(BuildContext context) {
+    if (!_person.data.isIgnored) {
+      return _person.data.name;
+    }
+    if (_shouldShowMemoryCountTitleForIgnoredPerson()) {
+      final memoryCount = files?.length ?? 0;
+      return AppLocalizations.of(context).memoryCount(
+        count: memoryCount,
+        formattedCount: NumberFormat().format(memoryCount),
+      );
+    }
+    return _person.data.name;
   }
 
   @override
@@ -204,9 +259,7 @@ class _PeoplePageState extends State<PeoplePage> {
               ),
               child: PeopleAppBar(
                 GalleryType.peopleTag,
-                _person.data.isIgnored
-                    ? AppLocalizations.of(context).ignored
-                    : _person.data.name,
+                _getPeoplePageTitle(context),
                 _selectedFiles,
                 _person,
                 memoryLaneReady: memoryLaneReady,

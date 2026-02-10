@@ -44,6 +44,12 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   }
 
   @override
+  void dispose() {
+    _debouncer.cancelDebounceTimer();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final Widget stateIcon = _stateIcon(enteColorScheme);

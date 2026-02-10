@@ -9,8 +9,8 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:styled_text/styled_text.dart";
@@ -73,18 +73,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
-
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -104,26 +94,30 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("createAccountButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _isFormValid(),
-        buttonText: AppLocalizations.of(context).createAccount,
-        onPressedFunction: () async {
-          _config.setVolatilePassword(_passwordController1.text);
-          await UserService.instance.setEmail(_email!);
-          await UserService.instance.setRefSource(_referralSource);
-          await UserService.instance.sendOtt(
-            context,
-            _email!,
-            isCreateAccountScreen: true,
-            purpose: "signup",
-          );
-          FocusScope.of(context).unfocus();
-        },
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("createAccountButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).createAccount,
+          isDisabled: !_isFormValid(),
+          onTap: _isFormValid()
+              ? () async {
+                  _config.setVolatilePassword(_passwordController1.text);
+                  await UserService.instance.setEmail(_email!);
+                  await UserService.instance.setRefSource(_referralSource);
+                  await UserService.instance.sendOtt(
+                    context,
+                    _email!,
+                    isCreateAccountScreen: true,
+                    purpose: "signup",
+                  );
+                  FocusScope.of(context).unfocus();
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -260,6 +254,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           ),
           const SizedBox(height: 16),
           _getTOSAgreement(colorScheme, textTheme),
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -302,7 +297,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       child: Row(
         children: [
           Checkbox(
-            fillColor: WidgetStateProperty.all(colorScheme.greenBase),
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return colorScheme.greenBase;
+              }
+              return null;
+            }),
             value: _hasAgreedToTOS,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
