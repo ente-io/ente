@@ -607,12 +607,13 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   Future<void> _showPerson(BuildContext context) async {
     final isUnnamedIgnoredPerson = _isLegacyIgnoredName(person.data.name);
     var shouldCloseDetailPage = false;
-    await showChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: AppLocalizations.of(
         context,
       ).areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
       firstButtonLabel: AppLocalizations.of(context).yesShowPerson,
+      isDismissible: false,
       firstButtonOnTap: () async {
         try {
           if (isUnnamedIgnoredPerson) {
@@ -644,13 +645,14 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               ),
             );
           }
-          Navigator.of(context).pop();
         } catch (e, s) {
           _logger.severe('Unignoring/showing person failed', e, s);
         }
       },
     );
-    if (!mounted || !shouldCloseDetailPage) {
+    if (!mounted ||
+        result?.action != ButtonAction.first ||
+        !shouldCloseDetailPage) {
       return;
     }
     await Navigator.of(context).maybePop();
