@@ -51,15 +51,15 @@ class _PeopleSelectionActionWidgetState
     super.dispose();
   }
 
-  List<String> _getSelectedPersonIds() {
+  List<String> _getSelectedPersonIds(Map<String, PersonEntity> personMap) {
     return widget.selectedPeople.personIds
-        .where((id) => !id.startsWith('cluster_'))
+        .where((id) => !id.startsWith('cluster_') && personMap.containsKey(id))
         .toList();
   }
 
-  List<String> _getSelectedClusterIds() {
+  List<String> _getSelectedClusterIds(Map<String, PersonEntity> personMap) {
     return widget.selectedPeople.personIds
-        .where((id) => id.startsWith('cluster_'))
+        .where((id) => id.startsWith('cluster_') || !personMap.containsKey(id))
         .toList();
   }
 
@@ -92,8 +92,8 @@ class _PeopleSelectionActionWidgetState
         }
         final personMap = snapshot.data!;
         final List<SelectionActionButton> items = [];
-        final selectedPersonIds = _getSelectedPersonIds();
-        final selectedClusterIds = _getSelectedClusterIds();
+        final selectedPersonIds = _getSelectedPersonIds(personMap);
+        final selectedClusterIds = _getSelectedClusterIds(personMap);
         final onlyOnePerson =
             selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
         final onlyPersonSelected =
@@ -127,8 +127,11 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.every(
               (id) => personMap[id]?.data.hideFromMemories ?? false,
             );
+        final bool hasNonIgnoredSelectedPerson = selectedPersonIds.any(
+          (id) => !(personMap[id]?.data.isIgnored ?? true),
+        );
         final bool showIgnoreAction =
-            selectedClusterIds.isNotEmpty && selectedPersonIds.isEmpty;
+            selectedClusterIds.isNotEmpty || hasNonIgnoredSelectedPerson;
         final bool hasVisibleAction = showEditAction ||
             showReviewAction ||
             showIgnoreAction ||
@@ -262,10 +265,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onEditPerson() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.length != 1) return;
     final personID = selectedPersonIds.first;
-    final personMap = await personEntitiesMapFuture;
     final person = personMap[personID];
     if (person == null) return;
 
@@ -281,10 +284,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onReviewSuggestion() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.length != 1) return;
     final personID = selectedPersonIds.first;
-    final personMap = await personEntitiesMapFuture;
     final person = personMap[personID];
     if (person == null) return;
 
@@ -296,7 +299,8 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _autoAddToAlbum() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.isEmpty) return;
     showCollectionActionSheet(
       context,
@@ -307,10 +311,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _updatePinState(bool shouldPin) async {
-    final selectedPersonIds = _getSelectedPersonIds();
-    if (selectedPersonIds.isEmpty) return;
     try {
       final personMap = await personEntitiesMapFuture;
+      final selectedPersonIds = _getSelectedPersonIds(personMap);
+      if (selectedPersonIds.isEmpty) return;
       for (final personID in selectedPersonIds) {
         final person = personMap[personID];
         if (person == null || person.data.name.isEmpty) continue;
@@ -329,10 +333,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _updateHideFromMemoriesState(bool shouldHide) async {
-    final selectedPersonIds = _getSelectedPersonIds();
-    if (selectedPersonIds.isEmpty) return;
     try {
       final personMap = await personEntitiesMapFuture;
+      final selectedPersonIds = _getSelectedPersonIds(personMap);
+      if (selectedPersonIds.isEmpty) return;
       for (final personID in selectedPersonIds) {
         final person = personMap[personID];
         if (person == null || person.data.name.isEmpty) continue;
@@ -351,10 +355,10 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onResetPerson() async {
-    final selectedPersonIds = _getSelectedPersonIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
     if (selectedPersonIds.length != 1) return;
     final personID = selectedPersonIds.first;
-    final personMap = await personEntitiesMapFuture;
     final person = personMap[personID];
     if (person == null) return;
 
@@ -375,8 +379,9 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onIgnore() async {
-    final selectedPersonIds = _getSelectedPersonIds();
-    final selectedClusterIds = _getSelectedClusterIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
+    final selectedClusterIds = _getSelectedClusterIds(personMap);
     if (selectedPersonIds.isEmpty && selectedClusterIds.isEmpty) return;
     final multiple = (selectedPersonIds.length + selectedClusterIds.length) > 1;
 
@@ -394,12 +399,11 @@ class _PeopleSelectionActionWidgetState
           for (final clusterID in selectedClusterIds) {
             await ClusterFeedbackService.instance.ignoreCluster(clusterID);
           }
-          final personMap = await personEntitiesMapFuture;
           for (final personID in selectedPersonIds) {
             final person = personMap[personID];
-            if (person == null) continue;
+            if (person == null || person.data.isIgnored) continue;
             final ignoredPerson = person.copyWith(
-              data: person.data.copyWith(name: "", isHidden: true),
+              data: person.data.copyWith(isHidden: true),
             );
             await PersonService.instance.updatePerson(ignoredPerson);
           }
@@ -413,11 +417,11 @@ class _PeopleSelectionActionWidgetState
   }
 
   Future<void> _onMerge() async {
-    final selectedPersonIds = _getSelectedPersonIds();
-    final selectedClusterIds = _getSelectedClusterIds();
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
+    final selectedClusterIds = _getSelectedClusterIds(personMap);
     if (selectedClusterIds.isEmpty) return;
 
-    final personMap = await personEntitiesMapFuture;
     if (!mounted) return;
     final namedSelectedPersonIds =
         _getNamedSelectedPersonIds(selectedPersonIds, personMap);

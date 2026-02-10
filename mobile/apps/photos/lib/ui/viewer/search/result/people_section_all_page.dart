@@ -517,6 +517,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       _sortFaces(normalFaces);
       _sortFaces(extraFaces);
     }
+    if (_showingIgnoredPeople) {
+      _prioritizeNamedIgnoredPeople(normalFaces);
+    }
     final showAllFaces = _showingAllFaces || _showingIgnoredPeople;
     final results =
         showAllFaces ? [...normalFaces, ...extraFaces] : normalFaces;
@@ -578,6 +581,35 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     return key == PeopleSortKey.name ||
         key == PeopleSortKey.lastUpdated ||
         key == PeopleSortKey.mostPhotos;
+  }
+
+  bool _isUnnamedIgnoredDisplayName(String name) {
+    final normalizedName = name.trim().toLowerCase();
+    return normalizedName.isEmpty ||
+        normalizedName == "(hidden)" ||
+        normalizedName == "(ignored)";
+  }
+
+  void _prioritizeNamedIgnoredPeople(List<GenericSearchResult> faces) {
+    if (faces.length < 2) {
+      return;
+    }
+
+    final namedIgnoredPeople = <GenericSearchResult>[];
+    final unnamedIgnoredPeople = <GenericSearchResult>[];
+
+    for (final face in faces) {
+      if (_isUnnamedIgnoredDisplayName(face.name())) {
+        unnamedIgnoredPeople.add(face);
+      } else {
+        namedIgnoredPeople.add(face);
+      }
+    }
+
+    faces
+      ..clear()
+      ..addAll(namedIgnoredPeople)
+      ..addAll(unnamedIgnoredPeople);
   }
 
   void _sortFaces(List<GenericSearchResult> faces) {
@@ -916,6 +948,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             }
             _sortFaces(normalFaces);
             _sortFaces(extraFaces);
+            if (_showingIgnoredPeople) {
+              _prioritizeNamedIgnoredPeople(normalFaces);
+            }
           });
           unawaited(_persistSortPreferences());
         },
