@@ -171,13 +171,17 @@ impl VectorDB {
                 .search(query, count)
                 .expect("Failed to search vectors");
 
-            let should_expand =
-                count < index_size && matches.distances.iter().all(|d| *d <= max_distance);
+            let should_expand = count < index_size
+                && matches
+                    .distances
+                    .last()
+                    .map(|d| *d <= max_distance)
+                    .unwrap_or(false);
             if should_expand {
                 continue;
             }
 
-            return Self::retain_matches_within_distance(
+            return Self::truncate_sorted_matches_within_distance(
                 matches.keys,
                 matches.distances,
                 max_distance,
@@ -189,7 +193,7 @@ impl VectorDB {
                 .index
                 .search(query, index_size)
                 .expect("Failed to search vectors");
-            return Self::retain_matches_within_distance(
+            return Self::truncate_sorted_matches_within_distance(
                 matches.keys,
                 matches.distances,
                 max_distance,
@@ -199,7 +203,7 @@ impl VectorDB {
         (Vec::new(), Vec::new())
     }
 
-    fn retain_matches_within_distance(
+    fn truncate_sorted_matches_within_distance(
         mut keys: Vec<u64>,
         mut distances: Vec<f32>,
         max_distance: f32,
@@ -208,19 +212,9 @@ impl VectorDB {
         keys.truncate(aligned_len);
         distances.truncate(aligned_len);
 
-        let mut write_idx = 0;
-        for read_idx in 0..aligned_len {
-            if distances[read_idx] <= max_distance {
-                if write_idx != read_idx {
-                    keys[write_idx] = keys[read_idx];
-                    distances[write_idx] = distances[read_idx];
-                }
-                write_idx += 1;
-            }
-        }
-
-        keys.truncate(write_idx);
-        distances.truncate(write_idx);
+        let keep_len = distances.partition_point(|distance| *distance <= max_distance);
+        keys.truncate(keep_len);
+        distances.truncate(keep_len);
         (keys, distances)
     }
 
