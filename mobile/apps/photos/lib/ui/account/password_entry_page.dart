@@ -17,6 +17,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
@@ -352,7 +353,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 
@@ -410,7 +411,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         } catch (e, s) {
           _logger.severe(e, s);
           await dialog.hide();
-          await showGenericErrorDialog(context: context, error: e);
+          await showGenericErrorBottomSheet(context: context, error: e);
         }
       }
 
@@ -429,14 +430,15 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       await dialog.hide();
       if (e is UnsupportedError) {
         // ignore: unawaited_futures
-        showErrorDialog(
+        showAlertBottomSheet(
           context,
-          AppLocalizations.of(context).insecureDevice,
-          AppLocalizations.of(context)
+          title: AppLocalizations.of(context).insecureDevice,
+          message: AppLocalizations.of(context)
               .sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
+          assetPath: 'assets/warning-green.png',
         );
       } else {
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorBottomSheet(context: context, error: e);
       }
     }
   }

@@ -15,6 +15,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/two_factor_authentication_page.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -72,16 +73,17 @@ class _PasskeyPageState extends State<PasskeyPage> {
       showToast(context, context.l10n.passKeyPendingVerification);
       return;
     } on PassKeySessionExpiredError {
-      await showErrorDialog(
+      await showAlertBottomSheet(
         context,
-        context.l10n.loginSessionExpired,
-        context.l10n.loginSessionExpiredDetails,
+        title: context.l10n.loginSessionExpired,
+        message: context.l10n.loginSessionExpiredDetails,
+        assetPath: 'assets/warning-green.png',
       );
       Navigator.of(context).pop();
       return;
     } catch (e, s) {
       _logger.severe("failed to check status", e, s);
-      showGenericErrorDialog(context: context, error: e).ignore();
+      showGenericErrorBottomSheet(context: context, error: e).ignore();
       return;
     }
     await UserService.instance.onPassKeyVerified(context, response);
@@ -127,7 +129,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
       }
     } catch (e, s) {
       _logger.severe('passKey: failed to handle deeplink', e, s);
-      showGenericErrorDialog(context: context, error: e).ignore();
+      showGenericErrorBottomSheet(context: context, error: e).ignore();
     }
   }
 
@@ -199,7 +201,8 @@ class _PasskeyPageState extends State<PasskeyPage> {
                   await checkStatus();
                 } catch (e) {
                   debugPrint('failed to check status $e');
-                  showGenericErrorDialog(context: context, error: e).ignore();
+                  showGenericErrorBottomSheet(context: context, error: e)
+                      .ignore();
                 }
               },
             ),

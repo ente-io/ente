@@ -5,9 +5,9 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
-import 'package:photos/utils/dialog_util.dart';
 
 class TwoFactorRecoveryPage extends StatefulWidget {
   final String sessionID;
@@ -124,12 +124,13 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                 buttonSize: ButtonSizeV2.small,
                 onTap: () async {
                   // ignore: unawaited_futures
-                  showErrorDialog(
+                  showAlertBottomSheet(
                     context,
-                    AppLocalizations.of(context).contactSupport,
-                    AppLocalizations.of(context).dropSupportEmail(
+                    title: AppLocalizations.of(context).contactSupport,
+                    message: AppLocalizations.of(context).dropSupportEmail(
                       supportEmail: "support@ente.io",
                     ),
+                    assetPath: 'assets/warning-green.png',
                   );
                 },
               ),

@@ -3,6 +3,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/password_entry_page.dart';
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 import 'package:photos/ui/notification/toast.dart';
@@ -85,10 +86,12 @@ class _RecoveryPageState extends State<RecoveryPage> {
               buttonSize: ButtonSizeV2.small,
               onTap: () async {
                 // ignore: unawaited_futures
-                showErrorDialog(
+                showAlertBottomSheet(
                   context,
-                  AppLocalizations.of(context).sorry,
-                  AppLocalizations.of(context).noRecoveryKeyNoDecryption,
+                  title: AppLocalizations.of(context).sorry,
+                  message:
+                      AppLocalizations.of(context).noRecoveryKeyNoDecryption,
+                  assetPath: 'assets/warning-green.png',
                 );
               },
             ),
@@ -132,10 +135,11 @@ class _RecoveryPageState extends State<RecoveryPage> {
         errMessage = '$errMessage : ${e.message}';
       }
       // ignore: unawaited_futures
-      showErrorDialog(
+      showAlertBottomSheet(
         context,
-        AppLocalizations.of(context).incorrectRecoveryKeyTitle,
-        errMessage,
+        title: AppLocalizations.of(context).incorrectRecoveryKeyTitle,
+        message: errMessage,
+        assetPath: 'assets/warning-green.png',
       );
     }
   }

@@ -114,15 +114,11 @@ class _LoginPageState extends State<LoginPage> {
               autoFocus: true,
               isRequired: true,
               onChange: _onEmailChanged,
-              message: _showValidationMessage
-                  ? (_emailIsValid
-                      ? AppLocalizations.of(context).validEmailAddress
-                      : AppLocalizations.of(context).invalidEmailAddress)
+              message: _showValidationMessage && !_emailIsValid
+                  ? AppLocalizations.of(context).invalidEmailAddress
                   : null,
-              messageType: _showValidationMessage
-                  ? (_emailIsValid
-                      ? TextInputMessageType.success
-                      : TextInputMessageType.alert)
+              messageType: _showValidationMessage && !_emailIsValid
+                  ? TextInputMessageType.alert
                   : TextInputMessageType.guide,
             ),
           ],

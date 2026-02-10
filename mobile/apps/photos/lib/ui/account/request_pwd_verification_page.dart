@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -113,10 +114,11 @@ class _RequestPasswordVerificationPageState
                       widget.onPasswordError!();
                     } else {
                       // ignore: unawaited_futures
-                      showErrorDialog(
+                      showAlertBottomSheet(
                         context,
-                        context.l10n.incorrectPasswordTitle,
-                        context.l10n.pleaseTryAgain,
+                        title: context.l10n.incorrectPasswordTitle,
+                        message: context.l10n.pleaseTryAgain,
+                        assetPath: 'assets/warning-green.png',
                       );
                     }
                   }
