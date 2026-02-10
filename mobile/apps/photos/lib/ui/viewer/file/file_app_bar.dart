@@ -289,7 +289,7 @@ class FileAppBarState extends State<FileAppBar> {
         Center(child: FavoriteWidget(widget.file)),
       );
     }
-    if (!isFileUploaded) {
+    if (!isFileUploaded && !isOfflineMode) {
       _actions.add(
         UploadIconWidget(
           file: widget.file,

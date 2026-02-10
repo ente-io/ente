@@ -231,6 +231,15 @@ Ente backs up a single primary full-resolution image from the Burst. Additional 
 
 iCloud Shared Albums store compressed copies, not the original files. Because of this, Ente sees the shared-album copy as a different file, so it gets backed up separately and appears as a duplicate.
 
+### Why are 2 copies of the same photo seen, one synced and one unsynced (slashed cloud icon) during device migration? {#migration-duplicate-photos}
+
+During migration, Ente rechecks all local photos against what is already uploaded. While this scan is in progress, the same photo can appear twice:
+
+- One as synced (already uploaded)
+- One as unsynced (slashed cloud), representing the local copy being verified
+
+This is temporary. Once verification finishes, the duplicate view disappears and only the synced photo remains.
+
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}

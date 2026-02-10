@@ -7,6 +7,7 @@ import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/device_album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import 'package:photos/models/search/search_result.dart';
@@ -14,6 +15,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/device_folder_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 
@@ -222,6 +224,18 @@ class SearchResultsWidgetGenerator extends StatelessWidget {
           ),
         ),
       );
+    } else if (result is DeviceAlbumSearchResult) {
+      final deviceResult = result as DeviceAlbumSearchResult;
+      return SearchResultWidget(
+        result,
+        resultCount: Future.value(deviceResult.deviceCollection.count),
+        borderRadius: borderRadius,
+        showTypeLabel: showTypeLabel,
+        onResultTap: () => routeToPage(
+          context,
+          DeviceFolderPage(deviceResult.deviceCollection),
+        ),
+      );
     } else if (result is GenericSearchResult) {
       return SearchResultWidget(
         result,
@@ -265,6 +279,7 @@ _SearchResultsSection _sectionForResult(SearchResult result) {
     case ResultType.shared:
       return _SearchResultsSection.shared;
     case ResultType.collection:
+    case ResultType.deviceCollection:
       return _SearchResultsSection.albums;
     case ResultType.magic:
       return _SearchResultsSection.magic;

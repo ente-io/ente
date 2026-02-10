@@ -37,6 +37,13 @@ class FeedItem {
   /// Timestamp of the most recent activity (microseconds since epoch).
   final int createdAt;
 
+  /// Whether the target of this action is owned by the current user.
+  ///
+  /// For photoLike/comment: whether the user owns the file.
+  /// For reply: whether the user wrote the parent comment.
+  /// For commentLike/replyLike: whether the user wrote the liked comment/reply.
+  final bool isOwnedByCurrentUser;
+
   const FeedItem({
     required this.type,
     required this.collectionID,
@@ -45,6 +52,7 @@ class FeedItem {
     required this.actorUserIDs,
     required this.actorAnonIDs,
     required this.createdAt,
+    required this.isOwnedByCurrentUser,
   });
 
   /// Number of users who performed this action.

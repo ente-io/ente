@@ -25,7 +25,8 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final _logger = Logger("NotificationService");
-  void Function(NotificationResponse notificationResponse)? _onNotificationTapped;
+  void Function(NotificationResponse notificationResponse)?
+      _onNotificationTapped;
   bool _pluginInitialized = false;
   bool _launchDetailsHandled = false;
 

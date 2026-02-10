@@ -667,7 +667,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                   FocusScope.of(context).unfocus();
                 }
               : null,
-          behavior: HitTestBehavior.opaque,
+          behavior: HitTestBehavior.translucent,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Form(

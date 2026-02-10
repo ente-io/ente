@@ -20,6 +20,7 @@ import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 import "package:photos/ui/viewer/search_tab/albums_section.dart";
+import "package:photos/ui/viewer/search_tab/device_albums_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
@@ -116,7 +117,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 .allSectionsExamplesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                if (snapshot.data!.every((element) => element.isEmpty)) {
+                // In offline mode, skip the empty state check since DeviceAlbumsSection
+                // fetches its own data and may have albums to show
+                if (!isOfflineMode &&
+                    snapshot.data!.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
                     child: SearchTabEmptyState(),
@@ -141,7 +145,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     final sectionType = searchTypes[index];
                     switch (sectionType) {
                       case SectionType.face:
-                        if (!flagService.hasGrantedMLConsent) {
+                        if (!hasGrantedMLConsent) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
@@ -149,11 +153,17 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
+                        if (isOfflineMode) {
+                          return const DeviceAlbumsSection();
+                        }
                         return AlbumsSection(
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.ritual:
+                        if (isOfflineMode) {
+                          return const SizedBox.shrink();
+                        }
                         return const _RitualsDiscoverySection();
                       case SectionType.wrapped:
                         return ValueListenableBuilder<WrappedEntryState>(

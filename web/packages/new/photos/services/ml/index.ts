@@ -3,6 +3,7 @@
  */
 
 import { proxy, transfer } from "comlink";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
@@ -953,9 +954,15 @@ export const addManualFileAssignmentsToPerson = async (
  * Return suggestions for the given {@link person}.
  *
  * The suggestion computation happens in a web worker.
- */
+ *
+ * Since the computation is happening in a web worker, and it doesn't
+ * have access to any localStorage, we need to pass the currentUserID explicitly.
+ * for the isHiddenCollection checks in the process.
+ *  */
 export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
-    worker().then((w) => w.suggestionsAndChoicesForPerson(person));
+    worker().then((w) =>
+        w.suggestionsAndChoicesForPerson(person, ensureLocalUser().id),
+    );
 
 /**
  * Implementation for the "save" action on the SuggestionsDialog.

@@ -438,6 +438,10 @@ class PersonService {
   Future<bool> fetchRemoteClusterFeedback({
     bool skipClusterUpdateIfNoChange = true,
   }) async {
+    if (isOfflineMode) {
+      logger.finest("Skip fetching remote clusters in offline mode");
+      return false;
+    }
     final int changedEntities =
         await entityService.syncEntity(EntityType.cgroup);
     final bool changed = changedEntities > 0;
