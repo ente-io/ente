@@ -14,6 +14,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/gradient_button.dart";
+import "package:photos/ui/components/alert_bottom_sheet.dart";
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -249,14 +250,20 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Future<void> _showPermissionDeniedDialog() async {
-    await showChoiceDialog(
+    await showAlertBottomSheet(
       context,
       title: context.l10n.allowPermTitle,
-      body: context.l10n.allowPermBody,
-      firstButtonLabel: context.l10n.openSettings,
-      firstButtonOnTap: () async {
-        await PhotoManager.openSetting();
-      },
+      message: context.l10n.allowPermBody,
+      assetPath: 'assets/ducky_smart_feature.png',
+      buttons: [
+        ButtonWidgetV2(
+          buttonType: ButtonTypeV2.primary,
+          labelText: context.l10n.openSettings,
+          onTap: () async {
+            await PhotoManager.openSetting();
+          },
+        ),
+      ],
     );
   }
 

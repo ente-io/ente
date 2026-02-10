@@ -15,7 +15,6 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/account/recovery_page.dart';
-import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart'
     show ButtonAction;
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
@@ -59,20 +58,12 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final isFormValid = _passwordController.text.isNotEmpty;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -92,18 +83,22 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("verifyPasswordButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: AppLocalizations.of(context).logInLabel,
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          await verifyPassword(_passwordController.text);
-        },
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("verifyPasswordButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).logInLabel,
+          isDisabled: !isFormValid,
+          onTap: isFormValid
+              ? () async {
+                  FocusScope.of(context).unfocus();
+                  await verifyPassword(_passwordController.text);
+                }
+              : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

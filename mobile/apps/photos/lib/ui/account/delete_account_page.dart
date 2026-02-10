@@ -273,7 +273,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       isDismissible: false,
     );
     if (choice!.action == ButtonAction.error) {
-      await showGenericErrorDialog(context: context, error: choice.exception);
+      await showGenericErrorBottomSheet(
+        context: context,
+        error: choice.exception,
+      );
     }
   }
 
@@ -303,7 +306,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       );
     } catch (e, s) {
       Logger("DeleteAccount").severe("failed to delete", e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorBottomSheet(context: context, error: e);
     }
   }
 }
