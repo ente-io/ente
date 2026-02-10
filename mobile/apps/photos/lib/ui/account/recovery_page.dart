@@ -21,7 +21,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
 
   @override
   void dispose() {
-    _recoveryKey.dispose();
+    _recoveryKeyController.dispose();
     super.dispose();
   }
 

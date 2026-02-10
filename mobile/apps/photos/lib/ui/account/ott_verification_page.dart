@@ -54,12 +54,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   }
 
   @override
-  void dispose() {
-    _verificationCodeController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);

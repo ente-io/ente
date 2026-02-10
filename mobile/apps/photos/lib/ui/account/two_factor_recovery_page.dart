@@ -39,12 +39,6 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
   }
 
   @override
-  void dispose() {
-    _recoveryKey.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);

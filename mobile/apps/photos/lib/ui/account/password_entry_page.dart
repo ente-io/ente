@@ -86,15 +86,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   @override
-  void dispose() {
-    _passwordController1.dispose();
-    _passwordController2.dispose();
-    _password1FocusNode.dispose();
-    _password2FocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final colorScheme = getEnteColorScheme(context);
