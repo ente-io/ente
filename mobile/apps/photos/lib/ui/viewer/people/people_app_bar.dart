@@ -594,6 +594,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
   Future<void> _showPerson(BuildContext context) async {
     final isUnnamedIgnoredPerson = _isLegacyIgnoredName(person.data.name);
+    var shouldCloseDetailPage = false;
     await showChoiceDialog(
       context,
       title: AppLocalizations.of(
@@ -605,6 +606,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           if (isUnnamedIgnoredPerson) {
             await PersonService.instance.deletePerson(person.remoteID);
             Bus.instance.fire(PeopleChangedEvent());
+            shouldCloseDetailPage = true;
           } else {
             final updatedPerson = await PersonService.instance.updateAttributes(
               person.remoteID,
@@ -631,6 +633,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         }
       },
     );
+    if (!mounted || !shouldCloseDetailPage) {
+      return;
+    }
+    await Navigator.of(context).maybePop();
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {
