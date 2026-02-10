@@ -9,7 +9,6 @@ import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:exif_reader/exif_reader.dart";
 import 'package:logging/logging.dart';
-import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,6 +24,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/src/rust/api/motion_photo_api.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
@@ -199,11 +199,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   int? motionPhotoStartingIndex;
   if (Platform.isAndroid && asset.type == AssetType.image) {
     try {
-      motionPhotoStartingIndex = await Computer.shared().compute(
-        motionVideoIndex,
-        param: {'path': sourceFile.path},
-        taskName: 'motionPhotoIndex',
-      );
+      motionPhotoStartingIndex =
+          await motionVideoIndex({'path': sourceFile.path});
     } catch (e) {
       _logger.severe('error while detecthing motion photo start index', e);
     }
@@ -224,7 +221,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
 
 Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
   final String path = args['path'];
-  return (await MotionPhotos(path).getMotionVideoIndex())?.start;
+  final videoIndex = await getMotionVideoIndex(filePath: path);
+  return videoIndex?.start.toInt();
 }
 
 Future<void> _computeZip(Map<String, dynamic> args) async {

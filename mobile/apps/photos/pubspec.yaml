@@ -153,8 +153,6 @@ dependencies:
       url: https://github.com/ente-io/mobile_ocr
       ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
   modal_bottom_sheet: ^3.0.0
-  motion_photos:
-    git: "https://github.com/ente-io/motion_photo.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: # no updates in git, replace package
