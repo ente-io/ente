@@ -73,7 +73,7 @@ struct SettingsView: View {
                     Button("Close") { dismiss() }
                 }
             }
-            .alert("Sign out of Ente SU?", isPresented: $showSignOutConfirm) {
+            .alert("Sign out of Ensu?", isPresented: $showSignOutConfirm) {
                 Button("Sign Out", role: .destructive) {
                     onSignOut()
                 }
@@ -117,6 +117,7 @@ struct SettingsView: View {
     }
 
     private var shouldShowSignInRow: Bool {
+        guard EnsuFeatureFlags.enableSignIn else { return false }
         guard !isLoggedIn else { return false }
         guard !trimmedQuery.isEmpty else { return true }
         let q = trimmedQuery.lowercased()

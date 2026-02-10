@@ -36,6 +36,7 @@ internal fun EnsuTopBar(
     sessionTitle: String?,
     showBrand: Boolean,
     isLoggedIn: Boolean,
+    signInEnabled: Boolean,
     attachmentDownloads: List<AttachmentDownloadItem>,
     attachmentDownloadProgress: Int?,
     modelDownloadStatus: String?,
@@ -71,7 +72,7 @@ internal fun EnsuTopBar(
             val isLoading = modelDownloadStatus?.contains("Loading", ignoreCase = true) == true
             val showModelProgress = isLoading
 
-            if (!isLoggedIn) {
+            if (!isLoggedIn && signInEnabled) {
                 if (showModelProgress) {
                     ModelProgressIndicator(
                         isLoading = isLoading,

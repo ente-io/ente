@@ -103,16 +103,13 @@ fun HomeView(
     var lastDeveloperTapAt by remember { mutableStateOf<Long?>(null) }
     var showDeveloperDialog by remember { mutableStateOf(false) }
 
-    val handleSignInRequest: () -> Unit = {
-        if (EnsuFeatureFlags.enableSignIn) {
-            isShowingAuth = true
-        } else {
-            showSignInComingSoon = true
-        }
+    val handleSignInRequest: () -> Unit = handle@{
+        if (!EnsuFeatureFlags.enableSignIn) return@handle
+        isShowingAuth = true
     }
 
     val handleDeveloperTap: () -> Unit = handle@{
-        if (!EnsuFeatureFlags.enableSignIn) return@handle
+        if (!EnsuFeatureFlags.enableDeveloperTools) return@handle
         // Don't allow switching endpoints for logged-in users.
         if (appState.auth.isLoggedIn) return@handle
 

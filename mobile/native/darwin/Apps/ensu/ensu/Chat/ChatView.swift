@@ -242,7 +242,7 @@ struct ChatView: View {
             ChatAppBar(
                 sessionTitle: viewModel.currentSessionId.map { viewModel.sessionTitle(for: $0) } ?? "New chat",
                 showBrand: viewModel.messages.isEmpty,
-                showSignIn: !appState.isLoggedIn,
+                showSignIn: EnsuFeatureFlags.enableSignIn && !appState.isLoggedIn,
                 showsMenuButton: showsMenuButton,
                 attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
                 modelDownloadState: viewModel.downloadToast,
@@ -482,7 +482,7 @@ struct ChatView: View {
     }
 
     private func handleDeveloperTap() {
-        guard EnsuFeatureFlags.enableSignIn else { return }
+        guard EnsuFeatureFlags.enableDeveloperTools else { return }
         // Don't allow switching endpoints for logged-in users.
         guard !appState.isLoggedIn else { return }
 
