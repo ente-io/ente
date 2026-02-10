@@ -19,7 +19,6 @@ Future<T?> showBaseBottomSheet<T>(
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
     builder: (context) => BaseBottomSheet(
@@ -69,7 +68,7 @@ class BaseBottomSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? colorScheme.backgroundElevated2,
+        color: backgroundColor ?? colorScheme.fill,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -121,7 +120,7 @@ class BottomSheetCloseButton extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: colorScheme.fillFaint,
+          color: colorScheme.fillDark,
         ),
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedCancel01,

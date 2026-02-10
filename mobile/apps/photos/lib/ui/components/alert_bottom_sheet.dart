@@ -17,7 +17,6 @@ Future<T?> showAlertBottomSheet<T>(
     isScrollControlled: true,
     isDismissible: isDismissible,
     enableDrag: isDismissible,
-    backgroundColor: Colors.transparent,
     builder: (context) => AlertBottomSheet<T>(
       title: title,
       message: message,
@@ -54,7 +53,7 @@ class AlertBottomSheet<T> extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
+        color: colorScheme.fill,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
