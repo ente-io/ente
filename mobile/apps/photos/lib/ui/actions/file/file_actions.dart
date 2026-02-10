@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -143,7 +144,9 @@ Future<void> showSingleFileDeleteSheet(
 }
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
-  guardedCheckPanorama(file).ignore();
+  if (file.isUploaded && file.isPanorama() == null) {
+    guardedCheckPanorama(file).ignore();
+  }
   Bus.instance.fire(
     DetailsSheetEvent(
       localID: file.localID,
