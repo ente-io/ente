@@ -3,10 +3,9 @@ import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-// ignore: implementation_imports
-import "package:motion_photos/src/xmp_extractor.dart";
 import "package:panorama/panorama.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/src/rust/api/motion_photo_api.dart";
 
 class PanoramaViewerScreen extends StatefulWidget {
   const PanoramaViewerScreen({
@@ -54,7 +53,7 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
   }
 
   Future<void> init() async {
-    final data = XMPExtractor().extract(widget.file.readAsBytesSync());
+    final data = await extractXmp(filePath: widget.file.path);
     double? cWidth =
         double.tryParse(data["GPano:CroppedAreaImageWidthPixels"] ?? "");
     double? cHeight =
