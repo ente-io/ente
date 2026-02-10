@@ -20,7 +20,7 @@ cd mobile/native/android/packages/rust/tool
 ./build_android.sh
 ```
 
-This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/`.
+This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/` (including `libcore_uniffi.so`, `libinference_rs_uniffi.so`, `libllmchat_db_uniffi.so`, and `libllmchat_sync_uniffi.so`).
 The UniFFI Kotlin bindings are generated separately into:
 - `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core_uniffi.kt`
 - `android/packages/rust/src/main/kotlin/io/ente/labs/*/*_uniffi.kt`

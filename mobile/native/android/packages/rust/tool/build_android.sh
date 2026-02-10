@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
+CORE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/core_uniffi"
 INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/inference_rs_uniffi"
 CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/llmchat_db_uniffi"
 CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/llmchat_sync_uniffi"
@@ -61,7 +62,7 @@ export CARGO_CFG_TARGET_FEATURE="${CARGO_CFG_TARGET_FEATURE:-}"
 
 mkdir -p "$OUT_DIR"
 
-for CRATE_DIR in "$INFERENCE_UNIFFI_RUST_DIR" "$CHATDB_UNIFFI_RUST_DIR" "$CHAT_SYNC_UNIFFI_RUST_DIR"; do
+for CRATE_DIR in "$CORE_UNIFFI_RUST_DIR" "$INFERENCE_UNIFFI_RUST_DIR" "$CHATDB_UNIFFI_RUST_DIR" "$CHAT_SYNC_UNIFFI_RUST_DIR"; do
   pushd "$CRATE_DIR" >/dev/null
   cargo ndk \
     --platform 23 \
