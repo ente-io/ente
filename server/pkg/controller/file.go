@@ -634,6 +634,28 @@ func (c *FileController) UpdateMagicMetadata(ctx *gin.Context, req ente.UpdateMu
 	return nil
 }
 
+// GetPublicMagicMetadata returns latest public magic metadata for a file in the
+// given collection if the actor has access to the collection.
+func (c *FileController) GetPublicMagicMetadata(ctx *gin.Context, fileID int64, collectionID int64) (*ente.PublicMagicMetadataResponse, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	_, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+		CollectionID: collectionID,
+		ActorUserID:  userID,
+	})
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+
+	resp, err := c.FileRepo.GetCollectionFilePublicMagicMetadata(collectionID, fileID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if resp == nil {
+		return nil, stacktrace.Propagate(&ente.ErrFileNotFoundInAlbum, "")
+	}
+	return resp, nil
+}
+
 // UpdateThumbnail updates thumbnail of a file
 func (c *FileController) UpdateThumbnail(ctx *gin.Context, fileID int64, newThumbnail ente.FileAttributes, app ente.App) error {
 	userID := auth.GetUserID(ctx.Request.Header)

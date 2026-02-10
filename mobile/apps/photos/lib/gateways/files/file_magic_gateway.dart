@@ -41,4 +41,21 @@ class FileMagicGateway {
       data: {"metadataList": metadataList},
     );
   }
+
+  /// Fetch latest public magic metadata for a file in a specific collection.
+  ///
+  /// GET /files/public-magic-metadata
+  Future<Map<String, dynamic>> getPublicMagicMetadata({
+    required int fileID,
+    required int collectionID,
+  }) async {
+    final response = await _enteDio.get(
+      "/files/public-magic-metadata",
+      queryParameters: {
+        "fileID": fileID,
+        "collectionID": collectionID,
+      },
+    );
+    return (response.data as Map).cast<String, dynamic>();
+  }
 }

@@ -560,6 +560,7 @@ func main() {
 	privateAPI.PUT("/files/thumbnail", fileHandler.UpdateThumbnail)
 	privateAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
 	privateAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
+	privateAPI.GET("/files/public-magic-metadata", fileHandler.GetPublicMagicMetadata)
 	publicAPI.GET("/files/count", fileHandler.GetTotalFileCount)
 
 	trashHandler := &api.TrashHandler{

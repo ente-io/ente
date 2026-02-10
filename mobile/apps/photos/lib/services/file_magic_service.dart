@@ -76,12 +76,11 @@ class FileMagicService {
       }
 
       _logger.warning(
-        "conflict while syncing public magic metadata, syncing and retrying once",
+        "conflict while syncing public magic metadata, fetching latest metadata and retrying once",
         e,
         s,
       );
-      await RemoteSyncService.instance.sync(silently: true);
-      await _refreshPublicMetadataFromDB(files);
+      await _refreshPublicMetadataFromServer(files);
 
       try {
         await _updatePublicMagicMetadataOnce(
@@ -92,8 +91,6 @@ class FileMagicService {
         );
       } on DioException catch (retryError, retryStack) {
         if (retryError.response?.statusCode == 409) {
-          // keep DB fresh so the caller can continue with the latest state
-          RemoteSyncService.instance.sync(silently: true).ignore();
           _logger.warning(
             "public magic metadata conflict persisted after retry",
             retryError,
@@ -175,21 +172,54 @@ class FileMagicService {
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
-  Future<void> _refreshPublicMetadataFromDB(List<EnteFile> files) async {
+  Future<void> _refreshPublicMetadataFromServer(List<EnteFile> files) async {
     for (final file in files) {
-      final uploadedFileID = file.uploadedFileID;
-      if (uploadedFileID == null) {
+      final fileID = file.uploadedFileID;
+      final collectionID = file.collectionID;
+      if (fileID == null || collectionID == null) {
         continue;
       }
-      final latestFile = await _filesDB.getAnyUploadedFile(uploadedFileID);
-      if (latestFile == null) {
+
+      final latest = await _gateway.getPublicMagicMetadata(
+        fileID: fileID,
+        collectionID: collectionID,
+      );
+      final ownerID = latest["ownerID"] as int?;
+      if (ownerID != null) {
+        file.ownerID = ownerID;
+      }
+
+      final metadataValue = latest["magicMetadata"];
+      if (metadataValue == null) {
+        file.pubMmdEncodedJson = null;
+        file.pubMagicMetadata = null;
+        file.pubMmdVersion = 0;
         continue;
       }
-      file.ownerID = latestFile.ownerID;
-      file.pubMmdEncodedJson = latestFile.pubMmdEncodedJson;
-      file.pubMagicMetadata = latestFile.pubMagicMetadata;
-      file.pubMmdVersion = latestFile.pubMmdVersion;
+      if (metadataValue is! Map) {
+        continue;
+      }
+      final metadataJson = metadataValue.cast<String, dynamic>();
+
+      final data = metadataJson["data"] as String?;
+      final header = metadataJson["header"] as String?;
+      final version = metadataJson["version"] as int?;
+      if (data == null || header == null || version == null) {
+        continue;
+      }
+
+      final fileKey = getFileKey(file);
+      final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+        CryptoUtil.base642bin(data),
+        fileKey,
+        CryptoUtil.base642bin(header),
+      );
+      file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+      file.pubMmdVersion = version;
+      file.pubMagicMetadata =
+          PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
     }
+    await _filesDB.insertMultiple(files);
   }
 
   Future<void> _updateMagicData(
