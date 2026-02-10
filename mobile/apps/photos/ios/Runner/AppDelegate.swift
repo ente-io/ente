@@ -5,7 +5,7 @@ import app_links
 import workmanager_apple
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -26,7 +26,6 @@ import workmanager_apple
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
 
-    GeneratedPluginRegistrant.register(with: self)
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
@@ -55,5 +54,9 @@ import workmanager_apple
 
   override func applicationWillEnterForeground(_ application: UIApplication) {
     signal(SIGPIPE, SIG_IGN)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }
