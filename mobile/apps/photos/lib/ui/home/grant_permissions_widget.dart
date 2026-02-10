@@ -8,9 +8,11 @@ import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/permission_granted_event.dart";
-import "package:photos/generated/l10n.dart";
+import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/gradient_button.dart";
@@ -223,6 +225,10 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
         await permissionService.onUpdatePermission(state);
+        await setMLConsent(true);
+        await MLService.instance.init();
+        await SemanticSearchService.instance.init();
+        unawaited(MLService.instance.runAllML(force: true));
         Bus.instance.fire(PermissionGrantedEvent());
       } else {
         await _showPermissionDeniedDialog();
