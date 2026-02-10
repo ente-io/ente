@@ -15,6 +15,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/viewer/people/merge_clusters_to_person_sheet.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -421,7 +422,7 @@ class _PeopleSelectionActionWidgetState
     if (selectedPersonIds.isEmpty && selectedClusterIds.isEmpty) return;
     final multiple = (selectedPersonIds.length + selectedClusterIds.length) > 1;
 
-    await showChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: multiple
           ? AppLocalizations.of(context).areYouSureYouWantToIgnoreThesePersons
@@ -430,26 +431,99 @@ class _PeopleSelectionActionWidgetState
           ? AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed
           : AppLocalizations.of(context).thePersonWillNotBeDisplayed,
       firstButtonLabel: AppLocalizations.of(context).yesIgnore,
-      firstButtonOnTap: () async {
-        try {
-          for (final clusterID in selectedClusterIds) {
-            await ClusterFeedbackService.instance.ignoreCluster(clusterID);
-          }
-          for (final personID in selectedPersonIds) {
-            final person = personMap[personID];
-            if (person == null || person.data.isIgnored) continue;
-            final ignoredPerson = person.copyWith(
-              data: person.data.copyWith(isHidden: true),
-            );
-            await PersonService.instance.updatePerson(ignoredPerson);
-          }
-          Bus.instance.fire(PeopleChangedEvent());
-          widget.selectedPeople.clearAll();
-        } catch (e, s) {
-          _logger.severe('Ignoring a cluster failed', e, s);
-        }
-      },
     );
+    if (!mounted || result?.action != ButtonAction.first) {
+      return;
+    }
+
+    try {
+      await _ignoreSelectedItems(
+        personMap: personMap,
+        selectedPersonIds: selectedPersonIds,
+        selectedClusterIds: selectedClusterIds,
+      );
+    } catch (e, s) {
+      _logger.severe('Ignoring a cluster failed', e, s);
+    }
+  }
+
+  Future<void> _ignoreSelectedItems({
+    required Map<String, PersonEntity> personMap,
+    required List<String> selectedPersonIds,
+    required List<String> selectedClusterIds,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final personIdsToIgnore = selectedPersonIds.where((personID) {
+      final person = personMap[personID];
+      return person != null && !person.data.isIgnored;
+    }).toList();
+    final total = selectedClusterIds.length + personIdsToIgnore.length;
+    if (total == 0) {
+      widget.selectedPeople.clearAll();
+      return;
+    }
+
+    final shouldShowProgressDialog = total > 1;
+    final dialog = shouldShowProgressDialog
+        ? createProgressDialog(
+            context,
+            _bulkIgnoreProgressMessage(l10n, 0, total),
+          )
+        : null;
+    if (dialog != null) {
+      await dialog.show();
+    }
+    var completed = 0;
+    var hasUpdates = false;
+    var completedAll = false;
+
+    try {
+      for (final clusterID in selectedClusterIds) {
+        await ClusterFeedbackService.instance.ignoreCluster(
+          clusterID,
+          firePeopleChangedEvent: false,
+        );
+        completed++;
+        hasUpdates = true;
+        dialog?.update(
+          message: _bulkIgnoreProgressMessage(l10n, completed, total),
+        );
+      }
+
+      for (final personID in personIdsToIgnore) {
+        final person = personMap[personID];
+        if (person == null) continue;
+        final ignoredPerson = person.copyWith(
+          data: person.data.copyWith(isHidden: true),
+        );
+        await PersonService.instance.updatePerson(ignoredPerson);
+        completed++;
+        hasUpdates = true;
+        dialog?.update(
+          message: _bulkIgnoreProgressMessage(l10n, completed, total),
+        );
+      }
+
+      completedAll = true;
+    } finally {
+      if (completedAll) {
+        widget.selectedPeople.clearAll();
+      }
+      if (hasUpdates) {
+        Bus.instance.fire(PeopleChangedEvent());
+      }
+      if (dialog != null) {
+        await dialog.hide();
+      }
+    }
+  }
+
+  String _bulkIgnoreProgressMessage(
+    AppLocalizations l10n,
+    int completed,
+    int total,
+  ) {
+    return "${l10n.pleaseWait} ($completed/$total)";
   }
 
   Future<void> _onShowPerson() async {

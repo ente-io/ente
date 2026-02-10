@@ -343,6 +343,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool userDismissedPersonGallerySuggestion = false;
   String _searchQuery = "";
   int _suggestionReloadToken = 0;
+  final Debouncer _peopleReloadDebouncer =
+      Debouncer(const Duration(milliseconds: 400));
   late PeopleSortKey _sortKey;
   bool _nameSortAscending = true;
   bool _updatedSortAscending = false;
@@ -428,11 +430,16 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               _suggestionReloadToken++;
             });
           } else {
-            setState(() {
-              _suggestionReloadToken++;
-              _isInitialLoad = false;
-              _isLoaded = false;
-              sectionData = getResults();
+            _peopleReloadDebouncer.run(() async {
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _suggestionReloadToken++;
+                _isInitialLoad = false;
+                _isLoaded = false;
+                sectionData = getResults();
+              });
             });
           }
         }),
@@ -585,6 +592,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   @override
   void dispose() {
+    _peopleReloadDebouncer.cancelDebounceTimer();
     for (var subscriptions in streamSubscriptions) {
       subscriptions.cancel();
     }
