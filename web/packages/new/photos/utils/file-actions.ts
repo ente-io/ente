@@ -14,6 +14,7 @@ export type FileContextAction =
     | "fixTime"
     | "editLocation"
     | "favorite"
+    | "unfavorite"
     | "archive"
     | "unarchive"
     | "hide"
@@ -146,8 +147,10 @@ function getBaseActions(
 
     const actions: FileContextAction[] = [];
 
-    // Favorite button only shown when not in favorites and not in archive
-    if (!isUserFavorites && !isArchiveItems) {
+    // Favorite/unfavorite action shown when not in archive.
+    if (isUserFavorites) {
+        actions.push("unfavorite");
+    } else if (!isArchiveItems) {
         actions.push("favorite");
     }
 

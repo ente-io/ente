@@ -7,8 +7,8 @@ import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:photos/core/errors.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/collection/public_url.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -419,7 +419,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             return QrCodeDialog(
                               data: urlValue,
                               title: widget.collection!.displayName,
-                              accentColor: enteColorScheme.primary500,
+                              accentColor: const Color(0xFF08C225),
                               shareFileName:
                                   'ente_qr_${widget.collection!.displayName}.png',
                               shareText:
@@ -432,7 +432,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                 text: 'ente',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Montserrat',
                                 ),
                               ),
                             );

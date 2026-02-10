@@ -3,7 +3,23 @@ import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import "package:photos/gateways/entity_gw.dart";
+import "package:photos/app_mode.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/gateways/billing/billing_gateway.dart";
+import "package:photos/gateways/collections/collection_files_gateway.dart";
+import "package:photos/gateways/collections/collection_share_gateway.dart";
+import "package:photos/gateways/collections/collections_gateway.dart";
+import "package:photos/gateways/emergency/emergency_gateway.dart";
+import "package:photos/gateways/entity/entity_gateway.dart";
+import "package:photos/gateways/files/file_data_gateway.dart";
+import "package:photos/gateways/files/file_magic_gateway.dart";
+import "package:photos/gateways/files/file_upload_gateway.dart";
+import "package:photos/gateways/files/files_gateway.dart";
+import "package:photos/gateways/push/push_gateway.dart";
+import "package:photos/gateways/social/social_gateway.dart";
+import "package:photos/gateways/trash/trash_gateway.dart";
+import "package:photos/gateways/users/passkey_gateway.dart";
+import "package:photos/gateways/users/users_gateway.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/backup_preference_service.dart";
@@ -75,6 +91,38 @@ LocalSettings get localSettings {
   return _localSettings!;
 }
 
+bool get isOfflineMode => localSettings.appMode == AppMode.offline;
+
+bool get hasGrantedMLConsent {
+  if (isOfflineMode) {
+    return localSettings.offlineMLConsent;
+  }
+  return flagService.hasGrantedMLConsent;
+}
+
+Future<void> setMLConsent(bool enabled) async {
+  if (isOfflineMode) {
+    await localSettings.setOfflineMLConsent(enabled);
+    return;
+  }
+  await flagService.setMLConsent(enabled);
+}
+
+bool get mapEnabled {
+  if (isOfflineMode) {
+    return localSettings.offlineMapEnabled;
+  }
+  return flagService.mapEnabled;
+}
+
+Future<void> setMapEnabled(bool enabled) async {
+  if (isOfflineMode) {
+    await localSettings.setOfflineMapEnabled(enabled);
+    return;
+  }
+  await flagService.setMapEnabled(enabled);
+}
+
 BackupPreferenceService? _backupPreferenceService;
 BackupPreferenceService get backupPreferenceService {
   _backupPreferenceService ??= BackupPreferenceService(
@@ -117,7 +165,7 @@ TrashSyncService? _trashSyncService;
 TrashSyncService get trashSyncService {
   _trashSyncService ??= TrashSyncService(
     ServiceLocator.instance.prefs,
-    ServiceLocator.instance.enteDio,
+    trashGateway,
   );
   return _trashSyncService!;
 }
@@ -158,9 +206,7 @@ TextEmbeddingsCacheService get textEmbeddingsCacheService {
 
 BillingService? _billingService;
 BillingService get billingService {
-  _billingService ??= BillingService(
-    ServiceLocator.instance.enteDio,
-  );
+  _billingService ??= BillingService();
   return _billingService!;
 }
 
@@ -186,7 +232,7 @@ FileDataService? _fileDataService;
 FileDataService get fileDataService {
   _fileDataService ??= FileDataService(
     ServiceLocator.instance.prefs,
-    ServiceLocator.instance.enteDio,
+    fileDataGateway,
   );
   return _fileDataService!;
 }
@@ -227,4 +273,95 @@ WrappedCacheService? _wrappedCacheService;
 WrappedCacheService get wrappedCacheService {
   _wrappedCacheService ??= WrappedCacheService.instance;
   return _wrappedCacheService!;
+}
+
+// Gateways
+PushGateway? _pushGateway;
+PushGateway get pushGateway {
+  _pushGateway ??= PushGateway(ServiceLocator.instance.enteDio);
+  return _pushGateway!;
+}
+
+EmergencyGateway? _emergencyGateway;
+EmergencyGateway get emergencyGateway {
+  _emergencyGateway ??= EmergencyGateway(ServiceLocator.instance.enteDio);
+  return _emergencyGateway!;
+}
+
+SocialGateway? _socialGateway;
+SocialGateway get socialGateway {
+  _socialGateway ??= SocialGateway(ServiceLocator.instance.enteDio);
+  return _socialGateway!;
+}
+
+FilesGateway? _filesGateway;
+FilesGateway get filesGateway {
+  _filesGateway ??= FilesGateway(ServiceLocator.instance.enteDio);
+  return _filesGateway!;
+}
+
+FileDataGateway? _fileDataGateway;
+FileDataGateway get fileDataGateway {
+  _fileDataGateway ??= FileDataGateway(ServiceLocator.instance.enteDio);
+  return _fileDataGateway!;
+}
+
+FileMagicGateway? _fileMagicGateway;
+FileMagicGateway get fileMagicGateway {
+  _fileMagicGateway ??= FileMagicGateway(ServiceLocator.instance.enteDio);
+  return _fileMagicGateway!;
+}
+
+FileUploadGateway? _fileUploadGateway;
+FileUploadGateway get fileUploadGateway {
+  _fileUploadGateway ??= FileUploadGateway(ServiceLocator.instance.enteDio);
+  return _fileUploadGateway!;
+}
+
+TrashGateway? _trashGateway;
+TrashGateway get trashGateway {
+  _trashGateway ??= TrashGateway(ServiceLocator.instance.enteDio);
+  return _trashGateway!;
+}
+
+CollectionFilesGateway? _collectionFilesGateway;
+CollectionFilesGateway get collectionFilesGateway {
+  _collectionFilesGateway ??=
+      CollectionFilesGateway(ServiceLocator.instance.enteDio);
+  return _collectionFilesGateway!;
+}
+
+CollectionShareGateway? _collectionShareGateway;
+CollectionShareGateway get collectionShareGateway {
+  _collectionShareGateway ??=
+      CollectionShareGateway(ServiceLocator.instance.enteDio);
+  return _collectionShareGateway!;
+}
+
+CollectionsGateway? _collectionsGateway;
+CollectionsGateway get collectionsGateway {
+  _collectionsGateway ??= CollectionsGateway(ServiceLocator.instance.enteDio);
+  return _collectionsGateway!;
+}
+
+BillingGateway? _billingGateway;
+BillingGateway get billingGateway {
+  _billingGateway ??= BillingGateway(ServiceLocator.instance.enteDio);
+  return _billingGateway!;
+}
+
+PasskeyGateway? _passkeyGateway;
+PasskeyGateway get passkeyGateway {
+  _passkeyGateway ??= PasskeyGateway(ServiceLocator.instance.enteDio);
+  return _passkeyGateway!;
+}
+
+UsersGateway? _usersGateway;
+UsersGateway get usersGateway {
+  _usersGateway ??= UsersGateway(
+    ServiceLocator.instance.enteDio,
+    ServiceLocator.instance.nonEnteDio,
+    Configuration.instance,
+  );
+  return _usersGateway!;
 }

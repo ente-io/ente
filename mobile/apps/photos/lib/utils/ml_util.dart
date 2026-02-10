@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
+import "package:photos/db/offline_files_db.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -30,6 +31,8 @@ final _logger = Logger("MlUtil");
 
 enum FileDataForML { thumbnailData, fileData }
 
+enum MLMode { online, offline }
+
 class IndexStatus {
   final int indexedItems, pendingItems;
   final bool? hasWifiEnabled;
@@ -39,23 +42,31 @@ class IndexStatus {
 
 class FileMLInstruction {
   final EnteFile file;
+  final MLMode mode;
+  final int? offlineFileKey;
   bool shouldRunFaces;
   bool shouldRunClip;
   FileDataEntity? existingRemoteFileML;
 
   FileMLInstruction({
     required this.file,
+    required this.mode,
+    this.offlineFileKey,
     required this.shouldRunFaces,
     required this.shouldRunClip,
   });
   // Returns true if the file should be indexed for either faces or clip
   bool get pendingML => shouldRunFaces || shouldRunClip;
+  bool get isOffline => mode == MLMode.offline;
+  int get fileKey => isOffline ? offlineFileKey! : file.uploadedFileID!;
 }
 
 Future<IndexStatus> getIndexStatus() async {
   try {
-    final mlDataDB = MLDataDB.instance;
-    final int indexableFiles = await getIndexableFileCount();
+    final MLMode mode = isOfflineMode ? MLMode.offline : MLMode.online;
+    final mlDataDB =
+        mode == MLMode.offline ? MLDataDB.offlineInstance : MLDataDB.instance;
+    final int indexableFiles = await _getIndexableFileCount(mode: mode);
     final int facesIndexedFiles = await mlDataDB.getFaceIndexedFileCount();
     final int clipIndexedFiles = await mlDataDB.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
@@ -103,6 +114,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     if (enteFile.skipIndex) {
       continue;
     }
+    if (enteFile.uploadedFileID == null || enteFile.uploadedFileID == -1) {
+      continue;
+    }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
       continue;
     }
@@ -117,6 +131,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
     final instruction = FileMLInstruction(
       file: enteFile,
+      mode: MLMode.online,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );
@@ -128,6 +143,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   }
   for (final EnteFile enteFile in hiddenFiles) {
     if (enteFile.skipIndex) {
+      continue;
+    }
+    if (enteFile.uploadedFileID == null || enteFile.uploadedFileID == -1) {
       continue;
     }
     if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
@@ -143,6 +161,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
     final instruction = FileMLInstruction(
       file: enteFile,
+      mode: MLMode.online,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );
@@ -179,9 +198,87 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return [...splitResult.matched, ...splitResult.unmatched];
 }
 
+Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
+  _logger.info('getOfflineFilesForMlIndexing called');
+  final mlDataDB = MLDataDB.offlineInstance;
+  final Map<int, int> faceIndexedFileIDs = await mlDataDB.faceIndexedFileIds();
+  final Map<int, int> clipIndexedFileIDs =
+      await mlDataDB.clipIndexedFileWithVersion();
+  final Set<int> queuedFileIDs = {};
+
+  final enteFiles = await SearchService.instance.getAllFilesForSearch();
+  final candidateFiles = <EnteFile>[];
+  final localIds = <String>[];
+  final List<FileMLInstruction> instructions = [];
+
+  for (final EnteFile enteFile in enteFiles) {
+    if (enteFile.fileType == FileType.other) {
+      continue;
+    }
+    if ((enteFile.localID ?? '').isEmpty ||
+        (enteFile.uploadedFileID != null && enteFile.uploadedFileID != -1)) {
+      continue;
+    }
+    final localID = enteFile.localID!;
+    candidateFiles.add(enteFile);
+    localIds.add(localID);
+  }
+
+  final localIdToIntId =
+      await OfflineFilesDB.instance.ensureLocalIntIds(localIds);
+
+  for (final enteFile in candidateFiles) {
+    final localID = enteFile.localID!;
+    final localIntId = localIdToIntId[localID];
+    if (localIntId == null) {
+      continue;
+    }
+    if (queuedFileIDs.contains(localIntId)) {
+      continue;
+    }
+    queuedFileIDs.add(localIntId);
+    final shouldRunFaces = _shouldRunIndexingWithFileId(
+      localIntId,
+      faceIndexedFileIDs,
+      faceMlVersion,
+    );
+    final shouldRunClip = _shouldRunIndexingWithFileId(
+      localIntId,
+      clipIndexedFileIDs,
+      clipMlVersion,
+    );
+    if (!shouldRunFaces && !shouldRunClip) {
+      continue;
+    }
+    instructions.add(
+      FileMLInstruction(
+        file: enteFile,
+        mode: MLMode.offline,
+        offlineFileKey: localIntId,
+        shouldRunFaces: shouldRunFaces,
+        shouldRunClip: shouldRunClip,
+      ),
+    );
+  }
+  _logger.info(
+    "Getting list of ${instructions.length} files to index for offline ML",
+  );
+  return instructions;
+}
+
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
-  int yieldSize,
-) async* {
+  int yieldSize, {
+  required MLMode mode,
+}) async* {
+  if (mode == MLMode.offline) {
+    final List<FileMLInstruction> filesToIndex =
+        await getOfflineFilesForMlIndexing();
+    final List<List<FileMLInstruction>> chunks = filesToIndex.chunks(yieldSize);
+    for (final batch in chunks) {
+      yield batch;
+    }
+    return;
+  }
   final mlDataDB = MLDataDB.instance;
   final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
   final List<List<FileMLInstruction>> chunks =
@@ -323,6 +420,21 @@ Future<int> getIndexableFileCount() async {
   return FilesDB.instance.remoteFileCount();
 }
 
+Future<int> _getIndexableFileCount({required MLMode mode}) async {
+  if (mode == MLMode.offline) {
+    final files = await SearchService.instance.getAllFilesForSearch();
+    return files
+        .where(
+          (file) =>
+              (file.localID ?? '').isNotEmpty &&
+              (file.uploadedFileID == null || file.uploadedFileID == -1) &&
+              file.fileType != FileType.other,
+        )
+        .length;
+  }
+  return getIndexableFileCount();
+}
+
 Future<String> getImagePathForML(EnteFile enteFile) async {
   String? imagePath;
 
@@ -382,7 +494,16 @@ bool _shouldRunIndexing(
   int newestVersion,
 ) {
   final id = enteFile.uploadedFileID!;
-  return !indexedFileIds.containsKey(id) || indexedFileIds[id]! < newestVersion;
+  return _shouldRunIndexingWithFileId(id, indexedFileIds, newestVersion);
+}
+
+bool _shouldRunIndexingWithFileId(
+  int fileId,
+  Map<int, int> indexedFileIds,
+  int newestVersion,
+) {
+  return !indexedFileIds.containsKey(fileId) ||
+      indexedFileIds[fileId]! < newestVersion;
 }
 
 void normalizeEmbedding(List<double> embedding) {

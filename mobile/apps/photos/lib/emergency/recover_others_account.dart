@@ -7,9 +7,9 @@ import 'package:logging/logging.dart';
 import 'package:password_strength/password_strength.dart';
 import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
+import "package:photos/gateways/users/models/key_attributes.dart";
+import "package:photos/gateways/users/models/set_keys_request.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/user/key_attributes.dart";
-import "package:photos/models/api/user/set_keys_request.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -97,8 +97,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordsMatch && _isPasswordValid,
         buttonText: title,
-        onPressedFunction: () {
-          _updatePassword();
+        onPressedFunction: () async {
+          await _updatePassword();
           FocusScope.of(context).unfocus();
         },
       ),
@@ -303,7 +303,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
     );
   }
 
-  void _updatePassword() async {
+  Future<void> _updatePassword() async {
     final dialog = createProgressDialog(
       context,
       AppLocalizations.of(context).generatingEncryptionKeys,

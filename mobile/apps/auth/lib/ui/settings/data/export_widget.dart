@@ -106,7 +106,7 @@ Future<void> _requestForEncryptionPassword(
             ),
           );
           // get json value of data
-          await _exportCodes(context, jsonEncode(data.toJson()), "txt");
+          await _exportCodes(context, jsonEncode(data.toJson()), "encrypted", "json");
         } catch (e) {
           showToast(context, "Error while exporting codes.");
         }
@@ -128,10 +128,10 @@ Future<void> _showExportWarningDialog(BuildContext context, String type) async {
   if (result?.action == ButtonAction.first) {
     if (type == "html") {
       final data = await generateHtml(context);
-      await _exportCodes(context, data, type);
+      await _exportCodes(context, data, "plainhtml", type);
     } else {
       final data = await _getAuthDataForExport();
-      await _exportCodes(context, data, type);
+      await _exportCodes(context, data, "plaintext", type);
     }
   }
 }
@@ -139,11 +139,12 @@ Future<void> _showExportWarningDialog(BuildContext context, String type) async {
 Future<void> _exportCodes(
   BuildContext context,
   String fileContent,
+  String exportType,
   String extension,
 ) async {
   DateTime now = DateTime.now().toUtc();
-  String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-  String exportFileName = 'ente-auth-codes-$formattedDate';
+  String formattedDate = DateFormat('yyyyMMdd-HHmmss').format(now);
+  String exportFileName = 'ente-auth-codes-$exportType-$formattedDate';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
   if (!hasAuthenticated) {

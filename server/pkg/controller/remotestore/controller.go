@@ -1,10 +1,14 @@
 package remotestore
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/ente-io/museum/pkg/controller"
+	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/rollout"
 	"github.com/spf13/viper"
 	"golang.org/x/net/idna"
@@ -14,17 +18,22 @@ import (
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	backupOptionsRolloutPercentage = 20
-	backupOptionsRolloutNonce      = "backup-options-v1"
+	backupOptionsRolloutPercentage  = 100
+	backupOptionsRolloutNonce       = "backup-options-v1"
+	videoStreamingRolloutPercentage = 20
+	videoStreamingRolloutNonce      = "video-streaming-v1"
 )
 
 // Controller is interface for exposing business logic related to for remote store
 type Controller struct {
 	Repo        *remotestore.Repository
 	BillingCtrl *controller.BillingController
+	UserRepo    *repo.UserRepository
+	FamilyRepo  *repo.FamilyRepository
 }
 
 // InsertOrUpdate the key's value
@@ -32,6 +41,9 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, request ente.UpdateKeyValu
 	userID := auth.GetUserID(ctx.Request.Header)
 	if err := c._validateRequest(userID, request.Key, request.Value, false); err != nil {
 		return err
+	}
+	if request.Key == string(ente.CustomDomain) {
+		return c.insertOrUpdateCustomDomain(ctx, userID, *request.Value)
 	}
 	if *request.Value == "" && ente.FlagKey(request.Key).CanRemove() {
 		return c.Repo.RemoveKey(ctx, userID, request.Key)
@@ -48,12 +60,21 @@ func (c *Controller) RemoveKey(ctx *gin.Context, key string) error {
 	if !ente.FlagKey(key).CanRemove() {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not removable", key)), "key not removable")
 	}
-	return c.Repo.RemoveKey(ctx, userID, key)
+	if err := c.Repo.RemoveKey(ctx, userID, key); err != nil {
+		return err
+	}
+	if key == string(ente.CustomDomain) {
+		return c.clearFamilyCustomDomainsIfAdmin(ctx, userID)
+	}
+	return nil
 }
 
 func (c *Controller) AdminInsertOrUpdate(ctx *gin.Context, request ente.AdminUpdateKeyValueRequest) error {
 	if err := c._validateRequest(request.UserID, request.Key, request.Value, true); err != nil {
 		return err
+	}
+	if request.Key == string(ente.CustomDomain) {
+		return c.insertOrUpdateCustomDomain(ctx, request.UserID, *request.Value)
 	}
 	return c.Repo.InsertOrUpdate(ctx, request.UserID, request.Key, *request.Value)
 }
@@ -67,6 +88,13 @@ func (c *Controller) Get(ctx *gin.Context, req ente.GetValueRequest) (*ente.GetV
 		} else {
 			return nil, stacktrace.Propagate(err, "")
 		}
+	}
+	if req.Key == string(ente.CustomDomain) {
+		resolved, resolveErr := ente.ResolveCustomDomainValue(value)
+		if resolveErr != nil {
+			return nil, stacktrace.Propagate(resolveErr, "")
+		}
+		value = resolved
 	}
 	return &ente.GetValueResponse{Value: value}, nil
 }
@@ -109,7 +137,13 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 			response.BetaUser = value == "true"
 		case ente.CustomDomain:
 			if value != "" {
-				response.CustomDomain = &value
+				resolved, resolveErr := ente.ResolveCustomDomainValue(value)
+				if resolveErr != nil {
+					return nil, stacktrace.Propagate(resolveErr, "")
+				}
+				if resolved != "" {
+					response.CustomDomain = &resolved
+				}
 			}
 		}
 	}
@@ -119,7 +153,155 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		response.ServerApiFlag |= ente.BackupOptions
 	}
 
+	if response.InternalUser ||
+		rollout.IsInPercentageRollout(userID, videoStreamingRolloutNonce, videoStreamingRolloutPercentage) {
+		response.ServerApiFlag |= ente.VideoStreaming
+	}
+
 	return response, nil
+}
+
+func (c *Controller) insertOrUpdateCustomDomain(ctx *gin.Context, userID int64, value string) error {
+	if value == "" {
+		if err := c.Repo.RemoveKey(ctx, userID, string(ente.CustomDomain)); err != nil {
+			return err
+		}
+		return c.clearFamilyCustomDomainsIfAdmin(ctx, userID)
+	}
+	if strings.HasPrefix(value, "_") {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid custom domain"), "family pointer not allowed in request")
+	}
+	ownerID, err := c.DomainOwner(ctx, value)
+	if err == nil {
+		if ownerID != nil && *ownerID == userID {
+			if err := c.Repo.InsertOrUpdate(ctx, userID, string(ente.CustomDomain), value); err != nil {
+				return err
+			}
+			return c.updateFamilyCustomDomainsIfAdmin(ctx, userID, value)
+		}
+		familyAdminID, adminErr := c.UserRepo.GetFamilyAdminID(userID)
+		if adminErr != nil {
+			return stacktrace.Propagate(adminErr, "")
+		}
+		if familyAdminID != nil && ownerID != nil && *familyAdminID == *ownerID {
+			adminDomain, domainErr := c.Repo.GetDomain(ctx, *ownerID)
+			if domainErr != nil {
+				return domainErr
+			}
+			if adminDomain == nil || *adminDomain == "" {
+				return stacktrace.Propagate(ente.NewBadRequestWithMessage("family admin has no custom domain"), "")
+			}
+			pointer := ente.BuildFamilyCustomDomainPointer(userID, *adminDomain)
+			return c.Repo.InsertOrUpdate(ctx, userID, string(ente.CustomDomain), pointer)
+		}
+		return ente.NewConflictError("custom domain already exists for another user")
+	}
+	if !errors.Is(err, &ente.ErrNotFoundError) {
+		return stacktrace.Propagate(err, "")
+	}
+	if err := c.Repo.InsertOrUpdate(ctx, userID, string(ente.CustomDomain), value); err != nil {
+		return err
+	}
+	return c.updateFamilyCustomDomainsIfAdmin(ctx, userID, value)
+}
+
+func (c *Controller) updateFamilyCustomDomainsIfAdmin(ctx context.Context, userID int64, domain string) error {
+	if c.UserRepo == nil || c.FamilyRepo == nil {
+		return nil
+	}
+	familyAdminID, err := c.UserRepo.GetFamilyAdminID(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if familyAdminID == nil || *familyAdminID != userID {
+		return nil
+	}
+	members, err := c.FamilyRepo.GetMembersWithStatus(userID, repo.ActiveFamilyMemberStatus)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	for _, member := range members {
+		if member.MemberUserID == userID {
+			continue
+		}
+		memberDomain, err := c.Repo.GetDomain(ctx, member.MemberUserID)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"admin_id":  userID,
+				"member_id": member.MemberUserID,
+			}).WithError(err).Warn("family custom domain fetch failed")
+			continue
+		}
+		if memberDomain == nil || *memberDomain == "" {
+			continue
+		}
+		_, _, isPointer, parseErr := ente.ParseFamilyCustomDomainPointer(*memberDomain)
+		if parseErr != nil {
+			logrus.WithFields(logrus.Fields{
+				"admin_id":  userID,
+				"member_id": member.MemberUserID,
+				"domain":    *memberDomain,
+			}).WithError(parseErr).Warn("family custom domain parse failed")
+			continue
+		}
+		if !isPointer {
+			continue
+		}
+		pointer := ente.BuildFamilyCustomDomainPointer(member.MemberUserID, domain)
+		if err := c.Repo.InsertOrUpdate(ctx, member.MemberUserID, string(ente.CustomDomain), pointer); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Controller) clearFamilyCustomDomainsIfAdmin(ctx context.Context, userID int64) error {
+	if c.UserRepo == nil || c.FamilyRepo == nil {
+		return nil
+	}
+	familyAdminID, err := c.UserRepo.GetFamilyAdminID(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if familyAdminID == nil || *familyAdminID != userID {
+		return nil
+	}
+	members, err := c.FamilyRepo.GetMembersWithStatus(userID, repo.ActiveFamilyMemberStatus)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	for _, member := range members {
+		if member.MemberUserID == userID {
+			continue
+		}
+		memberDomain, err := c.Repo.GetDomain(ctx, member.MemberUserID)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"admin_id":  userID,
+				"member_id": member.MemberUserID,
+			}).WithError(err).Warn("family custom domain fetch failed")
+			continue
+		}
+		if memberDomain == nil || *memberDomain == "" {
+			continue
+		}
+		_, _, isPointer, parseErr := ente.ParseFamilyCustomDomainPointer(*memberDomain)
+		if parseErr != nil {
+			logrus.WithFields(logrus.Fields{
+				"admin_id":  userID,
+				"member_id": member.MemberUserID,
+				"domain":    *memberDomain,
+			}).WithError(parseErr).Warn("family custom domain parse failed")
+			continue
+		}
+		if !isPointer {
+			continue
+		}
+		if err := c.Repo.RemoveKey(ctx, member.MemberUserID, string(ente.CustomDomain)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *Controller) DomainOwner(ctx *gin.Context, domain string) (*int64, error) {

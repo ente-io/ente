@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -8,6 +7,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import 'package:photos/ui/notification/update/change_log_strings.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -91,16 +91,26 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
 
   Widget _getChangeLog(BuildContext ctx) {
     final scrollController = ScrollController();
+    final strings = ChangeLogStrings.forLocale(Localizations.localeOf(context));
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        context.l10n.cLTitle1,
-        context.l10n.cLDesc1,
+        strings.title1,
+        description: strings.desc1,
+        items: [
+          strings.desc1Item1,
+          strings.desc1Item2,
+        ],
         isFeature: true,
       ),
       ChangeLogEntry(
-        context.l10n.cLTitle2,
-        context.l10n.cLDesc2,
+        strings.title2,
+        description: strings.desc2,
+        isFeature: true,
+      ),
+      ChangeLogEntry(
+        strings.title3,
+        description: strings.desc3,
         isFeature: true,
       ),
     ]);

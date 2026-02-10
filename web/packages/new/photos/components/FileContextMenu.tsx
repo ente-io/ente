@@ -1,17 +1,20 @@
-import ClockIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
-import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
-import MoveIcon from "@mui/icons-material/ArrowForward";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DownloadIcon from "@mui/icons-material/Download";
-import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
-import RestoreIcon from "@mui/icons-material/Restore";
-import UnArchiveIcon from "@mui/icons-material/Unarchive";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import type { SvgIconProps } from "@mui/material";
+import {
+    AddSquareIcon,
+    ArrowRight02Icon,
+    Clock02Icon,
+    Delete02Icon,
+    Download01Icon,
+    Download05Icon,
+    Location01Icon,
+    RemoveCircleIcon,
+    StarOffIcon,
+    Time04Icon,
+    Unarchive03Icon,
+    UserAdd02Icon,
+    ViewIcon,
+    ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
     ListItemIcon,
     ListItemText,
@@ -48,30 +51,39 @@ interface FileContextMenuProps {
 
 interface ActionConfig {
     label: string;
-    Icon: React.ComponentType<SvgIconProps>;
+    Icon: React.ReactNode;
     isDestructive?: boolean;
 }
 
+const hugeIcon = (icon: IconSvgElement, size = 20) => (
+    <HugeiconsIcon icon={icon} size={size} />
+);
+
 const actionConfigs: Record<FileContextAction, ActionConfig> = {
-    download: { label: "download", Icon: DownloadIcon },
-    fixTime: { label: "fix_creation_time", Icon: ClockIcon },
-    editLocation: { label: "edit_location", Icon: EditLocationAltIcon },
-    favorite: { label: "favorite", Icon: StarBorderIcon },
-    archive: { label: "archive", Icon: ArchiveIcon },
-    unarchive: { label: "unarchive", Icon: UnArchiveIcon },
-    hide: { label: "hide", Icon: VisibilityOffOutlinedIcon },
-    unhide: { label: "unhide", Icon: VisibilityOutlinedIcon },
-    trash: { label: "delete", Icon: DeleteIcon, isDestructive: true },
-    deletePermanently: {
-        label: "delete_permanently",
-        Icon: DeleteIcon,
+    download: { label: "download", Icon: hugeIcon(Download01Icon) },
+    fixTime: { label: "fix_creation_time", Icon: hugeIcon(Time04Icon) },
+    editLocation: { label: "edit_location", Icon: hugeIcon(Location01Icon) },
+    favorite: { label: "favorite", Icon: <StarBorderIcon fontSize="small" /> },
+    unfavorite: { label: "un_favorite", Icon: hugeIcon(StarOffIcon) },
+    archive: { label: "archive", Icon: hugeIcon(Download05Icon) },
+    unarchive: { label: "unarchive", Icon: hugeIcon(Unarchive03Icon) },
+    hide: { label: "hide", Icon: hugeIcon(ViewOffSlashIcon) },
+    unhide: { label: "unhide", Icon: hugeIcon(ViewIcon) },
+    trash: {
+        label: "delete",
+        Icon: hugeIcon(Delete02Icon),
         isDestructive: true,
     },
-    restore: { label: "restore", Icon: RestoreIcon },
-    addToAlbum: { label: "add", Icon: AddIcon },
-    moveToAlbum: { label: "move", Icon: MoveIcon },
-    removeFromAlbum: { label: "remove", Icon: RemoveIcon },
-    addPerson: { label: "add_a_person", Icon: PersonAddIcon },
+    deletePermanently: {
+        label: "delete_permanently",
+        Icon: hugeIcon(Delete02Icon),
+        isDestructive: true,
+    },
+    restore: { label: "restore", Icon: hugeIcon(Clock02Icon) },
+    addToAlbum: { label: "add", Icon: hugeIcon(AddSquareIcon) },
+    moveToAlbum: { label: "move", Icon: hugeIcon(ArrowRight02Icon) },
+    removeFromAlbum: { label: "remove", Icon: hugeIcon(RemoveCircleIcon) },
+    addPerson: { label: "add_a_person", Icon: hugeIcon(UserAdd02Icon) },
 };
 
 /**
@@ -110,6 +122,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
             <StyledMenu
                 open={open}
                 onClose={onClose}
+                disableAutoFocusItem
                 anchorReference="anchorPosition"
                 anchorPosition={anchorPosition}
                 slotProps={{
@@ -126,9 +139,7 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                             key={action}
                             onClick={() => handleActionClick(action)}
                         >
-                            <ListItemIcon>
-                                <Icon fontSize="small" />
-                            </ListItemIcon>
+                            <ListItemIcon>{Icon}</ListItemIcon>
                             <ListItemText>{t(label)}</ListItemText>
                         </StyledMenuItem>
                     );
@@ -140,10 +151,16 @@ export const FileContextMenu: React.FC<FileContextMenuProps> = memo(
                         <StyledMenuItem
                             key={action}
                             onClick={() => handleActionClick(action)}
-                            sx={{ color: "critical.main" }}
+                            sx={{
+                                color: "critical.main",
+                                "&:hover": {
+                                    backgroundColor: "critical.main",
+                                    color: "#fff",
+                                },
+                            }}
                         >
                             <ListItemIcon sx={{ color: "inherit" }}>
-                                <Icon fontSize="small" />
+                                {Icon}
                             </ListItemIcon>
                             <ListItemText>{t(label)}</ListItemText>
                         </StyledMenuItem>
@@ -158,13 +175,31 @@ FileContextMenu.displayName = "FileContextMenu";
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
     "& .MuiPaper-root": {
-        minWidth: 180,
-        borderRadius: 8,
-        boxShadow: theme.shadows[8],
+        backgroundColor: "#1f1f1f",
+        minWidth: 220,
+        borderRadius: 12,
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+        marginTop: 6,
     },
+    "& .MuiList-root": { padding: theme.spacing(1) },
+    ...theme.applyStyles("dark", {
+        "& .MuiPaper-root": {
+            backgroundColor: "#161616",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.6)",
+        },
+    }),
 }));
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
-    padding: theme.spacing(1, 2),
-    "& .MuiListItemIcon-root": { minWidth: 32 },
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: theme.spacing(1.5, 2),
+    borderRadius: 10,
+    color: "#f5f5f5",
+    fontSize: 15,
+    "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.08)" },
+    "& .MuiListItemIcon-root": { minWidth: 0, color: "inherit" },
+    "& .MuiListItemText-root": { margin: 0 },
+    "& .MuiListItemText-primary": { color: "inherit", fontSize: "inherit" },
 }));

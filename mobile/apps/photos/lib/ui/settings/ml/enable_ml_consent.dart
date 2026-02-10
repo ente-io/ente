@@ -153,7 +153,7 @@ class _EnableMachineLearningConsentState
 
   Future<void> enableMlConsent(BuildContext context) async {
     try {
-      await flagService.setMLConsent(true);
+      await setMLConsent(true);
       Bus.instance.fire(NotificationEvent());
       Navigator.of(context).pop(true);
     } catch (e) {

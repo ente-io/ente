@@ -14,7 +14,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -24,12 +23,12 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/gateways/collections/models/collection_file_item.dart';
+import 'package:photos/gateways/collections/models/create_request.dart';
+import "package:photos/gateways/collections/models/metadata.dart";
+import "package:photos/gateways/collections/models/public_url.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/collection/collection_file_item.dart';
-import 'package:photos/models/api/collection/create_request.dart';
-import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/action.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -60,7 +59,6 @@ class CollectionsService {
   late Configuration _config;
   late SharedPreferences _prefs;
 
-  final _enteDio = NetworkClient.instance.enteDio;
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
@@ -330,15 +328,12 @@ class CollectionsService {
   List<Collection> getHiddenCollections({bool includeDefaultHidden = true}) {
     if (includeDefaultHidden) {
       return _collectionIDToCollections.values
-          .toList()
-          .where((element) => element.isHidden())
+          .where((c) => c.isHidden())
           .toList();
     } else {
       return _collectionIDToCollections.values
-          .toList()
           .where(
-            (element) => (element.isHidden() &&
-                element.id != cachedDefaultHiddenCollection?.id),
+            (c) => c.isHidden() && c.id != cachedDefaultHiddenCollection?.id,
           )
           .toList();
     }
@@ -346,21 +341,14 @@ class CollectionsService {
 
   Set<int> getHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.isHidden())
+        .where((c) => c.isHidden())
         .map((e) => e.id)
         .toSet();
   }
 
   Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) =>
-              element.hasShareeArchived() ||
-              element.isHidden() ||
-              element.isArchived(),
-        )
+        .where((c) => c.isArchived() || c.isHidden())
         .map((e) => e.id)
         .toSet();
   }
@@ -817,20 +805,10 @@ class CollectionsService {
         );
   }
 
-  Future<List<User>> getSharees(int collectionID) {
-    return _enteDio.get(
-      "/collections/sharees",
-      queryParameters: {
-        "collectionID": collectionID,
-      },
-    ).then((response) {
-      _logger.info(response.toString());
-      final sharees = <User>[];
-      for (final user in response.data["sharees"]) {
-        sharees.add(User.fromMap(user));
-      }
-      return sharees;
-    });
+  Future<List<User>> getSharees(int collectionID) async {
+    final sharees = await collectionShareGateway.getSharees(collectionID);
+    _logger.info(sharees.toString());
+    return sharees;
   }
 
   String getCastData(
@@ -861,19 +839,12 @@ class CollectionsService {
       CryptoUtil.base642bin(publicKey),
     );
     try {
-      final response = await _enteDio.post(
-        "/collections/share",
-        data: {
-          "collectionID": collectionID,
-          "email": email,
-          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-          "role": role.toStringVal(),
-        },
+      final sharees = await collectionShareGateway.share(
+        collectionID: collectionID,
+        email: email,
+        encryptedKey: CryptoUtil.bin2base64(encryptedKey),
+        role: role.toStringVal(),
       );
-      final sharees = <User>[];
-      for (final user in response.data["sharees"]) {
-        sharees.add(User.fromMap(user));
-      }
       _collectionIDToCollections[collectionID] =
           _collectionIDToCollections[collectionID]!.copyWith(sharees: sharees);
       unawaited(_db.insert([_collectionIDToCollections[collectionID]!]));
@@ -889,17 +860,10 @@ class CollectionsService {
 
   Future<List<User>> unshare(int collectionID, String email) async {
     try {
-      final response = await _enteDio.post(
-        "/collections/unshare",
-        data: {
-          "collectionID": collectionID,
-          "email": email,
-        },
+      final sharees = await collectionShareGateway.unshare(
+        collectionID: collectionID,
+        email: email,
       );
-      final sharees = <User>[];
-      for (final user in response.data["sharees"]) {
-        sharees.add(User.fromMap(user));
-      }
       _collectionIDToCollections[collectionID] =
           _collectionIDToCollections[collectionID]!.copyWith(sharees: sharees);
       unawaited(_db.insert([_collectionIDToCollections[collectionID]!]));
@@ -916,8 +880,9 @@ class CollectionsService {
   ) async {
     try {
       await _turnOffDeviceFolderSync(collection);
-      await _enteDio.delete(
-        "/collections/v3/${collection.id}?keepFiles=False&collectionID=${collection.id}",
+      await collectionsGateway.deleteCollection(
+        collectionID: collection.id,
+        keepFiles: false,
       );
       await _handleCollectionDeletion(collection);
     } catch (e) {
@@ -957,8 +922,9 @@ class CollectionsService {
       // The server will verify that the collection is actually empty before
       // deleting the files. If keepFiles is set as False and the collection
       // is not empty, then the files in the collections will be moved to trash.
-      await _enteDio.delete(
-        "/collections/v3/${collection.id}?keepFiles=True&collectionID=${collection.id}",
+      await collectionsGateway.deleteCollection(
+        collectionID: collection.id,
+        keepFiles: true,
       );
       if (isBulkDelete) {
         final deletedCollection = collection.copyWith(isDeleted: true);
@@ -1157,13 +1123,10 @@ class CollectionsService {
         utf8.encode(newName),
         getCollectionKey(collection.id),
       );
-      await _enteDio.post(
-        "/collections/rename",
-        data: {
-          "collectionID": collection.id,
-          "encryptedName": CryptoUtil.bin2base64(encryptedName.encryptedData!),
-          "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!),
-        },
+      await collectionsGateway.renameCollection(
+        collectionID: collection.id,
+        encryptedName: CryptoUtil.bin2base64(encryptedName.encryptedData!),
+        nameDecryptionNonce: CryptoUtil.bin2base64(encryptedName.nonce!),
       );
       collection.setName(newName);
       _collectionIDToCollections[collection.id] = collection;
@@ -1183,9 +1146,7 @@ class CollectionsService {
 
   Future<void> leaveAlbum(Collection collection) async {
     try {
-      await _enteDio.post(
-        "/collections/leave/${collection.id}",
-      );
+      await collectionsGateway.leaveCollection(collection.id);
       await _handleCollectionDeletion(collection);
     } catch (e, s) {
       _logger.severe("failed to leave collection", e, s);
@@ -1228,10 +1189,7 @@ class CollectionsService {
           header: CryptoUtil.bin2base64(encryptedMMd.header!),
         ),
       );
-      await _enteDio.put(
-        "/collections/magic-metadata",
-        data: params.toJson(),
-      );
+      await collectionsGateway.updateMagicMetadata(params);
       // update the local information so that it's reflected on UI
       collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
       collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
@@ -1287,10 +1245,7 @@ class CollectionsService {
           header: CryptoUtil.bin2base64(encryptedMMd.header!),
         ),
       );
-      await _enteDio.put(
-        "/collections/public-magic-metadata",
-        data: params.toJson(),
-      );
+      await collectionsGateway.updatePublicMagicMetadata(params);
       // update the local information so that it's reflected on UI
       collection.mMdPubEncodedJson = jsonEncode(jsonToUpdate);
       collection.pubMagicMetadata =
@@ -1347,10 +1302,7 @@ class CollectionsService {
           header: CryptoUtil.bin2base64(encryptedMMd.header!),
         ),
       );
-      await _enteDio.put(
-        "/collections/sharee-magic-metadata",
-        data: params.toJson(),
-      );
+      await collectionsGateway.updateShareeMagicMetadata(params);
       // update the local information so that it's reflected on UI
       collection.sharedMmdJson = jsonEncode(jsonToUpdate);
       collection.sharedMagicMetadata =
@@ -1376,16 +1328,11 @@ class CollectionsService {
     bool enableCollect = false,
   }) async {
     try {
-      final response = await _enteDio.post(
-        "/collections/share-url",
-        data: {
-          "collectionID": collection.id,
-          "enableCollect": enableCollect,
-          "enableJoin": true,
-          "enableComment": true,
-        },
+      final publicUrl = await collectionShareGateway.createShareUrl(
+        collectionID: collection.id,
+        enableCollect: enableCollect,
       );
-      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+      collection.publicURLs.add(publicUrl);
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
@@ -1406,15 +1353,14 @@ class CollectionsService {
     Collection collection,
     Map<String, dynamic> prop,
   ) async {
-    prop.putIfAbsent('collectionID', () => collection.id);
     try {
-      final response = await _enteDio.put(
-        "/collections/share-url",
-        data: json.encode(prop),
+      final publicUrl = await collectionShareGateway.updateShareUrl(
+        collectionID: collection.id,
+        props: prop,
       );
       // remove existing url information
       collection.publicURLs.clear();
-      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+      collection.publicURLs.add(publicUrl);
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
@@ -1437,9 +1383,7 @@ class CollectionsService {
 
   Future<void> disableShareUrl(Collection collection) async {
     try {
-      await _enteDio.delete(
-        "/collections/share-url/" + collection.id.toString(),
-      );
+      await collectionShareGateway.deleteShareUrl(collection.id);
       collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
@@ -1458,15 +1402,12 @@ class CollectionsService {
 
   Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
-      final response = await _enteDio.get(
-        "/collections/v2",
-        queryParameters: {
-          "sinceTime": sinceTime,
-          "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",
-        },
+      final response = await collectionsGateway.getAll(
+        sinceTime: sinceTime,
+        source: AppLifecycleService.instance.isForeground ? "fg" : "bg",
       );
       final List<Collection> collections = [];
-      final c = response.data["collections"];
+      final c = response["collections"];
       for (final collectionData in c) {
         final Collection collection =
             await _fromRemoteCollection(collectionData);
@@ -1484,11 +1425,9 @@ class CollectionsService {
 
   Future<List<CollectionAction>> fetchPendingRemovalActions() async {
     try {
-      final response = await _enteDio.get(
-        "/collection-actions/pending-remove/",
-      );
+      final response = await collectionsGateway.fetchPendingRemovalActions();
       final List<dynamic> rawActions =
-          (response.data["actions"] as List<dynamic>?) ?? const [];
+          (response["actions"] as List<dynamic>?) ?? const [];
       final actions = rawActions
           .map(
             (dynamic action) => CollectionAction.fromJson(
@@ -1507,10 +1446,9 @@ class CollectionsService {
 
   Future<List<int>> fetchDeleteSuggestionFileIDs() async {
     try {
-      final response =
-          await _enteDio.get("/collection-actions/delete-suggestions/");
+      final response = await collectionsGateway.fetchDeleteSuggestions();
       final List<dynamic> rawActions =
-          (response.data["actions"] as List<dynamic>?) ?? const [];
+          (response["actions"] as List<dynamic>?) ?? const [];
       final actions = rawActions
           .map(
             (dynamic action) => CollectionAction.fromJson(
@@ -1539,10 +1477,7 @@ class CollectionsService {
       return;
     }
     try {
-      await _enteDio.post(
-        "/collection-actions/reject-delete-suggestions",
-        data: {"fileIDs": fileIDs},
-      );
+      await collectionsGateway.rejectDeleteSuggestions(fileIDs);
     } catch (e, s) {
       _logger.warning("Failed to reject delete suggestions", e, s);
       rethrow;
@@ -1556,20 +1491,16 @@ class CollectionsService {
     final String? authToken = uri.queryParameters["t"];
     final String albumKey = uri.fragment;
     try {
-      final response = await _enteDio.get(
-        "/public-collection/info",
-        options: Options(
-          headers: {"X-Auth-Access-Token": authToken},
-        ),
-      );
+      final responseData =
+          await collectionShareGateway.getPublicCollectionInfo(authToken!);
 
-      final collectionData = response.data["collection"];
+      final collectionData = responseData["collection"];
       final Collection collection = Collection.fromMap(collectionData);
       final Uint8List collectionKey =
           Uint8List.fromList(Base58Decode(albumKey));
 
       _cachedKeys[collection.id] = collectionKey;
-      _cachedPublicAlbumToken[collection.id] = authToken!;
+      _cachedPublicAlbumToken[collection.id] = authToken;
       _cachedPublicCollectionID.add(collection.id);
       _cachedPublicAlbumKey[collection.id] = albumKey;
 
@@ -1618,22 +1549,17 @@ class CollectionsService {
     int collectionID,
   ) async {
     final authToken = getSharedPublicAlbumToken(collectionID);
-    try {
-      final response = await _enteDio.post(
-        "/public-collection/verify-password",
-        data: {"passHash": passwordHash},
-        options: Options(
-          headers: {
-            "X-Auth-Access-Token": authToken,
-          },
-        ),
-      );
-      final jwtToken = response.data["jwtToken"];
-      if (response.statusCode == 200) {
-        await setPublicAlbumTokenJWT(collectionID, jwtToken);
-        return true;
-      }
+    if (authToken == null) {
+      _logger.warning("Auth token not found for collection $collectionID");
       return false;
+    }
+    try {
+      final jwtToken = await collectionShareGateway.verifyPublicPassword(
+        authToken: authToken,
+        passwordHash: passwordHash,
+      );
+      await setPublicAlbumTokenJWT(collectionID, jwtToken);
+      return true;
     } catch (e) {
       _logger.warning("Failed to verify public collection password $e");
       await showErrorDialog(
@@ -1659,15 +1585,10 @@ class CollectionsService {
         Configuration.instance.getKeyAttributes()!.publicKey,
       ),
     );
-    await _enteDio.post(
-      "/collections/join-link",
-      data: {
-        "collectionID": collectionID,
-        "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-      },
-      options: Options(
-        headers: publicCollectionHeaders(collectionID),
-      ),
+    await collectionsGateway.joinViaLink(
+      collectionID: collectionID,
+      encryptedKey: CryptoUtil.bin2base64(encryptedKey),
+      headers: publicCollectionHeaders(collectionID),
     );
   }
 
@@ -1789,11 +1710,8 @@ class CollectionsService {
   Future<Collection> fetchCollectionByID(int collectionID) async {
     try {
       _logger.info('fetching collectionByID $collectionID');
-      final response = await _enteDio.get(
-        "/collections/$collectionID",
-      );
-      assert(response.data != null);
-      final collectionData = response.data["collection"];
+      final collectionData =
+          await collectionsGateway.getCollection(collectionID);
       final collection = await _fromRemoteCollection(collectionData);
       await _db.insert(List.from([collection]));
       _cacheLocalPathAndCollection(collection);
@@ -1914,11 +1832,9 @@ class CollectionsService {
       );
     }
 
-    final params = <String, dynamic>{};
-    params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      params["files"] = [];
+      final fileItems = <CollectionFileItem>[];
       for (final file in batch) {
         final fileKey = getFileKey(file);
         file.generatedID =
@@ -1930,20 +1846,17 @@ class CollectionsService {
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
         file.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
-        params["files"].add(
+        fileItems.add(
           CollectionFileItem(
             file.uploadedFileID!,
             file.encryptedKey!,
             file.keyDecryptionNonce!,
-          ).toMap(),
+          ),
         );
       }
 
       try {
-        await _enteDio.post(
-          "/collections/add-files",
-          data: params,
-        );
+        await collectionFilesGateway.addFiles(collectionID, fileItems);
         await _filesDB.insertMultiple(batch);
         Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
       } catch (e) {
@@ -1979,11 +1892,9 @@ class CollectionsService {
       _logger.info("nothing to add to the collection");
       return;
     }
-    final params = <String, dynamic>{};
-    params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      params["files"] = [];
+      final fileItems = <CollectionFileItem>[];
       for (final file in batch) {
         final int uploadedFileID = file.uploadedFileID!;
         final fileKey = getFileKey(file);
@@ -1993,16 +1904,12 @@ class CollectionsService {
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
         final String keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
-        params["files"].add(
-          CollectionFileItem(uploadedFileID, encryptedKey, keyDecryptionNonce)
-              .toMap(),
+        fileItems.add(
+          CollectionFileItem(uploadedFileID, encryptedKey, keyDecryptionNonce),
         );
       }
       try {
-        await _enteDio.post(
-          "/collections/add-files",
-          data: params,
-        );
+        await collectionFilesGateway.addFiles(collectionID, fileItems);
       } catch (e) {
         _logger.warning('failed to add files to collection', e);
         rethrow;
@@ -2017,11 +1924,8 @@ class CollectionsService {
   }) async {
     _validateCopyInput(dstCollectionID, srcCollectionID, files);
     final batchedFiles = files.chunks(batchSizeCopy);
-    final params = <String, dynamic>{};
-    params["dstCollectionID"] = dstCollectionID;
-    params["srcCollectionID"] = srcCollectionID;
     for (final batch in batchedFiles) {
-      params["files"] = [];
+      final fileItems = <CollectionFileItem>[];
       for (final batchFile in batch) {
         final fileKey = getFileKey(batchFile);
         final encryptedKeyData =
@@ -2030,24 +1934,20 @@ class CollectionsService {
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
         batchFile.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
-        params["files"].add(
+        fileItems.add(
           CollectionFileItem(
             batchFile.uploadedFileID!,
             batchFile.encryptedKey!,
             batchFile.keyDecryptionNonce!,
-          ).toMap(),
+          ),
         );
       }
 
       try {
-        final res = await _enteDio.post(
-          "/files/copy",
-          data: params,
-        );
-        final oldToCopiedFileIDMap = Map<int, int>.from(
-          (res.data["oldToNewFileIDMap"] as Map<String, dynamic>).map(
-            (key, value) => MapEntry(int.parse(key), value as int),
-          ),
+        final oldToCopiedFileIDMap = await collectionFilesGateway.copyFiles(
+          dstCollectionID: dstCollectionID,
+          srcCollectionID: srcCollectionID,
+          files: fileItems,
         );
         for (final file in batch) {
           final int uploadIDForOriginalFIle = file.uploadedFileID!;
@@ -2142,9 +2042,6 @@ class CollectionsService {
     required EnteFile localFileToUpload,
     required EnteFile existingUploadedFile,
   }) async {
-    final params = <String, dynamic>{};
-    params["collectionID"] = destCollectionID;
-    params["files"] = [];
     final int uploadedFileID = existingUploadedFile.uploadedFileID!;
 
     // encrypt the fileKey with destination collection's key
@@ -2157,19 +2054,16 @@ class CollectionsService {
     localFileToUpload.keyDecryptionNonce =
         CryptoUtil.bin2base64(encryptedKeyData.nonce!);
 
-    params["files"].add(
+    final fileItems = [
       CollectionFileItem(
         uploadedFileID,
         localFileToUpload.encryptedKey!,
         localFileToUpload.keyDecryptionNonce!,
-      ).toMap(),
-    );
+      ),
+    ];
 
     try {
-      await _enteDio.post(
-        "/collections/add-files",
-        data: params,
-      );
+      await collectionFilesGateway.addFiles(destCollectionID, fileItems);
       localFileToUpload.collectionID = destCollectionID;
       localFileToUpload.uploadedFileID = uploadedFileID;
       await _filesDB.insertMultiple([localFileToUpload]);
@@ -2180,15 +2074,13 @@ class CollectionsService {
   }
 
   Future<void> restore(int toCollectionID, List<EnteFile> files) async {
-    final params = <String, dynamic>{};
-    params["collectionID"] = toCollectionID;
     final toCollectionKey = getCollectionKey(toCollectionID);
     final int ownerID = Configuration.instance.getUserID()!;
     final Set<String> existingLocalIDS =
         await FilesDB.instance.getExistingLocalFileIDs(ownerID);
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      params["files"] = [];
+      final fileItems = <CollectionFileItem>[];
       for (final file in batch) {
         final fileKey = getFileKey(file);
         file.generatedID =
@@ -2205,19 +2097,16 @@ class CollectionsService {
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
         file.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
-        params["files"].add(
+        fileItems.add(
           CollectionFileItem(
             file.uploadedFileID!,
             file.encryptedKey!,
             file.keyDecryptionNonce!,
-          ).toMap(),
+          ),
         );
       }
       try {
-        await _enteDio.post(
-          "/collections/restore-files",
-          data: params,
-        );
+        await collectionFilesGateway.restoreFiles(toCollectionID, fileItems);
         await _filesDB.insertMultiple(batch);
         await TrashDB.instance
             .delete(batch.map((e) => e.uploadedFileID!).toList());
@@ -2256,12 +2145,9 @@ class CollectionsService {
       _logger.info("nothing to move to collection");
       return;
     }
-    final params = <String, dynamic>{};
-    params["toCollectionID"] = toCollectionID;
-    params["fromCollectionID"] = fromCollectionID;
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      params["files"] = [];
+      final fileItems = <CollectionFileItem>[];
       for (final file in batch) {
         final fileKey = getFileKey(file);
         file.generatedID =
@@ -2273,17 +2159,18 @@ class CollectionsService {
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
         file.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
-        params["files"].add(
+        fileItems.add(
           CollectionFileItem(
             file.uploadedFileID!,
             file.encryptedKey!,
             file.keyDecryptionNonce!,
-          ).toMap(),
+          ),
         );
       }
-      await _enteDio.post(
-        "/collections/move-files",
-        data: params,
+      await collectionFilesGateway.moveFiles(
+        toCollectionID: toCollectionID,
+        fromCollectionID: fromCollectionID,
+        files: fileItems,
       );
     }
 
@@ -2347,23 +2234,15 @@ class CollectionsService {
     int collectionID,
     List<EnteFile> files,
   ) async {
-    final params = <String, dynamic>{};
-    params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      params["fileIDs"] = <int>[];
+      final fileIDs = <int>[];
       for (final file in batch) {
-        params["fileIDs"].add(file.uploadedFileID);
+        fileIDs.add(file.uploadedFileID!);
       }
-      final resp = await _enteDio.post(
-        "/collections/v3/remove-files",
-        data: params,
-      );
-      if (resp.statusCode != 200) {
-        throw Exception("Failed to remove files from collection");
-      }
+      await collectionFilesGateway.removeFiles(collectionID, fileIDs);
 
-      await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
+      await _filesDB.removeFromCollection(collectionID, fileIDs);
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collectionID,
@@ -2392,17 +2271,7 @@ class CollectionsService {
     if (fileIDs.isEmpty) {
       return;
     }
-    final params = <String, dynamic>{
-      "collectionID": collectionID,
-      "fileIDs": fileIDs,
-    };
-    final resp = await _enteDio.post(
-      "/collections/suggest-delete",
-      data: params,
-    );
-    if (resp.statusCode != 200) {
-      throw Exception("Failed to send delete suggestion");
-    }
+    await collectionFilesGateway.suggestDelete(collectionID, fileIDs);
 
     await _filesDB.removeFromCollection(collectionID, fileIDs);
     Bus.instance.fire(
@@ -2426,17 +2295,10 @@ class CollectionsService {
   Future<Collection> createAndCacheCollection(
     CreateRequest createRequest,
   ) async {
-    final dynamic payload = createRequest.toJson();
-    return _enteDio
-        .post(
-      "/collections",
-      data: payload,
-    )
-        .then((response) async {
-      final collectionData = response.data["collection"];
-      final collection = await _fromRemoteCollection(collectionData);
-      return _cacheLocalPathAndCollection(collection);
-    });
+    final collectionData =
+        await collectionsGateway.createCollection(createRequest);
+    final collection = await _fromRemoteCollection(collectionData);
+    return _cacheLocalPathAndCollection(collection);
   }
 
   @Deprecated("Use _cacheLocalPathAndCollection instead")

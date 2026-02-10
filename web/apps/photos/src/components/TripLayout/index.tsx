@@ -614,7 +614,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             {collection && credentials?.current && collectionKey && (
                 <PublicFeedSidebar
                     {...publicFeedVisibilityProps}
-                    albumName={collectionTitle}
                     files={files}
                     credentials={credentials.current}
                     collectionKey={collectionKey}

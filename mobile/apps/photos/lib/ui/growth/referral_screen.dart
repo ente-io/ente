@@ -1,8 +1,8 @@
 import "package:ente_pure_utils/ente_pure_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/gateways/storage_bonus/models/storage_bonus.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
@@ -276,6 +276,9 @@ class ReferralWidget extends StatelessWidget {
     const greenColor = Color(0xFF08C225);
     final storageInGB = referralView.planInfo.storageInGB;
     final mutedStyle = textTheme.miniMuted.copyWith(height: 2);
+    final step3Text = AppLocalizations.of(context).referralStep3(
+      storageInGB: storageInGB,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,22 +294,81 @@ class ReferralWidget extends StatelessWidget {
         RichText(
           text: TextSpan(
             style: mutedStyle,
-            children: [
-              TextSpan(
-                text: "3. ${AppLocalizations.of(context).youBothGet} ",
-              ),
-              TextSpan(
-                text: "${storageInGB}GB ${AppLocalizations.of(context).free}",
-                style: const TextStyle(color: greenColor),
-              ),
-              TextSpan(
-                text:
-                    ". (${AppLocalizations.of(context).youCanAtMaxDoubleYourStorage})",
-              ),
-            ],
+            children: _buildHighlightedSpans(
+              step3Text,
+              mutedStyle,
+              greenColor,
+              [
+                "${storageInGB}GB free",
+                "$storageInGB GB free",
+              ],
+              [
+                "${storageInGB}GB",
+                "$storageInGB GB",
+              ],
+            ),
           ),
         ),
       ],
     );
+  }
+
+  List<TextSpan> _buildHighlightedSpans(
+    String text,
+    TextStyle baseStyle,
+    Color highlightColor,
+    List<String> preferredTokens,
+    List<String> fallbackTokens,
+  ) {
+    final tokens = preferredTokens.any(text.contains)
+        ? preferredTokens
+        : fallbackTokens.any(text.contains)
+            ? fallbackTokens
+            : const <String>[];
+
+    if (tokens.isEmpty) {
+      return [TextSpan(text: text)];
+    }
+
+    final spans = <TextSpan>[];
+    var index = 0;
+
+    while (index < text.length) {
+      int? nextIndex;
+      String? nextToken;
+      for (final token in tokens) {
+        final tokenIndex = text.indexOf(token, index);
+        if (tokenIndex == -1) {
+          continue;
+        }
+        if (nextIndex == null || tokenIndex < nextIndex) {
+          nextIndex = tokenIndex;
+          nextToken = token;
+        }
+      }
+
+      if (nextIndex == null || nextToken == null) {
+        break;
+      }
+
+      if (nextIndex > index) {
+        spans.add(TextSpan(text: text.substring(index, nextIndex)));
+      }
+
+      spans.add(
+        TextSpan(
+          text: nextToken,
+          style: baseStyle.copyWith(color: highlightColor),
+        ),
+      );
+
+      index = nextIndex + nextToken.length;
+    }
+
+    if (index < text.length) {
+      spans.add(TextSpan(text: text.substring(index)));
+    }
+
+    return spans;
   }
 }

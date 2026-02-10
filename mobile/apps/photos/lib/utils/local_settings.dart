@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:photos/app_mode.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -32,6 +32,9 @@ class LocalSettings {
   static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
+  static const _kOfflineMLConsent = "ls.offline_ml_consent";
+  static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
+  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
   static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
@@ -58,15 +61,23 @@ class LocalSettings {
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
+  static const _kSharedPhotoFeedCutoffTime = "ls.shared_photo_feed_cutoff_time";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
+  static const _kAppLockEnabled = "ls.app_lock_enabled";
   static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
   static const _kChristmasBannerEnabled = "ls.christmas_banner_enabled";
   static const _kAutoMergeThresholdOverride = "ml_debug.auto_merge_threshold";
   static const _kDefaultClusteringDistanceOverride =
       "ml_debug.default_clustering_distance";
+  static const _kAppMode = "ls.app_mode";
+  static const _kAppModeEnvKey = "app_mode";
+  static const _kOfflineGetStartedBannerDismissed =
+      "ls.offline_get_started_banner_dismissed";
 
   final SharedPreferences _prefs;
+
+  AppMode? _cachedAppMode;
 
   LocalSettings(this._prefs);
 
@@ -136,6 +147,12 @@ class LocalSettings {
     await _prefs.setBool(kPeopleSortSimilaritySelected, value);
   }
 
+  bool get appLockEnabledCached => _prefs.getBool(_kAppLockEnabled) ?? false;
+
+  Future<void> setAppLockEnabledCached(bool value) async {
+    await _prefs.setBool(_kAppLockEnabled, value);
+  }
+
   GroupType getGalleryGroupType() {
     final groupTypeString = _prefs.getString(kGalleryGroupType);
     if (groupTypeString != null) {
@@ -193,8 +210,24 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isMLLocalIndexingEnabled =>
-      _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
+  bool get offlineMLConsent => _prefs.getBool(_kOfflineMLConsent) ?? false;
+
+  Future<void> setOfflineMLConsent(bool value) async {
+    await _prefs.setBool(_kOfflineMLConsent, value);
+  }
+
+  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? false;
+
+  Future<void> setOfflineMapEnabled(bool value) async {
+    await _prefs.setBool(_kOfflineMapEnabled, value);
+  }
+
+  bool get isMLLocalIndexingEnabled {
+    final key = appMode == AppMode.offline
+        ? _kOfflineMLLocalIndexingEnabled
+        : _kisMLLocalIndexingEnabled;
+    return _prefs.getBool(key) ?? enoughRamForLocalIndexing;
+  }
 
   bool get isSmartMemoriesEnabled =>
       _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
@@ -252,8 +285,12 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    await _prefs.setBool(_kisMLLocalIndexingEnabled, !isMLLocalIndexingEnabled);
-    return isMLLocalIndexingEnabled;
+    final key = appMode == AppMode.offline
+        ? _kOfflineMLLocalIndexingEnabled
+        : _kisMLLocalIndexingEnabled;
+    final nextValue = !(_prefs.getBool(key) ?? enoughRamForLocalIndexing);
+    await _prefs.setBool(key, nextValue);
+    return nextValue;
   }
 
   bool get hasSeenMLEnablingBanner =>
@@ -344,6 +381,18 @@ class LocalSettings {
     await _prefs.setBool(_kInternalUserDisabled, value);
   }
 
+  int getOrCreateSharedPhotoFeedCutoffTime() {
+    final existingCutoff = _prefs.getInt(_kSharedPhotoFeedCutoffTime);
+    if (existingCutoff != null) {
+      return existingCutoff;
+    }
+
+    // files.added_time is stored in microseconds since epoch.
+    final cutoff = DateTime.now().microsecondsSinceEpoch;
+    _prefs.setInt(_kSharedPhotoFeedCutoffTime, cutoff).ignore();
+    return cutoff;
+  }
+
   int wrapped2025ResumeIndex() {
     return _prefs.getInt(_kWrapped2025ResumeIndex) ?? 0;
   }
@@ -369,5 +418,34 @@ class LocalSettings {
 
   Future<void> setChristmasBannerEnabled(bool value) async {
     await _prefs.setBool(_kChristmasBannerEnabled, value);
+  }
+
+  AppMode get appMode {
+    if (_cachedAppMode != null) return _cachedAppMode!;
+
+    final savedIndex = _prefs.getInt(_kAppMode);
+    if (savedIndex != null &&
+        savedIndex >= 0 &&
+        savedIndex < AppMode.values.length) {
+      _cachedAppMode = AppMode.values[savedIndex];
+      return _cachedAppMode!;
+    }
+
+    const envValue =
+        String.fromEnvironment(_kAppModeEnvKey, defaultValue: "online");
+    _cachedAppMode = envValue == "offline" ? AppMode.offline : AppMode.online;
+    return _cachedAppMode!;
+  }
+
+  Future<void> setAppMode(AppMode mode) async {
+    await _prefs.setInt(_kAppMode, mode.index);
+    _cachedAppMode = mode;
+  }
+
+  bool get isOfflineGetStartedBannerDismissed =>
+      _prefs.getBool(_kOfflineGetStartedBannerDismissed) ?? false;
+
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) async {
+    await _prefs.setBool(_kOfflineGetStartedBannerDismissed, value);
   }
 }

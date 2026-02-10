@@ -125,6 +125,10 @@ class SelectablePersonSearchExample extends StatelessWidget {
   });
 
   void _handleTap(BuildContext context) {
+    if (isOfflineMode) {
+      _handleNavigation(context);
+      return;
+    }
     if (selectedPeople.personIds.isNotEmpty) {
       _toggleSelection();
     } else {
@@ -133,6 +137,9 @@ class SelectablePersonSearchExample extends StatelessWidget {
   }
 
   void _handleLongPress() {
+    if (isOfflineMode) {
+      return;
+    }
     _toggleSelection();
   }
 
@@ -162,8 +169,8 @@ class SelectablePersonSearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCluster = (searchResult.type() == ResultType.faces &&
-        int.tryParse(searchResult.name()) != null);
+    final bool isCluster = searchResult.type() == ResultType.faces &&
+        searchResult.params.containsKey(kClusterParamId);
     final bool isPinnedPerson =
         !isCluster && (searchResult.params[kPersonPinned] as bool? ?? false);
 
@@ -264,45 +271,50 @@ class SelectablePersonSearchExample extends StatelessWidget {
                 ],
               ),
               isCluster
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () async {
-                        final result = await showAssignPersonAction(
-                          context,
-                          clusterID: searchResult.name(),
-                        );
-                        if (result != null &&
-                            result is (PersonEntity, EnteFile)) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result.$1,
-                              searchResult: null,
+                  ? isOfflineMode
+                      ? const SizedBox.shrink()
+                      : GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () async {
+                            final clusterId =
+                                searchResult.params[kClusterParamId] as String?;
+                            final result = await showAssignPersonAction(
+                              context,
+                              clusterID: clusterId ?? searchResult.name(),
+                            );
+                            if (result != null &&
+                                result is (PersonEntity, EnteFile)) {
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result.$1,
+                                  searchResult: null,
+                                ),
+                              );
+                            } else if (result != null &&
+                                result is PersonEntity) {
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result,
+                                  searchResult: null,
+                                ),
+                              );
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 6, bottom: 0),
+                            child: Text(
+                              "Add name",
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: getEnteTextTheme(context).small,
                             ),
-                          );
-                        } else if (result != null && result is PersonEntity) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result,
-                              searchResult: null,
-                            ),
-                          );
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 6, bottom: 0),
-                        child: Text(
-                          "Add name",
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
-                        ),
-                      ),
-                    )
+                          ),
+                        )
                   : Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 0),
                       child: Text(

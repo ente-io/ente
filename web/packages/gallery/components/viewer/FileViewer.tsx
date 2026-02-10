@@ -356,9 +356,8 @@ export type FileViewerProps = ModalVisibilityProps & {
     /**
      * `true` if the comments and reactions feature is enabled for the user.
      *
-     * This is controlled by a server-side feature flag. When `false`, the
-     * like and comment buttons will be hidden for logged-in users.
-     * Defaults to `false`.
+     * When `false`, the like and comment buttons will be hidden for logged-in
+     * users. Defaults to `true`.
      */
     isCommentsFeatureEnabled?: boolean;
     /**
@@ -412,7 +411,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     collectionKey,
     onJoinAlbum,
     enableComment = true,
-    isCommentsFeatureEnabled = false,
+    isCommentsFeatureEnabled = true,
     enableJoin = true,
 }) => {
     const { onGenericError } = useBaseContext();
@@ -603,6 +602,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleClose = useCallback(() => {
+        if (document.fullscreenElement) void document.exitFullscreen();
         setNeedsRemotePull((needsPull) => {
             if (needsPull) onTriggerRemotePull?.();
             return false;
@@ -618,6 +618,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
+        setIsFullscreen(false);
         onClose();
     }, [onTriggerRemotePull, onClose]);
 
@@ -1743,7 +1744,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             document.fullscreenElement
                 ? document.exitFullscreen()
                 : document.body.requestFullscreen()
-        ).then(updateFullscreenStatus);
+        ).then(() => setTimeout(updateFullscreenStatus, 200));
     }, [handleMoreMenuCloseIfNeeded, updateFullscreenStatus]);
 
     const handleShortcuts = useCallback(() => {

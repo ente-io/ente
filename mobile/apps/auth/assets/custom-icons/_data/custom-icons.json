@@ -118,6 +118,13 @@
       "title": "availity"
     },
     {
+      "title": "Avenue",
+      "altNames": [
+        "avenue.us",
+        "Avenue Securities"
+      ]
+    },
+    {
       "title": "AvistaZ.to",
       "slug": "avistaz"
     },
@@ -958,6 +965,13 @@
       "slug": "lark",
       "altNames": [
         "飞书"
+      ]
+    },
+    {
+      "title": "Laneros",
+      "slug": "laneros",
+      "altNames": [
+        "laneros.com"
       ]
     },
     {
@@ -2150,6 +2164,12 @@
     {
       "title": "Hytale",
       "slug": "hytale"
+    },
+    {
+      "title": "Manage My Health",
+      "name": "Manage My Health",
+      "slug": "managemyhealth",
+      "altNames": ["managemyhealth", "Manage My Health NZ"]
     }
   ]
 }

@@ -14,11 +14,13 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/components/banners/offline_settings_banner.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget_new.dart";
 import "package:photos/ui/components/settings/settings_grouped_card.dart";
 import "package:photos/ui/components/settings/social_icons_row.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/growth/referral_screen.dart";
+import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/settings/about/about_us_page.dart";
 import "package:photos/ui/settings/account/account_settings_page.dart";
@@ -32,6 +34,7 @@ import "package:photos/ui/settings/inherited_settings_state.dart";
 import "package:photos/ui/settings/memories_settings_screen.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/notification_settings_screen.dart";
+import "package:photos/ui/settings/search/settings_search_page.dart";
 import "package:photos/ui/settings/security/security_settings_page.dart";
 import "package:photos/ui/settings/storage_card_widget.dart";
 import "package:photos/ui/settings/streaming/video_streaming_settings_page.dart";
@@ -69,6 +72,8 @@ class _SettingsBody extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final hasLoggedIn = Configuration.instance.isLoggedIn();
+    final hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
+    final showLoginEntry = isOfflineMode && !hasConfiguredAccount;
 
     final pageBackgroundColor =
         isDarkMode ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
@@ -88,7 +93,19 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildEmailHeader(context, colorScheme, textTheme),
                 const SizedBox(height: 16),
-                if (hasLoggedIn) ...[
+                if (showLoginEntry) ...[
+                  OfflineSettingsBanner(
+                    onGetStarted: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const LandingPageWidget(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                if (hasLoggedIn && !isOfflineMode) ...[
                   const StorageCardWidget(),
                   const SizedBox(height: 16),
                   _buildAccountCard(context, colorScheme),
@@ -100,19 +117,23 @@ class _SettingsBody extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildAppearanceCard(context, colorScheme),
                 const SizedBox(height: 8),
-                if (hasLoggedIn) ...[
+                if (isOfflineMode) ...[
+                  _buildOfflineFeaturesCard(context, colorScheme),
+                  const SizedBox(height: 8),
+                ],
+                if (hasLoggedIn && !isOfflineMode) ...[
                   _buildPersonalFeaturesCard(context, colorScheme),
                   const SizedBox(height: 8),
                   _buildFeaturesAndPlansCard(context, colorScheme),
                   const SizedBox(height: 8),
-                  _buildEngagementCard(context, colorScheme),
-                  const SizedBox(height: 8),
                 ],
+                _buildEngagementCard(context, colorScheme),
+                const SizedBox(height: 8),
                 _buildHelpSupportCard(context, colorScheme),
                 const SizedBox(height: 8),
                 _buildAboutUsCard(context, colorScheme),
                 const SizedBox(height: 8),
-                if (hasLoggedIn) ...[
+                if (hasLoggedIn && !isOfflineMode) ...[
                   _buildLogoutCard(context, colorScheme),
                 ],
                 const Padding(
@@ -121,6 +142,7 @@ class _SettingsBody extends StatelessWidget {
                 ),
                 const AppVersionWidget(),
                 if (hasLoggedIn &&
+                    !isOfflineMode &&
                     (flagService.flags.internalUser || kDebugMode)) ...[
                   _buildDebugCard(context, colorScheme),
                   const SizedBox(height: 8),
@@ -145,30 +167,50 @@ class _SettingsBody extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             child: Icon(
-              Icons.chevron_left,
+              Icons.keyboard_double_arrow_left,
               size: 24,
               color: colorScheme.textBase,
             ),
           ),
         ),
-        if (localSettings.enableDatabaseLogging)
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const LogViewerPage(),
-                ),
-              );
-            },
-            child: Container(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               padding: const EdgeInsets.all(8),
-              child: Icon(
-                Icons.bug_report,
-                size: 20,
+              iconSize: 20,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsSearchPage(),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.search_rounded,
                 color: colorScheme.textMuted,
               ),
             ),
-          ),
+            if (localSettings.enableDatabaseLogging)
+              IconButton(
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                padding: const EdgeInsets.all(8),
+                iconSize: 20,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const LogViewerPage(),
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.bug_report,
+                  color: colorScheme.textMuted,
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -243,6 +285,69 @@ class _SettingsBody extends StatelessWidget {
     );
   }
 
+  Widget _buildOfflineFeaturesCard(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+  ) {
+    return SettingsGroupedCard(
+      children: [
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).machineLearning,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedMagicWand01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MachineLearningSettingsPage());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).memories,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedSparkles,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MemoriesSettingsScreen());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).notifications,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedNotification01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const NotificationSettingsScreen());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).widgets,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedAlignBoxBottomRight,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const WidgetSettingsScreen());
+          },
+        ),
+        _buildMapsMenuItem(context, colorScheme),
+      ],
+    );
+  }
+
   Widget _buildSecurityCard(BuildContext context, EnteColorScheme colorScheme) {
     return MenuItemWidgetNew(
       title: AppLocalizations.of(context).security,
@@ -311,6 +416,72 @@ class _SettingsBody extends StatelessWidget {
           },
         ),
         MenuItemWidgetNew(
+          title: AppLocalizations.of(context).familyPlans,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedUserMultiple,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
+          onTap: () async {
+            final userDetails =
+                await UserService.instance.getUserDetailsV2(memoryCount: false);
+            await billingService.launchFamilyPortal(context, userDetails);
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).referrals,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedTicketStar,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const ReferralScreen());
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturesAndPlansCard(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+  ) {
+    return SettingsGroupedCard(
+      children: [
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).freeUpSpace,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedRocket01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
+          onTap: () async {
+            await routeToPage(context, const FreeUpSpaceOptionsScreen());
+          },
+        ),
+        MenuItemWidgetNew(
+          title: AppLocalizations.of(context).machineLearning,
+          borderRadius: 0,
+          leadingIconWidget: _buildIconWidget(
+            HugeIcons.strokeRoundedMagicWand01,
+            colorScheme,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await routeToPage(context, const MachineLearningSettingsPage());
+          },
+        ),
+        MenuItemWidgetNew(
           title: AppLocalizations.of(context).memories,
           borderRadius: 0,
           leadingIconWidget: _buildIconWidget(
@@ -349,29 +520,6 @@ class _SettingsBody extends StatelessWidget {
             await routeToPage(context, const WidgetSettingsScreen());
           },
         ),
-      ],
-    );
-  }
-
-  Widget _buildFeaturesAndPlansCard(
-    BuildContext context,
-    EnteColorScheme colorScheme,
-  ) {
-    return SettingsGroupedCard(
-      children: [
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).machineLearning,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedMagicWand01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await routeToPage(context, const MachineLearningSettingsPage());
-          },
-        ),
         MenuItemWidgetNew(
           title: AppLocalizations.of(context).videoStreaming,
           borderRadius: 0,
@@ -385,73 +533,34 @@ class _SettingsBody extends StatelessWidget {
             await routeToPage(context, const VideoStreamingSettingsPage());
           },
         ),
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).freeUpSpace,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedRocket01,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          showOnlyLoadingState: true,
-          onTap: () async {
-            await routeToPage(context, const FreeUpSpaceOptionsScreen());
-          },
-        ),
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).referrals,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedTicketStar,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await routeToPage(context, const ReferralScreen());
-          },
-        ),
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).familyPlans,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedUserMultiple,
-            colorScheme,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          showOnlyLoadingState: true,
-          onTap: () async {
-            final userDetails =
-                await UserService.instance.getUserDetailsV2(memoryCount: false);
-            await billingService.launchFamilyPortal(context, userDetails);
-          },
-        ),
-        MenuItemWidgetNew(
-          title: AppLocalizations.of(context).maps,
-          borderRadius: 0,
-          leadingIconWidget: _buildIconWidget(
-            HugeIcons.strokeRoundedMaping,
-            colorScheme,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => flagService.mapEnabled,
-            onChanged: () async {
-              final isEnabled = flagService.mapEnabled;
-              try {
-                await flagService.setMapEnabled(!isEnabled);
-              } catch (e) {
-                showShortToast(
-                  context,
-                  AppLocalizations.of(context).somethingWentWrong,
-                );
-                rethrow;
-              }
-            },
-          ),
-        ),
+        _buildMapsMenuItem(context, colorScheme),
       ],
+    );
+  }
+
+  Widget _buildMapsMenuItem(BuildContext context, EnteColorScheme colorScheme) {
+    return MenuItemWidgetNew(
+      title: AppLocalizations.of(context).maps,
+      borderRadius: 0,
+      leadingIconWidget: _buildIconWidget(
+        HugeIcons.strokeRoundedMaping,
+        colorScheme,
+      ),
+      trailingWidget: ToggleSwitchWidget(
+        value: () => mapEnabled,
+        onChanged: () async {
+          final isEnabled = mapEnabled;
+          try {
+            await setMapEnabled(!isEnabled);
+          } catch (e) {
+            showShortToast(
+              context,
+              AppLocalizations.of(context).somethingWentWrong,
+            );
+            rethrow;
+          }
+        },
+      ),
     );
   }
 

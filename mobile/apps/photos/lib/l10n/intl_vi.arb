@@ -2099,10 +2099,6 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Bình luận và bày tỏ cảm xúc",
-  "cLDesc1": "Chúng tôi đang triển khai tính năng bình luận và bày tỏ cảm xúc trên ảnh được chia sẻ. Bạn có thể bày tỏ cảm xúc hoặc bình luận về một bức ảnh bằng cách mở ảnh đó và sử dụng các thao tác ở phía dưới. Tất cả các bình luận và bày tỏ cảm xúc đến sẽ hiển thị trên tab Đã chia sẻ.",
-  "cLTitle2": "Người quản lý album",
-  "cLDesc2": "Giờ đây, bạn có thể chỉ định một người dùng Ente khác làm quản trị viên cho album của mình. Với tính năng này, họ sẽ có thể thêm người xem và cộng tác viên khác, xóa ảnh khỏi album, và thậm chí đề xuất người tham gia xóa ảnh của họ.",
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

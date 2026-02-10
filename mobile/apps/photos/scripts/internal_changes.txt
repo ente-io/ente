@@ -1,29 +1,14 @@
-- Laurens: QOL: Improve the merge persons flow
-- Ashil: QOL: Better copy when sharing link
-- Laurens: Redesign search results page
-- Ashil: Fix background audio from other apps stopping when opening Ente on iOS
-- Ashil: QOL: Enalbe swipe to select on Samsung S series devices after fixing issue introduced by it. 
-- Laurens: QOL: Fix issies with contact list
-- Laurens: QOL: Improve search tab loading speed (especially for big libraries)
-- Laurens: QOL: Add overview of ignored persons
-- Laurens: QOL: Add search and custom sorts 
-- Laurens: QOL: Add search to all search tab section
-- Neeraj: Referral screen redesign
-- Neeraj: Settings screen redesign
-- Ashil: Fix app getting stuck in splash screen after backup restore or device migration
-- Ashil: QOL: Fix home gallery getting cut on the right end on landscape mode (affects tablets)
-- Ashil: QOL: Fix uncategorized page not updating after move
-- Ashil: QOL: Pause video when using jump to date
-- Ashil: QOL(perf): Potential perf improvement when there are lot of shared files in gallery (Optimized PersonFaceWidget that displays face thumbnail)
-- Ashil: QOL: Pinch to zoom on video
-- Laurens: Small improvements to rituals
-- Ashil: QOL: Fix jank on file info sheet
-- Ashil: QOL: Show large thumbnail for unsupported image formats in file viewer
-- Neeraj: (i) Surface shared albums in add/move-to-album flows with owner avatar
-- Neeraj: QOL: Priority debouncer for recent local photos (< 7 days) to reduce home gallery delay
-- Neeraj: QOL: Collage creator: swap photos via long-press select + tap to replace
+- Neeraj: (i) Show incoming photos in feed
+- Neeraj: Remove internal-user gating for extended collage layouts
+- Ashil: Fix likes on someone else's photo coming up as your in feed + improvements in feed (ownership aware copies for comments and replies)
+- Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
+- Ashil: Social notification improvements
+- Laurens: Notifications for comments and likes
+- Neeraj: Fix incorrect thumbnail for local files
+- Neeraj: QOL: Parse duration & always show video indicator/duration 
+- Ashil: QOL: Option to remove hidden files from outside of hidden
+- Neeraj: Show on device albums in search result
+- Ashil: Scroll to parent comment on tapping it in reply bubble
+- Ashil: QOL: Support for hiding incoming shared albums
 - Prateek: (i) Always enable video streaming
 - Prateek: Add "Start with latest backups"  (last 7 days onwards) (20% rollout)
-- Prateek: Stop streaming if not 75% processed for upload and thermal change
-- Prateek: Stop streaming immediately on log-out
-

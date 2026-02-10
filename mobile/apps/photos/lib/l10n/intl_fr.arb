@@ -969,7 +969,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
-  "freeUpSpaceSaving": "{count, plural, one {}=1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1003,7 +1003,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {}=1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, =1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1347,8 +1347,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
-  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
+  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1477,7 +1477,7 @@
   "@noFacesDetectedTapToAdd": {
     "description": "Shown in file details when no faces are detected, but manual tagging is available."
   },
-  "addedFilesToPerson": "{count, plural, one {}=1 {Ajout d'un fichier à {personName}} other { {count} fichiers ajoutés à {personName}}}",
+  "addedFilesToPerson": "{count, plural, =1 {Ajout d'un fichier à {personName}} other { {count} fichiers ajoutés à {personName}}}",
   "@addedFilesToPerson": {
     "description": "Toast shown after manually tagging one or more files to a person.",
     "placeholders": {
@@ -1491,7 +1491,7 @@
       }
     }
   },
-  "filesAlreadyLinkedToPerson": "{count, plural, one {}=1 {Un fichier est déjà lié à {personName}} other {{count} fichiers sont déjà liés à {personName}}}",
+  "filesAlreadyLinkedToPerson": "{count, plural, =1 {Un fichier est déjà lié à {personName}} other {{count} fichiers sont déjà liés à {personName}}}",
   "@filesAlreadyLinkedToPerson": {
     "description": "Toast shown when selected files are already manually tagged to the selected person.",
     "placeholders": {
@@ -1532,7 +1532,7 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1562,7 +1562,7 @@
     },
     "description": "Number of admins that were successfully added to an album."
   },
-  "addAdmins": "{count, plural, one {}=0 {Ajouter un admin} =1 {Ajouter un admin} other {Ajouter des admins}}",
+  "addAdmins": "{count, plural, =0 {Ajouter un admin} =1 {Ajouter un admin} other {Ajouter des admins}}",
   "@addAdmins": {
     "placeholders": {
       "count": {
@@ -1966,7 +1966,7 @@
   "font": "Police",
   "background": "Arrière-plan",
   "align": "Aligner",
-  "addedToAlbums": "{count, plural, one {}=1{Ajouté avec succès à 1 album} other{Ajouté avec succès à {count} albums}}",
+  "addedToAlbums": "{count, plural, =1{Ajouté avec succès à 1 album} other{Ajouté avec succès à {count} albums}}",
   "@addedToAlbums": {
     "description": "Message shown when items are added to albums",
     "placeholders": {
@@ -2005,7 +2005,7 @@
   "findSimilarImages": "Rechercher des images similaires",
   "noSimilarImagesFound": "Aucune image similaire trouvée",
   "yourPhotosLookUnique": "Vos photos semblent uniques",
-  "similarGroupsFound": "{count, plural, one {}=1{{count} groupe trouvé} other{{count} groupes trouvés}}",
+  "similarGroupsFound": "{count, plural, =1{{count} groupe trouvé} other{{count} groupes trouvés}}",
   "@similarGroupsFound": {
     "placeholders": {
       "count": {
@@ -2099,10 +2099,6 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Commentaires et réactions",
-  "cLDesc1": "Nous ajoutons les commentaires et réactions sur les photos partagées. Vous pouvez réagir ou commenter une photo en l'ouvrant et en utilisant les actions en bas de page. Tous les commentaires et réactions entrants seront visibles dans l’onglet Partagé.",
-  "cLTitle2": "Administrateur pour les albums",
-  "cLDesc2": "Vous pouvez maintenant assigner un autre utilisateur Ente en tant qu'administrateur de votre album. Avec cela, ils seront en mesure d'ajouter d'autres spectateurs et collaborateurs, de supprimer des photos des albums, et même de suggérer aux participants de supprimer leurs photos.",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
@@ -2340,7 +2336,7 @@
       }
     }
   },
-  "likesCount": "{count, plural, one {}=1{1 j'aime} other{{count} j'aime}}",
+  "likesCount": "{count, plural, =1{1 j'aime} other{{count} j'aime}}",
   "@likesCount": {
     "description": "Number of likes with pluralization",
     "placeholders": {
@@ -2361,7 +2357,7 @@
   "@failedToUpdateLike": {
     "description": "Toast when like update fails"
   },
-  "failedToLikeAlbums": "{count, plural, one {}=1{J'aime impossible sur 1 album} other{J'aime impossible sur {count} albums}}",
+  "failedToLikeAlbums": "{count, plural, =1{J'aime impossible sur 1 album} other{J'aime impossible sur {count} albums}}",
   "@failedToLikeAlbums": {
     "description": "Error when liking albums fails",
     "placeholders": {
@@ -2374,7 +2370,7 @@
   "@couldNotLoadAlbums": {
     "description": "Error when albums fail to load"
   },
-  "albumsCount": "{count, plural, one {}=1{1 album} other{{count} albums}}",
+  "albumsCount": "{count, plural, =1{1 album} other{{count} albums}}",
   "@albumsCount": {
     "description": "Number of albums with pluralization",
     "placeholders": {
@@ -2420,7 +2416,7 @@
       }
     }
   },
-  "commentsCount": "{count, plural, one {} =0{0 commentaires} =1{1 commentaire} other{{count} commentaires}}",
+  "commentsCount": "{count, plural, =0{0 commentaires} =1{1 commentaire} other{{count} commentaires}}",
   "@commentsCount": {
     "description": "Number of comments with pluralization",
     "placeholders": {
