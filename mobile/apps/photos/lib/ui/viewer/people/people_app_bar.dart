@@ -10,7 +10,6 @@ import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
@@ -22,8 +21,6 @@ import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
-import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
-import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/person_selection_action_widgets.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -403,6 +400,36 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       items.addAll(
         [
           PopupMenuItem(
+            value: PeoplePopupAction.rename,
+            child: Row(
+              children: [
+                const Icon(Icons.edit),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  AppLocalizations.of(context).edit,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: PeoplePopupAction.reviewSuggestions,
+            child: Row(
+              children: [
+                const Icon(Icons.search_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  AppLocalizations.of(context).review,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
             value: PeoplePopupAction.unignore,
             child: Row(
               children: [
@@ -410,7 +437,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(AppLocalizations.of(context).showPerson),
+                Text(
+                  AppLocalizations.of(context).showPerson,
+                  style: textTheme.bodyBold,
+                ),
               ],
             ),
           ),
@@ -526,7 +556,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   bool _isLegacyIgnoredName(String name) {
-    final normalizedName = name.trim();
+    final normalizedName = name.trim().toLowerCase();
     return normalizedName.isEmpty ||
         normalizedName == "(ignored)" ||
         normalizedName == "(hidden)";
@@ -563,27 +593,28 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   Future<void> _showPerson(BuildContext context) async {
-    if (!_isLegacyIgnoredName(person.data.name)) {
-      await showChoiceDialog(
-        context,
-        title:
-            "Are you sure you want to show this person in people section again?",
-        firstButtonLabel: "Yes, show person",
-        firstButtonOnTap: () async {
-          try {
+    final isUnnamedIgnoredPerson = _isLegacyIgnoredName(person.data.name);
+    await showChoiceDialog(
+      context,
+      title:
+          "Are you sure you want to show this person in people section again?",
+      firstButtonLabel: "Yes, show person",
+      firstButtonOnTap: () async {
+        try {
+          if (isUnnamedIgnoredPerson) {
+            await PersonService.instance.deletePerson(person.remoteID);
+            Bus.instance.fire(PeopleChangedEvent());
+          } else {
             final updatedPerson = await PersonService.instance.updateAttributes(
               person.remoteID,
               isHidden: false,
             );
             setState(() {
               person = updatedPerson;
-              if (person.data.email == Configuration.instance.getEmail()) {
-                _appBarTitle = context.l10n.accountOwnerPersonAppbarTitle(
-                  title: person.data.name,
-                );
-              } else {
-                _appBarTitle = person.data.name;
-              }
+              _appBarTitle = _resolveAppBarTitle(
+                sourcePerson: person,
+                title: person.data.name,
+              );
             });
             Bus.instance.fire(
               PeopleChangedEvent(
@@ -592,49 +623,13 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 person: updatedPerson,
               ),
             );
-          } catch (e, s) {
-            _logger.severe('Unignoring/showing person failed', e, s);
           }
-        },
-      );
-      return;
-    }
-
-    bool assignName = false;
-    await showChoiceDialog(
-      context,
-      title:
-          "Are you sure you want to show this person in people section again?",
-      firstButtonLabel: "Yes, show person",
-      firstButtonOnTap: () async {
-        try {
-          await PersonService.instance.deletePerson(person.remoteID);
-          Bus.instance.fire(PeopleChangedEvent());
-          assignName = true;
+          Navigator.of(context).pop();
         } catch (e, s) {
-          _logger.severe('Unignoring/showing and naming person failed', e, s);
-          // await showGenericErrorDialog(context: context, error: e);
+          _logger.severe('Unignoring/showing person failed', e, s);
         }
       },
     );
-    if (assignName) {
-      final result = await showAssignPersonAction(
-        context,
-        clusterID: person.data.assigned.first.id,
-      );
-      Navigator.pop(context);
-      if (result != null) {
-        final person = result is (PersonEntity, EnteFile) ? result.$1 : result;
-        // ignore: unawaited_futures
-        routeToPage(
-          context,
-          PeoplePage(
-            person: person,
-            searchResult: null,
-          ),
-        );
-      }
-    }
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {

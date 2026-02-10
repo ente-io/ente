@@ -38,6 +38,13 @@ class _PeopleSelectionActionWidgetState
   late Future<Map<String, PersonEntity>> personEntitiesMapFuture;
   final _logger = Logger("PeopleSelectionActionWidget");
 
+  bool _isUnnamedIgnoredPerson(PersonEntity person) {
+    final normalizedName = person.data.name.trim().toLowerCase();
+    return normalizedName.isEmpty ||
+        normalizedName == "(ignored)" ||
+        normalizedName == "(hidden)";
+  }
+
   @override
   void initState() {
     super.initState();
@@ -98,45 +105,66 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
         final onlyPersonSelected =
             selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
+        final ignoredSelectedPersonIds = selectedPersonIds
+            .where((id) => personMap[id]?.data.isIgnored ?? false)
+            .toList();
+        final onlyIgnoredPersonsSelected =
+            ignoredSelectedPersonIds.isNotEmpty &&
+                selectedClusterIds.isEmpty &&
+                ignoredSelectedPersonIds.length == selectedPersonIds.length;
         final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
             selectedPersonIds.every(
               (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
             );
         final bool showEditAction = onlyOnePerson;
         final bool showReviewAction = onlyOnePerson;
-        final bool showMergeAction = selectedClusterIds.isNotEmpty;
-        final bool showResetAction = onlyOnePerson;
-        final bool showAutoAddAction = onlyPersonSelected;
-        final bool showPinAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => !(personMap[id]?.data.isPinned ?? false),
-            );
-        final bool showUnpinAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => personMap[id]?.data.isPinned ?? false,
-            );
-        final bool showHideFromMemoriesAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => !(personMap[id]?.data.hideFromMemories ?? false),
-            );
-        final bool showShowInMemoriesAction = onlyPersonSelected &&
-            namedPersonsSelected &&
-            selectedPersonIds.every(
-              (id) => personMap[id]?.data.hideFromMemories ?? false,
-            );
+        final bool showMergeAction =
+            onlyIgnoredPersonsSelected ? false : selectedClusterIds.isNotEmpty;
+        final bool showResetAction =
+            onlyIgnoredPersonsSelected ? false : onlyOnePerson;
+        final bool showShowPersonAction = onlyIgnoredPersonsSelected;
+        final bool showAutoAddAction =
+            onlyIgnoredPersonsSelected ? false : onlyPersonSelected;
+        final bool showPinAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => !(personMap[id]?.data.isPinned ?? false),
+                );
+        final bool showUnpinAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => personMap[id]?.data.isPinned ?? false,
+                );
+        final bool showHideFromMemoriesAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+                );
+        final bool showShowInMemoriesAction = onlyIgnoredPersonsSelected
+            ? false
+            : onlyPersonSelected &&
+                namedPersonsSelected &&
+                selectedPersonIds.every(
+                  (id) => personMap[id]?.data.hideFromMemories ?? false,
+                );
         final bool hasNonIgnoredSelectedPerson = selectedPersonIds.any(
           (id) => !(personMap[id]?.data.isIgnored ?? true),
         );
-        final bool showIgnoreAction =
-            selectedClusterIds.isNotEmpty || hasNonIgnoredSelectedPerson;
+        final bool showIgnoreAction = onlyIgnoredPersonsSelected
+            ? false
+            : selectedClusterIds.isNotEmpty || hasNonIgnoredSelectedPerson;
         final bool hasVisibleAction = showEditAction ||
             showReviewAction ||
             showIgnoreAction ||
             showMergeAction ||
             showResetAction ||
+            showShowPersonAction ||
             showPinAction ||
             showUnpinAction ||
             showHideFromMemoriesAction ||
@@ -185,6 +213,14 @@ class _PeopleSelectionActionWidgetState
             icon: Icons.remove_outlined,
             onTap: _onResetPerson,
             shouldShow: showResetAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).showPerson,
+            icon: Icons.visibility_outlined,
+            onTap: _onShowPerson,
+            shouldShow: showShowPersonAction,
           ),
         );
         items.add(
@@ -411,6 +447,47 @@ class _PeopleSelectionActionWidgetState
           widget.selectedPeople.clearAll();
         } catch (e, s) {
           _logger.severe('Ignoring a cluster failed', e, s);
+        }
+      },
+    );
+  }
+
+  Future<void> _onShowPerson() async {
+    final personMap = await personEntitiesMapFuture;
+    final selectedPersonIds = _getSelectedPersonIds(personMap);
+    if (selectedPersonIds.isEmpty) return;
+    final ignoredSelectedPersonIds = selectedPersonIds
+        .where((id) => personMap[id]?.data.isIgnored ?? false)
+        .toList();
+    if (ignoredSelectedPersonIds.length != selectedPersonIds.length) {
+      return;
+    }
+    final multiple = ignoredSelectedPersonIds.length > 1;
+
+    await showChoiceDialog(
+      context,
+      title: multiple
+          ? "Are you sure you want to show these people in the people section again?"
+          : "Are you sure you want to show this person in the people section again?",
+      firstButtonLabel: multiple ? "Yes, show people" : "Yes, show person",
+      firstButtonOnTap: () async {
+        try {
+          for (final personID in ignoredSelectedPersonIds) {
+            final person = personMap[personID];
+            if (person == null) continue;
+            if (_isUnnamedIgnoredPerson(person)) {
+              await PersonService.instance.deletePerson(person.remoteID);
+            } else {
+              await PersonService.instance.updateAttributes(
+                person.remoteID,
+                isHidden: false,
+              );
+            }
+          }
+          Bus.instance.fire(PeopleChangedEvent());
+          widget.selectedPeople.clearAll();
+        } catch (e, s) {
+          _logger.severe('Failed to show person(s)', e, s);
         }
       },
     );
