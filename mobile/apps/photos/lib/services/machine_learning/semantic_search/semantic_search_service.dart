@@ -34,6 +34,8 @@ class SemanticSearchService {
   static const kMinimumSimilarityThreshold = 0.175;
   MLDataDB get _mlDataDB =>
       isOfflineMode ? MLDataDB.offlineInstance : MLDataDB.instance;
+  ClipVectorDB get _vectorDB =>
+      isOfflineMode ? ClipVectorDB.offlineInstance : ClipVectorDB.instance;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
@@ -352,7 +354,7 @@ class SemanticSearchService {
     // }
     if (await _canUseVectorDbForSearch()) {
       final startTime = DateTime.now();
-      final queryResults = await ClipVectorDB.instance.computeBulkSimilarities(
+      final queryResults = await _vectorDB.computeBulkSimilarities(
         textQueryToEmbeddingMap,
         minimumSimilarityMap,
         maxResults: maxResults,
@@ -392,7 +394,7 @@ class SemanticSearchService {
     if (await _canUseVectorDbForSearch()) {
       final startTime = DateTime.now();
       final queryResults =
-          await ClipVectorDB.instance.searchApproxSimilaritiesWithinThreshold(
+          await _vectorDB.searchApproxSimilaritiesWithinThreshold(
         textEmbedding,
         minimumSimilarity,
       );
@@ -425,7 +427,7 @@ class SemanticSearchService {
   Future<bool> _canUseVectorDbForSearch() async {
     if (!flagService.usearchForSearch) return false;
     if (!flagService.hasGrantedMLConsent) return false;
-    return ClipVectorDB.instance.checkIfMigrationDone();
+    return _vectorDB.checkIfMigrationDone();
   }
 
   void _resetInactivityTimer() {
