@@ -1,6 +1,9 @@
+#if canImport(Flutter)
 import Flutter
 import UIKit
+#if canImport(app_links)
 import app_links
+#endif
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -10,9 +13,11 @@ import app_links
   ) -> Bool {
     super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
+#if canImport(app_links)
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
       AppLinks.shared.handleLink(url: url)
     }
+#endif
 
     return false
 
@@ -23,3 +28,9 @@ import app_links
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }
+#else
+import UIKit
+
+@main
+@objc class AppDelegate: UIResponder, UIApplicationDelegate {}
+#endif

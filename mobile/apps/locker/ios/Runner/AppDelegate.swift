@@ -1,3 +1,4 @@
+#if canImport(Flutter)
 import Flutter
 import UIKit
 
@@ -14,3 +15,9 @@ import UIKit
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }
+#else
+import UIKit
+
+@main
+@objc class AppDelegate: UIResponder, UIApplicationDelegate {}
+#endif

@@ -1,8 +1,13 @@
+#if canImport(Flutter)
 import AVFoundation
 import Flutter
 import UIKit
+#if canImport(app_links)
 import app_links
+#endif
+#if canImport(workmanager_apple)
 import workmanager_apple
+#endif
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -26,6 +31,7 @@ import workmanager_apple
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
 
+#if canImport(workmanager_apple)
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
@@ -34,8 +40,10 @@ import workmanager_apple
     WorkmanagerPlugin.registerPeriodicTask(
       withIdentifier: "io.ente.frame.iOSBackgroundAppRefresh",
       frequency: NSNumber(value: freqInMinutes))
+#endif
 
     // Retrieve the link from parameters
+#if canImport(app_links)
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
       // only accept non-homewidget urls for AppLinks
       if !url.absoluteString.contains("&homeWidget") {
@@ -44,6 +52,7 @@ import workmanager_apple
         return true
       }
     }
+#endif
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -60,3 +69,9 @@ import workmanager_apple
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }
+#else
+import UIKit
+
+@main
+@objc class AppDelegate: UIResponder, UIApplicationDelegate {}
+#endif
