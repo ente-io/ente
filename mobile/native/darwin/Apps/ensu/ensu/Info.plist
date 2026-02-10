@@ -6,7 +6,7 @@
     <string>en</string>
 
     <key>CFBundleDisplayName</key>
-    <string>Ente SU</string>
+    <string>Ensu</string>
 
     <key>CFBundleIdentifier</key>
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -24,7 +24,7 @@
     <string>0.1.0</string>
 
     <key>CFBundleVersion</key>
-    <string>16</string>
+    <string>17</string>
 
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
