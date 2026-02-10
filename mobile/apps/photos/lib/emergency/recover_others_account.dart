@@ -106,8 +106,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordsMatch && _isPasswordValid,
         buttonText: title,
-        onPressedFunction: () {
-          _updatePassword();
+        onPressedFunction: () async {
+          await _updatePassword();
           FocusScope.of(context).unfocus();
         },
       ),
@@ -312,7 +312,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
     );
   }
 
-  void _updatePassword() async {
+  Future<void> _updatePassword() async {
     final dialog = createProgressDialog(
       context,
       AppLocalizations.of(context).generatingEncryptionKeys,

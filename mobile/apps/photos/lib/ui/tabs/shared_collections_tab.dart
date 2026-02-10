@@ -20,8 +20,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/banners/shared_empty_offline_state_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/offline/empty/share.dart";
 import "package:photos/ui/social/widgets/feed_preview_widget.dart";
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
@@ -123,11 +123,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (isOfflineMode) {
-            return SafeArea(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: EmptySharedSection(collections: snapshot.data!),
-              ),
+            return const SafeArea(
+              child: SharedEmptyOfflineStateWidget(),
             );
           }
           if ((snapshot.data?.incoming.length ?? 0) == 0 &&

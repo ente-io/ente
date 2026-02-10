@@ -72,6 +72,8 @@ class LocalSettings {
       "ml_debug.default_clustering_distance";
   static const _kAppMode = "ls.app_mode";
   static const _kAppModeEnvKey = "app_mode";
+  static const _kOfflineGetStartedBannerDismissed =
+      "ls.offline_get_started_banner_dismissed";
 
   final SharedPreferences _prefs;
 
@@ -438,5 +440,12 @@ class LocalSettings {
   Future<void> setAppMode(AppMode mode) async {
     await _prefs.setInt(_kAppMode, mode.index);
     _cachedAppMode = mode;
+  }
+
+  bool get isOfflineGetStartedBannerDismissed =>
+      _prefs.getBool(_kOfflineGetStartedBannerDismissed) ?? false;
+
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) async {
+    await _prefs.setBool(_kOfflineGetStartedBannerDismissed, value);
   }
 }

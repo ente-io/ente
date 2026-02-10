@@ -111,7 +111,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           RecoveryKeyPage(
             recoveryKey,
             AppLocalizations.of(context).ok,
-            showAppBar: true,
+            isOnboarding: false,
             onDone: () {
               Navigator.of(context).pop();
             },
