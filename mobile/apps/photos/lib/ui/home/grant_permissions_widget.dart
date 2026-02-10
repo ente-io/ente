@@ -398,7 +398,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Image.asset(
-                          "assets/ducky_smart_feature.png",
+                          "assets/ducky_permission.png",
                           height: 164,
                           errorBuilder: (context, error, stackTrace) {
                             return const SizedBox(height: 164);
