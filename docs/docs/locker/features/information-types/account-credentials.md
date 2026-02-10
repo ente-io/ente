@@ -55,7 +55,7 @@ Locker works alongside your password manager rather than replacing it:
 
 - **Your password manager** is for everyday accounts and daily logins with
   browser autofill
-- **Ente Locker** is for your most important accounts—the ones you can't afford
+- **Ente Locker** is for your most important accounts - the ones you can't afford
   to lose access to
 
 Use Locker for accounts like banking, primary email, and critical services.

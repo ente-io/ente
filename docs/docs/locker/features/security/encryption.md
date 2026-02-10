@@ -6,7 +6,7 @@ description: How Ente Locker protects your data with end-to-end encryption so on
 # Encryption
 
 Ente Locker uses end-to-end encryption to protect your data. Your information is
-encrypted on your device before being sent to our servers—we can't see your
+encrypted on your device before being sent to our servers - we can't see your
 data, and neither can anyone else.
 
 ## What this means for you
@@ -44,7 +44,7 @@ Your password protects your account. Choose a strong, unique password.
 ### Recovery key
 
 Your recovery key is a 24-word phrase that can recover your account if you
-forget your password. Store it securely—it's the only way to regain access.
+forget your password. Store it securely - it's the only way to regain access.
 
 ### Collection keys
 
