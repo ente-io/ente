@@ -3,7 +3,6 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/password_entry_page.dart';
-import 'package:photos/ui/common/dynamic_fab.dart';
 import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 import 'package:photos/ui/notification/toast.dart';
@@ -23,18 +22,10 @@ class _RecoveryPageState extends State<RecoveryPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
+    final isFormValid = _recoveryKeyController.text.isNotEmpty;
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -54,15 +45,17 @@ class _RecoveryPageState extends State<RecoveryPage> {
         centerTitle: true,
       ),
       body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("recoveryButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _recoveryKeyController.text.isNotEmpty,
-        buttonText: AppLocalizations.of(context).logInLabel,
-        onPressedFunction: _onRecoverPressed,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("recoveryButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).logInLabel,
+          isDisabled: !isFormValid,
+          onTap: isFormValid ? _onRecoverPressed : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

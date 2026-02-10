@@ -13,7 +13,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/account/login_pwd_verification_page.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
 import "package:photos/ui/components/models/text_input_type_v2.dart";
 import "package:photos/ui/components/text_input_widget_v2.dart";
 
@@ -61,18 +61,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
-
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
+      resizeToAvoidBottomInset: true,
       backgroundColor: colorScheme.backgroundColour,
       appBar: AppBar(
         elevation: 0,
@@ -92,15 +82,17 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
       ),
       body: _getBody(colorScheme, textTheme),
-      floatingActionButton: DynamicFAB(
-        key: const ValueKey("logInButton"),
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _emailIsValid,
-        buttonText: AppLocalizations.of(context).continueLabel,
-        onPressedFunction: _onLoginPressed,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("logInButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).continueLabel,
+          isDisabled: !_emailIsValid,
+          onTap: _emailIsValid ? _onLoginPressed : null,
+        ),
       ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
