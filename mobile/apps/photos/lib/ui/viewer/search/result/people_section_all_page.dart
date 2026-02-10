@@ -940,7 +940,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         detail = l10n.count;
         break;
       case PeopleSortKey.name:
-        detail = _isSortAscending(key) ? "A-Z" : "Z-A";
+        detail = _isSortAscending(key) ? l10n.sortAToZ : l10n.sortZToA;
         break;
       case PeopleSortKey.lastUpdated:
         detail =

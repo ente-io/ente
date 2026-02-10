@@ -467,9 +467,13 @@ class _PeopleSelectionActionWidgetState
     await showChoiceDialog(
       context,
       title: multiple
-          ? "Are you sure you want to show these people in the people section again?"
-          : "Are you sure you want to show this person in the people section again?",
-      firstButtonLabel: multiple ? "Yes, show people" : "Yes, show person",
+          ? AppLocalizations.of(context)
+              .areYouSureYouWantToShowThesePeopleInPeopleSectionAgain
+          : AppLocalizations.of(context)
+              .areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
+      firstButtonLabel: multiple
+          ? AppLocalizations.of(context).yesShowPeople
+          : AppLocalizations.of(context).yesShowPerson,
       firstButtonOnTap: () async {
         try {
           for (final personID in ignoredSelectedPersonIds) {

@@ -81,7 +81,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }) {
     if (sourcePerson.data.email == Configuration.instance.getEmail()) {
       if (title == null) {
-        return "Me";
+        return context.l10n.me;
       }
       return context.l10n.accountOwnerPersonAppbarTitle(title: title);
     }
@@ -596,9 +596,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     final isUnnamedIgnoredPerson = _isLegacyIgnoredName(person.data.name);
     await showChoiceDialog(
       context,
-      title:
-          "Are you sure you want to show this person in people section again?",
-      firstButtonLabel: "Yes, show person",
+      title: AppLocalizations.of(
+        context,
+      ).areYouSureYouWantToShowThisPersonInPeopleSectionAgain,
+      firstButtonLabel: AppLocalizations.of(context).yesShowPerson,
       firstButtonOnTap: () async {
         try {
           if (isUnnamedIgnoredPerson) {
