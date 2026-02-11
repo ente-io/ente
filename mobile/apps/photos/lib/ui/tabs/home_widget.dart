@@ -135,6 +135,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   late StreamSubscription _publicAlbumLinkSubscription;
+  StreamSubscription<Uri?>? _authDeepLinkSubscription;
   late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
       _homepageSwipeToSelectInProgressEventSubscription;
   late StreamSubscription<ChristmasBannerEvent>
@@ -535,6 +536,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
     _publicAlbumLinkSubscription.cancel();
+    _authDeepLinkSubscription?.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _christmasBannerEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
@@ -992,7 +994,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    appLinks.uriLinkStream.listen(
+    _authDeepLinkSubscription = appLinks.uriLinkStream.listen(
       (link) {
         _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);

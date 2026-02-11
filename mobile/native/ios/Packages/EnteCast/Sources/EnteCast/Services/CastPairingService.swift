@@ -22,7 +22,7 @@ public class CastPairingService {
         logger.info("Starting device registration")
         
         // Generate real X25519 keypair for this session
-        let keyPair = EnteCrypto.generateKeyPair()
+        let keyPair = try EnteCrypto.generateKeyPair()
         logger.debug("Generated keypair for cast session")
         
         // Register with the server to get a device code

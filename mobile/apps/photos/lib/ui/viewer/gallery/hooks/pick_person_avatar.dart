@@ -1,5 +1,3 @@
-import "dart:math";
-
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
@@ -67,73 +65,68 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
     });
 
     return Padding(
-      padding: const EdgeInsets.all(0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: min(428, MediaQuery.of(context).size.width),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+      padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 children: [
+                  BottomOfTitleBarWidget(
+                    title: TitleBarTitleWidget(
+                      title: AppLocalizations.of(context).selectCoverPhoto,
+                    ),
+                    caption: personEntity.data.name,
+                    showCloseButton: true,
+                  ),
                   Expanded(
-                    child: Column(
-                      children: [
-                        BottomOfTitleBarWidget(
-                          title: TitleBarTitleWidget(
-                            title:
-                                AppLocalizations.of(context).selectCoverPhoto,
-                          ),
-                          caption: personEntity.data.name,
-                          showCloseButton: true,
-                        ),
-                        Expanded(
-                          child: GalleryFilesState(
-                            child: Gallery(
-                              asyncLoader: (
-                                creationStartTime,
-                                creationEndTime, {
-                                limit,
-                                asc,
-                              }) async {
-                                final FileLoadResult result =
-                                    await loadPersonFiles();
+                    child: GalleryFilesState(
+                      child: Gallery(
+                        asyncLoader: (
+                          creationStartTime,
+                          creationEndTime, {
+                          limit,
+                          asc,
+                        }) async {
+                          final FileLoadResult result = await loadPersonFiles();
 
-                                return result;
-                              },
-                              // reloadEvent: Bus.instance
-                              //     .on<CollectionUpdatedEvent>()
-                              //     .where(
-                              //       (event) =>
-                              //           event.collectionID == collection.id,
-                              //     ),
-                              tagPrefix: "pick_center_point_gallery",
-                              selectedFiles: selectedFiles,
-                              limitSelectionToOne: true,
-                              showSelectAll: false,
-                              disablePinnedGroupHeader: true,
-                              disableVerticalPaddingForScrollbar: true,
-                            ),
-                          ),
-                        ),
-                      ],
+                          return result;
+                        },
+                        // reloadEvent: Bus.instance
+                        //     .on<CollectionUpdatedEvent>()
+                        //     .where(
+                        //       (event) =>
+                        //           event.collectionID == collection.id,
+                        //     ),
+                        tagPrefix: "pick_center_point_gallery",
+                        selectedFiles: selectedFiles,
+                        limitSelectionToOne: true,
+                        showSelectAll: false,
+                        disablePinnedGroupHeader: true,
+                        disableVerticalPaddingForScrollbar: true,
+                      ),
                     ),
                   ),
-                  SafeArea(
-                    child: Container(
+                ],
+              ),
+            ),
+            SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: getEnteColorScheme(context).strokeFaint,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 428),
+                    child: Padding(
                       //inner stroke of 1pt + 15 pts of top padding = 16 pts
                       padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
-                          ),
-                        ),
-                      ),
                       child: ValueListenableBuilder(
                         valueListenable: isFileSelected,
                         builder: (context, bool value, _) {
@@ -168,11 +161,11 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
