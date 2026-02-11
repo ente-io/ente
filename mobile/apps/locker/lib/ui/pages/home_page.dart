@@ -748,10 +748,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(isSyncing: _isSyncingWithServer),
+          padding: EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(),
         ),
       );
     }
@@ -761,10 +761,10 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? Center(
+            ? const Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: HomeEmptyStateWidget(isSyncing: _isSyncingWithServer),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(),
                 ),
               )
             : SingleChildScrollView(
