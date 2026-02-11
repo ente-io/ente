@@ -1,3 +1,4 @@
+- Ashil: Allow download of locally existing uploaded files
 - Neeraj: (i) Show incoming photos in feed
 - Neeraj: Remove internal-user gating for extended collage layouts
 - Ashil: Improve free up device space experience on iOS if backedup shared iCloud albums exists 
