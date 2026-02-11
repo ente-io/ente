@@ -40,21 +40,7 @@ internal fun ComingSoonDialog(
             Text(text = title, style = EnsuTypography.h3Bold)
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .background(
-                            EnsuColor.fillFaint(),
-                            RoundedCornerShape(EnsuCornerRadius.card.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "Illustration", style = EnsuTypography.small, color = EnsuColor.textMuted())
-                }
-                Text(text = message, style = EnsuTypography.body, color = EnsuColor.textMuted())
-            }
+            Text(text = message, style = EnsuTypography.body, color = EnsuColor.textMuted())
         },
         confirmButton = {
             TextButton(

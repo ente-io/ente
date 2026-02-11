@@ -142,7 +142,7 @@ private fun DrawerHeader(
                 modifier = Modifier
                     .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
             ) {
-                EnsuLogo(height = 28.dp)
+                EnsuLogo(height = 27.dp)
             }
 
             Spacer(modifier = Modifier.weight(1f))

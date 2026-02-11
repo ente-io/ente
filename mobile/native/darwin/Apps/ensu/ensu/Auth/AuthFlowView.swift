@@ -72,7 +72,7 @@ struct AuthFlowView: View {
                     }
                 },
                 center: {
-                    EnsuLogo(height: 20)
+                    EnsuLogo(height: 23)
                 },
                 trailing: {
                     Button("Close") {
@@ -100,7 +100,7 @@ struct AuthFlowView: View {
         #if os(iOS)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                EnsuLogo(height: 20)
+                EnsuLogo(height: 23)
             }
 
             ToolbarItem(placement: trailingPlacement) {
@@ -217,7 +217,7 @@ struct AuthFlowView: View {
                 }
 
                 ToolbarItem(placement: .principal) {
-                    EnsuLogo(height: 20)
+                    EnsuLogo(height: 23)
                 }
 
                 ToolbarItem(placement: trailingPlacement) {

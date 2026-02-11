@@ -35,7 +35,6 @@ import io.ente.ensu.modelsettings.ModelSettingsScreen
 import io.ente.ensu.settings.DeveloperSettingsScreen
 import io.ente.ensu.settings.LogViewerScreen
 import io.ente.ensu.settings.SettingsScreen
-import io.ente.ensu.utils.EnsuFeatureFlags
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -69,7 +68,6 @@ internal fun HomeNavigation(
                             sessionTitle = currentSession?.title,
                             showBrand = appState.chat.messages.isEmpty(),
                             isLoggedIn = appState.auth.isLoggedIn,
-                            signInEnabled = EnsuFeatureFlags.enableSignIn,
                             attachmentDownloads = appState.chat.attachmentDownloads,
                             attachmentDownloadProgress = appState.chat.attachmentDownloadProgress,
                             modelDownloadStatus = appState.chat.downloadStatus,

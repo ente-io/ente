@@ -75,17 +75,11 @@ struct SessionDrawerView: View {
             headerControls
         }
         .padding(EnsuSpacing.lg)
-        .background(
-            LinearGradient(
-                colors: [EnsuColor.accent.opacity(0.2), EnsuColor.backgroundBase],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(EnsuColor.backgroundBase)
     }
 
     private var drawerLogo: some View {
-        EnsuLogo(height: 28)
+        EnsuLogo(height: 27)
     }
 
     private var headerControls: some View {

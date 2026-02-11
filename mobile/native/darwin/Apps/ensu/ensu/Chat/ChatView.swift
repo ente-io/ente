@@ -175,11 +175,6 @@ struct ChatView: View {
                 onDismiss: { viewState.showAttachmentDownloads = false }
             )
         }
-        .sheet(isPresented: $viewState.showSignInComingSoon) {
-            ComingSoonSheet(title: "Sign in", message: "Coming soon") {
-                viewState.showSignInComingSoon = false
-            }
-        }
         .sheet(isPresented: $viewState.showModelSettings) {
             ModelSettingsView(embeddedInNavigation: true)
         }
@@ -227,6 +222,16 @@ struct ChatView: View {
                 Text("")
             }
         }
+        .overlay {
+            if viewState.showSignInComingSoon {
+                SignInComingSoonDialog(
+                    title: "Coming Soon",
+                    message: "Sign in and cloud backup will be available in a future update."
+                ) {
+                    viewState.showSignInComingSoon = false
+                }
+            }
+        }
         .overlay(alignment: .bottom) {
             if let toastMessage = viewState.toastMessage {
                 ToastView(message: toastMessage.text)
@@ -242,7 +247,7 @@ struct ChatView: View {
             ChatAppBar(
                 sessionTitle: viewModel.currentSessionId.map { viewModel.sessionTitle(for: $0) } ?? "New chat",
                 showBrand: viewModel.messages.isEmpty,
-                showSignIn: EnsuFeatureFlags.enableSignIn && !appState.isLoggedIn,
+                showSignIn: !appState.isLoggedIn,
                 showsMenuButton: showsMenuButton,
                 attachmentDownloadSummary: viewModel.attachmentDownloadSummary,
                 modelDownloadState: viewModel.downloadToast,

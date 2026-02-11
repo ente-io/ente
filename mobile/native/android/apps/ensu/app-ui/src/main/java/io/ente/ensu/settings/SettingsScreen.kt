@@ -33,7 +33,6 @@ import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
 import io.ente.ensu.designsystem.EnsuTypography
 import io.ente.ensu.designsystem.HugeIcons
-import io.ente.ensu.utils.EnsuFeatureFlags
 
 @Composable
 fun SettingsScreen(
@@ -71,7 +70,7 @@ fun SettingsScreen(
                         onClick = onSignOut
                     )
                 )
-            } else if (EnsuFeatureFlags.enableSignIn) {
+            } else {
                 add(
                     SettingsItem(
                         title = "Sign In to Backup",

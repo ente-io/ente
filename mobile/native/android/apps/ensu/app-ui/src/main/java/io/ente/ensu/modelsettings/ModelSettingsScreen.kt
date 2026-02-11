@@ -203,7 +203,7 @@ fun ModelSettingsScreen(
             maxTokens = ""
             temperature = ""
         }) {
-            Text(text = "Use Default Model", style = EnsuTypography.body, color = EnsuColor.accent())
+            Text(text = "Use Default Model", style = EnsuTypography.body, color = EnsuColor.action())
         }
 
         Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
@@ -230,7 +230,7 @@ private fun SuggestedModelCard(title: String, subtitle: String, onFill: () -> Un
             Text(text = title, style = EnsuTypography.body)
             Text(text = subtitle, style = EnsuTypography.small, color = EnsuColor.textMuted())
             TextButton(onClick = onFill) {
-                Text(text = "Fill", style = EnsuTypography.small, color = EnsuColor.accent())
+                Text(text = "Fill", style = EnsuTypography.small, color = EnsuColor.action())
             }
         }
     }

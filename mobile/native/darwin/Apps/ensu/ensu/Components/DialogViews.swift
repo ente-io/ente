@@ -12,7 +12,7 @@ enum ChoiceDialogButtonType {
         case .neutral:
             return EnsuColor.textMuted
         case .normal:
-            return EnsuColor.accent
+            return EnsuColor.action
         }
     }
 }

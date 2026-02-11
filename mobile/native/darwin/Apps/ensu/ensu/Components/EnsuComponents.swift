@@ -15,11 +15,11 @@ struct PrimaryButton: View {
             ZStack {
                 if isLoading {
                     ProgressView()
-                        .tint(EnsuColor.backgroundBase)
+                        .tint(Color.black)
                 } else {
                     Text(text)
                         .font(EnsuFont.ui(size: 18, weight: .semibold))
-                        .foregroundStyle(EnsuColor.backgroundBase)
+                        .foregroundStyle(Color.black)
                 }
             }
         }
@@ -54,7 +54,7 @@ struct TextLink: View {
                 .underline()
         }
         .buttonStyle(.plain)
-        .foregroundStyle(EnsuColor.accent)
+        .foregroundStyle(EnsuColor.action)
     }
 }
 
