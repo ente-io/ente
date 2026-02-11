@@ -141,6 +141,19 @@ const MEDIA_MARKER = "<__media__>";
 const IMAGE_TOKEN_ESTIMATE = 768;
 const MAX_INFERENCE_IMAGE_PIXELS = 3500;
 const INFERENCE_IMAGE_QUALITY = 0.85;
+const IMAGE_SELECTOR_ACCEPT =
+    "image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.heic,.heif,.avif";
+const IMAGE_FILE_EXTENSIONS = new Set([
+    "png",
+    "jpg",
+    "jpeg",
+    "webp",
+    "gif",
+    "bmp",
+    "heic",
+    "heif",
+    "avif",
+]);
 
 const buildPromptWithImages = (text: string, imageCount: number) => {
     if (imageCount <= 0) return text;
@@ -228,6 +241,13 @@ const sanitizeImageExtension = (filename?: string) => {
     if (!extension) return undefined;
     const cleaned = extension.replace(/[^a-z0-9]+/gi, "");
     return cleaned || undefined;
+};
+
+const isSelectableImageFile = (file: File) => {
+    const mime = file.type?.toLowerCase();
+    if (mime?.startsWith("image/")) return true;
+    const extension = sanitizeImageExtension(file.name)?.toLowerCase();
+    return !!extension && IMAGE_FILE_EXTENSIONS.has(extension);
 };
 
 const prepareInferenceImageBytes = async (
@@ -3347,7 +3367,9 @@ const Page: React.FC = () => {
     const handleImageSelect = useCallback(
         (files: File[]) => {
             closeAttachmentMenu();
-            const images = files.map((file) => ({
+            const validFiles = files.filter(isSelectableImageFile);
+            const invalidCount = files.length - validFiles.length;
+            const images = validFiles.map((file) => ({
                 id: createAttachmentId(),
                 name: file.name.replace(/\0/g, ""),
                 size: file.size,
@@ -3356,8 +3378,17 @@ const Page: React.FC = () => {
             if (images.length) {
                 setPendingImages((prev) => [...prev, ...images]);
             }
+            if (invalidCount > 0) {
+                showMiniDialog({
+                    title: "Unsupported file",
+                    message:
+                        invalidCount === files.length
+                            ? "Please select image files only."
+                            : "Some selected files were not images and were skipped.",
+                });
+            }
         },
-        [closeAttachmentMenu],
+        [closeAttachmentMenu, showMiniDialog],
     );
 
     const handleImageCancel = useCallback(() => {
@@ -3369,7 +3400,7 @@ const Page: React.FC = () => {
         openSelector: openImageSelector,
     } = useFileInput({
         directory: false,
-        accept: "image/*",
+        accept: IMAGE_SELECTOR_ACCEPT,
         onSelect: handleImageSelect,
         onCancel: handleImageCancel,
     });
