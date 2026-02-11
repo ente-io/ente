@@ -118,14 +118,11 @@ interface MessageRowProps {
     onRetryMessage: (message: ChatMessage) => void;
     onPrevBranch: (switcher: BranchSwitcher) => void;
     onNextBranch: (switcher: BranchSwitcher) => void;
-    onRequestPreview: (attachment: ChatAttachment, sessionUuid: string) => void;
     parseDocumentBlocks: (text: string) => ParsedDocuments;
     stripHiddenParts: (text: string) => string;
     formatTime: (timestamp: number) => string;
-    scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
     userBubbleBackground: string;
     userMessageTextSx: SxProps<Theme>;
-    assistantTextSx: SxProps<Theme>;
     assistantMarkdownSx: SxProps<Theme>;
     streamingMessageSx: SxProps<Theme>;
     actionButtonSx: SxProps<Theme>;
@@ -145,14 +142,11 @@ const MessageRow = memo(
         onRetryMessage,
         onPrevBranch,
         onNextBranch,
-        onRequestPreview,
         parseDocumentBlocks,
         stripHiddenParts,
         formatTime,
-        scrollContainerRef,
         userBubbleBackground,
         userMessageTextSx,
-        assistantTextSx,
         assistantMarkdownSx,
         streamingMessageSx,
         actionButtonSx,
@@ -278,9 +272,6 @@ const MessageRow = memo(
                                         width: "100%",
                                     }}
                                 >
-                                    <GeneratingRiveIndicator
-                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
-                                    />
                                     {showLoadingPlaceholder ? null : (
                                         <Box
                                             sx={assistantMarkdownSx}
@@ -292,6 +283,9 @@ const MessageRow = memo(
                                             />
                                         </Box>
                                     )}
+                                    <GeneratingRiveIndicator
+                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
+                                    />
                                 </Stack>
                             ) : (
                                 <Box sx={assistantMarkdownSx}>
@@ -361,144 +355,151 @@ const MessageRow = memo(
                         )}
                     </Stack>
 
-                    <Stack
-                        direction="row"
-                        sx={{
-                            mt: 0.5,
-                            width: "100%",
-                            alignItems: "center",
-                            gap: 0.75,
-                            pl: isSelf ? 0 : assistantMessagePaddingX,
-                        }}
-                    >
-                        {isSelf ? (
-                            <>
-                                <Box sx={{ flex: 1 }} />
-                                {showSwitcher && (
-                                    <Stack
-                                        direction="row"
-                                        sx={{ alignItems: "center", gap: 0.25 }}
-                                    >
-                                        <IconButton
-                                            aria-label="Previous branch"
-                                            sx={actionButtonSx}
-                                            onClick={() =>
-                                                switcher &&
-                                                onPrevBranch(switcher)
-                                            }
-                                        >
-                                            <HugeiconsIcon
-                                                icon={ArrowLeft01Icon}
-                                                {...smallIconProps}
-                                            />
-                                        </IconButton>
-                                        <Typography
-                                            variant="small"
+                    {isStreaming ? null : (
+                        <Stack
+                            direction="row"
+                            sx={{
+                                mt: 0.5,
+                                width: "100%",
+                                alignItems: "center",
+                                gap: 0.75,
+                                pl: isSelf ? 0 : assistantMessagePaddingX,
+                            }}
+                        >
+                            {isSelf ? (
+                                <>
+                                    <Box sx={{ flex: 1 }} />
+                                    {showSwitcher && (
+                                        <Stack
+                                            direction="row"
                                             sx={{
-                                                color: "text.muted",
-                                                fontVariantNumeric:
-                                                    "tabular-nums",
-                                                minWidth: 40,
-                                                textAlign: "center",
+                                                alignItems: "center",
+                                                gap: 0.25,
                                             }}
                                         >
-                                            {switcher
-                                                ? switcher.currentIndex + 1
-                                                : 1}
-                                            /{switcher ? switcher.total : 1}
-                                        </Typography>
-                                        <IconButton
-                                            aria-label="Next branch"
-                                            sx={actionButtonSx}
-                                            onClick={() =>
-                                                switcher &&
-                                                onNextBranch(switcher)
-                                            }
-                                        >
-                                            <HugeiconsIcon
-                                                icon={ArrowRight01Icon}
-                                                {...smallIconProps}
-                                            />
-                                        </IconButton>
-                                    </Stack>
-                                )}
-                                <Typography
-                                    variant="mini"
-                                    sx={{
-                                        color: "text.muted",
-                                        fontVariantNumeric: "tabular-nums",
-                                    }}
-                                >
-                                    {timestamp}
-                                </Typography>
-                            </>
-                        ) : (
-                            <>
-                                <Typography
-                                    variant="mini"
-                                    sx={{
-                                        color: "text.muted",
-                                        fontVariantNumeric: "tabular-nums",
-                                    }}
-                                >
-                                    {timestamp}
-                                </Typography>
-                                {showSwitcher && (
-                                    <Stack
-                                        direction="row"
+                                            <IconButton
+                                                aria-label="Previous branch"
+                                                sx={actionButtonSx}
+                                                onClick={() =>
+                                                    switcher &&
+                                                    onPrevBranch(switcher)
+                                                }
+                                            >
+                                                <HugeiconsIcon
+                                                    icon={ArrowLeft01Icon}
+                                                    {...smallIconProps}
+                                                />
+                                            </IconButton>
+                                            <Typography
+                                                variant="small"
+                                                sx={{
+                                                    color: "text.muted",
+                                                    fontVariantNumeric:
+                                                        "tabular-nums",
+                                                    minWidth: 40,
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                {switcher
+                                                    ? switcher.currentIndex + 1
+                                                    : 1}
+                                                /
+                                                {switcher ? switcher.total : 1}
+                                            </Typography>
+                                            <IconButton
+                                                aria-label="Next branch"
+                                                sx={actionButtonSx}
+                                                onClick={() =>
+                                                    switcher &&
+                                                    onNextBranch(switcher)
+                                                }
+                                            >
+                                                <HugeiconsIcon
+                                                    icon={ArrowRight01Icon}
+                                                    {...smallIconProps}
+                                                />
+                                            </IconButton>
+                                        </Stack>
+                                    )}
+                                    <Typography
+                                        variant="mini"
                                         sx={{
-                                            alignItems: "center",
-                                            gap: 0.25,
-                                            ml: 0.75,
+                                            color: "text.muted",
+                                            fontVariantNumeric: "tabular-nums",
                                         }}
                                     >
-                                        <IconButton
-                                            aria-label="Previous branch"
-                                            sx={actionButtonSx}
-                                            onClick={() =>
-                                                switcher &&
-                                                onPrevBranch(switcher)
-                                            }
-                                        >
-                                            <HugeiconsIcon
-                                                icon={ArrowLeft01Icon}
-                                                {...smallIconProps}
-                                            />
-                                        </IconButton>
-                                        <Typography
-                                            variant="small"
+                                        {timestamp}
+                                    </Typography>
+                                </>
+                            ) : (
+                                <>
+                                    <Typography
+                                        variant="mini"
+                                        sx={{
+                                            color: "text.muted",
+                                            fontVariantNumeric: "tabular-nums",
+                                        }}
+                                    >
+                                        {timestamp}
+                                    </Typography>
+                                    {showSwitcher && (
+                                        <Stack
+                                            direction="row"
                                             sx={{
-                                                color: "text.muted",
-                                                fontVariantNumeric:
-                                                    "tabular-nums",
-                                                minWidth: 40,
-                                                textAlign: "center",
+                                                alignItems: "center",
+                                                gap: 0.25,
+                                                ml: 0.75,
                                             }}
                                         >
-                                            {switcher
-                                                ? switcher.currentIndex + 1
-                                                : 1}
-                                            /{switcher ? switcher.total : 1}
-                                        </Typography>
-                                        <IconButton
-                                            aria-label="Next branch"
-                                            sx={actionButtonSx}
-                                            onClick={() =>
-                                                switcher &&
-                                                onNextBranch(switcher)
-                                            }
-                                        >
-                                            <HugeiconsIcon
-                                                icon={ArrowRight01Icon}
-                                                {...smallIconProps}
-                                            />
-                                        </IconButton>
-                                    </Stack>
-                                )}
-                                <Box sx={{ flex: 1 }} />
-                            </>
-                        )}
-                    </Stack>
+                                            <IconButton
+                                                aria-label="Previous branch"
+                                                sx={actionButtonSx}
+                                                onClick={() =>
+                                                    switcher &&
+                                                    onPrevBranch(switcher)
+                                                }
+                                            >
+                                                <HugeiconsIcon
+                                                    icon={ArrowLeft01Icon}
+                                                    {...smallIconProps}
+                                                />
+                                            </IconButton>
+                                            <Typography
+                                                variant="small"
+                                                sx={{
+                                                    color: "text.muted",
+                                                    fontVariantNumeric:
+                                                        "tabular-nums",
+                                                    minWidth: 40,
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                {switcher
+                                                    ? switcher.currentIndex + 1
+                                                    : 1}
+                                                /
+                                                {switcher ? switcher.total : 1}
+                                            </Typography>
+                                            <IconButton
+                                                aria-label="Next branch"
+                                                sx={actionButtonSx}
+                                                onClick={() =>
+                                                    switcher &&
+                                                    onNextBranch(switcher)
+                                                }
+                                            >
+                                                <HugeiconsIcon
+                                                    icon={ArrowRight01Icon}
+                                                    {...smallIconProps}
+                                                />
+                                            </IconButton>
+                                        </Stack>
+                                    )}
+                                    <Box sx={{ flex: 1 }} />
+                                </>
+                            )}
+                        </Stack>
+                    )}
                 </Stack>
             </Box>
         );
@@ -522,14 +523,12 @@ export const ChatMessageList = memo(
         onRetryMessage,
         onPrevBranch,
         onNextBranch,
-        onRequestPreview,
         parseDocumentBlocks,
         stripHiddenParts,
         formatTime,
         isDesktopOverlay,
         userBubbleBackground,
         userMessageTextSx,
-        assistantTextSx,
         assistantMarkdownSx,
         streamingMessageSx,
         actionButtonSx,
@@ -578,14 +577,11 @@ export const ChatMessageList = memo(
                         onRetryMessage={onRetryMessage}
                         onPrevBranch={onPrevBranch}
                         onNextBranch={onNextBranch}
-                        onRequestPreview={onRequestPreview}
                         parseDocumentBlocks={parseDocumentBlocks}
                         stripHiddenParts={stripHiddenParts}
                         formatTime={formatTime}
-                        scrollContainerRef={scrollContainerRef}
                         userBubbleBackground={userBubbleBackground}
                         userMessageTextSx={userMessageTextSx}
-                        assistantTextSx={assistantTextSx}
                         assistantMarkdownSx={assistantMarkdownSx}
                         streamingMessageSx={streamingMessageSx}
                         actionButtonSx={actionButtonSx}
@@ -598,7 +594,6 @@ export const ChatMessageList = memo(
                 actionButtonSx,
                 actionIconProps,
                 assistantMarkdownSx,
-                assistantTextSx,
                 branchSwitchers,
                 formatTime,
                 loadingDots,
@@ -608,10 +603,8 @@ export const ChatMessageList = memo(
                 onNextBranch,
                 onOpenAttachment,
                 onPrevBranch,
-                onRequestPreview,
                 onRetryMessage,
                 parseDocumentBlocks,
-                scrollContainerRef,
                 smallIconProps,
                 streamingMessageSx,
                 stripHiddenParts,
@@ -623,7 +616,8 @@ export const ChatMessageList = memo(
         return (
             <Box
                 ref={(ref) => {
-                    scrollContainerRef.current = ref;
+                    scrollContainerRef.current =
+                        (ref as HTMLDivElement | null) ?? null;
                 }}
                 onScroll={() => {
                     onScroll();
