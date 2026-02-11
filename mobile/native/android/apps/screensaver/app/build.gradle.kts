@@ -147,7 +147,7 @@ tasks.register<Exec>("generateEnteCoreBindings") {
     commandLine(
         "uniffi-bindgen",
         "generate",
-        "src/ente_core.udl",
+        "src/core.udl",
         "--language",
         "kotlin",
         "--out-dir",
