@@ -2,42 +2,6 @@ name: "Screensaver Android"
 
 on:
   workflow_dispatch:
-    inputs:
-      signing_key_base64:
-        description: "Base64-encoded Android keystore (.jks)"
-        required: false
-        type: string
-      signing_key_alias:
-        description: "Android signing key alias"
-        required: false
-        type: string
-      signing_key_password:
-        description: "Android signing key password"
-        required: false
-        type: string
-      signing_store_password:
-        description: "Android signing store password"
-        required: false
-        type: string
-      signing_key_file:
-        description: "Keystore file name written under keystore/"
-        required: false
-        default: "screensaver-release.jks"
-        type: string
-      playstore_service_account_json:
-        description: "Google Play service account JSON (plain text)"
-        required: false
-        type: string
-      playstore_package_name:
-        description: "Play Store package name"
-        required: false
-        default: "io.ente.screensaver"
-        type: string
-      playstore_track:
-        description: "Play Store track"
-        required: false
-        default: "internal"
-        type: string
   push:
     tags:
       - "screensaver-v*"
@@ -56,14 +20,14 @@ jobs:
       run:
         working-directory: mobile/native/android/apps/screensaver
     env:
-      SIGNING_KEY_B64: ${{ github.event.inputs.signing_key_base64 || secrets.SIGNING_KEY_SCREENSAVER || secrets.SIGNING_KEY }}
-      SIGNING_KEY_ALIAS: ${{ github.event.inputs.signing_key_alias || secrets.SIGNING_KEY_ALIAS_SCREENSAVER || secrets.SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ github.event.inputs.signing_key_password || secrets.SIGNING_KEY_PASSWORD_SCREENSAVER || secrets.SIGNING_KEY_PASSWORD }}
-      SIGNING_STORE_PASSWORD: ${{ github.event.inputs.signing_store_password || secrets.SIGNING_STORE_PASSWORD_SCREENSAVER || secrets.SIGNING_STORE_PASSWORD }}
-      SIGNING_KEY_FILE: ${{ github.event.inputs.signing_key_file || 'screensaver-release.jks' }}
-      PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ github.event.inputs.playstore_service_account_json || secrets.SERVICE_ACCOUNT_JSON }}
-      PLAYSTORE_PACKAGE_NAME: ${{ github.event.inputs.playstore_package_name || vars.SCREENSAVER_PLAYSTORE_PACKAGE_NAME || 'io.ente.screensaver' }}
-      PLAYSTORE_TRACK: ${{ github.event.inputs.playstore_track || vars.SCREENSAVER_PLAYSTORE_TRACK || 'internal' }}
+      SIGNING_KEY_B64: ${{ secrets.SIGNING_KEY_SCREENSAVER || secrets.SIGNING_KEY }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_SCREENSAVER || secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_SCREENSAVER || secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_SCREENSAVER || secrets.SIGNING_STORE_PASSWORD }}
+      SIGNING_KEY_FILE: "screensaver-release.jks"
+      PLAYSTORE_SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON_SCREENSAVER || secrets.SERVICE_ACCOUNT_JSON }}
+      PLAYSTORE_PACKAGE_NAME: "io.ente.screensaver"
+      PLAYSTORE_TRACK: "internal"
 
     steps:
       - name: Checkout code
@@ -107,8 +71,8 @@ jobs:
       - name: Build release APK
         run: ./gradlew assembleRelease
 
-      - name: Build release AAB (when Play Store config is present)
-        if: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON != '' }}
+      - name: Build release AAB (when Play Store + signing secrets are present)
+        if: ${{ env.PLAYSTORE_SERVICE_ACCOUNT_JSON != '' && env.SIGNING_KEY_B64 != '' && env.SIGNING_KEY_ALIAS != '' && env.SIGNING_KEY_PASSWORD != '' && env.SIGNING_STORE_PASSWORD != '' }}
         run: ./gradlew bundleRelease
 
       - name: Prepare release artifacts
