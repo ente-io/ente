@@ -21,6 +21,7 @@ import {
     Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import HoverRiveLogo from "components/chat/HoverRiveLogo";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import React, { memo } from "react";
 import type { ChatSession } from "services/chat/store";
@@ -123,44 +124,12 @@ export const ChatSidebar = memo(
                                 lineHeight: 1,
                                 display: "inline-flex",
                                 alignItems: "center",
-                                "& .ensu-drawer-logo": {
-                                    transition:
-                                        "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
-                                    transformOrigin: "50% 55%",
-                                },
-                                "&:hover .ensu-drawer-logo": {
-                                    animation:
-                                        "ensu-drawer-logo-hover 520ms cubic-bezier(0.22, 1, 0.36, 1)",
-                                },
-                                "@keyframes ensu-drawer-logo-hover": {
-                                    "0%": {
-                                        transform: "translateY(0) scale(1) rotate(0deg)",
-                                    },
-                                    "35%": {
-                                        transform:
-                                            "translateY(-1px) scale(1.05) rotate(-7deg)",
-                                    },
-                                    "70%": {
-                                        transform:
-                                            "translateY(0) scale(1.03) rotate(6deg)",
-                                    },
-                                    "100%": {
-                                        transform:
-                                            "translateY(0) scale(1) rotate(0deg)",
-                                    },
-                                },
                             }}
                         >
-                            <Box
-                                component="img"
-                                className="ensu-drawer-logo"
-                                src={appIconSrc}
+                            <HoverRiveLogo
+                                staticSrc={appIconSrc}
                                 alt="Ensu"
-                                sx={{
-                                    height: "1em",
-                                    width: "auto",
-                                    display: "block",
-                                }}
+                                sizePx={28}
                             />
                         </Typography>
                     </Stack>
