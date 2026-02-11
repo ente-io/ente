@@ -26,12 +26,19 @@ target/
 # Generated native bindings / binaries (regenerate locally)
 mobile/native/android/apps/ensu/crypto-auth-core/src/main/jniLibs/
 mobile/native/android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core_uniffi.kt
+mobile/native/android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core.kt
 mobile/native/android/packages/rust/.gradle/
 mobile/native/android/packages/rust/src/main/jniLibs/
 mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference_rs_uniffi.kt
+mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference.kt
 mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/llmchat_db/llmchat_db_uniffi.kt
+mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/ensu_db/db.kt
 mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/llmchat_sync/llmchat_sync_uniffi.kt
+mobile/native/android/packages/rust/src/main/kotlin/io/ente/labs/ensu_sync/sync.kt
 mobile/native/darwin/Apps/ensu/ensu/Generated/*_uniffi*
+mobile/native/darwin/Apps/ensu/ensu/Generated/core*
+mobile/native/darwin/Apps/ensu/ensu/Generated/db*
+mobile/native/darwin/Apps/ensu/ensu/Generated/sync*
 mobile/native/darwin/Packages/Rust/InferenceRSFFI.xcframework/
 mobile/native/darwin/Packages/Rust/Sources/InferenceRS/inference_rs_uniffi*
 
