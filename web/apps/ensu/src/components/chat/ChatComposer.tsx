@@ -676,13 +676,6 @@ export const ChatComposer = memo(
                                     Image
                                 </MenuItem>
                             )}
-                            <MenuItem
-                                onClick={() =>
-                                    handleAttachmentChoice("document")
-                                }
-                            >
-                                Document
-                            </MenuItem>
                         </Menu>
                     </>
                 )}

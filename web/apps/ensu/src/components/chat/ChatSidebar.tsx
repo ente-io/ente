@@ -18,7 +18,6 @@ import {
     ListItemButton,
     Stack,
     Tooltip,
-    Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
@@ -49,6 +48,7 @@ export interface ChatSidebarProps {
     isLoggedIn: boolean;
     syncNow: (options?: { showToast?: boolean }) => Promise<void>;
     openSettingsModal: () => void;
+    appIconSrc: string;
 }
 
 export const ChatSidebar = memo(
@@ -74,6 +74,7 @@ export const ChatSidebar = memo(
         isLoggedIn,
         syncNow,
         openSettingsModal,
+        appIconSrc,
     }: ChatSidebarProps) => (
         <Stack
             sx={{
@@ -96,15 +97,10 @@ export const ChatSidebar = memo(
                     sx={{ gap: 1, alignItems: "center", width: "100%" }}
                 >
                     <Stack sx={{ flex: 1, gap: 1 }}>
-                        <Typography
+                        <Box
                             component="button"
                             onClick={handleNewChat}
-                            variant="h2"
                             sx={{
-                                fontFamily: "inherit",
-                                fontWeight: 600,
-                                letterSpacing: "1px",
-                                textTransform: "lowercase",
                                 border: "none",
                                 padding: 0,
                                 background: "transparent",
@@ -117,10 +113,24 @@ export const ChatSidebar = memo(
                                 MozUserSelect: "none",
                                 msUserSelect: "none",
                                 outline: "none",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                lineHeight: 1,
                             }}
+                            aria-label="New chat"
                         >
-                            e
-                        </Typography>
+                            <Box
+                                component="img"
+                                src={appIconSrc}
+                                alt="Ensu"
+                                sx={{
+                                    width: 22,
+                                    height: 22,
+                                    display: "block",
+                                }}
+                            />
+                        </Box>
                     </Stack>
                     <Stack
                         direction="row"
