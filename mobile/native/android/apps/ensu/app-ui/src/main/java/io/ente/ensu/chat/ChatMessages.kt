@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -269,7 +270,8 @@ internal fun MessageList(
                             (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id),
                     enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                         scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 140))
+                    exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
+                        shrinkVertically(animationSpec = tween(durationMillis = 220))
                 ) {
                     Column {
                         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -289,7 +291,8 @@ internal fun MessageList(
                         (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == null),
                 enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                     scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 140))
+                exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
+                    shrinkVertically(animationSpec = tween(durationMillis = 220))
             ) {
                 StreamingMessageBubble(
                     text = streamingResponse,
@@ -697,7 +700,7 @@ private fun StreamingMessageBubble(
 
     val riveBoxWidth = 115.dp
     val riveBoxHeight = 52.5.dp
-    val riveOverflowScale = if (isGenerating) 1f else 1.08f
+    val riveOverflowScale = 1.08f
 
     Column(
         modifier = Modifier.fillMaxWidth(),
