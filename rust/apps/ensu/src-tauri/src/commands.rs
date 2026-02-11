@@ -992,15 +992,13 @@ pub async fn chat_db_insert_message_with_uuid(
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db_async(&state, app, key_b64, move |db| {
-        let attachment_metas: Vec<ensu_db::AttachmentMeta> =
-            attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message_with_uuid(
             message_uuid,
             session_uuid,
             sender,
             &input.text,
             parent,
-            attachment_metas,
+            attachments,
             input.created_at,
             input.deleted_at,
         )?;

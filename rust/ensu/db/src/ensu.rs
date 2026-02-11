@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::Result;
 use crate::attachments_db::{AttachmentUploadRow, AttachmentsDb, UploadState};
 use crate::db::ChatDb;
-use crate::models::{AttachmentMeta, EntityType, Message, Session, SessionWithPreview};
+use crate::models::{Attachment, AttachmentMeta, EntityType, Message, Session, SessionWithPreview};
 use crate::traits::{Clock, UuidGen};
 
 /// High-level DB that ties together the main chat DB and the attachments upload-state DB.
@@ -99,30 +99,46 @@ impl<B: crate::Backend> EnsuDb<B> {
         sender: &str,
         text: &str,
         parent: Option<Uuid>,
-        attachments: Vec<AttachmentMeta>,
+        attachments: Vec<Attachment>,
         created_at: i64,
         deleted_at: Option<i64>,
         needs_sync: bool,
     ) -> Result<Message> {
+        let attachment_metas: Vec<AttachmentMeta> = attachments
+            .iter()
+            .cloned()
+            .map(AttachmentMeta::from)
+            .collect();
         let message = self.chat.insert_message_with_uuid_and_state(
             message_uuid,
             session_uuid,
             sender,
             text,
             parent,
-            attachments.clone(),
+            attachment_metas,
             created_at,
             deleted_at,
             needs_sync,
         )?;
 
         for attachment in attachments {
-            self.attachments.upsert_pending_attachment(
-                &attachment.id,
-                session_uuid,
-                message_uuid,
-                attachment.size,
-            )?;
+            if attachment.uploaded_at.is_some() {
+                self.attachments.upsert_attachment_with_state(
+                    &attachment.id,
+                    session_uuid,
+                    message_uuid,
+                    attachment.size,
+                    None,
+                    UploadState::Uploaded,
+                )?;
+            } else {
+                self.attachments.upsert_pending_attachment(
+                    &attachment.id,
+                    session_uuid,
+                    message_uuid,
+                    attachment.size,
+                )?;
+            }
         }
 
         Ok(message)
@@ -135,7 +151,7 @@ impl<B: crate::Backend> EnsuDb<B> {
         sender: &str,
         text: &str,
         parent: Option<Uuid>,
-        attachments: Vec<AttachmentMeta>,
+        attachments: Vec<Attachment>,
         created_at: i64,
         deleted_at: Option<i64>,
     ) -> Result<Message> {
