@@ -97,6 +97,7 @@ struct MessageListView: View {
     private func handleScrollChange(_ newValue: ScrollChange, scrollProxy: ScrollViewProxy) {
         let previous = lastScrollChange
         lastScrollChange = newValue
+        let didGenerationJustFinish = previous.isGenerating && !newValue.isGenerating
 
         if newValue.messagesCount != previous.messagesCount {
             if !didInitialScroll {
@@ -127,7 +128,7 @@ struct MessageListView: View {
         }
 
         if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled && !isUserDragging && !isGenerating {
+            if autoScrollEnabled && !isUserDragging && !isGenerating && !didGenerationJustFinish {
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
