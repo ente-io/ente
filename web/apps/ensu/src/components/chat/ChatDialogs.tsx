@@ -66,7 +66,6 @@ export interface ChatDialogsProps {
     handleLogout: () => void;
     openLoginFromChat: () => void;
     openPasskeysFromChat: () => void;
-    signInEnabled: boolean;
     developerSettingsEnabled: boolean;
     modelSettingsEnabled: boolean;
     showDeveloperMenu: boolean;
@@ -126,7 +125,6 @@ export const ChatDialogs = memo(
         handleLogout,
         openLoginFromChat,
         openPasskeysFromChat,
-        signInEnabled,
         developerSettingsEnabled,
         modelSettingsEnabled,
         showDeveloperMenu,
@@ -296,7 +294,7 @@ export const ChatDialogs = memo(
                                 </ListItemButton>
                             )}
 
-                            {!isLoggedIn && signInEnabled && (
+                            {!isLoggedIn && (
                                 <ListItemButton
                                     onClick={() => {
                                         closeSettingsModal();

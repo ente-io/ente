@@ -3428,8 +3428,15 @@ const Page: React.FC = () => {
     );
 
     const openLoginFromChat = useCallback(() => {
+        if (!SIGN_IN_ENABLED) {
+            showMiniDialog({
+                title: "Coming soon",
+                message: "Sign in is coming soon.",
+            });
+            return;
+        }
         void router.push("/login");
-    }, [router]);
+    }, [router, showMiniDialog]);
 
     const openPasskeysFromChat = useCallback(async () => {
         try {
@@ -3857,7 +3864,7 @@ const Page: React.FC = () => {
                                 </Box>
                             </Stack>
                         </Stack>
-                        {!isLoggedIn && SIGN_IN_ENABLED && (
+                        {!isLoggedIn && (
                             <Button
                                 onClick={openLoginFromChat}
                                 color="inherit"
@@ -3964,7 +3971,6 @@ const Page: React.FC = () => {
                 handleLogout={handleLogout}
                 openLoginFromChat={openLoginFromChat}
                 openPasskeysFromChat={openPasskeysFromChat}
-                signInEnabled={SIGN_IN_ENABLED}
                 developerSettingsEnabled={DEVELOPER_SETTINGS_ENABLED}
                 modelSettingsEnabled={MODEL_SETTINGS_ENABLED}
                 showDeveloperMenu={showDeveloperMenu}
