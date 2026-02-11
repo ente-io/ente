@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -694,18 +695,26 @@ private fun StreamingMessageBubble(
         renderedText = text
     }
 
+    val riveBoxWidth = 115.dp
+    val riveBoxHeight = 52.5.dp
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        ensuRiveAnimation(
+        Box(
             modifier = Modifier
-                .wrapContentSize(align = Alignment.TopStart)
-                .width(115.dp)
-                .height(52.5.dp),
-            outroTrigger = !isGenerating,
-            outroInputName = "outro"
-        )
+                .width(riveBoxWidth)
+                .height(riveBoxHeight)
+                .graphicsLayer { clip = false },
+            contentAlignment = Alignment.TopStart
+        ) {
+            ensuRiveAnimation(
+                modifier = Modifier.matchParentSize(),
+                outroTrigger = !isGenerating,
+                outroInputName = "outro"
+            )
+        }
 
         if (renderedText.isNotBlank()) {
             Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
