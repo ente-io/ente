@@ -18,6 +18,7 @@ import {
     ListItemButton,
     Stack,
     Tooltip,
+    Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
