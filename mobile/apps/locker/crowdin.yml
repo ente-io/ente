@@ -3,3 +3,8 @@ api_token_env: CROWDIN_PERSONAL_TOKEN
 files:
   - source: /lib/l10n/app_en.arb
     translation: /lib/l10n/app_%two_letters_code%.arb
+  - source: /fastlane/metadata/android/en-US/*.txt
+    translation: /fastlane/metadata/android/%two_letters_code%/%original_file_name%
+    dest: /fdroid/%original_file_name%
+    type: txt
+    skip_untranslated_files: true
