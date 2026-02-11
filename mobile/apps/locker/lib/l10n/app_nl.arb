@@ -4,7 +4,7 @@
   "existingUser": "Bestaande gebruiker",
   "developerSettings": "Ontwikkelaarsinstellingen",
   "yes": "Ja",
-  "developerSettingsWarning": "Weet je zeker dat je de ontwikkelaarsinstellingen wilt wijzigen?",
+  "developerSettingsWarning": "Weet u zeker dat u de ontwikkelaarsinstellingen wilt wijzigen?",
   "serverEndpoint": "Server eindpunt",
   "endpointUpdatedMessage": "Eindpunt met succes bijgewerkt",
   "invalidEndpoint": "Ongeldig eindpunt",
@@ -1023,5 +1023,7 @@
   "usageFamily": "Familie",
   "searchSettings": "Zoeken in instellingen",
   "suggestions": "Suggesties",
-  "noResultsFound": "Geen resultaten gevonden"
+  "noResultsFound": "Geen resultaten gevonden",
+  "viewActiveSessions": "Actieve sessies bekijken",
+  "authToViewYourActiveSessions": "Graag verifiëren om uw actieve sessies te bekijken"
 }
