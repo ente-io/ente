@@ -37,6 +37,7 @@ enum OfflineFlag {
   nameFaceBannerDismissed,
   seenMLEnablingBanner,
   mlProgressBannerDismissed,
+  offlineSettingsBannerDismissed,
 }
 
 class LocalSettings {
@@ -486,4 +487,10 @@ class LocalSettings {
 
   Future<void> setOfflineNameFaceBannerDismissed(bool value) =>
       _setFlag(OfflineFlag.nameFaceBannerDismissed, value);
+
+  bool get isOfflineSettingsBannerDismissed =>
+      _getFlag(OfflineFlag.offlineSettingsBannerDismissed);
+
+  Future<void> setOfflineSettingsBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.offlineSettingsBannerDismissed, value);
 }
