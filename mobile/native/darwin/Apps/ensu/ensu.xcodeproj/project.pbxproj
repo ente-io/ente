@@ -17,6 +17,8 @@
 		DBA3E91D2F7A6B9000AA11BB /* SwiftMath in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DBA3E91B2F7A6B9000AA11BB /* SwiftMath */; };
 		DB9F1C3C2F9D123400ABCD02 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = DB9F1C3B2F9D123400ABCD02 /* Markdown */; };
 		DB9F1C3D2F9D123400ABCD02 /* Markdown in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DB9F1C3B2F9D123400ABCD02 /* Markdown */; };
+		DBC1A0032FD0123400ABCD02 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = DBC1A0022FD0123400ABCD02 /* RiveRuntime */; };
+		DBC1A0042FD0123400ABCD02 /* RiveRuntime in Frameworks (macOS) */ = {isa = PBXBuildFile; productRef = DBC1A0022FD0123400ABCD02 /* RiveRuntime */; };
 /* End PBXBuildFile section */
 
 
@@ -69,6 +71,7 @@
 				DAF584672E61BB8300F8A08F /* ZIPFoundation in Frameworks */,
 				DBA3E91C2F7A6B9000AA11BB /* SwiftMath in Frameworks */,
 				DB9F1C3C2F9D123400ABCD02 /* Markdown in Frameworks */,
+				DBC1A0032FD0123400ABCD02 /* RiveRuntime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +84,7 @@
 				DAF584682E61BB8300F8A08F /* ZIPFoundation in Frameworks (macOS) */,
 				DBA3E91D2F7A6B9000AA11BB /* SwiftMath in Frameworks (macOS) */,
 				DB9F1C3D2F9D123400ABCD02 /* Markdown in Frameworks (macOS) */,
+				DBC1A0042FD0123400ABCD02 /* RiveRuntime in Frameworks (macOS) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +156,7 @@
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 				DBA3E91B2F7A6B9000AA11BB /* SwiftMath */,
 				DB9F1C3B2F9D123400ABCD02 /* Markdown */,
+				DBC1A0022FD0123400ABCD02 /* RiveRuntime */,
 			);
 			productName = ensu;
 			productReference = DA72BC612E5F87A000D128FF /* ensu.app */;
@@ -180,6 +185,7 @@
 				DAF584662E61BB8300F8A08F /* ZIPFoundation */,
 				DBA3E91B2F7A6B9000AA11BB /* SwiftMath */,
 				DB9F1C3B2F9D123400ABCD02 /* Markdown */,
+				DBC1A0022FD0123400ABCD02 /* RiveRuntime */,
 			);
 			productName = Ensu;
 			productReference = 77E1DDDF900AB047CB554122 /* Ensu.app */;
@@ -266,6 +272,7 @@
 				DBA3E91A2F7A6B9000AA11BB /* XCRemoteSwiftPackageReference "SwiftMath" */,
 				DAF584652E61BB6300F8A08F /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				DB9F1C3A2F9D123400ABCD02 /* XCRemoteSwiftPackageReference "swift-markdown" */,
+				DBC1A0012FD0123400ABCD02 /* XCRemoteSwiftPackageReference "rive-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DA72BC622E5F87A000D128FF /* Products */;
@@ -902,6 +909,14 @@
 				minimumVersion = 1.7.3;
 			};
 		};
+		DBC1A0012FD0123400ABCD02 /* XCRemoteSwiftPackageReference "rive-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rive-app/rive-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.9.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -927,6 +942,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DB9F1C3A2F9D123400ABCD02 /* XCRemoteSwiftPackageReference "swift-markdown" */;
 			productName = Markdown;
+		};
+		DBC1A0022FD0123400ABCD02 /* RiveRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DBC1A0012FD0123400ABCD02 /* XCRemoteSwiftPackageReference "rive-ios" */;
+			productName = RiveRuntime;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

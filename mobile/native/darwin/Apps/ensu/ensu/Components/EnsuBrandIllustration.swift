@@ -1,33 +1,36 @@
 import SwiftUI
+import RiveRuntime
 
 struct EnsuBrandIllustration: View {
     var width: CGFloat = 92
     var height: CGFloat = 42
     var animated: Bool = true
 
-    @State private var isAnimating = false
+    @StateObject private var riveViewModel = RiveViewModel(
+        fileName: "ensu",
+        fit: .contain,
+        alignment: .centerLeft,
+        autoPlay: true
+    )
 
     var body: some View {
-        let activePhase = animated ? isAnimating : true
-
-        Image("EnsuLogoForeground")
-            .resizable()
-            .scaledToFit()
+        riveViewModel
+            .view()
             .frame(width: width, height: height, alignment: .leading)
-            .scaleEffect(activePhase ? 1 : 0.94)
-            .opacity(activePhase ? 1 : 0.84)
-            .animation(
-                animated
-                    ? .easeInOut(duration: 0.9).repeatForever(autoreverses: true)
-                    : nil,
-                value: isAnimating
-            )
+            .clipped()
             .onAppear {
-                guard animated else { return }
-                isAnimating = true
+                if animated {
+                    riveViewModel.play()
+                } else {
+                    riveViewModel.pause()
+                }
             }
-            .onDisappear {
-                isAnimating = false
+            .onChange(of: animated) { value in
+                if value {
+                    riveViewModel.play()
+                } else {
+                    riveViewModel.pause()
+                }
             }
             .accessibilityLabel("Ensu")
     }
