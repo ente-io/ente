@@ -151,7 +151,7 @@ class _FileSelectionActionsWidgetState
           (element) => element.fileType == FileType.video,
         );
     final showDownloadOption =
-        widget.selectedFiles.files.any((element) => element.localID == null);
+        widget.selectedFiles.files.any((element) => element.isUploaded);
     final bool isCollectionOwnerOrAdmin = widget.collection != null &&
         (widget.collection!.isOwner(currentUserID) ||
             widget.collection!.isAdmin(currentUserID));
@@ -1099,7 +1099,8 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _download(List<EnteFile> files) async {
-    final totalFiles = files.length;
+    final filesToDownload = files.where((file) => file.isUploaded).toList();
+    final totalFiles = filesToDownload.length;
     int downloadedFiles = 0;
 
     final dialog = createProgressDialog(
@@ -1112,19 +1113,17 @@ class _FileSelectionActionsWidgetState
     try {
       final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
       final futures = <Future>[];
-      for (final file in files) {
-        if (file.localID == null) {
-          futures.add(
-            taskQueue.add(() async {
-              await downloadToGallery(file);
-              downloadedFiles++;
-              dialog.update(
-                message: AppLocalizations.of(context).downloading +
-                    " ($downloadedFiles/$totalFiles)",
-              );
-            }),
-          );
-        }
+      for (final file in filesToDownload) {
+        futures.add(
+          taskQueue.add(() async {
+            await downloadToGallery(file);
+            downloadedFiles++;
+            dialog.update(
+              message: AppLocalizations.of(context).downloading +
+                  " ($downloadedFiles/$totalFiles)",
+            );
+          }),
+        );
       }
       await Future.wait(futures);
       await dialog.hide();

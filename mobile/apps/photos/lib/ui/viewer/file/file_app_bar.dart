@@ -312,7 +312,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     } else {
-      if (widget.file.isRemoteFile) {
+      if (widget.file.isUploaded) {
         items.add(
           EntePopupMenuItem(
             AppLocalizations.of(context).download,
