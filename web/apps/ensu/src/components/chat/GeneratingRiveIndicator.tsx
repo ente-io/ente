@@ -7,9 +7,14 @@ type GeneratingRiveIndicatorProps = {
     fallbackText?: string;
 };
 
+type RivePlaybackTarget = string | string[];
+
 type RiveInstance = {
     cleanup?: () => void;
     resizeDrawingSurfaceToCanvas?: () => void;
+    play?: (animation?: RivePlaybackTarget) => void;
+    animationNames?: string[];
+    stateMachineNames?: string[];
 };
 
 const RIVE_SRC = "/animations/ensu.riv";
@@ -26,6 +31,7 @@ const GeneratingRiveIndicator = memo(
 
             let canceled = false;
             let instance: RiveInstance | null = null;
+            let playbackTarget: RivePlaybackTarget | undefined;
 
             const initialize = async () => {
                 try {
@@ -38,7 +44,7 @@ const GeneratingRiveIndicator = memo(
                     instance = new Rive({
                         src: riveSrc,
                         canvas: canvasRef.current,
-                        autoplay: true,
+                        autoplay: false,
                         layout: new Layout({
                             fit: Fit.Contain,
                             alignment: Alignment.Center,
@@ -46,6 +52,35 @@ const GeneratingRiveIndicator = memo(
                         onLoad: () => {
                             try {
                                 instance?.resizeDrawingSurfaceToCanvas?.();
+                                const stateMachineNames =
+                                    instance?.stateMachineNames ?? [];
+                                const animationNames =
+                                    instance?.animationNames ?? [];
+
+                                if (stateMachineNames.length > 0) {
+                                    playbackTarget = stateMachineNames[0];
+                                } else if (animationNames.length > 1) {
+                                    playbackTarget = animationNames;
+                                } else if (animationNames.length === 1) {
+                                    playbackTarget = animationNames[0];
+                                }
+
+                                if (playbackTarget) {
+                                    instance?.play?.(playbackTarget);
+                                } else {
+                                    instance?.play?.();
+                                }
+                            } catch {
+                                // noop
+                            }
+                        },
+                        onStop: () => {
+                            try {
+                                if (playbackTarget) {
+                                    instance?.play?.(playbackTarget);
+                                } else {
+                                    instance?.play?.();
+                                }
                             } catch {
                                 // noop
                             }
