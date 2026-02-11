@@ -90,9 +90,7 @@ class _SettingsBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleBar(context, colorScheme),
-                const SizedBox(height: 16),
-                _buildEmailHeader(context, colorScheme, textTheme),
-                const SizedBox(height: 16),
+                _buildEmailHeaderSection(context, colorScheme, textTheme),
                 if (showLoginEntry) ...[
                   OfflineSettingsBanner(
                     onGetStarted: () {
@@ -238,6 +236,30 @@ class _SettingsBody extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildEmailHeaderSection(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    return AnimatedBuilder(
+      animation: emailNotifier,
+      builder: (BuildContext context, Widget? child) {
+        final email = emailNotifier.value ?? "";
+        if (email.isEmpty) {
+          return const SizedBox(height: 8);
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            _buildEmailHeader(context, colorScheme, textTheme),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
     );
   }
 
