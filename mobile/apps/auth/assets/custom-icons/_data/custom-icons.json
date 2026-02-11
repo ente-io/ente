@@ -2174,6 +2174,10 @@
       "name": "Manage My Health",
       "slug": "managemyhealth",
       "altNames": ["managemyhealth", "Manage My Health NZ"]
+    },
+    {
+      "title": "Pufferfish Host",
+      "slug": "pufferfish_host"
     }
   ]
 }
