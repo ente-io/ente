@@ -3375,18 +3375,18 @@ const Page: React.FC = () => {
     });
 
     const openAttachmentMenu = useCallback(
-        (event: React.MouseEvent<HTMLElement>) => {
-            if (!showImageAttachment) {
-                closeAttachmentMenu();
-                openDocumentSelector();
+        (_event: React.MouseEvent<HTMLElement>) => {
+            closeAttachmentMenu();
+            if (showImageAttachment) {
+                openImageSelector();
                 return;
             }
-            setAttachmentAnchor(event.currentTarget);
+            openDocumentSelector();
         },
         [
             closeAttachmentMenu,
             openDocumentSelector,
-            setAttachmentAnchor,
+            openImageSelector,
             showImageAttachment,
         ],
     );
