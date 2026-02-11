@@ -99,8 +99,8 @@ const GeneratingRiveIndicator = memo(
                                 const animationNames =
                                     instance?.animationNames ?? [];
 
-                                if (stateMachineNames.length > 0) {
-                                    const stateMachineName = stateMachineNames[0];
+                                const stateMachineName = stateMachineNames[0];
+                                if (stateMachineName) {
                                     playbackTargetRef.current = stateMachineName;
                                     const inputs =
                                         instance?.stateMachineInputs?.(
