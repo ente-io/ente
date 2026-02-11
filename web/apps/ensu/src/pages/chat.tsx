@@ -3430,8 +3430,9 @@ const Page: React.FC = () => {
     const openLoginFromChat = useCallback(() => {
         if (!SIGN_IN_ENABLED) {
             showMiniDialog({
-                title: "Coming soon",
-                message: "Sign in is coming soon.",
+                title: "Coming Soon",
+                message:
+                    "Sign in and cloud backup will be available in a future update.",
                 cancel: "Got it",
             });
             return;
