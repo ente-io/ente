@@ -1,3 +1,5 @@
+@file:Suppress("PackageDirectoryMismatch")
+
 package io.ente.ensu.components
 
 import androidx.compose.runtime.Composable
@@ -13,7 +15,7 @@ import app.rive.runtime.kotlin.core.Rive
 import io.ente.ensu.R
 
 @Composable
-fun EnsuRiveAnimation(
+fun ensuRiveAnimation(
     modifier: Modifier = Modifier,
     fit: Fit = Fit.CONTAIN,
     alignment: RiveAlignment = RiveAlignment.CENTER_LEFT,

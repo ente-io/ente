@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import io.ente.ensu.components.BranchSwitcher
-import io.ente.ensu.components.EnsuRiveAnimation
+import io.ente.ensu.components.ensuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.EnsuSpacing
@@ -675,7 +675,7 @@ private fun StreamingMessageBubble(text: String) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        EnsuRiveAnimation(
+        ensuRiveAnimation(
             modifier = Modifier
                 .wrapContentSize(align = Alignment.TopStart)
                 .width(92.dp)

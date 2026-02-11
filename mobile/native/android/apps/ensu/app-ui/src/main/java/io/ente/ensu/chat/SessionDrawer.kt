@@ -43,7 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.ente.ensu.components.EnsuRiveAnimation
+import io.ente.ensu.components.ensuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
@@ -142,7 +142,7 @@ private fun DrawerHeader(
                 modifier = Modifier
                     .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
             ) {
-                EnsuRiveAnimation(
+                ensuRiveAnimation(
                     modifier = Modifier
                         .width(124.dp)
                         .height(32.dp)
