@@ -1,9 +1,9 @@
 {
   "build": {
-    "beforeDevCommand": "cd ../../web && yarn build:wasm && yarn workspace ensu next dev -p 3010",
+    "beforeDevCommand": "cd ../../../web && yarn build:wasm && yarn workspace ensu next dev -p 3010",
     "beforeBuildCommand": "node scripts/tauri-build-web.mjs",
     "devPath": "http://localhost:3010",
-    "distDir": "../../../web/apps/ensu/out"
+    "distDir": "../../../../web/apps/ensu/out"
   },
   "package": {
     "productName": "Ensu",

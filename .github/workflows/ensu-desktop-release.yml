@@ -62,8 +62,8 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      desktop/ensu-tauri/src-tauri/target
-                  key: ${{ runner.os }}-${{ matrix.platform.rust-target }}-cargo-ensu-release-${{ hashFiles('desktop/ensu-tauri/src-tauri/Cargo.lock') }}
+                      rust/apps/ensu/src-tauri/target
+                  key: ${{ runner.os }}-${{ matrix.platform.rust-target }}-cargo-ensu-release-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
 
             - name: Install web dependencies
               working-directory: web
@@ -74,12 +74,12 @@ jobs:
               run: yarn build:wasm
 
             - name: Install Tauri dependencies
-              working-directory: desktop/ensu-tauri
+              working-directory: rust/apps/ensu
               run: yarn install
 
             - name: Fetch Rust dependencies
               shell: bash
-              working-directory: desktop/ensu-tauri/src-tauri
+              working-directory: rust/apps/ensu/src-tauri
               run: cargo fetch
 
             - name: Patch llama.cpp mtmd sources
@@ -95,7 +95,7 @@ jobs:
                   MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
                   CMAKE_OSX_DEPLOYMENT_TARGET: ${{ matrix.platform.os == 'macos-latest' && '10.15' || '' }}
               with:
-                  projectPath: desktop/ensu-tauri
+                  projectPath: rust/apps/ensu
                   tagName: ${{ github.ref_name }}
                   releaseName: "Ensu Desktop ${{ github.ref_name }}"
                   releaseBody: |

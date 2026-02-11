@@ -17,7 +17,7 @@ const config = JSON.parse(rawConfig);
 
 config.build = config.build || {};
 config.build.beforeDevCommand =
-    `cd ../../web && yarn build:wasm && yarn workspace ensu next dev -p ${port}`;
+    `cd ../../../web && yarn build:wasm && yarn workspace ensu next dev -p ${port}`;
 config.build.devPath = `http://localhost:${port}`;
 
 await fs.writeFile(devConfigPath, JSON.stringify(config, null, 2));

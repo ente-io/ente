@@ -4,7 +4,7 @@ on:
     # Run on every pull request (open or push to it) that changes ensu desktop
     pull_request:
         paths:
-            - "desktop/ensu-tauri/**"
+            - "rust/apps/ensu/**"
             - "rust/core/**"
             - "rust/llmchat/**"
             - ".github/workflows/ensu-desktop-lint.yml"
@@ -25,7 +25,7 @@ jobs:
         runs-on: ubuntu-22.04
         defaults:
             run:
-                working-directory: desktop/ensu-tauri/src-tauri
+                working-directory: rust/apps/ensu/src-tauri
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -36,8 +36,8 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      desktop/ensu-tauri/src-tauri/target
-                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('desktop/ensu-tauri/src-tauri/Cargo.lock') }}
+                      rust/apps/ensu/src-tauri/target
+                  key: ${{ runner.os }}-cargo-ensu-desktop-${{ hashFiles('rust/apps/ensu/src-tauri/Cargo.lock') }}
 
             - name: Install system dependencies
               run: |
