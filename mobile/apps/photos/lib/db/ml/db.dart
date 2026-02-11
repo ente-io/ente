@@ -278,7 +278,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteClipEmbeddingsTable);
     await db.execute(deleteFileDataTable);
     if (await _clipVectorDB.checkIfMigrationDone()) {
-      await _clipVectorDB.deleteIndexFile();
+      await _clipVectorDB.deleteIndexFile(undoMigration: true);
     }
   }
 
@@ -1291,6 +1291,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final totalCount = countResult.first['total'] as int;
     if (totalCount == 0) {
       _logger.info("No clip embeddings to migrate");
+      await _clipVectorDB.deleteAllEmbeddings();
       await _clipVectorDB.setMigrationDone();
       return;
     }

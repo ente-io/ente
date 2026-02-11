@@ -771,7 +771,10 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
       firstButtonLabel: "Yes, confirm",
       firstButtonOnTap: () async {
         try {
-          await ClipVectorDB.instance.deleteIndexFile(undoMigration: true);
+          final vectorDB = isOfflineMode
+              ? ClipVectorDB.offlineInstance
+              : ClipVectorDB.instance;
+          await vectorDB.deleteIndexFile(undoMigration: true);
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('reset usearch index failed ', e, s);

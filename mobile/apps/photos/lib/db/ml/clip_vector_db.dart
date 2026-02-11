@@ -47,6 +47,13 @@ class ClipVectorDB {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final String dbPath = join(documentsDirectory.path, _databaseName);
     _logger.info("Opening vectorDB access: DB path " + dbPath);
+    final indexFile = File(dbPath);
+    if (!await indexFile.exists() && await checkIfMigrationDone()) {
+      _logger.severe(
+        "VectorDB file is missing while migration is marked done. Invalidating migration state.",
+      );
+      await invalidateMigrationState();
+    }
     late VectorDb vectorDB;
     try {
       vectorDB = VectorDb(
@@ -56,7 +63,7 @@ class ClipVectorDB {
     } catch (e, s) {
       _logger.severe("Could not open VectorDB at path $dbPath", e, s);
       _logger.severe("Deleting the index file and trying again");
-      await deleteIndexFile();
+      await deleteIndexFile(undoMigration: true);
       try {
         vectorDB = VectorDb(
           filePath: dbPath,
@@ -94,6 +101,13 @@ class ClipVectorDB {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_migrationKey, true);
     _migrationDone = true;
+  }
+
+  Future<void> invalidateMigrationState() async {
+    _logger.info("Invalidating ClipVectorDB migration state");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_migrationKey, false);
+    _migrationDone = false;
   }
 
   Future<void> insertEmbedding({
@@ -156,6 +170,7 @@ class ClipVectorDB {
   }
 
   Future<void> deleteAllEmbeddings() async {
+    await invalidateMigrationState();
     final db = await _vectorDB;
     try {
       await db.resetIndex();
@@ -259,6 +274,11 @@ class ClipVectorDB {
     double minimumSimilarity,
   ) async {
     final db = await _vectorDB;
+    if (!await checkIfMigrationDone()) {
+      throw StateError(
+        "ClipVectorDB migration is not done, cannot run approximate search",
+      );
+    }
     try {
       final result = await db.approxSearchVectorsWithinSimilarity(
         query: query,
@@ -365,6 +385,7 @@ class ClipVectorDB {
   }
 
   Future<void> deleteIndex() async {
+    await invalidateMigrationState();
     final db = await _vectorDB;
     try {
       await db.deleteIndex();
@@ -388,12 +409,12 @@ class ClipVectorDB {
       _logger.info("Deleted index file on disk");
       _vectorDbFuture = null;
       _warmupFuture = null;
-      if (undoMigration) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(_migrationKey, false);
-        _migrationDone = false;
-        _logger.info("Undid migration flag");
+      if (!undoMigration) {
+        _logger.info(
+          "Index file was deleted without explicit undo flag; invalidating migration state regardless.",
+        );
       }
+      await invalidateMigrationState();
     } catch (e, s) {
       _logger.severe("Error deleting index file on disk", e, s);
       rethrow;
