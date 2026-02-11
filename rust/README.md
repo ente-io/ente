@@ -42,7 +42,7 @@
 
 - `rust/core/` (`ente-core`) - shared, pure Rust code used by clients (crypto + auth, plus small HTTP/URL helpers).
 - `rust/cli/` (`ente-rs`) - Rust CLI.
-- `rust/llmchat/` - LLM chat stack (see `rust/llmchat/README.md`).
+- `rust/ensu/` - LLM chat stack (see `rust/ensu/README.md`).
 
 ## Directory Structure
 
@@ -64,10 +64,11 @@ rust/
 │   │   └── auth.md
 │   └── Cargo.toml
 │
-└── llmchat/                      # LLM chat stack (see rust/llmchat/README.md)
+└── ensu/                         # LLM chat stack (see rust/ensu/README.md)
 
-rust/uniffi/                      # UniFFI bindings for core crypto/auth
-├── core_uniffi/
+rust/uniffi/                      # UniFFI bindings for core crypto/auth + ensu
+├── core/
+└── ensu/
 
 web/packages/wasm/                # WASM bindings (lives in web workspace)
 ├── src/

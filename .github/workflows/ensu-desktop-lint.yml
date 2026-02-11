@@ -6,7 +6,7 @@ on:
         paths:
             - "rust/apps/ensu/**"
             - "rust/core/**"
-            - "rust/llmchat/**"
+            - "rust/ensu/**"
             - ".github/workflows/ensu-desktop-lint.yml"
 
 permissions:
@@ -50,7 +50,7 @@ jobs:
             - name: Patch llama.cpp mtmd sources
               shell: bash
               working-directory: .
-              run: rust/llmchat/inference/tool/patch_llama_mtmd.sh
+              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
             - run: cargo fmt --check
 

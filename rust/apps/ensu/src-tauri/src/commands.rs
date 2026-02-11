@@ -5,11 +5,11 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+use ensu_db::backend::sqlite::SqliteBackend;
+use ensu_db::{EnsuDb, Error as DbError};
+use ensu_sync as chat_sync;
 use ente_core::{auth as core_auth, crypto as core_crypto};
 use inference_rs as llm;
-use llmchat_db::backend::sqlite::SqliteBackend;
-use llmchat_db::{Error as DbError, LlmChatDb};
-use llmchat_sync as chat_sync;
 use serde::{Deserialize, Serialize};
 use tauri::async_runtime;
 use tauri::{AppHandle, State, Window};
@@ -33,7 +33,7 @@ pub struct ChatDbState {
 
 struct ChatDbHolder {
     key_b64: String,
-    db: Arc<LlmChatDb<SqliteBackend>>,
+    db: Arc<EnsuDb<SqliteBackend>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -130,7 +130,7 @@ impl From<core_crypto::CryptoError> for ApiError {
 
 impl From<DbError> for ApiError {
     fn from(e: DbError) -> Self {
-        use llmchat_db::Error as E;
+        use ensu_db::Error as E;
 
         let code = match &e {
             E::InvalidKeyLength { .. } => "db_invalid_key_length",
@@ -459,8 +459,8 @@ pub struct ChatSessionDto {
     deleted_at: Option<i64>,
 }
 
-impl From<llmchat_db::Session> for ChatSessionDto {
-    fn from(session: llmchat_db::Session) -> Self {
+impl From<ensu_db::Session> for ChatSessionDto {
+    fn from(session: ensu_db::Session) -> Self {
         Self {
             session_uuid: session.uuid.to_string(),
             title: session.title,
@@ -486,8 +486,8 @@ pub struct ChatSessionPreviewDto {
     last_message_preview: Option<String>,
 }
 
-impl From<llmchat_db::SessionWithPreview> for ChatSessionPreviewDto {
-    fn from(session: llmchat_db::SessionWithPreview) -> Self {
+impl From<ensu_db::SessionWithPreview> for ChatSessionPreviewDto {
+    fn from(session: ensu_db::SessionWithPreview) -> Self {
         Self {
             session_uuid: session.uuid.to_string(),
             title: session.title,
@@ -511,11 +511,11 @@ pub struct ChatAttachmentDto {
     uploaded_at: Option<i64>,
 }
 
-impl From<llmchat_db::Attachment> for ChatAttachmentDto {
-    fn from(attachment: llmchat_db::Attachment) -> Self {
+impl From<ensu_db::Attachment> for ChatAttachmentDto {
+    fn from(attachment: ensu_db::Attachment) -> Self {
         let kind = match attachment.kind {
-            llmchat_db::AttachmentKind::Image => "image",
-            llmchat_db::AttachmentKind::Document => "document",
+            ensu_db::AttachmentKind::Image => "image",
+            ensu_db::AttachmentKind::Document => "document",
         };
 
         Self {
@@ -586,13 +586,13 @@ impl From<chat_sync::SyncResult> for ChatSyncResultDto {
     }
 }
 
-impl TryFrom<ChatAttachmentInput> for llmchat_db::Attachment {
+impl TryFrom<ChatAttachmentInput> for ensu_db::Attachment {
     type Error = ApiError;
 
     fn try_from(value: ChatAttachmentInput) -> Result<Self, Self::Error> {
         let kind = match value.kind.as_str() {
-            "image" => llmchat_db::AttachmentKind::Image,
-            "document" => llmchat_db::AttachmentKind::Document,
+            "image" => ensu_db::AttachmentKind::Image,
+            "document" => ensu_db::AttachmentKind::Document,
             other => {
                 return Err(ApiError::new(
                     "db_invalid_attachment_kind",
@@ -625,8 +625,8 @@ pub struct ChatMessageDto {
 }
 
 fn build_message_dto(
-    db: &LlmChatDb<SqliteBackend>,
-    message: llmchat_db::Message,
+    db: &EnsuDb<SqliteBackend>,
+    message: ensu_db::Message,
 ) -> Result<ChatMessageDto, DbError> {
     let uploads = db.get_uploads_for_message(message.uuid)?;
     let mut uploads_by_id = HashMap::new();
@@ -635,8 +635,8 @@ fn build_message_dto(
     }
 
     let sender = match message.sender {
-        llmchat_db::Sender::SelfUser => "self",
-        llmchat_db::Sender::Other => "assistant",
+        ensu_db::Sender::SelfUser => "self",
+        ensu_db::Sender::Other => "assistant",
     };
 
     let attachments = message
@@ -644,7 +644,7 @@ fn build_message_dto(
         .into_iter()
         .map(|meta| {
             let uploaded_at = uploads_by_id.get(&meta.id).and_then(|value| *value);
-            llmchat_db::Attachment {
+            ensu_db::Attachment {
                 id: meta.id,
                 kind: meta.kind,
                 size: meta.size,
@@ -667,11 +667,11 @@ fn build_message_dto(
     })
 }
 
-impl From<llmchat_db::Message> for ChatMessageDto {
-    fn from(message: llmchat_db::Message) -> Self {
+impl From<ensu_db::Message> for ChatMessageDto {
+    fn from(message: ensu_db::Message) -> Self {
         let sender = match message.sender {
-            llmchat_db::Sender::SelfUser => "self",
-            llmchat_db::Sender::Other => "assistant",
+            ensu_db::Sender::SelfUser => "self",
+            ensu_db::Sender::Other => "assistant",
         };
 
         Self {
@@ -684,7 +684,7 @@ impl From<llmchat_db::Message> for ChatMessageDto {
             attachments: message
                 .attachments
                 .into_iter()
-                .map(llmchat_db::Attachment::from)
+                .map(ensu_db::Attachment::from)
                 .map(ChatAttachmentDto::from)
                 .collect(),
             deleted_at: message.deleted_at,
@@ -902,11 +902,11 @@ pub async fn chat_db_insert_message(
         .attachments
         .unwrap_or_default()
         .into_iter()
-        .map(llmchat_db::Attachment::try_from)
+        .map(ensu_db::Attachment::try_from)
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db_async(&state, app, key_b64, move |db| {
-        let attachment_metas: Vec<llmchat_db::AttachmentMeta> =
+        let attachment_metas: Vec<ensu_db::AttachmentMeta> =
             attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message(session_uuid, sender, &text, parent, attachment_metas)?;
         build_message_dto(db, message)
@@ -988,17 +988,19 @@ pub async fn chat_db_insert_message_with_uuid(
         .attachments
         .unwrap_or_default()
         .into_iter()
-        .map(llmchat_db::Attachment::try_from)
+        .map(ensu_db::Attachment::try_from)
         .collect::<Result<Vec<_>, ApiError>>()?;
 
     with_chat_db_async(&state, app, key_b64, move |db| {
+        let attachment_metas: Vec<ensu_db::AttachmentMeta> =
+            attachments.into_iter().map(Into::into).collect();
         let message = db.insert_message_with_uuid(
             message_uuid,
             session_uuid,
             sender,
             &input.text,
             parent,
-            attachments,
+            attachment_metas,
             input.created_at,
             input.deleted_at,
         )?;
@@ -1083,8 +1085,8 @@ pub async fn chat_db_get_pending_deletions(
             .into_iter()
             .map(|(entity, uuid)| ChatDeletionDto {
                 entity_type: match entity {
-                    llmchat_db::EntityType::Session => "session".to_string(),
-                    llmchat_db::EntityType::Message => "message".to_string(),
+                    ensu_db::EntityType::Session => "session".to_string(),
+                    ensu_db::EntityType::Message => "message".to_string(),
                 },
                 uuid: uuid.to_string(),
             })
@@ -1485,10 +1487,10 @@ fn normalize_sender(sender: &str) -> Result<&'static str, ApiError> {
     }
 }
 
-fn parse_entity_type(value: &str) -> Result<llmchat_db::EntityType, ApiError> {
+fn parse_entity_type(value: &str) -> Result<ensu_db::EntityType, ApiError> {
     match value {
-        "session" => Ok(llmchat_db::EntityType::Session),
-        "message" => Ok(llmchat_db::EntityType::Message),
+        "session" => Ok(ensu_db::EntityType::Session),
+        "message" => Ok(ensu_db::EntityType::Message),
         other => Err(ApiError::new(
             "db_invalid_entity_type",
             format!("Unsupported entity type: {other}"),
@@ -1546,7 +1548,7 @@ fn with_chat_db<T, F>(
     f: F,
 ) -> Result<T, ApiError>
 where
-    F: FnOnce(&LlmChatDb<SqliteBackend>) -> Result<T, DbError>,
+    F: FnOnce(&EnsuDb<SqliteBackend>) -> Result<T, DbError>,
 {
     let db = {
         let mut guard = inner
@@ -1562,8 +1564,8 @@ where
             let key = core_crypto::decode_b64(key_b64).map_err(ApiError::from)?;
             let path = chat_db_path(app)?;
             let sync_path = sync_db_path(app)?;
-            let db = LlmChatDb::open_sqlite_with_defaults(path, sync_path, key)
-                .map_err(ApiError::from)?;
+            let db =
+                EnsuDb::open_sqlite_with_defaults(path, sync_path, key).map_err(ApiError::from)?;
             *guard = Some(ChatDbHolder {
                 key_b64: key_b64.to_string(),
                 db: Arc::new(db),
@@ -1588,7 +1590,7 @@ async fn with_chat_db_async<T, F>(
 ) -> Result<T, ApiError>
 where
     T: Send + 'static,
-    F: FnOnce(&LlmChatDb<SqliteBackend>) -> Result<T, DbError> + Send + 'static,
+    F: FnOnce(&EnsuDb<SqliteBackend>) -> Result<T, DbError> + Send + 'static,
 {
     let inner = state.inner.clone();
     async_runtime::spawn_blocking(move || with_chat_db(&inner, &app, &key_b64, f))

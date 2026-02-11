@@ -125,7 +125,7 @@ jobs:
 
             - name: Patch llama.cpp mtmd sources
               shell: bash
-              run: rust/llmchat/inference/tool/patch_llama_mtmd.sh
+              run: rust/ensu/inference/tool/patch_llama_mtmd.sh
 
             - name: Build and release Tauri app
               uses: tauri-apps/tauri-action@v0
