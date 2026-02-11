@@ -1800,6 +1800,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         const container = scrollContainerRef.current;
         if (!container || !stickToBottom) return;
+        if (isGenerating) return;
         container.scrollTo({ top: container.scrollHeight, behavior: "auto" });
     }, [displayMessages.length, streamingText, isGenerating, stickToBottom]);
 

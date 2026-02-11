@@ -272,6 +272,9 @@ const MessageRow = memo(
                                         width: "100%",
                                     }}
                                 >
+                                    <GeneratingRiveIndicator
+                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
+                                    />
                                     {showLoadingPlaceholder ? null : (
                                         <Box
                                             sx={assistantMarkdownSx}
@@ -283,9 +286,6 @@ const MessageRow = memo(
                                             />
                                         </Box>
                                     )}
-                                    <GeneratingRiveIndicator
-                                        fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
-                                    />
                                 </Stack>
                             ) : (
                                 <Box sx={assistantMarkdownSx}>
