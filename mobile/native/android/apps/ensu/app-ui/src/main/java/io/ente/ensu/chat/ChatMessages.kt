@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -683,47 +684,39 @@ private fun StreamingMessageBubble(text: String) {
             ),
         horizontalAlignment = Alignment.Start
     ) {
-        if (text.isNotBlank()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
-            ) {
-                MarkdownView(markdown = text, enableSelection = false, trailingCursor = showCursor)
-            }
-        }
-
-        Box(
+        GeneratingAnimation(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(42.dp),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            GeneratingAnimation(
-                modifier = Modifier
-                    .width(92.dp)
-                    .height(42.dp)
-            )
+                .width(92.dp)
+                .height(42.dp)
+        )
+
+        if (text.isNotBlank()) {
+            Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
+            MarkdownView(markdown = text, enableSelection = false, trailingCursor = showCursor)
         }
     }
 }
 
 @Composable
 private fun GeneratingAnimation(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val riveView = remember {
+        Rive.init(context.applicationContext)
+        RiveAnimationView(context).apply {
+            setRiveResource(
+                resId = R.raw.ensu,
+                autoplay = true,
+                fit = Fit.CONTAIN,
+                alignment = RiveAlignment.CENTER,
+                loop = Loop.LOOP
+            )
+        }
+    }
+
     AndroidView(
         modifier = modifier,
-        factory = { context ->
-            Rive.init(context)
-            RiveAnimationView(context).apply {
-                setRiveResource(
-                    resId = R.raw.ensu,
-                    autoplay = true,
-                    fit = Fit.CONTAIN,
-                    alignment = RiveAlignment.CENTER,
-                    loop = Loop.LOOP
-                )
-            }
-        }
+        factory = { riveView },
+        update = { }
     )
 }
 
