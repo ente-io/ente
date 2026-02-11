@@ -130,8 +130,8 @@ export const ChatSidebar = memo(
                                 src={appIconSrc}
                                 alt="Ensu"
                                 sx={{
-                                    width: "1.35em",
-                                    height: "1.35em",
+                                    height: "1em",
+                                    width: "auto",
                                     display: "block",
                                 }}
                             />
