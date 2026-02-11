@@ -53,8 +53,14 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import app.rive.runtime.kotlin.RiveAnimationView
+import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
+import app.rive.runtime.kotlin.core.Fit
+import app.rive.runtime.kotlin.core.Loop
+import io.ente.ensu.R
 import io.ente.ensu.components.BranchSwitcher
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
@@ -679,9 +685,14 @@ private fun StreamingMessageBubble(text: String) {
                 )
                 .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
         ) {
-            if (text.isBlank()) {
-                LoadingDotsText()
-            } else {
+            GeneratingAnimation(
+                modifier = Modifier
+                    .width(92.dp)
+                    .height(42.dp)
+            )
+
+            if (text.isNotBlank()) {
+                Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
                 MarkdownView(markdown = text, enableSelection = false, trailingCursor = showCursor)
             }
         }
@@ -689,61 +700,22 @@ private fun StreamingMessageBubble(text: String) {
 }
 
 @Composable
-private fun LoadingDotsText() {
-    var dotCount by remember { mutableStateOf(1) }
-    val phrase = remember { randomLoadingPhrase() }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(450)
-            dotCount = if (dotCount == 3) 1 else dotCount + 1
+private fun GeneratingAnimation(modifier: Modifier = Modifier) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            RiveAnimationView(context).apply {
+                setRiveResource(
+                    resId = R.raw.ensu,
+                    autoplay = true,
+                    fit = Fit.CONTAIN,
+                    alignment = RiveAlignment.CENTER,
+                    loop = Loop.LOOP
+                )
+            }
         }
-    }
-
-    Text(
-        text = phrase + ".".repeat(dotCount),
-        style = EnsuTypography.message,
-        color = EnsuColor.textMuted()
     )
 }
-
-private fun randomLoadingPhrase(): String {
-    val verb = loadingPhraseVerbs.random()
-    val target = loadingPhraseTargets.random()
-    return "$verb $target"
-}
-
-private val loadingPhraseVerbs = listOf(
-    "Generating",
-    "Thinking through",
-    "Assembling",
-    "Drafting",
-    "Composing",
-    "Crunching",
-    "Exploring",
-    "Piecing together",
-    "Reviewing",
-    "Organizing",
-    "Synthesizing",
-    "Sketching",
-    "Refining",
-    "Shaping"
-)
-
-private val loadingPhraseTargets = listOf(
-    "your reply",
-    "an answer",
-    "ideas",
-    "context",
-    "details",
-    "the response",
-    "the next steps",
-    "a solution",
-    "the summary",
-    "insights",
-    "the draft",
-    "the explanation"
-)
 
 @Composable
 private fun TimestampText(timestampMillis: Long) {
