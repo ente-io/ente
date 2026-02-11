@@ -591,6 +591,7 @@ const Page: React.FC = () => {
     const assetBasePath = router.basePath ?? "";
     const logoSrc = `${assetBasePath}/images/ensu-logo.svg`;
     const appIconSrc = `${assetBasePath}/images/ensu-app-icon-foreground.png`;
+    const comingSoonDuckySrc = `${assetBasePath}/images/ensu-ducky.png`;
     const [isDarkMode, setIsDarkMode] = useState(theme.palette.mode === "dark");
 
     useEffect(() => {
@@ -3622,14 +3623,36 @@ const Page: React.FC = () => {
         if (!SIGN_IN_ENABLED) {
             showMiniDialog({
                 title: "Coming Soon",
-                message:
-                    "Sign in and cloud backup will be available in a future update.",
+                message: (
+                    <Stack
+                        sx={{
+                            gap: 1.25,
+                            alignItems: "center",
+                            textAlign: "center",
+                        }}
+                    >
+                        <Box
+                            component="img"
+                            src={comingSoonDuckySrc}
+                            alt="Ensu ducky"
+                            sx={{
+                                width: 92,
+                                height: 92,
+                                objectFit: "contain",
+                            }}
+                        />
+                        <Box component="span">
+                            Sign in and cloud backup will be available in a
+                            future update.
+                        </Box>
+                    </Stack>
+                ),
                 cancel: "Got it",
             });
             return;
         }
         void router.push("/login");
-    }, [router, showMiniDialog]);
+    }, [comingSoonDuckySrc, router, showMiniDialog]);
 
     const openPasskeysFromChat = useCallback(async () => {
         try {
