@@ -20,15 +20,11 @@ struct MessageListView: View {
     @State private var isAtBottom = true
     @State private var autoScrollEnabled = true
     @State private var previewItem: AttachmentPreviewItem?
-    @State private var lastHapticLength = 0
     @State private var wasAtBottomBeforeKeyboard = false
     @State private var isUserDragging = false
     @State private var lastContentHeight: CGFloat = 0
     @State private var lastScrollChange = ScrollChange()
     @State private var didInitialScroll = false
-    #if os(iOS)
-    @State private var haptic: UIImpactFeedbackGenerator?
-    #endif
 
     var body: some View {
         GeometryReader { proxy in
@@ -66,8 +62,9 @@ struct MessageListView: View {
                 .onPreferenceChange(ContentHeightKey.self) { newHeight in
                     let delta = newHeight - lastContentHeight
                     lastContentHeight = newHeight
-                    if delta > 1, autoScrollEnabled, !isUserDragging {
-                        scrollToBottom(scrollProxy, force: true, animated: false)
+                    let lastMessageIsUser = messages.last?.role == .user
+                    if delta > 1, autoScrollEnabled, !isUserDragging, !isGenerating, lastMessageIsUser {
+                        scrollToBottom(scrollProxy, force: true, animated: true)
                     }
                 }
                 .onChange(of: currentScrollChange) { newValue in
@@ -75,9 +72,6 @@ struct MessageListView: View {
                 }
                 .onAppear {
                     lastScrollChange = currentScrollChange
-                    #if os(iOS)
-                    prepareHaptic()
-                    #endif
                     didInitialScroll = false
                     scheduleInitialScroll(scrollProxy)
                 }
@@ -107,8 +101,9 @@ struct MessageListView: View {
         if newValue.messagesCount != previous.messagesCount {
             if !didInitialScroll {
                 scheduleInitialScroll(scrollProxy)
-            } else {
-                scrollToBottom(scrollProxy, animated: newValue.isGenerating)
+            } else if messages.last?.role == .user {
+                autoScrollEnabled = true
+                scrollToBottom(scrollProxy, force: true, animated: true)
             }
         }
 
@@ -116,19 +111,6 @@ struct MessageListView: View {
             autoScrollEnabled = true
             didInitialScroll = false
             scheduleInitialScroll(scrollProxy)
-        }
-
-        if newValue.streamingLength != previous.streamingLength {
-            #if os(iOS)
-            if newValue.isGenerating {
-                let length = newValue.streamingLength
-                if length > lastHapticLength {
-                    impactHaptic()
-                    lastHapticLength = length
-                }
-            }
-            #endif
-            scrollToBottom(scrollProxy, animated: false)
         }
 
         if newValue.keyboardHeight != previous.keyboardHeight {
@@ -145,18 +127,7 @@ struct MessageListView: View {
         }
 
         if newValue.inputBarHeight != previous.inputBarHeight {
-            if autoScrollEnabled && !isUserDragging {
-                scrollToBottom(scrollProxy, force: true, animated: false)
-            }
-        }
-
-        if newValue.isGenerating != previous.isGenerating {
-            if newValue.isGenerating {
-                autoScrollEnabled = true
-                lastHapticLength = 0
-                #if os(iOS)
-                prepareHaptic()
-                #endif
+            if autoScrollEnabled && !isUserDragging && !isGenerating {
                 scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
@@ -164,25 +135,9 @@ struct MessageListView: View {
         if newValue.isAtBottom != previous.isAtBottom {
             if newValue.isAtBottom && !isUserDragging {
                 autoScrollEnabled = true
-                scrollToBottom(scrollProxy, force: true, animated: false)
             }
         }
     }
-
-    #if os(iOS)
-    private func prepareHaptic() {
-        let generator = haptic ?? UIImpactFeedbackGenerator(style: .medium)
-        haptic = generator
-        generator.prepare()
-    }
-
-    private func impactHaptic() {
-        let generator = haptic ?? UIImpactFeedbackGenerator(style: .medium)
-        haptic = generator
-        generator.impactOccurred()
-        generator.prepare()
-    }
-    #endif
 
     @ViewBuilder
     private func messageListContent(containerHeight: CGFloat) -> some View {

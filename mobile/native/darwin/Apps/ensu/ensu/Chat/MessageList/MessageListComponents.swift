@@ -223,89 +223,30 @@ struct StreamingBubbleView: View {
     @State private var storageId = UUID().uuidString
 
     var body: some View {
+        let hasText = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                    if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        LoadingDotsView()
-                    } else {
-                        TimelineView(.periodic(from: .now, by: 0.55)) { context in
-                            let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
-                            let showCursor = phase == 0
-                            AssistantMessageRenderer(
-                                text: text,
-                                isStreaming: true,
-                                storageId: storageId,
-                                showsCursor: showCursor
-                            )
-                        }
+                EnsuBrandIllustration(width: 92, height: 42)
+
+                if hasText {
+                    TimelineView(.periodic(from: .now, by: 0.55)) { context in
+                        let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 2
+                        let showCursor = phase == 0
+                        AssistantMessageRenderer(
+                            text: text,
+                            isStreaming: true,
+                            storageId: storageId,
+                            showsCursor: showCursor
+                        )
                     }
                 }
-                .padding(.vertical, EnsuSpacing.md)
-                .padding(.horizontal, EnsuSpacing.sm)
             }
+            .padding(.vertical, EnsuSpacing.md)
+            .padding(.horizontal, EnsuSpacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .foregroundStyle(EnsuColor.textPrimary)
-    }
-}
-
-struct LoadingDotsView: View {
-    @State private var phrase: String = LoadingDotsView.randomPhrase()
-
-    var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.5)) { context in
-            let phase = Int(context.date.timeIntervalSinceReferenceDate * 2) % 3
-            Text(phrase + dots(for: phase))
-                .font(EnsuTypography.message)
-                .foregroundStyle(EnsuColor.textMuted)
-        }
-    }
-
-    private static let loadingPhraseVerbs = [
-        "Generating",
-        "Thinking through",
-        "Assembling",
-        "Drafting",
-        "Composing",
-        "Crunching",
-        "Exploring",
-        "Piecing together",
-        "Reviewing",
-        "Organizing",
-        "Synthesizing",
-        "Sketching",
-        "Refining",
-        "Shaping"
-    ]
-
-    private static let loadingPhraseTargets = [
-        "your reply",
-        "an answer",
-        "ideas",
-        "context",
-        "details",
-        "the response",
-        "the next steps",
-        "a solution",
-        "the summary",
-        "insights",
-        "the draft",
-        "the explanation"
-    ]
-
-    private static func randomPhrase() -> String {
-        let verb = loadingPhraseVerbs.randomElement() ?? "Generating"
-        let target = loadingPhraseTargets.randomElement() ?? "your reply"
-        return "\(verb) \(target)"
-    }
-
-    private func dots(for phase: Int) -> String {
-        switch phase {
-        case 0: return "."
-        case 1: return ".."
-        default: return "..."
-        }
     }
 }
 
