@@ -1027,11 +1027,6 @@ class UserService {
             CryptoUtil.bin2base64(encryptionResult.nonce!),
       );
       await setTwoFactor(value: true);
-      final UserDetails? profile = getCachedUserDetails();
-      if (profile != null && profile.profileData != null) {
-        profile.profileData!.isTwoFactorEnabled = true;
-        await _preferences.setString(keyUserDetails, profile.toJson());
-      }
       await dialog.hide();
       Navigator.pop(context);
       Bus.instance.fire(UserDetailsChangedEvent());
@@ -1073,11 +1068,6 @@ class UserService {
     try {
       await _gateway.disableTwoFactor();
       await setTwoFactor(value: false);
-      final UserDetails? profile = getCachedUserDetails();
-      if (profile != null && profile.profileData != null) {
-        profile.profileData!.isTwoFactorEnabled = false;
-        await _preferences.setString(keyUserDetails, profile.toJson());
-      }
       await dialog.hide();
       Bus.instance.fire(UserDetailsChangedEvent());
       showShortToast(
@@ -1102,11 +1092,6 @@ class UserService {
       final previousStatus = hasEnabledTwoFactor();
       final status = await _gateway.getTwoFactorStatus();
       await setTwoFactor(value: status);
-      final UserDetails? profile = getCachedUserDetails();
-      if (profile != null && profile.profileData != null) {
-        profile.profileData!.isTwoFactorEnabled = status;
-        await _preferences.setString(keyUserDetails, profile.toJson());
-      }
       if (previousStatus != status) {
         Bus.instance.fire(UserDetailsChangedEvent());
       }
