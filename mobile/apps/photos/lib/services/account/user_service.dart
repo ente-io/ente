@@ -14,7 +14,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/account_configured_event.dart";
-import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/gateways/users/models/delete_account.dart';
 import 'package:photos/gateways/users/models/key_attributes.dart';
@@ -67,8 +66,6 @@ class UserService {
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
   late SharedPreferences _preferences;
-  StreamSubscription<TwoFactorStatusChangeEvent>?
-      _twoFactorStatusChangeSubscription;
 
   UsersGateway get _gateway => usersGateway;
 
@@ -89,13 +86,6 @@ class UserService {
         () => {setTwoFactor(fetchTwoFactorStatus: true).ignore()},
       );
     }
-    if (_twoFactorStatusChangeSubscription != null) {
-      await _twoFactorStatusChangeSubscription!.cancel();
-    }
-    _twoFactorStatusChangeSubscription =
-        Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
-      setTwoFactor(value: event.status);
-    });
   }
 
   Future<void> sendOtt(
@@ -208,14 +198,31 @@ class UserService {
     bool shouldCache = true,
   }) async {
     _logger.info("Fetching user details");
+    final bool previousEmailMFAStatus = hasEmailMFAEnabled();
+    final bool previousTwoFactorStatus = hasEnabledTwoFactor();
     final userDetails = await _gateway.getUserDetails(memoryCount: memoryCount);
     if (shouldCache) {
       await _preferences.setString(keyUserDetails, userDetails.toJson());
+      bool hasSecurityStatusChanged = false;
       if (userDetails.profileData != null) {
+        final bool currentEmailMFAStatus =
+            userDetails.profileData!.isEmailMFAEnabled;
         await _preferences.setBool(
           kIsEmailMFAEnabled,
-          userDetails.profileData!.isEmailMFAEnabled,
+          currentEmailMFAStatus,
         );
+        hasSecurityStatusChanged =
+            hasSecurityStatusChanged ||
+            previousEmailMFAStatus != currentEmailMFAStatus;
+        final bool currentTwoFactorStatus =
+            userDetails.profileData!.isTwoFactorEnabled;
+        await setTwoFactor(value: currentTwoFactorStatus);
+        hasSecurityStatusChanged =
+            hasSecurityStatusChanged ||
+            previousTwoFactorStatus != currentTwoFactorStatus;
+      }
+      if (hasSecurityStatusChanged) {
+        Bus.instance.fire(UserDetailsChangedEvent());
       }
       // handle email change from different client
       if (userDetails.email != _config.getEmail()) {
@@ -1019,9 +1026,15 @@ class UserService {
         twoFactorSecretDecryptionNonce:
             CryptoUtil.bin2base64(encryptionResult.nonce!),
       );
+      await setTwoFactor(value: true);
+      final UserDetails? profile = getCachedUserDetails();
+      if (profile != null && profile.profileData != null) {
+        profile.profileData!.isTwoFactorEnabled = true;
+        await _preferences.setString(keyUserDetails, profile.toJson());
+      }
       await dialog.hide();
       Navigator.pop(context);
-      Bus.instance.fire(TwoFactorStatusChangeEvent(true));
+      Bus.instance.fire(UserDetailsChangedEvent());
       return true;
     } catch (e, s) {
       await dialog.hide();
@@ -1059,8 +1072,14 @@ class UserService {
     await dialog.show();
     try {
       await _gateway.disableTwoFactor();
+      await setTwoFactor(value: false);
+      final UserDetails? profile = getCachedUserDetails();
+      if (profile != null && profile.profileData != null) {
+        profile.profileData!.isTwoFactorEnabled = false;
+        await _preferences.setString(keyUserDetails, profile.toJson());
+      }
       await dialog.hide();
-      Bus.instance.fire(TwoFactorStatusChangeEvent(false));
+      Bus.instance.fire(UserDetailsChangedEvent());
       showShortToast(
         context,
         AppLocalizations.of(context).twofactorAuthenticationHasBeenDisabled,
@@ -1080,8 +1099,17 @@ class UserService {
 
   Future<bool> fetchTwoFactorStatus() async {
     try {
+      final previousStatus = hasEnabledTwoFactor();
       final status = await _gateway.getTwoFactorStatus();
       await setTwoFactor(value: status);
+      final UserDetails? profile = getCachedUserDetails();
+      if (profile != null && profile.profileData != null) {
+        profile.profileData!.isTwoFactorEnabled = status;
+        await _preferences.setString(keyUserDetails, profile.toJson());
+      }
+      if (previousStatus != status) {
+        Bus.instance.fire(UserDetailsChangedEvent());
+      }
       return status;
     } catch (e) {
       _logger.severe("Failed to fetch 2FA status", e);
@@ -1185,6 +1213,7 @@ class UserService {
         profile.profileData!.isEmailMFAEnabled = isEnabled;
         await _preferences.setString(keyUserDetails, profile.toJson());
       }
+      Bus.instance.fire(UserDetailsChangedEvent());
     } catch (e) {
       _logger.severe("Failed to update email mfa", e);
       rethrow;
