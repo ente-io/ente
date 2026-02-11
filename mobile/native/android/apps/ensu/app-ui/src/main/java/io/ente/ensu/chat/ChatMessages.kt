@@ -1,10 +1,9 @@
 package io.ente.ensu.chat
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -128,6 +127,8 @@ internal fun MessageList(
     var wasAtBottomBeforeResize by remember { mutableStateOf(true) }
     var lastViewportHeight by remember { mutableStateOf(0) }
     var lastUserMessageId by remember { mutableStateOf<String?>(null) }
+    var keepStreamingVisible by remember { mutableStateOf(false) }
+    var lastStreamingParentForOutro by remember { mutableStateOf<String?>(null) }
     val isAtBottom by remember {
         derivedStateOf {
             !listState.canScrollForward
@@ -143,6 +144,17 @@ internal fun MessageList(
             if (!listState.isScrollInProgress || isAtBottom) {
                 autoScrollEnabled = true
             }
+        }
+    }
+
+    LaunchedEffect(isGenerating, streamingParentId) {
+        if (isGenerating) {
+            keepStreamingVisible = true
+            lastStreamingParentForOutro = streamingParentId
+        } else if (keepStreamingVisible) {
+            delay(650)
+            keepStreamingVisible = false
+            lastStreamingParentForOutro = null
         }
     }
 
@@ -251,11 +263,12 @@ internal fun MessageList(
                 }
 
                 AnimatedVisibility(
-                    visible = isGenerating && streamingParentId == message.id,
+                    visible =
+                        (isGenerating && streamingParentId == message.id) ||
+                            (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id),
                     enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                         scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
-                        scaleOut(targetScale = 0.86f, animationSpec = tween(durationMillis = 180))
+                    exit = ExitTransition.None
                 ) {
                     Column {
                         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -270,11 +283,12 @@ internal fun MessageList(
 
         item(key = "streaming") {
             AnimatedVisibility(
-                visible = isGenerating && streamingParentId == null,
+                visible =
+                    (isGenerating && streamingParentId == null) ||
+                        (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == null),
                 enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                     scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
-                    scaleOut(targetScale = 0.86f, animationSpec = tween(durationMillis = 180))
+                exit = ExitTransition.None
             ) {
                 StreamingMessageBubble(
                     text = streamingResponse,
