@@ -1,4 +1,4 @@
-name: "Release (ensu desktop)"
+name: "Release (ensu)"
 
 on:
     push:
@@ -12,7 +12,48 @@ permissions:
     contents: write
 
 jobs:
-    release:
+    deploy-web:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: web
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
+
+            - name: Audit dependencies
+              run: |
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
+                      echo "::error::Yarn audit found critical issues"
+                      exit 1
+                  fi
+
+            - name: Build ensu
+              run: yarn build:ensu
+
+            - name: Publish ensu
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/ensu web/apps/ensu/out
+
+    release-desktop:
         strategy:
             fail-fast: false
             matrix:
