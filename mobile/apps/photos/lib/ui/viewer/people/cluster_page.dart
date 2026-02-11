@@ -223,7 +223,7 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: files,
-      header: widget.showNamingBanner &&
+      header: (isOfflineMode || widget.showNamingBanner) &&
               files.isNotEmpty &&
               !_isNamingBannerDismissed
           ? isOfflineMode

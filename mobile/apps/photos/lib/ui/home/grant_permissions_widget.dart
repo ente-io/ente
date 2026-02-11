@@ -225,11 +225,15 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
         await permissionService.onUpdatePermission(state);
-        await setMLConsent(true);
-        await MLService.instance.init();
-        await SemanticSearchService.instance.init();
-        unawaited(MLService.instance.runAllML(force: true));
         Bus.instance.fire(PermissionGrantedEvent());
+        try {
+          await setMLConsent(true);
+          await MLService.instance.init();
+          await SemanticSearchService.instance.init();
+          unawaited(MLService.instance.runAllML(force: true));
+        } catch (e) {
+          _logger.severe("Failed to initialize ML after permission grant", e);
+        }
       } else {
         await _showPermissionDeniedDialog();
       }

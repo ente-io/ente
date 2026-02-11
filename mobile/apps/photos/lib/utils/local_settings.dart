@@ -27,15 +27,24 @@ enum PeopleSortKey {
   lastUpdated,
 }
 
+/// Bit positions for offline-related boolean flags stored as a single integer.
+/// IMPORTANT: Never reorder or remove values. Only append new values at the end.
+enum OfflineFlag {
+  mlConsent,
+  mapEnabled,
+  getStartedBannerDismissed,
+  facesBannerDismissed,
+  nameFaceBannerDismissed,
+  seenMLEnablingBanner,
+  mlProgressBannerDismissed,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
-  static const _kOfflineMLConsent = "ls.offline_ml_consent";
   static const _kOfflineMLLocalIndexingEnabled = "ls.offline_ml_local_indexing";
-  static const _kOfflineMapEnabled = "ls.offline_map_enabled";
-  static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
@@ -72,19 +81,29 @@ class LocalSettings {
       "ml_debug.default_clustering_distance";
   static const _kAppMode = "ls.app_mode";
   static const _kAppModeEnvKey = "app_mode";
-  static const _kOfflineGetStartedBannerDismissed =
-      "ls.offline_get_started_banner_dismissed";
-  static const _kMLProgressBannerDismissed = "ls.ml_progress_banner_dismissed";
-  static const _kOfflineFacesBannerDismissed =
-      "ls.offline_faces_banner_dismissed";
-  static const _kOfflineNameFaceBannerDismissed =
-      "ls.offline_name_face_banner_dismissed";
+
+  static const _kOfflineFlags = "ls.offline_flags";
 
   final SharedPreferences _prefs;
 
   AppMode? _cachedAppMode;
 
   LocalSettings(this._prefs);
+
+  bool _getFlag(OfflineFlag flag) {
+    final bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+    return (bitmap & (1 << flag.index)) != 0;
+  }
+
+  Future<void> _setFlag(OfflineFlag flag, bool value) {
+    var bitmap = _prefs.getInt(_kOfflineFlags) ?? 0;
+    if (value) {
+      bitmap |= (1 << flag.index);
+    } else {
+      bitmap &= ~(1 << flag.index);
+    }
+    return _prefs.setInt(_kOfflineFlags, bitmap);
+  }
 
   AlbumSortKey albumSortKey() {
     return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref) ?? 0];
@@ -215,17 +234,15 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get offlineMLConsent => _prefs.getBool(_kOfflineMLConsent) ?? false;
+  bool get offlineMLConsent => _getFlag(OfflineFlag.mlConsent);
 
-  Future<void> setOfflineMLConsent(bool value) async {
-    await _prefs.setBool(_kOfflineMLConsent, value);
-  }
+  Future<void> setOfflineMLConsent(bool value) =>
+      _setFlag(OfflineFlag.mlConsent, value);
 
-  bool get offlineMapEnabled => _prefs.getBool(_kOfflineMapEnabled) ?? false;
+  bool get offlineMapEnabled => _getFlag(OfflineFlag.mapEnabled);
 
-  Future<void> setOfflineMapEnabled(bool value) async {
-    await _prefs.setBool(_kOfflineMapEnabled, value);
-  }
+  Future<void> setOfflineMapEnabled(bool value) =>
+      _setFlag(OfflineFlag.mapEnabled, value);
 
   bool get isMLLocalIndexingEnabled {
     final key = appMode == AppMode.offline
@@ -299,10 +316,9 @@ class LocalSettings {
   }
 
   bool get hasSeenMLEnablingBanner =>
-      _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
-  Future<void> setHasSeenMLEnablingBanner() async {
-    await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
-  }
+      _getFlag(OfflineFlag.seenMLEnablingBanner);
+  Future<void> setHasSeenMLEnablingBanner() =>
+      _setFlag(OfflineFlag.seenMLEnablingBanner, true);
 
   bool hasSeenMemoryLane(String personId) {
     final seenIds = _prefs.getStringList(_memoryLaneSeenKey);
@@ -448,30 +464,26 @@ class LocalSettings {
   }
 
   bool get isOfflineGetStartedBannerDismissed =>
-      _prefs.getBool(_kOfflineGetStartedBannerDismissed) ?? false;
+      _getFlag(OfflineFlag.getStartedBannerDismissed);
 
-  Future<void> setOfflineGetStartedBannerDismissed(bool value) async {
-    await _prefs.setBool(_kOfflineGetStartedBannerDismissed, value);
-  }
+  Future<void> setOfflineGetStartedBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.getStartedBannerDismissed, value);
 
   bool get isMLProgressBannerDismissed =>
-      _prefs.getBool(_kMLProgressBannerDismissed) ?? false;
+      _getFlag(OfflineFlag.mlProgressBannerDismissed);
 
-  Future<void> setMLProgressBannerDismissed(bool value) async {
-    await _prefs.setBool(_kMLProgressBannerDismissed, value);
-  }
+  Future<void> setMLProgressBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.mlProgressBannerDismissed, value);
 
   bool get isOfflineFacesBannerDismissed =>
-      _prefs.getBool(_kOfflineFacesBannerDismissed) ?? false;
+      _getFlag(OfflineFlag.facesBannerDismissed);
 
-  Future<void> setOfflineFacesBannerDismissed(bool value) async {
-    await _prefs.setBool(_kOfflineFacesBannerDismissed, value);
-  }
+  Future<void> setOfflineFacesBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.facesBannerDismissed, value);
 
   bool get isOfflineNameFaceBannerDismissed =>
-      _prefs.getBool(_kOfflineNameFaceBannerDismissed) ?? false;
+      _getFlag(OfflineFlag.nameFaceBannerDismissed);
 
-  Future<void> setOfflineNameFaceBannerDismissed(bool value) async {
-    await _prefs.setBool(_kOfflineNameFaceBannerDismissed, value);
-  }
+  Future<void> setOfflineNameFaceBannerDismissed(bool value) =>
+      _setFlag(OfflineFlag.nameFaceBannerDismissed, value);
 }
