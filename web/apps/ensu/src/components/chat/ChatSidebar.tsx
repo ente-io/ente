@@ -98,10 +98,16 @@ export const ChatSidebar = memo(
                     sx={{ gap: 1, alignItems: "center", width: "100%" }}
                 >
                     <Stack sx={{ flex: 1, gap: 1 }}>
-                        <Box
+                        <Typography
                             component="button"
                             onClick={handleNewChat}
+                            variant="h2"
+                            aria-label="New chat"
                             sx={{
+                                fontFamily: "inherit",
+                                fontWeight: 600,
+                                letterSpacing: "1px",
+                                textTransform: "lowercase",
                                 border: "none",
                                 padding: 0,
                                 background: "transparent",
@@ -114,24 +120,22 @@ export const ChatSidebar = memo(
                                 MozUserSelect: "none",
                                 msUserSelect: "none",
                                 outline: "none",
+                                lineHeight: 1,
                                 display: "inline-flex",
                                 alignItems: "center",
-                                justifyContent: "center",
-                                lineHeight: 1,
                             }}
-                            aria-label="New chat"
                         >
                             <Box
                                 component="img"
                                 src={appIconSrc}
                                 alt="Ensu"
                                 sx={{
-                                    width: 22,
-                                    height: 22,
+                                    width: "1.35em",
+                                    height: "1.35em",
                                     display: "block",
                                 }}
                             />
-                        </Box>
+                        </Typography>
                     </Stack>
                     <Stack
                         direction="row"
