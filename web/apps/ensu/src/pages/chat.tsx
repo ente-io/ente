@@ -1788,14 +1788,11 @@ const Page: React.FC = () => {
 
     const displayMessages = useMemo(() => {
         const base = messageState.path ?? [];
-        if (
-            messageState.streamingSelectedParent &&
-            streamingParentId === messageState.streamingSelectedParent
-        ) {
+        if (streamingParentId) {
             const streamingMessage: ChatMessage = {
                 messageUuid: STREAMING_SELECTION_KEY,
                 sessionUuid: currentSessionId ?? "",
-                parentMessageUuid: messageState.streamingSelectedParent,
+                parentMessageUuid: streamingParentId,
                 sender: "assistant",
                 text: streamingText,
                 createdAt: streamingCreatedAtRef.current ?? Date.now() * 1000,
@@ -1803,13 +1800,7 @@ const Page: React.FC = () => {
             return [...base, streamingMessage];
         }
         return base;
-    }, [
-        messageState.path,
-        messageState.streamingSelectedParent,
-        streamingParentId,
-        streamingText,
-        currentSessionId,
-    ]);
+    }, [messageState.path, streamingParentId, streamingText, currentSessionId]);
 
     const branchSwitchers = messageState.switchers;
 
