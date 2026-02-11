@@ -10,6 +10,7 @@ import 'package:locker/services/files/download/models/task.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 
 final _logger = Logger("FileDownloader");
 
@@ -26,46 +27,76 @@ Future<File?> downloadAndDecrypt(
   final String tempDir = Configuration.instance.getTempDirectory();
   final String cacheDir = Configuration.instance.getCacheDirectory();
 
-  String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";
+  final String cachedEncryptedFilePath =
+      "$cacheDir${file.uploadedFileID}.encrypted";
+  final String tempEncryptedFilePath =
+      "$tempDir${file.uploadedFileID}.encrypted";
+  String encryptedFilePath = tempEncryptedFilePath;
   File encryptedFile = File(encryptedFilePath);
+  bool usingCachedEncryptedFile = false;
+  bool downloadedFreshEncryptedFile = false;
 
-  final String decryptedFilePath = shouldUseCache
-      ? "$cacheDir${file.displayName}"
-      : "$tempDir${file.displayName}";
+  final String safeDisplayName = p.basename(file.displayName);
+  final String decryptedFilePath =
+      "$tempDir${file.uploadedFileID}_$safeDisplayName";
+  final File decryptedFile = File(decryptedFilePath);
 
   final startTime = DateTime.now().millisecondsSinceEpoch;
 
   try {
-    if (downloadManager.enableResumableDownload(file.fileSize)) {
-      final DownloadResult result = await downloadManager.download(
-        file.uploadedFileID!,
-        file.displayName,
-        file.fileSize!,
-      );
-      if (result.success) {
-        encryptedFilePath = result.task.filePath!;
-        encryptedFile = File(encryptedFilePath);
-      } else {
-        _logger.warning(
-          '$logPrefix download failed ${result.task.error} ${result.task.status}',
-        );
-        return null;
+    bool shouldDownload = true;
+    if (shouldUseCache) {
+      final cachedEncryptedFile = File(cachedEncryptedFilePath);
+      if (await cachedEncryptedFile.exists()) {
+        final encryptedSize = await cachedEncryptedFile.length();
+        if (encryptedSize > 0) {
+          shouldDownload = false;
+          usingCachedEncryptedFile = true;
+          encryptedFilePath = cachedEncryptedFilePath;
+          encryptedFile = cachedEncryptedFile;
+          _logger.info('$logPrefix using cached encrypted file');
+        } else {
+          await cachedEncryptedFile.delete();
+        }
       }
-    } else {
-      // If the file is small, download it directly to the final location
-      final response = await Network.instance.getDio().download(
-        file.downloadUrl,
-        encryptedFilePath,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-        onReceiveProgress: (a, b) {
-          progressCallback?.call(a, b);
-        },
-      );
-      if (response.statusCode != 200 || !encryptedFile.existsSync()) {
-        _logger.warning('$logPrefix download failed ${response.toString()}');
-        return null;
+    }
+
+    if (shouldDownload) {
+      if (downloadManager.enableResumableDownload(file.fileSize)) {
+        final DownloadResult result = await downloadManager.download(
+          file.uploadedFileID!,
+          file.displayName,
+          file.fileSize!,
+        );
+        if (result.success) {
+          encryptedFilePath = result.task.filePath!;
+          encryptedFile = File(encryptedFilePath);
+          downloadedFreshEncryptedFile = true;
+        } else {
+          _logger.warning(
+            '$logPrefix download failed ${result.task.error} ${result.task.status}',
+          );
+          return null;
+        }
+      } else {
+        // If the file is small, download it directly to the final location
+        final response = await Network.instance.getDio().download(
+          file.downloadUrl,
+          tempEncryptedFilePath,
+          options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},
+          ),
+          onReceiveProgress: (a, b) {
+            progressCallback?.call(a, b);
+          },
+        );
+        encryptedFilePath = tempEncryptedFilePath;
+        encryptedFile = File(encryptedFilePath);
+        downloadedFreshEncryptedFile = true;
+        if (response.statusCode != 200 || !encryptedFile.existsSync()) {
+          _logger.warning('$logPrefix download failed ${response.toString()}');
+          return null;
+        }
       }
     }
 
@@ -91,6 +122,9 @@ Future<File?> downloadAndDecrypt(
     try {
       // Start the periodic callback after initial 5 seconds
       fakeProgress?.start();
+      if (await decryptedFile.exists()) {
+        await decryptedFile.delete();
+      }
       await CryptoUtil.decryptFile(
         encryptedFilePath,
         decryptedFilePath,
@@ -103,10 +137,36 @@ Future<File?> downloadAndDecrypt(
     } catch (e, s) {
       fakeProgress?.stop();
       _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      if (downloadedFreshEncryptedFile) {
+        try {
+          await encryptedFile.delete();
+        } catch (_) {}
+      } else if (usingCachedEncryptedFile) {
+        // Cached encrypted file is likely corrupted; remove it so next attempt
+        // fetches a fresh copy.
+        try {
+          await encryptedFile.delete();
+        } catch (_) {}
+      }
       return null;
     }
-    await encryptedFile.delete();
-    return File(decryptedFilePath);
+    if (shouldUseCache && downloadedFreshEncryptedFile) {
+      try {
+        if (encryptedFilePath != cachedEncryptedFilePath) {
+          await encryptedFile.copy(cachedEncryptedFilePath);
+          await encryptedFile.delete();
+        }
+      } catch (e, s) {
+        _logger.warning(
+          '$logPrefix failed to persist encrypted file cache',
+          e,
+          s,
+        );
+      }
+    } else if (!shouldUseCache) {
+      await encryptedFile.delete();
+    }
+    return decryptedFile;
   } catch (e, s) {
     _logger.severe("$logPrefix failed to download or decrypt", e, s);
     return null;
