@@ -34,6 +34,7 @@ export interface ChatMessageListProps {
     branchSwitchers: Record<string, BranchSwitcher>;
     loadingPhrase: string | null;
     loadingDots: number;
+    isGenerating: boolean;
     stickToBottom: boolean;
     onStickToBottomChange: (value: boolean) => void;
     scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -109,6 +110,7 @@ interface MessageRowProps {
     branchSwitchers: Record<string, BranchSwitcher>;
     loadingPhrase: string | null;
     loadingDots: number;
+    isGenerating: boolean;
     onOpenAttachment: (
         message: ChatMessage,
         attachment: ChatAttachment,
@@ -136,6 +138,7 @@ const MessageRow = memo(
         branchSwitchers,
         loadingPhrase,
         loadingDots,
+        isGenerating,
         onOpenAttachment,
         onEditMessage,
         onCopyMessage,
@@ -273,6 +276,7 @@ const MessageRow = memo(
                                     }}
                                 >
                                     <GeneratingRiveIndicator
+                                        isGenerating={isGenerating && isStreaming}
                                         fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
                                     />
                                     {showLoadingPlaceholder ? null : (
@@ -513,6 +517,7 @@ export const ChatMessageList = memo(
         branchSwitchers,
         loadingPhrase,
         loadingDots,
+        isGenerating,
         onStickToBottomChange,
         scrollContainerRef,
         onScroll,
@@ -571,6 +576,7 @@ export const ChatMessageList = memo(
                         branchSwitchers={branchSwitchers}
                         loadingPhrase={isStreaming ? loadingPhrase : null}
                         loadingDots={isStreaming ? loadingDots : 0}
+                        isGenerating={isGenerating}
                         onOpenAttachment={onOpenAttachment}
                         onEditMessage={onEditMessage}
                         onCopyMessage={onCopyMessage}
@@ -596,6 +602,7 @@ export const ChatMessageList = memo(
                 assistantMarkdownSx,
                 branchSwitchers,
                 formatTime,
+                isGenerating,
                 loadingDots,
                 loadingPhrase,
                 onCopyMessage,
