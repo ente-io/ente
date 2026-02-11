@@ -4,7 +4,7 @@
 - `app/` is the only module and contains the Android application.
 - Source code lives under `app/src/main/java/io/ente/screensaver/` (feature folders like `dream`, `photos`, `slideshow`).
 - Android resources are in `app/src/main/res/`.
-- Debug-only assets and config live in `app/src/debug/` (see `app/src/debug/assets/sample_photos/`).
+- Debug-only config can live in `app/src/debug/` when needed.
 - Build outputs are generated in `app/build/` (do not commit).
 
 ## Build, Test, and Development Commands

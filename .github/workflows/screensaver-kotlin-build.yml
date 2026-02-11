@@ -1,29 +1,21 @@
-name: "Kotlin build"
+name: "Kotlin build (screensaver)"
 
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "app/**"
-      - "build.gradle.kts"
-      - "settings.gradle.kts"
-      - "gradle/**"
-      - "gradle.properties"
-      - "gradlew"
-      - "gradlew.bat"
-      - ".github/workflows/kotlin-build.yml"
+      - "mobile/native/android/apps/screensaver/**"
+      - "rust/uniffi/core/**"
+      - "rust/core/**"
+      - ".github/workflows/screensaver-kotlin-build.yml"
   push:
     branches:
       - main
     paths:
-      - "app/**"
-      - "build.gradle.kts"
-      - "settings.gradle.kts"
-      - "gradle/**"
-      - "gradle.properties"
-      - "gradlew"
-      - "gradlew.bat"
-      - ".github/workflows/kotlin-build.yml"
+      - "mobile/native/android/apps/screensaver/**"
+      - "rust/uniffi/core/**"
+      - "rust/core/**"
+      - ".github/workflows/screensaver-kotlin-build.yml"
 
 permissions:
   contents: read
@@ -31,6 +23,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/native/android/apps/screensaver
 
     steps:
       - name: Checkout code

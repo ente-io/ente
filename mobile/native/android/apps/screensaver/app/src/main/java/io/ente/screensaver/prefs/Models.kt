@@ -1,7 +1,6 @@
 package io.ente.screensaver.prefs
 
 enum class PhotoSourceType {
-    DEBUG_ASSETS,
     MEDIASTORE,
     ENTE_PUBLIC_ALBUM,
 }

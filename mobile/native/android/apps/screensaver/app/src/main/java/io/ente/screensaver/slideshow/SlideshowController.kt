@@ -8,7 +8,6 @@ import io.ente.screensaver.diagnostics.AppLog
 import io.ente.screensaver.diagnostics.redactedForLog
 import io.ente.screensaver.permissions.MediaPermissions
 import io.ente.screensaver.ente.EnteImageCache
-import io.ente.screensaver.photos.DebugAssetPhotoSource
 import io.ente.screensaver.photos.EntePublicAlbumPhotoSource
 import io.ente.screensaver.photos.MediaStorePhotoSource
 import io.ente.screensaver.photos.PhotoSource
@@ -51,7 +50,6 @@ class SlideshowController(
     private fun primarySource(sourceType: PhotoSourceType): PhotoSource {
         return when (sourceType) {
             PhotoSourceType.MEDIASTORE -> MediaStorePhotoSource(context)
-            PhotoSourceType.DEBUG_ASSETS -> DebugAssetPhotoSource(context)
             PhotoSourceType.ENTE_PUBLIC_ALBUM -> EntePublicAlbumPhotoSource(context)
         }
     }

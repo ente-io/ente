@@ -1,7 +1,6 @@
 package io.ente.screensaver.prefs
 
 import android.content.Context
-import io.ente.screensaver.BuildConfig
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -29,15 +28,13 @@ private object Keys {
 
 class PreferencesRepository(private val context: Context) {
 
-    private val defaultSourceRaw: String =
-        if (BuildConfig.DEBUG) "debug_assets" else "ente_public_album"
+    private val defaultSourceRaw: String = "ente_public_album"
 
     val flow: Flow<SaverSettings> = context.ssaverDataStore.data.map { prefs ->
         val sourceRaw = prefs[Keys.sourceKey] ?: defaultSourceRaw
         val sourceType = when (sourceRaw) {
             "mediastore" -> PhotoSourceType.MEDIASTORE
             "ente_public_album" -> PhotoSourceType.ENTE_PUBLIC_ALBUM
-            "debug_assets" -> if (BuildConfig.DEBUG) PhotoSourceType.DEBUG_ASSETS else PhotoSourceType.ENTE_PUBLIC_ALBUM
             else -> PhotoSourceType.ENTE_PUBLIC_ALBUM
         }
 
