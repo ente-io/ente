@@ -110,7 +110,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 }
 
-val rustCoreDir = rootProject.file("../../../../../rust/uniffi/core_uniffi")
+val rustCoreDir = rootProject.file("../../../../../rust/uniffi/core")
 val jniLibsDir = layout.projectDirectory.dir("src/main/jniLibs").asFile
 val rustTargetDir = rootProject.layout.buildDirectory.dir("ente-core").get().asFile
 
