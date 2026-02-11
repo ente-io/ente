@@ -31,8 +31,8 @@ object EnsuColor {
     val fillFaintLight = Color(0xFFF0EBE4)
     val fillFaintDark = Color(0xFF1E1E1E)
 
-    val accentLight = Color(0xFFF4D93B)
-    val accentDark = Color(0xFFF4D93B)
+    val accentLight = Color(0xFFFDCE13)
+    val accentDark = Color(0xFFFDCE13)
 
     val actionLight = textPrimaryLight
     val actionDark = accentDark

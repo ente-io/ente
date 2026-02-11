@@ -89,6 +89,11 @@ struct SignInComingSoonDialog: View {
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: EnsuSpacing.lg) {
+                Image("EnsuDucky")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 120)
+
                 Text(title)
                     .font(EnsuTypography.large)
                     .foregroundStyle(EnsuColor.textPrimary)
