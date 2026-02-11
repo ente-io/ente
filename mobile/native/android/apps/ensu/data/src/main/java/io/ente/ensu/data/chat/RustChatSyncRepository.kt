@@ -10,14 +10,14 @@ import io.ente.ensu.domain.model.MigrationConfig as DomainMigrationConfig
 import io.ente.ensu.domain.model.MigrationPriority as DomainMigrationPriority
 import io.ente.ensu.domain.model.MigrationProgress as DomainMigrationProgress
 import io.ente.ensu.domain.model.MigrationState as DomainMigrationState
-import io.ente.labs.llmchat_sync.LlmChatSync
-import io.ente.labs.llmchat_sync.MigrationConfig as RustMigrationConfig
-import io.ente.labs.llmchat_sync.MigrationPriority as RustMigrationPriority
-import io.ente.labs.llmchat_sync.MigrationProgress as RustMigrationProgress
-import io.ente.labs.llmchat_sync.MigrationProgressCallback
-import io.ente.labs.llmchat_sync.MigrationState as RustMigrationState
-import io.ente.labs.llmchat_sync.SyncAuth
-import io.ente.labs.llmchat_sync.SyncException
+import io.ente.labs.ensu_sync.EnsuSync
+import io.ente.labs.ensu_sync.MigrationConfig as RustMigrationConfig
+import io.ente.labs.ensu_sync.MigrationPriority as RustMigrationPriority
+import io.ente.labs.ensu_sync.MigrationProgress as RustMigrationProgress
+import io.ente.labs.ensu_sync.MigrationProgressCallback
+import io.ente.labs.ensu_sync.MigrationState as RustMigrationState
+import io.ente.labs.ensu_sync.SyncAuth
+import io.ente.labs.ensu_sync.SyncException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -29,7 +29,7 @@ class RustChatSyncRepository(
 ) : ChatSyncRepository {
 
     private val filePaths = FilePathManager(context)
-    private var syncEngine: LlmChatSync? = null
+    private var syncEngine: EnsuSync? = null
     private var chatKey: ByteArray? = null
 
     override suspend fun sync() {
@@ -89,7 +89,7 @@ class RustChatSyncRepository(
         return withContext(Dispatchers.IO) {
             resetSyncStateInternal()
             val auth = buildAuth()
-            val key = io.ente.labs.llmchat_sync.fetchChatKey(auth, filePaths.syncDbFile.absolutePath)
+            val key = io.ente.labs.ensu_sync.fetchChatKey(auth, filePaths.syncDbFile.absolutePath)
             chatKey = key
             val engine = buildSyncEngine(key).also { syncEngine = it }
             val offlineKey = credentialStore.getOrCreateChatDbKey()
@@ -104,15 +104,15 @@ class RustChatSyncRepository(
         }
     }
 
-    private suspend fun ensureSyncEngine(): LlmChatSync {
+    private suspend fun ensureSyncEngine(): EnsuSync {
         return syncEngine ?: run {
             val key = chatKey ?: prepareOnlineDb()
             buildSyncEngine(key).also { syncEngine = it }
         }
     }
 
-    private fun buildSyncEngine(dbKey: ByteArray): LlmChatSync {
-        return LlmChatSync.open(
+    private fun buildSyncEngine(dbKey: ByteArray): EnsuSync {
+        return EnsuSync.open(
             mainDbPath = filePaths.onlineDbFile.absolutePath,
             attachmentsDbPath = filePaths.syncDbFile.absolutePath,
             dbKey = dbKey,

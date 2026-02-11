@@ -20,13 +20,15 @@ cd mobile/native/android/packages/rust/tool
 ./build_android.sh
 ```
 
-This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/` (including `libcore_uniffi.so`, `libinference_rs_uniffi.so`, `libllmchat_db_uniffi.so`, and `libllmchat_sync_uniffi.so`).
+This script produces the JNI `.so` artifacts in `android/packages/rust/src/main/jniLibs/` (including `libcore.so`, `libinference.so`, `libdb.so`, and `libsync.so`).
 The UniFFI Kotlin bindings are generated separately into:
-- `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core_uniffi.kt`
-- `android/packages/rust/src/main/kotlin/io/ente/labs/*/*_uniffi.kt`
+- `android/apps/ensu/crypto-auth-core/src/main/java/io/ente/ensu/crypto/core.kt`
+- `android/packages/rust/src/main/kotlin/io/ente/labs/ensu_db/db.kt`
+- `android/packages/rust/src/main/kotlin/io/ente/labs/ensu_sync/sync.kt`
+- `android/packages/rust/src/main/kotlin/io/ente/labs/inference_rs/inference.kt`
 
 These generated files are gitignored. If bindings are missing, rebuild the corresponding
-`rust/uniffi/*` and `rust/llmchat/uniffi/*` crates and run `uniffi-bindgen generate` for Kotlin (see each crate’s
+`rust/uniffi/core` and `rust/uniffi/ensu/*` crates and run `uniffi-bindgen generate` for Kotlin (see each crate’s
 `uniffi.toml` for package names).
 
 ### 2. Build Debug APK

@@ -253,10 +253,10 @@ struct LlmChatMessage {
     let attachments: [AttachmentMeta]
 }
 
-final class LlmChatDb {
-    static func open(mainDbPath: String, attachmentsDbPath: String, key: Data) throws -> LlmChatDb {
+final class EnsuDb {
+    static func open(mainDbPath: String, attachmentsDbPath: String, key: Data) throws -> EnsuDb {
         _ = (mainDbPath, attachmentsDbPath, key)
-        return LlmChatDb()
+        return EnsuDb()
     }
 
     func listSessions() throws -> [LlmChatSession] { [] }
@@ -297,7 +297,7 @@ final class LlmChatDb {
     }
 }
 
-final class LlmChatSync {
+final class EnsuSync {
     static func open(
         mainDbPath: String,
         attachmentsDbPath: String,
@@ -305,9 +305,9 @@ final class LlmChatSync {
         attachmentsDir: String,
         metaDir: String,
         plaintextDir: String
-    ) throws -> LlmChatSync {
+    ) throws -> EnsuSync {
         _ = (mainDbPath, attachmentsDbPath, dbKey, attachmentsDir, metaDir, plaintextDir)
-        return LlmChatSync()
+        return EnsuSync()
     }
 
     func sync(auth: SyncAuth) throws -> Bool {
@@ -377,8 +377,8 @@ final class MigrationProgressHandler: MigrationProgressCallback {
 
 private struct OnlineStorePreparation {
     let chatKey: Data
-    let chatDb: LlmChatDb
-    let syncEngine: LlmChatSync
+    let chatDb: EnsuDb
+    let syncEngine: EnsuSync
 }
 
 @MainActor
@@ -436,8 +436,8 @@ final class ChatViewModel: ObservableObject {
     @Published var generationErrorMessage: String?
 
     private let provider: InferenceRsProvider
-    private var chatDb: LlmChatDb
-    private var syncEngine: LlmChatSync
+    private var chatDb: EnsuDb
+    private var syncEngine: EnsuSync
     private let attachmentsDir: URL
     private let offlineDbPath: String
     private let onlineDbPath: String
@@ -503,9 +503,9 @@ final class ChatViewModel: ObservableObject {
         let onlineDbPath = dbDir.appendingPathComponent("llmchat_online.db").path
         let syncDbPath = dbDir.appendingPathComponent("llmchat_sync.db").path
 
-        let chatDb: LlmChatDb
+        let chatDb: EnsuDb
         do {
-            chatDb = try LlmChatDb.open(mainDbPath: offlineDbPath, attachmentsDbPath: syncDbPath, key: offlineKey)
+            chatDb = try EnsuDb.open(mainDbPath: offlineDbPath, attachmentsDbPath: syncDbPath, key: offlineKey)
         } catch {
             fatalError("Failed to open chat DB: \(error)")
         }
@@ -515,9 +515,9 @@ final class ChatViewModel: ObservableObject {
         let encryptedAttachmentsDir = dbDir.appendingPathComponent("chat_attachments_encrypted", isDirectory: true)
         try? FileManager.default.createDirectory(at: encryptedAttachmentsDir, withIntermediateDirectories: true, attributes: nil)
 
-        let syncEngine: LlmChatSync
+        let syncEngine: EnsuSync
         do {
-            syncEngine = try LlmChatSync.open(
+            syncEngine = try EnsuSync.open(
                 mainDbPath: offlineDbPath,
                 attachmentsDbPath: syncDbPath,
                 dbKey: offlineKey,
@@ -593,12 +593,12 @@ final class ChatViewModel: ObservableObject {
                 attributes: nil
             )
 
-            chatDb = try LlmChatDb.open(
+            chatDb = try EnsuDb.open(
                 mainDbPath: activeDbPath,
                 attachmentsDbPath: syncDbPath,
                 key: key
             )
-            syncEngine = try LlmChatSync.open(
+            syncEngine = try EnsuSync.open(
                 mainDbPath: activeDbPath,
                 attachmentsDbPath: syncDbPath,
                 dbKey: key,
@@ -645,12 +645,12 @@ final class ChatViewModel: ObservableObject {
 
             let chatKey = try fetchChatKey(auth: auth, syncDbPath: syncDbPath)
 
-            let chatDb = try LlmChatDb.open(
+            let chatDb = try EnsuDb.open(
                 mainDbPath: onlineDbPath,
                 attachmentsDbPath: syncDbPath,
                 key: chatKey
             )
-            let newSyncEngine = try LlmChatSync.open(
+            let newSyncEngine = try EnsuSync.open(
                 mainDbPath: onlineDbPath,
                 attachmentsDbPath: syncDbPath,
                 dbKey: chatKey,
@@ -803,7 +803,7 @@ final class ChatViewModel: ObservableObject {
     private func deleteOfflineSessionIfNeeded(_ sessionId: UUID) {
         guard isOnlineMode else { return }
         do {
-            let offlineDb = try LlmChatDb.open(
+            let offlineDb = try EnsuDb.open(
                 mainDbPath: offlineDbPath,
                 attachmentsDbPath: syncDbPath,
                 key: offlineDbKey
@@ -1805,7 +1805,7 @@ final class ChatViewModel: ObservableObject {
 
     private nonisolated static func buildSessions(
         from loaded: [LlmChatSession],
-        chatDb: LlmChatDb,
+        chatDb: EnsuDb,
         summaries: [String: String]
     ) -> [ChatSession] {
         let sessions: [ChatSession] = loaded.compactMap { session in

@@ -133,7 +133,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DA72BC872E5F87A100D128FF /* Build configuration list for PBXNativeTarget "ensu" */;
 			buildPhases = (
-				CC142736A470612F436ECF8E /* Build Rust (core_uniffi) */,
+				CC142736A470612F436ECF8E /* Build Rust (core/db/sync) */,
 				DA72BC5D2E5F87A000D128FF /* Sources */,
 				DA72BC5E2E5F87A000D128FF /* Frameworks */,
 				DA72BC5F2E5F87A000D128FF /* Resources */,
@@ -161,7 +161,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9C5C5C140967470293DCAAF2 /* Build configuration list for PBXNativeTarget "ensu-macos" */;
 			buildPhases = (
-				25484CE4873ED7217FB27990 /* Build Rust (core_uniffi) */,
+				25484CE4873ED7217FB27990 /* Build Rust (core/db/sync) */,
 				BB83D829CC14232E7E8BDD51 /* Sources */,
 				0BCBB02794980AFFDC386B69 /* Frameworks */,
 				1FDE2B245F9DADEF5E026D0B /* Resources */,
@@ -310,35 +310,35 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		CC142736A470612F436ECF8E /* Build Rust (core_uniffi) */ = {
+		CC142736A470612F436ECF8E /* Build Rust (core/db/sync) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (core_uniffi)";
+			name = "Build Rust (core/db/sync)";
 			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "ENTE_API_ENDPOINT=\"${ENTE_API_ENDPOINT}\" \"${SRCROOT}/scripts/build-rust.sh\"\n";
 		};
-		25484CE4873ED7217FB27990 /* Build Rust (core_uniffi) */ = {
+		25484CE4873ED7217FB27990 /* Build Rust (core/db/sync) */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Build Rust (core_uniffi)";
+			name = "Build Rust (core/db/sync)";
 			outputPaths = (
-				"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
-				"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
+				"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -544,18 +544,18 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 				);
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -605,18 +605,18 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 				);
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -664,18 +664,18 @@
 					"-framework",
 					"SystemConfiguration",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 				);
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -724,18 +724,18 @@
 					"-framework",
 					"SystemConfiguration",
 					"-force_load",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libcore_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_db_uniffi.a",
-					"$(TARGET_TEMP_DIR)/ensu_rust/libllmchat_sync_uniffi.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libcore.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libdb.a",
+					"$(TARGET_TEMP_DIR)/ensu_rust/libsync.a",
 				);
 				OTHER_SWIFT_FLAGS = (
 					"$(inherited)",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/core_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/coreFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_db_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/dbFFI.modulemap",
 					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/llmchat_sync_uniffiFFI.modulemap",
+					"-fmodule-map-file=$(SRCROOT)/ensu/Generated/syncFFI.modulemap",
 				);
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;

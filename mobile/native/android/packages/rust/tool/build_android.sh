@@ -3,12 +3,12 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO_ROOT="$(cd "$ROOT/../../../../.." && pwd)"
-CORE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/core_uniffi"
-INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/inference_rs_uniffi"
-CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/llmchat_db_uniffi"
-CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/llmchat/uniffi/llmchat_sync_uniffi"
+CORE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/core"
+INFERENCE_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/inference"
+CHATDB_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/db"
+CHAT_SYNC_UNIFFI_RUST_DIR="$REPO_ROOT/rust/uniffi/ensu/sync"
 # Patch llama.cpp mtmd sources so mmproj models load correctly.
-PATCH_SCRIPT="$REPO_ROOT/rust/llmchat/inference/tool/patch_llama_mtmd.sh"
+PATCH_SCRIPT="$REPO_ROOT/rust/ensu/inference/tool/patch_llama_mtmd.sh"
 APPLY_LLAMA_MTMD_PATCH="${APPLY_LLAMA_MTMD_PATCH:-1}"
 OUT_DIR="$ROOT/src/main/jniLibs"
 SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
@@ -33,9 +33,9 @@ if [[ -n "$NDK_VERSION" ]]; then
   NDK_ROOT_PATH="$SDK_ROOT/ndk/$NDK_VERSION"
 elif [[ -d "$SDK_ROOT/ndk" ]]; then
   # Prefer numeric version folders (ignore legacy rXX folders).
-  NDK_ROOT_PATH="$(ls -1d "$SDK_ROOT/ndk/"[0-9]* 2>/dev/null | sort -V | tail -n 1)"
+  NDK_ROOT_PATH="$(find "$SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 -name '[0-9]*' 2>/dev/null | sort -V | tail -n 1 || true)"
   if [[ -z "$NDK_ROOT_PATH" ]]; then
-    NDK_ROOT_PATH="$(ls -1d "$SDK_ROOT/ndk/"* 2>/dev/null | sort -V | tail -n 1)"
+    NDK_ROOT_PATH="$(find "$SDK_ROOT/ndk" -mindepth 1 -maxdepth 1 2>/dev/null | sort -V | tail -n 1 || true)"
   fi
 elif [[ -d "$SDK_ROOT/ndk-bundle" ]]; then
   NDK_ROOT_PATH="$SDK_ROOT/ndk-bundle"

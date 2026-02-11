@@ -10,10 +10,10 @@ import io.ente.ensu.domain.model.ChatMessage
 import io.ente.ensu.domain.model.ChatSession
 import io.ente.ensu.domain.model.MessageAuthor
 import io.ente.ensu.domain.model.sessionTitleFromText
-import io.ente.labs.llmchat_db.AttachmentKind
-import io.ente.labs.llmchat_db.AttachmentMeta
-import io.ente.labs.llmchat_db.DbException
-import io.ente.labs.llmchat_db.LlmChatDb
+import io.ente.labs.ensu_db.AttachmentKind
+import io.ente.labs.ensu_db.AttachmentMeta
+import io.ente.labs.ensu_db.DbException
+import io.ente.labs.ensu_db.EnsuDb
 import java.io.File
 
 class RustChatRepository(
@@ -29,7 +29,7 @@ class RustChatRepository(
     private var offlineDbKey = credentialStore.getOrCreateChatDbKey()
     private var onlineDbKey: ByteArray? = null
     private var usingOnlineDb = false
-    private var db: LlmChatDb = openDb(offlineDbFile, offlineDbKey)
+    private var db: EnsuDb = openDb(offlineDbFile, offlineDbKey)
 
     override fun listSessions(): List<ChatSession> = withDbRecovery {
         val sessions = db.listSessions()
@@ -69,8 +69,8 @@ class RustChatRepository(
                 sessionId = message.sessionUuid,
                 parentId = message.parentMessageUuid,
                 author = when (message.sender) {
-                    io.ente.labs.llmchat_db.Sender.SELF_USER -> MessageAuthor.User
-                    io.ente.labs.llmchat_db.Sender.OTHER -> MessageAuthor.Assistant
+                    io.ente.labs.ensu_db.Sender.SELF_USER -> MessageAuthor.User
+                    io.ente.labs.ensu_db.Sender.OTHER -> MessageAuthor.Assistant
                 },
                 text = message.text,
                 timestampMillis = message.createdAtUs / 1000,
@@ -112,7 +112,7 @@ class RustChatRepository(
 
         val message = db.insertMessage(
             sessionUuid = sessionId,
-            sender = if (author == MessageAuthor.User) io.ente.labs.llmchat_db.Sender.SELF_USER else io.ente.labs.llmchat_db.Sender.OTHER,
+            sender = if (author == MessageAuthor.User) io.ente.labs.ensu_db.Sender.SELF_USER else io.ente.labs.ensu_db.Sender.OTHER,
             text = text,
             parentMessageUuid = parentId,
             attachments = meta
@@ -170,8 +170,8 @@ class RustChatRepository(
         db = openDb(offlineDbFile, offlineDbKey)
     }
 
-    private fun openDb(dbFile: File, key: ByteArray): LlmChatDb {
-        return LlmChatDb.open(
+    private fun openDb(dbFile: File, key: ByteArray): EnsuDb {
+        return EnsuDb.open(
             dbFile.absolutePath,
             syncDbFile.absolutePath,
             key
