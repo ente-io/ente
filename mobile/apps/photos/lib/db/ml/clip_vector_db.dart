@@ -34,6 +34,7 @@ class ClipVectorDB {
 
   // only have a single app-wide reference to the database
   Future<VectorDb>? _vectorDbFuture;
+  Future<void>? _warmupFuture;
 
   Future<VectorDb> get _vectorDB async {
     _vectorDbFuture ??= _initVectorDB();
@@ -217,6 +218,42 @@ class ClipVectorDB {
     }
   }
 
+  Future<void> warmupApproxSearch() async {
+    _warmupFuture ??= _warmupApproxSearchInternal();
+    await _warmupFuture;
+  }
+
+  Future<void> _warmupApproxSearchInternal() async {
+    final stopwatch = Stopwatch()..start();
+    try {
+      final db = await _vectorDB;
+      final stats = await getIndexStats(db);
+      if (stats.size == 0) {
+        _logger.info("Skipping VectorDB warmup: index is empty");
+        return;
+      }
+
+      final warmupQuery = List<double>.filled(
+        stats.dimensions,
+        0.0,
+        growable: false,
+      );
+      await db.searchVectors(
+        query: warmupQuery,
+        count: BigInt.one,
+        exact: false,
+      );
+      _logger.info(
+        "VectorDB warmup finished in ${stopwatch.elapsedMilliseconds} ms",
+      );
+    } catch (e, s) {
+      _logger.warning("VectorDB warmup failed", e, s);
+      _warmupFuture = null;
+    } finally {
+      stopwatch.stop();
+    }
+  }
+
   Future<List<QueryResult>> searchApproxSimilaritiesWithinThreshold(
     List<double> query,
     double minimumSimilarity,
@@ -332,6 +369,7 @@ class ClipVectorDB {
     try {
       await db.deleteIndex();
       _vectorDbFuture = null;
+      _warmupFuture = null;
     } catch (e, s) {
       _logger.severe("Error deleting index", e, s);
       rethrow;
@@ -349,6 +387,7 @@ class ClipVectorDB {
       }
       _logger.info("Deleted index file on disk");
       _vectorDbFuture = null;
+      _warmupFuture = null;
       if (undoMigration) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_migrationKey, false);

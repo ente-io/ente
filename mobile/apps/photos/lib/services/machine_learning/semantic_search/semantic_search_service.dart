@@ -68,7 +68,7 @@ class SemanticSearchService {
     });
 
     if (flagService.usearchForSearch) {
-      unawaited(_mlDataDB.checkMigrateFillClipVectorDB());
+      unawaited(_prepareVectorDbForSearch());
     }
 
     unawaited(_loadTextModel(delay: true));
@@ -76,6 +76,17 @@ class SemanticSearchService {
 
   bool isMagicSearchEnabledAndReady() {
     return hasGrantedMLConsent && _textModelIsLoaded;
+  }
+
+  Future<void> _prepareVectorDbForSearch() async {
+    try {
+      await _mlDataDB.checkMigrateFillClipVectorDB();
+      if (await _canUseVectorDbForSearch()) {
+        await _vectorDB.warmupApproxSearch();
+      }
+    } catch (e, s) {
+      _logger.warning("Failed to prepare VectorDB for search", e, s);
+    }
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
