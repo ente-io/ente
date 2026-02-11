@@ -676,6 +676,7 @@ private fun StreamingMessageBubble(text: String) {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
+        val isOnlyLoader = text.isBlank()
         Column(
             modifier = Modifier
                 .animateContentSize(
@@ -684,15 +685,32 @@ private fun StreamingMessageBubble(text: String) {
                         stiffness = Spring.StiffnessMediumLow
                     )
                 )
-                .padding(horizontal = EnsuSpacing.sm.dp, vertical = EnsuSpacing.md.dp)
+                .padding(
+                    start = if (isOnlyLoader) 0.dp else EnsuSpacing.sm.dp,
+                    end = if (isOnlyLoader) 0.dp else EnsuSpacing.sm.dp,
+                    top = if (isOnlyLoader) 0.dp else EnsuSpacing.md.dp,
+                    bottom = if (isOnlyLoader) 0.dp else EnsuSpacing.md.dp
+                )
         ) {
-            GeneratingAnimation(
-                modifier = Modifier
-                    .width(92.dp)
-                    .height(42.dp)
-            )
-
-            if (text.isNotBlank()) {
+            if (isOnlyLoader) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp),
+                    contentAlignment = Alignment.BottomStart
+                ) {
+                    GeneratingAnimation(
+                        modifier = Modifier
+                            .width(92.dp)
+                            .height(42.dp)
+                    )
+                }
+            } else {
+                GeneratingAnimation(
+                    modifier = Modifier
+                        .width(92.dp)
+                        .height(42.dp)
+                )
                 Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
                 MarkdownView(markdown = text, enableSelection = false, trailingCursor = showCursor)
             }
