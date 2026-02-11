@@ -175,6 +175,7 @@ const SESSION_TITLE_PROMPT =
 
 const REPEAT_PENALTY = 1.18;
 const STREAMING_OUTRO_DURATION_MS = 520;
+const STREAMING_COLLAPSE_DURATION_MS = 300;
 
 type DocumentAttachment = {
     id: string;
@@ -786,6 +787,7 @@ const Page: React.FC = () => {
     >(undefined);
     const [syncNotificationOpen, setSyncNotificationOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isStreamingOutro, setIsStreamingOutro] = useState(false);
     const [loadingPhrase, setLoadingPhrase] = useState<string | null>(null);
     const [loadingDots, setLoadingDots] = useState(1);
     const [isDownloading, setIsDownloading] = useState(false);
@@ -842,7 +844,6 @@ const Page: React.FC = () => {
     const streamingChunksRef = useRef<string[]>([]);
     const streamingCreatedAtRef = useRef<number | null>(null);
     const streamingFlushTimerRef = useRef<number | null>(null);
-    const streamingOutroTimerRef = useRef<number | null>(null);
     const lastDownloadProgressRef = useRef(0);
     const pendingDownloadProgressRef = useRef<DownloadProgress | null>(null);
     const downloadProgressTimerRef = useRef<number | null>(null);
@@ -869,13 +870,6 @@ const Page: React.FC = () => {
         },
         [],
     );
-
-    const clearStreamingOutroTimer = useCallback(() => {
-        if (streamingOutroTimerRef.current) {
-            window.clearTimeout(streamingOutroTimerRef.current);
-            streamingOutroTimerRef.current = null;
-        }
-    }, []);
 
     const sessionFromQuery = useMemo(() => {
         if (!router.isReady) return undefined;
@@ -1609,24 +1603,18 @@ const Page: React.FC = () => {
     }, [currentSessionId, isDraftSession, sessionFromQuery, sessions]);
 
     useEffect(() => {
-        clearStreamingOutroTimer();
         setStreamingParentId(null);
         setStreamingText("");
         streamingBufferRef.current = "";
         streamingChunksRef.current = [];
         streamingCreatedAtRef.current = null;
         setIsGenerating(false);
+        setIsStreamingOutro(false);
         setPendingImages([]);
         setStickToBottom(true);
         currentJobIdRef.current = null;
         pendingCancelRef.current = false;
-    }, [clearStreamingOutroTimer, currentSessionId]);
-
-    useEffect(() => {
-        return () => {
-            clearStreamingOutroTimer();
-        };
-    }, [clearStreamingOutroTimer]);
+    }, [currentSessionId]);
 
     useEffect(() => {
         if (!isGenerating || streamingText.trim().length > 0) {
@@ -2424,6 +2412,7 @@ const Page: React.FC = () => {
         streamingChunksRef.current = [];
         streamingCreatedAtRef.current = null;
         setIsGenerating(false);
+        setIsStreamingOutro(false);
         setIsDraftSession(true);
         isDraftSessionRef.current = true;
         updateRouteSession(undefined, true);
@@ -2700,6 +2689,7 @@ const Page: React.FC = () => {
         const last = lastGenerationRef.current;
 
         setIsGenerating(false);
+        setIsStreamingOutro(false);
         setIsDownloading(false);
         currentJobIdRef.current = null;
 
@@ -2839,17 +2829,16 @@ const Page: React.FC = () => {
                 STREAMING_SELECTION_KEY,
                 false,
             );
-            clearStreamingOutroTimer();
             setStreamingParentId(parentMessageUuid);
             setStreamingText("");
             streamingBufferRef.current = "";
             streamingChunksRef.current = [];
             streamingCreatedAtRef.current = Date.now() * 1000;
+            setIsStreamingOutro(false);
             setIsGenerating(true);
             currentJobIdRef.current = null;
 
             let errorMessage: string | null = null;
-            let shouldPlayStreamingOutro = false;
 
             try {
                 await provider.ensureModelReady(settings);
@@ -2891,6 +2880,7 @@ const Page: React.FC = () => {
                         );
                     }
                     setIsGenerating(false);
+                    setIsStreamingOutro(false);
                     setIsDownloading(false);
                     setStreamingParentId(null);
                     streamingBufferRef.current = "";
@@ -2970,10 +2960,25 @@ const Page: React.FC = () => {
                     return;
                 }
 
+                const assistantText = finalText.replace(/\u0000/g, "");
+                setIsStreamingOutro(true);
+
+                await new Promise<void>((resolve) => {
+                    window.setTimeout(
+                        resolve,
+                        STREAMING_OUTRO_DURATION_MS +
+                            STREAMING_COLLAPSE_DURATION_MS,
+                    );
+                });
+
+                if (!isActiveGeneration()) {
+                    return;
+                }
+
                 const assistantMessage = await addMessage(
                     activeSessionId,
                     "assistant",
-                    finalText.replace(/\u0000/g, ""),
+                    assistantText,
                     chatKey,
                     parentMessageUuid,
                 );
@@ -2984,7 +2989,6 @@ const Page: React.FC = () => {
                 );
                 appendMessageToState(assistantMessage);
                 updateSessionAfterMessage(assistantMessage);
-                shouldPlayStreamingOutro = true;
 
                 void syncChat(chatKey);
                 void maybeGenerateSessionTitle({
@@ -3009,35 +3013,21 @@ const Page: React.FC = () => {
                     return;
                 }
                 setIsGenerating(false);
+                setIsStreamingOutro(false);
                 setIsDownloading(false);
                 streamingBufferRef.current = "";
                 streamingChunksRef.current = [];
                 setStreamingText("");
+                setStreamingParentId(null);
+                streamingCreatedAtRef.current = null;
                 currentJobIdRef.current = null;
                 pendingCancelRef.current = false;
-
-                if (shouldPlayStreamingOutro) {
-                    const outroParentMessageUuid = parentMessageUuid;
-                    clearStreamingOutroTimer();
-                    streamingOutroTimerRef.current = window.setTimeout(() => {
-                        setStreamingParentId((current) =>
-                            current === outroParentMessageUuid ? null : current,
-                        );
-                        streamingCreatedAtRef.current = null;
-                        streamingOutroTimerRef.current = null;
-                    }, STREAMING_OUTRO_DURATION_MS);
-                } else {
-                    clearStreamingOutroTimer();
-                    setStreamingParentId(null);
-                    streamingCreatedAtRef.current = null;
-                }
             }
         },
         [
             chatKey,
             currentSessionId,
             ensureProvider,
-            clearStreamingOutroTimer,
             getModelSettings,
             buildHistory,
             branchSelections,
@@ -4078,6 +4068,7 @@ const Page: React.FC = () => {
                         loadingPhrase={loadingPhrase}
                         loadingDots={loadingDots}
                         isGenerating={isGenerating}
+                        isStreamingOutro={isStreamingOutro}
                         stickToBottom={stickToBottom}
                         onStickToBottomChange={handleStickToBottomChange}
                         scrollContainerRef={scrollContainerRef}

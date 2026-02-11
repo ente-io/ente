@@ -6,6 +6,9 @@ type GeneratingRiveIndicatorProps = {
     size?: number;
     fallbackText?: string;
     isGenerating?: boolean;
+    isOutroPhase?: boolean;
+    outroDurationMs?: number;
+    collapseDurationMs?: number;
 };
 
 type RivePlaybackTarget = string | string[];
@@ -28,15 +31,35 @@ type RiveInstance = {
 const RIVE_SRC = "/animations/ensu.riv";
 
 const GeneratingRiveIndicator = memo(
-    ({ size = 42, fallbackText, isGenerating = true }: GeneratingRiveIndicatorProps) => {
+    ({
+        size = 42,
+        fallbackText,
+        isGenerating = true,
+        isOutroPhase = false,
+        outroDurationMs = 520,
+        collapseDurationMs = 300,
+    }: GeneratingRiveIndicatorProps) => {
         const canvasRef = useRef<HTMLCanvasElement | null>(null);
         const instanceRef = useRef<RiveInstance | null>(null);
-        const playbackTargetRef = useRef<RivePlaybackTarget | undefined>(undefined);
+        const playbackTargetRef = useRef<RivePlaybackTarget | undefined>(
+            undefined,
+        );
         const outroInputRef = useRef<RiveInput | null>(null);
+        const outroNamedTargetRef = useRef<string | undefined>(undefined);
         const wasGeneratingRef = useRef(isGenerating);
+        const wasOutroPhaseRef = useRef(isOutroPhase);
+        const collapseTimerRef = useRef<number | null>(null);
         const [failedToLoad, setFailedToLoad] = useState(false);
+        const [isCollapsed, setIsCollapsed] = useState(false);
         const { basePath } = useRouter();
         const riveSrc = `${basePath ?? ""}${RIVE_SRC}`;
+
+        const clearCollapseTimer = () => {
+            if (collapseTimerRef.current) {
+                window.clearTimeout(collapseTimerRef.current);
+                collapseTimerRef.current = null;
+            }
+        };
 
         const playMain = () => {
             const instance = instanceRef.current;
@@ -50,21 +73,30 @@ const GeneratingRiveIndicator = memo(
         };
 
         const triggerOutro = () => {
+            const instance = instanceRef.current;
+            if (!instance) return;
+
             const outroInput = outroInputRef.current;
-            if (!outroInput) return;
+            if (outroInput) {
+                if (typeof outroInput.fire === "function") {
+                    outroInput.fire();
+                    return;
+                }
 
-            if (typeof outroInput.fire === "function") {
-                outroInput.fire();
-                return;
+                if (typeof outroInput.value === "boolean") {
+                    outroInput.value = true;
+                    return;
+                }
+
+                if (typeof outroInput.value === "number") {
+                    outroInput.value = 1;
+                    return;
+                }
             }
 
-            if (typeof outroInput.value === "boolean") {
-                outroInput.value = true;
-                return;
-            }
-
-            if (typeof outroInput.value === "number") {
-                outroInput.value = 1;
+            const outroNamedTarget = outroNamedTargetRef.current;
+            if (outroNamedTarget) {
+                instance.play?.(outroNamedTarget);
             }
         };
 
@@ -118,6 +150,12 @@ const GeneratingRiveIndicator = memo(
                                     playbackTargetRef.current = animationNames[0];
                                 }
 
+                                outroNamedTargetRef.current =
+                                    [...stateMachineNames, ...animationNames].find(
+                                        (name) =>
+                                            name.toLowerCase() === "outro",
+                                    );
+
                                 playMain();
                             } catch {
                                 // noop
@@ -125,7 +163,10 @@ const GeneratingRiveIndicator = memo(
                         },
                         onStop: () => {
                             try {
-                                if (wasGeneratingRef.current) {
+                                if (
+                                    wasGeneratingRef.current &&
+                                    !wasOutroPhaseRef.current
+                                ) {
                                     playMain();
                                 }
                             } catch {
@@ -149,6 +190,7 @@ const GeneratingRiveIndicator = memo(
 
             return () => {
                 canceled = true;
+                clearCollapseTimer();
                 try {
                     instanceRef.current?.cleanup?.();
                 } catch {
@@ -157,22 +199,36 @@ const GeneratingRiveIndicator = memo(
                 instanceRef.current = null;
                 playbackTargetRef.current = undefined;
                 outroInputRef.current = null;
+                outroNamedTargetRef.current = undefined;
             };
         }, [riveSrc]);
 
         useEffect(() => {
             const wasGenerating = wasGeneratingRef.current;
+            const wasOutroPhase = wasOutroPhaseRef.current;
 
-            if (wasGenerating && !isGenerating) {
-                triggerOutro();
+            if (wasOutroPhase && !isOutroPhase) {
+                clearCollapseTimer();
+                setIsCollapsed(false);
             }
 
-            if (!wasGenerating && isGenerating) {
+            if (!wasOutroPhase && isOutroPhase) {
+                triggerOutro();
+                clearCollapseTimer();
+                collapseTimerRef.current = window.setTimeout(() => {
+                    setIsCollapsed(true);
+                    collapseTimerRef.current = null;
+                }, outroDurationMs);
+            }
+
+            if (!isOutroPhase && isGenerating && !wasGenerating) {
+                setIsCollapsed(false);
                 playMain();
             }
 
             wasGeneratingRef.current = isGenerating;
-        }, [isGenerating]);
+            wasOutroPhaseRef.current = isOutroPhase;
+        }, [isGenerating, isOutroPhase, outroDurationMs]);
 
         if (failedToLoad) {
             return (
@@ -188,9 +244,12 @@ const GeneratingRiveIndicator = memo(
         return (
             <Box
                 sx={{
-                    minHeight: size,
                     display: "flex",
                     alignItems: "center",
+                    overflow: "hidden",
+                    maxHeight: isCollapsed ? 0 : size,
+                    opacity: isCollapsed ? 0 : 1,
+                    transition: `max-height ${collapseDurationMs}ms ease-in-out, opacity ${collapseDurationMs}ms ease-in-out`,
                 }}
             >
                 <Box

@@ -35,6 +35,7 @@ export interface ChatMessageListProps {
     loadingPhrase: string | null;
     loadingDots: number;
     isGenerating: boolean;
+    isStreamingOutro: boolean;
     stickToBottom: boolean;
     onStickToBottomChange: (value: boolean) => void;
     scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -111,6 +112,7 @@ interface MessageRowProps {
     loadingPhrase: string | null;
     loadingDots: number;
     isGenerating: boolean;
+    isStreamingOutro: boolean;
     onOpenAttachment: (
         message: ChatMessage,
         attachment: ChatAttachment,
@@ -139,6 +141,7 @@ const MessageRow = memo(
         loadingPhrase,
         loadingDots,
         isGenerating,
+        isStreamingOutro,
         onOpenAttachment,
         onEditMessage,
         onCopyMessage,
@@ -277,6 +280,7 @@ const MessageRow = memo(
                                 >
                                     <GeneratingRiveIndicator
                                         isGenerating={isGenerating && isStreaming}
+                                        isOutroPhase={isStreaming && isStreamingOutro}
                                         fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
                                     />
                                     {showLoadingPlaceholder ? null : (
@@ -518,6 +522,7 @@ export const ChatMessageList = memo(
         loadingPhrase,
         loadingDots,
         isGenerating,
+        isStreamingOutro,
         onStickToBottomChange,
         scrollContainerRef,
         onScroll,
@@ -577,6 +582,7 @@ export const ChatMessageList = memo(
                         loadingPhrase={isStreaming ? loadingPhrase : null}
                         loadingDots={isStreaming ? loadingDots : 0}
                         isGenerating={isGenerating}
+                        isStreamingOutro={isStreamingOutro}
                         onOpenAttachment={onOpenAttachment}
                         onEditMessage={onEditMessage}
                         onCopyMessage={onCopyMessage}
@@ -603,6 +609,7 @@ export const ChatMessageList = memo(
                 branchSwitchers,
                 formatTime,
                 isGenerating,
+                isStreamingOutro,
                 loadingDots,
                 loadingPhrase,
                 onCopyMessage,
