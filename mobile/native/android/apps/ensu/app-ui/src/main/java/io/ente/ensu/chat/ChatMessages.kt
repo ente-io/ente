@@ -49,8 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -699,44 +697,20 @@ private fun StreamingMessageBubble(
         renderedText = text
     }
 
-    val riveBoxWidth = 115.dp
-    val riveBoxHeight = 52.5.dp
-    val riveNormalPadding = 32.dp
-    val riveOutroOverflowScale = 1.08f
+    val riveWidth = 115.dp
+    val riveHeight = 52.5.dp
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        Box(
+        ensuRiveAnimation(
             modifier = Modifier
-                .width(riveBoxWidth)
-                .height(riveBoxHeight + riveNormalPadding)
-                .graphicsLayer { clip = false },
-            contentAlignment = Alignment.TopStart
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(riveBoxWidth)
-                    .height(riveBoxHeight)
-                    .graphicsLayer { clip = false },
-                contentAlignment = Alignment.TopStart
-            ) {
-                ensuRiveAnimation(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            val overflowScale = if (isGenerating) 1f else riveOutroOverflowScale
-                            scaleX = overflowScale
-                            scaleY = overflowScale
-                            transformOrigin = TransformOrigin(0f, 0f)
-                            clip = false
-                        },
-                    outroTrigger = !isGenerating,
-                    outroInputName = "outro"
-                )
-            }
-        }
+                .width(riveWidth)
+                .height(riveHeight),
+            outroTrigger = !isGenerating,
+            outroInputName = "outro"
+        )
 
         if (renderedText.isNotBlank()) {
             Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
