@@ -23,6 +23,8 @@ type RiveInstance = {
     cleanup?: () => void;
     resizeDrawingSurfaceToCanvas?: () => void;
     play?: (animation?: RivePlaybackTarget) => void;
+    pause?: () => void;
+    stop?: () => void;
     animationNames?: string[];
     stateMachineNames?: string[];
     stateMachineInputs?: (stateMachineName: string) => RiveInput[];
@@ -48,6 +50,8 @@ const GeneratingRiveIndicator = memo(
         const outroNamedTargetRef = useRef<string | undefined>(undefined);
         const wasGeneratingRef = useRef(isGenerating);
         const wasOutroPhaseRef = useRef(isOutroPhase);
+        const generatingLiveRef = useRef(isGenerating);
+        const outroPhaseLiveRef = useRef(isOutroPhase);
         const collapseTimerRef = useRef<number | null>(null);
         const [failedToLoad, setFailedToLoad] = useState(false);
         const [isCollapsed, setIsCollapsed] = useState(false);
@@ -96,6 +100,8 @@ const GeneratingRiveIndicator = memo(
 
             const outroNamedTarget = outroNamedTargetRef.current;
             if (outroNamedTarget) {
+                instance.pause?.();
+                instance.stop?.();
                 instance.play?.(outroNamedTarget);
             }
         };
@@ -139,11 +145,26 @@ const GeneratingRiveIndicator = memo(
                                             stateMachineName,
                                         ) ?? [];
                                     outroInputRef.current =
-                                        inputs.find(
-                                            (input) =>
-                                                input.name?.toLowerCase() ===
-                                                "outro",
+                                        inputs.find((input) =>
+                                            input.name
+                                                ?.toLowerCase()
+                                                .includes("outro"),
                                         ) ?? null;
+
+                                    if (
+                                        outroInputRef.current &&
+                                        typeof outroInputRef.current.value ===
+                                            "boolean"
+                                    ) {
+                                        outroInputRef.current.value = false;
+                                    }
+                                    if (
+                                        outroInputRef.current &&
+                                        typeof outroInputRef.current.value ===
+                                            "number"
+                                    ) {
+                                        outroInputRef.current.value = 0;
+                                    }
                                 } else if (animationNames.length > 1) {
                                     playbackTargetRef.current = animationNames;
                                 } else if (animationNames.length === 1) {
@@ -153,7 +174,9 @@ const GeneratingRiveIndicator = memo(
                                 outroNamedTargetRef.current =
                                     [...stateMachineNames, ...animationNames].find(
                                         (name) =>
-                                            name.toLowerCase() === "outro",
+                                            name
+                                                .toLowerCase()
+                                                .includes("outro"),
                                     );
 
                                 playMain();
@@ -164,8 +187,8 @@ const GeneratingRiveIndicator = memo(
                         onStop: () => {
                             try {
                                 if (
-                                    wasGeneratingRef.current &&
-                                    !wasOutroPhaseRef.current
+                                    generatingLiveRef.current &&
+                                    !outroPhaseLiveRef.current
                                 ) {
                                     playMain();
                                 }
@@ -206,6 +229,9 @@ const GeneratingRiveIndicator = memo(
         useEffect(() => {
             const wasGenerating = wasGeneratingRef.current;
             const wasOutroPhase = wasOutroPhaseRef.current;
+
+            generatingLiveRef.current = isGenerating;
+            outroPhaseLiveRef.current = isOutroPhase;
 
             if (wasOutroPhase && !isOutroPhase) {
                 clearCollapseTimer();
