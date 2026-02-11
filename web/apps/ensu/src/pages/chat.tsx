@@ -1797,12 +1797,6 @@ const Page: React.FC = () => {
 
     const branchSwitchers = messageState.switchers;
 
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (!container || !stickToBottom) return;
-        if (isGenerating) return;
-        container.scrollTo({ top: container.scrollHeight, behavior: "auto" });
-    }, [displayMessages.length, streamingText, isGenerating, stickToBottom]);
 
     useEffect(() => {
         if (!chatKey) return;
@@ -3660,16 +3654,7 @@ const Page: React.FC = () => {
             return;
         }
 
-        const container = scrollContainerRef.current;
-        if (container) {
-            setStickToBottom(true);
-            container.scrollTo({
-                top: container.scrollHeight,
-                behavior: "auto",
-            });
-        } else {
-            setStickToBottom(true);
-        }
+        setStickToBottom(true);
 
         let activeSessionId = currentSessionId;
         if (!activeSessionId) {
