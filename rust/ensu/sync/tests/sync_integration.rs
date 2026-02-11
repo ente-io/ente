@@ -1,3 +1,5 @@
+use ensu_db::LlmChatDb;
+use ensu_db::crypto::KEY_BYTES;
 use ensu_sync::SyncAuth;
 use ensu_sync::SyncEngine;
 use ensu_sync::crypto::{encrypt_chat_key, encrypt_payload};
@@ -7,8 +9,6 @@ use ensu_sync::models::{
 };
 use httpmock::Method::{DELETE, GET, POST};
 use httpmock::MockServer;
-use llmchat_db::LlmChatDb;
-use llmchat_db::crypto::KEY_BYTES;
 use tempfile::TempDir;
 use uuid::Uuid;
 use zeroize::Zeroizing;

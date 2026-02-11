@@ -4,8 +4,8 @@ This directory contains the Rust crates for the Ensu LLM chat stack.
 
 ## Crates
 
-- `db/` (`llmchat-db`) — local chat database.
-- `sync/` (`ensu-sync`) — sync engine (uses `llmchat-db`).
+- `db/` (`ensu-db`) — local chat database.
+- `sync/` (`ensu-sync`) — sync engine (uses `ensu-db`).
 - `inference/` (`inference_rs`) — inference runtime.
 
 ## UniFFI bindings

@@ -63,7 +63,7 @@ pub fn encrypt_attachment_bytes(
     session_uuid: Uuid,
 ) -> Result<Vec<u8>, SyncError> {
     let key = derive_attachment_key(chat_key, session_uuid)?;
-    Ok(llmchat_db::crypto::encrypt_blob(plaintext, &key)?)
+    Ok(ensu_db::crypto::encrypt_blob(plaintext, &key)?)
 }
 
 pub fn decrypt_attachment_bytes(
@@ -72,5 +72,5 @@ pub fn decrypt_attachment_bytes(
     session_uuid: Uuid,
 ) -> Result<Vec<u8>, SyncError> {
     let key = derive_attachment_key(chat_key, session_uuid)?;
-    Ok(llmchat_db::crypto::decrypt_blob(ciphertext, &key)?)
+    Ok(ensu_db::crypto::decrypt_blob(ciphertext, &key)?)
 }

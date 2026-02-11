@@ -5,12 +5,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use zeroize::Zeroizing;
 
-use ente_core::crypto::keys;
-use llmchat_db::{
+use ensu_db::{
     AttachmentKind, AttachmentMeta, AttachmentStore, Clock, EntityType, FsAttachmentStore,
     LlmChatDb, Message, Sender, Session, SqliteBackend, SyncEntityState, SyncStateDb, SystemClock,
     UploadState,
 };
+use ente_core::crypto::keys;
 use uuid::Uuid;
 
 use crate::conflict::{
@@ -130,9 +130,9 @@ impl SyncEngine {
         _meta_dir: String,
         plaintext_dir: Option<String>,
     ) -> Result<Self, SyncError> {
-        llmchat_db::traits::ensure_directory(&attachments_dir)?;
+        ensu_db::traits::ensure_directory(&attachments_dir)?;
         if let Some(ref dir) = plaintext_dir {
-            let _ = llmchat_db::traits::ensure_directory(dir);
+            let _ = ensu_db::traits::ensure_directory(dir);
         }
 
         let db = LlmChatDb::open_sqlite_with_defaults(main_db_path, sync_db_path.clone(), db_key)?;
@@ -160,7 +160,7 @@ impl SyncEngine {
         if auth.auth_token.trim().is_empty() {
             return Err(SyncError::NotLoggedIn);
         }
-        if auth.master_key.len() != llmchat_db::crypto::KEY_BYTES {
+        if auth.master_key.len() != ensu_db::crypto::KEY_BYTES {
             return Err(SyncError::Crypto("invalid master key length".to_string()));
         }
 
@@ -212,7 +212,7 @@ impl SyncEngine {
         if auth.auth_token.trim().is_empty() {
             return Err(SyncError::NotLoggedIn);
         }
-        if auth.master_key.len() != llmchat_db::crypto::KEY_BYTES {
+        if auth.master_key.len() != ensu_db::crypto::KEY_BYTES {
             return Err(SyncError::Crypto("invalid master key length".to_string()));
         }
 
@@ -348,7 +348,7 @@ impl SyncEngine {
             return Ok(());
         }
 
-        let offline_db = llmchat_db::ChatDb::open_sqlite_with_defaults(
+        let offline_db = ensu_db::ChatDb::open_sqlite_with_defaults(
             offline_db_path.clone(),
             offline_db_key.clone(),
         )?;
@@ -391,7 +391,7 @@ impl SyncEngine {
         if auth.auth_token.trim().is_empty() {
             return Err(SyncError::NotLoggedIn);
         }
-        if auth.master_key.len() != llmchat_db::crypto::KEY_BYTES {
+        if auth.master_key.len() != ensu_db::crypto::KEY_BYTES {
             return Err(SyncError::Crypto("invalid master key length".to_string()));
         }
 
@@ -465,7 +465,7 @@ impl SyncEngine {
         if auth.auth_token.trim().is_empty() {
             return Err(SyncError::NotLoggedIn);
         }
-        if auth.master_key.len() != llmchat_db::crypto::KEY_BYTES {
+        if auth.master_key.len() != ensu_db::crypto::KEY_BYTES {
             return Err(SyncError::Crypto("invalid master key length".to_string()));
         }
 
@@ -921,7 +921,7 @@ impl SyncEngine {
         Ok(())
     }
 
-    fn open_offline_db(&self) -> Result<Option<llmchat_db::ChatDb<SqliteBackend>>, SyncError> {
+    fn open_offline_db(&self) -> Result<Option<ensu_db::ChatDb<SqliteBackend>>, SyncError> {
         let config = match self.offline_db.lock() {
             Ok(guard) => guard.clone(),
             Err(_) => None,
@@ -932,7 +932,7 @@ impl SyncEngine {
         if config.path.trim().is_empty() {
             return Ok(None);
         }
-        let db = llmchat_db::ChatDb::open_sqlite_with_defaults(config.path, config.key)?;
+        let db = ensu_db::ChatDb::open_sqlite_with_defaults(config.path, config.key)?;
         Ok(Some(db))
     }
 
@@ -1582,7 +1582,7 @@ pub fn fetch_chat_key(auth: SyncAuth, sync_db_path: String) -> Result<Vec<u8>, S
     if auth.auth_token.trim().is_empty() {
         return Err(SyncError::NotLoggedIn);
     }
-    if auth.master_key.len() != llmchat_db::crypto::KEY_BYTES {
+    if auth.master_key.len() != ensu_db::crypto::KEY_BYTES {
         return Err(SyncError::Crypto("invalid master key length".to_string()));
     }
 
@@ -1713,7 +1713,7 @@ fn encode_client_metadata(
     chat_key: &[u8],
 ) -> Result<String, SyncError> {
     let created_at_value = if created_at > 0 {
-        let encrypted = llmchat_db::crypto::encrypt_json_field(&created_at.to_string(), chat_key)
+        let encrypted = ensu_db::crypto::encrypt_json_field(&created_at.to_string(), chat_key)
             .map_err(|err| SyncError::Crypto(err.to_string()))?;
         Some(serde_json::Value::String(encrypted))
     } else {
@@ -1740,8 +1740,7 @@ fn decode_client_created_at(value: &str, chat_key: &[u8]) -> Option<i64> {
         let parsed = match created_at_value {
             serde_json::Value::Number(number) => number.as_i64(),
             serde_json::Value::String(raw) => {
-                let decrypted =
-                    llmchat_db::crypto::decrypt_json_field(&raw, chat_key).unwrap_or(raw);
+                let decrypted = ensu_db::crypto::decrypt_json_field(&raw, chat_key).unwrap_or(raw);
                 decrypted.parse::<i64>().ok()
             }
             _ => None,
@@ -1749,8 +1748,8 @@ fn decode_client_created_at(value: &str, chat_key: &[u8]) -> Option<i64> {
         return parsed.filter(|created_at| *created_at > 0);
     }
 
-    let decrypted = llmchat_db::crypto::decrypt_json_field(value, chat_key)
-        .unwrap_or_else(|_| value.to_string());
+    let decrypted =
+        ensu_db::crypto::decrypt_json_field(value, chat_key).unwrap_or_else(|_| value.to_string());
     decrypted
         .parse::<i64>()
         .ok()
@@ -1775,7 +1774,7 @@ fn encode_attachment_metadata(
     message_uuid: Uuid,
     chat_key: &[u8],
 ) -> Result<String, SyncError> {
-    let encrypted_name = llmchat_db::crypto::encrypt_json_field(&attachment.name, chat_key)
+    let encrypted_name = ensu_db::crypto::encrypt_json_field(&attachment.name, chat_key)
         .map_err(|err| SyncError::Crypto(err.to_string()))?;
     let payload = AttachmentClientMetadata {
         client_id: format!("{}:{}", message_uuid, attachment.id),
@@ -1797,7 +1796,7 @@ fn decode_attachment_metadata(
         let encrypted_name = payload.encrypted_name.ok_or_else(|| {
             SyncError::InvalidResponse("missing attachment encryptedName".to_string())
         })?;
-        let name = llmchat_db::crypto::decrypt_json_field(&encrypted_name, chat_key)
+        let name = ensu_db::crypto::decrypt_json_field(&encrypted_name, chat_key)
             .map_err(|err| SyncError::Crypto(err.to_string()))?;
         let kind = payload.kind.unwrap_or_else(|| infer_kind(&name));
         let local_id = payload
@@ -1820,7 +1819,7 @@ fn decode_attachment_metadata(
         .encrypted_name
         .as_ref()
         .ok_or_else(|| SyncError::InvalidResponse("missing attachment metadata".to_string()))?;
-    let name = llmchat_db::crypto::decrypt_json_field(encrypted_name, chat_key)
+    let name = ensu_db::crypto::decrypt_json_field(encrypted_name, chat_key)
         .map_err(|err| SyncError::Crypto(err.to_string()))?;
     let kind = attachment.kind.unwrap_or_else(|| infer_kind(&name));
     let client_id = attachment.id.clone();

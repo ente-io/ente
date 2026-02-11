@@ -345,7 +345,7 @@ dependencies = [
 name = "db"
 version = "0.1.0"
 dependencies = [
- "llmchat-db",
+ "ensu-db",
  "serde",
  "thiserror",
  "uniffi",
@@ -381,6 +381,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "ensu-db"
+version = "0.1.0"
+dependencies = [
+ "ente-core",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
+ "zeroize",
 ]
 
 [[package]]
@@ -913,19 +926,6 @@ name = "litemap"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6373607a59f0be73a39b6fe456b8192fcc3585f602af20751600e974dd455e77"
-
-[[package]]
-name = "llmchat-db"
-version = "0.1.0"
-dependencies = [
- "ente-core",
- "rusqlite",
- "serde",
- "serde_json",
- "thiserror",
- "uuid",
- "zeroize",
-]
 
 [[package]]
 name = "log"

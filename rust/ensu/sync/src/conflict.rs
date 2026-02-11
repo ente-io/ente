@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use llmchat_db::{AttachmentMeta, Message, Sender};
+use ensu_db::{AttachmentMeta, Message, Sender};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -167,7 +167,7 @@ fn attachments_signature(attachments: &[AttachmentMeta]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use llmchat_db::{AttachmentKind, AttachmentMeta, Message, Sender};
+    use ensu_db::{AttachmentKind, AttachmentMeta, Message, Sender};
     use uuid::Uuid;
 
     #[test]

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-llmchat-db = { path = "../db" }
+ensu-db = { path = "../db" }
 ente-core = { path = "../../core" }
 reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "http2", "charset", "system-proxy", "rustls-tls-native-roots"] }
 serde = { version = "1", features = ["derive"] }

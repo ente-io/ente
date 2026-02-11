@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::diff_cursor::SyncCursor;
-use llmchat_db::AttachmentKind;
+use ensu_db::AttachmentKind;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

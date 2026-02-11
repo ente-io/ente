@@ -1,4 +1,4 @@
-use llmchat_db as core;
+use ensu_db as core;
 use thiserror::Error;
 use uuid::Uuid;
 

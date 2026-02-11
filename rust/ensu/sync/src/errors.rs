@@ -7,7 +7,7 @@ pub enum SyncError {
     #[error("unauthorized")]
     Unauthorized,
     #[error("db error: {0}")]
-    Db(#[from] llmchat_db::Error),
+    Db(#[from] ensu_db::Error),
     #[error("crypto error: {0}")]
     Crypto(String),
     #[error("http {status}: {message}")]
