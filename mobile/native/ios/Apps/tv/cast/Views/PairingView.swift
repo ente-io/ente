@@ -34,11 +34,11 @@ struct PairingView: View {
                             // Title section
                             VStack(spacing: -5) {
                                 Text("Ready to")
-                                    .font(FontUtils.gilroyExtraBold(size: geometry.size.width * 0.035))
+                                    .font(FontUtils.montserratExtraBold(size: geometry.size.width * 0.035))
                                     .foregroundColor(.white)
                                 
                                 Text("Connect?")
-                                    .font(FontUtils.gilroyExtraBold(size: geometry.size.width * 0.065))
+                                    .font(FontUtils.montserratExtraBold(size: geometry.size.width * 0.065))
                                     .foregroundColor(.white)
                             }
                             .padding(.top, geometry.size.height * 0.06)

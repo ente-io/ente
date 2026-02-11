@@ -1,7 +1,11 @@
-import "package:flutter/material.dart";
-import "package:photos/generated/l10n.dart";
+import "dart:async";
 
-class OfflineSettingsBanner extends StatelessWidget {
+import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
+
+class OfflineSettingsBanner extends StatefulWidget {
   final VoidCallback onGetStarted;
 
   const OfflineSettingsBanner({
@@ -10,7 +14,19 @@ class OfflineSettingsBanner extends StatelessWidget {
   });
 
   @override
+  State<OfflineSettingsBanner> createState() => _OfflineSettingsBannerState();
+}
+
+class _OfflineSettingsBannerState extends State<OfflineSettingsBanner> {
+  bool _dismissed = false;
+
+  @override
   Widget build(BuildContext context) {
+    if (_dismissed) return const SizedBox.shrink();
+    if (localSettings.isOfflineSettingsBannerDismissed) {
+      return const SizedBox.shrink();
+    }
+
     const titleStyle = TextStyle(
       fontFamily: "Montserrat",
       fontWeight: FontWeight.bold,
@@ -64,12 +80,32 @@ class OfflineSettingsBanner extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 235),
-                    child: Text(
-                      l10n.offlineSettingsBannerTitle,
-                      style: titleStyle,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 235),
+                          child: Text(
+                            l10n.offlineSettingsBannerTitle,
+                            style: titleStyle,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _onDismiss,
+                        behavior: HitTestBehavior.opaque,
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 8),
+                          child: HugeIcon(
+                            icon: HugeIcons.strokeRoundedCancel01,
+                            color: Colors.white,
+                            size: 20,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   ConstrainedBox(
@@ -81,7 +117,7 @@ class OfflineSettingsBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
-                    onTap: onGetStarted,
+                    onTap: widget.onGetStarted,
                     child: Container(
                       height: 36,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -116,6 +152,13 @@ class OfflineSettingsBanner extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _onDismiss() {
+    setState(() {
+      _dismissed = true;
+    });
+    unawaited(localSettings.setOfflineSettingsBannerDismissed(true));
   }
 }
 

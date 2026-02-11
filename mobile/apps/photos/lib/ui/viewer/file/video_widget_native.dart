@@ -36,6 +36,7 @@ import "package:photos/ui/viewer/file/zoomable_video_viewer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
+import "package:video_player/video_player.dart" as vp;
 import "package:visibility_detector/visibility_detector.dart";
 
 class VideoWidgetNative extends StatefulWidget {
@@ -103,7 +104,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _transformationController.addListener(_onZoomChanged);
 
     if (widget.selectedPreview) {
       loadPreview();
@@ -224,6 +224,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   @override
   void dispose() {
     _subscription?.cancel();
+    _controller?.stop().ignore();
     _controller?.dispose();
     if (downloadTaskSubscription != null) {
       downloadTaskSubscription!.cancel();
@@ -258,22 +259,19 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _captionUpdatedSubscription.cancel();
-    _transformationController.removeListener(_onZoomChanged);
     _transformationController.dispose();
     EnteWakeLockService.instance
         .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
     super.dispose();
   }
 
-  void _onZoomChanged() {
-    final scale = _transformationController.value.getMaxScaleOnAxis();
-    final isZoomed = scale > kZoomThreshold;
-    if (_isZooming != isZoomed) {
+  void _onInteractionLockChanged(bool shouldLock) {
+    if (_isZooming != shouldLock) {
       setState(() {
-        _isZooming = isZoomed;
+        _isZooming = shouldLock;
       });
-      widget.shouldDisableScroll?.call(isZoomed);
     }
+    widget.shouldDisableScroll?.call(shouldLock);
   }
 
   @override
@@ -290,18 +288,18 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
         },
         child: GestureDetector(
+          // Keep recognizer out of the arena during multi-touch/zoom to avoid
+          // it stealing pinch gestures with predominantly vertical movement.
           onVerticalDragUpdate: _isGuestView || _isZooming
               ? null
-              : (d) => {
-                    if (d.delta.dy > dragSensitivity)
-                      {
-                        Navigator.of(context).pop(),
-                      }
-                    else if (d.delta.dy < (dragSensitivity * -1))
-                      {
-                        showDetailsSheet(context, widget.file),
-                      },
-                  },
+              : (d) {
+                  if (d.delta.dy > dragSensitivity) {
+                    _stopPlaybackBeforeDismiss();
+                    Navigator.of(context).pop();
+                  } else if (d.delta.dy < (dragSensitivity * -1)) {
+                    showDetailsSheet(context, widget.file);
+                  }
+                },
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 750),
             switchOutCurve: Curves.easeOutExpo,
@@ -315,7 +313,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                     children: [
                       ZoomableVideoViewer(
                         transformationController: _transformationController,
-                        shouldDisableScroll: widget.shouldDisableScroll,
+                        onInteractionLockChanged: _onInteractionLockChanged,
                         child: Center(
                           child: AspectRatio(
                             aspectRatio: aspectRatio ?? 1,
@@ -452,6 +450,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           ),
         ),
       ),
+    );
+  }
+
+  void _stopPlaybackBeforeDismiss() {
+    _controller?.pause();
+    _controller?.stop().ignore();
+    widget.playbackCallback?.call(
+      false,
+      FullScreenRequestReason.userInteraction,
     );
   }
 
@@ -750,6 +757,21 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       _logger.info("Getting aspect ratio from preview video");
       return;
     }
+    if (Platform.isIOS) {
+      // FFprobe in ffmpeg_kit can crash on certain iOS media files.
+      // On iOS, use lightweight metadata probing via AVPlayer.
+      if (widget.file.hasDimensions) {
+        aspectRatio = widget.file.width / widget.file.height;
+      } else {
+        aspectRatio ??= 1;
+      }
+      if ((duration == null || duration == "0:00") &&
+          (widget.file.duration ?? 0) > 0) {
+        duration = secondsToDuration(widget.file.duration!);
+      }
+      await _setAspectAndDurationFromIosPlayerProbe();
+      return;
+    }
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
       duration = videoProps.propData?["duration"];
@@ -768,6 +790,48 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     } else {
       _logger.info("Video props are null");
       aspectRatio = 1;
+    }
+  }
+
+  Future<void> _setAspectAndDurationFromIosPlayerProbe() async {
+    final path = _filePath;
+    if (path == null) return;
+    vp.VideoPlayerController? metadataController;
+    try {
+      metadataController = vp.VideoPlayerController.file(File(path));
+      await metadataController.initialize().timeout(const Duration(seconds: 4));
+      final value = metadataController.value;
+      final probeAspectRatio = value.aspectRatio;
+      if ((aspectRatio == null || aspectRatio == 1) && probeAspectRatio > 0) {
+        aspectRatio = probeAspectRatio;
+      }
+      final durationInMilliseconds = value.duration.inMilliseconds;
+      if ((duration == null || duration == "0:00") &&
+          durationInMilliseconds > 0) {
+        duration = secondsToDuration(durationInMilliseconds ~/ 1000);
+      }
+    } on TimeoutException catch (e, s) {
+      _logger.warning(
+        "_setAspectAndDurationFromIosPlayerProbe timed out for ${widget.file.generatedID}",
+        e,
+        s,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "_setAspectAndDurationFromIosPlayerProbe failed for ${widget.file.generatedID}",
+        e,
+        s,
+      );
+    } finally {
+      try {
+        await metadataController?.dispose();
+      } catch (e, s) {
+        _logger.warning(
+          "_setAspectAndDurationFromIosPlayerProbe dispose failed for ${widget.file.generatedID}",
+          e,
+          s,
+        );
+      }
     }
   }
 }

@@ -67,6 +67,15 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   }
 
   @override
+  void dispose() {
+    _passwordController1.dispose();
+    _passwordController2.dispose();
+    _password1FocusNode.dispose();
+    _password2FocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     String title = AppLocalizations.of(context).setPasswordTitle;
     title = AppLocalizations.of(context).resetPasswordTitle;

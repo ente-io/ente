@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -485,6 +486,16 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           trailingIconIsMuted: true,
           onTap: () async => _onResetAllLocalClip(context),
         ),
+        MenuItemWidgetNew(
+          title: "Reset USearch index",
+          leadingIconWidget: _buildIconWidget(
+            context,
+            HugeIcons.strokeRoundedAiSearch,
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => _onResetUsearchIndex(context),
+        ),
       ],
     );
   }
@@ -745,6 +756,28 @@ class _MLDebugSettingsPageState extends State<MLDebugSettingsPage> {
           showShortToast(context, "Done");
         } catch (e, s) {
           logger.warning('drop clip embeddings failed ', e, s);
+          await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
+  }
+
+  Future<void> _onResetUsearchIndex(BuildContext context) async {
+    await showChoiceDialog(
+      context,
+      title: "Are you sure?",
+      body:
+          "This will delete the USearch index and clear the migration flag. The app will rebuild it when needed.",
+      firstButtonLabel: "Yes, confirm",
+      firstButtonOnTap: () async {
+        try {
+          final vectorDB = isOfflineMode
+              ? ClipVectorDB.offlineInstance
+              : ClipVectorDB.instance;
+          await vectorDB.deleteIndexFile(undoMigration: true);
+          showShortToast(context, "Done");
+        } catch (e, s) {
+          logger.warning('reset usearch index failed ', e, s);
           await showGenericErrorDialog(context: context, error: e);
         }
       },

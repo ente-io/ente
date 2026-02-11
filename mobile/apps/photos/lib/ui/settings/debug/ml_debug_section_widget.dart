@@ -114,7 +114,10 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await ClipVectorDB.instance.deleteIndexFile(undoMigration: true);
+              final clipVectorDB = isOfflineMode
+                  ? ClipVectorDB.offlineInstance
+                  : ClipVectorDB.instance;
+              await clipVectorDB.deleteIndexFile(undoMigration: true);
               await SimilarImagesService.instance.clearCache();
               showShortToast(context, 'Deleted vectorDB index');
             } catch (e, s) {
