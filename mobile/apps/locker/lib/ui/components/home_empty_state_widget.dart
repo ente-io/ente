@@ -6,12 +6,18 @@ import 'package:locker/l10n/l10n.dart';
 class HomeEmptyStateWidget extends StatelessWidget {
   const HomeEmptyStateWidget({
     super.key,
+    this.isSyncing = false,
   });
+
+  final bool isSyncing;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final title =
+        isSyncing ? context.l10n.syncing : context.l10n.homeLockerEmptyTitle;
+    final subtitle = isSyncing ? null : context.l10n.homeLockerEmptySubtitle;
     return DottedBorder(
       options: RoundedRectDottedBorderOptions(
         strokeWidth: 1,
@@ -33,24 +39,34 @@ class HomeEmptyStateWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/upload_file.png',
-            ),
+            isSyncing
+                ? SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: colorScheme.primary700,
+                    ),
+                  )
+                : Image.asset(
+                    'assets/upload_file.png',
+                  ),
             const SizedBox(height: 12),
             Text(
-              context.l10n.homeLockerEmptyTitle,
+              title,
               style: textTheme.h3Bold.copyWith(
                 color: colorScheme.textBase,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.homeLockerEmptySubtitle,
-              style: textTheme.small.copyWith(
-                color: colorScheme.primary700,
-                decoration: TextDecoration.none,
+            if (subtitle != null) const SizedBox(height: 8),
+            if (subtitle != null)
+              Text(
+                subtitle,
+                style: textTheme.small.copyWith(
+                  color: colorScheme.primary700,
+                  decoration: TextDecoration.none,
+                ),
               ),
-            ),
           ],
         ),
       ),

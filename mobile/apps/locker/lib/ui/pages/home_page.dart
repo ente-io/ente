@@ -218,6 +218,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   bool _isLoading = true;
   bool _hasCompletedInitialLoad = false;
   bool _isSettingsOpen = false;
+  bool get _isSyncing => !_hasCompletedInitialLoad || _isLoading;
 
   List<Collection> _collections = [];
   List<Collection> _filteredCollections = [];
@@ -642,7 +643,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                 appBar: CustomLockerAppBar(
                   scaffoldKey: scaffoldKey,
                   isSearchActive: isSearchActive,
-                  isSyncing: !_hasCompletedInitialLoad || _isLoading,
+                  isSyncing: _isSyncing,
                   searchController: searchController,
                   searchFocusNode: _searchFocusNode,
                   onSearchFocused: _handleSearchFocused,
@@ -732,10 +733,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(),
+          padding: const EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(isSyncing: _isSyncing),
         ),
       );
     }
@@ -745,10 +746,10 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
         return _recentFiles.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: HomeEmptyStateWidget(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(isSyncing: _isSyncing),
                 ),
               )
             : SingleChildScrollView(
