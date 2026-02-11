@@ -1,136 +1,271 @@
-use ente_core::crypto;
-use serde_json::Value;
+use base64::{
+    engine::general_purpose::{STANDARD as BASE64_STANDARD, URL_SAFE as BASE64_URL_SAFE},
+    Engine,
+};
+use once_cell::sync::Lazy;
+use std::sync::{Mutex, MutexGuard};
 
-uniffi::include_scaffolding!("ente_core");
+use ente_core::{auth, crypto};
+
+uniffi::include_scaffolding!("core");
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AuthSecrets {
+    pub master_key: Vec<u8>,
+    pub secret_key: Vec<u8>,
+    pub token: Vec<u8>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct KeyAttributes {
+    pub kek_salt: String,
+    pub encrypted_key: String,
+    pub key_decryption_nonce: String,
+    pub public_key: String,
+    pub encrypted_secret_key: String,
+    pub secret_key_decryption_nonce: String,
+    pub mem_limit: Option<u32>,
+    pub ops_limit: Option<u32>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SrpAttributes {
+    pub srp_user_id: String,
+    pub srp_salt: String,
+    pub kek_salt: String,
+    pub mem_limit: u32,
+    pub ops_limit: u32,
+    pub is_email_mfa_enabled: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SrpSessionResult {
+    pub srp_a: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SrpVerifyResult {
+    pub srp_m1: String,
+}
 
 #[derive(Debug, thiserror::Error)]
-pub enum EnteCoreError {
-    #[error("{detail}")]
-    Message { detail: String },
+pub enum EnsuError {
+    #[error("{message}")]
+    Message { message: String },
 }
 
-fn message_error(detail: impl Into<String>) -> EnteCoreError {
-    EnteCoreError::Message {
-        detail: detail.into(),
+impl From<auth::AuthError> for EnsuError {
+    fn from(err: auth::AuthError) -> Self {
+        EnsuError::Message {
+            message: err.to_string(),
+        }
     }
 }
 
-fn decrypt_with_stream_blob_fallback(
-    encrypted_data: &[u8],
-    decryption_header: &[u8],
-    key: &[u8],
-) -> Result<Vec<u8>, EnteCoreError> {
-    match crypto::stream::decrypt_file_data(encrypted_data, decryption_header, key) {
-        Ok(bytes) => Ok(bytes),
-        Err(stream_err) => match crypto::blob::decrypt(encrypted_data, decryption_header, key) {
-            Ok(bytes) => Ok(bytes),
-            Err(blob_err) => Err(message_error(format!(
-                "stream decrypt failed: {stream_err}; blob decrypt failed: {blob_err}"
-            ))),
-        },
+struct SrpState {
+    session: auth::SrpSession,
+    kek: crypto::SecretVec,
+}
+
+static SRP_STATE: Lazy<Mutex<Option<SrpState>>> = Lazy::new(|| Mutex::new(None));
+
+fn lock_srp_state() -> Result<MutexGuard<'static, Option<SrpState>>, EnsuError> {
+    SRP_STATE.lock().map_err(|_| EnsuError::Message {
+        message: "SRP state lock poisoned".to_string(),
+    })
+}
+
+fn to_core_key_attrs(attrs: &KeyAttributes) -> auth::KeyAttributes {
+    auth::KeyAttributes {
+        kek_salt: attrs.kek_salt.clone(),
+        encrypted_key: attrs.encrypted_key.clone(),
+        key_decryption_nonce: attrs.key_decryption_nonce.clone(),
+        public_key: attrs.public_key.clone(),
+        encrypted_secret_key: attrs.encrypted_secret_key.clone(),
+        secret_key_decryption_nonce: attrs.secret_key_decryption_nonce.clone(),
+        mem_limit: attrs.mem_limit,
+        ops_limit: attrs.ops_limit,
+        master_key_encrypted_with_recovery_key: None,
+        master_key_decryption_nonce: None,
+        recovery_key_encrypted_with_master_key: None,
+        recovery_key_decryption_nonce: None,
     }
 }
 
-pub fn decrypt_blob_bytes(
-    encrypted_data: Vec<u8>,
-    decryption_header_b64: String,
-    key: Vec<u8>,
-) -> Result<Vec<u8>, EnteCoreError> {
-    let decryption_header = crypto::decode_b64(&decryption_header_b64)
-        .map_err(|e| message_error(format!("decryption_header_b64 decode failed: {e}")))?;
-
-    decrypt_with_stream_blob_fallback(&encrypted_data, &decryption_header, &key)
-}
-
-pub fn decrypt_box_key(
-    encrypted_key_b64: String,
-    key_decryption_nonce_b64: String,
-    collection_key_b64: String,
-) -> Result<Vec<u8>, EnteCoreError> {
-    let encrypted_key = crypto::decode_b64(&encrypted_key_b64)
-        .map_err(|e| message_error(format!("encrypted_key_b64 decode failed: {e}")))?;
-    let key_decryption_nonce = crypto::decode_b64(&key_decryption_nonce_b64)
-        .map_err(|e| message_error(format!("key_decryption_nonce_b64 decode failed: {e}")))?;
-    let collection_key = crypto::decode_b64(&collection_key_b64)
-        .map_err(|e| message_error(format!("collection_key_b64 decode failed: {e}")))?;
-
-    crypto::secretbox::decrypt(&encrypted_key, &key_decryption_nonce, &collection_key)
-        .map_err(|e| message_error(format!("secretbox decrypt failed: {e}")))
-}
-
-pub fn decrypt_metadata_file_type(
-    encrypted_data_b64: String,
-    decryption_header_b64: String,
-    key: Vec<u8>,
-) -> Result<Option<i32>, EnteCoreError> {
-    let encrypted_data = crypto::decode_b64(&encrypted_data_b64)
-        .map_err(|e| message_error(format!("encrypted_data_b64 decode failed: {e}")))?;
-    let decryption_header = crypto::decode_b64(&decryption_header_b64)
-        .map_err(|e| message_error(format!("decryption_header_b64 decode failed: {e}")))?;
-
-    let plaintext = decrypt_with_stream_blob_fallback(&encrypted_data, &decryption_header, &key)?;
-    let metadata_json = String::from_utf8(plaintext)
-        .map_err(|e| message_error(format!("metadata UTF-8 decode failed: {e}")))?;
-
-    let metadata: Value = serde_json::from_str(&metadata_json)
-        .map_err(|e| message_error(format!("metadata JSON parse failed: {e}")))?;
-
-    Ok(extract_file_type(&metadata))
-}
-
-fn extract_file_type(metadata: &Value) -> Option<i32> {
-    let direct = metadata
-        .get("fileType")
-        .or_else(|| metadata.get("file_type"));
-
-    let nested = metadata
-        .get("metadata")
-        .and_then(|it| it.get("fileType").or_else(|| it.get("file_type")));
-
-    direct
-        .and_then(parse_file_type_value)
-        .or_else(|| nested.and_then(parse_file_type_value))
-}
-
-fn parse_file_type_value(value: &Value) -> Option<i32> {
-    if let Some(number) = value.as_i64() {
-        return i32::try_from(number).ok();
+fn to_core_srp_attrs(attrs: &SrpAttributes) -> auth::SrpAttributes {
+    auth::SrpAttributes {
+        srp_user_id: attrs.srp_user_id.clone(),
+        srp_salt: attrs.srp_salt.clone(),
+        mem_limit: attrs.mem_limit,
+        ops_limit: attrs.ops_limit,
+        kek_salt: attrs.kek_salt.clone(),
+        is_email_mfa_enabled: attrs.is_email_mfa_enabled,
     }
-    if let Some(number) = value.as_u64() {
-        return i32::try_from(number).ok();
+}
+
+fn secrets_from_login_result(result: auth::LoginResult) -> AuthSecrets {
+    AuthSecrets {
+        master_key: result.master_key,
+        secret_key: result.secret_key,
+        token: result.token,
     }
-    if let Some(text) = value.as_str() {
-        return text.parse::<i32>().ok();
+}
+
+fn secrets_from_decrypted(result: auth::DecryptedSecrets) -> AuthSecrets {
+    AuthSecrets {
+        master_key: result.master_key,
+        secret_key: result.secret_key,
+        token: result.token,
     }
-    None
 }
 
-pub fn derive_key(
-    passphrase: String,
-    salt_b64: String,
-    ops_limit: u64,
-    mem_limit: u64,
-) -> Result<String, EnteCoreError> {
-    let ops_limit_u32 = u32::try_from(ops_limit)
-        .map_err(|_| message_error(format!("ops_limit out of range: {ops_limit}")))?;
-    let mem_limit_u32 = u32::try_from(mem_limit)
-        .map_err(|_| message_error(format!("mem_limit out of range: {mem_limit}")))?;
-
-    let key = crypto::argon::derive_key_from_b64_salt(
-        &passphrase,
-        &salt_b64,
-        mem_limit_u32,
-        ops_limit_u32,
-    )
-    .map_err(|e| message_error(format!("derive key failed: {e}")))?;
-
-    Ok(crypto::encode_b64(&key))
+fn decode_token(token: &str) -> Result<Vec<u8>, EnsuError> {
+    // Tokens are generated by the server as base64 URL-safe with padding
+    // (Go's base64.URLEncoding). Older tokens might still be standard base64.
+    BASE64_URL_SAFE
+        .decode(token)
+        .or_else(|_| BASE64_STANDARD.decode(token))
+        .map_err(|e| EnsuError::Message {
+            message: format!("token: {}", e),
+        })
 }
 
-pub fn init_crypto() -> Result<(), EnteCoreError> {
-    crypto::init().map_err(|e| message_error(format!("crypto init failed: {e}")))
+pub fn init_crypto() -> Result<(), EnsuError> {
+    crypto::init().map_err(|e| EnsuError::Message {
+        message: e.to_string(),
+    })
 }
 
-pub fn secretbox_key_bytes() -> u32 {
-    crypto::secretbox::KEY_BYTES as u32
+pub fn srp_start(
+    password: String,
+    srp_attrs: SrpAttributes,
+) -> Result<SrpSessionResult, EnsuError> {
+    let srp_attrs_core = to_core_srp_attrs(&srp_attrs);
+    let creds = auth::derive_srp_credentials(&password, &srp_attrs_core)?;
+
+    let srp_salt = crypto::decode_b64(&srp_attrs.srp_salt).map_err(|e| EnsuError::Message {
+        message: format!("srp_salt: {}", e),
+    })?;
+
+    let session = auth::SrpSession::new(&srp_attrs.srp_user_id, &srp_salt, &creds.login_key)?;
+    let srp_a = crypto::encode_b64(&session.public_a());
+
+    let mut guard = lock_srp_state()?;
+    if guard.is_some() {
+        return Err(EnsuError::Message {
+            message:
+                "SRP session already initialized. Call srp_clear() before starting a new session"
+                    .to_string(),
+        });
+    }
+
+    *guard = Some(SrpState {
+        session,
+        kek: crypto::SecretVec::new(creds.kek),
+    });
+
+    Ok(SrpSessionResult { srp_a })
+}
+
+pub fn srp_finish(srp_b: String) -> Result<SrpVerifyResult, EnsuError> {
+    let mut guard = lock_srp_state()?;
+    let state = guard.as_mut().ok_or_else(|| EnsuError::Message {
+        message: "SRP session not initialized".to_string(),
+    })?;
+
+    let srp_b_bytes = crypto::decode_b64(&srp_b).map_err(|e| EnsuError::Message {
+        message: format!("srp_b: {}", e),
+    })?;
+
+    let srp_m1 = state.session.compute_m1(&srp_b_bytes)?;
+    let srp_m1 = crypto::encode_b64(&srp_m1);
+
+    Ok(SrpVerifyResult { srp_m1 })
+}
+
+pub fn srp_clear() {
+    // Best-effort cleanup. Even if the lock is poisoned, we should avoid panicking.
+    match SRP_STATE.lock() {
+        Ok(mut guard) => {
+            *guard = None;
+        }
+        Err(poisoned) => {
+            let mut guard = poisoned.into_inner();
+            *guard = None;
+        }
+    }
+}
+
+pub fn srp_decrypt_secrets(
+    key_attrs: KeyAttributes,
+    encrypted_token: Option<String>,
+    plain_token: Option<String>,
+) -> Result<AuthSecrets, EnsuError> {
+    // Consume the SRP state so KEK doesn't linger in memory if the caller forgets srp_clear().
+    let state = {
+        let mut guard = lock_srp_state()?;
+        guard.take().ok_or_else(|| EnsuError::Message {
+            message: "SRP session not initialized".to_string(),
+        })?
+    };
+
+    let core_attrs = to_core_key_attrs(&key_attrs);
+
+    if let Some(token) = encrypted_token {
+        let result = auth::decrypt_secrets(&state.kek, &core_attrs, &token)?;
+        return Ok(secrets_from_decrypted(result));
+    }
+
+    if let Some(token) = plain_token {
+        let (master_key, secret_key) = auth::decrypt_keys_only(&state.kek, &core_attrs)?;
+        let token_bytes = decode_token(&token)?;
+        return Ok(AuthSecrets {
+            master_key,
+            secret_key,
+            token: token_bytes,
+        });
+    }
+
+    Err(EnsuError::Message {
+        message: "Missing auth token".to_string(),
+    })
+}
+
+pub fn derive_kek_for_login(
+    password: String,
+    kek_salt: String,
+    mem_limit: u32,
+    ops_limit: u32,
+) -> Result<Vec<u8>, EnsuError> {
+    let kek = auth::derive_kek(&password, &kek_salt, mem_limit, ops_limit)?;
+    Ok(kek)
+}
+
+pub fn decrypt_secrets_with_kek(
+    kek: Vec<u8>,
+    key_attrs: KeyAttributes,
+    encrypted_token: Option<String>,
+    plain_token: Option<String>,
+) -> Result<AuthSecrets, EnsuError> {
+    let kek = crypto::SecretVec::new(kek);
+    let core_attrs = to_core_key_attrs(&key_attrs);
+
+    if let Some(token) = encrypted_token {
+        let result = auth::decrypt_secrets_with_kek(&kek, &core_attrs, &token)?;
+        return Ok(secrets_from_login_result(result));
+    }
+
+    if let Some(token) = plain_token {
+        let (master_key, secret_key) = auth::decrypt_keys_only(&kek, &core_attrs)?;
+        let token_bytes = decode_token(&token)?;
+        return Ok(AuthSecrets {
+            master_key,
+            secret_key,
+            token: token_bytes,
+        });
+    }
+
+    Err(EnsuError::Message {
+        message: "Missing auth token".to_string(),
+    })
 }

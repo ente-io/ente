@@ -1,2 +1,5 @@
-target/
-Cargo.lock
+# Rust build artifacts
+/target/
+
+# OS
+.DS_Store
