@@ -60,7 +60,11 @@ export const decryptChatField = async (
     chatKeyB64: string,
 ): Promise<string> => {
     const [prefix, version, ciphertext, header] = value.split(":");
-    if (`${prefix}:${version}` !== CHAT_FIELD_PREFIX || !ciphertext || !header) {
+    if (
+        `${prefix}:${version}` !== CHAT_FIELD_PREFIX ||
+        !ciphertext ||
+        !header
+    ) {
         throw new Error("Invalid encrypted field format");
     }
 

@@ -279,8 +279,12 @@ const MessageRow = memo(
                                     }}
                                 >
                                     <GeneratingRiveIndicator
-                                        isGenerating={isGenerating && isStreaming}
-                                        isOutroPhase={isStreaming && isStreamingOutro}
+                                        isGenerating={
+                                            isGenerating && isStreaming
+                                        }
+                                        isOutroPhase={
+                                            isStreaming && isStreamingOutro
+                                        }
                                         fallbackText={`${loadingPhrase ?? "Generating your reply"}${dots}`}
                                     />
                                     {showLoadingPlaceholder ? null : (
@@ -411,8 +415,7 @@ const MessageRow = memo(
                                                 {switcher
                                                     ? switcher.currentIndex + 1
                                                     : 1}
-                                                /
-                                                {switcher ? switcher.total : 1}
+                                                /{switcher ? switcher.total : 1}
                                             </Typography>
                                             <IconButton
                                                 aria-label="Next branch"
@@ -485,8 +488,7 @@ const MessageRow = memo(
                                                 {switcher
                                                     ? switcher.currentIndex + 1
                                                     : 1}
-                                                /
-                                                {switcher ? switcher.total : 1}
+                                                /{switcher ? switcher.total : 1}
                                             </Typography>
                                             <IconButton
                                                 aria-label="Next branch"

@@ -1,4 +1,3 @@
-import "katex/dist/katex.min.css";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { savedLocalUser } from "ente-accounts/services/accounts-db";
@@ -19,6 +18,7 @@ import {
 import { ensuTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
+import "katex/dist/katex.min.css";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
 
@@ -35,8 +35,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         if (typeof window === "undefined") return;
-        const isTauri =
-            "__TAURI__" in window || "__TAURI_IPC__" in window;
+        const isTauri = "__TAURI__" in window || "__TAURI_IPC__" in window;
         if (!isTauri) return;
         const isEditableTarget = (target: EventTarget | null) => {
             if (!(target instanceof HTMLElement)) return false;

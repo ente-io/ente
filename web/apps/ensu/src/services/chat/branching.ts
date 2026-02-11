@@ -31,7 +31,9 @@ export const buildSelectedPath = (
     selections: BranchSelections,
     streaming?: StreamingState,
 ): PathBuildResult => {
-    const byId = new Map(messages.map((message) => [message.messageUuid, message]));
+    const byId = new Map(
+        messages.map((message) => [message.messageUuid, message]),
+    );
     const children = new Map<string | null, ChatMessage[]>();
 
     for (const message of messages) {
@@ -57,7 +59,7 @@ export const buildSelectedPath = (
         selectTarget(rootTargets, selections[ROOT_SELECTION_KEY]) ??
         rootTargets[rootTargets.length - 1];
     const rootMessage = selectedRoot
-        ? byId.get(selectedRoot) ?? roots[roots.length - 1]
+        ? (byId.get(selectedRoot) ?? roots[roots.length - 1])
         : roots[roots.length - 1];
 
     if (roots.length > 1 && rootMessage) {

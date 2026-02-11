@@ -1,12 +1,12 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
 import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
-import { appName } from "ente-base/app";
 import {
     replaceSavedLocalUser,
     saveSRPAttributes,
 } from "ente-accounts/services/accounts-db";
 import { getSRPAttributes } from "ente-accounts/services/srp";
 import { sendOTT } from "ente-accounts/services/user";
+import { appName } from "ente-base/app";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "ente-base/http";

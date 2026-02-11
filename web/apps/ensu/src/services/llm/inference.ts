@@ -1,13 +1,13 @@
-import log from "ente-base/log";
+import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/tauri";
+import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
 import {
     ModelManager,
     ModelValidationStatus,
     Wllama,
     WllamaAbortError,
 } from "@wllama/wllama/esm/index.js";
-import type { AssetsPathConfig } from "@wllama/wllama/esm/index.js";
-import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/tauri";
+import log from "ente-base/log";
 import type {
     GenerateChatRequest,
     GenerateEvent,
@@ -58,7 +58,10 @@ export interface InferenceBackend {
     readonly kind: BackendType;
     initBackend(): Promise<void>;
     loadModel(params: LoadModelParams): Promise<void>;
-    createContext(model: { modelPath: string }, params?: ContextParams): Promise<void>;
+    createContext(
+        model: { modelPath: string },
+        params?: ContextParams,
+    ): Promise<void>;
     generateChatStream(
         request: GenerateChatRequest,
         onEvent?: (event: GenerateEvent) => void,
@@ -67,7 +70,10 @@ export interface InferenceBackend {
     freeContext(): Promise<void>;
     freeModel(): Promise<void>;
     isModelAvailable(modelPath: string): Promise<boolean>;
-    applyChatTemplate?(messages: LlmMessage[], templateOverride?: string): Promise<string>;
+    applyChatTemplate?(
+        messages: LlmMessage[],
+        templateOverride?: string,
+    ): Promise<string>;
 }
 
 const isTauriRuntime = () =>
@@ -117,7 +123,10 @@ class WasmInference implements InferenceBackend {
         this.loadedModelUrl = modelUrl;
     }
 
-    async createContext(model: { modelPath: string }, params: ContextParams = {}) {
+    async createContext(
+        model: { modelPath: string },
+        params: ContextParams = {},
+    ) {
         const modelUrl = ensureUrl(model.modelPath);
         await this.ensureModelLoaded(modelUrl, params);
     }
@@ -129,14 +138,20 @@ class WasmInference implements InferenceBackend {
         if (!this.loadedModelUrl) {
             throw new Error("WASM backend: model must be loaded first.");
         }
-        return this.wllama.formatChat(messages, true, templateOverride ?? undefined);
+        return this.wllama.formatChat(
+            messages,
+            true,
+            templateOverride ?? undefined,
+        );
     }
 
     async isModelAvailable(modelPath: string): Promise<boolean> {
         const modelUrl = ensureUrl(modelPath);
         const urls = ModelManager.parseModelUrl(modelUrl);
         if (urls.length === 0) return false;
-        const models = await this.modelManager.getModels({ includeInvalid: true });
+        const models = await this.modelManager.getModels({
+            includeInvalid: true,
+        });
         return urls.every((url) => {
             const existing = models.find((model) => model.url === url);
             return (
@@ -191,7 +206,10 @@ class WasmInference implements InferenceBackend {
             n_batch: params.nBatch ?? null,
         });
 
-        if (this.loadedModelUrl === modelUrl && this.loadedContextKey === contextKey) {
+        if (
+            this.loadedModelUrl === modelUrl &&
+            this.loadedContextKey === contextKey
+        ) {
             return;
         }
 
@@ -261,29 +279,27 @@ class WasmInference implements InferenceBackend {
                 includeInvalid: true,
             });
             const existing = models.find((model) => model.url === url);
-            if (existing && existing.validate() === ModelValidationStatus.VALID) {
+            if (
+                existing &&
+                existing.validate() === ModelValidationStatus.VALID
+            ) {
                 totals[index] = existing.size;
                 loaded[index] = existing.size;
                 emitProgress("Ready");
                 continue;
             }
 
-            const filename = await this.modelManager.cacheManager.getNameFromURL(
-                url,
-            );
+            const filename =
+                await this.modelManager.cacheManager.getNameFromURL(url);
             const handle = await opfsCache.getFileHandle(filename, {
                 create: true,
             });
             const file = await handle.getFile();
             let downloaded = file.size ?? 0;
 
-            const metadata = await this.modelManager.cacheManager.getMetadata(
-                url,
-            );
-            if (
-                metadata?.originalSize &&
-                downloaded >= metadata.originalSize
-            ) {
+            const metadata =
+                await this.modelManager.cacheManager.getMetadata(url);
+            if (metadata?.originalSize && downloaded >= metadata.originalSize) {
                 totals[index] = metadata.originalSize;
                 loaded[index] = metadata.originalSize;
                 emitProgress("Ready");
@@ -305,7 +321,9 @@ class WasmInference implements InferenceBackend {
             const contentRangeTotal = parseContentRangeTotal(
                 res.headers.get("Content-Range"),
             );
-            const contentLength = Number(res.headers.get("Content-Length") ?? 0);
+            const contentLength = Number(
+                res.headers.get("Content-Length") ?? 0,
+            );
             const totalBytes =
                 contentRangeTotal ??
                 (contentLength ? contentLength + downloaded : 0);
@@ -389,7 +407,10 @@ class WasmInference implements InferenceBackend {
 
         try {
             try {
-                const promptTokenList = await this.wllama.tokenize(prompt, true);
+                const promptTokenList = await this.wllama.tokenize(
+                    prompt,
+                    true,
+                );
                 promptTokens = promptTokenList.length;
             } catch {
                 promptTokens = null;
@@ -428,7 +449,8 @@ class WasmInference implements InferenceBackend {
             }
         } catch (error) {
             if (!(error instanceof WllamaAbortError)) {
-                errorMessage = error instanceof Error ? error.message : String(error);
+                errorMessage =
+                    error instanceof Error ? error.message : String(error);
             } else {
                 errorMessage = "Generation aborted";
             }
@@ -589,10 +611,12 @@ class TauriInference implements InferenceBackend {
         let resolveSummary!: (summary: GenerateSummary) => void;
         let rejectSummary!: (error: Error) => void;
 
-        const summaryPromise = new Promise<GenerateSummary>((resolve, reject) => {
-            resolveSummary = resolve;
-            rejectSummary = reject;
-        });
+        const summaryPromise = new Promise<GenerateSummary>(
+            (resolve, reject) => {
+                resolveSummary = resolve;
+                rejectSummary = reject;
+            },
+        );
 
         const unlisten = await listen<GenerateEvent>("llm-event", (event) => {
             const payload = event.payload;
@@ -673,13 +697,20 @@ const normalizeInvokeError = (error: unknown, fallback: string) => {
     if (error instanceof Error) return error;
     if (typeof error === "string") return new Error(error);
     if (error && typeof error === "object") {
-        const code = "code" in error ? String((error as { code?: unknown }).code) : undefined;
+        const code =
+            "code" in error
+                ? String((error as { code?: unknown }).code)
+                : undefined;
         const message =
             "message" in error
                 ? String((error as { message?: unknown }).message)
                 : "";
         const payload = message || safeJson(error);
-        const text = payload ? (code ? `${payload} (${code})` : payload) : fallback;
+        const text = payload
+            ? code
+                ? `${payload} (${code})`
+                : payload
+            : fallback;
         const err = new Error(text);
         if (code) {
             (err as Error & { code?: string }).code = code;
@@ -731,10 +762,16 @@ const buildSamplingConfig = (request: GenerateChatRequest) => {
     if (request.repeatPenalty !== undefined && request.repeatPenalty !== null) {
         sampling.penalty_repeat = request.repeatPenalty;
     }
-    if (request.frequencyPenalty !== undefined && request.frequencyPenalty !== null) {
+    if (
+        request.frequencyPenalty !== undefined &&
+        request.frequencyPenalty !== null
+    ) {
         sampling.penalty_freq = request.frequencyPenalty;
     }
-    if (request.presencePenalty !== undefined && request.presencePenalty !== null) {
+    if (
+        request.presencePenalty !== undefined &&
+        request.presencePenalty !== null
+    ) {
         sampling.penalty_present = request.presencePenalty;
     }
     if (request.grammar !== undefined && request.grammar !== null) {

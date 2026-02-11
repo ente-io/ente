@@ -439,13 +439,16 @@ const prepareInferenceImageBytes = async (
                     }
 
                     if (isJpegExtension(originalExtension)) {
-                        log.info("Prepared inference image (bitmap no resize)", {
-                            id: image.id,
-                            name: image.name,
-                            width: bitmap.width,
-                            height: bitmap.height,
-                            bytes: originalBytes.length,
-                        });
+                        log.info(
+                            "Prepared inference image (bitmap no resize)",
+                            {
+                                id: image.id,
+                                name: image.name,
+                                width: bitmap.width,
+                                height: bitmap.height,
+                                bytes: originalBytes.length,
+                            },
+                        );
                         return {
                             bytes: originalBytes,
                             extension: originalExtension,
@@ -479,7 +482,10 @@ const prepareInferenceImageBytes = async (
                         };
                     }
 
-                    return { bytes: originalBytes, extension: originalExtension };
+                    return {
+                        bytes: originalBytes,
+                        extension: originalExtension,
+                    };
                 } finally {
                     bitmap.close();
                 }
@@ -1791,7 +1797,6 @@ const Page: React.FC = () => {
     }, [messageState.path, streamingParentId, streamingText, currentSessionId]);
 
     const branchSwitchers = messageState.switchers;
-
 
     useEffect(() => {
         if (!chatKey) return;

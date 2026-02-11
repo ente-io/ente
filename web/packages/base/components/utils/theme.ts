@@ -597,7 +597,8 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * value, we alias it the same weight as regular, 500).
  */
 const baseTypography: TypographyVariantsOptions = {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,
@@ -636,7 +637,8 @@ const baseTypography: TypographyVariantsOptions = {
     tiny: { fontSize: "10px", lineHeight: "12px" },
 };
 
-const getTypography = (_appName: AppName): TypographyVariantsOptions => {
+const getTypography = (appName: AppName): TypographyVariantsOptions => {
+    void appName;
     return baseTypography;
 };
 
@@ -954,17 +956,22 @@ const components: Components = {
 const getComponents = (appName: AppName): Components => {
     if (appName !== "ensu") return components;
 
+    const muiButtonStyleOverrides = (components.MuiButton?.styleOverrides ??
+        {}) as Record<string, unknown>;
+    const muiButtonRootStyleOverrides =
+        (muiButtonStyleOverrides.root as Record<string, unknown> | undefined) ??
+        {};
+
     return {
         ...components,
         MuiButton: {
             ...components.MuiButton,
             styleOverrides: {
-                ...components.MuiButton?.styleOverrides,
-                root: {
-                    ...((components.MuiButton?.styleOverrides as Components["MuiButton"]["styleOverrides"])?.root ?? {}),
-                    borderRadius: "16px",
-                },
-            },
+                ...muiButtonStyleOverrides,
+                root: { ...muiButtonRootStyleOverrides, borderRadius: "16px" },
+            } as NonNullable<
+                NonNullable<Components["MuiButton"]>["styleOverrides"]
+            >,
         },
     };
 };

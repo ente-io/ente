@@ -1,12 +1,8 @@
 import { Box } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
-type HoverRiveLogoProps = {
-    staticSrc: string;
-    alt: string;
-    sizePx?: number;
-};
+type HoverRiveLogoProps = { staticSrc: string; alt: string; sizePx?: number };
 
 type RivePlaybackTarget = string | string[];
 

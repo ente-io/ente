@@ -41,13 +41,14 @@ export const encryptAttachmentBytes = async (
     const wasm = await enteWasm();
     const derivedKeyB64 = await deriveAttachmentKeyB64(chatKeyB64, sessionUuid);
     const plaintextB64 = bytesToBase64(bytes);
-    const encrypted = await wasm.crypto_encrypt_blob(plaintextB64, derivedKeyB64);
+    const encrypted = await wasm.crypto_encrypt_blob(
+        plaintextB64,
+        derivedKeyB64,
+    );
 
     const headerBytes = base64ToBytes(encrypted.decryption_header);
     const cipherBytes = base64ToBytes(encrypted.encrypted_data);
-    const combined = new Uint8Array(
-        headerBytes.length + cipherBytes.length,
-    );
+    const combined = new Uint8Array(headerBytes.length + cipherBytes.length);
     combined.set(headerBytes, 0);
     combined.set(cipherBytes, headerBytes.length);
     return combined;

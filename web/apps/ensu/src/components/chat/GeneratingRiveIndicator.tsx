@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 type GeneratingRiveIndicatorProps = {
     size?: number;
@@ -13,11 +13,7 @@ type GeneratingRiveIndicatorProps = {
 
 type RivePlaybackTarget = string | string[];
 
-type RiveInput = {
-    name?: string;
-    value?: boolean | number;
-    fire?: () => void;
-};
+type RiveInput = { name?: string; value?: boolean | number; fire?: () => void };
 
 type RiveInstance = {
     cleanup?: () => void;
@@ -139,7 +135,8 @@ const GeneratingRiveIndicator = memo(
 
                                 const stateMachineName = stateMachineNames[0];
                                 if (stateMachineName) {
-                                    playbackTargetRef.current = stateMachineName;
+                                    playbackTargetRef.current =
+                                        stateMachineName;
                                     const inputs =
                                         instance?.stateMachineInputs?.(
                                             stateMachineName,
@@ -168,16 +165,16 @@ const GeneratingRiveIndicator = memo(
                                 } else if (animationNames.length > 1) {
                                     playbackTargetRef.current = animationNames;
                                 } else if (animationNames.length === 1) {
-                                    playbackTargetRef.current = animationNames[0];
+                                    playbackTargetRef.current =
+                                        animationNames[0];
                                 }
 
-                                outroNamedTargetRef.current =
-                                    [...stateMachineNames, ...animationNames].find(
-                                        (name) =>
-                                            name
-                                                .toLowerCase()
-                                                .includes("outro"),
-                                    );
+                                outroNamedTargetRef.current = [
+                                    ...stateMachineNames,
+                                    ...animationNames,
+                                ].find((name) =>
+                                    name.toLowerCase().includes("outro"),
+                                );
 
                                 playMain();
                             } catch {
@@ -284,11 +281,7 @@ const GeneratingRiveIndicator = memo(
                     width={size}
                     height={size}
                     aria-label="Generating response animation"
-                    sx={{
-                        width: size,
-                        height: size,
-                        display: "block",
-                    }}
+                    sx={{ width: size, height: size, display: "block" }}
                 />
             </Box>
         );
