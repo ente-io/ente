@@ -1,0 +1,81 @@
+package io.ente.screensaver.preview
+
+import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import io.ente.screensaver.R
+import io.ente.screensaver.imageloading.AppImageLoader
+import io.ente.screensaver.databinding.ActivityPreviewBinding
+import io.ente.screensaver.diagnostics.AppLog
+import io.ente.screensaver.permissions.MediaPermissions
+import io.ente.screensaver.prefs.PhotoSourceType
+import io.ente.screensaver.prefs.PreferencesRepository
+import io.ente.screensaver.slideshow.SlideshowController
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+
+class PreviewActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityPreviewBinding
+    private val scope = MainScope()
+
+    private lateinit var preferencesRepository: PreferencesRepository
+    private lateinit var slideshowController: SlideshowController
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (!granted) {
+            binding.slideshow.showMessage(getString(R.string.missing_permission))
+        }
+        slideshowController.start()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        AppLog.initialize(this)
+        binding = ActivityPreviewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        preferencesRepository = PreferencesRepository(this)
+        slideshowController = SlideshowController(
+            context = this,
+            scope = scope,
+            slideshowView = binding.slideshow,
+            imageLoader = AppImageLoader.get(this),
+            preferencesRepository = preferencesRepository,
+        )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        scope.launch {
+            val settings = preferencesRepository.get()
+            val needsPermission = settings.sourceType == PhotoSourceType.MEDIASTORE
+            val hasPermission = MediaPermissions.hasReadImagesPermission(this@PreviewActivity)
+            if (needsPermission && !hasPermission) {
+                binding.slideshow.showMessage(getString(R.string.missing_permission))
+                val permission = MediaPermissions.requiredReadImagesPermission()
+                if (permission != null) {
+                    permissionLauncher.launch(permission)
+                } else {
+                    slideshowController.start()
+                }
+            } else {
+                binding.slideshow.showMessage(null)
+                slideshowController.start()
+            }
+        }
+    }
+
+    override fun onStop() {
+        slideshowController.stop()
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
+    }
+}

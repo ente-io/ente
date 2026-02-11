@@ -1,0 +1,4 @@
+<dream xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/dream_description"
+    android:previewImage="@drawable/dream_preview"
+    android:settingsActivity="io.ente.screensaver/.settings.SettingsActivity" />

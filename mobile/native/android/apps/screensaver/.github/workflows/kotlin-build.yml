@@ -1,0 +1,50 @@
+name: "Kotlin build"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "app/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/kotlin-build.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/kotlin-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build app
+        run: ./gradlew lint assembleRelease -x buildEnteCore

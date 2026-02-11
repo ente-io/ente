@@ -1,0 +1,28 @@
+package io.ente.screensaver.prefs
+
+enum class PhotoSourceType {
+    DEBUG_ASSETS,
+    MEDIASTORE,
+    ENTE_PUBLIC_ALBUM,
+}
+
+enum class FitMode {
+    CROP,
+    FIT,
+}
+
+enum class OverlayMode {
+    NORMAL,
+    ALTERNATE,
+    DISABLE,
+}
+
+data class SaverSettings(
+    val sourceType: PhotoSourceType,
+    val intervalMs: Long,
+    val shuffle: Boolean,
+    val fitMode: FitMode,
+    val enteCacheLimit: Int,
+    val enteRefreshIntervalMs: Long,
+    val overlayMode: OverlayMode,
+)

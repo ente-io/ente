@@ -1,0 +1,171 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <string name="app_name">Ente Screensaver</string>
+    <string name="settings">Settings</string>
+    <string name="preview">Preview</string>
+
+    <string name="setup_preview_summary">Preview the slideshow now</string>
+    <string name="ente_cache_clear">Clear Ente cache</string>
+    <string name="ente_cache_clear_summary">Remove cached Ente photos and refresh metadata.</string>
+    <string name="ente_cache_cleared">Ente cache cleared.</string>
+    <string name="ente_cache_clear_none">No Ente album configured.</string>
+
+    <string name="missing_permission">Photo permission required. Open SSaver to grant access.</string>
+    <string name="no_photos">No photos available. Configure a source in Settings.</string>
+    <string name="ente_album_not_configured">Ente album not configured. Open Ente Screensaver to set a public album link.</string>
+    <string name="ente_album_loading">Loading…</string>
+    <string name="ente_album_image_failed">Images failed to load. Open Diagnostics for details.</string>
+    <string name="ente_album_no_cached_photos">No cached Ente photos are available. Connect to the internet to load photos.</string>
+    <string name="ente_album_no_photos">Couldn’t load any photos from the configured Ente album. Check the link, network, or Diagnostics.</string>
+    <string name="image_load_failed">Images failed to load. Open Diagnostics for details.</string>
+
+    <string name="dream_label">Ente Screensaver</string>
+    <string name="dream_description">Photo slideshow screensaver</string>
+
+    <string name="open_system_screensaver_settings">Open system screensaver settings</string>
+    <string name="unavailable_system_screensaver_settings">Couldn’t open system screensaver settings. Use Diagnostics to set it via ADB.</string>
+    <string name="diagnostics">Diagnostics</string>
+    <string name="diagnostics_logs_title">Recent logs</string>
+    <string name="diagnostics_refresh">Refresh</string>
+    <string name="diagnostics_no_recent_logs">No recent logs.</string>
+
+    <string name="main_subtitle">Configure a public album to start the screensaver.</string>
+    <string name="main_adb_hint">Need ADB? Open ADB instructions below.</string>
+    <string name="step_connect_album">Step 1: Connect album</string>
+    <string name="step_set_screensaver">Step 2: Set as screensaver</string>
+    <string name="section_settings_logs">Settings &amp; logs</string>
+    <string name="screensaver_status_configured">Status: Screensaver set</string>
+    <string name="screensaver_status_needs_setup">Status: Not set. ADB may be required.</string>
+    <string name="button_set_screensaver">Set as screensaver</string>
+    <string name="button_adb_instructions">ADB instructions</string>
+
+    <string name="adb_title">ADB setup</string>
+    <string name="adb_subtitle">Run this once from a computer on the same network.</string>
+    <string name="adb_commands_label">Command:</string>
+
+    <string name="setup">Setup</string>
+    <string name="setup_title">Connect Ente Public Album</string>
+    <string name="setup_status_not_configured">Status: Not configured</string>
+    <string name="setup_status_configured">Status: Configured</string>
+    <string name="setup_album_url_hint">Ente public album link (paste full link)</string>
+    <string name="setup_album_password_hint">Album password (if set)</string>
+    <string name="setup_pairing_code">Pairing code: %1$s</string>
+    <string name="setup_open_on_phone_prefix">Open on your phone (same Wi‑Fi):</string>
+    <string name="setup_wifi_hint">Same Wi‑Fi required. If the QR doesn’t open, ensure your phone is on Wi‑Fi (disable VPN/mobile data) and type one of the URLs above in your browser.</string>
+    <string name="setup_no_network">Connect this TV to your network to enable QR setup.</string>
+    <string name="setup_server_running">Setup server running on port %1$d</string>
+    <string name="setup_server_failed">Setup server failed to start. Try reopening this screen.</string>
+    <string name="setup_save">Save</string>
+    <string name="setup_clear">Clear</string>
+    <string name="setup_saved">Saved</string>
+    <string name="setup_configured_from_phone">Album configured from phone. Returning…</string>
+    <string name="setup_cleared">Cleared</string>
+    <string name="setup_configure_summary">Configure Ente public album (QR or paste)</string>
+    <string name="setup_help">How to set this as the TV screensaver:\n\n1) Install the app on your TV.\n2) If your TV doesn’t show a screensaver picker UI, you may need ADB.\n3) From a computer on the same network, run:\n   adb shell pm grant io.ente.screensaver android.permission.WRITE_SECURE_SETTINGS\n   adb shell settings put secure screensaver_default_component io.ente.screensaver/io.ente.screensaver.dream.PhotoDreamService\n   adb shell settings put secure screensaver_components io.ente.screensaver/io.ente.screensaver.dream.PhotoDreamService\n\nThen wait for idle or run: adb shell cmd dream start</string>
+
+    <string name="setup_network_label_wifi">Wi‑Fi</string>
+    <string name="setup_network_label_ethernet">Ethernet</string>
+    <string name="setup_network_label_format">%1$s: %2$s</string>
+
+    <string name="pref_title_photo_source">Photo source</string>
+    <string name="pref_title_slideshow_interval">Slideshow interval</string>
+    <string name="pref_title_ente_cache_size">Ente cache size</string>
+    <string name="pref_title_ente_refresh_interval">Ente refresh interval</string>
+    <string name="pref_title_shuffle">Shuffle</string>
+    <string name="pref_title_fit_mode">Fit mode</string>
+    <string name="pref_title_show_clock">Show clock</string>
+    <string name="pref_title_overlay">Overlay display</string>
+    <string name="pref_overlay_summary">Configure bottom overlay visibility</string>
+
+    <string name="common_yes">Yes</string>
+    <string name="common_no">No</string>
+
+    <string name="screensaver_set_success">Set SSaver as screensaver. If it still doesn’t run, use ADB: cmd dream start</string>
+    <string name="screensaver_set_rejected">Attempted to set screensaver but system rejected the change.</string>
+    <string name="screensaver_set_needs_permission">Needs WRITE_SECURE_SETTINGS (ADB) to set screensaver on this device.</string>
+    <string name="screensaver_set_failed">Failed to set screensaver: %1$s</string>
+    <string name="screensaver_set_failed_no_details">(no details)</string>
+    <string name="screensaver_adb_grant_command" translatable="false">adb shell pm grant %1$s android.permission.WRITE_SECURE_SETTINGS</string>
+
+    <string name="diagnostics_report_title">SSaver Diagnostics</string>
+    <string name="diagnostics_report_separator">================</string>
+    <string name="diagnostics_report_device">Device: %1$s %2$s</string>
+    <string name="diagnostics_report_android">Android: %1$s (SDK %2$d)</string>
+    <string name="diagnostics_report_dream_component">Dream component: %1$s</string>
+    <string name="diagnostics_report_action_dream_settings_resolvable">ACTION_DREAM_SETTINGS resolvable: %1$s</string>
+    <string name="diagnostics_report_leanback_settings_resolvable">LEANBACK_SETTINGS resolvable: %1$s</string>
+    <string name="diagnostics_report_tv_daydream_resolvable">TvSettings DaydreamActivity resolvable: %1$s</string>
+    <string name="diagnostics_report_secure_settings">Secure settings:</string>
+    <string name="diagnostics_report_secure_screensaver_enabled">- screensaver_enabled: %1$d</string>
+    <string name="diagnostics_report_secure_activate_on_sleep">- screensaver_activate_on_sleep: %1$d</string>
+    <string name="diagnostics_report_secure_activate_on_dock">- screensaver_activate_on_dock: %1$d</string>
+    <string name="diagnostics_report_secure_default_component">- screensaver_default_component: %1$s</string>
+    <string name="diagnostics_report_secure_components">- screensaver_components: %1$s</string>
+    <string name="diagnostics_report_dream_services_found">Dream services found: %1$d</string>
+    <string name="diagnostics_report_service_item">- %1$s</string>
+    <string name="diagnostics_report_null">(null)</string>
+
+    <string name="setup_error_unknown_detail">unknown error</string>
+    <string name="setup_error_empty_url">Enter a public album link.</string>
+    <string name="setup_error_invalid_url">Invalid public album link.</string>
+    <string name="setup_error_missing_access_token">Missing access token in link (t=… or /&lt;token&gt;).</string>
+    <string name="setup_error_missing_collection_key">Missing collection key in link fragment (#…).</string>
+    <string name="setup_error_invalid_collection_key">Invalid collection key.</string>
+    <string name="setup_error_invalid_collection_key_length">Invalid collection key length.</string>
+    <string name="setup_error_fetch_album_info">Failed to fetch album info: %1$s</string>
+    <string name="setup_error_missing_password_parameters">Missing password parameters for this album.</string>
+    <string name="setup_error_password_hash_derivation">Failed to derive password hash: %1$s</string>
+    <string name="setup_error_incorrect_password">Incorrect password.</string>
+    <string name="setup_error_password_verification">Password verification failed: %1$s</string>
+    <string name="setup_error_password_required">Password required for this album.</string>
+
+    <string name="setup_server_method_not_allowed">Method not allowed</string>
+    <string name="setup_server_not_found">Not found</string>
+    <string name="setup_server_page_title">Ente Screensaver Setup</string>
+    <string name="setup_server_pairing_code_label">Pairing code</string>
+    <string name="setup_server_pairing_code_placeholder">123456</string>
+    <string name="setup_server_pairing_code_hint">Enter the 6‑digit code shown on the TV.</string>
+    <string name="setup_server_public_album_label">Public album link</string>
+    <string name="setup_server_public_album_placeholder">https://albums.ente.io/...#...</string>
+    <string name="setup_server_password_label">Album password (optional)</string>
+    <string name="setup_server_save_button">Save</string>
+    <string name="setup_server_open_screen_note">This page works only while the setup screen is open.</string>
+    <string name="setup_server_saved_title">Saved</string>
+    <string name="setup_server_saved_heading">Saved</string>
+    <string name="setup_server_saved_body">Your TV should update in a few seconds.</string>
+    <string name="setup_server_saved_note">You can close this page now.</string>
+    <string name="setup_server_error_title">Error</string>
+    <string name="setup_server_error_heading">Couldn’t save</string>
+    <string name="setup_server_go_back">Go back</string>
+    <string name="setup_server_internal_error">Error: %1$s</string>
+    <string name="setup_server_cleared_plaintext">Cleared</string>
+    <string name="setup_server_request_too_large_title">Request too large</string>
+    <string name="setup_server_request_too_large_heading">Request too large</string>
+    <string name="setup_server_request_too_large_body">Please submit a shorter link/password.</string>
+    <string name="setup_server_back_to_setup">Back to setup</string>
+    <string name="setup_server_too_many_attempts_title">Too many attempts</string>
+    <string name="setup_server_too_many_attempts_heading">Too many attempts</string>
+    <string name="setup_server_too_many_attempts_body">Too many incorrect pairing codes. Reopen the Setup screen on the TV to generate a new QR code.</string>
+    <string name="setup_server_pairing_mismatch_title">Pairing code mismatch</string>
+    <string name="setup_server_pairing_mismatch_heading">Pairing code mismatch</string>
+    <string name="setup_server_pairing_mismatch_body">Scan the QR code again from the TV.</string>
+    <string name="setup_server_missing_link_title">Missing link</string>
+    <string name="setup_server_missing_link_heading">Missing link</string>
+    <string name="setup_server_missing_link_body">Please paste the full public album link.</string>
+
+    <!-- Setup screen refactor -->
+    <string name="setup_button_manual">Type manually</string>
+    <string name="setup_button_hide_manual">Hide manual entry</string>
+    <string name="setup_manual_entry_title">Manual Entry</string>
+    <string name="setup_qr_instructions">Scan this QR code with your phone to configure the album</string>
+
+    <!-- Settings refactor -->
+    <string name="pref_change_album">Change album</string>
+    <string name="pref_change_album_summary">Reconfigure your Ente album</string>
+    <string name="pref_advanced">Advanced settings</string>
+    <string name="pref_advanced_summary">Cache, intervals, fit mode, and more</string>
+    <string name="pref_clock_summary">Display clock on screensaver</string>
+    <string name="advanced_settings_title">Advanced Settings</string>
+
+    <!-- MainActivity preview mode -->
+    <string name="hint_press_down_settings">Press Down Arrow for Settings</string>
+</resources>

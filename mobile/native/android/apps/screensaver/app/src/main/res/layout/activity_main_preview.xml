@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Fullscreen slideshow view -->
+    <io.ente.screensaver.ui.SlideshowView
+        android:id="@+id/slideshow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Hint overlay at bottom center -->
+    <LinearLayout
+        android:id="@+id/hint_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="80dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-thin"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:text="@string/hint_press_down_settings"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_down" />
+
+    </LinearLayout>
+
+</FrameLayout>

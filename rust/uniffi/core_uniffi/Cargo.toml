@@ -1,0 +1,17 @@
+[package]
+name = "ente_core_uniffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "ente_core"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+ente-core = { path = "../../core" }
+serde_json = "1"
+thiserror = "1"
+uniffi = "0.31.0"
+
+[build-dependencies]
+uniffi = { version = "0.31.0", features = ["build"] }

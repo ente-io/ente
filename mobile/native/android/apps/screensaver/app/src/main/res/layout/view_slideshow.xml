@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:ignore="Overdraw">
+
+    <ImageView
+        android:id="@+id/image_current"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+    <ImageView
+        android:id="@+id/image_next"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
+    <!-- Common bottom overlay bar -->
+    <LinearLayout
+        android:id="@+id/bottom_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_text_overlay"
+        android:orientation="horizontal"
+        android:paddingStart="32dp"
+        android:paddingTop="48dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="26dp">
+
+        <!-- Left side: description or message -->
+        <FrameLayout
+            android:id="@+id/description_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/text_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-thin"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:shadowColor="#000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/text_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:fontFamily="sans-serif-thin"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:shadowColor="#000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <!-- Right side: clock -->
+        <TextView
+            android:id="@+id/text_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="16dp"
+            android:fontFamily="sans-serif-thin"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:shadowColor="#000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="1"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</FrameLayout>

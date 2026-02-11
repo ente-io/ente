@@ -1,0 +1,19 @@
+<resources>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="ssaver_background">#0B0E10</color>
+    <color name="ssaver_surface">#15181B</color>
+    <color name="ssaver_surface_border">#2A2F33</color>
+    <color name="ssaver_text_primary">#FFFFFF</color>
+    <color name="ssaver_text_secondary">#B7BDC3</color>
+    <color name="ssaver_text_hint">#8D949A</color>
+    <color name="ssaver_green">#08C225</color>
+    <color name="ssaver_green_dark">#06A51F</color>
+    <color name="ssaver_green_focus">#14D93A</color>
+    <color name="ssaver_green_alpha">#3308C225</color>
+    <color name="ssaver_surface_focus">#1A08C225</color>
+    <color name="ssaver_text_on_primary">#FFFFFF</color>
+
+    <color name="ic_launcher_background">#08C225</color>
+</resources>

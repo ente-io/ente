@@ -1,0 +1,23 @@
+[Error]
+interface EnteCoreError {
+  Message(string detail);
+};
+
+namespace ente_core {
+  [Throws=EnteCoreError]
+  bytes decrypt_blob_bytes(bytes encrypted_data, string decryption_header_b64, bytes key);
+
+  [Throws=EnteCoreError]
+  bytes decrypt_box_key(string encrypted_key_b64, string key_decryption_nonce_b64, string collection_key_b64);
+
+  [Throws=EnteCoreError]
+  i32? decrypt_metadata_file_type(string encrypted_data_b64, string decryption_header_b64, bytes key);
+
+  [Throws=EnteCoreError]
+  string derive_key(string passphrase, string salt_b64, u64 ops_limit, u64 mem_limit);
+
+  [Throws=EnteCoreError]
+  void init_crypto();
+
+  u32 secretbox_key_bytes();
+};

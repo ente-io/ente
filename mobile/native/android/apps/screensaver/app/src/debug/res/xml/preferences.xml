@@ -1,0 +1,39 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="pref_open_setup"
+        android:title="@string/setup"
+        android:summary="@string/setup_configure_summary" />
+
+    <ListPreference
+        android:defaultValue="debug_assets"
+        android:entries="@array/pref_source_entries"
+        android:entryValues="@array/pref_source_values"
+        android:key="pref_source"
+        android:title="Photo source" />
+
+    <ListPreference
+        android:defaultValue="10000"
+        android:entries="@array/pref_interval_entries"
+        android:entryValues="@array/pref_interval_values"
+        android:key="pref_interval_ms"
+        android:title="Slideshow interval" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="pref_shuffle"
+        android:title="Shuffle" />
+
+    <ListPreference
+        android:defaultValue="crop"
+        android:entries="@array/pref_fit_entries"
+        android:entryValues="@array/pref_fit_values"
+        android:key="pref_fit_mode"
+        android:title="Fit mode" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="pref_clock"
+        android:title="Show clock" />
+
+</PreferenceScreen>
