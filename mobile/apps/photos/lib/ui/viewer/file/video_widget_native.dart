@@ -104,7 +104,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _transformationController.addListener(_onZoomChanged);
 
     if (widget.selectedPreview) {
       loadPreview();
@@ -260,22 +259,19 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _captionUpdatedSubscription.cancel();
-    _transformationController.removeListener(_onZoomChanged);
     _transformationController.dispose();
     EnteWakeLockService.instance
         .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
     super.dispose();
   }
 
-  void _onZoomChanged() {
-    final scale = _transformationController.value.getMaxScaleOnAxis();
-    final isZoomed = scale > kZoomThreshold;
-    if (_isZooming != isZoomed) {
+  void _onInteractionLockChanged(bool shouldLock) {
+    if (_isZooming != shouldLock) {
       setState(() {
-        _isZooming = isZoomed;
+        _isZooming = shouldLock;
       });
-      widget.shouldDisableScroll?.call(isZoomed);
     }
+    widget.shouldDisableScroll?.call(shouldLock);
   }
 
   @override
@@ -292,19 +288,18 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
         },
         child: GestureDetector(
+          // Keep recognizer out of the arena during multi-touch/zoom to avoid
+          // it stealing pinch gestures with predominantly vertical movement.
           onVerticalDragUpdate: _isGuestView || _isZooming
               ? null
-              : (d) => {
-                    if (d.delta.dy > dragSensitivity)
-                      {
-                        _stopPlaybackBeforeDismiss(),
-                        Navigator.of(context).pop(),
-                      }
-                    else if (d.delta.dy < (dragSensitivity * -1))
-                      {
-                        showDetailsSheet(context, widget.file),
-                      },
-                  },
+              : (d) {
+                  if (d.delta.dy > dragSensitivity) {
+                    _stopPlaybackBeforeDismiss();
+                    Navigator.of(context).pop();
+                  } else if (d.delta.dy < (dragSensitivity * -1)) {
+                    showDetailsSheet(context, widget.file);
+                  }
+                },
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 750),
             switchOutCurve: Curves.easeOutExpo,
@@ -318,7 +313,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                     children: [
                       ZoomableVideoViewer(
                         transformationController: _transformationController,
-                        shouldDisableScroll: widget.shouldDisableScroll,
+                        onInteractionLockChanged: _onInteractionLockChanged,
                         child: Center(
                           child: AspectRatio(
                             aspectRatio: aspectRatio ?? 1,
