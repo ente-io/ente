@@ -75,7 +75,7 @@ from pathlib import Path
 import sys
 
 path = Path("$CLIP_CPP")
-text = path.read_text()
+text = path.read_text(encoding="utf-8", errors="ignore")
 
 replacements = {
     """            case PROJECTOR_TYPE_LFM2:\n            case PROJECTOR_TYPE_KIMIVL:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""": """            case PROJECTOR_TYPE_LFM2:\n            case PROJECTOR_TYPE_KIMIVL:\n                {\n                    model.mm_input_norm_w = get_tensor(TN_MM_INP_NORM, false);\n                    model.mm_input_norm_b = get_tensor(TN_MM_INP_NORM_B, false);\n                    model.mm_1_w = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"weight\"));\n                    model.mm_1_b = get_tensor(string_format(TN_LLAVA_PROJ, 1, \"bias\"));\n                    model.mm_2_w = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"weight\"));\n                    model.mm_2_b = get_tensor(string_format(TN_LLAVA_PROJ, 2, \"bias\"));\n                } break;\n""",
@@ -98,7 +98,7 @@ for old, new in replacements.items():
         missing.append(old)
 
 if updated != text:
-    path.write_text(updated)
+    path.write_text(updated, encoding="utf-8")
 
 if missing:
     sys.stderr.write("mtmd clip.cpp patch patterns not found; llama.cpp may have changed.\n")
