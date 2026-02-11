@@ -417,7 +417,7 @@ impl SyncEngine {
             return Ok(MigrationState::NotNeeded);
         }
 
-        let remote = http.get_json_optional::<ChatKeyPayload>("/ensu/chat/key", &[]);
+        let remote = http.get_json_optional::<ChatKeyPayload>("/llmchat/chat/key", &[]);
         match remote {
             Ok(Some(_)) => Ok(MigrationState::InProgress),
             Ok(None) => Ok(MigrationState::InProgress),
@@ -513,7 +513,7 @@ impl SyncEngine {
                     fallback
                 }
             };
-            let mut url = format!("{}/ensu/chat/attachment/{}", base_url, remote_id);
+            let mut url = format!("{}/llmchat/chat/attachment/{}", base_url, remote_id);
             let bytes = match http.get_bytes(&url) {
                 Ok(bytes) => bytes,
                 Err(SyncError::Http { status: 404, .. }) => {
@@ -524,7 +524,7 @@ impl SyncEngine {
                     }
                     if let Some(updated) = self.db.get_attachment_remote_id(&attachment_id)? {
                         remote_id = updated;
-                        url = format!("{}/ensu/chat/attachment/{}", base_url, remote_id);
+                        url = format!("{}/llmchat/chat/attachment/{}", base_url, remote_id);
                     }
                     http.get_bytes(&url)?
                 }
@@ -565,7 +565,7 @@ impl SyncEngine {
                 ("sinceId", cursor.since_id.clone()),
                 ("limit", self.diff_limit.to_string()),
             ];
-            let response: DiffResponse = http.get_json("/ensu/chat/diff", &query)?;
+            let response: DiffResponse = http.get_json("/llmchat/chat/diff", &query)?;
 
             self.apply_diff(&response, chat_key, result)?;
 
@@ -975,7 +975,7 @@ impl SyncEngine {
         let deleted_sessions = self.db.get_deleted_sessions()?;
         for (uuid, _deleted_at) in deleted_sessions {
             if let Some(remote_id) = self.sync_state.get_session_remote_id(uuid)? {
-                http.delete("/ensu/chat/session", &[("id", remote_id)])?;
+                http.delete("/llmchat/chat/session", &[("id", remote_id)])?;
                 let _ = self.sync_state.delete_session_state(uuid);
             }
             let _ = self.db.delete_attachment_tracking_for_session(uuid);
@@ -985,7 +985,7 @@ impl SyncEngine {
         let deleted_messages = self.db.get_deleted_messages()?;
         for (uuid, _deleted_at) in deleted_messages {
             if let Some(remote_id) = self.sync_state.get_message_remote_id(uuid)? {
-                http.delete("/ensu/chat/message", &[("id", remote_id)])?;
+                http.delete("/llmchat/chat/message", &[("id", remote_id)])?;
                 let _ = self.sync_state.delete_message_state(uuid);
             }
             let _ = self.db.delete_attachment_tracking_for_message(uuid);
@@ -1092,7 +1092,7 @@ impl SyncEngine {
             client_metadata: Some(client_metadata),
         };
         let response: UpsertSessionResponse =
-            http.post_json("/ensu/chat/session", &session_request)?;
+            http.post_json("/llmchat/chat/session", &session_request)?;
         let remote_id = response.session_uuid;
         self.sync_state
             .set_session_state(session.uuid, Some(&remote_id), response.updated_at)?;
@@ -1171,7 +1171,7 @@ impl SyncEngine {
             client_metadata: Some(client_metadata),
         };
         let response: UpsertMessageResponse =
-            http.post_json("/ensu/chat/message", &message_request)?;
+            http.post_json("/llmchat/chat/message", &message_request)?;
         self.sync_state.set_message_state(
             message.uuid,
             Some(&response.message_uuid),
@@ -1364,12 +1364,12 @@ impl SyncEngine {
                     }
                 };
 
-                let status = match http.head_status(&format!("/ensu/chat/attachment/{}", remote_id))
-                {
-                    Ok(status) => status,
-                    Err(SyncError::Unauthorized) => return Err(SyncError::Unauthorized),
-                    Err(_) => continue,
-                };
+                let status =
+                    match http.head_status(&format!("/llmchat/chat/attachment/{}", remote_id)) {
+                        Ok(status) => status,
+                        Err(SyncError::Unauthorized) => return Err(SyncError::Unauthorized),
+                        Err(_) => continue,
+                    };
 
                 if status == 404 {
                     let _ = self.db.upsert_pending_attachment(
@@ -1403,7 +1403,7 @@ impl SyncEngine {
             content_md5: None,
         };
         let upload_url = http.post_json::<UploadUrlResponse, _>(
-            "/ensu/chat/attachment/upload-url?force=true",
+            "/llmchat/chat/attachment/upload-url?force=true",
             &request,
         )?;
         self.db
@@ -1450,9 +1450,9 @@ impl SyncEngine {
             };
 
             let upload_path = if force_uploads.contains(&row.attachment_id) {
-                "/ensu/chat/attachment/upload-url?force=true".to_string()
+                "/llmchat/chat/attachment/upload-url?force=true".to_string()
             } else {
-                "/ensu/chat/attachment/upload-url".to_string()
+                "/llmchat/chat/attachment/upload-url".to_string()
             };
 
             let upload_url = match http.post_json::<UploadUrlResponse, _>(&upload_path, &request) {
@@ -1646,7 +1646,7 @@ fn get_or_create_chat_key_with_state(
         return Ok((key, ChatKeyStatus::Cached));
     }
 
-    let remote = http.get_json_optional::<ChatKeyPayload>("/ensu/chat/key", &[]);
+    let remote = http.get_json_optional::<ChatKeyPayload>("/llmchat/chat/key", &[]);
     let remote = match remote {
         Ok(value) => value,
         Err(SyncError::Http {
@@ -1674,13 +1674,13 @@ fn get_or_create_chat_key_with_state(
     let encrypted = encrypt_chat_key(&chat_key, master_key)?;
     let payload = ChatKeyPayload::from_encrypted(&encrypted);
 
-    match http.post_empty("/ensu/chat/key", &payload) {
+    match http.post_empty("/llmchat/chat/key", &payload) {
         Ok(()) => {
             save_chat_key_to_meta(sync_state, &payload)?;
             Ok((chat_key, ChatKeyStatus::Created))
         }
         Err(SyncError::Http { status: 409, .. }) => {
-            let existing = http.get_json_optional::<ChatKeyPayload>("/ensu/chat/key", &[])?;
+            let existing = http.get_json_optional::<ChatKeyPayload>("/llmchat/chat/key", &[])?;
             let payload = existing
                 .ok_or_else(|| SyncError::InvalidResponse("chat key already exists".to_string()))?;
             let encrypted = payload.encrypted_value().ok_or_else(|| {
