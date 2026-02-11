@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -700,7 +701,7 @@ private fun StreamingMessageBubble(
 
     val riveBoxWidth = 115.dp
     val riveBoxHeight = 52.5.dp
-    val riveOverflowScale = 1.08f
+    val riveOutroOverflowScale = 1.08f
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -713,21 +714,19 @@ private fun StreamingMessageBubble(
                 .graphicsLayer { clip = false },
             contentAlignment = Alignment.CenterStart
         ) {
-            Box(
+            ensuRiveAnimation(
                 modifier = Modifier
                     .fillMaxSize()
-                    .wrapContentSize(align = Alignment.CenterStart, unbounded = true)
-                    .graphicsLayer { clip = false },
-                contentAlignment = Alignment.CenterStart
-            ) {
-                ensuRiveAnimation(
-                    modifier = Modifier
-                        .width(riveBoxWidth * riveOverflowScale)
-                        .height(riveBoxHeight * riveOverflowScale),
-                    outroTrigger = !isGenerating,
-                    outroInputName = "outro"
-                )
-            }
+                    .graphicsLayer {
+                        val overflowScale = if (isGenerating) 1f else riveOutroOverflowScale
+                        scaleX = overflowScale
+                        scaleY = overflowScale
+                        transformOrigin = TransformOrigin(0f, 0.5f)
+                        clip = false
+                    },
+                outroTrigger = !isGenerating,
+                outroInputName = "outro"
+            )
         }
 
         if (renderedText.isNotBlank()) {
