@@ -12,10 +12,11 @@ important documents in the cloud with secure sharing capabilities.
 3. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
    - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
+   - Then generate localizations for the shared strings package by running `flutter gen-l10n` in `packages/strings` (these generated files are not committed).
 
-4. For Android, [setup your
-   keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-   and run `flutter build apk --release --flavor independent`
+4. For Android:
+   - **F-Droid build:** Run `flutter build apk --release --flavor fdroid` (does not require a keystore; output is `build/app/outputs/flutter-apk/app-fdroid-release.apk`).
+   - **Independent build:** [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`.
 
 5. For iOS, run `flutter build ios`
 
