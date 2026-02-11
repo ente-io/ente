@@ -79,7 +79,7 @@ struct SessionDrawerView: View {
     }
 
     private var drawerLogo: some View {
-        EnsuBrandIllustration(width: 124, height: 32)
+        EnsuBrandIllustration(width: 248, height: 64)
     }
 
     private var headerControls: some View {

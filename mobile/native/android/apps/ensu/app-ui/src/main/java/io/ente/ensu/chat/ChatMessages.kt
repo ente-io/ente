@@ -678,8 +678,8 @@ private fun StreamingMessageBubble(text: String) {
         ensuRiveAnimation(
             modifier = Modifier
                 .wrapContentSize(align = Alignment.TopStart)
-                .width(92.dp)
-                .height(42.dp)
+                .width(115.dp)
+                .height(52.5.dp)
         )
 
         if (renderedText.isNotBlank()) {

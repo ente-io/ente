@@ -144,8 +144,8 @@ private fun DrawerHeader(
             ) {
                 ensuRiveAnimation(
                     modifier = Modifier
-                        .width(124.dp)
-                        .height(32.dp)
+                        .width(248.dp)
+                        .height(64.dp)
                 )
             }
 

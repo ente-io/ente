@@ -227,7 +227,7 @@ struct StreamingBubbleView: View {
 
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: EnsuSpacing.sm) {
-                EnsuBrandIllustration(width: 92, height: 42)
+                EnsuBrandIllustration(width: 115, height: 52.5)
 
                 if hasText {
                     TimelineView(.periodic(from: .now, by: 0.55)) { context in
