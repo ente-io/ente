@@ -1,0 +1,25 @@
+Ente Locker is a simple app to securely store your important documents.
+
+If you've been looking for a privacy-friendly way to store sensitive documents like IDs, passports, certificates, and other files, you've come to the right place. With Ente Locker, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+
+We have open-source apps across Android, iOS, web and desktop, and your documents will seamlessly sync between all of them in an end-to-end encrypted (e2ee) manner.
+
+Ente Locker also makes it simple to share your collections with your loved ones. You can organize documents into collections and share them securely.
+
+Your encrypted data is replicated to 3 different locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your documents are always safe and accessible.
+
+We are here to make the safest document storage app ever, come join our journey!
+
+FEATURES
+- End-to-end encrypted storage for all your documents
+- Organize documents into collections
+- Share collections securely with others
+- Cross-platform sync across Android, iOS, web and desktop
+- Original quality storage, no compression
+- Human support, because you're worth it
+
+PRICING
+We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+
+SUPPORT
+We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
