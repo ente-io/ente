@@ -107,8 +107,8 @@ pub struct Message {
 }
 
 #[derive(uniffi::Object)]
-pub struct LlmChatDb {
-    inner: core::LlmChatDb<core::SqliteBackend>,
+pub struct EnsuDb {
+    inner: core::EnsuDb<core::SqliteBackend>,
 }
 
 fn to_session(session: core::Session) -> Session {
@@ -140,7 +140,7 @@ fn to_message(message: core::Message) -> Message {
 }
 
 #[uniffi::export]
-impl LlmChatDb {
+impl EnsuDb {
     #[uniffi::constructor]
     pub fn open(
         main_db_path: String,
@@ -148,7 +148,7 @@ impl LlmChatDb {
         key: Vec<u8>,
     ) -> Result<Self, DbError> {
         let inner =
-            core::LlmChatDb::open_sqlite_with_defaults(main_db_path, attachments_db_path, key)?;
+            core::EnsuDb::open_sqlite_with_defaults(main_db_path, attachments_db_path, key)?;
         Ok(Self { inner })
     }
 

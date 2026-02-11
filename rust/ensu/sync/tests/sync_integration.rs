@@ -1,4 +1,4 @@
-use ensu_db::LlmChatDb;
+use ensu_db::EnsuDb;
 use ensu_db::crypto::KEY_BYTES;
 use ensu_sync::SyncAuth;
 use ensu_sync::SyncEngine;
@@ -143,7 +143,7 @@ fn pull_applies_remote_sessions_and_messages() {
     let auth = make_auth(&server, master_key);
     engine.sync(auth).expect("sync");
 
-    let db = LlmChatDb::open_sqlite_with_defaults(
+    let db = EnsuDb::open_sqlite_with_defaults(
         env.main_db_path.clone(),
         env.attachments_db_path.clone(),
         db_key,
@@ -176,7 +176,7 @@ fn push_only_needs_sync_messages() {
     )
     .expect("sync engine");
 
-    let db = LlmChatDb::open_sqlite_with_defaults(
+    let db = EnsuDb::open_sqlite_with_defaults(
         env.main_db_path.clone(),
         env.attachments_db_path.clone(),
         db_key.clone(),
@@ -299,7 +299,7 @@ fn tombstone_removes_messages() {
     let auth = make_auth(&server, master_key);
     engine.sync(auth).expect("sync");
 
-    let db = LlmChatDb::open_sqlite_with_defaults(
+    let db = EnsuDb::open_sqlite_with_defaults(
         env.main_db_path.clone(),
         env.attachments_db_path.clone(),
         db_key,

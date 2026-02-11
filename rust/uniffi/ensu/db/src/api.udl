@@ -42,9 +42,9 @@ dictionary Message {
 };
 
 namespace db {
-  interface LlmChatDb {
+  interface EnsuDb {
     [Constructor, Throws=DbError]
-    LlmChatDb(string main_db_path, string attachments_db_path, sequence<u8> key);
+    EnsuDb(string main_db_path, string attachments_db_path, sequence<u8> key);
 
     [Throws=DbError]
     Session create_session(string title);

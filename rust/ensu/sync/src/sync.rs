@@ -6,8 +6,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use zeroize::Zeroizing;
 
 use ensu_db::{
-    AttachmentKind, AttachmentMeta, AttachmentStore, Clock, EntityType, FsAttachmentStore,
-    LlmChatDb, Message, Sender, Session, SqliteBackend, SyncEntityState, SyncStateDb, SystemClock,
+    AttachmentKind, AttachmentMeta, AttachmentStore, Clock, EnsuDb, EntityType, FsAttachmentStore,
+    Message, Sender, Session, SqliteBackend, SyncEntityState, SyncStateDb, SystemClock,
     UploadState,
 };
 use ente_core::crypto::keys;
@@ -107,7 +107,7 @@ enum ChatKeyStatus {
 }
 
 pub struct SyncEngine {
-    db: LlmChatDb<SqliteBackend>,
+    db: EnsuDb<SqliteBackend>,
     sync_state: SyncStateDb<SqliteBackend>,
     attachment_store: FsAttachmentStore,
     plaintext_dir: Option<PathBuf>,
@@ -135,7 +135,7 @@ impl SyncEngine {
             let _ = ensu_db::traits::ensure_directory(dir);
         }
 
-        let db = LlmChatDb::open_sqlite_with_defaults(main_db_path, sync_db_path.clone(), db_key)?;
+        let db = EnsuDb::open_sqlite_with_defaults(main_db_path, sync_db_path.clone(), db_key)?;
         let sync_state = SyncStateDb::open_sqlite_with_defaults(sync_db_path)?;
         let attachment_store = FsAttachmentStore::new(attachments_dir);
         Ok(Self {

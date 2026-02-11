@@ -9,12 +9,12 @@ use crate::models::{AttachmentMeta, EntityType, Message, Session};
 use crate::traits::{Clock, UuidGen};
 
 /// High-level DB that ties together the main chat DB and the attachments upload-state DB.
-pub struct LlmChatDb<B: crate::Backend> {
+pub struct EnsuDb<B: crate::Backend> {
     pub chat: ChatDb<B>,
     pub attachments: AttachmentsDb<B>,
 }
 
-impl<B: crate::Backend> LlmChatDb<B> {
+impl<B: crate::Backend> EnsuDb<B> {
     pub fn new(chat: ChatDb<B>, attachments: AttachmentsDb<B>) -> Self {
         Self { chat, attachments }
     }
@@ -356,7 +356,7 @@ impl<B: crate::Backend> LlmChatDb<B> {
 }
 
 #[cfg(feature = "sqlite")]
-impl LlmChatDb<crate::backend::sqlite::SqliteBackend> {
+impl EnsuDb<crate::backend::sqlite::SqliteBackend> {
     pub fn open_sqlite(
         main_path: impl AsRef<std::path::Path>,
         attachments_path: impl AsRef<std::path::Path>,
