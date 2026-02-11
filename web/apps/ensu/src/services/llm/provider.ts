@@ -12,6 +12,7 @@ import type {
 const DEFAULT_CONTEXT_SIZE = 4096;
 const DEFAULT_MAX_TOKENS = 512;
 const MIN_GGUF_BYTES = 1024 * 1024; // 1MB
+const MIN_HIGH_RAM_MAC_BYTES = 16 * 1024 * 1024 * 1024;
 
 export const DEFAULT_MODEL: ModelInfo = {
     id: "lfm-2.5-vl-1.6b",
@@ -25,6 +26,15 @@ export const DEFAULT_MODEL: ModelInfo = {
     mmprojSizeBytes: 583_109_888,
 };
 
+const HIGH_RAM_MAC_MODEL: ModelInfo = {
+    id: "qwen3-vl-8b-instruct-q4km",
+    name: "Qwen3-VL 8B Instruct (Q4_K_M)",
+    url: "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF/resolve/main/Qwen3VL-8B-Instruct-Q4_K_M.gguf?download=true",
+    mmprojUrl:
+        "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-8B-Instruct-Q8_0.gguf",
+    description: "Qwen multimodal model for higher-memory macOS devices",
+};
+
 export class LlmProvider {
     private backend = createInferenceBackend({
         backend: "auto",
@@ -36,6 +46,7 @@ export class LlmProvider {
     private currentModelPath?: string;
     private currentMmprojPath?: string;
     private currentContextKey?: string;
+    private defaultModel = DEFAULT_MODEL;
 
     private downloadAbort?: AbortController;
     private progressListeners = new Set<(progress: DownloadProgress) => void>();
@@ -45,6 +56,7 @@ export class LlmProvider {
     public async initialize() {
         if (this.initialized) return;
         await this.backend.initBackend();
+        await this.resolveDefaultModelForDevice();
         this.initialized = true;
     }
 
@@ -57,6 +69,10 @@ export class LlmProvider {
 
     public getCurrentModel() {
         return this.currentModel;
+    }
+
+    public getDefaultModel() {
+        return this.defaultModel;
     }
 
     public getBackendKind() {
@@ -314,6 +330,40 @@ export class LlmProvider {
         });
     }
 
+    private async resolveDefaultModelForDevice() {
+        this.defaultModel = DEFAULT_MODEL;
+
+        if (this.backend.kind !== "tauri") {
+            return;
+        }
+
+        try {
+            const { invoke } = await import("@tauri-apps/api/tauri");
+            const info = await invoke<{
+                platform?: string;
+                totalMemoryBytes?: number | null;
+            }>("system_info");
+
+            const platform = info.platform?.toLowerCase();
+            const totalMemoryBytes = info.totalMemoryBytes ?? 0;
+
+            if (
+                platform === "macos" &&
+                totalMemoryBytes >= MIN_HIGH_RAM_MAC_BYTES
+            ) {
+                this.defaultModel = HIGH_RAM_MAC_MODEL;
+            }
+
+            log.info("LLM default model resolved", {
+                platform,
+                totalMemoryBytes,
+                modelId: this.defaultModel.id,
+            });
+        } catch (error) {
+            log.warn("Failed to resolve device-specific default model", error);
+        }
+    }
+
     private resolveTargetModel(settings: ModelSettings): ModelInfo {
         if (settings.useCustomModel && settings.modelUrl) {
             return {
@@ -323,7 +373,7 @@ export class LlmProvider {
                 mmprojUrl: settings.mmprojUrl,
             };
         }
-        return DEFAULT_MODEL;
+        return this.defaultModel;
     }
 
     private resolveMmprojUrl(model: ModelInfo, settings: ModelSettings) {

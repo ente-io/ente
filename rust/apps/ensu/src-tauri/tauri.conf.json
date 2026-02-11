@@ -24,9 +24,9 @@
     ],
     "bundle": {
       "active": true,
-      "targets": ["app"],
+      "targets": "all",
       "identifier": "io.ente.ensu",
-      "icon": ["icons/icon.icns", "icons/icon.png"]
+      "icon": ["icons/icon.icns", "icons/icon.ico", "icons/icon.png"]
     },
     "allowlist": {
       "all": false,
