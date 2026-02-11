@@ -25,9 +25,9 @@ dictionary SyncResult {
 };
 
 namespace sync {
-  interface LlmChatSync {
+  interface EnsuSync {
     [Constructor, Throws=SyncError]
-    LlmChatSync(string main_db_path, string attachments_db_path, sequence<u8> db_key, string attachments_dir, string meta_dir, string? plaintext_dir);
+    EnsuSync(string main_db_path, string attachments_db_path, sequence<u8> db_key, string attachments_dir, string meta_dir, string? plaintext_dir);
 
     [Throws=SyncError]
     SyncResult sync(SyncAuth auth);

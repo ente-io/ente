@@ -373,6 +373,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ensu-sync"
+version = "0.1.0"
+dependencies = [
+ "ente-core",
+ "hkdf",
+ "llmchat-db",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror",
+ "uuid",
+ "zeroize",
+]
+
+[[package]]
 name = "ente-core"
 version = "0.0.1"
 dependencies = [
@@ -939,22 +955,6 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
- "thiserror",
- "uuid",
- "zeroize",
-]
-
-[[package]]
-name = "llmchat-sync"
-version = "0.1.0"
-dependencies = [
- "ente-core",
- "hkdf",
- "llmchat-db",
- "reqwest",
- "serde",
- "serde_json",
- "sha2",
  "thiserror",
  "uuid",
  "zeroize",
@@ -1626,7 +1626,7 @@ dependencies = [
 name = "sync"
 version = "0.1.0"
 dependencies = [
- "llmchat-sync",
+ "ensu-sync",
  "serde",
  "thiserror",
  "uniffi",

@@ -8,7 +8,7 @@ name = "sync"
 crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-llmchat-sync = { path = "../../../ensu/sync" }
+ensu-sync = { path = "../../../ensu/sync" }
 serde = { version = "1", features = ["derive"] }
 thiserror = "2"
 uniffi = { version = "0.31.0" }

@@ -1,5 +1,5 @@
 [package]
-name = "llmchat-sync"
+name = "ensu-sync"
 version = "0.1.0"
 edition = "2024"
 

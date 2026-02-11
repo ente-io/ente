@@ -1,4 +1,4 @@
-use llmchat_sync as core;
+use ensu_sync as core;
 use thiserror::Error;
 
 #[derive(Debug, Error, uniffi::Error)]
@@ -174,12 +174,12 @@ pub fn fetch_chat_key(auth: SyncAuth, sync_db_path: String) -> Result<Vec<u8>, S
 }
 
 #[derive(uniffi::Object)]
-pub struct LlmChatSync {
+pub struct EnsuSync {
     inner: core::SyncEngine,
 }
 
 #[uniffi::export]
-impl LlmChatSync {
+impl EnsuSync {
     #[uniffi::constructor]
     pub fn open(
         main_db_path: String,

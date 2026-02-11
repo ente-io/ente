@@ -1,14 +1,14 @@
+use ensu_sync::SyncAuth;
+use ensu_sync::SyncEngine;
+use ensu_sync::crypto::{encrypt_chat_key, encrypt_payload};
+use ensu_sync::models::{
+    ChatKeyPayload, DiffResponse, DiffTombstones, MessagePayload, MessageTombstone, RemoteMessage,
+    RemoteSession, SessionPayload,
+};
 use httpmock::Method::{DELETE, GET, POST};
 use httpmock::MockServer;
 use llmchat_db::LlmChatDb;
 use llmchat_db::crypto::KEY_BYTES;
-use llmchat_sync::SyncAuth;
-use llmchat_sync::SyncEngine;
-use llmchat_sync::crypto::{encrypt_chat_key, encrypt_payload};
-use llmchat_sync::models::{
-    ChatKeyPayload, DiffResponse, DiffTombstones, MessagePayload, MessageTombstone, RemoteMessage,
-    RemoteSession, SessionPayload,
-};
 use tempfile::TempDir;
 use uuid::Uuid;
 use zeroize::Zeroizing;
@@ -55,7 +55,7 @@ fn mock_chat_key(server: &MockServer, master_key: &[u8], chat_key: &[u8]) {
     let encrypted = encrypt_chat_key(chat_key, master_key).expect("encrypt chat key");
     let payload = ChatKeyPayload::from_encrypted(&encrypted);
     server.mock(|when, then| {
-        when.method(GET).path("/llmchat/chat/key");
+        when.method(GET).path("/ensu/chat/key");
         then.status(200).json_body_obj(&payload);
     });
 }
@@ -69,7 +69,7 @@ fn mock_empty_diff(server: &MockServer, timestamp: i64) {
         timestamp: Some(timestamp),
     };
     server.mock(|when, then| {
-        when.method(GET).path("/llmchat/chat/diff");
+        when.method(GET).path("/ensu/chat/diff");
         then.status(200).json_body_obj(&diff);
     });
 }
@@ -136,7 +136,7 @@ fn pull_applies_remote_sessions_and_messages() {
     };
 
     server.mock(|when, then| {
-        when.method(GET).path("/llmchat/chat/diff");
+        when.method(GET).path("/ensu/chat/diff");
         then.status(200).json_body_obj(&diff);
     });
 
@@ -200,12 +200,12 @@ fn push_only_needs_sync_messages() {
     mock_empty_diff(&server, 10);
 
     let session_mock = server.mock(|when, then| {
-        when.method(POST).path("/llmchat/chat/session");
+        when.method(POST).path("/ensu/chat/session");
         then.status(200).json_body_obj(&serde_json::json!({}));
     });
 
     let message_mock = server.mock(|when, then| {
-        when.method(POST).path("/llmchat/chat/message");
+        when.method(POST).path("/ensu/chat/message");
         then.status(200).json_body_obj(&serde_json::json!({}));
     });
 
@@ -287,12 +287,12 @@ fn tombstone_removes_messages() {
     };
 
     server.mock(|when, then| {
-        when.method(GET).path("/llmchat/chat/diff");
+        when.method(GET).path("/ensu/chat/diff");
         then.status(200).json_body_obj(&diff);
     });
 
     server.mock(|when, then| {
-        when.method(DELETE).path("/llmchat/chat/message");
+        when.method(DELETE).path("/ensu/chat/message");
         then.status(200).json_body_obj(&serde_json::json!({}));
     });
 
