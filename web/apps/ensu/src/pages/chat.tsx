@@ -3432,6 +3432,7 @@ const Page: React.FC = () => {
             showMiniDialog({
                 title: "Coming soon",
                 message: "Sign in is coming soon.",
+                cancel: "Got it",
             });
             return;
         }
