@@ -139,7 +139,7 @@ const randomLoadingPhrase = () => {
 
 const MEDIA_MARKER = "<__media__>";
 const IMAGE_TOKEN_ESTIMATE = 768;
-const MAX_INFERENCE_IMAGE_PIXELS = 3_500_000;
+const MAX_INFERENCE_IMAGE_PIXELS = 1_500_000;
 const MAX_INFERENCE_IMAGE_LONG_EDGE = 2048;
 const INFERENCE_IMAGE_QUALITY = 0.92;
 const IMAGE_SELECTOR_EXTENSIONS = [
@@ -245,6 +245,11 @@ const sanitizeImageExtension = (filename?: string) => {
     return cleaned || undefined;
 };
 
+const isJpegExtension = (extension?: string) => {
+    const lower = extension?.toLowerCase();
+    return lower === "jpg" || lower === "jpeg";
+};
+
 const prepareInferenceImageBytes = async (
     image: ImageAttachment,
     maxPixels: number,
@@ -255,6 +260,43 @@ const prepareInferenceImageBytes = async (
     if (typeof document === "undefined") {
         return { bytes: originalBytes, extension: originalExtension };
     }
+
+    const encodeToJpeg = async (
+        width: number,
+        height: number,
+        draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void,
+    ) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+            return null;
+        }
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        draw(ctx, width, height);
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(
+                (result) => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error("Failed to encode image"));
+                    }
+                },
+                "image/jpeg",
+                INFERENCE_IMAGE_QUALITY,
+            );
+        });
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        return {
+            bytes,
+            extension: "jpg" as const,
+            resizedWidth: width,
+            resizedHeight: height,
+        };
+    };
 
     const resizeToJpeg = async (
         width: number,
@@ -281,36 +323,7 @@ const prepareInferenceImageBytes = async (
 
         const targetWidth = Math.max(1, Math.round(width * scale));
         const targetHeight = Math.max(1, Math.round(height * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            return null;
-        }
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        draw(ctx, targetWidth, targetHeight);
-        const blob = await new Promise<Blob>((resolve, reject) => {
-            canvas.toBlob(
-                (result) => {
-                    if (result) {
-                        resolve(result);
-                    } else {
-                        reject(new Error("Failed to encode image"));
-                    }
-                },
-                "image/jpeg",
-                INFERENCE_IMAGE_QUALITY,
-            );
-        });
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        return {
-            bytes,
-            extension: "jpg",
-            resizedWidth: targetWidth,
-            resizedHeight: targetHeight,
-        };
+        return encodeToJpeg(targetWidth, targetHeight, draw);
     };
 
     const loadImage = async () => {
@@ -356,55 +369,118 @@ const prepareInferenceImageBytes = async (
         if (width * height > maxPixels) {
             throw new Error("Image too large to resize for inference");
         }
-        log.info("Prepared inference image (no resize)", {
-            id: image.id,
-            name: image.name,
-            maxPixels,
-            width,
-            height,
-            bytes: originalBytes.length,
+
+        if (isJpegExtension(originalExtension)) {
+            log.info("Prepared inference image (no resize)", {
+                id: image.id,
+                name: image.name,
+                maxPixels,
+                width,
+                height,
+                bytes: originalBytes.length,
+            });
+            return { bytes: originalBytes, extension: originalExtension };
+        }
+
+        const converted = await encodeToJpeg(width, height, (ctx, w, h) => {
+            ctx.drawImage(img, 0, 0, w, h);
         });
+
+        if (converted) {
+            log.info("Prepared inference image (format normalized)", {
+                id: image.id,
+                name: image.name,
+                maxPixels,
+                width,
+                height,
+                originalBytes: originalBytes.length,
+                resizedBytes: converted.bytes.length,
+                originalExtension,
+            });
+            return { bytes: converted.bytes, extension: converted.extension };
+        }
+
         return { bytes: originalBytes, extension: originalExtension };
     } catch (error) {
         log.error("Failed to decode image for inference", error);
         if (typeof createImageBitmap !== "undefined") {
             try {
                 const bitmap = await createImageBitmap(image.file);
-                const resized = await resizeToJpeg(
-                    bitmap.width,
-                    bitmap.height,
-                    (ctx, w, h) => {
-                        ctx.drawImage(bitmap, 0, 0, w, h);
-                    },
-                );
-                bitmap.close();
-                if (resized) {
-                    log.info("Prepared inference image (bitmap fallback)", {
-                        id: image.id,
-                        name: image.name,
-                        originalWidth: bitmap.width,
-                        originalHeight: bitmap.height,
-                        resizedWidth: resized.resizedWidth,
-                        resizedHeight: resized.resizedHeight,
-                        originalBytes: originalBytes.length,
-                        resizedBytes: resized.bytes.length,
-                    });
-                    return {
-                        bytes: resized.bytes,
-                        extension: resized.extension,
-                    };
+                try {
+                    const resized = await resizeToJpeg(
+                        bitmap.width,
+                        bitmap.height,
+                        (ctx, w, h) => {
+                            ctx.drawImage(bitmap, 0, 0, w, h);
+                        },
+                    );
+                    if (resized) {
+                        log.info("Prepared inference image (bitmap fallback)", {
+                            id: image.id,
+                            name: image.name,
+                            originalWidth: bitmap.width,
+                            originalHeight: bitmap.height,
+                            resizedWidth: resized.resizedWidth,
+                            resizedHeight: resized.resizedHeight,
+                            originalBytes: originalBytes.length,
+                            resizedBytes: resized.bytes.length,
+                        });
+                        return {
+                            bytes: resized.bytes,
+                            extension: resized.extension,
+                        };
+                    }
+                    if (bitmap.width * bitmap.height > maxPixels) {
+                        throw new Error(
+                            "Image too large to resize for inference",
+                        );
+                    }
+
+                    if (isJpegExtension(originalExtension)) {
+                        log.info("Prepared inference image (bitmap no resize)", {
+                            id: image.id,
+                            name: image.name,
+                            width: bitmap.width,
+                            height: bitmap.height,
+                            bytes: originalBytes.length,
+                        });
+                        return {
+                            bytes: originalBytes,
+                            extension: originalExtension,
+                        };
+                    }
+
+                    const converted = await encodeToJpeg(
+                        bitmap.width,
+                        bitmap.height,
+                        (ctx, w, h) => {
+                            ctx.drawImage(bitmap, 0, 0, w, h);
+                        },
+                    );
+
+                    if (converted) {
+                        log.info(
+                            "Prepared inference image (bitmap format normalized)",
+                            {
+                                id: image.id,
+                                name: image.name,
+                                width: bitmap.width,
+                                height: bitmap.height,
+                                originalBytes: originalBytes.length,
+                                resizedBytes: converted.bytes.length,
+                                originalExtension,
+                            },
+                        );
+                        return {
+                            bytes: converted.bytes,
+                            extension: converted.extension,
+                        };
+                    }
+
+                    return { bytes: originalBytes, extension: originalExtension };
+                } finally {
+                    bitmap.close();
                 }
-                if (bitmap.width * bitmap.height > maxPixels) {
-                    throw new Error("Image too large to resize for inference");
-                }
-                log.info("Prepared inference image (bitmap no resize)", {
-                    id: image.id,
-                    name: image.name,
-                    width: bitmap.width,
-                    height: bitmap.height,
-                    bytes: originalBytes.length,
-                });
-                return { bytes: originalBytes, extension: originalExtension };
             } catch (bitmapError) {
                 log.error(
                     "Failed to resize image with ImageBitmap",
