@@ -71,6 +71,8 @@ class FlagService {
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
+  bool get usearchForSearch => internalUser;
+
   String get castUrl => flags.castUrl;
 
   String get customDomain => flags.customDomain;

@@ -1,3 +1,5 @@
+- Laurens: (i) Use usearch vectorDB for magic search and discover section
+- Laurens: Make it possible to ignore already named persons
 - Neeraj: Fix iOS native video crash by avoiding FFprobe on problematic files, harden seekbar null handling, and stop audio on swipe dismiss
 - Ashil: Fix pinch to zoom opening info sheet on video
 - Neeraj: Refresh Security toggles with latest account state (2FA + email verification)
