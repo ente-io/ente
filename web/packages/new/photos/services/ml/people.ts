@@ -575,7 +575,9 @@ export const _suggestionsAndChoicesForPerson = async (
         for (const faceID of cluster.faces) {
             const fileID = fileIDFromFaceID(faceID);
             if (!fileID) {
-                assertionFailed();
+                assertionFailed(
+                    `Invalid faceID while preparing preview faces: personID=${person.id}, clusterID=${cluster.id}, faceID=${faceID}, fileID=${String(fileID)}`,
+                );
                 continue;
             }
 

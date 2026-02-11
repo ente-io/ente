@@ -3,7 +3,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
-import "package:photos/generated/l10n.dart";
+import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
@@ -14,6 +14,7 @@ import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/banners/ml_progress_banner.dart";
 import "package:photos/ui/rituals/rituals_banner.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
@@ -140,16 +141,20 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
-                  itemCount: searchTypes.length,
+                  itemCount: searchTypes.length + 1,
                   itemBuilder: (context, index) {
-                    final sectionType = searchTypes[index];
+                    if (index == 0) {
+                      return const MLProgressBanner();
+                    }
+                    final sectionIndex = index - 1;
+                    final sectionType = searchTypes[sectionIndex];
                     switch (sectionType) {
                       case SectionType.face:
                         if (!hasGrantedMLConsent) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
-                          examples: snapshot.data!.elementAt(index)
+                          examples: snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
@@ -157,7 +162,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           return const DeviceAlbumsSection();
                         }
                         return AlbumsSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.ritual:
@@ -181,19 +186,19 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         );
                       case SectionType.location:
                         return LocationsSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.contacts:
                         return const SizedBox.shrink();
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.magic:
                         return MagicSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                     }

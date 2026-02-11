@@ -71,7 +71,10 @@ class MLService {
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
-    if (_isInitialized) return;
+    if (_isInitialized) {
+      unawaited(_maybePredownloadLocalModels());
+      return;
+    }
     _logger.info("init called");
 
     // Check if the device has enough RAM to run local indexing
@@ -115,7 +118,28 @@ class MLService {
     });
 
     _isInitialized = true;
+    unawaited(_maybePredownloadLocalModels());
     _logger.info('init done');
+  }
+
+  Future<void> _maybePredownloadLocalModels() async {
+    if (!hasGrantedMLConsent) {
+      return;
+    }
+    if (!localSettings.isMLLocalIndexingEnabled) {
+      _logger.info(
+        "Skipping ML model predownload because local indexing is disabled",
+      );
+      return;
+    }
+    if (MLIndexingIsolate.instance.areModelsDownloaded) {
+      return;
+    }
+    try {
+      await MLIndexingIsolate.instance.ensureDownloadedModels();
+    } catch (e, s) {
+      _logger.warning("Failed to predownload local ML models", e, s);
+    }
   }
 
   bool canFetch() {
@@ -232,6 +256,9 @@ class MLService {
     try {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
+      if (localSettings.isMLLocalIndexingEnabled) {
+        await MLIndexingIsolate.instance.ensureDownloadedModels();
+      }
       final Stream<List<FileMLInstruction>> instructionStream =
           fetchEmbeddingsAndInstructions(fileDownloadMlLimit, mode: mode);
 
