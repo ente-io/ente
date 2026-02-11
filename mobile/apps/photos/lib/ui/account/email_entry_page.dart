@@ -1,17 +1,18 @@
+import 'dart:async';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/common/dynamic_fab.dart';
+import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/common/web_page.dart';
-import "package:photos/ui/notification/toast.dart";
-import "package:photos/utils/dialog_util.dart";
-import 'package:step_progress_indicator/step_progress_indicator.dart';
+import "package:photos/ui/components/buttons/button_widget_v2.dart";
+import "package:photos/ui/components/models/text_input_type_v2.dart";
+import "package:photos/ui/components/text_input_widget_v2.dart";
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
@@ -26,9 +27,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   static const kStrongPasswordStrengthThreshold = 0.7;
 
   final _config = Configuration.instance;
+  final _emailController = TextEditingController();
   final _passwordController1 = TextEditingController();
   final _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
 
   String? _email;
   String? _password;
@@ -36,36 +37,33 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   String _referralSource = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
+  bool _showEmailValidation = false;
   bool _hasAgreedToTOS = true;
-  bool _hasAgreedToE2E = false;
-  bool _password1Visible = false;
-  bool _password2Visible = false;
   bool _passwordsMatch = false;
-
-  final _password1FocusNode = FocusNode();
-  final _password2FocusNode = FocusNode();
-  bool _password1InFocus = false;
-  bool _password2InFocus = false;
   bool _passwordIsValid = false;
+  bool _showPasswordStrength = false;
+  bool _showConfirmPasswordValidation = false;
+  Timer? _emailValidationTimer;
+  Timer? _passwordStrengthTimer;
+  Timer? _confirmPasswordTimer;
 
   @override
   void initState() {
     super.initState();
-    _email = _config.getEmail();
-    _password1FocusNode.addListener(
-      _password1FocusListener,
-    );
-    _password2FocusNode.addListener(
-      _password2FocusListener,
-    );
+    final storedEmail = _config.getEmail();
+    if (storedEmail != null && storedEmail.isNotEmpty) {
+      _email = storedEmail;
+      _emailController.text = storedEmail;
+      _emailIsValid = EmailValidator.validate(storedEmail);
+    }
   }
 
   @override
   void dispose() {
-    _password1FocusNode.removeListener(_password1FocusListener);
-    _password2FocusNode.removeListener(_password2FocusListener);
-    _password1FocusNode.dispose();
-    _password2FocusNode.dispose();
+    _emailValidationTimer?.cancel();
+    _passwordStrengthTimer?.cancel();
+    _confirmPasswordTimer?.cancel();
+    _emailController.dispose();
     _passwordController1.dispose();
     _passwordController2.dispose();
     super.dispose();
@@ -73,373 +71,222 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: colorScheme.backgroundColour,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.backgroundColour,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: colorScheme.content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: Text(
+          AppLocalizations.of(context).createAccount,
+          style: textTheme.largeBold,
+        ),
+        centerTitle: true,
+      ),
+      body: _getBody(colorScheme, textTheme),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ButtonWidgetV2(
+          key: const ValueKey("createAccountButton"),
+          buttonType: ButtonTypeV2.primary,
+          labelText: AppLocalizations.of(context).createAccount,
+          isDisabled: !_isFormValid(),
+          onTap: _isFormValid()
+              ? () async {
+                  _config.setVolatilePassword(_passwordController1.text);
+                  await UserService.instance.setEmail(_email!);
+                  await UserService.instance.setRefSource(_referralSource);
+                  await UserService.instance.sendOtt(
+                    context,
+                    _email!,
+                    isCreateAccountScreen: true,
+                    purpose: "signup",
+                  );
+                  FocusScope.of(context).unfocus();
+                }
+              : null,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
 
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
+  Widget _getBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+    String? passwordMessage;
+    TextInputMessageType passwordMessageType = TextInputMessageType.guide;
+
+    if (_password != null && _password!.isNotEmpty && _showPasswordStrength) {
+      if (_passwordStrength > kStrongPasswordStrengthThreshold) {
+        passwordMessage = AppLocalizations.of(context).strongPassword;
+        passwordMessageType = TextInputMessageType.success;
+      } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
+        passwordMessage = AppLocalizations.of(context).moderateStrength;
+        passwordMessageType = TextInputMessageType.alert;
       } else {
-        return FloatingActionButtonLocation.centerFloat;
+        passwordMessage = AppLocalizations.of(context).weakStrength;
+        passwordMessageType = TextInputMessageType.alert;
       }
     }
 
-    final appBar = AppBar(
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        color: Theme.of(context).iconTheme.color,
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-      title: Material(
-        type: MaterialType.transparency,
-        child: StepProgressIndicator(
-          totalSteps: 4,
-          currentStep: 1,
-          selectedColor: Theme.of(context).colorScheme.greenAlternative,
-          roundedEdges: const Radius.circular(10),
-          unselectedColor:
-              Theme.of(context).colorScheme.stepProgressUnselectedColor,
-        ),
-      ),
-    );
-    return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
-      appBar: appBar,
-      body: _getBody(),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        isFormValid: _isFormValid(),
-        buttonText: AppLocalizations.of(context).createAccount,
-        onPressedFunction: () {
-          _config.setVolatilePassword(_passwordController1.text);
-          UserService.instance.setEmail(_email!);
-          UserService.instance.setRefSource(_referralSource);
-          UserService.instance.sendOtt(
-            context,
-            _email!,
-            isCreateAccountScreen: true,
-            purpose: "signup",
-          );
-          FocusScope.of(context).unfocus();
-        },
-      ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
-    );
-  }
+    String? confirmPasswordMessage;
+    TextInputMessageType confirmPasswordMessageType =
+        TextInputMessageType.guide;
 
-  Widget _getBody() {
-    var passwordStrengthText = AppLocalizations.of(context).weakStrength;
-    var passwordStrengthColor = Colors.redAccent;
-    if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = AppLocalizations.of(context).strongStrength;
-      passwordStrengthColor = Colors.greenAccent;
-    } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = AppLocalizations.of(context).moderateStrength;
-      passwordStrengthColor = Colors.orangeAccent;
+    if (_cnfPassword.isNotEmpty &&
+        _password != null &&
+        _password!.isNotEmpty &&
+        _showConfirmPasswordValidation) {
+      if (_passwordsMatch) {
+        confirmPasswordMessage = AppLocalizations.of(context).passwordsMatch;
+        confirmPasswordMessageType = TextInputMessageType.success;
+      } else {
+        confirmPasswordMessage =
+            AppLocalizations.of(context).passwordsDontMatch;
+        confirmPasswordMessageType = TextInputMessageType.error;
+      }
     }
-    return Column(
-      children: [
-        Expanded(
-          child: AutofillGroup(
-            child: ListView(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text(
-                    AppLocalizations.of(context).createNewAccount,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: TextFormField(
-                    style: Theme.of(context).textTheme.titleMedium,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: InputDecoration(
-                      fillColor: _emailIsValid
-                          ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
-                      filled: true,
-                      hintText: AppLocalizations.of(context).email,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: _emailIsValid
-                          ? Icon(
-                              Icons.check,
-                              color: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .focusedBorder!
-                                  .borderSide
-                                  .color,
-                            )
-                          : null,
-                    ),
-                    onChanged: (value) {
-                      _email = value.trim();
-                      if (_emailIsValid != EmailValidator.validate(_email!)) {
-                        setState(() {
-                          _emailIsValid = EmailValidator.validate(_email!);
-                        });
-                      }
-                    },
-                    autocorrect: false,
-                    keyboardType: TextInputType.emailAddress,
-                    //initialValue: _email,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                const Padding(padding: EdgeInsets.all(4)),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.text,
-                    controller: _passwordController1,
-                    obscureText: !_password1Visible,
-                    enableSuggestions: true,
-                    autofillHints: const [AutofillHints.newPassword],
-                    decoration: InputDecoration(
-                      fillColor: _passwordIsValid
-                          ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
-                      filled: true,
-                      hintText: AppLocalizations.of(context).password,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      suffixIcon: _password1InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password1Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password1Visible = !_password1Visible;
-                                });
-                              },
-                            )
-                          : _passwordIsValid
-                              ? Icon(
-                                  Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
-                                )
-                              : null,
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    focusNode: _password1FocusNode,
-                    onChanged: (password) {
-                      if (password != _password) {
-                        setState(() {
-                          _password = password;
-                          _passwordStrength =
-                              estimatePasswordStrength(password);
-                          _passwordIsValid = _passwordStrength >=
-                              kMildPasswordStrengthThreshold;
-                          _passwordsMatch = _password == _cnfPassword;
-                        });
-                      }
-                    },
-                    onEditingComplete: () {
-                      _password1FocusNode.unfocus();
-                      _password2FocusNode.requestFocus();
-                      TextInput.finishAutofillContext();
-                    },
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.visiblePassword,
-                    controller: _passwordController2,
-                    obscureText: !_password2Visible,
-                    autofillHints: const [AutofillHints.newPassword],
-                    onEditingComplete: () => TextInput.finishAutofillContext(),
-                    decoration: InputDecoration(
-                      fillColor: _passwordsMatch && _passwordIsValid
-                          ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
-                      filled: true,
-                      hintText: AppLocalizations.of(context).confirmPassword,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      suffixIcon: _password2InFocus
-                          ? IconButton(
-                              icon: Icon(
-                                _password2Visible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _password2Visible = !_password2Visible;
-                                });
-                              },
-                            )
-                          : _passwordsMatch
-                              ? Icon(
-                                  Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
-                                )
-                              : null,
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    focusNode: _password2FocusNode,
-                    onChanged: (cnfPassword) {
-                      setState(() {
-                        _cnfPassword = cnfPassword;
-                        if (_password != null && _password != '') {
-                          _passwordsMatch = _password == _cnfPassword;
-                        }
-                      });
-                    },
-                  ),
-                ),
-                Opacity(
-                  opacity: (_password != null && _password != '') ? 1 : 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 8,
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        showInfoDialog(
-                          context,
-                          body:
-                              AppLocalizations.of(context).passwordStrengthInfo,
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          Text(
-                            AppLocalizations.of(context).passwordStrength(
-                              passwordStrengthValue: passwordStrengthText,
-                            ),
-                            style: TextStyle(
-                              color: passwordStrengthColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.info_outline,
-                            size: 16,
-                            color: getEnteColorScheme(context).fillStrong,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                  child: Text(
-                    AppLocalizations.of(context).hearUsWhereTitle,
-                    style: getEnteTextTheme(context).smallFaint,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: TextFormField(
-                    style: Theme.of(context).textTheme.titleMedium,
-                    decoration: InputDecoration(
-                      fillColor: getEnteColorScheme(context).fillFaint,
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      suffixIcon: InkWell(
-                        onTap: () {
-                          showToast(
-                            context,
-                            AppLocalizations.of(context).hearUsExplanation,
-                            iosLongToastLengthInSec: 4,
-                          );
-                        },
-                        child: Icon(
-                          Icons.info_outline_rounded,
-                          color: getEnteColorScheme(context).fillStrong,
-                        ),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      _referralSource = value.trim();
-                    },
-                    autocorrect: false,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                Divider(
-                  thickness: 1,
-                  color: getEnteColorScheme(context).strokeFaint,
-                ),
-                const SizedBox(height: 12),
-                _getAgreement(),
-                const SizedBox(height: 40),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Container _getAgreement() {
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-      child: Column(
+    return AutofillGroup(
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          _getTOSAgreement(),
-          _getPasswordAgreement(),
+          const SizedBox(height: 24),
+          TextInputWidgetV2(
+            label: AppLocalizations.of(context).email,
+            hintText: AppLocalizations.of(context).email,
+            textEditingController: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            autoCorrect: false,
+            isRequired: true,
+            onChange: _onEmailChanged,
+            message: _showEmailValidation && !_emailIsValid
+                ? AppLocalizations.of(context).invalidEmailAddress
+                : null,
+            messageType: _showEmailValidation && !_emailIsValid
+                ? TextInputMessageType.alert
+                : TextInputMessageType.guide,
+          ),
+          const SizedBox(height: 24),
+          TextInputWidgetV2(
+            label: AppLocalizations.of(context).password,
+            hintText: AppLocalizations.of(context).password,
+            textEditingController: _passwordController1,
+            isPasswordInput: true,
+            isRequired: true,
+            autoCorrect: false,
+            autofillHints: const [AutofillHints.newPassword],
+            message: passwordMessage,
+            messageType: passwordMessageType,
+            onChange: (password) {
+              if (password != _password) {
+                _passwordStrengthTimer?.cancel();
+                setState(() {
+                  _password = password;
+                  _passwordStrength = estimatePasswordStrength(password);
+                  _passwordIsValid =
+                      _passwordStrength >= kMildPasswordStrengthThreshold;
+                  _passwordsMatch = _password == _cnfPassword;
+                  _showPasswordStrength = false;
+                });
+                _passwordStrengthTimer = Timer(
+                  const Duration(seconds: 1),
+                  () {
+                    if (mounted) {
+                      setState(() {
+                        _showPasswordStrength = true;
+                      });
+                    }
+                  },
+                );
+              }
+            },
+          ),
+          const SizedBox(height: 24),
+          TextInputWidgetV2(
+            label: AppLocalizations.of(context).confirmPassword,
+            hintText: AppLocalizations.of(context).confirmPassword,
+            textEditingController: _passwordController2,
+            isPasswordInput: true,
+            isRequired: true,
+            autoCorrect: false,
+            autofillHints: const [],
+            finishAutofillContextOnEditingComplete: true,
+            message: confirmPasswordMessage,
+            messageType: confirmPasswordMessageType,
+            onChange: (cnfPassword) {
+              _confirmPasswordTimer?.cancel();
+              setState(() {
+                _cnfPassword = cnfPassword;
+                _showConfirmPasswordValidation = false;
+                if (_password != null && _password!.isNotEmpty) {
+                  _passwordsMatch = _password == _cnfPassword;
+                }
+              });
+              _confirmPasswordTimer = Timer(
+                const Duration(seconds: 1),
+                () {
+                  if (mounted) {
+                    setState(() {
+                      _showConfirmPasswordValidation = true;
+                    });
+                  }
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          TextInputWidgetV2(
+            label: AppLocalizations.of(context).hearUsWhereTitle,
+            autoCorrect: false,
+            onChange: (value) {
+              _referralSource = value.trim();
+            },
+          ),
+          const SizedBox(height: 16),
+          _getTOSAgreement(colorScheme, textTheme),
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
 
-  Widget _getTOSAgreement() {
+  void _onEmailChanged(String value) {
+    _emailValidationTimer?.cancel();
+
+    final trimmed = value.trim();
+    final isValid = EmailValidator.validate(trimmed);
+
+    setState(() {
+      _email = trimmed;
+      _emailIsValid = isValid;
+      _showEmailValidation = false;
+    });
+
+    if (trimmed.isNotEmpty) {
+      _emailValidationTimer = Timer(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          setState(() {
+            _showEmailValidation = true;
+          });
+        }
+      });
+    }
+  }
+
+  Widget _getTOSAgreement(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -450,21 +297,29 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       child: Row(
         children: [
           Checkbox(
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return colorScheme.greenBase;
+              }
+              return null;
+            }),
             value: _hasAgreedToTOS,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
             side: CheckboxTheme.of(context).side,
+            visualDensity: VisualDensity.compact,
             onChanged: (value) {
               setState(() {
                 _hasAgreedToTOS = value!;
               });
             },
           ),
+          const SizedBox(width: 8),
           Expanded(
             child: StyledText(
               text: AppLocalizations.of(context).signUpTerms,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: textTheme.small.copyWith(color: colorScheme.textMuted),
               tags: {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
@@ -478,8 +333,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       },
                     ),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     decoration: TextDecoration.underline,
+                    color: colorScheme.textMuted,
                   ),
                 ),
                 'u-policy': StyledTextActionTag(
@@ -494,8 +350,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       },
                     ),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     decoration: TextDecoration.underline,
+                    color: colorScheme.textMuted,
                   ),
                 ),
               },
@@ -504,76 +361,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         ],
       ),
     );
-  }
-
-  Widget _getPasswordAgreement() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _hasAgreedToE2E = !_hasAgreedToE2E;
-        });
-      },
-      behavior: HitTestBehavior.translucent,
-      child: Row(
-        children: [
-          Checkbox(
-            value: _hasAgreedToE2E,
-            side: CheckboxTheme.of(context).side,
-            onChanged: (value) {
-              setState(() {
-                _hasAgreedToE2E = value!;
-              });
-            },
-          ),
-          Expanded(
-            child: StyledText(
-              text: AppLocalizations.of(context).ackPasswordLostWarning,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
-              tags: {
-                'underline': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) =>
-                      Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return WebPage(
-                          AppLocalizations.of(context).encryption,
-                          "https://ente.io/architecture",
-                        );
-                      },
-                    ),
-                  ),
-                  style: const TextStyle(
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _password1FocusListener() {
-    setState(() {
-      _password1InFocus = _password1FocusNode.hasFocus;
-    });
-  }
-
-  void _password2FocusListener() {
-    setState(() {
-      _password2InFocus = _password2FocusNode.hasFocus;
-    });
   }
 
   bool _isFormValid() {
     return _emailIsValid &&
         _passwordsMatch &&
         _hasAgreedToTOS &&
-        _hasAgreedToE2E &&
         _passwordIsValid;
   }
 }

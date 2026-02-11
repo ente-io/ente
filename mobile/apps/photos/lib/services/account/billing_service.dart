@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/errors.dart';
+import "package:photos/gateways/billing/billing_gateway.dart";
+import 'package:photos/gateways/billing/models/billing_plan.dart';
+import 'package:photos/gateways/billing/models/subscription.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/billing/billing_plan.dart';
-import 'package:photos/models/api/billing/subscription.dart';
 import 'package:photos/models/user_details.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -27,12 +27,14 @@ const kWebPaymentBaseEndpoint = String.fromEnvironment(
 
 class BillingService {
   late final _logger = Logger("BillingService");
-  final Dio _enteDio;
 
   bool _isOnSubscriptionPage = false;
 
   Future<BillingPlans>? _future;
-  BillingService(this._enteDio) {
+
+  BillingGateway get _gateway => billingGateway;
+
+  BillingService() {
     _logger.info("BillingService constructor");
     init();
   }
@@ -66,14 +68,8 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    _future ??= _fetchBillingPlans().then((response) {
-      return BillingPlans.fromMap(response.data);
-    });
+    _future ??= _gateway.getUserPlans();
     return _future!;
-  }
-
-  Future<Response<dynamic>> _fetchBillingPlans() {
-    return _enteDio.get("/billing/user-plans/");
   }
 
   Future<Subscription> verifySubscription(
@@ -82,22 +78,12 @@ class BillingService {
     final paymentProvider,
   }) async {
     try {
-      final response = await _enteDio.post(
-        "/billing/verify-subscription",
-        data: {
-          "paymentProvider": paymentProvider ??
-              (Platform.isAndroid ? "playstore" : "appstore"),
-          "productID": productID,
-          "verificationData": verificationData,
-        },
+      return await _gateway.verifySubscription(
+        productID: productID,
+        verificationData: verificationData,
+        paymentProvider:
+            paymentProvider ?? (Platform.isAndroid ? "playstore" : "appstore"),
       );
-      return Subscription.fromMap(response.data["subscription"]);
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.statusCode == 409) {
-        throw SubscriptionAlreadyClaimedError();
-      } else {
-        rethrow;
-      }
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
@@ -106,10 +92,8 @@ class BillingService {
 
   Future<Subscription> fetchSubscription() async {
     try {
-      final response = await _enteDio.get("/billing/subscription");
-      final subscription = Subscription.fromMap(response.data["subscription"]);
-      return subscription;
-    } on DioException catch (e, s) {
+      return await _gateway.getSubscription();
+    } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -117,11 +101,8 @@ class BillingService {
 
   Future<Subscription> cancelStripeSubscription() async {
     try {
-      final response =
-          await _enteDio.post("/billing/stripe/cancel-subscription");
-      final subscription = Subscription.fromMap(response.data["subscription"]);
-      return subscription;
-    } on DioException catch (e, s) {
+      return await _gateway.cancelStripeSubscription();
+    } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -129,11 +110,8 @@ class BillingService {
 
   Future<Subscription> activateStripeSubscription() async {
     try {
-      final response =
-          await _enteDio.post("/billing/stripe/activate-subscription");
-      final subscription = Subscription.fromMap(response.data["subscription"]);
-      return subscription;
-    } on DioException catch (e, s) {
+      return await _gateway.activateStripeSubscription();
+    } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -143,14 +121,10 @@ class BillingService {
     String endpoint = kWebPaymentRedirectUrl,
   }) async {
     try {
-      final response = await _enteDio.get(
-        "/billing/stripe/customer-portal",
-        queryParameters: {
-          "redirectURL": kWebPaymentRedirectUrl,
-        },
+      return await _gateway.getStripeCustomerPortalUrl(
+        redirectURL: kWebPaymentRedirectUrl,
       );
-      return response.data["url"];
-    } on DioException catch (e, s) {
+    } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }

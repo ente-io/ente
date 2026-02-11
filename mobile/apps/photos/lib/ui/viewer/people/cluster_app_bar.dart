@@ -21,6 +21,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/machine_learning/ml_result.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/common/popup_item.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -166,7 +167,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   }
 
   Future<void> _onIgnoredClusterClicked(BuildContext context) async {
-    await showChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson,
       body: AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed,
@@ -174,13 +175,18 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       firstButtonOnTap: () async {
         try {
           await ClusterFeedbackService.instance.ignoreCluster(widget.clusterID);
-          Navigator.of(context).pop(); // Close the cluster page
         } catch (e, s) {
           _logger.severe('Ignoring a cluster failed', e, s);
-          // await showGenericErrorDialog(context: context, error: e);
+          rethrow;
         }
       },
     );
+
+    if (!mounted || result?.action != ButtonAction.first) {
+      return;
+    }
+
+    Navigator.of(context).pop(ClusterPageResult.ignoredPerson);
   }
 
   Future<void> _breakUpCluster(BuildContext context) async {

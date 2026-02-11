@@ -305,9 +305,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente_media_inspector"
+version = "0.1.0"
+dependencies = [
+ "quick-xml",
+]
+
+[[package]]
 name = "ente_photos_rust"
 version = "0.0.1"
 dependencies = [
+ "ente_media_inspector",
  "flutter_rust_bridge",
  "usearch",
 ]
@@ -666,6 +674,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5ee95bc4ef87b8d5ba32e8b7714ccc834865276eab0aed5c9958d00ec45f49e8"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "quick-xml"
+version = "0.37.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "331e97a1af0bf59823e6eadffe373d7b27f485be8748f71471c662c1f269b7fb"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]

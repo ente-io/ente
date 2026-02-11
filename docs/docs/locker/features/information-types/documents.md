@@ -1,9 +1,9 @@
 ---
-title: Documents
+title: Document
 description: Upload and store important files like passports, contracts, and tax returns with end-to-end encryption
 ---
 
-# Documents
+# Document
 
 Documents let you upload and store files securely with end-to-end encryption.
 Store PDFs, images, scanned documents, and other important files that you need
@@ -24,12 +24,11 @@ to keep safe and accessible.
 
 1. Open Ente Locker
 2. Tap the **+** button
-3. Select **Documents**
+3. Select **Document**
 4. Choose a file from your device
 5. Add a title for the document
-6. Add notes if needed (optional)
-7. Select one or more collections
-8. Tap **Save**
+6. Select one or more collections
+7. Tap **Save**
 
 ## Supported file formats
 
@@ -53,7 +52,6 @@ on your device for viewing and remain encrypted in storage.
 Each document can include:
 
 - **Title**: A descriptive name for easy identification
-- **Notes**: Additional context or information about the document
 - **Collection**: Organize with related items
 
 ### Search
@@ -75,10 +73,9 @@ Create collections to organize your documents by category:
 
 Share documents via public links:
 
-1. Open the document
+1. Long press on the document you want to share
 2. Tap the share button
-3. Select **Create public link**
-4. For sensitive documents, add password protection and set an expiration date
+3. Tap **Share link**
 
 To share documents with another Ente user, add them to a collection and share
 the collection.
@@ -96,8 +93,6 @@ Uploaded documents count toward your storage quota. Consider:
 ## Best practices
 
 - **Use descriptive titles**: Make documents easy to find with clear names
-- **Add context in notes**: Include expiration dates, account numbers, or other
-  relevant details
 - **Organize with collections**: Group related documents together
 - **Keep originals safe**: Locker is for secure backup, not a replacement for
   physical document storage

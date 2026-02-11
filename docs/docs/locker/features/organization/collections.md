@@ -44,7 +44,7 @@ lets you organize the same item in different ways:
 
 ### Adding existing items to a collection
 
-1. Open an item
+1. Long press on the item
 2. Tap the edit button
 3. Tap the collection field
 4. Select additional collections
@@ -71,7 +71,7 @@ lets you organize the same item in different ways:
 
 ## Removing items from a collection
 
-1. Open an item
+1. Long press on the item
 2. Tap the edit button
 3. Tap the collection field
 4. Deselect the collection you want to remove the item from
@@ -87,7 +87,7 @@ information.
 
 To add an item to Important:
 
-1. Open the item
+1. Long press on the item
 2. Tap the star or favorite icon
 3. The item is added to the Important collection
 

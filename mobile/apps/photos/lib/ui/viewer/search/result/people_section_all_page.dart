@@ -7,9 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/events/people_sort_order_change_event.dart";
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/file/file.dart";
-import "package:photos/models/ml/face/person.dart";
+import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -23,14 +21,13 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/banners/save_faces_banner.dart";
 import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
-import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/ui/viewer/people/pinned_person_badge.dart";
@@ -270,61 +267,16 @@ class SelectablePersonSearchExample extends StatelessWidget {
                     ),
                 ],
               ),
-              isCluster
-                  ? isOfflineMode
-                      ? const SizedBox.shrink()
-                      : GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () async {
-                            final clusterId =
-                                searchResult.params[kClusterParamId] as String?;
-                            final result = await showAssignPersonAction(
-                              context,
-                              clusterID: clusterId ?? searchResult.name(),
-                            );
-                            if (result != null &&
-                                result is (PersonEntity, EnteFile)) {
-                              // ignore: unawaited_futures
-                              routeToPage(
-                                context,
-                                PeoplePage(
-                                  person: result.$1,
-                                  searchResult: null,
-                                ),
-                              );
-                            } else if (result != null &&
-                                result is PersonEntity) {
-                              // ignore: unawaited_futures
-                              routeToPage(
-                                context,
-                                PeoplePage(
-                                  person: result,
-                                  searchResult: null,
-                                ),
-                              );
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 6, bottom: 0),
-                            child: Text(
-                              "Add name",
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: getEnteTextTheme(context).small,
-                            ),
-                          ),
-                        )
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 0),
-                      child: Text(
-                        searchResult.name(),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).small,
-                      ),
-                    ),
+              Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 0),
+                child: Text(
+                  isCluster ? " " : searchResult.name(),
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: getEnteTextTheme(context).small,
+                ),
+              ),
             ],
           ),
         );
@@ -392,6 +344,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool userDismissedPersonGallerySuggestion = false;
   String _searchQuery = "";
   int _suggestionReloadToken = 0;
+  final Debouncer _peopleReloadDebouncer =
+      Debouncer(const Duration(milliseconds: 400));
   late PeopleSortKey _sortKey;
   bool _nameSortAscending = true;
   bool _updatedSortAscending = false;
@@ -477,11 +431,16 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               _suggestionReloadToken++;
             });
           } else {
-            setState(() {
-              _suggestionReloadToken++;
-              _isInitialLoad = false;
-              _isLoaded = false;
-              sectionData = getResults();
+            _peopleReloadDebouncer.run(() async {
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _suggestionReloadToken++;
+                _isInitialLoad = false;
+                _isLoaded = false;
+                sectionData = getResults();
+              });
             });
           }
         }),
@@ -516,6 +475,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     if (widget.showSearchBar) {
       _sortFaces(normalFaces);
       _sortFaces(extraFaces);
+    }
+    if (_showingIgnoredPeople) {
+      _prioritizeNamedIgnoredPeople(normalFaces);
     }
     final showAllFaces = _showingAllFaces || _showingIgnoredPeople;
     final results =
@@ -580,6 +542,35 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         key == PeopleSortKey.mostPhotos;
   }
 
+  bool _isUnnamedIgnoredDisplayName(String name) {
+    final normalizedName = name.trim().toLowerCase();
+    return normalizedName.isEmpty ||
+        normalizedName == "(hidden)" ||
+        normalizedName == "(ignored)";
+  }
+
+  void _prioritizeNamedIgnoredPeople(List<GenericSearchResult> faces) {
+    if (faces.length < 2) {
+      return;
+    }
+
+    final namedIgnoredPeople = <GenericSearchResult>[];
+    final unnamedIgnoredPeople = <GenericSearchResult>[];
+
+    for (final face in faces) {
+      if (_isUnnamedIgnoredDisplayName(face.name())) {
+        unnamedIgnoredPeople.add(face);
+      } else {
+        namedIgnoredPeople.add(face);
+      }
+    }
+
+    faces
+      ..clear()
+      ..addAll(namedIgnoredPeople)
+      ..addAll(unnamedIgnoredPeople);
+  }
+
   void _sortFaces(List<GenericSearchResult> faces) {
     sortPeopleFaces(
       faces,
@@ -602,6 +593,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   @override
   void dispose() {
+    _peopleReloadDebouncer.cancelDebounceTimer();
     for (var subscriptions in streamSubscriptions) {
       subscriptions.cancel();
     }
@@ -736,6 +728,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 showAllFaces && filteredExtraFaces.isNotEmpty;
             slivers.addAll(
               [
+                if (isOfflineMode)
+                  const SliverToBoxAdapter(
+                    child: SaveFacesBanner(),
+                  ),
                 (!userDismissedPersonGallerySuggestion &&
                         !widget.namedOnly &&
                         !_showingIgnoredPeople)
@@ -916,6 +912,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             }
             _sortFaces(normalFaces);
             _sortFaces(extraFaces);
+            if (_showingIgnoredPeople) {
+              _prioritizeNamedIgnoredPeople(normalFaces);
+            }
           });
           unawaited(_persistSortPreferences());
         },
@@ -954,7 +953,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         detail = l10n.count;
         break;
       case PeopleSortKey.name:
-        detail = _isSortAscending(key) ? "A-Z" : "Z-A";
+        detail = _isSortAscending(key) ? l10n.sortAToZ : l10n.sortZToA;
         break;
       case PeopleSortKey.lastUpdated:
         detail =

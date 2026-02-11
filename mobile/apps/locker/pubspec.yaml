@@ -1,7 +1,7 @@
 name: locker
 description: "Ente Locker – Safe space for your important documents"
 publish_to: "none"
-version: 0.1.5+83
+version: 0.1.6+86
 environment:
   sdk: ">=3.0.0 <4.0.0"
 

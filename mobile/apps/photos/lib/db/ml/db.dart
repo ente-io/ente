@@ -278,7 +278,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteClipEmbeddingsTable);
     await db.execute(deleteFileDataTable);
     if (await _clipVectorDB.checkIfMigrationDone()) {
-      await _clipVectorDB.deleteIndexFile();
+      await _clipVectorDB.deleteIndexFile(undoMigration: true);
     }
   }
 
@@ -1291,6 +1291,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final totalCount = countResult.first['total'] as int;
     if (totalCount == 0) {
       _logger.info("No clip embeddings to migrate");
+      await _clipVectorDB.deleteAllEmbeddings();
       await _clipVectorDB.setMigrationDone();
       return;
     }
@@ -1375,6 +1376,25 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       );
       await _clipVectorDB.setMigrationDone();
       _logger.info("ClipVectorDB migration done");
+      try {
+        final latestClipCount = await getClipIndexedFileCount();
+        final vectorStats = await _clipVectorDB.getIndexStats();
+        if (vectorStats.size != latestClipCount) {
+          _logger.warning(
+            "ClipVectorDB size mismatch: vectorDb=${vectorStats.size}, clipTableLatest=$latestClipCount",
+          );
+        } else {
+          _logger.info(
+            "ClipVectorDB size match: vectorDb=${vectorStats.size}, clipTableLatest=$latestClipCount",
+          );
+        }
+      } catch (e, s) {
+        _logger.warning(
+          "Failed to log ClipVectorDB size after migration",
+          e,
+          s,
+        );
+      }
     } catch (e, s) {
       _logger.severe(
         "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",

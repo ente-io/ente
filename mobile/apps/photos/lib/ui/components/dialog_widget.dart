@@ -216,24 +216,32 @@ class _TextInputDialogState extends State<TextInputDialog> {
   final _submitNotifier = ValueNotifier(false);
   late final ValueNotifier<bool> _inputIsEmptyNotifier;
   late final TextEditingController _textEditingController;
+  late final bool _ownsTextEditingController;
+  late final VoidCallback _textEditingControllerListener;
 
   @override
   void initState() {
     super.initState();
+    _ownsTextEditingController = widget.textEditingController == null;
     _textEditingController =
         widget.textEditingController ?? TextEditingController();
     _inputIsEmptyNotifier = widget.initialValue?.isEmpty ?? true
         ? ValueNotifier(true)
         : ValueNotifier(false);
-    _textEditingController.addListener(() {
+    _textEditingControllerListener = () {
       if (_textEditingController.text.isEmpty != _inputIsEmptyNotifier.value) {
         _inputIsEmptyNotifier.value = _textEditingController.text.isEmpty;
       }
-    });
+    };
+    _textEditingController.addListener(_textEditingControllerListener);
   }
 
   @override
   void dispose() {
+    _textEditingController.removeListener(_textEditingControllerListener);
+    if (_ownsTextEditingController) {
+      _textEditingController.dispose();
+    }
     _submitNotifier.dispose();
     _inputIsEmptyNotifier.dispose();
     super.dispose();
