@@ -1,8 +1,8 @@
 package io.ente.ensu.chat
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -153,7 +153,7 @@ internal fun MessageList(
             keepStreamingVisible = true
             lastStreamingParentForOutro = streamingParentId
         } else if (keepStreamingVisible) {
-            delay(650)
+            delay(900)
             keepStreamingVisible = false
             lastStreamingParentForOutro = null
         }
@@ -269,7 +269,7 @@ internal fun MessageList(
                             (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == message.id),
                     enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                         scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                    exit = ExitTransition.None
+                    exit = fadeOut(animationSpec = tween(durationMillis = 140))
                 ) {
                     Column {
                         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
@@ -289,7 +289,7 @@ internal fun MessageList(
                         (!isGenerating && keepStreamingVisible && lastStreamingParentForOutro == null),
                 enter = fadeIn(animationSpec = tween(durationMillis = 140)) +
                     scaleIn(initialScale = 0.94f, animationSpec = tween(durationMillis = 180)),
-                exit = ExitTransition.None
+                exit = fadeOut(animationSpec = tween(durationMillis = 140))
             ) {
                 StreamingMessageBubble(
                     text = streamingResponse,
@@ -697,6 +697,7 @@ private fun StreamingMessageBubble(
 
     val riveBoxWidth = 115.dp
     val riveBoxHeight = 52.5.dp
+    val riveOverflowScale = if (isGenerating) 1f else 1.08f
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -707,13 +708,23 @@ private fun StreamingMessageBubble(
                 .width(riveBoxWidth)
                 .height(riveBoxHeight)
                 .graphicsLayer { clip = false },
-            contentAlignment = Alignment.TopStart
+            contentAlignment = Alignment.CenterStart
         ) {
-            ensuRiveAnimation(
-                modifier = Modifier.matchParentSize(),
-                outroTrigger = !isGenerating,
-                outroInputName = "outro"
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(align = Alignment.CenterStart, unbounded = true)
+                    .graphicsLayer { clip = false },
+                contentAlignment = Alignment.CenterStart
+            ) {
+                ensuRiveAnimation(
+                    modifier = Modifier
+                        .width(riveBoxWidth * riveOverflowScale)
+                        .height(riveBoxHeight * riveOverflowScale),
+                    outroTrigger = !isGenerating,
+                    outroInputName = "outro"
+                )
+            }
         }
 
         if (renderedText.isNotBlank()) {
