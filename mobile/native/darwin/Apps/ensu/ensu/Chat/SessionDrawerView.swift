@@ -47,11 +47,11 @@ struct SessionDrawerView: View {
     }
 
     private var drawerHeader: some View {
-        VStack(alignment: .leading, spacing: EnsuSpacing.md) {
-            HStack {
-                Spacer()
+        VStack(alignment: .leading, spacing: 0) {
+            if isLoggedIn {
+                HStack {
+                    Spacer()
 
-                if isLoggedIn {
                     drawerPrimaryTile(
                         icon: "ArrowReloadHorizontalIcon",
                         title: "Sync",
@@ -59,6 +59,7 @@ struct SessionDrawerView: View {
                         expands: false
                     )
                 }
+                .padding(.bottom, EnsuSpacing.md)
             }
 
             headerControls

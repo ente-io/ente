@@ -127,16 +127,15 @@ private fun DrawerHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(EnsuColor.backgroundBase())
-            .padding(EnsuSpacing.lg.dp),
-        verticalArrangement = Arrangement.spacedBy(EnsuSpacing.md.dp)
+            .padding(EnsuSpacing.lg.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
+        if (isLoggedIn) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
 
-            if (isLoggedIn) {
                 DrawerPrimaryTile(
                     iconRes = HugeIcons.ArrowReloadHorizontalIcon,
                     label = "Sync",
@@ -144,6 +143,8 @@ private fun DrawerHeader(
                     isEnabled = true
                 )
             }
+
+            Spacer(modifier = Modifier.height(EnsuSpacing.md.dp))
         }
 
         DrawerSearchControls(
