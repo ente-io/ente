@@ -3,7 +3,10 @@
 package io.ente.ensu.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -20,7 +23,10 @@ fun ensuRiveAnimation(
     fit: Fit = Fit.CONTAIN,
     alignment: RiveAlignment = RiveAlignment.CENTER_LEFT,
     loop: Loop = Loop.LOOP,
-    autoplay: Boolean = true
+    autoplay: Boolean = true,
+    outroTrigger: Boolean = false,
+    outroInputName: String = "outro",
+    outroStateMachineName: String? = null
 ) {
     val context = LocalContext.current
     val appContext = context.applicationContext
@@ -36,10 +42,21 @@ fun ensuRiveAnimation(
             )
         }
     }
+    var lastOutroTrigger by remember { mutableStateOf(false) }
 
     AndroidView(
         modifier = modifier,
         factory = { riveView },
-        update = { }
+        update = { view ->
+            if (outroTrigger && !lastOutroTrigger) {
+                val stateMachineName = outroStateMachineName ?: view.stateMachines.firstOrNull()?.name
+                if (stateMachineName != null) {
+                    runCatching {
+                        view.fireState(stateMachineName, outroInputName)
+                    }
+                }
+            }
+            lastOutroTrigger = outroTrigger
+        }
     )
 }

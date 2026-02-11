@@ -259,7 +259,10 @@ internal fun MessageList(
                 ) {
                     Column {
                         Spacer(modifier = Modifier.height(EnsuSpacing.sm.dp))
-                        StreamingMessageBubble(text = streamingResponse)
+                        StreamingMessageBubble(
+                            text = streamingResponse,
+                            isGenerating = isGenerating
+                        )
                     }
                 }
             }
@@ -273,7 +276,10 @@ internal fun MessageList(
                 exit = fadeOut(animationSpec = tween(durationMillis = 180)) +
                     scaleOut(targetScale = 0.86f, animationSpec = tween(durationMillis = 180))
             ) {
-                StreamingMessageBubble(text = streamingResponse)
+                StreamingMessageBubble(
+                    text = streamingResponse,
+                    isGenerating = isGenerating
+                )
             }
         }
 
@@ -644,7 +650,10 @@ private fun MessageActionsMenu(
 }
 
 @Composable
-private fun StreamingMessageBubble(text: String) {
+private fun StreamingMessageBubble(
+    text: String,
+    isGenerating: Boolean
+) {
     var showCursor by remember { mutableStateOf(true) }
     val shouldBlink = text.isNotBlank()
 
@@ -679,7 +688,9 @@ private fun StreamingMessageBubble(text: String) {
             modifier = Modifier
                 .wrapContentSize(align = Alignment.TopStart)
                 .width(115.dp)
-                .height(52.5.dp)
+                .height(52.5.dp),
+            outroTrigger = !isGenerating,
+            outroInputName = "outro"
         )
 
         if (renderedText.isNotBlank()) {
