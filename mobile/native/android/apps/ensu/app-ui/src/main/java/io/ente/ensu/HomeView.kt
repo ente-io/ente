@@ -281,9 +281,6 @@ fun HomeView(
                         popUpTo(HomeRoute.Chat) { inclusive = false }
                     }
                     scope.launch { drawerState.close() }
-                },
-                onDeveloperTap = {
-                    handleDeveloperTap()
                 }
             )
         }

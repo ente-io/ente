@@ -43,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.ente.ensu.components.ensuRiveAnimation
 import io.ente.ensu.designsystem.EnsuColor
 import io.ente.ensu.designsystem.EnsuCornerRadius
 import io.ente.ensu.designsystem.HugeIcons
@@ -62,8 +61,7 @@ fun SessionDrawer(
     onSelectSession: (ChatSession) -> Unit,
     onDeleteSession: (ChatSession) -> Unit,
     onSync: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onDeveloperTap: () -> Unit
+    onOpenSettings: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val filteredSessions = remember(searchQuery, sessions) {
@@ -92,7 +90,6 @@ fun SessionDrawer(
                 isLoggedIn = isLoggedIn,
                 searchQuery = searchQuery,
                 onSearchChange = { searchQuery = it },
-                onDeveloperTap = onDeveloperTap,
                 onNewChat = onNewChat,
                 onSync = onSync
             )
@@ -123,7 +120,6 @@ private fun DrawerHeader(
     isLoggedIn: Boolean,
     searchQuery: String,
     onSearchChange: (String) -> Unit,
-    onDeveloperTap: () -> Unit,
     onNewChat: () -> Unit,
     onSync: () -> Unit
 ) {
@@ -138,17 +134,6 @@ private fun DrawerHeader(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .clickable(enabled = !isLoggedIn) { onDeveloperTap() }
-            ) {
-                ensuRiveAnimation(
-                    modifier = Modifier
-                        .width(248.dp)
-                        .height(64.dp)
-                )
-            }
-
             Spacer(modifier = Modifier.weight(1f))
 
             if (isLoggedIn) {

@@ -11,7 +11,6 @@ struct SessionDrawerView: View {
     let onDeleteSession: (ChatSession) -> Void
     let onSync: () -> Void
     let onOpenSettings: () -> Void
-    let onDeveloperTap: () -> Void
 
     @State private var searchQuery: String = ""
 
@@ -50,16 +49,6 @@ struct SessionDrawerView: View {
     private var drawerHeader: some View {
         VStack(alignment: .leading, spacing: EnsuSpacing.md) {
             HStack {
-                if isLoggedIn {
-                    drawerLogo
-                } else {
-                    drawerLogo
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            onDeveloperTap()
-                        }
-                }
-
                 Spacer()
 
                 if isLoggedIn {
@@ -76,10 +65,6 @@ struct SessionDrawerView: View {
         }
         .padding(EnsuSpacing.lg)
         .background(EnsuColor.backgroundBase)
-    }
-
-    private var drawerLogo: some View {
-        EnsuBrandIllustration(width: 248, height: 64)
     }
 
     private var headerControls: some View {

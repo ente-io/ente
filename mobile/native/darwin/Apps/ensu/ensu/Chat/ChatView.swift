@@ -420,9 +420,6 @@ struct ChatView: View {
             onOpenSettings: {
                 viewState.isDrawerOpen = false
                 viewState.showSettings = true
-            },
-            onDeveloperTap: {
-                handleDeveloperTap()
             }
         )
         .frame(width: drawerWidth)
