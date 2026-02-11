@@ -45,6 +45,7 @@ class SemanticSearchService {
   bool? _cachedEmbeddingsOffline;
   Timer? _embeddingsCacheTimer;
   final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
+  Future<void>? _prepareVectorDbFuture;
 
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
@@ -78,14 +79,25 @@ class SemanticSearchService {
     return hasGrantedMLConsent && _textModelIsLoaded;
   }
 
-  Future<void> _prepareVectorDbForSearch() async {
+  Future<void> _prepareVectorDbForSearch() {
+    _prepareVectorDbFuture ??= _prepareVectorDbForSearchInternal();
+    return _prepareVectorDbFuture!;
+  }
+
+  Future<void> _prepareVectorDbForSearchInternal() async {
     try {
-      await _mlDataDB.checkMigrateFillClipVectorDB();
-      if (await _canUseVectorDbForSearch()) {
+      if (!flagService.usearchForSearch) return;
+      if (!flagService.hasGrantedMLConsent) return;
+      if (!await _vectorDB.checkIfMigrationDone()) {
+        await _mlDataDB.checkMigrateFillClipVectorDB();
+      }
+      if (await _vectorDB.checkIfMigrationDone()) {
         await _vectorDB.warmupApproxSearch();
       }
     } catch (e, s) {
-      _logger.warning("Failed to prepare VectorDB for search", e, s);
+      _logger.severe("Failed to prepare VectorDB for search", e, s);
+    } finally {
+      _prepareVectorDbFuture = null;
     }
   }
 
@@ -174,11 +186,11 @@ class SemanticSearchService {
 
     final minimumSimilarity =
         similarityThreshold ?? kMinimumSimilarityThreshold;
-    final queryResults = await _getSimilaritiesForUserSearch(
-      query,
-      textEmbedding,
-      minimumSimilarity,
+    final similarityResults = await _getSimilarities(
+      {query: textEmbedding},
+      minimumSimilarityMap: {query: minimumSimilarity},
     );
+    final queryResults = similarityResults[query] ?? <QueryResult>[];
     // Uncomment if needed for debugging: print query for top ten scores
     // if (kDebugMode) {
     //   for (int i = 0; i < min(10, queryResults.length); i++) {
@@ -365,19 +377,28 @@ class SemanticSearchService {
     // }
     if (await _canUseVectorDbForSearch()) {
       final startTime = DateTime.now();
-      final queryResults = await _vectorDB.computeBulkSimilarities(
-        textQueryToEmbeddingMap,
-        minimumSimilarityMap,
-        maxResults: maxResults,
-      );
-      final endTime = DateTime.now();
-      _logger.info(
-        "computingSimilarities (usearch) took for ${textQueryToEmbeddingMap.length} queries " +
-            (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-                .toString() +
-            "ms",
-      );
-      return queryResults;
+      try {
+        final queryResults = await _computeApproxSimilaritiesWithVectorDb(
+          textQueryToEmbeddingMap,
+          minimumSimilarityMap,
+          maxResults: maxResults,
+        );
+        final endTime = DateTime.now();
+        _logger.info(
+          "computingSimilarities (usearch approximate) took for ${textQueryToEmbeddingMap.length} queries " +
+              (endTime.millisecondsSinceEpoch -
+                      startTime.millisecondsSinceEpoch)
+                  .toString() +
+              "ms",
+        );
+        return queryResults;
+      } catch (e, s) {
+        _logger.severe(
+          "VectorDB similarity search failed, falling back to in-memory dot-product",
+          e,
+          s,
+        );
+      }
     }
 
     await _cacheClipVectors();
@@ -397,48 +418,38 @@ class SemanticSearchService {
     return queryResults;
   }
 
-  Future<List<QueryResult>> _getSimilaritiesForUserSearch(
-    String query,
-    List<double> textEmbedding,
-    double minimumSimilarity,
-  ) async {
-    if (await _canUseVectorDbForSearch()) {
-      final startTime = DateTime.now();
-      final queryResults =
-          await _vectorDB.searchApproxSimilaritiesWithinThreshold(
+  Future<Map<String, List<QueryResult>>> _computeApproxSimilaritiesWithVectorDb(
+    Map<String, List<double>> textQueryToEmbeddingMap,
+    Map<String, double> minimumSimilarityMap, {
+    int? maxResults,
+  }) async {
+    final queryResults = <String, List<QueryResult>>{};
+    final bool shouldLimitResults = maxResults != null && maxResults > 0;
+    for (final entry in textQueryToEmbeddingMap.entries) {
+      final query = entry.key;
+      final minimumSimilarity = minimumSimilarityMap[query]!;
+      final textEmbedding = entry.value;
+      final results = await _vectorDB.searchApproxSimilaritiesWithinThreshold(
         textEmbedding,
         minimumSimilarity,
       );
-      final endTime = DateTime.now();
-      _logger.info(
-        "computingSimilarities (usearch approximate) took for 1 query " +
-            (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-                .toString() +
-            "ms",
-      );
-      return queryResults;
+      if (shouldLimitResults && results.length > maxResults) {
+        queryResults[query] = results.sublist(0, maxResults);
+      } else {
+        queryResults[query] = results;
+      }
     }
-
-    await _cacheClipVectors();
-    final startTime = DateTime.now();
-    final queryResults = await MLComputer.instance.computeBulkSimilarities(
-      {query: textEmbedding},
-      {query: minimumSimilarity},
-    );
-    final endTime = DateTime.now();
-    _logger.info(
-      "computingSimilarities (dot-product) took for 1 query " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
-    return queryResults[query] ?? <QueryResult>[];
+    return queryResults;
   }
 
   Future<bool> _canUseVectorDbForSearch() async {
     if (!flagService.usearchForSearch) return false;
     if (!flagService.hasGrantedMLConsent) return false;
-    return _vectorDB.checkIfMigrationDone();
+    if (await _vectorDB.checkIfMigrationDone()) return true;
+    // Keep interactive search responsive: prepare/migrate in the background and
+    // immediately fall back to in-memory similarity search for this request.
+    unawaited(_prepareVectorDbForSearch());
+    return false;
   }
 
   void _resetInactivityTimer() {
