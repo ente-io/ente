@@ -2,22 +2,9 @@ name: "Screensaver Android"
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "mobile/native/android/apps/screensaver/**"
-      - "rust/uniffi/core/**"
-      - "rust/core/**"
-      - ".github/workflows/screensaver-android.yml"
   push:
-    branches:
-      - main
     tags:
       - "screensaver-v*"
-    paths:
-      - "mobile/native/android/apps/screensaver/**"
-      - "rust/uniffi/core/**"
-      - "rust/core/**"
-      - ".github/workflows/screensaver-android.yml"
 
 env:
   NDK_VERSION: "27.0.12077973"
@@ -26,45 +13,8 @@ permissions:
   contents: write
 
 jobs:
-  validate:
-    if: ${{ !startsWith(github.ref, 'refs/tags/screensaver-v') }}
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mobile/native/android/apps/screensaver
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install NDK
-        run: |
-          echo "y" | sdkmanager --install "ndk;${{ env.NDK_VERSION }}"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}" >> "$GITHUB_ENV"
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
-
-      - name: Install cargo-ndk
-        run: cargo install cargo-ndk
-
-      - name: Validate build
-        run: ./gradlew lint assembleRelease
-
   release:
-    if: ${{ startsWith(github.ref, 'refs/tags/screensaver-v') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/screensaver-v') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -108,6 +58,7 @@ jobs:
           sha256sum "$APK_DIR/$APK_NAME" > "$APK_DIR/sha256sum"
 
       - name: Create draft GitHub release
+        if: ${{ startsWith(github.ref, 'refs/tags/screensaver-v') }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: "mobile/native/android/apps/screensaver/app/build/outputs/apk/release/ente-screensaver-${{ github.ref_name }}.apk,mobile/native/android/apps/screensaver/app/build/outputs/apk/release/sha256sum"
