@@ -139,8 +139,9 @@ const randomLoadingPhrase = () => {
 
 const MEDIA_MARKER = "<__media__>";
 const IMAGE_TOKEN_ESTIMATE = 768;
-const MAX_INFERENCE_IMAGE_PIXELS = 3500;
-const INFERENCE_IMAGE_QUALITY = 0.85;
+const MAX_INFERENCE_IMAGE_PIXELS = 3_500_000;
+const MAX_INFERENCE_IMAGE_LONG_EDGE = 3072;
+const INFERENCE_IMAGE_QUALITY = 0.92;
 const IMAGE_SELECTOR_EXTENSIONS = [
     "png",
     "jpg",
@@ -262,10 +263,22 @@ const prepareInferenceImageBytes = async (
     ) => {
         const totalPixels = width * height;
         const maxPixelCount = Math.max(1, maxPixels);
-        if (totalPixels <= maxPixelCount) {
+        const longestEdge = Math.max(width, height);
+
+        const areaScale =
+            totalPixels > maxPixelCount
+                ? Math.sqrt(maxPixelCount / totalPixels)
+                : 1;
+        const edgeScale =
+            longestEdge > MAX_INFERENCE_IMAGE_LONG_EDGE
+                ? MAX_INFERENCE_IMAGE_LONG_EDGE / longestEdge
+                : 1;
+
+        const scale = Math.min(1, areaScale, edgeScale);
+        if (scale >= 0.999) {
             return null;
         }
-        const scale = Math.min(1, Math.sqrt(maxPixelCount / totalPixels));
+
         const targetWidth = Math.max(1, Math.round(width * scale));
         const targetHeight = Math.max(1, Math.round(height * scale));
         const canvas = document.createElement("canvas");
