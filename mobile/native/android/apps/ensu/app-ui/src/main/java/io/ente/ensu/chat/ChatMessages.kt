@@ -701,7 +701,8 @@ private fun StreamingMessageBubble(
 
     val riveBoxWidth = 115.dp
     val riveBoxHeight = 52.5.dp
-    val riveOutroOverflowScaleX = 1.08f
+    val riveNormalPadding = 32.dp
+    val riveOutroOverflowScale = 1.08f
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -710,23 +711,31 @@ private fun StreamingMessageBubble(
         Box(
             modifier = Modifier
                 .width(riveBoxWidth)
-                .height(riveBoxHeight)
+                .height(riveBoxHeight + riveNormalPadding)
                 .graphicsLayer { clip = false },
-            contentAlignment = Alignment.CenterStart
+            contentAlignment = Alignment.TopStart
         ) {
-            ensuRiveAnimation(
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        val overflowScaleX = if (isGenerating) 1f else riveOutroOverflowScaleX
-                        scaleX = overflowScaleX
-                        scaleY = 1f
-                        transformOrigin = TransformOrigin(0f, 0.5f)
-                        clip = false
-                    },
-                outroTrigger = !isGenerating,
-                outroInputName = "outro"
-            )
+                    .width(riveBoxWidth)
+                    .height(riveBoxHeight)
+                    .graphicsLayer { clip = false },
+                contentAlignment = Alignment.TopStart
+            ) {
+                ensuRiveAnimation(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            val overflowScale = if (isGenerating) 1f else riveOutroOverflowScale
+                            scaleX = overflowScale
+                            scaleY = overflowScale
+                            transformOrigin = TransformOrigin(0f, 0f)
+                            clip = false
+                        },
+                    outroTrigger = !isGenerating,
+                    outroInputName = "outro"
+                )
+            }
         }
 
         if (renderedText.isNotBlank()) {
