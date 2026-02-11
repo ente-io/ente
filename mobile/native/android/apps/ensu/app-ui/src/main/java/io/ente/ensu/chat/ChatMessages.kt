@@ -176,7 +176,7 @@ internal fun MessageList(
         if (targetIndex >= 0) {
             isAutoScrolling = true
             try {
-                listState.scrollToItem(targetIndex)
+                listState.animateScrollToItem(targetIndex)
             } finally {
                 isAutoScrolling = false
             }
