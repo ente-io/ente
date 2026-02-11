@@ -1,6 +1,5 @@
 import Foundation
 import EnteCore
-import Sodium
 import Crypto
 import Logging
 import BigInt
@@ -20,7 +19,6 @@ public struct SRPConstants {
 
 public class SRPClient {
     private let logger = Logger(label: "SRPClient")
-    private let sodium = Sodium()
     
     private let identity: Data
     private let password: Data
@@ -41,9 +39,8 @@ public class SRPClient {
         
         self.prime = BigInt(SRPConstants.prime, radix: 16)!
         self.generator = BigInt(SRPConstants.generator, radix: 16)!
-        guard let randomBytes = sodium.randomBytes.buf(length: 32) else {
-            throw CryptoError.derivationFailed
-        }
+        var rng = SystemRandomNumberGenerator()
+        let randomBytes = (0..<32).map { _ in UInt8.random(in: UInt8.min ... UInt8.max, using: &rng) }
         self.privateKey = BigInt(Data(randomBytes))
         
         logger.debug("SRP client initialized")
