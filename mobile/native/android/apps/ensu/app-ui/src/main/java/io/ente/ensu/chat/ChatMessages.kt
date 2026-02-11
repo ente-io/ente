@@ -170,7 +170,8 @@ internal fun MessageList(
 
 
     LaunchedEffect(messages.size, streamingParentId, isGenerating, autoScrollEnabled) {
-        if (!autoScrollEnabled || isGenerating) return@LaunchedEffect
+        val shouldScrollForNewUserMessage = messages.lastOrNull()?.author == MessageAuthor.User
+        if (!autoScrollEnabled || isGenerating || !shouldScrollForNewUserMessage) return@LaunchedEffect
         val targetIndex = messages.size
         if (targetIndex >= 0) {
             isAutoScrolling = true
@@ -665,6 +666,18 @@ private fun StreamingMessageBubble(text: String) {
         }
     }
 
+    var renderedText by remember { mutableStateOf(text) }
+
+    LaunchedEffect(text) {
+        if (text.isBlank()) {
+            renderedText = text
+            return@LaunchedEffect
+        }
+        // Throttle markdown re-rendering while streaming to reduce dropped frames.
+        delay(33)
+        renderedText = text
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
@@ -676,13 +689,9 @@ private fun StreamingMessageBubble(text: String) {
                 .height(42.dp)
         )
 
-        if (text.isNotBlank()) {
+        if (renderedText.isNotBlank()) {
             Spacer(modifier = Modifier.height(EnsuSpacing.xs.dp))
-            Text(
-                text = if (showCursor) "$text▍" else text,
-                style = EnsuTypography.message,
-                color = EnsuColor.textPrimary()
-            )
+            MarkdownView(markdown = renderedText, enableSelection = false, trailingCursor = showCursor)
         }
     }
 }
