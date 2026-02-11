@@ -27,12 +27,12 @@ export const DEFAULT_MODEL: ModelInfo = {
 };
 
 const HIGH_RAM_MAC_MODEL: ModelInfo = {
-    id: "qwen3-vl-8b-instruct-q4km",
-    name: "Qwen3-VL 8B Instruct (Q4_K_M)",
-    url: "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF/resolve/main/Qwen3VL-8B-Instruct-Q4_K_M.gguf?download=true",
+    id: "gemma-3-4b-it-q4km",
+    name: "Gemma 3 4B IT (Q4_K_M)",
+    url: "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf?download=true",
     mmprojUrl:
-        "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-8B-Instruct-Q8_0.gguf",
-    description: "Qwen multimodal model for higher-memory macOS devices",
+        "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/mmproj-F16.gguf",
+    description: "Gemma multimodal model for higher-memory macOS devices",
 };
 
 export class LlmProvider {
